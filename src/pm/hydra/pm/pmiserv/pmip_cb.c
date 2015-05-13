@@ -640,6 +640,14 @@ static HYD_status launch_procs(void)
                                 HYDU_strerror(errno));
 
         for (i = 0; i < exec->proc_count; i++) {
+            str = HYDU_int_to_str(exec->proc_count);
+            status = HYDU_append_env_to_list("MPI_LOCALNRANKS", str, &force_env);
+            HYDU_ERR_POP(status, "unable to add env to list\n");
+
+            str = HYDU_int_to_str(process_id);
+            status = HYDU_append_env_to_list("MPI_LOCALRANKID", str, &force_env);
+            HYDU_ERR_POP(status, "unable to add env to list\n");
+
             if (using_pmi_port) {
                 /* If we are using the PMI_PORT format */
 
