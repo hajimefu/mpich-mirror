@@ -15,7 +15,7 @@
 
 extern int *MPIDI_CH4U_gpid_local;
 
-static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm* comm)
+static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
 {
     int ret;
 
@@ -27,4 +27,4 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm* comm)
     MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
     return ret;
 }
-#endif /*MPIDCH4U_PROC_H_INCLUDED*/
+#endif /*MPIDCH4U_PROC_H_INCLUDED */

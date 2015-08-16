@@ -24,4 +24,4 @@ static inline int MPIDI_netmod_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;
 }
-#endif /*NETMOD_OFI_PROC_H_INCLUDED*/
+#endif /*NETMOD_OFI_PROC_H_INCLUDED */

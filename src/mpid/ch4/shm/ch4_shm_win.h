@@ -86,10 +86,9 @@ static inline int MPIDI_shm_win_fence(int assert, MPID_Win * win)
 }
 
 static inline int MPIDI_shm_win_create(void *base,
-                                          MPI_Aint length,
-                                          int disp_unit,
-                                          MPID_Info * info,
-                                          MPID_Comm * comm_ptr, MPID_Win ** win_ptr)
+                                       MPI_Aint length,
+                                       int disp_unit,
+                                       MPID_Info * info, MPID_Comm * comm_ptr, MPID_Win ** win_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -102,10 +101,10 @@ static inline int MPIDI_shm_win_attach(MPID_Win * win, void *base, MPI_Aint size
 }
 
 static inline int MPIDI_shm_win_allocate_shared(MPI_Aint size,
-                                                   int disp_unit,
-                                                   MPID_Info * info_ptr,
-                                                   MPID_Comm * comm_ptr,
-                                                   void **base_ptr, MPID_Win ** win_ptr)
+                                                int disp_unit,
+                                                MPID_Info * info_ptr,
+                                                MPID_Comm * comm_ptr,
+                                                void **base_ptr, MPID_Win ** win_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -118,17 +117,17 @@ static inline int MPIDI_shm_win_detach(MPID_Win * win, const void *base)
 }
 
 static inline int MPIDI_shm_win_shared_query(MPID_Win * win,
-                                                int rank,
-                                                MPI_Aint * size, int *disp_unit, void *baseptr)
+                                             int rank,
+                                             MPI_Aint * size, int *disp_unit, void *baseptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_win_allocate(MPI_Aint size,
-                                            int disp_unit,
-                                            MPID_Info * info,
-                                            MPID_Comm * comm, void *baseptr, MPID_Win ** win)
+                                         int disp_unit,
+                                         MPID_Info * info,
+                                         MPID_Comm * comm, void *baseptr, MPID_Win ** win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -152,8 +151,7 @@ static inline int MPIDI_shm_win_unlock_all(MPID_Win * win)
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_win_create_dynamic(MPID_Info * info,
-                                                  MPID_Comm * comm, MPID_Win ** win)
+static inline int MPIDI_shm_win_create_dynamic(MPID_Info * info, MPID_Comm * comm, MPID_Win ** win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

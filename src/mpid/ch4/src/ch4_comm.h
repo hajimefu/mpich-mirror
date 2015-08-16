@@ -76,10 +76,10 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CREATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -96,10 +96,10 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

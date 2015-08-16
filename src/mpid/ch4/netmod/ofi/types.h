@@ -25,14 +25,11 @@
 #include <stdint.h>
 
 EXTERN_C_BEGIN
-
 #define __SHORT_FILE__                          \
   (strrchr(__FILE__,'/')                        \
    ? strrchr(__FILE__,'/')+1                    \
    : __FILE__                                   \
 )
-
-
 #ifndef MIN
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #endif
@@ -77,16 +74,12 @@ EXTERN_C_BEGIN
 #define MPIDI_MAP_NOT_FOUND      ((void*)(-1UL))
 #define MPIDI_FI_MAJOR_VERSION 1
 #define MPIDI_FI_MINOR_VERSION 0
-
-
 #define MPIDI_MAX_SHORT_SEND_SZ		(16 * 1024)
 #define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
 #define MPIDI_MAX_AM_HANDLERS 		(16)
 #define MPIDI_MAX_AM_HDR_SZ		    (16)
-
-
 /* Macros and inlines */
 /* match/ignore bit manipulation
  *
@@ -136,8 +129,8 @@ typedef struct fi_msg_rma msg_rma_t;
 typedef struct fi_msg_atomic msg_atomic_t;
 typedef enum fi_op fi_op_t;
 typedef enum fi_datatype fi_datatype_t;
-typedef int (*event_callback_fn)(cq_tagged_entry_t *wc, MPID_Request *);
-typedef int (*control_callback_fn)(void *buf);
+typedef int (*event_callback_fn) (cq_tagged_entry_t * wc, MPID_Request *);
+typedef int (*control_callback_fn) (void *buf);
 
 typedef enum {
     MPIDI_ACCU_ORDER_RAR = 1,
@@ -189,11 +182,9 @@ enum {
 typedef struct MPIDI_VCR {
     unsigned is_local:1;
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-unsigned ep_idx:
-    MPIDI_MAX_ENDPOINTS_BITS;
+    unsigned ep_idx:MPIDI_MAX_ENDPOINTS_BITS;
 #endif
-unsigned addr_idx:
-    (31 - MPIDI_MAX_ENDPOINTS_BITS);
+    unsigned addr_idx:(31 - MPIDI_MAX_ENDPOINTS_BITS);
 } MPIDI_VCR;
 #define VCR_OFI(vcr)   ((MPIDI_VCR*)(vcr)->pad)
 
@@ -513,7 +504,7 @@ typedef struct MPIDI_Win_info_args {
 typedef struct MPIDI_Win_info {
     void *base_addr;
     uint32_t disp_unit;
-} __attribute__((packed)) MPIDI_Win_info;
+} __attribute__ ((packed)) MPIDI_Win_info;
 
 typedef struct MPIDI_Win_sync_lock {
     struct {
@@ -555,10 +546,10 @@ typedef struct {
 
 #define MPID_LKEY_START 16384
 
-extern MPIDI_Addr_table_t  *MPIDI_Addr_table;
-extern MPIDI_Global_t       MPIDI_Global;
-extern MPIU_Object_alloc_t  MPIDI_Request_mem;
-extern MPID_Request         MPIDI_Request_direct[];
+extern MPIDI_Addr_table_t *MPIDI_Addr_table;
+extern MPIDI_Global_t MPIDI_Global;
+extern MPIU_Object_alloc_t MPIDI_Request_mem;
+extern MPID_Request MPIDI_Request_direct[];
 
 /* Utility functions */
 extern int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
@@ -569,36 +560,36 @@ extern void MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
 extern void MPIDI_OFI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
 
-extern int MPIDI_OFI_Gethuge_callback(cq_tagged_entry_t *wc, MPID_Request *req);
+extern int MPIDI_OFI_Gethuge_callback(cq_tagged_entry_t * wc, MPID_Request * req);
 extern int MPIDI_OFI_control_callback(void *buf);
-extern void MPIDI_OFI_build_nodemap(uint32_t *in_nodeids,
-                                    MPID_Node_id_t *out_nodemap, int sz, MPID_Node_id_t *sz_out);
-extern int MPIDI_OFI_Control_dispatch(cq_tagged_entry_t *wc,
-                                      MPID_Request *req) __attribute__((noinline));
+extern void MPIDI_OFI_build_nodemap(uint32_t * in_nodeids,
+                                    MPID_Node_id_t * out_nodemap, int sz, MPID_Node_id_t * sz_out);
+extern int MPIDI_OFI_Control_dispatch(cq_tagged_entry_t * wc,
+                                      MPID_Request * req) __attribute__ ((noinline));
 extern void MPIDI_OFI_Index_datatypes();
 
 /* Prototypes for inliner */
 extern int MPIR_Datatype_init_names(void);
 extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                               MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
-extern int MPIR_Barrier_impl(MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                               MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
+extern int MPIR_Barrier_impl(MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIR_Comm_commit(MPID_Comm *);
-extern int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **newcomm_ptr);
+extern int MPIR_Comm_split_impl(MPID_Comm * comm_ptr, int color, int key, MPID_Comm ** newcomm_ptr);
 extern int MPIR_Allreduce_impl(const void *sendbuf, void *recvbuf, int count,
-                               MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
-                               MPIR_Errflag_t *errflag);
+                               MPI_Datatype datatype, MPI_Op op, MPID_Comm * comm_ptr,
+                               MPIR_Errflag_t * errflag);
 extern int MPIR_Bcast_impl(void *buffer, int count, MPI_Datatype datatype, int root,
-                           MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                           MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtype,
                           void *recvbuf, MPI_Aint recvcount, MPI_Datatype recvtype);
-extern int MPIR_Info_set_impl(MPID_Info *info_ptr, const char *key, const char *value);
+extern int MPIR_Info_set_impl(MPID_Info * info_ptr, const char *key, const char *value);
 extern int MPIR_Bcast_intra(void *buffer, int count, MPI_Datatype datatype, int
-                            root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                            root, MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIDU_Sched_progress(int *made_progress);
 extern int MPIR_Comm_create(MPID_Comm **);
-extern int MPIR_Comm_dup_impl(MPID_Comm *comm_ptr, MPID_Comm **newcomm_ptr);
-extern int MPIR_Comm_free_impl(MPID_Comm *comm_ptr);
+extern int MPIR_Comm_dup_impl(MPID_Comm * comm_ptr, MPID_Comm ** newcomm_ptr);
+extern int MPIR_Comm_free_impl(MPID_Comm * comm_ptr);
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

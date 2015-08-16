@@ -21,7 +21,7 @@ MPIDI_CH4_Global_t MPIDI_CH4_Global;
 #define MPID_REQUEST_PREALLOC 16
 #endif
 
-MPID_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0}};
+MPID_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0} };
 
 MPIU_Object_alloc_t MPIDI_Request_mem = {
     0, 0, 0, 0,
@@ -31,7 +31,7 @@ MPIU_Object_alloc_t MPIDI_Request_mem = {
     MPID_REQUEST_PREALLOC
 };
 
-MPIDI_netmod_funcs_t        *MPIDI_netmod_func;
+MPIDI_netmod_funcs_t *MPIDI_netmod_func;
 MPIDI_netmod_native_funcs_t *MPIDI_netmod_native_func;
 
 #ifdef MPID_DEVICE_DEFINES_THREAD_CS

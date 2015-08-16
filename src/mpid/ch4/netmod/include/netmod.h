@@ -13,19 +13,15 @@ typedef int (*MPIDI_netmod_am_origin_handler_fn) (MPID_Request * req);
 /* Callback function setup by handler register function */
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_netmod_am_target_handler_fn)
-(void          *am_hdr,
- size_t         am_hdr_sz,
- void          *reply_token, /* contains information about reply operation */
- void         **data,        /* data should be set as iovs if *is_contig is true */
- size_t       *data_sz,
- int 	      *is_contig,
- MPIDI_netmod_am_completion_handler_fn *cmpl_handler_fn, /* completion handler */
- MPID_Request **req);        /* if allocated, need pointer to completion function */
+ (void *am_hdr, size_t am_hdr_sz, void *reply_token,    /* contains information about reply operation */
+  void **data,                  /* data should be set as iovs if *is_contig is true */
+  size_t * data_sz, int *is_contig, MPIDI_netmod_am_completion_handler_fn * cmpl_handler_fn,    /* completion handler */
+  MPID_Request ** req);         /* if allocated, need pointer to completion function */
 
 /* Macro helper types for netmod_api.h */
-typedef MPID_Gpid      MPID_Gpid_array_t[];
-typedef int            intarray_t[];
-typedef MPID_Request*  MPID_Request_array_t[];
+typedef MPID_Gpid MPID_Gpid_array_t[];
+typedef int intarray_t[];
+typedef MPID_Request *MPID_Request_array_t[];
 
 #define USE_NETMOD_TYPEDEFS
 #include "netmod_api.h"
@@ -62,7 +58,7 @@ typedef struct MPIDI_netmod_funcs {
     MPIDI_netmod_comm_create_t comm_create;
     MPIDI_netmod_comm_destroy_t comm_destroy;
     /* Request allocation routines */
-    MPIDI_netmod_request_create_t  request_create;
+    MPIDI_netmod_request_create_t request_create;
     MPIDI_netmod_request_release_t request_release;
 } MPIDI_netmod_funcs_t;
 

@@ -19,16 +19,17 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Progress_test(void)
 {
-    int mpi_errno,made_progress,i;
+    int mpi_errno, made_progress, i;
     MPIDI_STATE_DECL(MPID_STATE_CH4_PROGRESS_TEST);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_PROGRESS_TEST);
 
     for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
         if (MPIDI_CH4_Global.progress_hooks[i] != NULL) {
-            mpi_errno = MPIDI_CH4_Global.progress_hooks[i](&made_progress);
-            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+            mpi_errno = MPIDI_CH4_Global.progress_hooks[i] (&made_progress);
+            if (mpi_errno)
+                MPIR_ERR_POP(mpi_errno);
             if (made_progress) {
-                break; /* break the for loop */
+                break;  /* break the for loop */
             }
         }
     }
@@ -43,10 +44,10 @@ __CH4_INLINE__ int MPIDI_Progress_test(void)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROGRESS_TEST);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;;
 }
 
@@ -92,16 +93,16 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
     }
 
     if (i >= MAX_PROGRESS_HOOKS) {
-        return MPIR_Err_create_code( MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
-                                     "MPIDI_Progress_register_hook", __LINE__,
-                                     MPI_ERR_INTERN, "**progresshookstoomany", 0 );
+        return MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
+                                    "MPIDI_Progress_register_hook", __LINE__,
+                                    MPI_ERR_INTERN, "**progresshookstoomany", 0);
     }
 
-fn_exit:
+  fn_exit:
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -118,12 +119,12 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
 
     MPIDI_CH4_Global.progress_hooks[id] = NULL;
 
-fn_exit:
+  fn_exit:
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     return mpi_errno;
 
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

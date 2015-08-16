@@ -22,9 +22,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Put(const void *origin_addr,
                                   MPI_Datatype origin_datatype,
                                   int target_rank,
                                   MPI_Aint target_disp,
-                                  int target_count,
-                                  MPI_Datatype target_datatype,
-                                  MPID_Win *win)
+                                  int target_count, MPI_Datatype target_datatype, MPID_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT);

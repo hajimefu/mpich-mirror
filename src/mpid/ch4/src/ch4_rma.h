@@ -32,10 +32,10 @@ __CH4_INLINE__ int MPIDI_Put(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PUT);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -58,10 +58,10 @@ __CH4_INLINE__ int MPIDI_Get(void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_GET);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -86,10 +86,10 @@ __CH4_INLINE__ int MPIDI_Accumulate(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ACCUMULATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -111,10 +111,10 @@ __CH4_INLINE__ int MPIDI_Compare_and_swap(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMPARE_AND_SWAP);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -140,10 +140,10 @@ __CH4_INLINE__ int MPIDI_Raccumulate(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RACCUMULATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -173,10 +173,10 @@ __CH4_INLINE__ int MPIDI_Rget_accumulate(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RGET_ACCUMULATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -198,10 +198,10 @@ __CH4_INLINE__ int MPIDI_Fetch_and_op(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_FETCH_AND_OP);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -227,10 +227,10 @@ __CH4_INLINE__ int MPIDI_Rget(void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RGET);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -255,10 +255,10 @@ __CH4_INLINE__ int MPIDI_Rput(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RPUT);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -287,10 +287,10 @@ __CH4_INLINE__ int MPIDI_Get_accumulate(const void *origin_addr,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_GET_ACCUMULATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

@@ -17,8 +17,8 @@
 
 static inline MPID_Request *devreq_to_req(void *context)
 {
-    char *base = (char *)context;
-    return (MPID_Request *) container_of(base,MPID_Request,dev.netmod);
+    char *base = (char *) context;
+    return (MPID_Request *) container_of(base, MPID_Request, dev.netmod);
 }
 
 #undef FUNCNAME
@@ -27,11 +27,11 @@ static inline MPID_Request *devreq_to_req(void *context)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 {
-    int                mpi_errno = MPI_SUCCESS;
-    int                ret,count;
-    cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
-    cq_err_entry_t     e;
-    MPID_Request      *req;
+    int mpi_errno = MPI_SUCCESS;
+    int ret, count;
+    cq_tagged_entry_t wc[NUM_CQ_ENTRIES];
+    cq_err_entry_t e;
+    MPID_Request *req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
@@ -40,22 +40,24 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 
     do {
         MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
-        ret = fi_cq_read(MPIDI_Global.p2p_cq,(void *)wc,NUM_CQ_ENTRIES);
+        ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
         MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
 
-        if(ret > 0) {
-            for(count=0; count < ret; count++) {
+        if (ret > 0) {
+            for (count = 0; count < ret; count++) {
                 req = devreq_to_req(wc[count].op_context);
-                mpi_errno = REQ_OFI(req,callback)(&wc[count],req);
+                mpi_errno = REQ_OFI(req, callback) (&wc[count], req);
             }
-        } else if(ret == -FI_EAGAIN) {
-        } else if(ret < 0) {
-            if(ret == -FI_EAVAIL) {
+        }
+        else if (ret == -FI_EAGAIN) {
+        }
+        else if (ret < 0) {
+            if (ret == -FI_EAVAIL) {
                 MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
-                fi_cq_readerr(MPIDI_Global.p2p_cq,&e,0);
+                fi_cq_readerr(MPIDI_Global.p2p_cq, &e, 0);
                 MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
 
-                if(e.err == FI_ETRUNC) {
+                if (e.err == FI_ETRUNC) {
                     /* This error message should only be delivered on send
                      * events.  We want to ignore truncation errors
                      * on the sender side, but complete the request anyways
@@ -63,37 +65,41 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
                      */
                     req = devreq_to_req(e.op_context);
 
-                    if(req->kind == MPID_REQUEST_SEND)
-                        mpi_errno = REQ_OFI(req,callback)(NULL,req);
-                    else if(req->kind == MPID_REQUEST_RECV) {
-                        mpi_errno = REQ_OFI(req,callback)((cq_tagged_entry_t *)&e,req);
+                    if (req->kind == MPID_REQUEST_SEND)
+                        mpi_errno = REQ_OFI(req, callback) (NULL, req);
+                    else if (req->kind == MPID_REQUEST_RECV) {
+                        mpi_errno = REQ_OFI(req, callback) ((cq_tagged_entry_t *) & e, req);
                         req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
-                    } else
-                        MPIR_ERR_SETFATALANDJUMP4(mpi_errno,MPI_ERR_OTHER,"**ofid_poll",
-                                                  "**ofid_poll %s %d %s %s",__SHORT_FILE__,__LINE__,
-                                                  FCNAME,fi_strerror(e.err));
-                } else if(e.err == FI_ECANCELED) {
+                    }
+                    else
+                        MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
+                                                  "**ofid_poll %s %d %s %s", __SHORT_FILE__,
+                                                  __LINE__, FCNAME, fi_strerror(e.err));
+                }
+                else if (e.err == FI_ECANCELED) {
                     req = devreq_to_req(e.op_context);
                     MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
-                } else
-                    MPIR_ERR_SETFATALANDJUMP4(mpi_errno,MPI_ERR_OTHER,"**ofid_poll",
-                                              "**ofid_poll %s %d %s %s",__SHORT_FILE__,__LINE__,
-                                              FCNAME,fi_strerror(e.err));
-            } else
-                MPIR_ERR_SETFATALANDJUMP4(mpi_errno,MPI_ERR_OTHER,"**ofid_poll",
-                                          "**ofid_poll %s %d %s %s",__SHORT_FILE__,__LINE__,
-                                          FCNAME,fi_strerror(errno));
+                }
+                else
+                    MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
+                                              "**ofid_poll %s %d %s %s", __SHORT_FILE__, __LINE__,
+                                              FCNAME, fi_strerror(e.err));
+            }
+            else
+                MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
+                                          "**ofid_poll %s %d %s %s", __SHORT_FILE__, __LINE__,
+                                          FCNAME, fi_strerror(errno));
         }
-    } while(ret > 0);
+    } while (ret > 0);
 
-fn_exit:
+  fn_exit:
     /* fixme:  lock cycling an artifact of per-object switch */
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

@@ -26,11 +26,11 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;
 #undef FCNAME
 #define FCNAME DECL_FUNC(shm_do_irecv)
 static inline int shm_do_irecv(void *buf,
-                                     int count,
-                                     MPI_Datatype datatype,
-                                     int rank,
-                                     int tag,
-                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               int count,
+                               MPI_Datatype datatype,
+                               int rank,
+                               int tag,
+                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;
@@ -39,7 +39,7 @@ static inline int shm_do_irecv(void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_DO_IRECV);
 
     MPIDI_Request_create_rreq(rreq);
-    ENVELOPE_SET(REQ_SHM(rreq),rank,tag,comm->context_id+context_offset);
+    ENVELOPE_SET(REQ_SHM(rreq), rank, tag, comm->context_id + context_offset);
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
     REQ_SHM(rreq)->user_buf = buf;
@@ -48,10 +48,10 @@ static inline int shm_do_irecv(void *buf,
     REQ_SHM(rreq)->next = NULL;
     MPIR_STATUS_SET_COUNT(rreq->status, 0);
     /* enqueue rreq */
-    REQ_SHM_ENQUEUE(rreq,MPIDI_shm_recvq_posted);
+    REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
     *request = rreq;
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_DO_IRECV);
     return mpi_errno;
 }
@@ -59,13 +59,12 @@ fn_exit:
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_shm_recv)
 static inline int MPIDI_shm_recv(void *buf,
-                                    int count,
-                                    MPI_Datatype datatype,
-                                    int rank,
-                                    int tag,
-                                    MPID_Comm * comm,
-                                    int context_offset,
-                                    MPI_Status * status, MPID_Request ** request)
+                                 int count,
+                                 MPI_Datatype datatype,
+                                 int rank,
+                                 int tag,
+                                 MPID_Comm * comm,
+                                 int context_offset, MPI_Status * status, MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS, dt_contig, src;
     MPIDI_msg_sz_t data_sz;
@@ -77,28 +76,30 @@ static inline int MPIDI_shm_recv(void *buf,
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_RECV);
 
-    MPIDI_Datatype_get_info(count, datatype,
-                            dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     /* search in unexpected queue */
-    MPID_Request* req = MPIDI_shm_recvq_unexpected.head;
-    MPID_Request* prev_req = NULL;
-    while( req ) {
-        MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,"Matching to unexpected in irecv %d,%d,%d\n",rank,tag,comm->context_id+context_offset));
-        if( ENVELOPE_MATCH(REQ_SHM(req),rank,tag,comm->context_id+context_offset) )
-        {
-            MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,"Matching done in irecv %d,%d,%d\n",rank,tag,comm->context_id+context_offset));
-            recv_buffer = (char *)buf + dt_true_lb;
-            MPIU_Memcpy( recv_buffer, (void*)REQ_SHM(req)->user_buf, REQ_SHM(req)->data_sz );
+    MPID_Request *req = MPIDI_shm_recvq_unexpected.head;
+    MPID_Request *prev_req = NULL;
+    while (req) {
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "Matching to unexpected in irecv %d,%d,%d\n", rank, tag,
+                          comm->context_id + context_offset));
+        if (ENVELOPE_MATCH(REQ_SHM(req), rank, tag, comm->context_id + context_offset)) {
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                             (MPIU_DBG_FDEST, "Matching done in irecv %d,%d,%d\n", rank, tag,
+                              comm->context_id + context_offset));
+            recv_buffer = (char *) buf + dt_true_lb;
+            MPIU_Memcpy(recv_buffer, (void *) REQ_SHM(req)->user_buf, REQ_SHM(req)->data_sz);
             /* set status */
-            if( status != MPI_STATUS_IGNORE ) {
+            if (status != MPI_STATUS_IGNORE) {
                 status->MPI_SOURCE = REQ_SHM(req)->rank;
                 status->MPI_TAG = REQ_SHM(req)->tag;
                 MPIR_STATUS_SET_COUNT(*status, REQ_SHM(req)->data_sz);
             }
             /* dequeue unexpected req */
-            MPIU_Free((void*)REQ_SHM(req)->user_buf);
-            REQ_SHM_DEQUEUE_AND_SET_ERROR(&req,prev_req,MPIDI_shm_recvq_unexpected,mpi_errno);
+            MPIU_Free((void *) REQ_SHM(req)->user_buf);
+            REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_shm_recvq_unexpected, mpi_errno);
             *request = NULL;
             goto fn_exit;
         }
@@ -107,24 +108,24 @@ static inline int MPIDI_shm_recv(void *buf,
     }
 
     /* try to receive immediately from fastbox */
-    if( rank != MPI_ANY_SOURCE )
-    {
-        MPID_nem_fbox_mpich_t* fbox = &MPID_nem_mem_region.mailboxes.in[rank]->mpich;
-        if( OPA_load_int(&fbox->flag.value) )
-        {
-            if( ENVELOPE_MATCH(&fbox->cell,rank,tag,comm->context_id+context_offset) )
-            {
-                MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,"Matching in irecv %d,%d,%d\n",rank,tag,comm->context_id+context_offset));
-                recv_buffer = (char *)buf + dt_true_lb;
-                MPIU_Memcpy( recv_buffer, (void*)fbox->cell.pkt.mpich.p.payload, fbox->cell.pkt.mpich.datalen );
+    if (rank != MPI_ANY_SOURCE) {
+        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[rank]->mpich;
+        if (OPA_load_int(&fbox->flag.value)) {
+            if (ENVELOPE_MATCH(&fbox->cell, rank, tag, comm->context_id + context_offset)) {
+                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                                 (MPIU_DBG_FDEST, "Matching in irecv %d,%d,%d\n", rank, tag,
+                                  comm->context_id + context_offset));
+                recv_buffer = (char *) buf + dt_true_lb;
+                MPIU_Memcpy(recv_buffer, (void *) fbox->cell.pkt.mpich.p.payload,
+                            fbox->cell.pkt.mpich.datalen);
                 /* set status */
-                if( status != MPI_STATUS_IGNORE ) {
+                if (status != MPI_STATUS_IGNORE) {
                     status->MPI_SOURCE = fbox->cell.rank;
                     status->MPI_TAG = fbox->cell.tag;
                     MPIR_STATUS_SET_COUNT(*status, fbox->cell.pkt.mpich.datalen);
                 }
                 /* release fastbox */
-                OPA_store_release_int( &(fbox->flag.value), 0 );
+                OPA_store_release_int(&(fbox->flag.value), 0);
                 *request = NULL;
                 goto fn_exit;
             }
@@ -133,20 +134,19 @@ static inline int MPIDI_shm_recv(void *buf,
 
     /* failed to receive immediately */
     /* create a request */
-    mpi_errno = shm_do_irecv( buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_SHM_RECV);
     return mpi_errno;
 }
 
 static inline int MPIDI_shm_recv_init(void *buf,
-                                         int count,
-                                         MPI_Datatype datatype,
-                                         int rank,
-                                         int tag,
-                                         MPID_Comm * comm,
-                                         int context_offset, MPID_Request ** request)
+                                      int count,
+                                      MPI_Datatype datatype,
+                                      int rank,
+                                      int tag,
+                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -154,9 +154,9 @@ static inline int MPIDI_shm_recv_init(void *buf,
 
 
 static inline int MPIDI_shm_mrecv(void *buf,
-                                     int count,
-                                     MPI_Datatype datatype,
-                                     MPID_Request * message, MPI_Status * status)
+                                  int count,
+                                  MPI_Datatype datatype,
+                                  MPID_Request * message, MPI_Status * status)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -164,9 +164,9 @@ static inline int MPIDI_shm_mrecv(void *buf,
 
 
 static inline int MPIDI_shm_imrecv(void *buf,
-                                      int count,
-                                      MPI_Datatype datatype,
-                                      MPID_Request * message, MPID_Request ** rreqp)
+                                   int count,
+                                   MPI_Datatype datatype,
+                                   MPID_Request * message, MPID_Request ** rreqp)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -175,20 +175,20 @@ static inline int MPIDI_shm_imrecv(void *buf,
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_shm_irecv)
 static inline int MPIDI_shm_irecv(void *buf,
-                                     int count,
-                                     MPI_Datatype datatype,
-                                     int rank,
-                                     int tag,
-                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                  int count,
+                                  MPI_Datatype datatype,
+                                  int rank,
+                                  int tag,
+                                  MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPIDI_SHM_IRECV);
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_IRECV);
 
-    mpi_errno = shm_do_irecv( buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_SHM_IRECV);
     return mpi_errno;
 }

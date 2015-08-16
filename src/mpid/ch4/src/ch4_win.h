@@ -26,10 +26,10 @@ __CH4_INLINE__ int MPIDI_Win_set_info(MPID_Win * win, MPID_Info * info)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_SET_INFO);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -46,10 +46,10 @@ __CH4_INLINE__ int MPIDI_Win_start(MPID_Group * group, int assert, MPID_Win * wi
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_START);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -66,10 +66,10 @@ __CH4_INLINE__ int MPIDI_Win_complete(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_COMPLETE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -86,10 +86,10 @@ __CH4_INLINE__ int MPIDI_Win_post(MPID_Group * group, int assert, MPID_Win * win
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_POST);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -106,10 +106,10 @@ __CH4_INLINE__ int MPIDI_Win_wait(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_WAIT);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -127,10 +127,10 @@ __CH4_INLINE__ int MPIDI_Win_test(MPID_Win * win, int *flag)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_TEST);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -147,10 +147,10 @@ __CH4_INLINE__ int MPIDI_Win_lock(int lock_type, int rank, int assert, MPID_Win 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_LOCK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -167,10 +167,10 @@ __CH4_INLINE__ int MPIDI_Win_unlock(int rank, MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_UNLOCK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -187,10 +187,10 @@ __CH4_INLINE__ int MPIDI_Win_get_info(MPID_Win * win, MPID_Info ** info_p_p)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_GET_INFO);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -207,10 +207,10 @@ __CH4_INLINE__ int MPIDI_Win_free(MPID_Win ** win_ptr)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FREE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -227,10 +227,10 @@ __CH4_INLINE__ int MPIDI_Win_fence(int assert, MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FENCE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -250,10 +250,10 @@ __CH4_INLINE__ int MPIDI_Win_create(void *base,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_CREATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -270,10 +270,10 @@ __CH4_INLINE__ int MPIDI_Win_attach(MPID_Win * win, void *base, MPI_Aint size)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_ATTACH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -295,10 +295,10 @@ __CH4_INLINE__ int MPIDI_Win_allocate_shared(MPI_Aint size,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_ALLOCATE_SHARED);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -315,10 +315,10 @@ __CH4_INLINE__ int MPIDI_Win_flush_local(int rank, MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FLUSH_LOCAL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -335,10 +335,10 @@ __CH4_INLINE__ int MPIDI_Win_detach(MPID_Win * win, const void *base)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_DETACH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -357,10 +357,10 @@ __CH4_INLINE__ int MPIDI_Win_shared_query(MPID_Win * win,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_SHARED_QUERY);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -380,10 +380,10 @@ __CH4_INLINE__ int MPIDI_Win_allocate(MPI_Aint size,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_ALLOCATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -400,10 +400,10 @@ __CH4_INLINE__ int MPIDI_Win_flush(int rank, MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FLUSH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -420,10 +420,10 @@ __CH4_INLINE__ int MPIDI_Win_flush_local_all(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FLUSH_LOCAL_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -440,10 +440,10 @@ __CH4_INLINE__ int MPIDI_Win_unlock_all(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_UNLOCK_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -460,10 +460,10 @@ __CH4_INLINE__ int MPIDI_Win_create_dynamic(MPID_Info * info, MPID_Comm * comm, 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_CREATE_DYNAMIC);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -480,10 +480,10 @@ __CH4_INLINE__ int MPIDI_Win_sync(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_SYNC);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -500,10 +500,10 @@ __CH4_INLINE__ int MPIDI_Win_flush_all(MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_FLUSH_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -520,10 +520,10 @@ __CH4_INLINE__ int MPIDI_Win_lock_all(int assert, MPID_Win * win)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_WIN_LOCK_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

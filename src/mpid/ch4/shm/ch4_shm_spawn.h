@@ -14,8 +14,8 @@
 #include "ch4_shm_impl.h"
 
 static inline int MPIDI_shm_comm_connect(const char *port_name,
-                                            MPID_Info * info,
-                                            int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                         MPID_Info * info,
+                                         int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -40,8 +40,8 @@ static inline int MPIDI_shm_close_port(const char *port_name)
 }
 
 static inline int MPIDI_shm_comm_accept(const char *port_name,
-                                           MPID_Info * info,
-                                           int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                        MPID_Info * info,
+                                        int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

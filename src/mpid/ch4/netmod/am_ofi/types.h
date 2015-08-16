@@ -14,9 +14,7 @@
 #include "../ofi/types.h"
 #include <mpidch4u.h>
 
-EXTERN_C_BEGIN
-
-typedef enum {
+EXTERN_C_BEGIN typedef enum {
     MPIDI_AMTYPE_SHORT_HDR = 0,
     MPIDI_AMTYPE_SHORT,
     MPIDI_AMTYPE_LMT_REQ,
@@ -27,19 +25,19 @@ typedef enum {
 typedef struct {
     uint64_t src_offset;
     uint64_t sreq_ptr;
-}MPIDI_OFI_lmt_msg_pyld_t;
+} MPIDI_OFI_lmt_msg_pyld_t;
 
 typedef struct {
     uint64_t sreq_ptr;
-}MPIDI_OFI_Ack_msg_pyld_t;
+} MPIDI_OFI_Ack_msg_pyld_t;
 
 typedef struct MPIDI_AM_OFI_hdr_t {
-    uint16_t        handler_id;
-    uint16_t        am_hdr_sz;
-    uint8_t         am_type;
-    uint8_t         pad[3];
-    uint64_t        data_sz;
-    uint8_t         payload[];
+    uint16_t handler_id;
+    uint16_t am_hdr_sz;
+    uint8_t am_type;
+    uint8_t pad[3];
+    uint64_t data_sz;
+    uint8_t payload[];
 } MPIDI_AM_OFI_hdr_t;
 #define MPIDI_AM_OFI_MSG_HDR_SZ (sizeof(MPIDI_AM_OFI_hdr_t))
 
@@ -54,7 +52,7 @@ typedef struct {
 } MPIDI_OFI_lmt_msg_t;
 
 typedef struct {
-    struct fi_context context;          /* fixed field, do not move */
+    struct fi_context context;  /* fixed field, do not move */
     MPIDI_AM_OFI_hdr_t msg_hdr;
     uint8_t am_hdr[MPIDI_MAX_AM_HDR_SZ];
     MPIDI_OFI_lmt_msg_pyld_t lmt_info;
@@ -65,4 +63,3 @@ typedef struct {
 #define AMREQ_OFI(req,field) ((MPIDI_OFIAMReq_t*)&MPIU_CH4U_REQUEST_AM_NETMOD(req))->field
 
 #endif /* NETMOD_AM_OFI_TYPES_H_INCLUDED */
-

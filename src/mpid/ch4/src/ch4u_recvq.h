@@ -19,8 +19,7 @@
 #define FUNCNAME MPIDI_CH4U_Enqueue_posted
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_Enqueue_posted(MPID_Request *req,
-					      MPIDI_CH4U_Devreq_t **list)
+__CH4_INLINE__ void MPIDI_CH4U_Enqueue_posted(MPID_Request * req, MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_POSTED);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_POSTED);
@@ -32,8 +31,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_posted(MPID_Request *req,
 #define FUNCNAME MPIDI_CH4U_Enqueue_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_Enqueue_unexp(MPID_Request *req,
-					     MPIDI_CH4U_Devreq_t **list)
+__CH4_INLINE__ void MPIDI_CH4U_Enqueue_unexp(MPID_Request * req, MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_UNEXP);
@@ -45,8 +43,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_unexp(MPID_Request *req,
 #define FUNCNAME MPIDI_CH4U_Delete_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_Delete_unexp(MPID_Request *req,
-					    MPIDI_CH4U_Devreq_t **list)
+__CH4_INLINE__ void MPIDI_CH4U_Delete_unexp(MPID_Request * req, MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_DELETE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DELETE_UNEXP);
@@ -59,20 +56,19 @@ __CH4_INLINE__ void MPIDI_CH4U_Delete_unexp(MPID_Request *req,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp_strict(uint64_t tag, uint64_t ignore,
-							     MPIDI_CH4U_Devreq_t **list)
+                                                             MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_CH4U_Devreq_t *curr, *tmp;
     MPID_Request *req = NULL;
     MPIDI_STATE_DECL(MPID_STATE_CH4_DEQUEUE_UNEXP_STRICT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DEQUEUE_UNEXP_STRICT);
-    
+
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
-	if (!(curr->status & MPIDI_CH4U_REQ_BUSY) &&
-	    ((tag & ~ignore) == (curr->tag & ~ignore))) {
-	    req = container_of(curr, MPID_Request, dev.ch4u);
-	    MPL_DL_DELETE(*list, curr);
-	    break;
-	}
+        if (!(curr->status & MPIDI_CH4U_REQ_BUSY) && ((tag & ~ignore) == (curr->tag & ~ignore))) {
+            req = container_of(curr, MPID_Request, dev.ch4u);
+            MPL_DL_DELETE(*list, curr);
+            break;
+        }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DEQUEUE_UNEXP_STRICT);
     return req;
@@ -83,19 +79,19 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp_strict(uint64_t tag, uint6
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp(uint64_t tag, uint64_t ignore,
-						      MPIDI_CH4U_Devreq_t **list)
+                                                      MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_CH4U_Devreq_t *curr, *tmp;
     MPID_Request *req = NULL;
     MPIDI_STATE_DECL(MPID_STATE_CH4_DEQUEUE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DEQUEUE_UNEXP);
-    
+
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
-	if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-	    req = container_of(curr, MPID_Request, dev.ch4u);
-	    MPL_DL_DELETE(*list, curr);
-	    break;
-	}
+        if ((tag & ~ignore) == (curr->tag & ~ignore)) {
+            req = container_of(curr, MPID_Request, dev.ch4u);
+            MPL_DL_DELETE(*list, curr);
+            break;
+        }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DEQUEUE_UNEXP);
     return req;
@@ -106,18 +102,18 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp(uint64_t tag, uint64_t ign
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Find_unexp(uint64_t tag, uint64_t ignore,
-						   MPIDI_CH4U_Devreq_t **list)
+                                                   MPIDI_CH4U_Devreq_t ** list)
 {
     MPIDI_CH4U_Devreq_t *curr, *tmp;
     MPID_Request *req = NULL;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FIND_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FIND_UNEXP);
-    
+
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
-	if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-	    req = container_of(curr, MPID_Request, dev.ch4u);
-	    break;
-	}
+        if ((tag & ~ignore) == (curr->tag & ~ignore)) {
+            req = container_of(curr, MPID_Request, dev.ch4u);
+            break;
+        }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_FIND_UNEXP);
     return req;
@@ -127,8 +123,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Find_unexp(uint64_t tag, uint64_t ignore
 #define FUNCNAME MPIDI_CH4U_Dequeue_posted
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag,
-						       MPIDI_CH4U_Devreq_t **list)
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag, MPIDI_CH4U_Devreq_t ** list)
 {
     MPID_Request *req = NULL;
     MPIDI_CH4U_Devreq_t *curr, *tmp;
@@ -136,11 +131,11 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DEQUEUE_POSTED);
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
-	if ((tag & ~curr->ignore) == (curr->tag & ~curr->ignore)) {
-	    req = container_of(curr, MPID_Request, dev.ch4u);
-	    MPL_DL_DELETE(*list, curr);
-	    break;
-	}
+        if ((tag & ~curr->ignore) == (curr->tag & ~curr->ignore)) {
+            req = container_of(curr, MPID_Request, dev.ch4u);
+            MPL_DL_DELETE(*list, curr);
+            break;
+        }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DEQUEUE_POSTED);
     return req;
@@ -150,8 +145,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag,
 #define FUNCNAME MPIDI_CH4U_Delete_posted
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Delete_posted(MPIDI_CH4U_Devreq_t *req,
-                                            MPIDI_CH4U_Devreq_t **list)
+__CH4_INLINE__ int MPIDI_CH4U_Delete_posted(MPIDI_CH4U_Devreq_t * req, MPIDI_CH4U_Devreq_t ** list)
 {
     int found = 0;
     MPIDI_CH4U_Devreq_t *curr, *tmp;
@@ -159,10 +153,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Delete_posted(MPIDI_CH4U_Devreq_t *req,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DELETE_POSTED);
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         if (curr == req) {
-	    MPL_DL_DELETE(*list, curr);
+            MPL_DL_DELETE(*list, curr);
             found = 1;
-	    break;
-	}
+            break;
+        }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DELETE_POSTED);
     return found;

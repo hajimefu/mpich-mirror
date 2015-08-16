@@ -21,76 +21,69 @@ static inline int MPIDI_shm_reg_hdr_handler(int handler_id,
 }
 
 static inline int MPIDI_shm_send_am_hdr(int rank,
-                                           MPID_Comm * comm,
-                                           int handler_id,
-                                           const void *am_hdr,
-                                           size_t am_hdr_sz,
-                                           MPID_Request * sreq, void *shm_context)
+                                        MPID_Comm * comm,
+                                        int handler_id,
+                                        const void *am_hdr,
+                                        size_t am_hdr_sz, MPID_Request * sreq, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_send_am(int rank,
-                                       MPID_Comm * comm,
-                                       int handler_id,
-                                       const void *am_hdr,
-                                       size_t am_hdr_sz,
-                                       const void *data,
-                                       MPI_Count count,
-                                       MPI_Datatype datatype,
-                                       MPID_Request * sreq,
-                                       void *shm_context)
+                                    MPID_Comm * comm,
+                                    int handler_id,
+                                    const void *am_hdr,
+                                    size_t am_hdr_sz,
+                                    const void *data,
+                                    MPI_Count count,
+                                    MPI_Datatype datatype, MPID_Request * sreq, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_send_amv(int rank,
-                                        MPID_Comm * comm,
-                                        int handler_id,
-                                        struct iovec *am_hdr,
-                                        size_t iov_len,
-                                        const void *data,
-                                        MPI_Count count,
-                                        MPI_Datatype datatype,
-                                        MPID_Request * sreq,
-                                        void *shm_context)
+                                     MPID_Comm * comm,
+                                     int handler_id,
+                                     struct iovec *am_hdr,
+                                     size_t iov_len,
+                                     const void *data,
+                                     MPI_Count count,
+                                     MPI_Datatype datatype, MPID_Request * sreq, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_send_am_hdr_reply(void *reply_token,
-                                                 int handler_id,
-                                                 const void *am_hdr,
-                                                 size_t am_hdr_sz, MPID_Request * sreq)
+                                              int handler_id,
+                                              const void *am_hdr,
+                                              size_t am_hdr_sz, MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_send_am_reply(void *reply_token,
-                                             int handler_id,
-                                             const void *am_hdr,
-                                             size_t am_hdr_sz,
-                                             const void *data,
-                                             MPI_Count count,
-                                             MPI_Datatype datatype,
-                                             MPID_Request * sreq)
+                                          int handler_id,
+                                          const void *am_hdr,
+                                          size_t am_hdr_sz,
+                                          const void *data,
+                                          MPI_Count count,
+                                          MPI_Datatype datatype, MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_send_amv_reply(void *reply_token,
-                                              int handler_id,
-                                              struct iovec *am_hdr,
-                                              size_t iov_len,
-                                              const void *data,
-                                              MPI_Count count,
-                                              MPI_Datatype datatype,
-                                              MPID_Request * sreq)
+                                           int handler_id,
+                                           struct iovec *am_hdr,
+                                           size_t iov_len,
+                                           const void *data,
+                                           MPI_Count count,
+                                           MPI_Datatype datatype, MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -103,72 +96,63 @@ static inline size_t MPIDI_shm_am_hdr_max_sz(void)
 }
 
 static inline int MPIDI_shm_inject_am_hdr(int rank,
-                                            MPID_Comm * comm,
-                                            int handler_id,
-                                            const void *am_hdr,
-                                            size_t am_hdr_sz,
-                                            void *shm_context)
+                                          MPID_Comm * comm,
+                                          int handler_id,
+                                          const void *am_hdr, size_t am_hdr_sz, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_inject_am(int rank,
-                                        MPID_Comm * comm,
-                                        int handler_id,
-                                        const void *am_hdr,
-                                        size_t am_hdr_sz,
-                                        const void *data,
-                                        MPI_Count count,
-                                        MPI_Datatype datatype,
-                                        void *shm_context)
+                                      MPID_Comm * comm,
+                                      int handler_id,
+                                      const void *am_hdr,
+                                      size_t am_hdr_sz,
+                                      const void *data,
+                                      MPI_Count count, MPI_Datatype datatype, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_inject_amv(int rank,
-                                         MPID_Comm * comm,
-                                         int handler_id,
-                                         struct iovec *am_hdr,
-                                         size_t iov_len,
-                                         const void *data,
-                                         MPI_Count count,
-                                         MPI_Datatype datatype,
-                                         void *shm_context)
+                                       MPID_Comm * comm,
+                                       int handler_id,
+                                       struct iovec *am_hdr,
+                                       size_t iov_len,
+                                       const void *data,
+                                       MPI_Count count, MPI_Datatype datatype, void *shm_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_inject_am_hdr_reply(void *reply_token,
-                                                  int handler_id,
-                                                  const void *am_hdr,
-                                                  size_t am_hdr_sz)
+                                                int handler_id,
+                                                const void *am_hdr, size_t am_hdr_sz)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_inject_am_reply(void *reply_token,
-                                              int handler_id,
-                                              const void *am_hdr,
-                                              size_t am_hdr_sz,
-                                              const void *data,
-                                              MPI_Count count,
-                                              MPI_Datatype datatype)
+                                            int handler_id,
+                                            const void *am_hdr,
+                                            size_t am_hdr_sz,
+                                            const void *data,
+                                            MPI_Count count, MPI_Datatype datatype)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_shm_inject_amv_reply(void *reply_token,
-                                               int handler_id,
-                                               struct iovec *am_hdr,
-                                               size_t iov_len,
-                                               const void *data,
-                                               MPI_Count count,
-                                               MPI_Datatype datatype)
+                                             int handler_id,
+                                             struct iovec *am_hdr,
+                                             size_t iov_len,
+                                             const void *data,
+                                             MPI_Count count, MPI_Datatype datatype)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

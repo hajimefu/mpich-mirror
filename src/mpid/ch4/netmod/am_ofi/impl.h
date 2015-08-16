@@ -232,10 +232,10 @@
 
 #define MPID_LKEY_START 16384
 
-extern MPIDI_Addr_table_t  *MPIDI_Addr_table;
-extern MPIDI_Global_t       MPIDI_Global;
-extern MPIU_Object_alloc_t  MPIDI_Request_mem;
-extern MPID_Request         MPIDI_Request_direct[];
+extern MPIDI_Addr_table_t *MPIDI_Addr_table;
+extern MPIDI_Global_t MPIDI_Global;
+extern MPIU_Object_alloc_t MPIDI_Request_mem;
+extern MPID_Request MPIDI_Request_direct[];
 
 /* Utility functions */
 extern int MPIDI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
@@ -246,37 +246,37 @@ extern void MPIDI_Map_set(void *_map, uint64_t id, void *val);
 extern void MPIDI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_Map_lookup(void *_map, uint64_t id);
 
-extern void MPIDI_build_nodemap(uint32_t *in_nodeids,
-                                MPID_Node_id_t *out_nodemap, int sz, MPID_Node_id_t *sz_out);
+extern void MPIDI_build_nodemap(uint32_t * in_nodeids,
+                                MPID_Node_id_t * out_nodemap, int sz, MPID_Node_id_t * sz_out);
 extern void MPIDI_Index_datatypes();
 
 /* Prototypes for inliner */
 extern int MPIR_Datatype_init_names(void);
 extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                               MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
-extern int MPIR_Barrier_impl(MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                               MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
+extern int MPIR_Barrier_impl(MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIR_Comm_commit(MPID_Comm *);
-extern int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **newcomm_ptr);
+extern int MPIR_Comm_split_impl(MPID_Comm * comm_ptr, int color, int key, MPID_Comm ** newcomm_ptr);
 extern int MPIR_Allreduce_impl(const void *sendbuf, void *recvbuf, int count,
-                               MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
-                               MPIR_Errflag_t *errflag);
+                               MPI_Datatype datatype, MPI_Op op, MPID_Comm * comm_ptr,
+                               MPIR_Errflag_t * errflag);
 extern int MPIR_Bcast_impl(void *buffer, int count, MPI_Datatype datatype, int root,
-                           MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                           MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtype,
                           void *recvbuf, MPI_Aint recvcount, MPI_Datatype recvtype);
-extern int MPIR_Info_set_impl(MPID_Info *info_ptr, const char *key, const char *value);
+extern int MPIR_Info_set_impl(MPID_Info * info_ptr, const char *key, const char *value);
 extern int MPIR_Bcast_intra(void *buffer, int count, MPI_Datatype datatype, int
-                            root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+                            root, MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
 extern int MPIDU_Sched_progress(int *made_progress);
 extern int MPIR_Comm_create(MPID_Comm **);
-extern int MPIR_Comm_dup_impl(MPID_Comm *comm_ptr, MPID_Comm **newcomm_ptr);
-extern int MPIR_Comm_free_impl(MPID_Comm *comm_ptr);
+extern int MPIR_Comm_dup_impl(MPID_Comm * comm_ptr, MPID_Comm ** newcomm_ptr);
+extern int MPIR_Comm_free_impl(MPID_Comm * comm_ptr);
 
 /* Common Utility functions used by the
  * C and C++ components
  */
-static inline fi_addr_t _comm_to_phys(MPID_Comm *comm, int rank, int ep_family)
+static inline fi_addr_t _comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
 {
     return COMM_TO_PHYS(comm, rank);
 }
@@ -287,5 +287,4 @@ static inline fi_addr_t _to_phys(int rank, int ep_family)
 }
 
 EXTERN_C_END
-
 #endif /* NETMOD_AM_OFI_IMPL_H_INCLUDED */

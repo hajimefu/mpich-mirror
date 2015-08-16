@@ -18,7 +18,7 @@ static inline int MPIDI_netmod_put(const void *origin_addr,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   int target_count, MPI_Datatype target_datatype, MPID_Win *win)
+                                   int target_count, MPI_Datatype target_datatype, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -29,7 +29,7 @@ static inline int MPIDI_netmod_get(void *origin_addr,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   int target_count, MPI_Datatype target_datatype, MPID_Win *win)
+                                   int target_count, MPI_Datatype target_datatype, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -42,7 +42,7 @@ static inline int MPIDI_netmod_rput(const void *origin_addr,
                                     MPI_Aint target_disp,
                                     int target_count,
                                     MPI_Datatype target_datatype,
-                                    MPID_Win *win, MPID_Request **request)
+                                    MPID_Win * win, MPID_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -54,7 +54,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
                                                 int target_rank,
-                                                MPI_Aint target_disp, MPID_Win *win)
+                                                MPI_Aint target_disp, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -67,7 +67,7 @@ static inline int MPIDI_netmod_raccumulate(const void *origin_addr,
                                            MPI_Aint target_disp,
                                            int target_count,
                                            MPI_Datatype target_datatype,
-                                           MPI_Op op, MPID_Win *win, MPID_Request **request)
+                                           MPI_Op op, MPID_Win * win, MPID_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -83,7 +83,7 @@ static inline int MPIDI_netmod_rget_accumulate(const void *origin_addr,
                                                MPI_Aint target_disp,
                                                int target_count,
                                                MPI_Datatype target_datatype,
-                                               MPI_Op op, MPID_Win *win, MPID_Request **request)
+                                               MPI_Op op, MPID_Win * win, MPID_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -93,7 +93,7 @@ static inline int MPIDI_netmod_fetch_and_op(const void *origin_addr,
                                             void *result_addr,
                                             MPI_Datatype datatype,
                                             int target_rank,
-                                            MPI_Aint target_disp, MPI_Op op, MPID_Win *win)
+                                            MPI_Aint target_disp, MPI_Op op, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -107,7 +107,7 @@ static inline int MPIDI_netmod_rget(void *origin_addr,
                                     MPI_Aint target_disp,
                                     int target_count,
                                     MPI_Datatype target_datatype,
-                                    MPID_Win *win, MPID_Request **request)
+                                    MPID_Win * win, MPID_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -124,7 +124,7 @@ static inline int MPIDI_netmod_get_accumulate(const void *origin_addr,
                                               MPI_Aint target_disp,
                                               int target_count,
                                               MPI_Datatype target_datatype,
-                                              MPI_Op op, MPID_Win *win)
+                                              MPI_Op op, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -136,7 +136,7 @@ static inline int MPIDI_netmod_accumulate(const void *origin_addr,
                                           int target_rank,
                                           MPI_Aint target_disp,
                                           int target_count,
-                                          MPI_Datatype target_datatype, MPI_Op op, MPID_Win *win)
+                                          MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

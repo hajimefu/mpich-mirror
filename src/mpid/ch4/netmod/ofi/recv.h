@@ -21,11 +21,11 @@ enum recv_mode {
 #define FUNCNAME recv_callback
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline  int recv_callback(cq_tagged_entry_t *wc, MPID_Request *rreq)
+static inline int recv_callback(cq_tagged_entry_t * wc, MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint last;
-    size_t   count;
+    size_t count;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
 
@@ -35,13 +35,13 @@ static inline  int recv_callback(cq_tagged_entry_t *wc, MPID_Request *rreq)
     count = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
 
-    if(REQ_OFI(rreq, pack_buffer)) {
+    if (REQ_OFI(rreq, pack_buffer)) {
         last = count;
         MPID_Segment_unpack(REQ_OFI(rreq, segment_ptr), 0, &last, REQ_OFI(rreq, pack_buffer));
         MPIU_Free(REQ_OFI(rreq, pack_buffer));
         MPID_Segment_free(REQ_OFI(rreq, segment_ptr));
 
-        if(last != count) {
+        if (last != count) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
                                              MPI_ERR_TYPE, "**dtypemismatch", 0);
@@ -52,7 +52,7 @@ static inline  int recv_callback(cq_tagged_entry_t *wc, MPID_Request *rreq)
     dtype_release_if_not_builtin(REQ_OFI(rreq, datatype));
 
     /* If syncronous, ack and complete when the ack is done */
-    if(unlikely(is_tag_sync(wc->tag))) {
+    if (unlikely(is_tag_sync(wc->tag))) {
         uint64_t ss_bits = init_sendtag(REQ_OFI(rreq, util_id),
                                         REQ_OFI(rreq, util_comm->rank),
                                         rreq->status.MPI_TAG,
@@ -67,10 +67,10 @@ static inline  int recv_callback(cq_tagged_entry_t *wc, MPID_Request *rreq)
     MPIDI_Request_complete(rreq);
 
     /* Polling loop will check for truncation */
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     rreq->status.MPI_ERROR = mpi_errno;
     goto fn_exit;
 }
@@ -79,7 +79,7 @@ fn_fail:
 #define FUNCNAME recv_huge_callback
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline  int recv_callback_huge(cq_tagged_entry_t *wc, MPID_Request *rreq)
+static inline int recv_callback_huge(cq_tagged_entry_t * wc, MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_Huge_recv_t *recv;
@@ -90,10 +90,10 @@ static inline  int recv_callback_huge(cq_tagged_entry_t *wc, MPID_Request *rreq)
 
     /* Look up the receive sequence number and chunk queue */
     comm_ptr = REQ_OFI(rreq, util_comm);
-    recv     = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
-                                                         get_source(wc->tag));
+    recv = (MPIDI_Huge_recv_t *) MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
+                                                      get_source(wc->tag));
 
-    if(recv == MPIDI_MAP_NOT_FOUND) {
+    if (recv == MPIDI_MAP_NOT_FOUND) {
         recv = (MPIDI_Huge_recv_t *) MPIU_Malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_OFI_Map_create(&recv->chunk_q);
@@ -103,7 +103,7 @@ static inline  int recv_callback_huge(cq_tagged_entry_t *wc, MPID_Request *rreq)
     /* Look up the receive in the chunk queue */
     hc = (MPIDI_Huge_chunk_t *) MPIDI_OFI_Map_lookup(recv->chunk_q, recv->seqno);
 
-    if(hc == MPIDI_MAP_NOT_FOUND) {
+    if (hc == MPIDI_MAP_NOT_FOUND) {
         hc = (MPIDI_Huge_chunk_t *) MPIU_Malloc(sizeof(*hc));
         memset(hc, 0, sizeof(*hc));
         hc->callback = MPIDI_OFI_Gethuge_callback;
@@ -116,10 +116,10 @@ static inline  int recv_callback_huge(cq_tagged_entry_t *wc, MPID_Request *rreq)
     hc->wc = *wc;
     MPIDI_OFI_Gethuge_callback(NULL, (MPID_Request *) hc);
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_CALLBACK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -127,14 +127,14 @@ fn_fail:
 #define FUNCNAME do_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline  int do_irecv(void *buf,
-                            int count,
-                            MPI_Datatype datatype,
-                            int rank,
-                            int tag,
-                            MPID_Comm *comm,
-                            int context_offset,
-                            MPID_Request **request, enum recv_mode mode, uint64_t flags)
+static inline int do_irecv(void *buf,
+                           int count,
+                           MPI_Datatype datatype,
+                           int rank,
+                           int tag,
+                           MPID_Comm * comm,
+                           int context_offset,
+                           MPID_Request ** request, enum recv_mode mode, uint64_t flags)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;
@@ -150,15 +150,15 @@ static inline  int do_irecv(void *buf,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_IRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_IRECV);
 
-    if(mode == ON_HEAP)         /* Branch should compile out */
+    if (mode == ON_HEAP)        /* Branch should compile out */
         REQ_CREATE(rreq);
-    else if(mode == USE_EXISTING)
+    else if (mode == USE_EXISTING)
         rreq = *request;
 
     rreq->kind = MPID_REQUEST_RECV;
     *request = rreq;
 
-    if(unlikely(rank == MPI_PROC_NULL)) {
+    if (unlikely(rank == MPI_PROC_NULL)) {
         rreq->kind = MPID_REQUEST_RECV;
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         rreq->status.MPI_SOURCE = rank;
@@ -175,7 +175,7 @@ static inline  int do_irecv(void *buf,
 
     recv_buf = (char *) buf + dt_true_lb;
 
-    if(!dt_contig) {
+    if (!dt_contig) {
         REQ_OFI(rreq, segment_ptr) = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(REQ_OFI(rreq, segment_ptr) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
@@ -185,19 +185,21 @@ static inline  int do_irecv(void *buf,
         MPIR_ERR_CHKANDJUMP1(REQ_OFI(rreq, pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv Pack Buffer alloc");
         recv_buf = REQ_OFI(rreq, pack_buffer);
-    } else
+    }
+    else
         REQ_OFI(rreq, pack_buffer) = NULL;
 
     REQ_OFI(rreq, util_comm) = comm;
     REQ_OFI(rreq, util_id) = context_id;
 
-    if(unlikely(data_sz > MPIDI_Global.max_send)) {
+    if (unlikely(data_sz > MPIDI_Global.max_send)) {
         REQ_OFI(rreq, callback) = recv_callback_huge;
         data_sz = MPIDI_Global.max_send;
-    } else
+    }
+    else
         REQ_OFI(rreq, callback) = recv_callback;
 
-    if(!flags)  /* Branch should compile out */
+    if (!flags) /* Branch should compile out */
         FI_RC_RETRY(fi_trecv(G_RXC_TAG(0),
                              recv_buf,
                              data_sz,
@@ -223,10 +225,10 @@ static inline  int do_irecv(void *buf,
         MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
     }
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_IRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -240,9 +242,9 @@ static inline int MPIDI_netmod_recv(void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm *comm,
+                                    MPID_Comm * comm,
                                     int context_offset,
-                                    MPI_Status *status, MPID_Request **request)
+                                    MPI_Status * status, MPID_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV);
@@ -262,8 +264,8 @@ static inline int MPIDI_netmod_recv_init(void *buf,
                                          MPI_Datatype datatype,
                                          int rank,
                                          int tag,
-                                         MPID_Comm *comm,
-                                         int context_offset, MPID_Request **request)
+                                         MPID_Comm * comm,
+                                         int context_offset, MPID_Request ** request)
 {
     MPID_Request *rreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
@@ -289,7 +291,7 @@ static inline int MPIDI_netmod_recv_init(void *buf,
 
     REQ_OFI(rreq, p_type) = MPIDI_PTYPE_RECV;
 
-    if(HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
+    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
         MPID_Datatype *dt_ptr;
         MPID_Datatype_get_ptr(datatype, dt_ptr);
         MPID_Datatype_add_ref(dt_ptr);
@@ -307,7 +309,7 @@ static inline int MPIDI_netmod_recv_init(void *buf,
 static inline int MPIDI_netmod_mrecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
-                                     MPID_Request *message, MPI_Status *status)
+                                     MPID_Request * message, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
     MPI_Request req_handle;
@@ -318,16 +320,16 @@ static inline int MPIDI_netmod_mrecv(void *buf,
 
     MPI_RC_POP(MPIDI_Imrecv(buf, count, datatype, message, &rreq));
 
-    if(!MPID_Request_is_complete(rreq))
+    if (!MPID_Request_is_complete(rreq))
         PROGRESS_WHILE(!MPID_Request_is_complete(rreq));
 
     MPIR_Request_extract_status(rreq, status);
     MPI_RC_POP(MPIR_Request_complete(&req_handle, rreq, status, &active_flag));
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_MRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -339,7 +341,7 @@ fn_fail:
 static inline int MPIDI_netmod_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
-                                      MPID_Request *message, MPID_Request **rreqp)
+                                      MPID_Request * message, MPID_Request ** rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq;
@@ -347,7 +349,7 @@ static inline int MPIDI_netmod_imrecv(void *buf,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IMRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
-    if(message == NULL) {
+    if (message == NULL) {
         MPIDI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
         *rreqp = rreq;
         goto fn_exit;
@@ -363,10 +365,10 @@ static inline int MPIDI_netmod_imrecv(void *buf,
                          message->status.MPI_TAG, rreq->comm, 0,
                          &rreq, USE_EXISTING, FI_CLAIM | FI_COMPLETION);
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_IMRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -379,7 +381,7 @@ static inline int MPIDI_netmod_irecv(void *buf,
                                      MPI_Datatype datatype,
                                      int rank,
                                      int tag,
-                                     MPID_Comm *comm, int context_offset, MPID_Request **request)
+                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRECV);
@@ -394,7 +396,7 @@ static inline int MPIDI_netmod_irecv(void *buf,
 #define FUNCNAME MPIDI_netmod_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_cancel_recv(MPID_Request *rreq)
+static inline int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
 {
 
     int mpi_errno = MPI_SUCCESS;
@@ -404,12 +406,12 @@ static inline int MPIDI_netmod_cancel_recv(MPID_Request *rreq)
 
     PROGRESS();
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
-    ret = fi_cancel((fid_t) G_RXC_TAG(0),&(REQ_OFI(rreq, context)));
+    ret = fi_cancel((fid_t) G_RXC_TAG(0), &(REQ_OFI(rreq, context)));
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
 
-    if(ret == 0) {
-        while(!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
-            if((mpi_errno = MPIDI_Progress_test()) != MPI_SUCCESS)
+    if (ret == 0) {
+        while (!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
+            if ((mpi_errno = MPIDI_Progress_test()) != MPI_SUCCESS)
                 goto fn_exit;
         }
 
@@ -418,10 +420,10 @@ static inline int MPIDI_netmod_cancel_recv(MPID_Request *rreq)
         MPIDI_Request_complete(rreq);
     }
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

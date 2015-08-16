@@ -25,11 +25,17 @@
 #include <assert.h>
 #endif
 
+/* *INDENT-OFF* */
 EXTERN_C_BEGIN
+/* *INDENT-ON* */
+
 #define MPICH_SKIP_MPICXX
 #include "mpiimpl.h"
 #include "mpid_sched.h"
+
+/* *INDENT-OFF* */
 EXTERN_C_END
+/* *INDENT-ON* */
 
 #if !defined(MPICH_MPIDPRE_H_INCLUDED)
 #include "mpidpre.h"

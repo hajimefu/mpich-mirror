@@ -12,9 +12,9 @@
 #  if (SIZEOF_OPA_PTR_T > 16)
 #    error unexpected size for OPA_ptr_t
 #  endif
-#  define MPID_NEM_CELL_HEAD_LEN  16 /* We use this to keep elements 64-bit aligned */
+#  define MPID_NEM_CELL_HEAD_LEN  16    /* We use this to keep elements 64-bit aligned */
 #else /* (SIZEOF_OPA_PTR_T <= 8) */
-#  define MPID_NEM_CELL_HEAD_LEN  8 /* We use this to keep elements 64-bit aligned */
+#  define MPID_NEM_CELL_HEAD_LEN  8     /* We use this to keep elements 64-bit aligned */
 #endif
 
 #if 0
@@ -45,26 +45,23 @@
     int dest;                               \
     MPIU_Pint datalen;                      \
     unsigned short seqno;                   \
-    unsigned short type; /* currently used only with checkpointing */
+    unsigned short type;        /* currently used only with checkpointing */
 
-typedef struct MPID_nem_pkt_header
-{
+typedef struct MPID_nem_pkt_header {
     MPID_NEM_PKT_HEADER_FIELDS;
 } MPID_nem_pkt_header_t;
 
-typedef struct MPID_nem_pkt_mpich
-{
+typedef struct MPID_nem_pkt_mpich {
     MPID_NEM_PKT_HEADER_FIELDS;
     union {
         char payload[MPID_NEM_MPICH_DATA_LEN];
-        double dummy; /* align paylod to double */
+        double dummy;           /* align paylod to double */
     } p;
 } MPID_nem_pkt_mpich_t;
 
-typedef union
-{
-    MPID_nem_pkt_header_t      header;
-    MPID_nem_pkt_mpich_t      mpich;
+typedef union {
+    MPID_nem_pkt_header_t header;
+    MPID_nem_pkt_mpich_t mpich;
 } MPID_nem_pkt_t;
 
 /* Nemesis cells which are to be used in shared memory need to use
@@ -76,11 +73,9 @@ typedef union
  * convert between relative and absolute pointers. */
 
 /* This should always be exactly the size of a pointer */
-typedef struct MPID_nem_cell_rel_ptr
-{
+typedef struct MPID_nem_cell_rel_ptr {
     OPA_ptr_t p;
-}
-MPID_nem_cell_rel_ptr_t;
+} MPID_nem_cell_rel_ptr_t;
 
 /* MPID_nem_cell and MPID_nem_abs_cell must be kept in sync so that we
  * can cast between them.  MPID_nem_abs_cell should only be used when
@@ -88,8 +83,7 @@ MPID_nem_cell_rel_ptr_t;
  * queue in a network module) where relative pointers are not
  * needed. */
 
-typedef struct MPID_nem_cell
-{
+typedef struct MPID_nem_cell {
     MPID_nem_cell_rel_ptr_t next;
 #if (MPID_NEM_CELL_HEAD_LEN > SIZEOF_OPA_PTR_T)
     char padding[MPID_NEM_CELL_HEAD_LEN - sizeof(MPID_nem_cell_rel_ptr_t)];
@@ -98,17 +92,16 @@ typedef struct MPID_nem_cell
     int tag;
     int context_id;
 #if MPID_NEM_CACHE_LINE_LEN != 0
-    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 3*sizeof(int)]; /* should be 64-16-16-12 = 20 */
+    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 3 * sizeof(int)]; /* should be 64-16-16-12 = 20 */
 #endif
     volatile MPID_nem_pkt_t pkt;
 } MPID_nem_cell_t;
 typedef MPID_nem_cell_t *MPID_nem_cell_ptr_t;
 
-typedef struct MPID_nem_abs_cell
-{
+typedef struct MPID_nem_abs_cell {
     struct MPID_nem_abs_cell *next;
 #if (MPID_NEM_CELL_HEAD_LEN > SIZEOF_VOID_P)
-    char padding[MPID_NEM_CELL_HEAD_LEN - sizeof(struct MPID_nem_abs_cell*)];
+    char padding[MPID_NEM_CELL_HEAD_LEN - sizeof(struct MPID_nem_abs_cell *)];
 #endif
     volatile MPID_nem_pkt_t pkt;
 } MPID_nem_abs_cell_t;
@@ -121,7 +114,7 @@ typedef MPID_nem_abs_cell_t *MPID_nem_abs_cell_ptr_t;
 #define MPID_NEM_MAX_PACKET_LEN (sizeof (MPID_nem_pkt_t))
 #define MPID_NEM_PACKET_LEN(pkt) ((pkt)->mpich.datalen + MPID_NEM_MPICH_HEAD_LEN)
 
-#define MPID_NEM_OPT_LOAD     16 
+#define MPID_NEM_OPT_LOAD     16
 #define MPID_NEM_OPT_SIZE     ((sizeof(MPIDI_CH3_Pkt_t)) + (MPID_NEM_OPT_LOAD))
 #define MPID_NEM_OPT_HEAD_LEN ((MPID_NEM_MPICH_HEAD_LEN) + (MPID_NEM_OPT_SIZE))
 
@@ -130,8 +123,7 @@ typedef MPID_nem_abs_cell_t *MPID_nem_abs_cell_ptr_t;
 
 #define MPID_NEM_PACKET_PAYLOAD(pkt) ((pkt)->mpich.payload)
 
-typedef struct MPID_nem_queue
-{
+typedef struct MPID_nem_queue {
     MPID_nem_cell_rel_ptr_t head;
     MPID_nem_cell_rel_ptr_t tail;
 #if (MPID_NEM_CACHE_LINE_LEN > (2 * SIZEOF_OPA_PTR_T))
@@ -149,37 +141,31 @@ typedef struct MPID_nem_queue
 #endif
 } MPID_nem_queue_t, *MPID_nem_queue_ptr_t;
 
-/* Fast Boxes*/ 
-typedef union
-{
+/* Fast Boxes*/
+typedef union {
     OPA_int_t value;
 #if MPID_NEM_CACHE_LINE_LEN != 0
     char padding[MPID_NEM_CACHE_LINE_LEN];
 #endif
-}
-MPID_nem_opt_volint_t;
+} MPID_nem_opt_volint_t;
 
-typedef struct MPID_nem_fbox_common
-{
-    MPID_nem_opt_volint_t  flag;
+typedef struct MPID_nem_fbox_common {
+    MPID_nem_opt_volint_t flag;
 } MPID_nem_fbox_common_t, *MPID_nem_fbox_common_ptr_t;
 
-typedef struct MPID_nem_fbox_mpich
-{
+typedef struct MPID_nem_fbox_mpich {
     MPID_nem_opt_volint_t flag;
     MPID_nem_cell_t cell;
 } MPID_nem_fbox_mpich_t;
 
 #define MPID_NEM_FBOX_DATALEN MPID_NEM_MPICH_DATA_LEN
 
-typedef union 
-{
+typedef union {
     MPID_nem_fbox_common_t common;
     MPID_nem_fbox_mpich_t mpich;
 } MPID_nem_fastbox_t;
 
-typedef struct MPID_nem_fbox_arrays
-{
+typedef struct MPID_nem_fbox_arrays {
     MPID_nem_fastbox_t **in;
     MPID_nem_fastbox_t **out;
 } MPID_nem_fbox_arrays_t;

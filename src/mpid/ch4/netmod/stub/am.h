@@ -14,8 +14,8 @@
 #include "impl.h"
 
 static inline int MPIDI_netmod_reg_hdr_handler(int handler_id,
-    MPIDI_netmod_am_origin_handler_fn origin_handler_fn,
-    MPIDI_netmod_am_target_handler_fn target_handler_fn)
+                                               MPIDI_netmod_am_origin_handler_fn origin_handler_fn,
+                                               MPIDI_netmod_am_target_handler_fn target_handler_fn)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -38,9 +38,9 @@ static inline int MPIDI_netmod_send_am(int rank,
                                        const void *am_hdr,
                                        size_t am_hdr_sz,
                                        const void *data,
-				       MPI_Count count,
-				       MPI_Datatype datatype,
-				       MPID_Request * sreq, void *netmod_context)
+                                       MPI_Count count,
+                                       MPI_Datatype datatype,
+                                       MPID_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -52,9 +52,9 @@ static inline int MPIDI_netmod_send_amv(int rank,
                                         struct iovec *am_hdr,
                                         size_t iov_len,
                                         const void *data,
-					MPI_Count count,
-					MPI_Datatype datatype,
-					MPID_Request * sreq, void *netmod_context)
+                                        MPI_Count count,
+                                        MPI_Datatype datatype,
+                                        MPID_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -74,9 +74,8 @@ static inline int MPIDI_netmod_send_am_reply(void *reply_token,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
                                              const void *data,
-					     MPI_Count count,
-					     MPI_Datatype datatype,
-					     MPID_Request * sreq)
+                                             MPI_Count count,
+                                             MPI_Datatype datatype, MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -87,9 +86,8 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
                                               const void *data,
-					      MPI_Count count,
-					      MPI_Datatype datatype,
-					      MPID_Request * sreq)
+                                              MPI_Count count,
+                                              MPI_Datatype datatype, MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -102,20 +100,18 @@ static inline size_t MPIDI_netmod_am_hdr_max_sz(void)
 }
 
 static inline int MPIDI_netmod_inject_am_hdr(int rank,
-					     MPID_Comm * comm,
-					     int handler_id,
-					     const void *am_hdr,
-					     size_t am_hdr_sz,
-					     void *netmod_context)
+                                             MPID_Comm * comm,
+                                             int handler_id,
+                                             const void *am_hdr,
+                                             size_t am_hdr_sz, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_netmod_inject_am_hdr_reply(void *reply_token,
-						   int handler_id,
-						   const void *am_hdr,
-						   size_t am_hdr_sz)
+                                                   int handler_id,
+                                                   const void *am_hdr, size_t am_hdr_sz)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

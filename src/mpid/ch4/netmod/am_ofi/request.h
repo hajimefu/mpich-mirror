@@ -37,11 +37,13 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
     MPIU_Object_release_ref(req, &count);
     MPIU_Assert(count >= 0);
-    if(count == 0) {
-	MPIU_Assert(MPID_cc_is_complete(&req->cc));
-	if(req->comm)              MPIR_Comm_release(req->comm);
-	if(req->greq_fns)          MPIU_Free(req->greq_fns);
-	MPIDI_Request_tls_free(req);
+    if (count == 0) {
+        MPIU_Assert(MPID_cc_is_complete(&req->cc));
+        if (req->comm)
+            MPIR_Comm_release(req->comm);
+        if (req->greq_fns)
+            MPIU_Free(req->greq_fns);
+        MPIDI_Request_tls_free(req);
     }
 }
 

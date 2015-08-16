@@ -25,17 +25,17 @@ static inline int MPIDI_CH4U_Get_tag(uint64_t match_bits)
 
 static inline int MPIDI_CH4U_Get_context(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >> \
-		   (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
+    return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >>
+                   (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
 }
 
 static inline int MPIDI_CH4U_Get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
-    raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX,context_id);
-    idx        = raw_prefix / MPIR_CONTEXT_INT_BITS;
-    bitpos     = raw_prefix % MPIR_CONTEXT_INT_BITS;
-    gen_id     = (idx*MPIR_CONTEXT_INT_BITS) + (31-bitpos);
+    raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX, context_id);
+    idx = raw_prefix / MPIR_CONTEXT_INT_BITS;
+    bitpos = raw_prefix % MPIR_CONTEXT_INT_BITS;
+    gen_id = (idx * MPIR_CONTEXT_INT_BITS) + (31 - bitpos);
     return gen_id;
 }
 
@@ -166,8 +166,7 @@ static inline MPID_Request *MPIDI_CH4U_Create_req()
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPID_CH4U_init_send_tag(MPIU_Context_id_t contextid,
-				     int source, int tag)
+static inline uint64_t MPID_CH4U_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
@@ -179,8 +178,7 @@ static inline uint64_t MPID_CH4U_init_send_tag(MPIU_Context_id_t contextid,
 }
 
 static inline uint64_t MPID_CH4U_init_recvtag(uint64_t * mask_bits,
-                                    MPIU_Context_id_t contextid, 
-				    int source, int tag)
+                                              MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_CH4U_PROTOCOL_MASK;

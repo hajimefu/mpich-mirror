@@ -29,12 +29,16 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_RECV);
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
-    mpi_errno = MPIDI_netmod_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
+    mpi_errno =
+        MPIDI_netmod_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
 #else
-    if(MPIDI_netmod_rank_is_local(rank, comm))
-        mpi_errno = MPIDI_shm_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
+    if (MPIDI_netmod_rank_is_local(rank, comm))
+        mpi_errno =
+            MPIDI_shm_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
     else
-        mpi_errno = MPIDI_netmod_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
+        mpi_errno =
+            MPIDI_netmod_recv(buf, count, datatype, rank, tag, comm, context_offset, status,
+                              request);
 #endif
 
     if (mpi_errno != MPI_SUCCESS) {
@@ -42,15 +46,16 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
     }
 #if 0
     /* MPI_Recv calls MPID_Recv and progress - no need to call it twice? */
-    if (*request == NULL) goto fn_exit;
+    if (*request == NULL)
+        goto fn_exit;
     while (!MPID_Request_is_complete(*request))
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #endif
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -72,7 +77,7 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
     mpi_errno = MPIDI_netmod_recv_init(buf, count, datatype, rank, tag,
                                        comm, context_offset, request);
 #else
-    if(MPIDI_netmod_rank_is_local(rank, comm))
+    if (MPIDI_netmod_rank_is_local(rank, comm))
         mpi_errno = MPIDI_shm_recv_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
     else
@@ -82,10 +87,10 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -106,7 +111,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, &rreq);
 #else
-    if(MPIDI_netmod_rank_is_local(message->status.MPI_SOURCE, message->comm))
+    if (MPIDI_netmod_rank_is_local(message->status.MPI_SOURCE, message->comm))
         mpi_errno = MPIDI_shm_imrecv(buf, count, datatype, message, &rreq);
     else
         mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, &rreq);
@@ -118,10 +123,10 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 
     MPIR_Request_extract_status(rreq, status);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -141,7 +146,7 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, rreqp);
 #else
-    if(MPIDI_netmod_rank_is_local(message->status.MPI_SOURCE, message->comm))
+    if (MPIDI_netmod_rank_is_local(message->status.MPI_SOURCE, message->comm))
         mpi_errno = MPIDI_shm_imrecv(buf, count, datatype, message, rreqp);
     else
         mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, rreqp);
@@ -149,10 +154,10 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IMRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -173,18 +178,19 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if(MPIDI_netmod_rank_is_local(rank, comm))
+    if (MPIDI_netmod_rank_is_local(rank, comm))
         mpi_errno = MPIDI_shm_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
-        mpi_errno = MPIDI_netmod_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
+        mpi_errno =
+            MPIDI_netmod_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IRECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -205,10 +211,10 @@ __CH4_INLINE__ int MPIDI_Cancel_recv(MPID_Request * rreq)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_CANCEL_RECV);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

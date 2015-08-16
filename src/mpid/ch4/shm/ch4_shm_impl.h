@@ -27,9 +27,9 @@
 /* ---------------------------------------------------- */
 /* temp headers                                         */
 /* ---------------------------------------------------- */
-#include "ch4_shm_datatypes.h" /* MPID_nem datatypes like cell, fastbox defined here */
-#include "ch4_shm_defs.h" /* MPID_nem objects like shared memory region defined here */
-#include "ch4_shm_queue.h" /* MPID_nem_queue functions defined here */
+#include "ch4_shm_datatypes.h"  /* MPID_nem datatypes like cell, fastbox defined here */
+#include "ch4_shm_defs.h"       /* MPID_nem objects like shared memory region defined here */
+#include "ch4_shm_queue.h"      /* MPID_nem_queue functions defined here */
 
 /* ---------------------------------------------------- */
 /* shm specific object data                      */
@@ -47,17 +47,17 @@ typedef struct {
 } MPIDI_shm_vcrt_t;
 
 typedef struct {
-    MPIDI_shm_vcrt_t* vcrt;
+    MPIDI_shm_vcrt_t *vcrt;
 } MPIDI_shm_comm_t;
 #define COMM_SHM(comm) ((MPIDI_shm_comm_t*)(comm)->dev.pad)
 
 typedef struct {
-    MPID_Request* next;
+    MPID_Request *next;
     int dest;
     int rank;
     int tag;
     int context_id;
-    char* user_buf;
+    char *user_buf;
     int data_sz;
     int type;
     int user_count;
@@ -68,12 +68,12 @@ typedef struct {
 /* general send/recv queue types, macros and objects    */
 /* ---------------------------------------------------- */
 typedef struct {
-    MPID_Request* head;
-    MPID_Request* tail;
+    MPID_Request *head;
+    MPID_Request *tail;
 } MPIDI_shm_queue_t;
-extern MPIDI_shm_queue_t MPIDI_shm_sendq; /* defined in send.h */
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_posted; /* defined in recv.h */
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected; /* defined in recv.h */
+extern MPIDI_shm_queue_t MPIDI_shm_sendq;       /* defined in send.h */
+extern MPIDI_shm_queue_t MPIDI_shm_recvq_posted;        /* defined in recv.h */
+extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
 
 #define REQ_SHM_COMPLETE(req_) \
 { \
@@ -154,7 +154,7 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected; /* defined in recv.h */
 /*
  * Helper routines and macros for request completion
  */
-extern MPIU_Object_alloc_t  MPIDI_Request_mem;
+extern MPIU_Object_alloc_t MPIDI_Request_mem;
 #define MPIDI_Request_tls_alloc(req)                                     \
   ({                                                                     \
     (req) = (MPID_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);    \

@@ -8,7 +8,7 @@
 #define SKIP MPIU_PW_Sched_yield()
 #warning "SKIP is yield"
 #else /* YIELD_IN_SKIP */
-#define SKIP do{}while(0)
+#define SKIP do {} while (0)
 /*#warning "SKIP is do ...while" */
 #endif /* YIELD_IN_SKIP */
 
@@ -28,7 +28,7 @@
         }                                                            \
     } while (0)
 #define MPID_nem_q_assert_fail(a_str_, file_, line_) \
-    do {/*nothing*/} while(0)
+    do {/*nothing*/} while (0)
 #else
 #define MPID_nem_q_assert(a_) \
     do {/*nothing*/} while (0)
@@ -45,7 +45,7 @@ static inline void MPID_nem_cell_init(MPID_nem_cell_ptr_t cell)
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_CELL_INIT);
 
     MPID_NEM_SET_REL_NULL(cell->next);
-    memset((void *)&cell->pkt, 0, sizeof(MPID_nem_pkt_header_t));
+    memset((void *) &cell->pkt, 0, sizeof(MPID_nem_pkt_header_t));
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPID_NEM_CELL_INIT);
 }
@@ -71,7 +71,8 @@ static inline void MPID_nem_queue_init(MPID_nem_queue_ptr_t qhead)
 
 #define MPID_NEM_USE_SHADOW_HEAD
 
-static inline MPID_nem_cell_rel_ptr_t MPID_NEM_SWAP_REL (MPID_nem_cell_rel_ptr_t *ptr, MPID_nem_cell_rel_ptr_t val)
+static inline MPID_nem_cell_rel_ptr_t MPID_NEM_SWAP_REL(MPID_nem_cell_rel_ptr_t * ptr,
+                                                        MPID_nem_cell_rel_ptr_t val)
 {
     MPID_nem_cell_rel_ptr_t ret;
     OPA_store_ptr(&ret.p, OPA_swap_ptr(&(ptr->p), OPA_load_ptr(&val.p)));
@@ -79,18 +80,18 @@ static inline MPID_nem_cell_rel_ptr_t MPID_NEM_SWAP_REL (MPID_nem_cell_rel_ptr_t
 }
 
 /* do a compare-and-swap with MPID_NEM_RELNULL */
-static inline MPID_nem_cell_rel_ptr_t MPID_NEM_CAS_REL_NULL (MPID_nem_cell_rel_ptr_t *ptr, MPID_nem_cell_rel_ptr_t oldv)
+static inline MPID_nem_cell_rel_ptr_t MPID_NEM_CAS_REL_NULL(MPID_nem_cell_rel_ptr_t * ptr,
+                                                            MPID_nem_cell_rel_ptr_t oldv)
 {
     MPID_nem_cell_rel_ptr_t ret;
     OPA_store_ptr(&ret.p, OPA_cas_ptr(&(ptr->p), OPA_load_ptr(&oldv.p), MPID_NEM_REL_NULL));
     return ret;
 }
 
-static inline void
-MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
+static inline void MPID_nem_queue_enqueue(MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
 {
     MPID_nem_cell_rel_ptr_t r_prev;
-    MPID_nem_cell_rel_ptr_t r_element = MPID_NEM_ABS_TO_REL (element);
+    MPID_nem_cell_rel_ptr_t r_element = MPID_NEM_ABS_TO_REL(element);
 
     /* the _dequeue can break if this does not hold */
     MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(element->next));
@@ -106,9 +107,8 @@ MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
     OPA_write_barrier();
 
     /* enqueue at tail */
-    r_prev = MPID_NEM_SWAP_REL (&(qhead->tail), r_element);
-    if (MPID_NEM_IS_REL_NULL (r_prev))
-    {
+    r_prev = MPID_NEM_SWAP_REL(&(qhead->tail), r_element);
+    if (MPID_NEM_IS_REL_NULL(r_prev)) {
         /* queue was empty, element is the new head too */
 
         /* no write barrier needed, we believe atomic SWAP with a control
@@ -116,8 +116,7 @@ MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
          * assignment */
         qhead->head = r_element;
     }
-    else
-    {
+    else {
         /* queue was not empty, swing old tail's next field to point to
          * our element */
         MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(MPID_NEM_REL_TO_ABS(r_prev)->next));
@@ -125,97 +124,86 @@ MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
         /* no write barrier needed, we believe atomic SWAP with a control
          * dependence (if/else) will enforce ordering between the SWAP and the
          * prev->next assignment */
-        MPID_NEM_REL_TO_ABS (r_prev)->next = r_element;
+        MPID_NEM_REL_TO_ABS(r_prev)->next = r_element;
     }
 }
 
 /* This operation is only safe because this is a single-dequeuer queue impl.
    Assumes that MPID_nem_queue_empty was called immediately prior to fix up any
    shadow head issues. */
-static inline MPID_nem_cell_ptr_t
-MPID_nem_queue_head (MPID_nem_queue_ptr_t qhead)
+static inline MPID_nem_cell_ptr_t MPID_nem_queue_head(MPID_nem_queue_ptr_t qhead)
 {
     MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(qhead->head));
     return MPID_NEM_REL_TO_ABS(qhead->my_head);
 }
 
-static inline int
-MPID_nem_queue_empty (MPID_nem_queue_ptr_t qhead)
+static inline int MPID_nem_queue_empty(MPID_nem_queue_ptr_t qhead)
 {
     /* outside of this routine my_head and head should never both
      * contain a non-null value */
-    MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(qhead->my_head) ||
-                      MPID_NEM_IS_REL_NULL(qhead->head));
+    MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(qhead->my_head) || MPID_NEM_IS_REL_NULL(qhead->head));
 
-    if (MPID_NEM_IS_REL_NULL (qhead->my_head))
-    {
+    if (MPID_NEM_IS_REL_NULL(qhead->my_head)) {
         /* the order of comparison between my_head and head does not
          * matter, no read barrier needed here */
-        if (MPID_NEM_IS_REL_NULL (qhead->head))
-        {
+        if (MPID_NEM_IS_REL_NULL(qhead->head)) {
             /* both null, nothing in queue */
             return 1;
         }
-        else
-        {
+        else {
             /* shadow head null and head has value, move the value to
              * our private shadow head and zero the real head */
             qhead->my_head = qhead->head;
             /* no barrier needed, my_head is entirely private to consumer */
-            MPID_NEM_SET_REL_NULL (qhead->head);
+            MPID_NEM_SET_REL_NULL(qhead->head);
         }
     }
 
     /* the following assertions are present at the beginning of _dequeue:
-    MPID_nem_q_assert(!MPID_NEM_IS_REL_NULL(qhead->my_head));
-    MPID_nem_q_assert( MPID_NEM_IS_REL_NULL(qhead->head));
-    */
+     * MPID_nem_q_assert(!MPID_NEM_IS_REL_NULL(qhead->my_head));
+     * MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(qhead->head));
+     */
     return 0;
 }
 
 
 /* Gets the head */
-static inline void
-MPID_nem_queue_dequeue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t *e)
+static inline void MPID_nem_queue_dequeue(MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t * e)
 {
     MPID_nem_cell_ptr_t _e;
     MPID_nem_cell_rel_ptr_t _r_e;
 
     /* _empty always called first, moving head-->my_head */
     MPID_nem_q_assert(!MPID_NEM_IS_REL_NULL(qhead->my_head));
-    MPID_nem_q_assert( MPID_NEM_IS_REL_NULL(qhead->head));
+    MPID_nem_q_assert(MPID_NEM_IS_REL_NULL(qhead->head));
 
     _r_e = qhead->my_head;
-    _e = MPID_NEM_REL_TO_ABS (_r_e);
+    _e = MPID_NEM_REL_TO_ABS(_r_e);
 
     /* no barrier needed, my_head is private to consumer, plus
      * head/my_head and _e->next are ordered by a data dependency */
-    if (!MPID_NEM_IS_REL_NULL(_e->next))
-    {
+    if (!MPID_NEM_IS_REL_NULL(_e->next)) {
         qhead->my_head = _e->next;
     }
-    else
-    {
+    else {
         /* we've reached the end (tail) of the queue */
         MPID_nem_cell_rel_ptr_t old_tail;
 
-        MPID_NEM_SET_REL_NULL (qhead->my_head);
+        MPID_NEM_SET_REL_NULL(qhead->my_head);
         /* no barrier needed, the caller doesn't need any ordering w.r.t.
          * my_head or the tail */
-        old_tail = MPID_NEM_CAS_REL_NULL (&(qhead->tail), _r_e);
+        old_tail = MPID_NEM_CAS_REL_NULL(&(qhead->tail), _r_e);
 
-        if (!MPID_NEM_REL_ARE_EQUAL (old_tail, _r_e))
-        {
+        if (!MPID_NEM_REL_ARE_EQUAL(old_tail, _r_e)) {
             /* FIXME is a barrier needed here because of the control-only dependency? */
-            while (MPID_NEM_IS_REL_NULL (_e->next))
-            {
+            while (MPID_NEM_IS_REL_NULL(_e->next)) {
                 SKIP;
             }
             /* no read barrier needed between loads from the same location */
             qhead->my_head = _e->next;
         }
     }
-    MPID_NEM_SET_REL_NULL (_e->next);
+    MPID_NEM_SET_REL_NULL(_e->next);
 
     /* Conservative read barrier here to ensure loads from head are ordered
      * w.r.t. payload reads by the caller.  The McKenney "whymb" document's
@@ -258,11 +246,10 @@ static inline void MPID_nem_queue_init(MPID_nem_queue_ptr_t qhead)
     MPIDI_FUNC_EXIT(MPID_STATE_MPID_NEM_QUEUE_INIT);
 }
 
-static inline void
-MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
+static inline void MPID_nem_queue_enqueue(MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
 {
     MPID_nem_cell_rel_ptr_t r_prev;
-    MPID_nem_cell_rel_ptr_t r_element = MPID_NEM_ABS_TO_REL (element);
+    MPID_nem_cell_rel_ptr_t r_element = MPID_NEM_ABS_TO_REL(element);
 
     MPID_nem_queue_mutex_lock(&qhead->lock);
 
@@ -279,8 +266,7 @@ MPID_nem_queue_enqueue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t element)
 }
 
 /* This operation is only safe because this is a single-dequeuer queue impl. */
-static inline MPID_nem_cell_ptr_t
-MPID_nem_queue_head (MPID_nem_queue_ptr_t qhead)
+static inline MPID_nem_cell_ptr_t MPID_nem_queue_head(MPID_nem_queue_ptr_t qhead)
 {
     return MPID_NEM_REL_TO_ABS(qhead->my_head);
 }
@@ -289,33 +275,28 @@ MPID_nem_queue_head (MPID_nem_queue_ptr_t qhead)
    true, but it's not uncommon.  We often need to use these "lock-ful" queues on
    platforms where atomics are not yet implemented, so we can't rely on the
    atomics to provide atomic load/store operations for us. */
-static inline int
-MPID_nem_queue_empty (MPID_nem_queue_ptr_t qhead)
+static inline int MPID_nem_queue_empty(MPID_nem_queue_ptr_t qhead)
 {
-    if (MPID_NEM_IS_REL_NULL (qhead->my_head))
-    {
-        if (MPID_NEM_IS_REL_NULL (qhead->head))
-        {
+    if (MPID_NEM_IS_REL_NULL(qhead->my_head)) {
+        if (MPID_NEM_IS_REL_NULL(qhead->head)) {
             return 1;
         }
-        else
-        {
+        else {
             qhead->my_head = qhead->head;
-            MPID_NEM_SET_REL_NULL (qhead->head); /* reset it for next time */
+            MPID_NEM_SET_REL_NULL(qhead->head); /* reset it for next time */
         }
     }
 
     return 0;
 }
 
-static inline void
-MPID_nem_queue_dequeue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t *e)
+static inline void MPID_nem_queue_dequeue(MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t * e)
 {
     MPID_nem_cell_ptr_t _e;
     MPID_nem_cell_rel_ptr_t _r_e;
 
     _r_e = qhead->my_head;
-    _e = MPID_NEM_REL_TO_ABS (_r_e);
+    _e = MPID_NEM_REL_TO_ABS(_r_e);
 
 
     if (MPID_NEM_IS_REL_NULL(_e->next)) {
@@ -323,23 +304,22 @@ MPID_nem_queue_dequeue (MPID_nem_queue_ptr_t qhead, MPID_nem_cell_ptr_t *e)
         MPID_nem_queue_mutex_lock(&qhead->lock);
         qhead->my_head = _e->next;
         /* We have to check _e->next again because it may have changed between
-           the time we checked it without the lock and the time that we acquired
-           the lock. */
+         * the time we checked it without the lock and the time that we acquired
+         * the lock. */
         if (MPID_NEM_IS_REL_NULL(_e->next)) {
             MPID_NEM_SET_REL_NULL(qhead->tail);
         }
         MPID_nem_queue_mutex_unlock(&qhead->lock);
     }
-    else { /* !MPID_NEM_IS_REL_NULL(_e->next) */
+    else {      /* !MPID_NEM_IS_REL_NULL(_e->next) */
         /* We don't need to lock because a non-null _e->next can't be changed by
-           anyone but us (the dequeuer) and we don't need to modify qhead->tail
-           because we aren't removing the last element from the queue. */
+         * anyone but us (the dequeuer) and we don't need to modify qhead->tail
+         * because we aren't removing the last element from the queue. */
         qhead->my_head = _e->next;
     }
 
-    MPID_NEM_SET_REL_NULL (_e->next);
+    MPID_NEM_SET_REL_NULL(_e->next);
     *e = _e;
 }
 
 #endif /* !defined(MPID_NEM_USE_LOCK_FREE_QUEUES) */
-

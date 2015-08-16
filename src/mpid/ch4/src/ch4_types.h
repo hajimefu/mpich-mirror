@@ -35,13 +35,13 @@
 
 
 #define MAX_PROGRESS_HOOKS 16
-typedef int (*progress_func_ptr_t) (int* made_progress);
+typedef int (*progress_func_ptr_t) (int *made_progress);
 
 typedef enum {
     MPIDI_CH4U_AM_SEND = 0,
     MPIDI_CH4U_AM_SSEND_REQ,
     MPIDI_CH4U_AM_SSEND_ACK,
-}MPIDI_CH4U_AM_TYPE;
+} MPIDI_CH4U_AM_TYPE;
 
 typedef struct MPIDI_CH4U_AM_Hdr_t {
     uint64_t msg_tag;
@@ -57,15 +57,15 @@ typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
 } MPIDI_CH4U_Ssend_ack_msg_t;
 
 typedef struct MPIDI_CH4_Global_t {
-    MPID_Request        *request_test;
-    MPID_Comm           *comm_test;
-    int                  pname_set;
-    int                  pname_len;
-    char                 pname[MPI_MAX_PROCESSOR_NAME];
-    int                  is_initialized;
+    MPID_Request *request_test;
+    MPID_Comm *comm_test;
+    int pname_set;
+    int pname_len;
+    char pname[MPI_MAX_PROCESSOR_NAME];
+    int is_initialized;
     MPID_Comm **comms;
-    progress_func_ptr_t  progress_hooks[MAX_PROGRESS_HOOKS];
-    void                *netmod_context[];
+    progress_func_ptr_t progress_hooks[MAX_PROGRESS_HOOKS];
+    void *netmod_context[];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 
@@ -73,10 +73,10 @@ extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 
 /* Define a data structure for CH4 to keep locality information for each
  * process. This is only used if the netmod doesn't explicitly turn it off. */
-extern int *MPIDI_CH4U_gpid_local; /* For now, this is implemented as a flat
-                                      integer array indexed by gpid. This will
-                                      probably be reimplemented with something more
-                                      efficient. */
+extern int *MPIDI_CH4U_gpid_local;      /* For now, this is implemented as a flat
+                                         * integer array indexed by gpid. This will
+                                         * probably be reimplemented with something more
+                                         * efficient. */
 
 #endif
 

@@ -30,10 +30,10 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
         }
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROBE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -57,10 +57,10 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
         }
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -81,10 +81,10 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IMPROBE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -105,10 +105,10 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IPROBE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

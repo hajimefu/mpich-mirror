@@ -12,7 +12,7 @@
 #define FUNCNAME MPID_nem_barrier_vars_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_barrier_vars_init (MPID_nem_barrier_vars_t *barrier_region)
+int MPID_nem_barrier_vars_init(MPID_nem_barrier_vars_t * barrier_region)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
@@ -20,8 +20,7 @@ int MPID_nem_barrier_vars_init (MPID_nem_barrier_vars_t *barrier_region)
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_BARRIER_VARS_INIT);
     if (MPID_nem_mem_region.local_rank == 0)
-        for (i = 0; i < MPID_NEM_NUM_BARRIER_VARS; ++i)
-        {
+        for (i = 0; i < MPID_NEM_NUM_BARRIER_VARS; ++i) {
             OPA_store_int(&barrier_region[i].context_id, NULL_CONTEXT_ID);
             OPA_store_int(&barrier_region[i].usage_cnt, 0);
             OPA_store_int(&barrier_region[i].cnt, 0);
@@ -44,12 +43,12 @@ static int barrier_init = 0;
 #define FUNCNAME MPID_nem_barrier_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_barrier_init(MPID_nem_barrier_t *barrier_region, int init_values)
+int MPID_nem_barrier_init(MPID_nem_barrier_t * barrier_region, int init_values)
 {
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_BARRIER_INIT);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_BARRIER_INIT);
-    
+
     MPID_nem_mem_region.barrier = barrier_region;
     if (init_values) {
         OPA_store_int(&MPID_nem_mem_region.barrier->val, 0);
@@ -81,23 +80,21 @@ int MPID_nem_barrier(void)
 
     MPIR_ERR_CHKINTERNAL(!barrier_init, mpi_errno, "barrier not initialized");
 
-    if (OPA_fetch_and_incr_int(&MPID_nem_mem_region.barrier->val) == MPID_nem_mem_region.num_local - 1)
-    {
-	OPA_store_int(&MPID_nem_mem_region.barrier->val, 0);
-	OPA_store_int(&MPID_nem_mem_region.barrier->wait, 1 - sense);
+    if (OPA_fetch_and_incr_int(&MPID_nem_mem_region.barrier->val) ==
+        MPID_nem_mem_region.num_local - 1) {
+        OPA_store_int(&MPID_nem_mem_region.barrier->val, 0);
+        OPA_store_int(&MPID_nem_mem_region.barrier->wait, 1 - sense);
         OPA_write_barrier();
     }
-    else
-    {
-	/* wait */
-	while (OPA_load_int(&MPID_nem_mem_region.barrier->wait) == sense)
-            MPIU_PW_Sched_yield(); /* skip */
+    else {
+        /* wait */
+        while (OPA_load_int(&MPID_nem_mem_region.barrier->wait) == sense)
+            MPIU_PW_Sched_yield();      /* skip */
     }
     sense = 1 - sense;
 
- fn_fail:
- fn_exit:
+  fn_fail:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPID_NEM_BARRIER);
     return mpi_errno;
 }
-

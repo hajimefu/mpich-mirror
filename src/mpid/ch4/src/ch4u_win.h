@@ -24,8 +24,8 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_Win_gather_info(void *base, MPI_Aint size, int disp_unit,
-                               MPID_Info *info, MPID_Comm *comm_ptr,
-                               MPID_Win **win_ptr)
+                                              MPID_Info * info, MPID_Comm * comm_ptr,
+                                              MPID_Win ** win_ptr)
 {
     int mpi_errno = MPI_SUCCESS, i, k, comm_size, rank;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -40,12 +40,12 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_gather_info(void *base, MPI_Aint size, int dis
     MPIU_CH4U_WIN(*win_ptr, basic_info_table) = (MPIDI_CH4U_win_basic_info_t *)
         MPIU_Malloc(comm_size * sizeof(MPIDI_CH4U_win_basic_info_t));
     MPIU_Assert(MPIU_CH4U_WIN(*win_ptr, basic_info_table) != NULL);
-    
-    MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].base = (uint64_t)base;
+
+    MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].base = (uint64_t) base;
     MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].size = size;
     MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].disp_unit = disp_unit;
-    MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].win_ptr = (uint64_t)(*win_ptr);
-    
+    MPIU_CH4U_WIN(*win_ptr, basic_info_table)[rank].win_ptr = (uint64_t) (*win_ptr);
+
     mpi_errno = MPIR_Allgather_impl(MPI_IN_PLACE, sizeof(MPIDI_CH4U_win_basic_info_t),
                                     MPI_BYTE, MPIU_CH4U_WIN((*win_ptr), basic_info_table),
                                     sizeof(MPIDI_CH4U_win_basic_info_t), MPI_BYTE,
@@ -53,10 +53,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_gather_info(void *base, MPI_Aint size, int dis
     if (mpi_errno) {
         MPIU_RC_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_RMA_FUNC_EXIT(MPID_STATE_MPIDI_CH4U_WIN_GATHER_INFO);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -120,10 +120,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_set_info(MPID_Win * win, MPID_Info * info)
                 MPIU_CH4U_WIN(win, info_args).alloc_shared_noncontig = 0;
         }
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_SET_INFO);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -137,10 +137,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_start(MPID_Group * group, int assert, MPID_Win
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_START);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_START);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_START);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -154,10 +154,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_complete(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_COMPLETE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_COMPLETE);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_COMPLETE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -171,10 +171,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_post(MPID_Group * group, int assert, MPID_Win 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_POST);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_POST);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_POST);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -188,10 +188,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_wait(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_WAIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_WAIT);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_WAIT);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -206,10 +206,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_test(MPID_Win * win, int *flag)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_TEST);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_TEST);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_TEST);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -223,10 +223,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_lock(int lock_type, int rank, int assert, MPID
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_LOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_LOCK);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_LOCK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -240,10 +240,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_unlock(int rank, MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_UNLOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_UNLOCK);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_UNLOCK);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -257,10 +257,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_get_info(MPID_Win * win, MPID_Info ** info_p_p
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_GET_INFO);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_GET_INFO);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_GET_INFO);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -274,10 +274,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_free(MPID_Win ** win_ptr)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FREE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FREE);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FREE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -291,10 +291,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_fence(int assert, MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FENCE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FENCE);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FENCE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -305,16 +305,14 @@ fn_fail:
 __CH4_INLINE__ int MPIDI_CH4U_Win_create(void *base,
                                          MPI_Aint length,
                                          int disp_unit,
-                                         MPID_Info *info,
-                                         MPID_Comm *comm_ptr, 
-                                         MPID_Win **win_ptr)
+                                         MPID_Info * info,
+                                         MPID_Comm * comm_ptr, MPID_Win ** win_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_CREATE);
 
-    mpi_errno = MPIDI_CH4U_Win_gather_info(base, length, disp_unit, info,
-                                           comm_ptr, win_ptr);
+    mpi_errno = MPIDI_CH4U_Win_gather_info(base, length, disp_unit, info, comm_ptr, win_ptr);
     if (mpi_errno != MPI_SUCCESS)
         MPIU_RC_POP(mpi_errno);
 
@@ -324,10 +322,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_create(void *base,
         goto fn_exit;
     }
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_CREATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -343,10 +341,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_attach(MPID_Win * win, void *base, MPI_Aint si
 
     /* no op, all of memory is exposed */
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_ATTACH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -364,10 +362,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_allocate_shared(MPI_Aint size,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_ALLOCATE_SHARED);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_ALLOCATE_SHARED);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_ALLOCATE_SHARED);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -381,10 +379,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_flush_local(int rank, MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FLUSH_LOCAL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FLUSH_LOCAL);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FLUSH_LOCAL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -400,10 +398,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_detach(MPID_Win * win, const void *base)
 
     /* no op, all of memory is exposed */
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_DETACH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -414,22 +412,20 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_Win_shared_query(MPID_Win * win,
                                                int rank,
-                                               MPI_Aint *size, 
-                                               int *disp_unit, 
-                                               void *baseptr)
+                                               MPI_Aint * size, int *disp_unit, void *baseptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_SHARED_QUERY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_SHARED_QUERY);
 
-    *(void **) baseptr = (void *)MPIU_CH4U_WIN(win, basic_info_table)[rank].base;
+    *(void **) baseptr = (void *) MPIU_CH4U_WIN(win, basic_info_table)[rank].base;
     *size = MPIU_CH4U_WIN(win, basic_info_table)[rank].size;
     *disp_unit = MPIU_CH4U_WIN(win, basic_info_table)[rank].disp_unit;
 
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_SHARED_QUERY);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -438,10 +434,10 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_Win_allocate_no_shm(MPI_Aint size, int disp_unit,
-                                                  MPID_Info *info, MPID_Comm *comm_ptr,
-                                                  void *baseptr, MPID_Win **win_ptr)
+                                                  MPID_Info * info, MPID_Comm * comm_ptr,
+                                                  void *baseptr, MPID_Win ** win_ptr)
 {
-    void **base_pp = (void **)baseptr;
+    void **base_pp = (void **) baseptr;
     int mpi_errno = MPI_SUCCESS;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH4U_WIN_ALLOCATE_NO_SHM);
@@ -450,15 +446,14 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_allocate_no_shm(MPI_Aint size, int disp_unit,
     *base_pp = (size > 0) ? MPIU_Malloc(size) : NULL;
     (*win_ptr)->base = *base_pp;
 
-    mpi_errno = MPIDI_CH4U_Win_gather_info(*base_pp, size, disp_unit, info,
-                                           comm_ptr, win_ptr);
+    mpi_errno = MPIDI_CH4U_Win_gather_info(*base_pp, size, disp_unit, info, comm_ptr, win_ptr);
     if (mpi_errno != MPI_SUCCESS) {
         MPIU_RC_POP(mpi_errno);
     }
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH4U_WIN_ALLOCATE_NO_SHM);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -468,10 +463,8 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_Win_allocate(MPI_Aint size,
                                            int disp_unit,
-                                           MPID_Info *info,
-                                           MPID_Comm *comm,
-                                           void *baseptr,
-                                           MPID_Win **win)
+                                           MPID_Info * info,
+                                           MPID_Comm * comm, void *baseptr, MPID_Win ** win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_ALLOCATE);
@@ -482,14 +475,13 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_allocate(MPI_Aint size,
         MPIU_Assert(0);
         goto fn_exit;
     }
-    mpi_errno = MPIDI_CH4U_Win_allocate_no_shm(size, disp_unit, info, 
-                                               comm, baseptr, win);
+    mpi_errno = MPIDI_CH4U_Win_allocate_no_shm(size, disp_unit, info, comm, baseptr, win);
     if (mpi_errno != MPI_SUCCESS)
         MPIU_RC_POP(mpi_errno);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_ALLOCATE);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -503,10 +495,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_flush(int rank, MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FLUSH);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FLUSH);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FLUSH);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -520,10 +512,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_flush_local_all(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FLUSH_LOCAL_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FLUSH_LOCAL_ALL);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FLUSH_LOCAL_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -537,10 +529,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_unlock_all(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_UNLOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_UNLOCK_ALL);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_UNLOCK_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -548,22 +540,20 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4U_Win_create_dynamic
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Win_create_dynamic(MPID_Info *info,
-                                                 MPID_Comm *comm, 
-                                                 MPID_Win **win)
+__CH4_INLINE__ int MPIDI_CH4U_Win_create_dynamic(MPID_Info * info,
+                                                 MPID_Comm * comm, MPID_Win ** win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_CREATE_DYNAMIC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_CREATE_DYNAMIC);
 
-    mpi_errno = MPIDI_CH4U_Win_gather_info(MPI_BOTTOM, 0, 1,
-                                           info, comm, win);
+    mpi_errno = MPIDI_CH4U_Win_gather_info(MPI_BOTTOM, 0, 1, info, comm, win);
     if (mpi_errno != MPI_SUCCESS)
         MPIU_RC_POP(mpi_errno);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_CREATE_DYNAMIC);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -577,10 +567,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_sync(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_SYNC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_SYNC);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_SYNC);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -594,10 +584,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_flush_all(MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_FLUSH_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_FLUSH_ALL);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_FLUSH_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -611,10 +601,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_lock_all(int assert, MPID_Win * win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_LOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_LOCK_ALL);
     MPIU_Assert(0);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_LOCK_ALL);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

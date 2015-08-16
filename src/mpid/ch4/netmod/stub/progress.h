@@ -60,6 +60,7 @@ static inline int MPIDI_netmod_progress_deregister(int id)
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
+
 static inline int MPIDI_netmod_progress_activate(int id)
 {
     MPIU_Assert(0);

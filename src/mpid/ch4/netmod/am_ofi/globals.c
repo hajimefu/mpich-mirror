@@ -14,7 +14,8 @@
 
 #ifndef HAVE_CH4_NETMOD_OFI
 
-MPIDI_Global_t      MPIDI_Global     = {0};
+MPIDI_Global_t MPIDI_Global = { 0 };
+
 MPIDI_Addr_table_t *MPIDI_Addr_table = NULL;
 
 #endif

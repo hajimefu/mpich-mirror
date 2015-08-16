@@ -28,13 +28,13 @@
 #ifndef __cplusplus
 struct MPIU_Object_alloc_t;
 #define ILU(ret,fcname,...) inline __attribute__((always_inline)) ret MPIU_##fcname(__VA_ARGS__)
-ILU(void *,Handle_obj_alloc_unsafe,struct MPIU_Object_alloc_t *);
-ILU(void *,Handle_obj_alloc,struct MPIU_Object_alloc_t *);
-ILU(void *,Handle_direct_init,void *, int, int, int);
-ILU(void *,Handle_indirect_init,void *(* *)[], int *, int, int, int, int);
-ILU(void  ,Handle_obj_alloc_complete,struct MPIU_Object_alloc_t *, int);
-ILU(void  ,Handle_obj_free,struct MPIU_Object_alloc_t *objmem, void *object);
-ILU(void *,Handle_get_ptr_indirect,int, struct MPIU_Object_alloc_t *);
+ILU(void *, Handle_obj_alloc_unsafe, struct MPIU_Object_alloc_t *);
+ILU(void *, Handle_obj_alloc, struct MPIU_Object_alloc_t *);
+ILU(void *, Handle_direct_init, void *, int, int, int);
+ILU(void *, Handle_indirect_init, void *(**)[], int *, int, int, int, int);
+ILU(void, Handle_obj_alloc_complete, struct MPIU_Object_alloc_t *, int);
+ILU(void, Handle_obj_free, struct MPIU_Object_alloc_t *objmem, void *object);
+ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #undef ILU
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
@@ -246,29 +246,29 @@ ILU(void *,Handle_get_ptr_indirect,int, struct MPIU_Object_alloc_t *);
 static inline MPID_Request *MPIDI_Request_alloc_and_init(int count)
 {
     MPID_Request *req;
-    req = (MPID_Request *)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
 
-    if(req == NULL)
+    if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
 
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)== MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
     MPID_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
-    req->greq_fns          = NULL;
+    req->greq_fns = NULL;
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->status.MPI_SOURCE    = MPI_UNDEFINED;
-    req->status.MPI_TAG       = MPI_UNDEFINED;
-    req->status.MPI_ERROR     = MPI_SUCCESS;
-    req->comm                 = NULL;
+    req->status.MPI_SOURCE = MPI_UNDEFINED;
+    req->status.MPI_TAG = MPI_UNDEFINED;
+    req->status.MPI_ERROR = MPI_SUCCESS;
+    req->comm = NULL;
     return req;
 }
 
 
 
-static inline fi_addr_t _comm_to_phys(MPID_Comm *comm, int rank, int ep_family)
+static inline fi_addr_t _comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
 {
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS
     int ep_num = COMM_TO_EP(comm, rank);
@@ -309,7 +309,7 @@ static inline uint64_t init_sendtag(MPIU_Context_id_t contextid, int source, int
 }
 
 /* receive posting */
-static inline uint64_t init_recvtag(uint64_t *mask_bits,
+static inline uint64_t init_recvtag(uint64_t * mask_bits,
                                     MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;
@@ -317,15 +317,16 @@ static inline uint64_t init_recvtag(uint64_t *mask_bits,
     match_bits = contextid;
     match_bits = (match_bits << MPID_SOURCE_SHIFT);
 
-    if(MPI_ANY_SOURCE == source) {
+    if (MPI_ANY_SOURCE == source) {
         match_bits = (match_bits << MPID_TAG_SHIFT);
         *mask_bits |= MPID_SOURCE_MASK;
-    } else {
+    }
+    else {
         match_bits |= source;
         match_bits = (match_bits << MPID_TAG_SHIFT);
     }
 
-    if(MPI_ANY_TAG == tag)
+    if (MPI_ANY_TAG == tag)
         *mask_bits |= MPID_TAG_MASK;
     else
         match_bits |= (MPID_TAG_MASK & tag);
@@ -335,20 +336,20 @@ static inline uint64_t init_recvtag(uint64_t *mask_bits,
 
 static inline int get_tag(uint64_t match_bits)
 {
-    return ((int)(match_bits & MPID_TAG_MASK));
+    return ((int) (match_bits & MPID_TAG_MASK));
 }
 
 static inline int get_source(uint64_t match_bits)
 {
-    return ((int)((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
+    return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
 }
 
 #undef FUNCNAME
 #define FUNCNAME do_control_win
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_win(MPIDI_Win_control_t *control,
-                                 int rank, MPID_Win *win, int use_comm)
+static inline int do_control_win(MPIDI_Win_control_t * control,
+                                 int rank, MPID_Win * win, int use_comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
@@ -365,10 +366,10 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
                                  control, sizeof(*control),
                                  use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
                                  _to_phys(rank, MPIDI_API_MSG)), inject);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 
@@ -376,10 +377,10 @@ fn_fail:
 #define FUNCNAME do_control_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_send(MPIDI_Send_control_t *control,
+static inline int do_control_send(MPIDI_Send_control_t * control,
                                   char *send_buf,
                                   size_t msgsize,
-                                  int rank, MPID_Comm *comm_ptr, MPID_Request *ackreq)
+                                  int rank, MPID_Comm * comm_ptr, MPID_Request * ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
@@ -395,10 +396,10 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     FI_RC_RETRY(fi_inject(G_TXC_MSG(0),
                           control, sizeof(*control),
                           _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG)), inject);
-fn_exit:
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;
-fn_fail:
+  fn_fail:
     goto fn_exit;
 }
 

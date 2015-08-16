@@ -41,7 +41,7 @@ typedef enum {
 #define MPIDI_CH4U_REQ_UNEXP_CLAIMED 	(0x1 << 4)
 #define MPIDI_CH4U_REQ_RCV_NON_CONTIG 	(0x1 << 5)
 
-typedef struct MPIDI_CH4U_Devreq_t{
+typedef struct MPIDI_CH4U_Devreq_t {
     void *buffer;
     uint64_t count;
     uint64_t tag;
@@ -94,7 +94,7 @@ typedef struct MPIDI_CH4U_win_info_args_t {
     int same_size;              /* valid flavor = allocate */
     int alloc_shared_noncontig; /* valid flavor = allocate shared */
     int alloc_shm;              /* valid flavor = allocate */
-}MPIDI_CH4U_win_info_args_t;
+} MPIDI_CH4U_win_info_args_t;
 
 typedef struct MPIDI_CH4U_win_t {
     MPIDI_CH4U_win_basic_info_t *basic_info_table;
@@ -109,7 +109,7 @@ typedef struct {
 
 typedef struct MPIDI_CH4U_Devcomm_t {
     MPIDI_CH4U_Devreq_t *posted_list;
-    MPIDI_CH4U_Devreq_t *unexp_list;    
+    MPIDI_CH4U_Devreq_t *unexp_list;
 } MPIDI_CH4U_Devcomm_t;
 
 typedef struct {

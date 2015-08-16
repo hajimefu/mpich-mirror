@@ -13,20 +13,16 @@ typedef int (*MPIDI_shm_am_origin_handler_fn) (MPID_Request * req);
 /* Callback function setup by handler register function */
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_shm_am_target_handler_fn)
-(void          *am_hdr,
- size_t         am_hdr_sz,
- void          *reply_token, /* contains information about reply operation */
- void         **data,        /* CH4 manages this buffer - shm only fills with data */
- MPI_Datatype  *datatype,
- MPI_Count     *count,
- int           *noncontig,   /* if TRUE: data/data_sz are actually iovec/count */
- MPIDI_shm_am_completion_handler_fn *cmpl_handler_fn, /* completion handler */
- MPID_Request **req);        /* if allocated, need pointer to completion function */
+ (void *am_hdr, size_t am_hdr_sz, void *reply_token,    /* contains information about reply operation */
+  void **data,                  /* CH4 manages this buffer - shm only fills with data */
+  MPI_Datatype * datatype, MPI_Count * count, int *noncontig,   /* if TRUE: data/data_sz are actually iovec/count */
+  MPIDI_shm_am_completion_handler_fn * cmpl_handler_fn, /* completion handler */
+  MPID_Request ** req);         /* if allocated, need pointer to completion function */
 
 /* Macro helper types for shm_api.h */
-typedef MPID_Gpid      MPID_Gpid_array_t[];
-typedef int            intarray_t[];
-typedef MPID_Request*  MPID_Request_array_t[];
+typedef MPID_Gpid MPID_Gpid_array_t[];
+typedef int intarray_t[];
+typedef MPID_Request *MPID_Request_array_t[];
 
 #define USE_SHM_TYPEDEFS
 #include "ch4_shm_api.h"
@@ -67,7 +63,7 @@ typedef struct MPIDI_shm_funcs {
     MPIDI_shm_comm_create_t comm_create;
     MPIDI_shm_comm_destroy_t comm_destroy;
     /* Request allocation routines */
-    MPIDI_shm_request_create_t  request_create;
+    MPIDI_shm_request_create_t request_create;
     MPIDI_shm_request_release_t request_release;
 } MPIDI_shm_funcs_t;
 
