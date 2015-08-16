@@ -565,7 +565,7 @@ __CH4_INLINE__ MPI_Aint MPIDI_Aint_diff(MPI_Aint addr1, MPI_Aint addr2)
     MPIDI_STATE_DECL(MPID_STATE_CH4_AINT_DIFF);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_AINT_DIFF);
 
-    result = MPI_PTR_DISP_CAST_TO_MPI_AINT((char *) MPIU_AINT_CAST_TO_VOID_PTR(addr1)
+    result = MPIU_PTR_DISP_CAST_TO_MPI_AINT((char *) MPIU_AINT_CAST_TO_VOID_PTR(addr1)
                                            - (char *) MPIU_AINT_CAST_TO_VOID_PTR(addr2));
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_AINT_DIFF);
     return result;
