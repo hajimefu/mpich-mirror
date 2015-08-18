@@ -23,8 +23,8 @@
 /* This allows an application with ipo/pgo enabled to inline */
 /* the function directly into the application despite        */
 /* mpi header files not using attribute inline               */
-/* Trick doesn't work with gcc                               */
-#if defined(__clang__) || defined(__INTEL_COMPILER)
+/* Trick doesn't work with gcc or clang                      */
+#if defined(__INTEL_COMPILER)
 #ifndef __cplusplus
 struct MPIU_Object_alloc_t;
 #define ILU(ret,fcname,...) inline __attribute__((always_inline)) ret MPIU_##fcname(__VA_ARGS__)
