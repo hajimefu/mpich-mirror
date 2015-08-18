@@ -18,7 +18,7 @@
 typedef size_t MPIDI_msg_sz_t;
 
 #include "mpid_dataloop.h"
-#include "mpid_thread_fallback.h"
+#include "mpid_thread.h"
 #include "mpid_timers_fallback.h"
 
 #define MPID_PROGRESS_STATE_DECL
