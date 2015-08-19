@@ -82,18 +82,6 @@
         }								\
     } while (0)
 
-#define MPIU_Thread_mutex_trylock(mutex_ptr_, flag_ptr_, err_ptr_)	\
-    do {                                                                \
-        int err__;                                                      \
-    									\
-        err__ = mutex_trylock(mutex_ptr_);                              \
-        *(flag_ptr_) = (err__ == 0) ? TRUE : FALSE;                     \
-        if ((err_ptr_) != NULL) {                                       \
-            *(err_ptr_) = (err__ == EBUSY) : MPIU_THREAD_SUCCESS ? err__; \
-            /* FIXME: convert error to an MPIU_THREAD_ERR value */      \
-        }                                                               \
-    } while (0)
-
 
 /*
  * Condition Variables
@@ -155,9 +143,6 @@
 /*
  * Thread Local Storage
  */
-typedef void (*MPIU_Thread_tls_exit_func_t) (void *value);
-
-
 #define MPIU_Thread_tls_create(exit_func_ptr_, tls_ptr_, err_ptr_)	\
     do {                                                                \
         if ((err_ptr_) == NULL) {                                       \

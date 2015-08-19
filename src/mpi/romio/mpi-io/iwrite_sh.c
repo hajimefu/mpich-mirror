@@ -55,8 +55,6 @@ int MPI_File_iwrite_shared(MPI_File fh, ROMIO_CONST void *buf, int count,
     ADIO_Offset off, shared_fp;
     static char myname[] = "MPI_FILE_IWRITE_SHARED";
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
-
     adio_fh = MPIO_File_resolve(fh);
 
     /* --BEGIN ERROR HANDLING-- */
@@ -114,7 +112,5 @@ int MPI_File_iwrite_shared(MPI_File fh, ROMIO_CONST void *buf, int count,
 			   shared_fp, request, &error_code); 
 
 fn_exit:
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
-
     return error_code;
 }

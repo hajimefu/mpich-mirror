@@ -35,8 +35,6 @@ int MPIO_Testsome(int count, MPIO_Request requests[], int *outcount,
     int flag;
     MPIU_THREADPRIV_DECL;
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
-
     if (count == 1) {
 	err = MPIO_Test( requests, &flag, statuses );
 	if (!err) {
@@ -80,7 +78,5 @@ int MPIO_Testsome(int count, MPIO_Request requests[], int *outcount,
     }
 
 fn_exit:
-
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
     return err;
 }

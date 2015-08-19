@@ -84,7 +84,7 @@ typedef struct qn_ent
 
 static qn_ent_t *qn_head = NULL;
 
-#define MAX_PROGRESS_HOOKS 16
+#define MAX_PROGRESS_HOOKS 4
 typedef int (*progress_func_ptr_t) (int* made_progress);
 
 typedef struct progress_hook_slot {
@@ -93,7 +93,6 @@ typedef struct progress_hook_slot {
 } progress_hook_slot_t;
 
 static progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
-static int total_progress_hook_cnt = 0; /* Keep track of how many progress hooks are currently activated */
 
 #ifdef HAVE_SIGNAL
 static void sigusr1_handler(int sig)
@@ -304,7 +303,7 @@ int MPIDI_CH3I_Progress_register_hook(int (*progress_fn)(int*), int *id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3I_PROGRESS_REGISTER_HOOK);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3I_PROGRESS_REGISTER_HOOK);
-    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
         if (progress_hooks[i].func_ptr == NULL) {
@@ -323,7 +322,7 @@ int MPIDI_CH3I_Progress_register_hook(int (*progress_fn)(int*), int *id)
     (*id) = i;
 
   fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3I_PROGRESS_REGISTER_HOOK);
     return mpi_errno;
 
@@ -341,7 +340,7 @@ int MPIDI_CH3I_Progress_deregister_hook(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3I_PROGRESS_DEREGISTER_HOOK);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3I_PROGRESS_DEREGISTER_HOOK);
-    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS && progress_hooks[id].func_ptr != NULL);
 
@@ -349,7 +348,7 @@ int MPIDI_CH3I_Progress_deregister_hook(int id)
     progress_hooks[id].active = FALSE;
 
   fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3I_PROGRESS_DEREGISTER_HOOK);
     return mpi_errno;
 
@@ -368,17 +367,14 @@ int MPIDI_CH3I_Progress_activate_hook(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3I_PROGRESS_ACTIVATE_HOOK);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3I_PROGRESS_ACTIVATE_HOOK);
-    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
                 progress_hooks[id].active == FALSE && progress_hooks[id].func_ptr != NULL);
     progress_hooks[id].active = TRUE;
 
-    total_progress_hook_cnt++;
-    MPIU_Assert(total_progress_hook_cnt <= MAX_PROGRESS_HOOKS);
-
   fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3I_PROGRESS_ACTIVATE_HOOK);
     return mpi_errno;
 
@@ -397,17 +393,14 @@ int MPIDI_CH3I_Progress_deactivate_hook(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3I_PROGRESS_DEACTIVATE_HOOK);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3I_PROGRESS_DEACTIVATE_HOOK);
-    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
                 progress_hooks[id].active == TRUE && progress_hooks[id].func_ptr != NULL);
     progress_hooks[id].active = FALSE;
 
-    total_progress_hook_cnt--;
-    MPIU_Assert(total_progress_hook_cnt >= 0);
-
   fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3I_PROGRESS_DEACTIVATE_HOOK);
     return mpi_errno;
 
@@ -430,7 +423,7 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3I_PROGRESS);
 
-    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     /* sanity: if this doesn't hold, we can't track our local view of completion safely */
     if (is_blocking) {
@@ -499,7 +492,6 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
 	int                  in_fbox = 0;
 	MPIDI_VC_t          *vc;
 	int i;
-	int called_progress_hook_cnt = 0;
 
         do /* receive progress */
         {
@@ -599,7 +591,6 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         }
 
-        called_progress_hook_cnt = 0;
         for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
             if (progress_hooks[i].active == TRUE) {
                 MPIU_Assert(progress_hooks[i].func_ptr != NULL);
@@ -607,10 +598,6 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
                 if (made_progress)
                     MPIDI_CH3_Progress_signal_completion();
-
-                called_progress_hook_cnt++;
-                if (called_progress_hook_cnt == total_progress_hook_cnt)
-                    break;
             }
         }
 
@@ -632,7 +619,7 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
         {
             if (is_blocking) {
                 MPIDI_CH3I_progress_blocked = TRUE;
-                MPID_THREAD_CS_YIELD(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
+                MPID_THREAD_CS_YIELD(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
                 /* MPIDCOMM yield is needed because at least the send
                  * functions acquire MPIDCOMM to put things into the send
                  * queues.  Failure to yield could result in a deadlock.
@@ -643,7 +630,7 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
                  * sections besides the MPIDCOMM CS at this point.
                  * Violating this will probably lead to lock-ordering
                  * deadlocks. */
-                MPID_THREAD_CS_YIELD(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+                MPID_THREAD_CS_YIELD(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
                 MPIDI_CH3I_progress_blocked = FALSE;
                 MPIDI_CH3I_progress_wakeup_signalled = FALSE;
             }
@@ -668,7 +655,7 @@ int MPIDI_CH3I_Progress (MPID_Progress_state *progress_state, int is_blocking)
 #endif
 
  fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3I_PROGRESS);
     return mpi_errno;
  fn_fail:
@@ -691,7 +678,7 @@ static int MPIDI_CH3I_Progress_delay(unsigned int completion_count)
     /* FIXME should be appropriately abstracted somehow */
 #   if defined(MPICH_IS_THREADED) && (MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_GLOBAL)
     {
-        MPID_Thread_cond_wait(&MPIDI_CH3I_progress_completion_cond, &MPIR_THREAD_GLOBAL_MUTEX/*MPIDCOMM*/, &err);
+        MPID_Thread_cond_wait(&MPIDI_CH3I_progress_completion_cond, &MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX/*MPIDCOMM*/, &err);
     }
 #   endif
 
