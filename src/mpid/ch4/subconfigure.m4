@@ -132,6 +132,18 @@ if test "$enable_ch4_shm" = "exclusive" ; then
         [Define if CH4 will be providing the exclusive implementation of shared memory])
 fi
 
+AC_ARG_ENABLE(ch4u-per-comm-msg-queue,
+    [--enable-ch4u-per-comm-msg-queue=option
+       Enable use of per-communicator message queues for posted recvs/unexpected messages
+         yes       - Use per-communicator message queue. (Default)
+         no        - Use global queue for posted recvs/unexpected messages.
+    ],,enable_ch4u_per_comm_msg_queue=yes)
+
+if test "$enable_ch4u_per_comm_msg_queue" = "yes" ; then
+    AC_DEFINE([MPIDI_CH4U_USE_PER_COMM_QUEUE], [1],
+        [Define if CH4U will use per-communicator message queues])
+fi
+
 AC_CONFIG_FILES([
 src/mpid/ch4/src/mpid_ch4_net_array.c
 ])

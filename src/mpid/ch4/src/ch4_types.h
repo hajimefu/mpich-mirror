@@ -65,6 +65,12 @@ typedef struct MPIDI_CH4_Global_t {
     int is_initialized;
     MPID_Comm **comms;
     progress_func_ptr_t progress_hooks[MAX_PROGRESS_HOOKS];
+
+#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
+    MPIDI_CH4U_Devreq_t *posted_list;
+    MPIDI_CH4U_Devreq_t *unexp_list;
+#endif
+
     void *netmod_context[];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;

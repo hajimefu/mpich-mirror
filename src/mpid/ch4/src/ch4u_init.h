@@ -509,6 +509,11 @@ __CH4_INLINE__ int MPIDI_CH4U_Init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT);
 
+#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
+    MPIDI_CH4_Global.posted_list = NULL;
+    MPIDI_CH4_Global.unexp_list = NULL;
+#endif
+
     MPIU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SEND,
                                              &MPIDI_CH4U_am_send_origin_cmpl_handler,
                                              &MPIDI_CH4U_am_send_target_handler));
