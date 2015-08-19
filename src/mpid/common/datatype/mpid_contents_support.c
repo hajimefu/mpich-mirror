@@ -6,7 +6,7 @@
  */
 
 #include <mpi.h>
-#include <mpid_datatype.h>
+#include <mpid_dataloop.h>
 
 void MPID_Type_access_contents(MPI_Datatype type,
 			       int **ints_p,

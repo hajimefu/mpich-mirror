@@ -56,8 +56,6 @@ int MPIO_Test(MPIO_Request *request, int *flag, MPI_Status *status)
     }
 #endif /* MPI_hpux */
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
-
     if (*request == MPIO_REQUEST_NULL) {
 	    error_code = MPI_SUCCESS;
 	    goto fn_exit;
@@ -89,7 +87,6 @@ int MPIO_Test(MPIO_Request *request, int *flag, MPI_Status *status)
 #endif /* MPI_hpux */
 
 fn_exit:
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
     return error_code;
 }
 #endif

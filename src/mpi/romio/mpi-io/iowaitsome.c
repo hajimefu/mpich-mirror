@@ -34,8 +34,6 @@ int MPIO_Waitsome(int count, MPIO_Request requests[], int *outcount,
     int i, flag, err; 
     MPIU_THREADPRIV_DECL;
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
-
     if (count == 1) {
 	err = MPIO_Wait( requests, statuses );
 	if (!err) {
@@ -76,6 +74,5 @@ int MPIO_Waitsome(int count, MPIO_Request requests[], int *outcount,
     } while (*outcount == 0);
 
 fn_exit:
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_MUTEX);
     return err;
 }

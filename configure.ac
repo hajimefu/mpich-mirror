@@ -5299,25 +5299,6 @@ void f1(void *a) { return; }],
             fi
     
         fi
-	# Check for PTHREAD_MUTEX_RECURSIVE_NP and PTHREAD_MUTEX_RECURSIVE
-	AC_CACHE_CHECK([whether pthread.h defines PTHREAD_MUTEX_RECURSIVE_NP],
-	pac_cv_has_pthread_mutex_recursive_np,[
-        AC_TRY_COMPILE([#include <pthread.h>],
-                       [int a=PTHREAD_MUTEX_RECURSIVE_NP;],
-		       pac_cv_has_pthread_mutex_recursive_np=yes,
-		       pac_cv_has_pthread_mutex_recursive_np=no)])
-	AC_CACHE_CHECK([whether pthread.h defines PTHREAD_MUTEX_RECURSIVE],
-	pac_cv_has_pthread_mutex_recursive,[
-        AC_TRY_COMPILE([#include <pthread.h>],
-                       [int a=PTHREAD_MUTEX_RECURSIVE;],
-		       pac_cv_has_pthread_mutex_recursive=yes,
-		       pac_cv_has_pthread_mutex_recursive=no)])
-        if test "$pac_cv_has_pthread_mutex_recursive_np" = yes ; then
-	    AC_DEFINE(HAVE_PTHREAD_MUTEX_RECURSIVE_NP,1,[Define if PTHREAD_MUTEX_RECURSIVE_NP is available in pthread.h])
-	fi		       
-        if test "$pac_cv_has_pthread_mutex_recursive" = yes ; then
-	    AC_DEFINE(HAVE_PTHREAD_MUTEX_RECURSIVE,1,[Define if PTHREAD_MUTEX_RECURSIVE is available in pthread.h])
-	fi		       
 
         # Check for PTHREAD_MUTEX_ERRORCHECK_NP and PTHREAD_MUTEX_ERRORCHECK
         AC_CACHE_CHECK([whether pthread.h defines PTHREAD_MUTEX_ERRORCHECK_NP],
@@ -5334,10 +5315,10 @@ void f1(void *a) { return; }],
                        pac_cv_has_pthread_mutex_errorcheck=no)])
 
         if test "$pac_cv_has_pthread_mutex_errorcheck" = yes ; then
-            AC_DEFINE(PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK,
+            AC_DEFINE(MPICH_PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK,
                       [Define to an expression that will result in an error checking mutex type.])
         elif test "$pac_cv_has_pthread_mutex_errorcheck_np" = yes ; then
-            AC_DEFINE(PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK_NP,
+            AC_DEFINE(MPICH_PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK_NP,
                       [Define to an expression that will result in an error checking mutex type.])
         fi
 

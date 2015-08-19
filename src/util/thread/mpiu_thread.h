@@ -18,6 +18,12 @@
 #include "mpiu_strerror.h"
 #include "mpiu_timer.h"
 
+/* FIXME: we should not be including an MPIR-level header here.  But
+ * the code is currently a rat-hole where the MPIU and MPIR functions
+ * are all mixed up.  Till that's resolved, adding mpimem.h here as a
+ * workaround for using MPIU_Calloc functionality. */
+#include "mpimem.h"
+
 /* _INVALID exists to avoid accidental macro evaluations to 0 */
 #define MPIU_THREAD_PACKAGE_INVALID 0
 #define MPIU_THREAD_PACKAGE_NONE    1
@@ -59,7 +65,6 @@ void MPIU_Thread_mutex_create(MPIU_Thread_mutex_t * mutex, int *err);
 void MPIU_Thread_mutex_destroy(MPIU_Thread_mutex_t * mutex, int *err);
 void MPIU_Thread_mutex_lock(MPIU_Thread_mutex_t * mutex, int *err);
 void MPIU_Thread_mutex_unlock(MPIU_Thread_mutex_t * mutex, int *err);
-void MPIU_Thread_mutex_trylock(MPIU_Thread_mutex_t * mutex, int *flag, int *err);
 
 void MPIU_Thread_cond_create(MPIU_Thread_cond_t * cond, int *err);
 void MPIU_Thread_cond_destroy(MPIU_Thread_cond_t * cond, int *err);
@@ -67,17 +72,6 @@ void MPIU_Thread_cond_wait(MPIU_Thread_cond_t * cond, MPIU_Thread_mutex_t * mute
 void MPIU_Thread_cond_broadcast(MPIU_Thread_cond_t * cond, int *err);
 void MPIU_Thread_cond_signal(MPIU_Thread_cond_t * cond, int *err);
 
-
-/*
- * Thread Local Storage
- */
-typedef void (*MPIU_Thread_tls_exit_func_t) (void *value);
-
-void MPIU_Thread_tls_create(MPIU_Thread_tls_exit_func_t exit_func, MPIU_Thread_tls_t * tls,
-                            int *err);
-void MPIU_Thread_tls_destroy(MPIU_Thread_tls_t * tls, int *err);
-void MPIU_Thread_tls_set(MPIU_Thread_tls_t * tls, void *value, int *err);
-void MPIU_Thread_tls_get(MPIU_Thread_tls_t * tls, void **value, int *err);
 
 /* Error values */
 #define MPIU_THREAD_SUCCESS 0
@@ -131,7 +125,6 @@ typedef struct MPICH_ThreadInfo_t {
 #if MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_GLOBAL || \
     MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_PER_OBJECT
     MPIU_Thread_mutex_t global_mutex;
-    /* We need the handle mutex to avoid problems with lock nesting */
     MPIU_Thread_mutex_t handle_mutex;
 #endif
 
@@ -149,7 +142,7 @@ typedef struct MPICH_ThreadInfo_t {
 } MPICH_ThreadInfo_t;
 extern MPICH_ThreadInfo_t MPIR_ThreadInfo;
 
-#define MPIR_THREAD_GLOBAL_MUTEX      MPIR_ThreadInfo.global_mutex
+#define MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX      MPIR_ThreadInfo.global_mutex
 #define MPIR_THREAD_HANDLE_MUTEX      MPIR_ThreadInfo.handle_mutex
 #define MPIR_THREAD_MSGQ_MUTEX        MPIR_ThreadInfo.msgq_mutex
 #define MPIR_THREAD_COMPLETION_MUTEX  MPIR_ThreadInfo.completion_mutex
@@ -167,9 +160,6 @@ extern MPICH_ThreadInfo_t MPIR_ThreadInfo;
  * destruction time */
 #define MPIU_STRERROR_BUF_SIZE (1024)
 
-/* FIXME should really be MPIU_NEST_NUM_MUTEXES, but it's defined later */
-#define MPICH_MAX_LOCKS (6)
-
 /* This structure contains all thread-local variables and will be zeroed at
  * allocation time.
  *
@@ -181,10 +171,6 @@ typedef struct MPICH_PerThread_t {
 
     /* error string storage for MPIU_Strerror */
     char strerrbuf[MPIU_STRERROR_BUF_SIZE];
-
-#if (MPICH_THREAD_LEVEL >= MPI_THREAD_SERIALIZED)
-    int lock_depth[MPICH_MAX_LOCKS];
-#endif
 } MPICH_PerThread_t;
 
 #if defined (MPICH_IS_THREADED)
