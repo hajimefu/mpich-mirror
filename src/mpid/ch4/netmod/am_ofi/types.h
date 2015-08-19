@@ -19,7 +19,6 @@ EXTERN_C_BEGIN typedef enum {
     MPIDI_AMTYPE_SHORT,
     MPIDI_AMTYPE_LMT_REQ,
     MPIDI_AMTYPE_LMT_ACK,
-    MPIDI_AMTYPE_ACK,
 } MPIDI_amtype;
 
 typedef struct {
