@@ -484,11 +484,11 @@ __CH4_INLINE__ int MPIDI_CH4U_Destroy_comm(MPID_Comm * comm)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
     comm_idx = MPIDI_CH4U_Get_context_index(comm->recvcontext_id);
-
-    MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]);
-    MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.posted_list == NULL);
-    MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.unexp_list == NULL);
-    MPIDI_CH4_Global.comms[comm_idx] = NULL;
+    if (MPIDI_CH4_Global.comms[comm_idx]) {
+        MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.posted_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.unexp_list == NULL);
+        MPIDI_CH4_Global.comms[comm_idx] = NULL;
+    }
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
   fn_exit:
