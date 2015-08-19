@@ -186,8 +186,7 @@ static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
         AMREQ_OFI(rreq, lmt_cntr) = ((data_sz - 1) / MPIDI_Global.max_send) + 1;
         MPIDI_netmod_do_rdma_read(p_data, lmt_msg->src_offset, data_sz, source, rreq);
         MPIR_STATUS_SET_COUNT(rreq->status, data_sz);
-    }
-    else {
+    } else {
         done = 0;
         rem = in_data_sz;
         iov = (struct iovec *) p_data;

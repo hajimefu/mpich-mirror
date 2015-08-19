@@ -207,9 +207,7 @@ static inline int MPIDI_netmod_ofi_send_am(int64_t rank, int handler_id,
     }
 
     mpi_errno = (data_sz <= MPIDI_MAX_SHORT_SEND_SZ) ?
-        MPIDI_netmod_ofi_send_am_short(rank, handler_id,
-                                       am_hdr, am_hdr_sz, send_buf, data_sz,
-                                       sreq) :
+        MPIDI_netmod_ofi_send_am_short(rank, handler_id,am_hdr, am_hdr_sz, send_buf, data_sz, sreq) :
         MPIDI_netmod_ofi_send_am_long(rank, handler_id, am_hdr, am_hdr_sz, send_buf, data_sz, sreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
@@ -257,7 +255,8 @@ static inline int MPIDI_netmod_send_am(int rank,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
-    mpi_errno = MPIDI_netmod_ofi_send_am(rank, handler_id,
+
+    mpi_errno = MPIDI_netmod_ofi_send_am(_comm_to_phys(comm, rank, MPIDI_API_TAG), handler_id,
                                          am_hdr, am_hdr_sz, data, count, datatype, sreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);

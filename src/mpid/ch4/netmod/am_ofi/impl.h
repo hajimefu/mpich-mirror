@@ -134,26 +134,26 @@
 			 fi_strerror(-_ret));		\
     } while (0)
 
-#define FI_RC_RETRY(FUNC,STR)					\
-    do								\
-    {								\
-	ssize_t _ret;						\
-	do {							\
-	    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);				\
-	    _ret = FUNC;					\
-	    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);				\
-	    if (likely(_ret==0)) break;				\
-	    MPIU_CH4_OFI_ERR(_ret<0,				\
-			     mpi_errno,				\
-			     MPI_ERR_OTHER,			\
-			     "**ofid_"#STR,			\
-			     "**ofid_"#STR" %s %d %s %s",	\
-			     __SHORT_FILE__,			\
-			     __LINE__,				\
-			     FCNAME,				\
-			     fi_strerror(-_ret));		\
-	    PROGRESS();						\
-	} while (_ret == -FI_EAGAIN);				\
+#define FI_RC_RETRY(FUNC,STR)                                           \
+    do                                                                  \
+    {                                                                   \
+	ssize_t _ret;                                                   \
+	do {                                                            \
+	    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex); \
+	    _ret = FUNC;                                                \
+	    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);  \
+	    if (likely(_ret==0)) break;                                 \
+	    MPIU_CH4_OFI_ERR(_ret != -FI_EAGAIN,                        \
+			     mpi_errno,                                 \
+			     MPI_ERR_OTHER,                             \
+			     "**ofid_"#STR,                             \
+			     "**ofid_"#STR" %s %d %s %s",               \
+			     __SHORT_FILE__,                            \
+			     __LINE__,                                  \
+			     FCNAME,                                    \
+			     fi_strerror(-_ret));                       \
+	    PROGRESS();                                                 \
+	} while (_ret == -FI_EAGAIN);                                   \
     } while (0)
 
 #define FI_RC_RETRY_NOLOCK(FUNC,STR)					\
@@ -163,7 +163,7 @@
 	do {								\
 	    _ret = FUNC;						\
 	    if (likely(_ret==0)) break;					\
-	    MPIU_CH4_OFI_ERR(_ret<0,					\
+	    MPIU_CH4_OFI_ERR(_ret != -FI_EAGAIN,                        \
 			     mpi_errno,					\
 			     MPI_ERR_OTHER,				\
 			     "**ofid_"#STR,				\
@@ -173,7 +173,6 @@
 			     FCNAME,					\
 			     fi_strerror(-_ret));			\
 	    PROGRESS();							\
-	    if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);	\
 	} while (_ret == -FI_EAGAIN);					\
     } while (0)
 
