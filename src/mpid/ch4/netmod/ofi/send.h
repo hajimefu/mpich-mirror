@@ -22,99 +22,6 @@
 #define SENDARGS buf,count,datatype,rank,tag, \
                  comm,context_offset,request
 
-typedef struct MPIDI_Hugecntr {
-    uint16_t counter;
-    uint16_t outstanding;
-} MPIDI_Hugecntr;
-
-#undef FUNCNAME
-#define FUNCNAME send_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int send_callback(cq_tagged_entry_t * wc, MPID_Request * sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    int c;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_CALLBACK);
-
-    MPID_cc_decr(sreq->cc_ptr, &c);
-    MPIU_Assert(c >= 0);
-
-    if (c == 0) {
-        if (REQ_OFI(sreq, pack_buffer))
-            MPIU_Free(REQ_OFI(sreq, pack_buffer));
-
-        dtype_release_if_not_builtin(REQ_OFI(sreq, datatype));
-        MPIDI_Request_release(sreq);
-    }   /* c != 0, ssend */
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_CALLBACK);
-    return mpi_errno;
-}
-
-#undef FUNCNAME
-#define FUNCNAME send_callback_huge
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int send_callback_huge(cq_tagged_entry_t * wc, MPID_Request * sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    int c;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_CALLBACK_HUGE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_CALLBACK_HUGE);
-
-    MPID_cc_decr(sreq->cc_ptr, &c);
-    MPIU_Assert(c >= 0);
-
-    if (c == 0) {
-        MPID_Comm *comm;
-        void *ptr;
-        MPIDI_Hugecntr *cntr;
-        comm = REQ_OFI(sreq, util_comm);
-        ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm)->huge_send_counters, REQ_OFI(sreq, util_id));
-        MPIU_Assert(ptr != MPIDI_MAP_NOT_FOUND);
-        cntr = (MPIDI_Hugecntr *) ptr;
-        cntr->outstanding--;
-
-        if (cntr->outstanding == 0) {
-            MPIDI_Send_control_t ctrl;
-            MPIDI_OFI_Map_erase(COMM_OFI(comm)->huge_send_counters, REQ_OFI(sreq, util_id));
-            MPIU_Free(ptr);
-            ctrl.type = MPIDI_CTRL_HUGE_CLEANUP;
-            MPI_RC_POP(do_control_send(&ctrl, NULL, 0, REQ_OFI(sreq, util_id), comm, NULL));
-        }
-
-        if (REQ_OFI(sreq, pack_buffer))
-            MPIU_Free(REQ_OFI(sreq, pack_buffer));
-
-        dtype_release_if_not_builtin(REQ_OFI(sreq, datatype));
-        MPIDI_Request_release(sreq);
-    }   /* c != 0, ssend */
-
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_CALLBACK_HUGE);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME ssend_ack_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int ssend_ack_callback(cq_tagged_entry_t * wc, MPID_Request * sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_Ssendack_request *req = (MPIDI_Ssendack_request *) sreq;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND_ACK_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SSEND_ACK_CALLBACK);
-    send_callback(NULL, req->signal_req);
-    MPIDI_Ssendack_request_tls_free(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND_ACK_CALLBACK);
-    return mpi_errno;
-}
-
 #undef FUNCNAME
 #define FUNCNAME send_lightweight
 #undef FCNAME
@@ -168,7 +75,7 @@ static inline int send_normal(const void *buf,
     sreq->kind = MPID_REQUEST_SEND;
     *request = sreq;
     match_bits = init_sendtag(comm->context_id + context_offset, comm->rank, tag, type);
-    REQ_OFI(sreq, callback) = send_callback;
+    REQ_OFI(sreq, event_id) = MPIDI_EVENT_SEND;
     REQ_OFI(sreq, datatype) = datatype;
     dtype_add_ref_if_not_builtin(datatype);
 
@@ -177,7 +84,7 @@ static inline int send_normal(const void *buf,
         uint64_t ssend_match, ssend_mask;
         MPIDI_Ssendack_request *ackreq;
         SSENDACKREQ_CREATE(ackreq);
-        ackreq->callback = ssend_ack_callback;
+        ackreq->event_id = MPIDI_EVENT_SSEND_ACK;
         ackreq->signal_req = sreq;
         MPID_cc_incr(sreq->cc_ptr, &c);
         ssend_match = init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
@@ -217,7 +124,7 @@ static inline int send_normal(const void *buf,
     if (data_sz <= MPIDI_Global.max_buffered_send) {
         FI_RC_RETRY(fi_tinject(G_TXC_TAG(0), send_buf, data_sz,
                                _comm_to_phys(comm, rank, MPIDI_API_TAG), match_bits), tinject);
-        send_callback(NULL, sreq);
+        send_event(NULL, sreq);
     }
     else if (data_sz <= MPIDI_Global.max_send)
         FI_RC_RETRY(fi_tsend(G_TXC_TAG(0), send_buf,
@@ -229,7 +136,7 @@ static inline int send_normal(const void *buf,
         MPIDI_Hugecntr *cntr;
         void *ptr;
         c = 1;
-        REQ_OFI(sreq, callback) = send_callback_huge;
+        REQ_OFI(sreq, event_id) = MPIDI_EVENT_SEND_HUGE;
         MPID_cc_incr(sreq->cc_ptr, &c);
         ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm)->huge_send_counters, rank);
 

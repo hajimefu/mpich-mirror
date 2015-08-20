@@ -349,7 +349,7 @@ static inline int MPIDI_netmod_init(int rank,
         MPIDI_Global.msg[i].iov_count = 1;
         MPIDI_Global.msg[i].addr = FI_ADDR_UNSPEC;
         MPIDI_Global.msg[i].context = &MPIDI_Global.control_req[i].context;
-        MPIDI_Global.control_req[i].callback = MPIDI_OFI_Control_dispatch;
+        MPIDI_Global.control_req[i].event_id = MPIDI_EVENT_CONTROL;
         MPIDI_Global.msg[i].data = 0;
         FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0), &MPIDI_Global.msg[i],
                                FI_MULTI_RECV | FI_COMPLETION), prepost);

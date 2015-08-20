@@ -15,7 +15,7 @@
 #include <new>
 #include <mpidimpl.h>
 #include "impl.h"
-
+#include "events.h"
 EXTERN_C_BEGIN
 
 #undef FUNCNAME
@@ -47,7 +47,6 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
     return mpi_errno;
 }
-
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_VCRT_Release
@@ -296,53 +295,6 @@ static inline void WinUnlockDoneCB(const MPIDI_Win_control_t *info,
 
 }
 
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_Gethuge_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_OFI_Gethuge_callback(cq_tagged_entry_t *wc,
-                               MPID_Request      *req)
-{
-    int mpi_errno = MPI_SUCCESS;
-    int c;
-    MPIDI_Huge_chunk_t *hc = (MPIDI_Huge_chunk_t *)req;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CONTROL_DISPATCH);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CONTROL_DISPATCH);
-
-    if(hc->localreq && hc->cur_offset!=0) {
-        size_t bytesSent  = hc->cur_offset - MPIDI_Global.max_send;
-        size_t bytesLeft  = hc->remote_info.msgsize - bytesSent - MPIDI_Global.max_send;
-        size_t bytesToGet = (bytesLeft<=MPIDI_Global.max_send)?bytesLeft:MPIDI_Global.max_send;
-
-        if(bytesToGet == 0ULL) {
-            MPIDI_Send_control_t ctrl;
-            hc->wc.len = hc->cur_offset;
-            hc->done_fn(&hc->wc, hc->localreq);
-            ctrl.type = MPIDI_CTRL_HUGEACK;
-            MPI_RC_POP(do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
-                                       hc->comm_ptr,hc->remote_info.ackreq));
-            MPIU_Free(hc);
-            goto fn_exit;
-        }
-
-        FI_RC_RETRY(fi_read(G_TXC_RMA(0),                                           /* endpoint     */
-                            (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
-                            bytesToGet,                                             /* bytes        */
-                            NULL,                                                   /* descriptor   */
-                            _comm_to_phys(hc->comm_ptr,hc->remote_info.origin_rank,MPIDI_API_MSG), /* Destination  */
-                            (uint64_t)hc->remote_info.send_buf+hc->cur_offset,      /* remote maddr */
-                            MPIDI_Global.lkey,                                      /* Key          */
-                            (void *)&hc->context),rdma_readfrom);                   /* Context      */
-        hc->cur_offset+=bytesToGet;
-    }
-
-fn_exit:
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
-
 static inline void MPIDI_Gethuge_cleanup(MPIDI_Send_control_t *info)
 {
     MPIDI_Huge_recv_t  *recv;
@@ -385,17 +337,17 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     if(hc == MPIDI_MAP_NOT_FOUND) {
         hc = (MPIDI_Huge_chunk_t *)MPIU_Malloc(sizeof(*hc));
         memset(hc,0, sizeof(*hc));
-        hc->callback = MPIDI_OFI_Gethuge_callback;
+        hc->event_id = MPIDI_EVENT_GET_HUGE;
         MPIDI_OFI_Map_set(recv->chunk_q,info->seqno,hc);
     }
 
     hc->cur_offset     = MPIDI_Global.max_send;
     hc->remote_info    = *info;
     hc->comm_ptr       = comm_ptr;
-    MPIDI_OFI_Gethuge_callback(NULL, (MPID_Request *)hc);
+    get_huge_event(NULL, (MPID_Request *)hc);
 }
 
-int MPIDI_OFI_control_callback(void *buf)
+int MPIDI_OFI_control_dispatch(void *buf)
 {
     int mpi_errno = MPI_SUCCESS;
     int senderrank;
@@ -405,7 +357,7 @@ int MPIDI_OFI_control_callback(void *buf)
     switch(control->type) {
         case MPIDI_CTRL_HUGEACK: {
             MPIDI_Send_control_t *ctrlsend = (MPIDI_Send_control_t *)buf;
-            REQ_OFI(ctrlsend->ackreq,callback)(NULL, ctrlsend->ackreq);
+            dispatch_function(NULL,ctrlsend->ackreq);
             goto fn_exit;
         }
         break;
@@ -470,43 +422,6 @@ fn_exit:
     return mpi_errno;
 }
 
-#undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_Control_dispatch
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_OFI_Control_dispatch(cq_tagged_entry_t *wc,
-                               MPID_Request      *req)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CONTROL_DISPATCH);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CONTROL_DISPATCH);
-
-    MPIU_Assert(wc->len == 0 || wc->len == MPID_MIN_CTRL_MSG_SZ);
-
-    if(wc->len == MPID_MIN_CTRL_MSG_SZ) {
-        int16_t *buf, dispatch_id;
-        buf         = (int16_t *)wc->buf;
-        MPIU_Assert(buf != NULL);
-        dispatch_id = *buf;
-        mpi_errno   = MPIDI_Global.control_fn[dispatch_id](buf);
-    }
-
-    if(wc->flags & FI_MULTI_RECV) {
-        FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0),
-                               &MPIDI_Global.msg[MPIDI_Global.cur_ctrlblock],
-                               FI_MULTI_RECV|FI_COMPLETION),repost);
-        MPIDI_Global.cur_ctrlblock++;
-
-        if(MPIDI_Global.cur_ctrlblock == MPIDI_Global.num_ctrlblock)
-            MPIDI_Global.cur_ctrlblock=0;
-    }
-
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CONTROL_DISPATCH);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
 
 /* MPI Datatype Processing for RMA */
 #define isS_INT(x) ( (x)==MPI_INTEGER ||                                \

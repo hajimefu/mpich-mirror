@@ -12,15 +12,11 @@
 #define NETMOD_OFI_PROGRESS_H_INCLUDED
 
 #include "impl.h"
-
+#include "events.h"
 #define NUM_CQ_ENTRIES 8
-static inline int handle_cq_error();
+static inline int handle_cq_error(int ret);
+static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num);
 
-static inline MPID_Request *devreq_to_req(void *context)
-{
-    char *base = (char *) context;
-    return (MPID_Request *) container_of(base, MPID_Request, dev.netmod);
-}
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_progress
 #undef FCNAME
@@ -37,14 +33,10 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-    if(likely(ret > 0)) {
-        for (count = 0; count < ret; count++) {
-            req = devreq_to_req(wc[count].op_context);
-            mpi_errno = REQ_OFI(req, callback) (&wc[count], req);
-        }
-    }
-    else if (ret == -FI_EAGAIN) {
-    }
+    if(likely(ret > 0))
+        MPIU_RC_POP(handle_cq_entries(wc,ret));
+    else if (ret == -FI_EAGAIN)
+        goto fn_exit;
     else if (ret < 0)
         MPIU_RC_POP(handle_cq_error(ret));
 
@@ -57,6 +49,19 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     goto fn_exit;
 }
 
+static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num)
+{
+    int i,mpi_errno;
+    MPID_Request *req;
+    for (i = 0; i < num; i++) {
+        req = devreq_to_req(wc[i].op_context);
+        MPIU_RC_POP(dispatch_function(&wc[i],req));
+    }
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
 
 #undef FUNCNAME
 #define FUNCNAME handle_cq_error
@@ -79,9 +84,9 @@ static inline int handle_cq_error(int ret)
              */
             req = devreq_to_req(e.op_context);
             if (req->kind == MPID_REQUEST_SEND)
-                mpi_errno = REQ_OFI(req, callback) (NULL, req);
+                mpi_errno = dispatch_function(NULL,req);
             else if (req->kind == MPID_REQUEST_RECV) {
-                mpi_errno = REQ_OFI(req, callback) ((cq_tagged_entry_t *) & e, req);
+                mpi_errno = dispatch_function((cq_tagged_entry_t *) &e, req);
                 req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
             }
             else

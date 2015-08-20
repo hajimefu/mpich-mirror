@@ -16,113 +16,6 @@
 enum recv_mode {
     ON_HEAP, USE_EXISTING
 };
-
-#undef FUNCNAME
-#define FUNCNAME recv_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int recv_callback(cq_tagged_entry_t * wc, MPID_Request * rreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPI_Aint last;
-    size_t count;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
-
-    rreq->status.MPI_ERROR = MPI_SUCCESS;
-    rreq->status.MPI_SOURCE = get_source(wc->tag);
-    rreq->status.MPI_TAG = get_tag(wc->tag);
-    count = wc->len;
-    MPIR_STATUS_SET_COUNT(rreq->status, count);
-
-    if (REQ_OFI(rreq, pack_buffer)) {
-        last = count;
-        MPID_Segment_unpack(REQ_OFI(rreq, segment_ptr), 0, &last, REQ_OFI(rreq, pack_buffer));
-        MPIU_Free(REQ_OFI(rreq, pack_buffer));
-        MPID_Segment_free(REQ_OFI(rreq, segment_ptr));
-
-        if (last != count) {
-            mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
-                                             __FUNCTION__, __LINE__,
-                                             MPI_ERR_TYPE, "**dtypemismatch", 0);
-            rreq->status.MPI_ERROR = mpi_errno;
-        }
-    }
-
-    dtype_release_if_not_builtin(REQ_OFI(rreq, datatype));
-
-    /* If syncronous, ack and complete when the ack is done */
-    if (unlikely(is_tag_sync(wc->tag))) {
-        uint64_t ss_bits = init_sendtag(REQ_OFI(rreq, util_id),
-                                        REQ_OFI(rreq, util_comm->rank),
-                                        rreq->status.MPI_TAG,
-                                        MPID_SYNC_SEND_ACK);
-        MPID_Comm *c = REQ_OFI(rreq, util_comm);
-        int r = rreq->status.MPI_SOURCE;
-        FI_RC_RETRY(fi_tinject(G_TXC_TAG(0), NULL, 0, _comm_to_phys(c, r, MPIDI_API_TAG),
-                               ss_bits), tsendsync);
-
-    }
-
-    MPIDI_Request_complete(rreq);
-
-    /* Polling loop will check for truncation */
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_CALLBACK);
-    return mpi_errno;
-  fn_fail:
-    rreq->status.MPI_ERROR = mpi_errno;
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME recv_huge_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int recv_callback_huge(cq_tagged_entry_t * wc, MPID_Request * rreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_Huge_recv_t *recv;
-    MPIDI_Huge_chunk_t *hc;
-    MPID_Comm *comm_ptr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_HUGE_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_HUGE_CALLBACK);
-
-    /* Look up the receive sequence number and chunk queue */
-    comm_ptr = REQ_OFI(rreq, util_comm);
-    recv = (MPIDI_Huge_recv_t *) MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
-                                                      get_source(wc->tag));
-
-    if (recv == MPIDI_MAP_NOT_FOUND) {
-        recv = (MPIDI_Huge_recv_t *) MPIU_Malloc(sizeof(*recv));
-        recv->seqno = 0;
-        MPIDI_OFI_Map_create(&recv->chunk_q);
-        MPIDI_OFI_Map_set(COMM_OFI(comm_ptr)->huge_recv_counters, get_source(wc->tag), recv);
-    }
-
-    /* Look up the receive in the chunk queue */
-    hc = (MPIDI_Huge_chunk_t *) MPIDI_OFI_Map_lookup(recv->chunk_q, recv->seqno);
-
-    if (hc == MPIDI_MAP_NOT_FOUND) {
-        hc = (MPIDI_Huge_chunk_t *) MPIU_Malloc(sizeof(*hc));
-        memset(hc, 0, sizeof(*hc));
-        hc->callback = MPIDI_OFI_Gethuge_callback;
-        MPIDI_OFI_Map_set(recv->chunk_q, recv->seqno, hc);
-    }
-
-    recv->seqno++;
-    hc->localreq = rreq;
-    hc->done_fn = recv_callback;
-    hc->wc = *wc;
-    MPIDI_OFI_Gethuge_callback(NULL, (MPID_Request *) hc);
-
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_CALLBACK);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
 #undef FUNCNAME
 #define FUNCNAME do_irecv
 #undef FCNAME
@@ -193,11 +86,11 @@ static inline int do_irecv(void *buf,
     REQ_OFI(rreq, util_id) = context_id;
 
     if (unlikely(data_sz > MPIDI_Global.max_send)) {
-        REQ_OFI(rreq, callback) = recv_callback_huge;
+        REQ_OFI(rreq, event_id) = MPIDI_EVENT_RECV_HUGE;
         data_sz = MPIDI_Global.max_send;
     }
     else
-        REQ_OFI(rreq, callback) = recv_callback;
+        REQ_OFI(rreq, event_id) = MPIDI_EVENT_RECV;
 
     if (!flags) /* Branch should compile out */
         FI_RC_RETRY(fi_trecv(G_RXC_TAG(0),

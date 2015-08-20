@@ -14,27 +14,6 @@
 #include "impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME peek_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int peek_callback(cq_tagged_entry_t * wc, MPID_Request * rreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    size_t count;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_CALLBACK);
-    REQ_OFI(rreq, util_id) = 1;
-    rreq->status.MPI_SOURCE = get_source(wc->tag);
-    rreq->status.MPI_TAG = get_tag(wc->tag);
-    count = wc->len;
-    rreq->status.MPI_ERROR = MPI_SUCCESS;
-    MPIR_STATUS_SET_COUNT(rreq->status, count);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_CALLBACK);
-    return mpi_errno;
-}
-
-
-#undef FUNCNAME
 #define FUNCNAME do_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -78,7 +57,7 @@ static inline int do_iprobe(int source,
 
     match_bits = init_recvtag(&mask_bits, comm->context_id + context_offset, source, tag);
 
-    REQ_OFI(rreq, callback) = peek_callback;
+    REQ_OFI(rreq, event_id) = MPIDI_EVENT_PEEK;
     REQ_OFI(rreq, util_id) = 0;
 
     msg.msg_iov = NULL;

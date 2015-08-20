@@ -130,8 +130,8 @@ typedef struct fi_msg_rma msg_rma_t;
 typedef struct fi_msg_atomic msg_atomic_t;
 typedef enum fi_op fi_op_t;
 typedef enum fi_datatype fi_datatype_t;
-typedef int (*event_callback_fn) (cq_tagged_entry_t * wc, MPID_Request *);
-typedef int (*control_callback_fn) (void *buf);
+typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
+typedef int (*control_event_fn) (void *buf);
 
 typedef enum {
     MPIDI_ACCU_ORDER_RAR = 1,
@@ -175,6 +175,18 @@ enum {
 };
 
 enum {
+    MPIDI_EVENT_ABORT,
+    MPIDI_EVENT_PEEK,
+    MPIDI_EVENT_RECV,
+    MPIDI_EVENT_RECV_HUGE,
+    MPIDI_EVENT_SEND,
+    MPIDI_EVENT_SEND_HUGE,
+    MPIDI_EVENT_SSEND_ACK,
+    MPIDI_EVENT_GET_HUGE,
+    MPIDI_EVENT_CONTROL,
+};
+
+enum {
     MPIDI_REQUEST_LOCK,
     MPIDI_REQUEST_LOCKALL,
 };
@@ -211,20 +223,20 @@ typedef struct {
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int       event_id;
 } MPIDI_Ctrl_req;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int event_id; /* fixed field, do not move */
     MPID_Request *signal_req;
 } MPIDI_Ssendack_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int event_id; /* fixed field, do not move */
     int done;
     uint32_t tag;
     uint32_t source;
@@ -307,7 +319,7 @@ typedef struct {
     int num_ctrlblock;
     uint64_t lkey;
     int control_init;
-    control_callback_fn control_fn[16];
+    control_event_fn control_fn[16];
     MPID_Node_id_t *node_map;
     MPID_Node_id_t max_node_id;
     void *win_map;
@@ -329,7 +341,7 @@ typedef struct {
 
 typedef struct {
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int event_id; /* fixed field, do not move */
 
     /* Re-usable fields for ssend, probe,persistent */
     int util_id;
@@ -475,7 +487,7 @@ typedef struct MPIDI_Win_request {
     MPIU_OBJECT_HEADER;
     char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int event_id; /* fixed field, do not move */
     struct MPIDI_Win_request *next;
     int target_rank;
     MPIDI_Win_noncontig *noncontig;
@@ -484,15 +496,15 @@ typedef struct MPIDI_Win_request {
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
+    int event_id; /* fixed field, do not move */
     MPID_Request *parent;       /* Parent request           */
 } MPIDI_Chunk_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    event_callback_fn callback; /* fixed field, do not move */
-    event_callback_fn done_fn;
+    int event_id; /* fixed field, do not move */
+    event_event_fn done_fn;
     MPIDI_Send_control_t remote_info;
     size_t cur_offset;
     MPID_Comm *comm_ptr;
@@ -504,6 +516,11 @@ typedef struct {
     uint16_t seqno;
     void *chunk_q;
 } MPIDI_Huge_recv_t;
+
+typedef struct MPIDI_Hugecntr {
+    uint16_t counter;
+    uint16_t outstanding;
+} MPIDI_Hugecntr;
 
 typedef struct MPIDI_Win_info_args {
     int no_locks;
@@ -564,21 +581,19 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern MPID_Request MPIDI_Request_direct[];
 
 /* Utility functions */
-extern int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
-extern int MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
-extern void MPIDI_OFI_Map_create(void **map);
-extern void MPIDI_OFI_Map_destroy(void *map);
-extern void MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
-extern void MPIDI_OFI_Map_erase(void *_map, uint64_t id);
+extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
+extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
+extern void  MPIDI_OFI_Map_create(void **map);
+extern void  MPIDI_OFI_Map_destroy(void *map);
+extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
-
-extern int MPIDI_OFI_Gethuge_callback(cq_tagged_entry_t * wc, MPID_Request * req);
-extern int MPIDI_OFI_control_callback(void *buf);
-extern void MPIDI_OFI_build_nodemap(uint32_t * in_nodeids,
-                                    MPID_Node_id_t * out_nodemap, int sz, MPID_Node_id_t * sz_out);
-extern int MPIDI_OFI_Control_dispatch(cq_tagged_entry_t * wc,
-                                      MPID_Request * req) __attribute__ ((noinline));
-extern void MPIDI_OFI_Index_datatypes();
+extern int   MPIDI_OFI_control_dispatch(void *buf);
+extern void  MPIDI_OFI_build_nodemap(uint32_t       *in_nodeids,
+                                     MPID_Node_id_t *out_nodemap,
+                                     int             sz,
+                                     MPID_Node_id_t *sz_out);
+extern void  MPIDI_OFI_Index_datatypes();
 
 /* Prototypes for inliner */
 extern int MPIR_Datatype_init_names(void);
