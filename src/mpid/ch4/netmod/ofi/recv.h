@@ -220,9 +220,9 @@ static inline int do_irecv(void *buf,
         msg.data = 0;
         msg.addr = FI_ADDR_UNSPEC;
 
-        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
         FI_RC_RETRY(fi_trecvmsg(G_RXC_TAG(0), &msg, flags), trecv);
-        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     }
 
   fn_exit:
@@ -405,9 +405,9 @@ static inline int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
 
     PROGRESS();
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     ret = fi_cancel((fid_t) G_RXC_TAG(0), &(REQ_OFI(rreq, context)));
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
 
     if (ret == 0) {
         while (!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {

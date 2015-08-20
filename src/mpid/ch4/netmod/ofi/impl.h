@@ -127,43 +127,41 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   })
 
 #define MPIU_CH4_OFI_ERR  MPIR_ERR_CHKANDJUMP4
-#define FI_RC(FUNC,STR)                             \
-  do                                                \
-    {                                               \
-      MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);               \
-      ssize_t _ret = FUNC;                          \
-      MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);                \
-      MPIU_CH4_OFI_ERR(_ret<0,                      \
-                       mpi_errno,                   \
-                       MPI_ERR_OTHER,               \
-                       "**ofid_"#STR,               \
-                       "**ofid_"#STR" %s %d %s %s", \
-                       __SHORT_FILE__,              \
-                       __LINE__,                    \
-                       FCNAME,                      \
-                       fi_strerror(-_ret));         \
+#define FI_RC(FUNC,STR)                                     \
+    do {                                                    \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        ssize_t _ret = FUNC;                                \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        MPIU_CH4_OFI_ERR(_ret<0,                            \
+                         mpi_errno,                         \
+                         MPI_ERR_OTHER,                     \
+                         "**ofid_"#STR,                     \
+                         "**ofid_"#STR" %s %d %s %s",       \
+                         __SHORT_FILE__,                    \
+                         __LINE__,                          \
+                         FCNAME,                            \
+                         fi_strerror(-_ret));               \
     } while (0)
 
-#define FI_RC_RETRY(FUNC,STR)                         \
-  do                                                  \
-    {                                                 \
-      ssize_t _ret;                                   \
-      do {                                            \
-        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);               \
-	      _ret = FUNC;                                  \
-	      MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);                \
-        if (likely(_ret==0)) break;                   \
-        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,            \
-                         mpi_errno,                   \
-                         MPI_ERR_OTHER,               \
-                         "**ofid_"#STR,               \
-                         "**ofid_"#STR" %s %d %s %s", \
-                         __SHORT_FILE__,              \
-                         __LINE__,                    \
-                         FCNAME,                      \
-                         fi_strerror(-_ret));         \
-        PROGRESS();                                   \
-      } while (_ret == -FI_EAGAIN);                   \
+#define FI_RC_RETRY(FUNC,STR)                               \
+    do {                                                    \
+    ssize_t _ret;                                           \
+    do {                                                    \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        _ret = FUNC;                                        \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        if(likely(_ret==0)) break;                          \
+        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
+                         mpi_errno,                         \
+                         MPI_ERR_OTHER,                     \
+                         "**ofid_"#STR,                     \
+                         "**ofid_"#STR" %s %d %s %s",       \
+                         __SHORT_FILE__,                    \
+                         __LINE__,                          \
+                         FCNAME,                            \
+                         fi_strerror(-_ret));               \
+        PROGRESS();                                         \
+    } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
 #define FI_RC_RETRY_NOLOCK(FUNC,STR)                          \

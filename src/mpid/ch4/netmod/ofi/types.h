@@ -80,6 +80,7 @@ EXTERN_C_BEGIN
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
 #define MPIDI_MAX_AM_HANDLERS 		(16)
 #define MPIDI_MAX_AM_HDR_SZ		    (16)
+#define MPIDI_CACHELINE_SIZE        (64)
 /* Macros and inlines */
 /* match/ignore bit manipulation
  *
@@ -249,6 +250,11 @@ typedef struct atomic_valid {
 #define MPIDI_API_MSG 2
 #define MPIDI_API_CTR 3
 
+#define MPIDI_THREAD_UTIL_MUTEX     MPIDI_Global.mutexes[0].m
+#define MPIDI_THREAD_PROGRESS_MUTEX MPIDI_Global.mutexes[1].m
+#define MPIDI_THREAD_FI_MUTEX       MPIDI_Global.mutexes[2].m
+#define MPIDI_THREAD_SPAWN_MUTEX    MPIDI_Global.mutexes[3].m
+
 typedef struct {
     fid_ep_t tx_tag;
     fid_ep_t rx_tag;
@@ -264,6 +270,11 @@ typedef struct {
 
     int ctx_offset;
 } MPIDI_Context_t;
+
+typedef union MPIDI_cacheline_mutex_t{
+    MPID_Thread_mutex_t m;
+    char cacheline[MPIDI_CACHELINE_SIZE];
+}MPIDI_cacheline_mutex_t __attribute__ ((aligned (MPIDI_CACHELINE_SIZE)));
 
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
@@ -283,6 +294,7 @@ typedef struct {
     fid_mr_t mr;
     fid_av_t av;
     iovec_t *iov;
+    MPIDI_cacheline_mutex_t mutexes[4];
     msg_t *msg;
     MPIDI_Ctrl_req *control_req;
     uint64_t cntr;

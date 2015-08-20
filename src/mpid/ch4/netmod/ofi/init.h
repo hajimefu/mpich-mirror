@@ -43,7 +43,7 @@ static inline int MPIDI_netmod_init(int rank,
                                     MPID_Comm * comm_self, int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
-    int str_errno, maxlen, iov_len, spawned = 0;
+    int thr_err=0, str_errno, maxlen, iov_len, spawned = 0;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;
@@ -62,6 +62,11 @@ static inline int MPIDI_netmod_init(int rank,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
 
     *tag_ub = (1 << MPID_TAG_SHIFT) - 1;
+
+    MPID_Thread_mutex_create(&MPIDI_THREAD_UTIL_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_THREAD_FI_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_THREAD_SPAWN_MUTEX, &thr_err);
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
@@ -408,7 +413,7 @@ static inline int MPIDI_netmod_init(int rank,
 
 static inline int MPIDI_netmod_finalize(void)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int thr_err=0,mpi_errno = MPI_SUCCESS;
     int i = 0;
     int barrier[2] = { 0 };
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -471,6 +476,11 @@ static inline int MPIDI_netmod_finalize(void)
     MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
 
     PMI_Finalize();
+
+    MPID_Thread_mutex_destroy(&MPIDI_THREAD_UTIL_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_THREAD_FI_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_THREAD_SPAWN_MUTEX, &thr_err);
 
   fn_exit:
     return mpi_errno;
