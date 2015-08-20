@@ -6,7 +6,7 @@
 
 /* common header includes */
 #include <stdlib.h>
-#include "mpichconf.h"  /* defines MPIU_THREAD_PACKAGE_NAME */
+#include "mpichconf.h"  /* defines MPICH_THREAD_PACKAGE_NAME */
 #include "mpl.h"
 #include "mpiutil.h"    /* for HAS_NO_SYMBOLS_WARNING */
 #include "mpiu_thread.h"
@@ -21,7 +21,7 @@ MPL_SUPPRESS_OSX_HAS_NO_SYMBOLS_WARNING;
  * header files and included as needed. [goodell@ 2009-06-24] */
 
 /* Implementation specific function definitions (usually in the form of macros) */
-#if defined(MPIU_THREAD_PACKAGE_NAME) && (MPIU_THREAD_PACKAGE_NAME == MPIU_THREAD_PACKAGE_POSIX)
+#if defined(MPICH_THREAD_PACKAGE_NAME) && (MPICH_THREAD_PACKAGE_NAME == MPICH_THREAD_PACKAGE_POSIX)
 /* begin posix impl */
 
 /* stdio.h is needed for mpimem, which prototypes a few routines that
@@ -30,19 +30,19 @@ MPL_SUPPRESS_OSX_HAS_NO_SYMBOLS_WARNING;
 #include "mpimem.h"
 
 /*
- * struct MPEI_Thread_info
+ * struct MPIUI_Thread_info
  *
  * Structure used to pass the user function and data to the intermediate
- * function, MPEI_Thread_start.  See comment in
- * MPEI_Thread_start() header for more information.
+ * function, MPIUI_Thread_start.  See comment in
+ * MPIUI_Thread_start() header for more information.
  */
-struct MPEI_Thread_info {
+struct MPIUI_Thread_info {
     MPIU_Thread_func_t func;
     void *data;
 };
 
 
-void *MPEI_Thread_start(void *arg);
+void *MPIUI_Thread_start(void *arg);
 
 
 /*
@@ -50,11 +50,11 @@ void *MPEI_Thread_start(void *arg);
  */
 void MPIU_Thread_create(MPIU_Thread_func_t func, void *data, MPIU_Thread_id_t * idp, int *errp)
 {
-    struct MPEI_Thread_info *thread_info;
+    struct MPIUI_Thread_info *thread_info;
     int err = MPIU_THREAD_SUCCESS;
 
     /* FIXME: faster allocation, or avoid it all together? */
-    thread_info = (struct MPEI_Thread_info *) MPIU_Malloc(sizeof(struct MPEI_Thread_info));
+    thread_info = (struct MPIUI_Thread_info *) MPIU_Malloc(sizeof(struct MPIUI_Thread_info));
     if (thread_info != NULL) {
         pthread_attr_t attr;
 
@@ -64,7 +64,7 @@ void MPIU_Thread_create(MPIU_Thread_func_t func, void *data, MPIU_Thread_id_t * 
         pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-        err = pthread_create(idp, &attr, MPEI_Thread_start, thread_info);
+        err = pthread_create(idp, &attr, MPIUI_Thread_start, thread_info);
         /* FIXME: convert error to an MPIU_THREAD_ERR value */
 
         pthread_attr_destroy(&attr);
@@ -80,16 +80,16 @@ void MPIU_Thread_create(MPIU_Thread_func_t func, void *data, MPIU_Thread_id_t * 
 
 
 /*
- * MPEI_Thread_start()
+ * MPIUI_Thread_start()
  *
  * Start functions in pthreads are expected to return a void pointer.  Since
  * our start functions do not return a value we must
  * use an intermediate function to perform call to the user's start function
  * and then return a value of NULL.
  */
-void *MPEI_Thread_start(void *arg)
+void *MPIUI_Thread_start(void *arg)
 {
-    struct MPEI_Thread_info *thread_info = (struct MPEI_Thread_info *) arg;
+    struct MPIUI_Thread_info *thread_info = (struct MPIUI_Thread_info *) arg;
     MPIU_Thread_func_t func = thread_info->func;
     void *data = thread_info->data;
 

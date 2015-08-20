@@ -4,14 +4,22 @@
  *  (C) 2001 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  */
-#ifndef MPIU_THREAD_SOLARIS_FUNCS_H_INCLUDED
-#define MPIU_THREAD_SOLARIS_FUNCS_H_INCLUDED
+#ifndef MPIU_THREAD_SOLARIS_H_INCLUDED
+#define MPIU_THREAD_SOLARIS_H_INCLUDED
+
+#include <thread.h>
+#include <synch.h>
+
+typedef mutex_t MPIU_Thread_mutex_t;
+typedef cond_t MPIU_Thread_cond_t;
+typedef thread_t MPIU_Thread_id_t;
+
+typedef void (*MPIU_Thread_func_t) (void *data);
+void MPIU_Thread_create(MPIU_Thread_func_t func, void *data, MPIU_Thread_id_t * id, int *err);
 
 /*
  * Threads
  */
-
-/* MPIU_Thread_create() defined in mpiu_thread.c */
 
 #define MPIU_Thread_exit()			\
     do {                                        \
@@ -190,4 +198,4 @@
         }                                                               \
     } while (0)
 
-#endif /* MPIU_THREAD_SOLARIS_FUNCS_H_INCLUDED */
+#endif /* MPIU_THREAD_SOLARIS_H_INCLUDED */

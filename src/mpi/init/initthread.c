@@ -84,7 +84,7 @@ int MPI_Init_thread(int *argc, char ***argv, int required, int *provided) __attr
 /* Global variables can be initialized here */
 MPICH_PerProcess_t MPIR_Process = { OPA_INT_T_INITIALIZER(MPICH_PRE_INIT) };
      /* all other fields in MPIR_Process are irrelevant */
-MPICH_ThreadInfo_t MPIR_ThreadInfo = { 0 };
+MPIR_Thread_info_t MPIR_ThreadInfo = { 0 };
 
 /* These are initialized as null (avoids making these into common symbols).
    If the Fortran binding is supported, these can be initialized to 
@@ -166,25 +166,15 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 static int thread_cs_init( void )
 {
     int err;
-    MPIU_THREADPRIV_DECL;
+    MPID_THREADPRIV_DECL;
 
-    /* we create this at all granularities right now */
-    MPID_Thread_mutex_create(&MPIR_THREAD_MEMALLOC_MUTEX, &err);
-    MPIU_Assert(err == 0);
-
-    /* must come after memalloc_mutex creation */
-    MPIU_THREADPRIV_INITKEY;
-    MPIU_THREADPRIV_INIT;
-
-#if MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_GLOBAL
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
 /* There is a single, global lock, held for the duration of an MPI call */
     MPID_Thread_mutex_create(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
     MPIU_Assert(err == 0);
-    MPID_Thread_mutex_create(&MPIR_THREAD_HANDLE_MUTEX, &err);
-    MPIU_Assert(err == 0);
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_PER_OBJECT
-    /* MPIR_THREAD_GRANULARITY_PER_OBJECT: Multiple locks */
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+    /* MPICH_THREAD_GRANULARITY_PER_OBJECT: Multiple locks */
     MPID_Thread_mutex_create(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
     MPIU_Assert(err == 0);
     MPID_Thread_mutex_create(&MPIR_THREAD_HANDLE_MUTEX, &err);
@@ -197,18 +187,24 @@ static int thread_cs_init( void )
     MPIU_Assert(err == 0);
     MPID_Thread_mutex_create(&MPIR_THREAD_PMI_MUTEX, &err);
     MPIU_Assert(err == 0);
+    MPID_Thread_mutex_create(&MPIR_THREAD_MEMALLOC_MUTEX, &err);
+    MPIU_Assert(err == 0);
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_LOCK_FREE
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_LOCK_FREE
 /* Updates to shared data and access to shared services is handled without 
    locks where ever possible. */
 #error lock-free not yet implemented
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_SINGLE
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_SINGLE
 /* No thread support, make all operations a no-op */
 
 #else
 #error Unrecognized thread granularity
 #endif
+
+    MPID_THREADPRIV_INITKEY;
+    MPID_THREADPRIV_INIT;
+
     MPIU_DBG_MSG(THREAD,TYPICAL,"Created global mutex and private storage");
     return MPI_SUCCESS;
 }
@@ -222,15 +218,13 @@ int MPIR_Thread_CS_Finalize( void )
     int err;
 
     MPIU_DBG_MSG(THREAD,TYPICAL,"Freeing global mutex and private storage");
-#if MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_GLOBAL
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
 /* There is a single, global lock, held for the duration of an MPI call */
     MPID_Thread_mutex_destroy(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
     MPIU_Assert(err == 0);
-    MPID_Thread_mutex_destroy(&MPIR_THREAD_HANDLE_MUTEX, &err);
-    MPIU_Assert(err == 0);
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_PER_OBJECT
-    /* MPIR_THREAD_GRANULARITY_PER_OBJECT: There are multiple locks,
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+    /* MPICH_THREAD_GRANULARITY_PER_OBJECT: There are multiple locks,
      * one for each logical class (e.g., each type of object) */
     MPID_Thread_mutex_destroy(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
     MPIU_Assert(err == 0);
@@ -246,19 +240,19 @@ int MPIR_Thread_CS_Finalize( void )
     MPIU_Assert(err == 0);
 
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_LOCK_FREE
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_LOCK_FREE
 /* Updates to shared data and access to shared services is handled without 
    locks where ever possible. */
 #error lock-free not yet implemented
 
-#elif MPICH_THREAD_GRANULARITY == MPIR_THREAD_GRANULARITY_SINGLE
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_SINGLE
 /* No thread support, make all operations a no-op */
 
 #else
 #error Unrecognized thread granularity
 #endif
 
-    MPIU_THREADPRIV_FINALIZE;
+    MPID_THREADPRIV_FINALIZE;
 
     return MPI_SUCCESS;
 }
