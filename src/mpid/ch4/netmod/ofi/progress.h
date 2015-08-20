@@ -36,12 +36,12 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     do {
-        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
         ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
-        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
         if (ret > 0) {
             for (count = 0; count < ret; count++) {
@@ -53,9 +53,9 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
         }
         else if (ret < 0) {
             if (ret == -FI_EAVAIL) {
-                MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+                MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
                 fi_cq_readerr(MPIDI_Global.p2p_cq, &e, 0);
-                MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+                MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
                 if (e.err == FI_ETRUNC) {
                     /* This error message should only be delivered on send
@@ -94,9 +94,9 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 
   fn_exit:
     /* fixme:  lock cycling an artifact of per-object switch */
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
   fn_fail:

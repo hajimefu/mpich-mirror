@@ -82,7 +82,7 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
     int i;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_REGISTER);
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
         if (MPIDI_CH4_Global.progress_hooks[i] == NULL) {
@@ -99,7 +99,7 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
     }
 
   fn_exit:
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     return mpi_errno;
   fn_fail:
@@ -115,12 +115,12 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     MPIDI_CH4_Global.progress_hooks[id] = NULL;
 
   fn_exit:
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     return mpi_errno;
 

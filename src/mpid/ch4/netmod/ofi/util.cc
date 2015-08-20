@@ -70,38 +70,38 @@ int MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt)
 typedef std::map<uint64_t,void *>  uint64_map;
 void MPIDI_OFI_Map_create(void **_map)
 {
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     *_map = (void *)MPIU_Malloc(sizeof(uint64_map));
     new(*_map) uint64_map();
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 }
 
 void MPIDI_OFI_Map_destroy(void *_map)
 {
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     m->~uint64_map();
     MPIU_Free(_map);
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 }
 
 void MPIDI_OFI_Map_set(void     *_map,
                        uint64_t  id,
                        void     *val)
 {
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     (*m)[id] = val;
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 }
 
 void MPIDI_OFI_Map_erase(void     *_map,
                          uint64_t  id)
 {
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     m->erase(id);
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 }
 
 void *MPIDI_OFI_Map_lookup(void     *_map,
@@ -109,14 +109,14 @@ void *MPIDI_OFI_Map_lookup(void     *_map,
 {
     uint64_map *m = (uint64_map *)_map;
     void       *rc;
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     if(m->find(id) == m->end())
         rc = MPIDI_MAP_NOT_FOUND;
     else
         rc = (*m)[id];
 
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     return rc;
 }
 

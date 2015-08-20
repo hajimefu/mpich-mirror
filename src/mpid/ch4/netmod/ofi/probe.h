@@ -90,9 +90,9 @@ static inline int do_iprobe(int source,
     msg.context = (void *) &(REQ_OFI(rreq, context));
     msg.data = 0;
 
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     ret = fi_trecvmsg(G_RXC_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION);
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     if (ret == -ENOMSG) {
         *flag = 0;
         if (message)

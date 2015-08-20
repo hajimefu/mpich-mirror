@@ -120,9 +120,9 @@
 #define FI_RC(FUNC,STR)					\
     do							\
     {							\
-	MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex);			\
+	MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);			\
 	ssize_t _ret = FUNC;				\
-	MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);			\
+	MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);			\
 	MPIU_CH4_OFI_ERR(_ret<0,			\
 			 mpi_errno,			\
 			 MPI_ERR_OTHER,			\
@@ -139,9 +139,9 @@
     {                                                                   \
 	ssize_t _ret;                                                   \
 	do {                                                            \
-	    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_ThreadInfo.global_mutex); \
+	    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX); \
 	    _ret = FUNC;                                                \
-	    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_ThreadInfo.global_mutex);  \
+	    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);  \
 	    if (likely(_ret==0)) break;                                 \
 	    MPIU_CH4_OFI_ERR(_ret != -FI_EAGAIN,                        \
 			     mpi_errno,                                 \
