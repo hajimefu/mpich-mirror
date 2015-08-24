@@ -362,6 +362,13 @@ static inline int MPIDI_netmod_init(int rank,
     nodemap[MPIR_Process.comm_world->rank] = gethostid();
     MPI_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
                                    sizeof(*nodemap), MPI_BYTE, MPIR_Process.comm_world, &errflag));
+#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
+    /* Populate the locality array */
+    for( i = 0; i < MPIR_Process.comm_world->local_size; i++ )
+    {
+        MPIDI_CH4U_gpid_local[i] = nodemap[i] == nodemap[MPIR_Process.comm_world->rank] ? TRUE: FALSE;
+    }
+#endif
     MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size
                                                            * sizeof(*MPIDI_Global.node_map));
     MPIDI_OFI_build_nodemap(nodemap, MPIDI_Global.node_map,

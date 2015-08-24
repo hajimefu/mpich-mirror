@@ -21,7 +21,7 @@
 static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count)
 {
     int complete = 0, mpi_errno = MPI_SUCCESS;
-    int rank;
+    int local_rank;
     int in_cell = 0, in_fbox = 0;
     MPID_nem_fbox_mpich_t *fbox;
     MPID_nem_cell_ptr_t cell = NULL;
@@ -38,9 +38,9 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         goto match_l;
     }
     /* try to receive from fastbox */
-    for (rank = 0; rank < MPID_nem_mem_region.num_local; rank++) {
-        if (rank != MPID_nem_mem_region.rank) {
-            fbox = &MPID_nem_mem_region.mailboxes.in[rank]->mpich;
+    for (local_rank = 0; local_rank < MPID_nem_mem_region.num_local; local_rank++) {
+        if (local_rank != MPID_nem_mem_region.local_rank) {
+            fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
             if (OPA_load_int(&fbox->flag.value)) {
                 cell = &fbox->cell;
                 MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
@@ -134,6 +134,9 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             REQ_SHM(rreq)->next = NULL;
             /* enqueue rreq */
             REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_unexpected);
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                             (MPIU_DBG_FDEST, "Unexpected enqueued %d,%d,%d\n", cell->rank, cell->tag,
+                              cell->context_id));
         }
         else {
             /* examine another message in unexpected queue */
@@ -146,13 +149,19 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
   release_cell_l:
     if (in_cell) {
         /* release cell */
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                             (MPIU_DBG_FDEST, "About to release cell %d,%d,%d in_fbox=%d\n", cell->rank, cell->tag,
+                              cell->context_id, in_fbox));
         if (in_fbox)
             OPA_store_release_int(&(fbox->flag.value), 0);
         else
             MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->rank], cell);
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                             (MPIU_DBG_FDEST, "Cell released\n"));
     }
     else {
         /* destroy unexpected req */
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL, (MPIU_DBG_FDEST, "About to release unexpected %p\n", sreq));
         MPIU_Free(REQ_SHM(sreq)->user_buf);
         REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_recvq_unexpected, mpi_errno);
     }

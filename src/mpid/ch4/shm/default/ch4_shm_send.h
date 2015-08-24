@@ -92,7 +92,8 @@ static inline int MPIDI_shm_send(const void *buf,
     if (data_sz <= EAGER_THRESHOLD) {
         /* eager message */
         /* Try fastbox */
-        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.out[rank]->mpich;
+        int local_rank = MPID_nem_mem_region.local_ranks[rank];
+        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.out[local_rank]->mpich;
         if (!MPID_nem_fbox_is_full((MPID_nem_fbox_common_ptr_t) fbox)) {
             ENVELOPE_SET(&fbox->cell, comm->rank, tag, comm->context_id + context_offset);
             fbox->cell.pkt.mpich.datalen = data_sz;

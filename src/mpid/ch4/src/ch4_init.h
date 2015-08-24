@@ -186,15 +186,17 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     mpi_errno = MPIDI_netmod_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
                                   MPIR_Process.comm_self, 1, &netmod_contexts);
+
 #if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
     MPIDI_choose_shm();
     mpi_errno = MPIDI_shm_init(rank, size);
 #endif
-
+#if 0
 #if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
     /* Populate the locality array */
     for (i = 0; i < size; i++)
         MPIDI_CH4U_gpid_local[i] = FALSE;
+#endif
 #endif
 
     MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;

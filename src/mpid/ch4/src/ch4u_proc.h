@@ -18,11 +18,14 @@ extern int *MPIDI_CH4U_gpid_local;
 static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
 {
     int ret;
+    int gpid;
 
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
-    ret = MPIDI_CH4U_gpid_local[0];
+    /* TODO: map comm's rank to lpid first, rank = gpid only for COMM_WORLD and dups */
+    gpid = rank;
+    ret = MPIDI_CH4U_gpid_local[gpid];
 
     MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
     return ret;

@@ -106,11 +106,22 @@ static inline int MPIDI_shm_recv(void *buf,
         prev_req = req;
         req = REQ_SHM(req)->next;
     }
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "No match to unexpected in irecv %d,%d,%d\n", rank, tag,
+                          comm->context_id + context_offset));
 
     /* try to receive immediately from fastbox */
     if (rank != MPI_ANY_SOURCE) {
-        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[rank]->mpich;
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "Try match to fastbox in irecv %d,%d,%d\n", rank, tag,
+                          comm->context_id + context_offset));
+        int local_rank = MPID_nem_mem_region.local_ranks[rank];
+        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "fastbox %p local_rank %d in irecv\n", fbox, local_rank ));
         if (OPA_load_int(&fbox->flag.value)) {
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "fastbox local_rank %d flag is set in irecv\n", local_rank ));
             if (ENVELOPE_MATCH(&fbox->cell, rank, tag, comm->context_id + context_offset)) {
                 MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                                  (MPIU_DBG_FDEST, "Matching in irecv %d,%d,%d\n", rank, tag,
@@ -127,10 +138,16 @@ static inline int MPIDI_shm_recv(void *buf,
                 /* release fastbox */
                 OPA_store_release_int(&(fbox->flag.value), 0);
                 *request = NULL;
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "fastbox released in irecv %d,%d,%d\n", rank, tag,
+                          comm->context_id + context_offset));
                 goto fn_exit;
             }
         }
     }
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "No match to fastbox in irecv %d,%d,%d\n", rank, tag,
+                          comm->context_id + context_offset));
 
     /* failed to receive immediately */
     /* create a request */
