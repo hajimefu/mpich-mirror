@@ -12,7 +12,7 @@
 #define SHM_SEND_H_INCLUDED
 
 #include "ch4_shm_impl.h"
-#include "../src/ch4_impl.h"
+#include "ch4_impl.h"
 /* ---------------------------------------------------- */
 /* general queues                                       */
 /* ---------------------------------------------------- */

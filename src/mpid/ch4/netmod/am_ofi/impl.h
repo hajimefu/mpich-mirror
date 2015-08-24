@@ -14,7 +14,7 @@
 #include <mpidimpl.h>
 #include "types.h"
 #include "mpidch4u.h"
-#include "../../src/ch4_impl.h"
+#include "ch4_impl.h"
 
 /*
  * Helper routines and macros for request completion

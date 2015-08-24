@@ -12,15 +12,13 @@
 #if !defined(MPICH_MPIDCH4U_H_INCLUDED)
 #define MPICH_MPIDCH4U_H_INCLUDED
 
-
-#include "../src/ch4u_recvq.h"
-#include "../src/ch4u_init.h"
-#include "../src/ch4u_probe.h"
-#include "../src/ch4u_recv.h"
-#include "../src/ch4u_rma.h"
-#include "../src/ch4u_send.h"
-#include "../src/ch4u_win.h"
-#include "../src/ch4u_proc.h"
-
+#include "ch4u_recvq.h"
+#include "ch4u_init.h"
+#include "ch4u_probe.h"
+#include "ch4u_recv.h"
+#include "ch4u_rma.h"
+#include "ch4u_send.h"
+#include "ch4u_win.h"
+#include "ch4u_proc.h"
 
 #endif /* !defined(MPICH_MPIDCH4U_H_INCLUDED) */

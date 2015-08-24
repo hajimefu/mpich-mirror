@@ -157,16 +157,16 @@ MPIDI_CH4_API(int, Comm_destroy, MPID_Comm *);
 #ifdef MPIDI_BUILD_CH4_SHM
 #include "ch4_shm.h"
 #endif
-#include "../src/ch4_init.h"
-#include "../src/ch4_probe.h"
-#include "../src/ch4_send.h"
-#include "../src/ch4_recv.h"
-#include "../src/ch4_request.h"
-#include "../src/ch4_comm.h"
-#include "../src/ch4_win.h"
-#include "../src/ch4_rma.h"
-#include "../src/ch4_progress.h"
-#include "../src/ch4_spawn.h"
+#include "ch4_init.h"
+#include "ch4_probe.h"
+#include "ch4_send.h"
+#include "ch4_recv.h"
+#include "ch4_request.h"
+#include "ch4_comm.h"
+#include "ch4_win.h"
+#include "ch4_rma.h"
+#include "ch4_progress.h"
+#include "ch4_spawn.h"
 
 #define MPID_Abort                       MPIDI_Abort
 #define MPID_Accumulate                  MPIDI_Accumulate

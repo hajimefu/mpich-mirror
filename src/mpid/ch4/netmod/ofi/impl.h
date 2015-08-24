@@ -14,7 +14,7 @@
 #include <mpidimpl.h>
 #include "types.h"
 #include "mpidch4u.h"
-#include "../../src/ch4_impl.h"
+#include "ch4_impl.h"
 
 /* The purpose of this hacky #ifdef is to tag                */
 /* select MPI util functions with always inline.  A better   */
@@ -24,6 +24,7 @@
 /* the function directly into the application despite        */
 /* mpi header files not using attribute inline               */
 /* Trick doesn't work with gcc or clang                      */
+#if 0
 #if defined(__INTEL_COMPILER)
 #ifndef __cplusplus
 struct MPIU_Object_alloc_t;
@@ -38,7 +39,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #undef ILU
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
-
+#endif
 /*
  * Helper routines and macros for request completion
  */
