@@ -12,7 +12,7 @@
 #define SHM_DISABLE_INLINES
 #include <mpidimpl.h>
 #include "ch4_shm_direct.h"
-MPIDI_shm_funcs_t MPIDI_shm_funcs = {
+MPIDI_shm_funcs_t MPIDI_shm_default_funcs = {
     MPIDI_shm_init,
     MPIDI_shm_finalize,
     MPIDI_shm_progress,
@@ -49,7 +49,7 @@ MPIDI_shm_funcs_t MPIDI_shm_funcs = {
     MPIDI_shm_request_release
 };
 
-MPIDI_shm_native_funcs_t MPIDI_shm_native_funcs = {
+MPIDI_shm_native_funcs_t MPIDI_shm_native_default_funcs = {
     MPIDI_shm_send,
     MPIDI_shm_ssend,
     MPIDI_shm_startall,

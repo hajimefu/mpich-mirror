@@ -165,7 +165,7 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
 #define MPIDI_Request_tls_free(req) \
   MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
 
-#define MPIDI_Request_alloc_and_init(req,count)         \
+#define MPIDI_Request_shm_alloc_and_init(req,count)     \
   ({                                                    \
     MPIDI_Request_tls_alloc(req);                       \
     MPIU_Assert(req != NULL);                           \
@@ -205,4 +205,10 @@ fn_fail:                      \
    : __FILE__                                   \
 )
 
+
+int MPIDI_CH3I_Seg_alloc(size_t len, void **ptr_p);
+int MPIDI_CH3I_Seg_commit(MPID_nem_seg_ptr_t memory, int num_local, int local_rank);
+int MPID_nem_barrier_vars_init(MPID_nem_barrier_vars_t * barrier_region);
+int MPID_nem_barrier(void);
+int MPIDI_CH3I_Seg_destroy(void);
 #endif /* NETMOD_SHM_IMPL_H_INCLUDED */

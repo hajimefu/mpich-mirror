@@ -32,7 +32,8 @@
 **ch4|close_progress:an error occurred while the device was waiting for all open connections to close
 **ch4|pmi_finalize:PMI_Finalize failed
 **ch4|pmi_finalize %d:PMI_Finalize failed, error %d
-
+**ch4|invalid_shm:Invalid shm specified
+**ch4|invalid_shm %s:Invalid shm specified (%s)
 #
 # RMA errors
 #

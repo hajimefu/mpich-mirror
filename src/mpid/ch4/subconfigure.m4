@@ -99,6 +99,106 @@ if test "$ch4_nets_array_sz" == "1" ;  then
 fi
 
 
+AC_ARG_ENABLE(ch4-shm,
+    [--enable-ch4-shm=level:module
+       Control whether CH4 shared memory is built and/or used.
+       level:
+         no        - Do not build or use CH4 shared memory.
+         yes       - Build CH4 shared memory, but do not use it by default (Your chosen netmod must provide it).
+         exclusive - Build and exclusively use CH4 shared memory. (Default)
+       module-list(optional).  comma separated list of shared memory modules:
+         default   - default shared memory implementation
+    ],,enable_ch4_shm=exclusive:default)
+
+ch4_shm_level=`echo $enable_ch4_shm | sed -e 's/:.*$//'`
+changequote(<<,>>)
+ch4_shm=`echo $enable_ch4_shm | sed -e 's/^[^:]*//' -e 's/^://'`
+changequote([,])
+
+if test "$ch4_shm_level" != "no" ; then
+    AC_DEFINE([MPIDI_BUILD_CH4_SHM], [1],
+        [Define if CH4 will build the default shared memory implementation as opposed to only using a netmod implementation])
+fi
+
+if test "$ch4_shm_level" = "exclusive" ; then
+    AC_DEFINE([MPIDI_CH4_EXCLUSIVE_SHM], [1],
+        [Define if CH4 will be providing the exclusive implementation of shared memory])
+fi
+
+# $ch4_shm - contains the shmmods
+if test -z "${ch4_shm}" ; then
+   ch4_shm="default"
+else
+   ch4_shm=`echo ${ch4_shm} | sed -e 's/,/ /g'`
+fi
+export ch4_shm
+
+ch4_shm_func_decl=""
+ch4_shm_native_func_decl=""
+ch4_shm_func_array=""
+ch4_shm_native_func_array=""
+ch4_shm_strings=""
+shm_index=0
+for shm in $ch4_shm ; do
+    if test ! -d $srcdir/src/mpid/ch4/shm/${shm} ; then
+        AC_MSG_ERROR([Shared memory module ${shm} is unknown "$srcdir/src/mpid/ch4/shm/${shm}"])
+    fi
+    shm_macro=`echo $shm | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+    shm_macro="MPIDI_CH4_SHM_${shm_macro}"
+
+    if test -z "$ch4_shm_array" ; then
+        ch4_shm_array="$shm_macro"
+    else
+        ch4_shm_array="$ch4_shm_array, $shm_macro"
+    fi
+
+    if test -z "$ch4_shm_func_decl" ; then
+        ch4_shm_func_decl="MPIDI_shm_${shm}_funcs"
+    else
+        ch4_shm_func_decl="${ch4_shm_func_decl}, MPIDI_shm_${shm}_funcs"
+    fi
+
+    if test -z "$ch4_shm_native_func_decl" ; then
+        ch4_shm_native_func_decl="MPIDI_shm_native_${shm}_funcs"
+    else
+        ch4_shm_native_func_decl="${ch4_shm_native_func_decl}, MPIDI_shm_native_${shm}_funcs"
+    fi
+
+    if test -z "$ch4_shm_func_array" ; then
+        ch4_shm_func_array="&MPIDI_shm_${shm}_funcs"
+    else
+        ch4_shm_func_array="${ch4_shm_func_array}, &MPIDI_shm_${shm}_funcs"
+    fi
+
+    if test -z "$ch4_shm_native_func_array" ; then
+        ch4_shm_native_func_array="&MPIDI_shm_native_${shm}_funcs"
+    else
+        ch4_shm_native_func_array="${ch4_shm_native_func_array}, &MPIDI_shm_native_${shm}_funcs"
+    fi
+
+    if test -z "$ch4_shm_strings" ; then
+        ch4_shm_strings="\"$shm\""
+    else
+        ch4_shm_strings="$ch4_shm_strings, \"$shm\""
+    fi
+
+    shm_index=`expr $shm_index + 1`
+done
+ch4_shm_array_sz=$shm_index
+
+AC_SUBST(ch4_shm)
+AC_SUBST(ch4_shm_array)
+AC_SUBST(ch4_shm_array_sz)
+AC_SUBST(ch4_shm_func_decl)
+AC_SUBST(ch4_shm_native_func_decl)
+AC_SUBST(ch4_shm_func_array)
+AC_SUBST(ch4_shm_native_func_array)
+AC_SUBST(ch4_shm_strings)
+
+if test "$ch4_shm_array_sz" == "1" ;  then
+   PAC_APPEND_FLAG([-DSHM_DIRECT=__shm_direct_${ch4_shm}__], [CPPFLAGS])
+fi
+
 ])dnl end AM_COND_IF(BUILD_CH4,...)
 ])dnl end PREREQ
 
@@ -114,24 +214,6 @@ if test "$rankbits" != "16" -a "$rankbits" != "32" ; then
 fi
 AC_DEFINE_UNQUOTED(CH4_RANK_BITS,$rankbits,[Define the number of CH4_RANK_BITS])
 
-AC_ARG_ENABLE(ch4-shm,
-    [--enable-ch4-shm=level
-       Control whether CH4 shared memory is built and/or used.
-         no        - Do not build or use CH4 shared memory.
-         yes       - Build CH4 shared memory, but do not use it by default (Your chosen netmod must provide it).
-         exclusive - Build and exclusively use CH4 shared memory. (Default)
-    ],,enable_ch4_shm=exclusive)
-
-if test "$enable_ch4_shm" != "no" ; then
-    AC_DEFINE([MPIDI_BUILD_CH4_SHM], [1],
-        [Define if CH4 will build the default shared memory implementation as opposed to only using a netmod implementation])
-fi
-
-if test "$enable_ch4_shm" = "exclusive" ; then
-    AC_DEFINE([MPIDI_CH4_EXCLUSIVE_SHM], [1],
-        [Define if CH4 will be providing the exclusive implementation of shared memory])
-fi
-
 AC_ARG_ENABLE(ch4u-per-comm-msg-queue,
     [--enable-ch4u-per-comm-msg-queue=option
        Enable use of per-communicator message queues for posted recvs/unexpected messages
@@ -146,11 +228,13 @@ fi
 
 AC_CONFIG_FILES([
 src/mpid/ch4/src/mpid_ch4_net_array.c
+src/mpid/ch4/src/mpid_ch4_shm_array.c
 ])
 
 ])dnl end AM_COND_IF(BUILD_CH4,...)
 
-AM_CONDITIONAL([BUILD_CH4_SHM],[test "$enable_ch4_shm" = "yes" -o "$enable_ch4_shm" = "exclusive"])
+AM_CONDITIONAL([BUILD_CH4_SHM],[test "$ch4_shm_level" = "yes" -o "$ch4_shm_level" = "exclusive"])
+
 
 ])dnl end _BODY
 

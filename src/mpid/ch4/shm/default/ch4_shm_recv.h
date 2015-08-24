@@ -42,7 +42,7 @@ static inline int shm_do_irecv(void *buf,
     ENVELOPE_SET(REQ_SHM(rreq), rank, tag, comm->context_id + context_offset);
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
-    REQ_SHM(rreq)->user_buf = buf;
+    REQ_SHM(rreq)->user_buf = (char*)buf;
     REQ_SHM(rreq)->user_count = count;
     REQ_SHM(rreq)->datatype = datatype;
     REQ_SHM(rreq)->next = NULL;

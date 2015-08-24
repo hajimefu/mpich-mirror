@@ -652,7 +652,7 @@ static inline int MPIU_SHMW_Seg_create_attach_templ(
             "**alloc_shar_mem %s %s", "mmap",
             MPIU_OSW_Strerror(MPIU_OSW_Get_errno()));
 
-        *shm_addr_ptr = buf_ptr;
+        *shm_addr_ptr = (char*)buf_ptr;
     }
 
 fn_exit:

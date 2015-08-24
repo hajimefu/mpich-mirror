@@ -26,9 +26,19 @@ cvars:
       scope       : MPI_T_SCOPE_ALL_EQ
       description : >-
         If non-empty, this cvar specifies which network module to use
+    - name        : MPIR_CVAR_SHM
+      category    : NEMESIS
+      type        : string
+      default     : ""
+      class       : device
+      verbosity   : MPI_T_VERBOSITY_USER_BASIC
+      scope       : MPI_T_SCOPE_ALL_EQ
+      description : >-
+        If non-empty, this cvar specifies which shm module to use
 
 === END_MPI_T_CVAR_INFO_BLOCK ===
 */
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_choose_netmod
 #undef FCNAME
@@ -66,6 +76,47 @@ static inline int MPIDI_choose_netmod(void)
 
     goto fn_exit;
 }
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_choose_shm
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_choose_shm(void)
+{
+    int i, mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_CH4_CHOOSE_SHM);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_CHOOSE_SHM);
+
+#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+    MPIU_Assert(MPIR_CVAR_SHM != NULL);
+
+    if (strcmp(MPIR_CVAR_SHM, "") == 0) {
+        /* shm not specified, using the default */
+        MPIDI_shm_func = MPIDI_shm_funcs[0];
+        MPIDI_shm_native_func = MPIDI_shm_native_funcs[0];
+        goto fn_exit;
+    }
+
+    for (i = 0; i < MPIDI_num_shms; ++i) {
+        if (!MPIU_Strncasecmp
+            (MPIR_CVAR_SHM, MPIDI_shm_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
+            MPIDI_shm_func = MPIDI_shm_funcs[i];
+            MPIDI_shm_native_func = MPIDI_shm_native_funcs[i];
+            goto fn_exit;
+        }
+    }
+
+    MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_shm", "**ch4|invalid_shm %s",
+                         MPIR_CVAR_SHM);
+#endif
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_CHOOSE_SHM);
+    return mpi_errno;
+  fn_fail:
+
+    goto fn_exit;
+}
+
 
 #if (MPIU_THREAD_GRANULARITY == MPIU_THREAD_GRANULARITY_PER_OBJECT)
 #define MAX_THREAD_MODE MPI_THREAD_MULTIPLE
@@ -135,7 +186,8 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     mpi_errno = MPIDI_netmod_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
                                   MPIR_Process.comm_self, 1, &netmod_contexts);
-#if defined(MPIDI_CH4_BUILD_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+    MPIDI_choose_shm();
     mpi_errno = MPIDI_shm_init(rank, size);
 #endif
 
@@ -206,7 +258,7 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FINALIZE);
     mpi_errno = MPIDI_netmod_finalize();
 
-#if defined(MPIDI_CH4_BUILD_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
     mpi_errno = MPIDI_shm_finalize();
 #endif
 

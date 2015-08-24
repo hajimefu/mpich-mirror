@@ -124,8 +124,12 @@ typedef struct MPIDI_shm_native_funcs {
     MPIDI_shm_win_lock_all_t win_lock_all;
 } MPIDI_shm_native_funcs_t;
 
-extern MPIDI_shm_funcs_t MPIDI_shm_funcs;
-extern MPIDI_shm_native_funcs_t MPIDI_shm_native_funcs;
+extern MPIDI_shm_funcs_t *MPIDI_shm_funcs[];
+extern MPIDI_shm_funcs_t *MPIDI_shm_func;
+extern MPIDI_shm_native_funcs_t *MPIDI_shm_native_funcs[];
+extern MPIDI_shm_native_funcs_t *MPIDI_shm_native_func;
+extern int MPIDI_num_shms;
+extern char MPIDI_shm_strings[][MPIDI_MAX_SHM_STRING_LEN];
 
 #define USE_SHM_PROTOTYPES
 #include "ch4_shm_api.h"
@@ -142,7 +146,17 @@ extern MPIDI_shm_native_funcs_t MPIDI_shm_native_funcs;
 
 #else
 
-#include "../ch4_shm_direct.h"
+#define __shm_direct_stub__     0
+#define __shm_direct_default__  1
+
+#if SHM_DIRECT==__shm_direct_stub__
+#include "../stub/ch4_shm_direct.h"
+#elif SHM_DIRECT==__shm_direct_default__
+#include "../default/ch4_shm_direct.h"
+#else
+#error "No direct shm included"
+#endif
+
 
 #endif /* SHM_DIRECT           */
 

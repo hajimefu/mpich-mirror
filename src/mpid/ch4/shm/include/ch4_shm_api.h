@@ -64,7 +64,7 @@ MPIDI_SHM_API(int,inject_am_hdr,
                  (int)            handler_id,
                  (const void*)    am_hdr,
                  (size_t)         am_hdr_sz,
-                 (void *)         netmod_context);
+                 (void *)         shm_context);
 
 /* active message send */
 MPIDI_SHM_API(int,send_am,
@@ -89,7 +89,7 @@ MPIDI_SHM_API(int,inject_am,
                  (const void *)   data,
                  (MPI_Count)      count,
                  (MPI_Datatype)   datatype,
-                 (void *)         netmod_context);/* CH4 selects netmod context via some policy */
+                 (void *)         shm_context);/* CH4 selects shm context via some policy */
 
 /* vector version of active message send */
 MPIDI_SHM_API(int,send_amv,
@@ -114,7 +114,7 @@ MPIDI_SHM_API(int,inject_amv,
                  (const void *)   data,
                  (MPI_Count)      count,
                  (MPI_Datatype)   datatype,
-                 (void *)         netmod_context);
+                 (void *)         shm_context);
 
 /* active message send am hdr reply */
 MPIDI_SHM_API(int,send_am_hdr_reply,
@@ -126,7 +126,7 @@ MPIDI_SHM_API(int,send_am_hdr_reply,
 
 /* active message inject hdr reply */
 MPIDI_SHM_API(int,inject_am_hdr_reply,
-                 (void *)         reply_token,     /* local pointer to netmod specific information */
+                 (void *)         reply_token,     /* local pointer to shm specific information */
                  (int)            handler_id,
                  (const void *)   am_hdr,
                  (size_t)         am_hdr_sz);
@@ -144,7 +144,7 @@ MPIDI_SHM_API(int,send_am_reply,
 
 /* active message inject reply */
 MPIDI_SHM_API(int,inject_am_reply,
-                 (void *)         reply_token, /* local pointer to netmod specific information */
+                 (void *)         reply_token, /* local pointer to shm specific information */
                  (int)            handler_id,
                  (const void *)   am_hdr,
                  (size_t)         am_hdr_sz,
@@ -165,7 +165,7 @@ MPIDI_SHM_API(int,send_amv_reply,
 
 /* vector version of reply inject */
 MPIDI_SHM_API(int,inject_amv_reply,
-                 (void *)         reply_token,        /* local pointer to netmod specific information */
+                 (void *)         reply_token,        /* local pointer to shm specific information */
                  (int)            handler_id,
                  (struct iovec *) am_hdrs,
                  (size_t)         iov_len,

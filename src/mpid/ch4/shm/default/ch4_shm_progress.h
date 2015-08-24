@@ -126,7 +126,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             rreq->status.MPI_TAG = cell->tag;
             MPIR_STATUS_SET_COUNT(rreq->status, cell->pkt.mpich.datalen);
             ENVELOPE_SET(REQ_SHM(rreq), cell->rank, cell->tag, cell->context_id);
-            REQ_SHM(rreq)->user_buf = MPIU_Malloc(cell->pkt.mpich.datalen);
+            REQ_SHM(rreq)->user_buf = (char*)MPIU_Malloc(cell->pkt.mpich.datalen);
             REQ_SHM(rreq)->data_sz = cell->pkt.mpich.datalen;
             REQ_SHM(rreq)->type = cell->pkt.mpich.type;
             MPIU_Memcpy(REQ_SHM(rreq)->user_buf, (void *) cell->pkt.mpich.p.payload,
@@ -273,19 +273,19 @@ static inline int MPIDI_shm_progress_register(int (*progress_fn) (int *))
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_progress_deregister(int id)
+static inline int MPIDI_shm_progress_deregister(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_progress_activate(int id)
+static inline int MPIDI_shm_progress_activate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_progress_deactivate(int id)
+static inline int MPIDI_shm_progress_deactivate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

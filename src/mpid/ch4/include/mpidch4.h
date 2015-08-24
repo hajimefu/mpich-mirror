@@ -156,6 +156,7 @@ MPIDI_CH4_API(int, Comm_destroy, MPID_Comm *);
 #include <netmod.h>
 #ifdef MPIDI_BUILD_CH4_SHM
 #include "ch4_shm.h"
+#else
 #endif
 #include "ch4_init.h"
 #include "ch4_probe.h"

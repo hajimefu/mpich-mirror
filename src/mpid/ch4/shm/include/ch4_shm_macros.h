@@ -40,7 +40,7 @@
 #ifdef USE_SHM_INLINES
 #define MPIDI_SHM_API(rc,fcnname,...)                                \
   __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_shm_funcs.fcnname(APPLY(STRIP, __VA_ARGS__));       \
+    return MPIDI_shm_func->fcnname(APPLY(STRIP, __VA_ARGS__));       \
   }
 #endif
 
@@ -58,6 +58,6 @@
 #ifdef USE_SHM_INLINES
 #define MPIDI_SHM_API_NATIVE(rc,fcnname,...)                         \
   __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_shm_native_funcs.fcnname(APPLY(STRIP, __VA_ARGS__)); \
+    return MPIDI_shm_native_func->fcnname(APPLY(STRIP, __VA_ARGS__)); \
   }
 #endif

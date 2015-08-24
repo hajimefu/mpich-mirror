@@ -6,8 +6,7 @@
 ##     See COPYRIGHT in top-level directory.
 ##
 
-AM_CPPFLAGS += -I$(top_srcdir)/src/mpid/ch4/netmod/include   \
-               -I$(top_builddir)/src/mpid/ch4/netmod/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/mpid/ch4/netmod/include
 
 noinst_HEADERS += src/mpid/ch4/netmod/include/netmod.h
 
