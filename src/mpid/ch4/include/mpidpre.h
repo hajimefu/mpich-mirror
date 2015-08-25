@@ -24,6 +24,8 @@ typedef size_t MPIDI_msg_sz_t;
 #define MPID_PROGRESS_STATE_DECL
 #define HAVE_GPID_ROUTINES
 
+#define __ALWAYS_INLINE__ __attribute__((always_inline)) static inline
+
 #define CH4_COMPILE_TIME_ASSERT(expr_)                                  \
   do { switch(0) { case 0: case (expr_): default: break; } } while (0)
 

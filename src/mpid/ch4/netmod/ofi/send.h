@@ -26,9 +26,9 @@
 #define FUNCNAME send_lightweight
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int send_lightweight(const void *buf,
-                                   MPIDI_msg_sz_t data_sz,
-                                   int rank, int tag, MPID_Comm * comm, int context_offset)
+__ALWAYS_INLINE__ int send_lightweight(const void *buf,MPIDI_msg_sz_t data_sz,
+                                       int rank, int tag, MPID_Comm * comm,
+                                       int context_offset)
 {
     int mpi_errno = MPI_SUCCESS;
     ssize_t ret;
@@ -49,7 +49,7 @@ static inline int send_lightweight(const void *buf,
 #define FUNCNAME send_normal
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int send_normal(const void *buf,
+__ALWAYS_INLINE__ int send_normal(const void *buf,
                               int count,
                               MPI_Datatype datatype,
                               int rank,
@@ -171,12 +171,19 @@ static inline int send_normal(const void *buf,
     goto fn_exit;
 }
 
-static inline int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
+#undef FUNCNAME
+#define FUNCNAME nm_send
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
 {
     int dt_contig, mpi_errno;
     MPIDI_msg_sz_t data_sz;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
+
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_SEND);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NM_SEND);
 
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
@@ -189,10 +196,9 @@ static inline int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
 
         goto fn_exit;
     }
-
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
-    if (noreq && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send))
+    if (likely(noreq && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send)))
         mpi_errno = send_lightweight((char *) buf + dt_true_lb, data_sz,
                                      rank, tag, comm, context_offset);
     else
@@ -201,6 +207,7 @@ static inline int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
                                 data_sz, dt_ptr, dt_true_lb, syncflag);
 
   fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NM_SEND);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -210,7 +217,7 @@ static inline int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
 #define FUNCNAME nm_psend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int nm_psend(const void *buf,
+__ALWAYS_INLINE__ int nm_psend(const void *buf,
                            int count,
                            MPI_Datatype datatype,
                            int rank,
@@ -265,7 +272,7 @@ static inline int nm_psend(const void *buf,
 #define FUNCNAME MPIDI_netmod_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_send(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND);
@@ -279,7 +286,7 @@ static inline int MPIDI_netmod_send(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_rsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rsend(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_rsend(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RSEND);
@@ -294,7 +301,7 @@ static inline int MPIDI_netmod_rsend(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_irsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_irsend(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_irsend(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRSEND);
@@ -308,7 +315,7 @@ static inline int MPIDI_netmod_irsend(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_ssend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ssend(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_ssend(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND);
@@ -323,7 +330,7 @@ static inline int MPIDI_netmod_ssend(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_isend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_isend(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_isend(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_ISEND);
@@ -337,7 +344,7 @@ static inline int MPIDI_netmod_isend(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_issend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_issend(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_issend(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_ISSEND);
@@ -352,7 +359,7 @@ static inline int MPIDI_netmod_issend(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_startall
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_startall(int count, MPID_Request * requests[])
+__ALWAYS_INLINE__ int MPIDI_netmod_startall(int count, MPID_Request * requests[])
 {
     int rc = MPI_SUCCESS, i;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_STARTALL);
@@ -412,7 +419,7 @@ static inline int MPIDI_netmod_startall(int count, MPID_Request * requests[])
 #define FUNCNAME MPIDI_netmod_send_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_init(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_send_init(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_INIT);
@@ -427,7 +434,7 @@ static inline int MPIDI_netmod_send_init(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_ssend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ssend_init(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_ssend_init(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND_INIT);
@@ -442,7 +449,7 @@ static inline int MPIDI_netmod_ssend_init(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_bsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_bsend_init(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_bsend_init(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_BSEND_INIT);
@@ -457,7 +464,7 @@ static inline int MPIDI_netmod_bsend_init(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_rsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rsend_init(SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_netmod_rsend_init(SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RSEND_INIT);
@@ -472,7 +479,7 @@ static inline int MPIDI_netmod_rsend_init(SENDPARAMS)
 #define FUNCNAME MPIDI_netmod_cancel_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_cancel_send(MPID_Request * sreq)
+__ALWAYS_INLINE__ int MPIDI_netmod_cancel_send(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CANCEL_SEND);
