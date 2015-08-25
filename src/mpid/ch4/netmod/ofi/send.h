@@ -31,7 +31,6 @@ __ALWAYS_INLINE__ int send_lightweight(const void *buf,MPIDI_msg_sz_t data_sz,
                                        int context_offset)
 {
     int mpi_errno = MPI_SUCCESS;
-    ssize_t ret;
     uint64_t match_bits;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
@@ -62,7 +61,6 @@ __ALWAYS_INLINE__ int send_normal(const void *buf,
                               MPID_Datatype * dt_ptr, MPI_Aint dt_true_lb, uint64_t type)
 {
     int mpi_errno = MPI_SUCCESS;
-    ssize_t ret;
     MPID_Request *sreq = NULL;
     MPI_Aint last;
     char *send_buf;
@@ -102,14 +100,13 @@ __ALWAYS_INLINE__ int send_normal(const void *buf,
     send_buf = (char *) buf + dt_true_lb;
 
     if (!dt_contig) {
-        MPIDI_msg_sz_t segment_first, segment_size;
+        MPIDI_msg_sz_t segment_first;
         struct MPID_Segment *segment_ptr;
         segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send MPID_Segment_alloc");
         MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
-        segment_size = data_sz;
         last = data_sz;
         REQ_OFI(sreq, pack_buffer) = (char *) MPIU_Malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(REQ_OFI(sreq, pack_buffer) == NULL, mpi_errno,
@@ -209,8 +206,6 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NM_SEND);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME

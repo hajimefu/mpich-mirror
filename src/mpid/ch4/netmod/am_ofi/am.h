@@ -186,14 +186,13 @@ static inline int MPIDI_netmod_ofi_send_am(int64_t rank, int handler_id,
     send_buf = (char *) buf + dt_true_lb;
 
     if (!dt_contig) {
-        MPIDI_msg_sz_t segment_first, segment_size;
+        MPIDI_msg_sz_t segment_first;
         struct MPID_Segment *segment_ptr;
         segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send MPID_Segment_alloc");
         MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
-        segment_size = data_sz;
         last = data_sz;
         AMREQ_OFI(sreq, pack_buffer) = (char *) MPIU_Malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(AMREQ_OFI(sreq, pack_buffer) == NULL, mpi_errno,
@@ -231,11 +230,8 @@ static inline int MPIDI_netmod_send_am_hdr(int rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
     mpi_errno = MPIDI_netmod_ofi_send_am_hdr(rank, handler_id, am_hdr, am_hdr_sz, sreq);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -258,11 +254,9 @@ static inline int MPIDI_netmod_send_am(int rank,
 
     mpi_errno = MPIDI_netmod_ofi_send_am(_comm_to_phys(comm, rank, MPIDI_API_TAG), handler_id,
                                          am_hdr, am_hdr_sz, data, count, datatype, sreq);
-  fn_exit:
+
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_netmod_send_amv(int rank,
@@ -293,11 +287,8 @@ static inline int MPIDI_netmod_send_am_hdr_reply(void *reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
     mpi_errno = MPIDI_netmod_ofi_send_am_hdr((int64_t) reply_token, handler_id,
                                              am_hdr, am_hdr_sz, sreq);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -316,11 +307,8 @@ static inline int MPIDI_netmod_send_am_reply(void *reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_REPLY);
     mpi_errno = MPIDI_netmod_ofi_send_am((int64_t) reply_token, handler_id,
                                          am_hdr, am_hdr_sz, data, count, datatype, sreq);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM_REPLY);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_netmod_send_amv_reply(void *reply_token,

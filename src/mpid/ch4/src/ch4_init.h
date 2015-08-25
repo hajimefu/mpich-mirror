@@ -83,7 +83,7 @@ static inline int MPIDI_choose_netmod(void)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_choose_shm(void)
 {
-    int i, mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_CHOOSE_SHM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CHOOSE_SHM);
 
@@ -108,13 +108,10 @@ static inline int MPIDI_choose_shm(void)
 
     MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_shm", "**ch4|invalid_shm %s",
                          MPIR_CVAR_SHM);
-#endif
   fn_exit:
+#endif
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_CHOOSE_SHM);
     return mpi_errno;
-  fn_fail:
-
-    goto fn_exit;
 }
 
 

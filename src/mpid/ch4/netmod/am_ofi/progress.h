@@ -81,11 +81,10 @@ static inline int MPIDI_netmod_handle_short_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_
 
     if (cmpl_handler_fn)
         cmpl_handler_fn(rreq);
+
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SHORT_AM);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -95,18 +94,14 @@ static inline int MPIDI_netmod_handle_short_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_
 static inline int MPIDI_netmod_handle_short_am_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_addr_t source)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_netmod_am_completion_handler_fn cmpl_handler_fn;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
 
     MPIDI_Global.am_handlers[msg_hdr->handler_id] (msg_hdr->payload, msg_hdr->am_hdr_sz,
                                                    (void *) source, NULL, NULL, NULL, NULL, NULL);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -147,7 +142,7 @@ static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
 {
     int mpi_errno = MPI_SUCCESS, is_contig = 0;
     MPID_Request *rreq;
-    void *p_data, *data;
+    void *p_data;
     size_t data_sz, rem, done, curr_len, in_data_sz;
     MPIDI_OFI_lmt_msg_pyld_t *lmt_msg;
     MPIDI_netmod_am_completion_handler_fn cmpl_handler_fn;
@@ -224,8 +219,6 @@ static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_LONG_AM);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -275,7 +268,7 @@ static inline int MPIDI_AMOFI_IS_CTRL_MSG(uint8_t msg_type)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *cq_entry)
 {
-    int mpi_errno = MPI_SUCCESS, count;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
     MPIDI_OFIAMReq_t *ofi_req;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
@@ -380,11 +373,6 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq;
     MPIDI_OFIAMReq_t *ofi_req;
-    int dt_contig;
-    MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
-    MPI_Aint last;
-    size_t data_sz, dt_sz;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);

@@ -22,7 +22,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
                                      MPID_Comm * comm,
                                      int context_offset, int *flag, MPI_Status * status)
 {
-    int mpi_errno, comm_idx;
+    int mpi_errno=MPI_SUCCESS, comm_idx;
     MPID_Comm *root_comm;
     MPID_Request *unexp_req;
     uint64_t match_bits, mask_bits;
@@ -51,11 +51,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
     }
     /* MPIDI_CS_EXIT(); */
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_IPROBE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -92,7 +89,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
                                       int context_offset,
                                       int *flag, MPID_Request ** message, MPI_Status * status)
 {
-    int mpi_errno, comm_idx;
+    int mpi_errno = MPI_SUCCESS, comm_idx;
     MPID_Comm *root_comm;
     MPID_Request *unexp_req;
     uint64_t match_bits, mask_bits;
@@ -128,11 +125,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
     }
     /* MPIDI_CS_EXIT(); */
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_IMPROBE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -152,11 +146,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Mprobe(int source,
         MPIDI_CH4U_Improbe(source, tag, comm, context_offset, &flag, message, status);
         MPIDI_Progress_test();
     }
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #endif /* MPIDCH4U_WIN_H_INCLUDED */

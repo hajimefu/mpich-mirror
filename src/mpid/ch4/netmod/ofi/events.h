@@ -61,7 +61,7 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
         MPIU_Free(REQ_OFI(rreq, pack_buffer));
         MPID_Segment_free(REQ_OFI(rreq, segment_ptr));
 
-        if (last != count) {
+        if (last != (MPI_Aint)count) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
                                              MPI_ERR_TYPE, "**dtypemismatch", 0);
@@ -136,11 +136,8 @@ static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     hc->wc = *wc;
     get_huge_event(NULL, (MPID_Request *) hc);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 
@@ -279,7 +276,6 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
                                  MPID_Request      *req)
 {
     int mpi_errno = MPI_SUCCESS;
-    int c;
     MPIDI_Huge_chunk_t *hc = (MPIDI_Huge_chunk_t *)req;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GETHUGE_CALLBACK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GETHUGE_CALLBACK);

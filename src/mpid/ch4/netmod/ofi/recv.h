@@ -238,7 +238,6 @@ __ALWAYS_INLINE__ int MPIDI_netmod_imrecv(void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq;
-    MPID_Comm *comm;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IMRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
@@ -252,7 +251,6 @@ __ALWAYS_INLINE__ int MPIDI_netmod_imrecv(void *buf,
     MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
 
     *rreqp = rreq = message;
-    comm = rreq->comm;
 
     mpi_errno = do_irecv(buf, count, datatype, message->status.MPI_SOURCE,
                          message->status.MPI_TAG, rreq->comm, 0,

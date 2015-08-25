@@ -26,15 +26,12 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int count,
                                              MPID_Comm * comm_ptr,
                                              MPID_Comm ** intercomm, int array_of_errcodes[])
 {
-    int mpi_errno;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     MPIU_Assert(0);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME

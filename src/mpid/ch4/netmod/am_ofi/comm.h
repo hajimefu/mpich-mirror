@@ -212,11 +212,8 @@ static inline int alloc_tables(MPID_Comm * comm)
         }
     }
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_ALLOC_TABLES);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
@@ -241,8 +238,6 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_COMM_CREATE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)

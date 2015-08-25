@@ -23,9 +23,8 @@ static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num);
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 {
-    int ret,count,mpi_errno = MPI_SUCCESS;
+    int ret,mpi_errno = MPI_SUCCESS;
     cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
-    MPID_Request      *req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);

@@ -39,15 +39,14 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
                                     MPID_Comm * comm_world, MPID_Comm * comm_self,
                                     int num_contexts, void **netmod_contexts)
 {
-    int mpi_errno = MPI_SUCCESS, pmi_errno, spawned;
-    int str_errno, maxlen, iov_len, i, fi_version;
+    int mpi_errno = MPI_SUCCESS, pmi_errno;
+    int str_errno, maxlen, i, fi_version;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;
     struct fi_info *hints, *prov, *prov_use;
     uint64_t mr_flags;
     struct fi_cq_attr cq_attr;
-    struct fi_cntr_attr cntr_attr;
     fi_addr_t *mapped_table;
     struct fi_av_attr av_attr;
     char valS[MPIDI_KVSAPPSTRLEN], *val;
@@ -404,8 +403,6 @@ static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
                                         struct fid_av *av, struct fid_ep **ep)
 {
     int mpi_errno = MPI_SUCCESS;
-    struct fi_tx_attr tx_attr;
-    struct fi_rx_attr rx_attr;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);

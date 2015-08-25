@@ -97,11 +97,8 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
                                     MPI_ERR_INTERN, "**progresshookstoomany", 0);
     }
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -116,12 +113,8 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
 
     MPIDI_CH4_Global.progress_hooks[id] = NULL;
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     return mpi_errno;
-
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -130,15 +123,12 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Progress_activate(int id)
 {
-    int mpi_errno;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
     MPIU_Assert(0);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -147,15 +137,12 @@ __CH4_INLINE__ int MPIDI_Progress_activate(int id)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Progress_deactivate(int id)
 {
-    int mpi_errno;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
     MPIU_Assert(0);
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #endif /* MPIDCH4_PROGRESS_H_INCLUDED */

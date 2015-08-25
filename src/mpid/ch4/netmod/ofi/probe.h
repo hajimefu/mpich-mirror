@@ -26,7 +26,6 @@ static inline int do_iprobe(int source,
 {
     int ret, mpi_errno = MPI_SUCCESS;
     fi_addr_t remote_proc;
-    size_t len, addrlen = 0;
     uint64_t match_bits, mask_bits;
     MPID_Request r, *rreq;      /* don't need to init request, output only */
     msg_tagged_t msg;
@@ -41,14 +40,10 @@ static inline int do_iprobe(int source,
             *message = NULL;
         goto fn_exit;
     }
-    else if (unlikely(MPI_ANY_SOURCE == source)) {
+    else if (unlikely(MPI_ANY_SOURCE == source))
         remote_proc = FI_ADDR_UNSPEC;
-        addrlen = 0;
-    }
-    else {
+    else
         remote_proc = _comm_to_phys(comm, source, MPIDI_API_TAG);
-        addrlen = sizeof(remote_proc);
-    }
 
     if (message)
         REQ_CREATE(rreq);

@@ -33,11 +33,8 @@ static inline int MPIDI_CH4U_Prepare_recv_req(void *buf, int count, MPI_Datatype
     MPIU_CH4U_REQUEST(rreq, buffer) = (char *) buf;
     MPIU_CH4U_REQUEST(rreq, count) = count;
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PREPARE_RECV_BUFFER);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -54,7 +51,7 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
     int dt_contig;
     MPI_Aint dt_true_lb, last;
     MPID_Datatype *dt_ptr;
-    MPIDI_msg_sz_t data_sz, in_data_sz, dt_sz;
+    MPIDI_msg_sz_t in_data_sz, dt_sz;
     MPID_Segment *segment_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_UNEXPECTED);
@@ -73,7 +70,7 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
     MPIR_STATUS_SET_COUNT(rreq->status, count * dt_sz);
     MPIU_CH4U_REQUEST(rreq, count) = count;
 
-    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_sz, dt_ptr, dt_true_lb);
     MPIU_CH4U_REQUEST(rreq, datatype) = datatype;
 
     if (!dt_contig) {
@@ -85,7 +82,7 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
         last = count * dt_sz;
         MPID_Segment_unpack(segment_ptr, 0, &last, MPIU_CH4U_REQUEST(rreq, buffer));
         MPID_Segment_free(segment_ptr);
-        if (last != count * dt_sz) {
+        if (last != (MPI_Aint)(count * dt_sz)) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
                                              MPI_ERR_TYPE, "**dtypemismatch", 0);
@@ -198,7 +195,6 @@ __CH4_INLINE__ int MPIDI_CH4U_Recv(void *buf,
                                    int context_offset, MPI_Status * status, MPID_Request ** request)
 {
     int mpi_errno;
-    MPID_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_RECV);
     MPIU_RC_POP(MPIDI_CH4U_Do_irecv(buf, count, datatype, rank, tag,
@@ -244,11 +240,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Recv_init(void *buf,
     MPIU_CH4U_REQUEST(rreq, p_type) = MPIDI_PTYPE_RECV;
     dtype_add_ref_if_not_builtin(datatype);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_RECV_INIT);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 
@@ -355,7 +348,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Irecv(void *buf,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_Cancel_recv(MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS, found, comm_idx, c;
+    int mpi_errno = MPI_SUCCESS, found, comm_idx;
     MPID_Comm *root_comm;
     uint64_t msg_tag;
 
@@ -375,11 +368,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Cancel_recv(MPID_Request * rreq)
     else {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, FALSE);
     }
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CANCEL_RECV);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #endif /* MPIDCH4U_RECV_H_INCLUDED */
