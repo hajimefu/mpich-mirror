@@ -38,7 +38,7 @@ static inline int shm_do_isend(const void *buf,
                                int tag,
                                MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    int dt_contig, mpi_errno = MPI_SUCCESS;
+    int dt_contig __attribute__ ((__unused__)), mpi_errno = MPI_SUCCESS;
     char *send_buffer;
     MPI_Aint dt_true_lb;
     MPID_Request *sreq = NULL;
@@ -62,7 +62,6 @@ static inline int shm_do_isend(const void *buf,
     REQ_SHM_ENQUEUE(sreq, MPIDI_shm_sendq);
     *request = sreq;
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_DO_ISEND);
     return mpi_errno;
 }
@@ -76,7 +75,7 @@ static inline int MPIDI_shm_send(const void *buf,
                                  int tag,
                                  MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    int dt_contig, mpi_errno = MPI_SUCCESS;
+    int dt_contig __attribute__ ((__unused__)), mpi_errno = MPI_SUCCESS;
     char *send_buffer;
     MPI_Aint dt_true_lb;
     MPIDI_msg_sz_t data_sz;
@@ -229,7 +228,6 @@ static inline int MPIDI_shm_isend(const void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
     mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
     return mpi_errno;
 }

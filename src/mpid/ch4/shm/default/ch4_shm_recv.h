@@ -51,7 +51,6 @@ static inline int shm_do_irecv(void *buf,
     REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
     *request = rreq;
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_DO_IRECV);
     return mpi_errno;
 }
@@ -66,12 +65,11 @@ static inline int MPIDI_shm_recv(void *buf,
                                  MPID_Comm * comm,
                                  int context_offset, MPI_Status * status, MPID_Request ** request)
 {
-    int mpi_errno = MPI_SUCCESS, dt_contig, src;
-    MPIDI_msg_sz_t data_sz;
+    int mpi_errno = MPI_SUCCESS, dt_contig __attribute__ ((__unused__));
+    MPIDI_msg_sz_t data_sz __attribute__ ((__unused__));
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
     char *recv_buffer;
-    MPID_Request *rreq = NULL;
     MPIDI_STATE_DECL(MPIDI_SHM_RECV);
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_RECV);
@@ -205,7 +203,6 @@ static inline int MPIDI_shm_irecv(void *buf,
 
     mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_SHM_IRECV);
     return mpi_errno;
 }

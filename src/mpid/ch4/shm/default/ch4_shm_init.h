@@ -12,6 +12,7 @@
 #define SHM_INIT_H_INCLUDED
 
 #include "ch4_shm_impl.h"
+#include "ch4_types.h"
 
 /* ------------------------------------------------------- */
 /* from mpid/ch3/channels/nemesis/src/mpid_nem_init.c */
@@ -34,7 +35,6 @@ static inline int MPIDI_shm_init(int rank, int size)
     MPID_nem_cell_t(*cells_p)[MPID_NEM_NUM_CELLS];
     MPID_nem_queue_t *recv_queues_p = NULL;
     MPID_nem_queue_t *free_queues_p = NULL;
-    MPID_Comm *comm;
     MPIU_CHKPMEM_DECL(9);
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_INIT);
 

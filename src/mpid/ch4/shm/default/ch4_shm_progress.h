@@ -20,7 +20,7 @@
 #define FCNAME DECL_FUNC(MPIDI_shm_do_progress_recv)
 static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count)
 {
-    int complete = 0, mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
     int local_rank;
     int in_cell = 0, in_fbox = 0;
     MPID_nem_fbox_mpich_t *fbox;
@@ -91,7 +91,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     req->status.MPI_SOURCE = sender_rank;
                     req->status.MPI_TAG = tag;
                     MPIR_STATUS_SET_COUNT(req->status,
-                                          MPIR_STATUS_GET_COUNT(req->status) + data_sz);
+                                          (MPIR_STATUS_GET_COUNT(req->status) + data_sz));
                     /* dequeue rreq */
                     REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_shm_recvq_posted,
                                                   mpi_errno);
@@ -102,7 +102,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     REQ_SHM(req)->data_sz = EAGER_THRESHOLD;
                     REQ_SHM(req)->user_buf += EAGER_THRESHOLD;
                     MPIR_STATUS_SET_COUNT(req->status,
-                                          MPIR_STATUS_GET_COUNT(req->status) + EAGER_THRESHOLD);
+                                          (MPIR_STATUS_GET_COUNT(req->status) + EAGER_THRESHOLD));
                 }
                 else {
                     MPIU_Assert(0);
@@ -178,7 +178,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
 #define FCNAME DECL_FUNC(MPIDI_shm_do_progress_send)
 static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count)
 {
-    int complete = 0, mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
     int dest;
     MPID_nem_cell_ptr_t cell = NULL;
     MPID_Request *sreq = MPIDI_shm_sendq.head;
@@ -197,7 +197,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
                           cell->context_id));
         char *recv_buffer = (char *) cell->pkt.mpich.p.payload;
         int data_sz = REQ_SHM(sreq)->data_sz;
-        if (data_sz <= EAGER_THRESHOLD) {
+        if (data_sz <= (int)EAGER_THRESHOLD) {
             /* eager message */
             MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, REQ_SHM(sreq)->data_sz);
             cell->pkt.mpich.datalen = REQ_SHM(sreq)->data_sz;
@@ -229,7 +229,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
 #define FCNAME DECL_FUNC(MPIDI_shm_progress)
 static inline int MPIDI_shm_progress(int blocking)
 {
-    int complete = 0, mpi_errno = MPI_SUCCESS;
+    int complete = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_PROGRESS);
