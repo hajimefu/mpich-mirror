@@ -325,9 +325,6 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
 {
     int mpi_errno;
     switch(REQ_OFI(req,event_id)) {
-    case MPIDI_EVENT_ABORT:
-        MPIU_Assert(0);
-        break;
     case MPIDI_EVENT_PEEK:
         MPIU_RC_POP(peek_event(wc,req));
         break;
@@ -352,7 +349,9 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
     case MPIDI_EVENT_CONTROL:
         MPIU_RC_POP(control_event(wc,req));
         break;
+    case MPIDI_EVENT_ABORT:
     default:
+        mpi_errno = MPI_SUCCESS;
         MPIU_Assert(0);
         break;
     }

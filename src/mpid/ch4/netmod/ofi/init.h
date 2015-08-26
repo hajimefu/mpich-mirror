@@ -68,25 +68,6 @@ static inline int MPIDI_netmod_init(int rank,
     MPID_Thread_mutex_create(&MPIDI_THREAD_FI_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_THREAD_SPAWN_MUTEX, &thr_err);
 
-    /* ---------------------------------- */
-    /* Initialize MPI_COMM_SELF and VCRT  */
-    /* ---------------------------------- */
-    comm = MPIR_Process.comm_self;
-    comm->rank = 0;
-    comm->remote_size = 1;
-    comm->local_size = 1;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
-    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
-
-    /* ---------------------------------- */
-    /* Initialize MPI_COMM_WORLD and VCRT */
-    /* ---------------------------------- */
-    comm = MPIR_Process.comm_world;
-    comm->rank = rank;
-    comm->remote_size = size;
-    comm->local_size = size;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
-
     /* ------------------------------------------------------------------------ */
     /* Hints to filter providers                                                */
     /* See man fi_getinfo for a list                                            */
@@ -354,6 +335,25 @@ static inline int MPIDI_netmod_init(int rank,
         FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0), &MPIDI_Global.msg[i],
                                FI_MULTI_RECV | FI_COMPLETION), prepost);
     }
+
+    /* ---------------------------------- */
+    /* Initialize MPI_COMM_SELF and VCRT  */
+    /* ---------------------------------- */
+    comm = MPIR_Process.comm_self;
+    comm->rank = 0;
+    comm->remote_size = 1;
+    comm->local_size = 1;
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
+
+    /* ---------------------------------- */
+    /* Initialize MPI_COMM_WORLD and VCRT */
+    /* ---------------------------------- */
+    comm = MPIR_Process.comm_world;
+    comm->rank = rank;
+    comm->remote_size = size;
+    comm->local_size = size;
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
 
     /* -------------------------------- */
     /* Calculate per-node map           */

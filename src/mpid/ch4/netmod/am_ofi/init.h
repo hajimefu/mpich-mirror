@@ -60,18 +60,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT);
-    comm = MPIR_Process.comm_self;
-    comm->rank = 0;
-    comm->remote_size = 1;
-    comm->local_size = 1;
-    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
-    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
-
-    comm = MPIR_Process.comm_world;
-    comm->rank = rank;
-    comm->remote_size = size;
-    comm->local_size = size;
-    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
 
     hints = fi_allocinfo();
     MPIU_Assert(hints != NULL);
@@ -172,6 +160,19 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     FI_RC(fi_av_insert(MPIDI_Global.av, table, size, mapped_table, 0ULL, NULL), avmap);
     MPIDI_Map_create(&MPIDI_Global.win_map);
     MPIDI_Map_create(&MPIDI_Global.comm_map);
+
+    comm = MPIR_Process.comm_self;
+    comm->rank = 0;
+    comm->remote_size = 1;
+    comm->local_size = 1;
+    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
+
+    comm = MPIR_Process.comm_world;
+    comm->rank = rank;
+    comm->remote_size = size;
+    comm->local_size = size;
+    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
 
     MPIU_RC_POP(MPIDI_CH4U_Init(comm_world, comm_self, num_contexts, netmod_contexts));
 

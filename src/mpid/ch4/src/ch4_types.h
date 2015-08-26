@@ -33,7 +33,7 @@
 #define MPIDI_CH4U_TAG_SHIFT     (28)
 #define MPIDI_CH4U_SOURCE_SHIFT  (16)
 
-
+#define MAX_NETMOD_CONTEXTS 8
 #define MAX_PROGRESS_HOOKS 16
 typedef int (*progress_func_ptr_t) (int *made_progress);
 
@@ -71,7 +71,7 @@ typedef struct MPIDI_CH4_Global_t {
     MPIDI_CH4U_Devreq_t *unexp_list;
 #endif
 
-    void *netmod_context[];
+    void *netmod_context[8];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 

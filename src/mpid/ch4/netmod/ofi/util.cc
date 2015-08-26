@@ -261,9 +261,7 @@ static inline void WinUnlock_proc(const MPIDI_Win_control_t *info,
     MPIDI_Win_control_t new_info;
     new_info.type = MPIDI_CTRL_UNLOCKACK;
 
-    int mpi_errno = do_control_win(&new_info,peer,win,1);
-    MPIU_Assert(mpi_errno == MPI_SUCCESS);
-
+    do_control_win(&new_info,peer,win,1);
 }
 
 static inline void WinComplete_proc(const MPIDI_Win_control_t *info,

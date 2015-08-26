@@ -206,6 +206,7 @@ __CH4_INLINE__ int MPIDI_Cancel_recv(MPID_Request * rreq)
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_cancel_recv(rreq);
 #else
+    mpi_errno=MPI_SUCCESS;
     assert(0);
 #endif
     if (mpi_errno != MPI_SUCCESS) {

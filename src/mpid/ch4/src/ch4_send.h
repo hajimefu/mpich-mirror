@@ -227,6 +227,7 @@ __CH4_INLINE__ int MPIDI_Startall(int count, MPID_Request * requests[])
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_startall(count, requests);
 #else
+    mpi_errno = MPI_SUCCESS;
     assert(0);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
@@ -392,6 +393,7 @@ __CH4_INLINE__ int MPIDI_Cancel_send(MPID_Request * sreq)
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_cancel_send(sreq);
 #else
+    mpi_errno = MPI_SUCCESS;
     assert(0);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
