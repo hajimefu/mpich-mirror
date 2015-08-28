@@ -18,10 +18,16 @@ typedef int (*MPIDI_netmod_am_target_handler_fn)
   size_t * data_sz, int *is_contig, MPIDI_netmod_am_completion_handler_fn * cmpl_handler_fn,    /* completion handler */
   MPID_Request ** req);         /* if allocated, need pointer to completion function */
 
+#ifndef MPIDI_CH4_ARRAY_TYPEDEFS
+#define MPIDI_CH4_ARRAY_TYPEDEFS
 /* Macro helper types for netmod_api.h */
+/* These typedefs can be removed when  */
+/* we remove macro definitions of the  */
+/* api */
 typedef MPID_Gpid MPID_Gpid_array_t[];
 typedef int intarray_t[];
 typedef MPID_Request *MPID_Request_array_t[];
+#endif /*MPIDI_CH4_ARRAY_TYPEDEFS */
 
 #define USE_NETMOD_TYPEDEFS
 #include "netmod_api.h"
