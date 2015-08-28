@@ -121,7 +121,16 @@ AM_SUBST_NOTMAKE(ch4_netmod_pre_include)
 AM_SUBST_NOTMAKE(ch4_netmod_amrequest_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_request_decl)
 
-if test "$ch4_nets_array_sz" == "1" ;  then
+AC_ARG_ENABLE(ch4-netmod-direct,
+    [--enable-ch4-netmod-direct
+       Enables inlined netmod build when a single netmod is used
+       level:
+         yes       - Enabled (default)
+         no        - Disabled (may improve build times and code size)
+    ],,enable_ch4_netmod_direct=yes)
+
+
+if test "$ch4_nets_array_sz" == "1" && test "$enable_ch4_netmod_direct" =="yes" ;  then
    PAC_APPEND_FLAG([-DNETMOD_DIRECT=__netmod_direct_${ch4_netmods}__], [CPPFLAGS])
 fi
 
@@ -129,13 +138,21 @@ fi
 AC_ARG_ENABLE(ch4-shm,
     [--enable-ch4-shm=level:module
        Control whether CH4 shared memory is built and/or used.
-  /home/cjarcher/code/mpich/ssg_sfi-mpich/src/mpid/ch4/     level:
+       level:
          no        - Do not build or use CH4 shared memory.
          yes       - Build CH4 shared memory, but do not use it by default (Your chosen netmod must provide it).
          exclusive - Build and exclusively use CH4 shared memory. (Default)
-  /home/cjarcher/code/mpich/ssg_sfi-mpich/src/mpid/ch4/     module-list(optional).  comma separated list of shared memory modules:
+       module-list(optional).  comma separated list of shared memory modules:
          simple   - simple shared memory implementation
     ],,enable_ch4_shm=exclusive:simple)
+
+AC_ARG_ENABLE(ch4-shm-direct,
+    [--enable-ch4-shm-direct
+       Enables inlined shared memory build when a single shared memory module is used
+       level:
+         yes       - Enabled (default)
+         no        - Disabled (may improve build times and code size)
+    ],,enable_ch4_shm_direct=yes)
 
 ch4_shm_level=`echo $enable_ch4_shm | sed -e 's/:.*$//'`
 changequote(<<,>>)
@@ -145,8 +162,7 @@ changequote([,])
 if test "$ch4_shm_level" != "no" ; then
     AC_DEFINE([MPIDI_BUILD_CH4_SHM], [1],
         [Define if CH4 will build the default shared memory implementation as opposed to only using a netmod implementation])
-else
-    ch4_shm=
+
 fi
 
 if test "$ch4_shm_level" = "exclusive" ; then
@@ -245,7 +261,7 @@ AC_SUBST(ch4_shm_request_decl)
 AM_SUBST_NOTMAKE(ch4_shm_pre_include)
 AM_SUBST_NOTMAKE(ch4_shm_request_decl)
 
-if test "$ch4_shm_array_sz" == "1" ;  then
+if test "$ch4_shm_array_sz" == "1"  && test "$enable_ch4_shm_direct" = "yes" ;  then
    PAC_APPEND_FLAG([-DSHM_DIRECT=__shm_direct_${ch4_shm}__], [CPPFLAGS])
 fi
 
