@@ -56,7 +56,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request) >=
                             (offsetof(MPID_Request, dev.ch4u.netmod_am) +
-                             sizeof(MPIDI_OFIAMReq_t)));
+                             sizeof(MPIDI_netmod_am_ofi_amrequest_t)));
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT);

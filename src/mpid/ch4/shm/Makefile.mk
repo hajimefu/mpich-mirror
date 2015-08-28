@@ -11,6 +11,6 @@ if BUILD_CH4_SHM
 
 include $(top_srcdir)/src/mpid/ch4/shm/include/Makefile.mk
 include $(top_srcdir)/src/mpid/ch4/shm/stub/Makefile.mk
-include $(top_srcdir)/src/mpid/ch4/shm/default/Makefile.mk
+include $(top_srcdir)/src/mpid/ch4/shm/simple/Makefile.mk
 
 endif

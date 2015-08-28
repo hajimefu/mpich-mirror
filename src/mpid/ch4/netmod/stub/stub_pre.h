@@ -8,10 +8,16 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_STUB_IMPL_H_INCLUDED
-#define NETMOD_STUB_IMPL_H_INCLUDED
 
-#include <mpidimpl.h>
-#include "mpidch4u.h"
+#ifndef NETMOD_STUB_PRE_H_INCLUDED
+#define NETMOD_STUB_PRE_H_INCLUDED
 
-#endif /* NETMOD_STUB_IMPL_H_INCLUDED */
+typedef struct {
+    int dummy;
+} MPIDI_netmod_stub_amrequest_t;
+
+typedef struct {
+    int dummy;
+} MPIDI_netmod_stub_request_t;
+
+#endif

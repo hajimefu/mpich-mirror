@@ -68,6 +68,14 @@ static inline int MPIDI_netmod_init(int rank,
     MPID_Thread_mutex_create(&MPIDI_THREAD_FI_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_THREAD_SPAWN_MUTEX, &thr_err);
 
+
+    fprintf(stderr, "Size of MPIDI_CH4U_Devreq_t = %d MPIDI_Devreq_t = %d Request = %d MPIDI_netmod_ofi_request_t = %d\n",
+            sizeof(MPIDI_CH4U_Devreq_t),
+            sizeof(MPIDI_Devreq_t),
+            sizeof(MPID_Request),
+            sizeof(MPIDI_netmod_ofi_request_t));
+
+
     /* ------------------------------------------------------------------------ */
     /* Hints to filter providers                                                */
     /* See man fi_getinfo for a list                                            */

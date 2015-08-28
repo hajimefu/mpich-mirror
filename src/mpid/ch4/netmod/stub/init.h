@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_AMSTUB_INIT_H_INCLUDED
-#define NETMOD_AMSTUB_INIT_H_INCLUDED
+#ifndef NETMOD_STUB_INIT_H_INCLUDED
+#define NETMOD_STUB_INIT_H_INCLUDED
 
 #include "impl.h"
 
@@ -91,4 +91,4 @@ static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
 }
 
 
-#endif /* NETMOD_AMSTUB_INIT_H_INCLUDED */
+#endif /* NETMOD_STUB_INIT_H_INCLUDED */

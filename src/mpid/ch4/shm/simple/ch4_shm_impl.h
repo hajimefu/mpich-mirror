@@ -51,19 +51,7 @@ typedef struct {
 } MPIDI_shm_comm_t;
 #define COMM_SHM(comm) ((MPIDI_shm_comm_t*)(comm)->dev.pad)
 
-typedef struct {
-    MPID_Request *next;
-    int dest;
-    int rank;
-    int tag;
-    int context_id;
-    char *user_buf;
-    int data_sz;
-    int type;
-    int user_count;
-    MPI_Datatype datatype;
-} MPIDI_shm_req_t;
-#define REQ_SHM(req) ((MPIDI_shm_req_t*)(MPIU_CH4_NETMOD_DIRECT_REQUEST(req)))
+#define REQ_SHM(req) (&(req)->dev.shm.simple)
 /* ---------------------------------------------------- */
 /* general send/recv queue types, macros and objects    */
 /* ---------------------------------------------------- */

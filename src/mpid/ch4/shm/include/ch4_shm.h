@@ -147,12 +147,12 @@ extern char MPIDI_shm_strings[][MPIDI_MAX_SHM_STRING_LEN];
 #else
 
 #define __shm_direct_stub__     0
-#define __shm_direct_default__  1
+#define __shm_direct_simple__  1
 
 #if SHM_DIRECT==__shm_direct_stub__
 #include "../stub/ch4_shm_direct.h"
-#elif SHM_DIRECT==__shm_direct_default__
-#include "../default/ch4_shm_direct.h"
+#elif SHM_DIRECT==__shm_direct_simple__
+#include "../simple/ch4_shm_direct.h"
 #else
 #error "No direct shm included"
 #endif

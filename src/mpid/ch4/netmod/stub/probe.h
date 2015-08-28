@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_AMSTUB_PROBE_H_INCLUDED
-#define NETMOD_AMSTUB_PROBE_H_INCLUDED
+#ifndef NETMOD_STUB_PROBE_H_INCLUDED
+#define NETMOD_STUB_PROBE_H_INCLUDED
 
 #include "impl.h"
 
@@ -47,4 +47,4 @@ static inline int MPIDI_netmod_iprobe(int source,
     return MPIDI_CH4U_Iprobe(source, tag, comm, context_offset, flag, status);
 }
 
-#endif /* NETMOD_AMSTUB_PROBE_H_INCLUDED */
+#endif /* NETMOD_STUB_PROBE_H_INCLUDED */

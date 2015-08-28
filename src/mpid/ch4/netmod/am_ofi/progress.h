@@ -270,13 +270,13 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
-    MPIDI_OFIAMReq_t *ofi_req;
+    MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
 
-    ofi_req = container_of(cq_entry->op_context, MPIDI_OFIAMReq_t, context);
+    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
     msg_hdr = &ofi_req->msg_hdr;
 
     if (MPIDI_AMOFI_IS_CTRL_MSG(msg_hdr->am_type))
@@ -341,7 +341,7 @@ static inline int MPIDI_netmod_handle_recv_completion(struct fi_cq_data_entry *c
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_dispatch_lmt_ack(fi_addr_t source,
-                                                MPIDI_OFIAMReq_t *ofi_req,
+                                                MPIDI_netmod_am_ofi_amrequest_t *ofi_req,
                                                 void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -372,12 +372,12 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq;
-    MPIDI_OFIAMReq_t *ofi_req;
+    MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
 
-    ofi_req = container_of(cq_entry->op_context, MPIDI_OFIAMReq_t, context);
+    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
     ofi_req->lmt_cntr--;
     if (ofi_req->lmt_cntr)
         goto fn_exit;

@@ -8,10 +8,25 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_STUB_IMPL_H_INCLUDED
-#define NETMOD_STUB_IMPL_H_INCLUDED
 
-#include <mpidimpl.h>
-#include "mpidch4u.h"
+#ifndef SHM_SIMPLE_PRE_H_INCLUDED
+#define SHM_SIMPLE_PRE_H_INCLUDED
 
-#endif /* NETMOD_STUB_IMPL_H_INCLUDED */
+#include <mpi.h>
+
+struct MPID_Request;
+
+typedef struct {
+    struct MPID_Request *next;
+    int dest;
+    int rank;
+    int tag;
+    int context_id;
+    char *user_buf;
+    int data_sz;
+    int type;
+    int user_count;
+    MPI_Datatype datatype;
+} MPIDI_shm_simple_request_t;
+
+#endif

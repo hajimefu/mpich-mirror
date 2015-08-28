@@ -13,14 +13,14 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
 	    fi
         done
     ])
-    AM_CONDITIONAL([BUILD_CH4_NETMOD_AMSTUB],[test "X$build_ch4_netmod_stub" = "Xyes"])
+    AM_CONDITIONAL([BUILD_CH4_NETMOD_STUB],[test "X$build_ch4_netmod_stub" = "Xyes"])
 ])dnl
 
 AC_DEFUN([PAC_SUBCFG_BODY_]PAC_SUBCFG_AUTO_SUFFIX,[
-AM_COND_IF([BUILD_CH4_NETMOD_AMSTUB],[
+AM_COND_IF([BUILD_CH4_NETMOD_STUB],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch4:stub])
     AC_DEFINE([ENABLE_COMM_OVERRIDES], 1, [define to add per-vc function pointers to override send and recv functions])
-])dnl end AM_COND_IF(BUILD_CH4_NETMOD_AMSTUB,...)
+])dnl end AM_COND_IF(BUILD_CH4_NETMOD_STUB,...)
 ])dnl end _BODY
 
 [#] end of __file__

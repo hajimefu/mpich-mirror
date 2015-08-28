@@ -22,7 +22,6 @@ MPIDI_CH4_Global_t MPIDI_CH4_Global;
 #endif
 
 MPID_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0} };
-
 MPIU_Object_alloc_t MPIDI_Request_mem = {
     0, 0, 0, 0,
     MPID_REQUEST,
@@ -35,7 +34,7 @@ MPIDI_netmod_funcs_t *MPIDI_netmod_func;
 MPIDI_netmod_native_funcs_t *MPIDI_netmod_native_func;
 
 #ifdef MPIDI_BUILD_CH4_SHM
-MPIDI_shm_funcs_t *MPIDI_shm_func;
+MPIDI_shm_funcs_t        *MPIDI_shm_func;
 MPIDI_shm_native_funcs_t *MPIDI_shm_native_func;
 #endif
 

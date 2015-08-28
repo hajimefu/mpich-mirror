@@ -24,7 +24,6 @@
 /* the function directly into the application despite        */
 /* mpi header files not using attribute inline               */
 /* Trick doesn't work with gcc or clang                      */
-#if 0
 #if defined(__INTEL_COMPILER)
 #ifndef __cplusplus
 struct MPIU_Object_alloc_t;
@@ -39,7 +38,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #undef ILU
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
-#endif
 /*
  * Helper routines and macros for request completion
  */

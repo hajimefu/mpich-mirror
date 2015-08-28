@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_AMSTUB_REQUEST_H_INCLUDED
-#define NETMOD_AMSTUB_REQUEST_H_INCLUDED
+#ifndef NETMOD_STUB_REQUEST_H_INCLUDED
+#define NETMOD_STUB_REQUEST_H_INCLUDED
 
 #include "impl.h"
 
@@ -43,4 +43,4 @@ static inline MPID_Request *MPIDI_netmod_request_create(void)
     return ((MPID_Request *) 0);
 }
 
-#endif /* NETMOD_AMSTUB_REQUEST_H_INCLUDED */
+#endif /* NETMOD_STUB_REQUEST_H_INCLUDED */

@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_AMSTUB_RMA_H_INCLUDED
-#define NETMOD_AMSTUB_RMA_H_INCLUDED
+#ifndef NETMOD_STUB_RMA_H_INCLUDED
+#define NETMOD_STUB_RMA_H_INCLUDED
 
 #include "impl.h"
 
@@ -147,4 +147,4 @@ static inline int MPIDI_netmod_accumulate(const void *origin_addr,
                                  target_rank, target_disp, target_count, target_datatype, op, win);
 }
 
-#endif /* NETMOD_AMSTUB_RMA_H_INCLUDED */
+#endif /* NETMOD_STUB_RMA_H_INCLUDED */

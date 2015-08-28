@@ -11,18 +11,11 @@
 #ifndef NETMOD_OFI_TYPES_H_INCLUDED
 #define NETMOD_OFI_TYPES_H_INCLUDED
 
-#include <rdma/fabric.h>
-#include <rdma/fi_endpoint.h>
-#include <rdma/fi_domain.h>
-#include <rdma/fi_tagged.h>
-#include <rdma/fi_rma.h>
-#include <rdma/fi_atomic.h>
-#include <rdma/fi_cm.h>
-#include <rdma/fi_errno.h>
 #include <netdb.h>
 #include <stddef.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include "ofi_pre.h"
 
 EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
@@ -79,8 +72,12 @@ EXTERN_C_BEGIN
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
 #define MPIDI_MAX_AM_HANDLERS 		(16)
-#define MPIDI_MAX_AM_HDR_SZ		    (16)
 #define MPIDI_CACHELINE_SIZE        (64)
+
+#ifndef MPIDI_MAX_AM_HDR_SZ
+#define MPIDI_MAX_AM_HDR_SZ		    (16)
+#endif
+
 /* Macros and inlines */
 /* match/ignore bit manipulation
  *
@@ -100,36 +97,7 @@ EXTERN_C_BEGIN
 #define MPID_TAG_SHIFT     (28)
 #define MPID_SOURCE_SHIFT  (16)
 /* Typedefs */
-typedef struct fid_ep *fid_base_ep_t;
-typedef struct fid_ep *fid_ep_t;
-typedef struct fid_fabric *fid_fabric_t;
-typedef struct fid_domain *fid_domain_t;
-typedef struct fid_cq *fid_cq_t;
-typedef struct fid_av *fid_av_t;
-typedef struct fid_mr *fid_mr_t;
-typedef struct fid_cntr *fid_cntr_t;
-typedef struct fi_fabric fabric_t;
-typedef struct fi_msg msg_t;
-typedef struct fi_info info_t;
-typedef struct fi_cq_attr cq_attr_t;
-typedef struct fi_cntr_attr cntr_attr_t;
-typedef struct fi_av_attr av_attr_t;
-typedef struct fi_domain_attr domain_attr_t;
-typedef struct fi_tx_attr tx_attr_t;
-typedef struct fi_rx_attr rx_attr_t;
-typedef struct fi_cq_tagged_entry cq_tagged_entry_t;
-typedef struct fi_cq_err_entry cq_err_entry_t;
-typedef struct fi_context context_t;
-typedef struct fi_info_addr info_addr_t;
-typedef struct fi_msg_tagged msg_tagged_t;
 typedef struct iovec iovec_t;
-typedef struct fi_rma_ioc rma_ioc_t;
-typedef struct fi_rma_iov rma_iov_t;
-typedef struct fi_ioc ioc_t;
-typedef struct fi_msg_rma msg_rma_t;
-typedef struct fi_msg_atomic msg_atomic_t;
-typedef enum fi_op fi_op_t;
-typedef enum fi_datatype fi_datatype_t;
 typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
 typedef int (*control_event_fn) (void *buf);
 
@@ -338,28 +306,17 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
 } MPIDI_Global_t;
+#define REQ_OFI(req,field) ((req)->dev.netmod.ofi.field)
 
 typedef struct {
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    MPID_VCRT  vcrt;
+    MPID_VCRT  local_vcrt;
+    uint32_t   window_instance;
+    void      *huge_send_counters;
+    void      *huge_recv_counters;
+} MPIDI_OFIComm_t;
+#define COMM_OFI(comm) ((MPIDI_OFIComm_t*)(comm)->dev.pad)
 
-    /* Re-usable fields for ssend, probe,persistent */
-    int util_id;
-    MPID_Comm *util_comm;
-
-    /* Datatype fields */
-    MPI_Datatype datatype;
-    struct MPID_Segment *segment_ptr;
-    char *pack_buffer;
-
-    /* persistent send fields */
-    MPIDI_ptype p_type;
-    int p_rank;
-    int p_tag;
-    int p_count;
-    void *p_buf;
-} MPIDI_OFIReq_t;
-#define REQ_OFI(req,field) (((MPIDI_OFIReq_t*)&MPIU_CH4_NETMOD_DIRECT_REQUEST(req))->field)
 
 typedef struct {
     char addr[30];
@@ -367,18 +324,6 @@ typedef struct {
 } MPIDI_OFIGpid_t;
 #define GPID_OFI(req) ((MPIDI_OFIGpid_t*)(req)->dev.pad)
 
-typedef struct {
-    MPID_VCRT vcrt;
-    MPID_VCRT local_vcrt;
-    uint32_t window_instance;
-    void *huge_send_counters;   /* Map of per destination send queues      */
-    void *huge_recv_counters;   /* Map of per destination receive queues   */
-    char coll_blob[232];
-} MPIDI_OFIComm_t;
-#define COMM_OFI(comm) ((MPIDI_OFIComm_t*)(comm)->dev.pad)
-#define COMMBLOBOFFSET() (offsetof(struct MPID_Comm,dev.pad) + \
-                          offsetof(MPIDI_OFIComm_t,coll_blob))
-#define COMMBLOBSIZE() sizeof((MPIDI_OFIComm_t*)0)->coll_blob
 
 typedef struct {
     uint32_t index;

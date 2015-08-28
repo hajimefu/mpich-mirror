@@ -80,7 +80,28 @@ for net in $ch4_netmods ; do
         ch4_nets_strings="$ch4_nets_strings, \"$net\""
     fi
 
-    net_index=`expr $net_index + 1`
+    if test -z "$ch4_netmod_pre_include" ; then
+        ch4_netmod_pre_include="#include \"${net}_pre.h\""
+    else
+        ch4_netmod_pre_include="${ch4_netmod_pre_include}
+        #include \"${net}_pre.h\""
+    fi
+
+    if test -z "$ch4_netmod_amrequest_decl" ; then
+        ch4_netmod_amrequest_decl="MPIDI_netmod_${net}_amrequest_t ${net};"
+    else
+        ch4_netmod_amrequest_decl="${ch4_netmod_amrequest_decl} \\
+MPIDI_netmod_${net}_amrequest_t ${net};"
+    fi
+
+    if test -z "$ch4_netmod_request_decl" ; then
+        ch4_netmod_request_decl="MPIDI_netmod_${net}_request_t ${net};"
+    else
+        ch4_netmod_request_decl="${ch4_netmod_request_decl} \\
+MPIDI_netmod_${net}_request_t ${net};"
+    fi
+
+net_index=`expr $net_index + 1`
 done
 ch4_nets_array_sz=$net_index
 
@@ -93,6 +114,12 @@ AC_SUBST(ch4_nets_native_func_decl)
 AC_SUBST(ch4_nets_func_array)
 AC_SUBST(ch4_nets_native_func_array)
 AC_SUBST(ch4_nets_strings)
+AC_SUBST(ch4_netmod_pre_include)
+AC_SUBST(ch4_netmod_amrequest_decl)
+AC_SUBST(ch4_netmod_request_decl)
+AM_SUBST_NOTMAKE(ch4_netmod_pre_include)
+AM_SUBST_NOTMAKE(ch4_netmod_amrequest_decl)
+AM_SUBST_NOTMAKE(ch4_netmod_request_decl)
 
 if test "$ch4_nets_array_sz" == "1" ;  then
    PAC_APPEND_FLAG([-DNETMOD_DIRECT=__netmod_direct_${ch4_netmods}__], [CPPFLAGS])
@@ -102,13 +129,13 @@ fi
 AC_ARG_ENABLE(ch4-shm,
     [--enable-ch4-shm=level:module
        Control whether CH4 shared memory is built and/or used.
-       level:
+  /home/cjarcher/code/mpich/ssg_sfi-mpich/src/mpid/ch4/     level:
          no        - Do not build or use CH4 shared memory.
          yes       - Build CH4 shared memory, but do not use it by default (Your chosen netmod must provide it).
          exclusive - Build and exclusively use CH4 shared memory. (Default)
-       module-list(optional).  comma separated list of shared memory modules:
-         default   - default shared memory implementation
-    ],,enable_ch4_shm=exclusive:default)
+  /home/cjarcher/code/mpich/ssg_sfi-mpich/src/mpid/ch4/     module-list(optional).  comma separated list of shared memory modules:
+         simple   - simple shared memory implementation
+    ],,enable_ch4_shm=exclusive:simple)
 
 ch4_shm_level=`echo $enable_ch4_shm | sed -e 's/:.*$//'`
 changequote(<<,>>)
@@ -125,9 +152,9 @@ if test "$ch4_shm_level" = "exclusive" ; then
         [Define if CH4 will be providing the exclusive implementation of shared memory])
 fi
 
-# $ch4_shm - contains the shmmods
+# $ch4_shm - contains the shm mods
 if test -z "${ch4_shm}" ; then
-   ch4_shm="default"
+   ch4_shm="simple"
 else
    ch4_shm=`echo ${ch4_shm} | sed -e 's/,/ /g'`
 fi
@@ -182,6 +209,21 @@ for shm in $ch4_shm ; do
         ch4_shm_strings="$ch4_shm_strings, \"$shm\""
     fi
 
+    if test -z "$ch4_shm_pre_include" ; then
+        ch4_shm_pre_include="#include \"shm_${shm}_pre.h\""
+    else
+        ch4_shm_pre_include="${ch4_shm_pre_include}
+        #include \"shm_${shm}_pre.h\""
+    fi
+
+    if test -z "$ch4_shm_request_decl" ; then
+        ch4_shm_request_decl="MPIDI_shm_${shm}_request_t ${shm};"
+    else
+        ch4_shm_request_decl="${ch4_shm_request_decl} \\
+MPIDI_shm_${shm}_request_t ${shm};"
+    fi
+
+
     shm_index=`expr $shm_index + 1`
 done
 ch4_shm_array_sz=$shm_index
@@ -194,6 +236,10 @@ AC_SUBST(ch4_shm_native_func_decl)
 AC_SUBST(ch4_shm_func_array)
 AC_SUBST(ch4_shm_native_func_array)
 AC_SUBST(ch4_shm_strings)
+AC_SUBST(ch4_shm_pre_include)
+AC_SUBST(ch4_shm_request_decl)
+AM_SUBST_NOTMAKE(ch4_shm_pre_include)
+AM_SUBST_NOTMAKE(ch4_shm_request_decl)
 
 if test "$ch4_shm_array_sz" == "1" ;  then
    PAC_APPEND_FLAG([-DSHM_DIRECT=__shm_direct_${ch4_shm}__], [CPPFLAGS])
@@ -229,6 +275,7 @@ fi
 AC_CONFIG_FILES([
 src/mpid/ch4/src/mpid_ch4_net_array.c
 src/mpid/ch4/src/mpid_ch4_shm_array.c
+src/mpid/ch4/include/netmodpre.h
 ])
 
 ])dnl end AM_COND_IF(BUILD_CH4,...)

@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_AMSTUB_COMM_H_INCLUDED
-#define NETMOD_AMSTUB_COMM_H_INCLUDED
+#ifndef NETMOD_STUB_COMM_H_INCLUDED
+#define NETMOD_STUB_COMM_H_INCLUDED
 
 #include "impl.h"
 
@@ -36,4 +36,4 @@ static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
 }
 
 
-#endif /* NETMOD_AMSTUB_COMM_H_INCLUDED */
+#endif /* NETMOD_STUB_COMM_H_INCLUDED */

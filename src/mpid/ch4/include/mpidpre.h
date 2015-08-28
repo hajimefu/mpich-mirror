@@ -20,6 +20,7 @@ typedef size_t MPIDI_msg_sz_t;
 #include "mpid_dataloop.h"
 #include "mpid_thread.h"
 #include "mpid_timers_fallback.h"
+#include "netmodpre.h"
 
 #define MPID_PROGRESS_STATE_DECL
 #define HAVE_GPID_ROUTINES
@@ -36,45 +37,51 @@ typedef enum {
     MPIDI_PTYPE_SSEND,
 } MPIDI_ptype;
 
-#define MPIDI_CH4U_REQ_BUSY 		(0x1)
-#define MPIDI_CH4U_REQ_PEER_SSEND 	(0x1 << 1)
-#define MPIDI_CH4U_REQ_UNEXPECTED 	(0x1 << 2)
-#define MPIDI_CH4U_REQ_UNEXP_DQUED 	(0x1 << 3)
-#define MPIDI_CH4U_REQ_UNEXP_CLAIMED 	(0x1 << 4)
-#define MPIDI_CH4U_REQ_RCV_NON_CONTIG 	(0x1 << 5)
+#define MPIDI_CH4U_REQ_BUSY 		  (0x1)
+#define MPIDI_CH4U_REQ_PEER_SSEND 	  (0x1 << 1)
+#define MPIDI_CH4U_REQ_UNEXPECTED 	  (0x1 << 2)
+#define MPIDI_CH4U_REQ_UNEXP_DQUED 	  (0x1 << 3)
+#define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
+#define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
 
 typedef struct MPIDI_CH4U_Devreq_t {
-    void *buffer;
-    uint64_t count;
-    uint64_t tag;
-    uint64_t ignore;
-    MPI_Datatype datatype;
+    void         *buffer;
+    uint64_t      count;
+    uint64_t      tag;
+    uint64_t      ignore;
+    MPI_Datatype  datatype;
     struct iovec *iov;
     struct MPIDI_CH4U_Devreq_t *prev, *next;
 
-    uint64_t peer_req_ptr;
-    void *reply_token;
-    uint64_t status;
+    uint64_t      peer_req_ptr;
+    void         *reply_token;
+    uint64_t      status;
 
     /* persistent send fields */
-    MPIDI_ptype p_type;
+    MPIDI_ptype   p_type;
 
     /* mrecv fields */
-    void *mrcv_buffer;
-    uint64_t mrcv_count;
-    MPI_Datatype mrcv_datatype;
+    void         *mrcv_buffer;
+    uint64_t      mrcv_count;
+    MPI_Datatype  mrcv_datatype;
 
-    char netmod_am[];
+    union {
+        MPIDI_CH4_NETMOD_REQUEST_AM_DECL
+    }netmod_am;
 } MPIDI_CH4U_Devreq_t;
-
 
 typedef union {
     /* The first fields are used by the CH4U apis */
     MPIDI_CH4U_Devreq_t ch4u;
 
     /* Used by the netmod direct apis */
-    /* Change back to 112/8 */
-    uint64_t netmod[512 / 8];
+    union {
+        MPIDI_CH4_NETMOD_REQUEST_DECL
+    }netmod;
+
+    union {
+        MPIDI_CH4_SHM_REQUEST_DECL
+    }shm;
 } MPIDI_Devreq_t;
 #define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.netmod)
 #define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.netmod_am)
