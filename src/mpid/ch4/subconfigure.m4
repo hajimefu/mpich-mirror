@@ -145,6 +145,8 @@ changequote([,])
 if test "$ch4_shm_level" != "no" ; then
     AC_DEFINE([MPIDI_BUILD_CH4_SHM], [1],
         [Define if CH4 will build the default shared memory implementation as opposed to only using a netmod implementation])
+else
+    ch4_shm=
 fi
 
 if test "$ch4_shm_level" = "exclusive" ; then
@@ -154,7 +156,9 @@ fi
 
 # $ch4_shm - contains the shm mods
 if test -z "${ch4_shm}" ; then
-   ch4_shm="simple"
+   if test "$ch4_shm_level" != "no" ; then
+      ch4_shm="simple"
+   fi
 else
    ch4_shm=`echo ${ch4_shm} | sed -e 's/,/ /g'`
 fi
