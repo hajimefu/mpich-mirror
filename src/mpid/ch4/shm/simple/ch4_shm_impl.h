@@ -16,6 +16,7 @@
 #define MPID_NEM_USE_LOCK_FREE_QUEUES 1
 
 #include <mpidimpl.h>
+#include "mpidch4u.h"
 
 #include "mpihandlemem.h"
 #include "mpiu_os_wrappers_pre.h"

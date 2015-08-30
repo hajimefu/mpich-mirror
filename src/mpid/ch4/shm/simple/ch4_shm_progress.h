@@ -84,10 +84,22 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 char *send_buffer =
                     in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
                 int type = in_cell ? cell->pkt.mpich.type : REQ_SHM(sreq)->type;
+                /*
+                 * TODO: check for not overflowing recv buffer
+                 */
                 if (type == TYPE_EAGER) {
                     /* eager message */
                     int data_sz = in_cell ? cell->pkt.mpich.datalen : REQ_SHM(sreq)->data_sz;
-                    MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
+                    if( REQ_SHM(req)->segment_ptr ) {
+                        /* non-contig */
+                        MPIDI_msg_sz_t last = REQ_SHM(req)->segment_first + data_sz;
+                        MPID_Segment_unpack(REQ_SHM(req)->segment_ptr, REQ_SHM(req)->segment_first, (MPI_Aint*)&last, send_buffer );
+                        MPID_Segment_free(REQ_SHM(req)->segment_ptr);
+                    }
+                    else {
+                        /* contig */
+                        MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
+                    }
                     REQ_SHM(req)->data_sz = data_sz;
                     /* set status */
                     req->status.MPI_SOURCE = sender_rank;
@@ -100,8 +112,17 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 }
                 else if (type == TYPE_LMT) {
                     /* long message */
-                    MPIU_Memcpy(recv_buffer, (void *) send_buffer, EAGER_THRESHOLD);
-                    REQ_SHM(req)->data_sz = EAGER_THRESHOLD;
+                    if( REQ_SHM(req)->segment_ptr ) {
+                        /* non-contig */
+                        MPIDI_msg_sz_t last = REQ_SHM(req)->segment_first + EAGER_THRESHOLD;
+                        MPID_Segment_unpack(REQ_SHM(req)->segment_ptr, REQ_SHM(req)->segment_first, (MPI_Aint*)&last, send_buffer );
+                        REQ_SHM(req)->segment_first = last;
+                    }
+                    else {
+                        /* contig */
+                        MPIU_Memcpy(recv_buffer, (void *) send_buffer, EAGER_THRESHOLD);
+                    }
+                    REQ_SHM(req)->data_sz -= EAGER_THRESHOLD;
                     REQ_SHM(req)->user_buf += EAGER_THRESHOLD;
                     MPIR_STATUS_SET_COUNT(req->status,
                                           (MPIR_STATUS_GET_COUNT(req->status) + EAGER_THRESHOLD));
@@ -154,9 +175,12 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                          (MPIU_DBG_FDEST, "About to release cell %d,%d,%d in_fbox=%d\n", cell->rank, cell->tag,
                           cell->context_id, in_fbox));
+#if 0
         if (in_fbox)
             OPA_store_release_int(&(fbox->flag.value), 0);
-        else {
+        else
+#endif
+        {
             MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->my_rank], cell);
         }
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
@@ -203,19 +227,40 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
         int grank = MPIDI_CH4U_rank_to_lpid(dest, sreq->comm);
         if (data_sz <= (int)EAGER_THRESHOLD) {
             /* eager message */
-            MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, REQ_SHM(sreq)->data_sz);
+            if( REQ_SHM(sreq)->segment_ptr ) {
+                /* non-contig */
+                MPID_Segment_pack(REQ_SHM(sreq)->segment_ptr, REQ_SHM(sreq)->segment_first, (MPI_Aint*)&REQ_SHM(sreq)->segment_size, recv_buffer );
+                MPID_Segment_free(REQ_SHM(sreq)->segment_ptr);
+            }
+            else {
+                /* contig */
+                MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, REQ_SHM(sreq)->data_sz);
+            }
             cell->pkt.mpich.datalen = REQ_SHM(sreq)->data_sz;
             cell->pkt.mpich.type = TYPE_EAGER;
             /* set status */
             sreq->status.MPI_SOURCE = cell->rank;
             sreq->status.MPI_TAG = cell->tag;
+            /*
+             * TODO: incorrect count for LMT - set to a last chunk of data
+             * is send status required?
+             */
             MPIR_STATUS_SET_COUNT(sreq->status, data_sz);
             /* dequeue sreq */
             REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_sendq, mpi_errno);
         }
         else {
             /* long message */
-            MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, EAGER_THRESHOLD);
+            if( REQ_SHM(sreq)->segment_ptr ) {
+                /* non-contig */
+                MPIDI_msg_sz_t last = REQ_SHM(sreq)->segment_first + EAGER_THRESHOLD;
+                MPID_Segment_pack(REQ_SHM(sreq)->segment_ptr, REQ_SHM(sreq)->segment_first, (MPI_Aint*)&last, recv_buffer );
+                REQ_SHM(sreq)->segment_first = last;
+            }
+            else {
+                /* contig */
+                MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, EAGER_THRESHOLD);
+            }
             cell->pkt.mpich.datalen = EAGER_THRESHOLD;
             REQ_SHM(sreq)->data_sz -= EAGER_THRESHOLD;
             REQ_SHM(sreq)->user_buf += EAGER_THRESHOLD;

@@ -32,27 +32,42 @@ static inline int shm_do_irecv(void *buf,
                                int tag,
                                MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS, dt_contig;
+    MPIDI_msg_sz_t data_sz;
+    MPI_Aint dt_true_lb;
+    MPID_Datatype *dt_ptr;
     MPID_Request *rreq = NULL;
-    MPIDI_STATE_DECL(MPID_STATE_DO_IRECV);
+    MPIDI_STATE_DECL(MPID_STATE_SHM_DO_IRECV);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_DO_IRECV);
+    MPIDI_FUNC_ENTER(MPID_STATE_SHM_DO_IRECV);
 
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_Request_create_rreq(rreq);
     ENVELOPE_SET(REQ_SHM(rreq), rank, tag, comm->context_id + context_offset);
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
-    REQ_SHM(rreq)->user_buf = (char*)buf;
+    REQ_SHM(rreq)->user_buf = (char*)buf + dt_true_lb;
     REQ_SHM(rreq)->user_count = count;
     REQ_SHM(rreq)->datatype = datatype;
     REQ_SHM(rreq)->next = NULL;
+    REQ_SHM(rreq)->segment_ptr = NULL;
     MPIR_STATUS_SET_COUNT(rreq->status, 0);
+    if( !dt_contig ) {
+        REQ_SHM(rreq)->segment_ptr = MPID_Segment_alloc( );
+        MPIR_ERR_CHKANDJUMP1((REQ_SHM(rreq)->segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment_alloc");
+        MPID_Segment_init((char*)buf, REQ_SHM(rreq)->user_count, REQ_SHM(rreq)->datatype, REQ_SHM(rreq)->segment_ptr, 0);
+        REQ_SHM(rreq)->segment_first = 0;
+        REQ_SHM(rreq)->segment_size = data_sz;
+    }
     /* enqueue rreq */
     REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
     *request = rreq;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_DO_IRECV);
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_SHM_DO_IRECV);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FCNAME
@@ -74,16 +89,24 @@ static inline int MPIDI_shm_recv(void *buf,
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_RECV);
 
+#if 0
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
-    /* search in unexpected queue */
+    /* search in unexpected queue, short messages only */
+    /*
+     * TODO: possibly breaks ordering
+     * suppose irecv put a matching req in the queue, and there's already unexpected by this moment
+     * then this blocking recv handles the unexpected out-of-order
+     * Either remove this from recv, or add it to irecv
+     */
     MPID_Request *req = MPIDI_shm_recvq_unexpected.head;
     MPID_Request *prev_req = NULL;
     while (req) {
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                          (MPIU_DBG_FDEST, "Matching to unexpected in irecv %d,%d,%d\n", rank, tag,
                           comm->context_id + context_offset));
-        if (ENVELOPE_MATCH(REQ_SHM(req), rank, tag, comm->context_id + context_offset)) {
+        /* check message type and matching info */
+        if ((REQ_SHM(req)->type == TYPE_EAGER) && ENVELOPE_MATCH(REQ_SHM(req), rank, tag, comm->context_id + context_offset)) {
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                              (MPIU_DBG_FDEST, "Matching done in irecv %d,%d,%d\n", rank, tag,
                               comm->context_id + context_offset));
@@ -108,7 +131,7 @@ static inline int MPIDI_shm_recv(void *buf,
     MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                      (MPIU_DBG_FDEST, "No match to unexpected in irecv %d,%d,%d\n", rank, tag,
                       comm->context_id + context_offset));
-
+#endif
 #if 0
     /* try to receive immediately from fastbox */
     if (rank != MPI_ANY_SOURCE) {

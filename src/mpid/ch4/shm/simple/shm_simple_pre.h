@@ -27,6 +27,12 @@ typedef struct {
     int type;
     int user_count;
     MPI_Datatype datatype;
+    /* segment, segment_first, and segment_size are used when processing
+       non-contiguous datatypes */
+    /*    MPID_Segment   segment; */
+    struct MPID_Segment *segment_ptr;
+    MPIDI_msg_sz_t segment_first;
+    MPIDI_msg_sz_t segment_size;
 } MPIDI_shm_simple_request_t;
 
 typedef struct MPIDI_shm_simple_comm_t {
