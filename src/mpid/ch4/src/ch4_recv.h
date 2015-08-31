@@ -97,12 +97,16 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
                                int count,
-                               MPI_Datatype datatype, MPID_Request * message, MPI_Status * status)
+                               MPI_Datatype datatype,
+                               MPID_Request * message,
+                               MPI_Status * status)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_MRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MRECV);
 
+    MPI_Request   req_handle;
+    int           active_flag;
     MPID_Request *rreq = NULL;
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, &rreq);
@@ -118,7 +122,10 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
     while (!MPID_Request_is_complete(rreq))
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 
+    /* This should probably be moved to MPICH (above device) level */
+    /* Someone neglected to put the blocking at the MPICH level    */
     MPIR_Request_extract_status(rreq, status);
+    MPIR_Request_complete(&req_handle, rreq, status, &active_flag);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MRECV);
     return mpi_errno;

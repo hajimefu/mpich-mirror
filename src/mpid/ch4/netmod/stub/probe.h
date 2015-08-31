@@ -20,16 +20,6 @@ static inline int MPIDI_netmod_probe(int source,
     return MPIDI_CH4U_Probe(source, tag, comm, context_offset, status);
 }
 
-
-static inline int MPIDI_netmod_mprobe(int source,
-                                      int tag,
-                                      MPID_Comm * comm,
-                                      int context_offset,
-                                      MPID_Request ** message, MPI_Status * status)
-{
-    return MPIDI_CH4U_Mprobe(source, tag, comm, context_offset, message, status);
-}
-
 static inline int MPIDI_netmod_improbe(int source,
                                        int tag,
                                        MPID_Comm * comm,

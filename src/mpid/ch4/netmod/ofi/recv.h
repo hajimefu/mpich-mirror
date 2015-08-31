@@ -194,39 +194,6 @@ __ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void *buf,
     return MPI_SUCCESS;
 }
 
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_mrecv
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_mrecv(void *buf,
-                                     int count,
-                                     MPI_Datatype datatype,
-                                     MPID_Request * message, MPI_Status * status)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPI_Request req_handle;
-    int active_flag;
-    MPID_Request *rreq = NULL;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_MRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_MRECV);
-
-    MPI_RC_POP(MPIDI_Imrecv(buf, count, datatype, message, &rreq));
-
-    if (!MPID_Request_is_complete(rreq))
-        PROGRESS_WHILE(!MPID_Request_is_complete(rreq));
-
-    MPIR_Request_extract_status(rreq, status);
-    MPI_RC_POP(MPIR_Request_complete(&req_handle, rreq, status, &active_flag));
-
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_MRECV);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_imrecv
 #undef FCNAME

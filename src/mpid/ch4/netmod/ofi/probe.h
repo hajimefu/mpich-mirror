@@ -120,34 +120,6 @@ static inline int MPIDI_netmod_probe(int source,
     goto fn_exit;
 }
 
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_mprobe
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_mprobe(int source,
-                                      int tag,
-                                      MPID_Comm * comm,
-                                      int context_offset,
-                                      MPID_Request ** message, MPI_Status * status)
-{
-    int mpi_errno = MPI_SUCCESS, flag = 0;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_MPROBE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_MPROBE);
-    while (flag == 0) {
-        /* Set flags for mprobe peek, when ready */
-        mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
-        if (mpi_errno)
-            MPIR_ERR_POP(mpi_errno);
-        PROGRESS();
-    }
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_MPROBE);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_improbe
 #undef FCNAME
@@ -174,7 +146,7 @@ static inline int MPIDI_netmod_improbe(int source,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_improbe
+#define FUNCNAME MPIDI_netmod_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_iprobe(int source,
