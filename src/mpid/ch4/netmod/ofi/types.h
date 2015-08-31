@@ -539,7 +539,7 @@ extern void  MPIDI_OFI_build_nodemap(uint32_t       *in_nodeids,
                                      int             sz,
                                      MPID_Node_id_t *sz_out);
 extern void  MPIDI_OFI_Index_datatypes();
-
+extern int MPIU_Info_alloc(MPID_Info **info_p_p);
 /* Prototypes for inliner */
 extern int MPIR_Datatype_init_names(void);
 extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
