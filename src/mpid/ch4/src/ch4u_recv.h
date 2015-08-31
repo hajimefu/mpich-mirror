@@ -51,7 +51,7 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
     int dt_contig;
     MPI_Aint dt_true_lb, last;
     MPID_Datatype *dt_ptr;
-    MPIDI_msg_sz_t in_data_sz, dt_sz;
+    MPIDI_msg_sz_t in_data_sz, dt_sz, nbytes;
     MPID_Segment *segment_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_UNEXPECTED);
@@ -62,27 +62,28 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
 
     if (in_data_sz > dt_sz * count) {
         rreq->status.MPI_ERROR = MPI_ERR_TRUNCATE;
+        nbytes = dt_sz * count;
     }
     else {
         rreq->status.MPI_ERROR = MPI_SUCCESS;
-        count = in_data_sz / dt_sz;
+        nbytes = in_data_sz;
     }
-    MPIR_STATUS_SET_COUNT(rreq->status, count * dt_sz);
+    MPIR_STATUS_SET_COUNT(rreq->status, nbytes);
+    MPIU_CH4U_REQUEST(rreq, datatype) = datatype;
     MPIU_CH4U_REQUEST(rreq, count) = count;
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_sz, dt_ptr, dt_true_lb);
-    MPIU_CH4U_REQUEST(rreq, datatype) = datatype;
 
     if (!dt_contig) {
         segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
-        MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
+        MPID_Segment_init(buf, nbytes/dt_sz, datatype, segment_ptr, 0);
 
-        last = count * dt_sz;
+        last = nbytes;
         MPID_Segment_unpack(segment_ptr, 0, &last, MPIU_CH4U_REQUEST(rreq, buffer));
         MPID_Segment_free(segment_ptr);
-        if (last != (MPI_Aint)(count * dt_sz)) {
+        if (last != (MPI_Aint)(nbytes)) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
                                              MPI_ERR_TYPE, "**dtypemismatch", 0);
@@ -90,7 +91,7 @@ static inline int MPIDI_CH4U_Handle_unexpected(void *buf,
         }
     }
     else {
-        MPIU_Memcpy((char *) buf + dt_true_lb, MPIU_CH4U_REQUEST(rreq, buffer), dt_sz * count);
+        MPIU_Memcpy((char *) buf + dt_true_lb, MPIU_CH4U_REQUEST(rreq, buffer), nbytes);
         MPIU_Free(MPIU_CH4U_REQUEST(rreq, buffer));
     }
 
