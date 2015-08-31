@@ -243,11 +243,10 @@ static inline int control_event(cq_tagged_entry_t *wc,
     MPIU_Assert(wc->len == 0 || wc->len == MPID_MIN_CTRL_MSG_SZ);
 
     if(wc->len == MPID_MIN_CTRL_MSG_SZ) {
-        int16_t *buf, event_id;
+        int16_t *buf;
         buf         = (int16_t *)wc->buf;
         MPIU_Assert(buf != NULL);
-        event_id = *buf;
-        mpi_errno   = MPIDI_Global.control_fn[event_id](buf);
+        mpi_errno   = MPIDI_OFI_control_dispatch(buf);
     }
 
     if(wc->flags & FI_MULTI_RECV) {

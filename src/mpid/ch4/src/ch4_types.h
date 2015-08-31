@@ -34,8 +34,12 @@
 #define MPIDI_CH4U_SOURCE_SHIFT  (16)
 
 #define MAX_NETMOD_CONTEXTS 8
-#define MAX_PROGRESS_HOOKS 16
+#define MAX_PROGRESS_HOOKS 4
 typedef int (*progress_func_ptr_t) (int *made_progress);
+typedef struct progress_hook_slot {
+    progress_func_ptr_t func_ptr;
+    int active;
+} progress_hook_slot_t;
 
 typedef enum {
     MPIDI_CH4U_AM_SEND = 0,
@@ -64,7 +68,8 @@ typedef struct MPIDI_CH4_Global_t {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
     MPID_Comm **comms;
-    progress_func_ptr_t progress_hooks[MAX_PROGRESS_HOOKS];
+    int active_progress_hooks;
+    progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
 
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4U_Devreq_t *posted_list;

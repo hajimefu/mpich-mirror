@@ -130,13 +130,13 @@ __CH4_INLINE__ int MPIDI_Irsend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4_IRSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_IRSEND);
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
-    mpi_errno = MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     if (MPIDI_netmod_rank_is_local(rank, comm))
-        mpi_errno = MPIDI_shm_send(buf, count, datatype, rank, tag, comm, context_offset, request);
+        mpi_errno = MPIDI_shm_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
-            MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
+            MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
