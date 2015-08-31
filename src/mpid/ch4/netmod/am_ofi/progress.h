@@ -282,7 +282,7 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
     if (MPIDI_AMOFI_IS_CTRL_MSG(msg_hdr->am_type))
         goto fn_exit;
 
-    sreq = container_of(ofi_req, MPID_Request, dev.ch4u.netmod_am);
+    sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
     if (AMREQ_OFI(sreq, pack_buffer)) {
         MPIU_Free(AMREQ_OFI(sreq, pack_buffer));
     }
@@ -382,7 +382,7 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
     if (ofi_req->lmt_cntr)
         goto fn_exit;
 
-    rreq = container_of(ofi_req, MPID_Request, dev.ch4u.netmod_am);
+    rreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
     MPI_RC_POP(MPIDI_netmod_dispatch_lmt_ack(source, ofi_req, netmod_context));
     ofi_req->cmpl_handler_fn(rreq);
   fn_exit:

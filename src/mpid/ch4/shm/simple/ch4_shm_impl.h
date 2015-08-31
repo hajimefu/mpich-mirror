@@ -51,7 +51,7 @@ typedef struct {
 } MPIDI_shm_comm_t;
 #define COMM_SHM(comm) ((MPIDI_shm_comm_t*)(comm)->dev.pad)
 
-#define REQ_SHM(req) (&(req)->dev.shm.simple)
+#define REQ_SHM(req) (&(req)->dev.ch4.shm.simple)
 /* ---------------------------------------------------- */
 /* general send/recv queue types, macros and objects    */
 /* ---------------------------------------------------- */

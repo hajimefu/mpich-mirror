@@ -15,6 +15,6 @@
 #include <mpidch4u.h>
 
 EXTERN_C_BEGIN
-#define AMREQ_OFI(req,field) ((req)->dev.ch4u.netmod_am.am_ofi.field)
+#define AMREQ_OFI(req,field) ((req)->dev.ch4.ch4u.netmod_am.am_ofi.field)
 
 #endif /* NETMOD_AM_OFI_TYPES_H_INCLUDED */
