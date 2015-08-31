@@ -70,24 +70,30 @@ typedef struct MPIDI_CH4U_Devreq_t {
     }netmod_am;
 } MPIDI_CH4U_Devreq_t;
 
-typedef union {
-    /* The first fields are used by the CH4U apis */
-    MPIDI_CH4U_Devreq_t ch4u;
-
-    /* Used by the netmod direct apis */
+typedef struct {
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    int is_local;
+#endif
     union {
-        MPIDI_CH4_NETMOD_REQUEST_DECL
-    }netmod;
+        /* The first fields are used by the CH4U apis */
+        MPIDI_CH4U_Devreq_t ch4u;
 
-    union {
-        MPIDI_CH4_SHM_REQUEST_DECL
-    }shm;
+        /* Used by the netmod direct apis */
+        union {
+            MPIDI_CH4_NETMOD_REQUEST_DECL
+        }netmod;
+
+        union {
+            MPIDI_CH4_SHM_REQUEST_DECL
+        }shm;
+    }ch4;
 } MPIDI_Devreq_t;
-#define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.netmod)
-#define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.netmod_am)
-#define MPIU_CH4U_REQUEST(req,field)        (((req)->dev.ch4u).field)
-#define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4u).netmod_am)
-#define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.netmod)
+#define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.ch4.netmod)
+#define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.ch4.netmod_am)
+#define MPIU_CH4_REQUEST(req,field)         (((req)->dev).field)
+#define MPIU_CH4U_REQUEST(req,field)        (((req)->dev.ch4.ch4u).field)
+#define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4.ch4u).netmod_am)
+#define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.ch4.netmod)
 
 typedef struct MPIDI_CH4U_win_basic_info_t {
     uint64_t base;

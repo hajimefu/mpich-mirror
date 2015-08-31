@@ -317,7 +317,7 @@ fn_fail:
 static inline MPID_Request *devreq_to_req(void *context)
 {
     char *base = (char *) context;
-    return (MPID_Request *) container_of(base, MPID_Request, dev.netmod);
+    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
 }
 
 static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)

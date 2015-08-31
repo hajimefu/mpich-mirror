@@ -306,7 +306,7 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
 } MPIDI_Global_t;
-#define REQ_OFI(req,field) ((req)->dev.netmod.ofi.field)
+#define REQ_OFI(req,field) ((req)->dev.ch4.netmod.ofi.field)
 
 typedef struct {
     MPID_VCRT  vcrt;

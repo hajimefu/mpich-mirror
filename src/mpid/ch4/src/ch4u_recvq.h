@@ -25,7 +25,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_posted(MPID_Request * req, MPIDI_CH4U_Dev
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_POSTED);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_POSTED);
-    MPL_DL_APPEND(*list, &req->dev.ch4u);
+    MPL_DL_APPEND(*list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ENQUEUE_POSTED);
 }
 
@@ -37,7 +37,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_unexp(MPID_Request * req, MPIDI_CH4U_Devr
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_UNEXP);
-    MPL_DL_APPEND(*list, &req->dev.ch4u);
+    MPL_DL_APPEND(*list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ENQUEUE_UNEXP);
 }
 
@@ -49,7 +49,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Delete_unexp(MPID_Request * req, MPIDI_CH4U_Devre
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_DELETE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DELETE_UNEXP);
-    MPL_DL_DELETE(*list, &req->dev.ch4u);
+    MPL_DL_DELETE(*list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DELETE_UNEXP);
 }
 
@@ -67,7 +67,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp_strict(uint64_t tag, uint6
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         if (!(curr->status & MPIDI_CH4U_REQ_BUSY) && ((tag & ~ignore) == (curr->tag & ~ignore))) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -90,7 +90,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp(uint64_t tag, uint64_t ign
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -113,7 +113,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Find_unexp(uint64_t tag, uint64_t ignore
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             break;
         }
     }
@@ -134,7 +134,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag, MPIDI_CH4U_
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         if ((tag & ~curr->ignore) == (curr->tag & ~curr->ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -176,7 +176,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_posted(MPID_Request * req, MPIDI_CH4U_Dev
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_POSTED);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_POSTED);
-    MPL_DL_APPEND(MPIDI_CH4_Global.posted_list, &req->dev.ch4u);
+    MPL_DL_APPEND(MPIDI_CH4_Global.posted_list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ENQUEUE_POSTED);
 }
 
@@ -188,7 +188,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Enqueue_unexp(MPID_Request * req, MPIDI_CH4U_Devr
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_ENQUEUE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ENQUEUE_UNEXP);
-    MPL_DL_APPEND(MPIDI_CH4_Global.unexp_list, &req->dev.ch4u);
+    MPL_DL_APPEND(MPIDI_CH4_Global.unexp_list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ENQUEUE_UNEXP);
 }
 
@@ -200,7 +200,7 @@ __CH4_INLINE__ void MPIDI_CH4U_Delete_unexp(MPID_Request * req, MPIDI_CH4U_Devre
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_DELETE_UNEXP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_DELETE_UNEXP);
-    MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, &req->dev.ch4u);
+    MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, &req->dev.ch4.ch4u);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_DELETE_UNEXP);
 }
 
@@ -218,7 +218,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp_strict(uint64_t tag, uint6
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         if (!(curr->status & MPIDI_CH4U_REQ_BUSY) && ((tag & ~ignore) == (curr->tag & ~ignore))) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, curr);
             break;
         }
@@ -241,7 +241,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_unexp(uint64_t tag, uint64_t ign
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, curr);
             break;
         }
@@ -264,7 +264,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Find_unexp(uint64_t tag, uint64_t ignore
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         if ((tag & ~ignore) == (curr->tag & ~ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             break;
         }
     }
@@ -285,7 +285,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_Dequeue_posted(uint64_t tag, MPIDI_CH4U_
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.posted_list, curr, tmp) {
         if ((tag & ~curr->ignore) == (curr->tag & ~curr->ignore)) {
-            req = container_of(curr, MPID_Request, dev.ch4u);
+            req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             MPL_DL_DELETE(MPIDI_CH4_Global.posted_list, curr);
             break;
         }

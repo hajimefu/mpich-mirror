@@ -30,11 +30,13 @@ __CH4_INLINE__ int MPIDI_Send(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS && *request) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -64,11 +66,13 @@ __CH4_INLINE__ int MPIDI_Isend(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -98,11 +102,13 @@ __CH4_INLINE__ int MPIDI_Rsend(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS && *request) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -132,11 +138,13 @@ __CH4_INLINE__ int MPIDI_Irsend(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -165,11 +173,13 @@ __CH4_INLINE__ int MPIDI_Ssend(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS && *request) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -198,12 +208,14 @@ __CH4_INLINE__ int MPIDI_Issend(const void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno =
             MPIDI_shm_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
             MPIDI_netmod_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -227,8 +239,16 @@ __CH4_INLINE__ int MPIDI_Startall(int count, MPID_Request * requests[])
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_startall(count, requests);
 #else
-    mpi_errno = MPI_SUCCESS;
-    assert(0);
+    int i;
+    for(i=0; i<count; i++)
+    {
+        /* This is sub-optimal, can we do better? */
+        if(MPIU_CH4_REQUEST(requests[i], is_local))
+            MPIDI_shm_startall(1, &requests[i]);
+        else
+            MPIDI_netmod_startall(1, &requests[i]);
+        mpi_errno = MPI_SUCCESS;
+    }
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -258,12 +278,14 @@ __CH4_INLINE__ int MPIDI_Send_init(const void *buf,
     mpi_errno = MPIDI_netmod_send_init(buf, count, datatype, rank, tag,
                                        comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
     else
         mpi_errno = MPIDI_netmod_send_init(buf, count, datatype, rank, tag,
                                            comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -293,12 +315,14 @@ __CH4_INLINE__ int MPIDI_Ssend_init(const void *buf,
     mpi_errno = MPIDI_netmod_ssend_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_ssend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else
         mpi_errno = MPIDI_netmod_ssend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS && *request) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -328,12 +352,14 @@ __CH4_INLINE__ int MPIDI_Bsend_init(const void *buf,
     mpi_errno = MPIDI_netmod_bsend_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_bsend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else
         mpi_errno = MPIDI_netmod_bsend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -363,12 +389,14 @@ __CH4_INLINE__ int MPIDI_Rsend_init(const void *buf,
     mpi_errno = MPIDI_netmod_rsend_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
 #else
-    if (MPIDI_netmod_rank_is_local(rank, comm))
+    int r;
+    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_rsend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else
         mpi_errno = MPIDI_netmod_rsend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
+    if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -393,8 +421,10 @@ __CH4_INLINE__ int MPIDI_Cancel_send(MPID_Request * sreq)
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_cancel_send(sreq);
 #else
-    mpi_errno = MPI_SUCCESS;
-    assert(0);
+    if(MPIU_CH4_REQUEST(sreq, is_local))
+        mpi_errno = MPIDI_netmod_cancel_send(sreq);
+    else
+        mpi_errno = MPIDI_shm_cancel_send(sreq);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);

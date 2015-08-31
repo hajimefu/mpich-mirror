@@ -359,7 +359,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Cancel_recv(MPID_Request * rreq)
     msg_tag = MPIU_CH4U_REQUEST(rreq, tag);
     comm_idx = MPIDI_CH4U_Get_context_index(MPIDI_CH4U_Get_context(msg_tag));
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
-    found = MPIDI_CH4U_Delete_posted(&rreq->dev.ch4u, &MPIU_CH4U_COMM(root_comm, posted_list));
+    found = MPIDI_CH4U_Delete_posted(&rreq->dev.ch4.ch4u, &MPIU_CH4U_COMM(root_comm, posted_list));
 
     if (found) {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
