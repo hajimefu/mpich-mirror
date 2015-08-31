@@ -409,7 +409,7 @@ static inline int MPIDI_netmod_inject_am_hdr_reply(void *reply_token,
     msg_hdr->am_type = MPIDI_AMTYPE_SHORT;
     MPIU_Memcpy(msg + sizeof(*msg_hdr), am_hdr, am_hdr_sz);
     FI_RC_RETRY(fi_inject(MPIDI_Global.ep, msg, sizeof(*msg_hdr) + am_hdr_sz,
-                          reply_token), inject);
+                          (int64_t) reply_token), inject);
     MPIU_Free(msg);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);
