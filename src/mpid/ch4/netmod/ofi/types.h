@@ -152,6 +152,8 @@ enum {
     MPIDI_EVENT_SSEND_ACK,
     MPIDI_EVENT_GET_HUGE,
     MPIDI_EVENT_CONTROL,
+    MPIDI_EVENT_CHUNK_DONE,
+    MPIDI_EVENT_RMA_DONE
 };
 
 enum {
@@ -432,7 +434,7 @@ typedef struct MPIDI_Win_request {
     MPIU_OBJECT_HEADER;
     char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
     context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    int       event_id; /* fixed field, do not move */
     struct MPIDI_Win_request *next;
     int target_rank;
     MPIDI_Win_noncontig *noncontig;
@@ -440,8 +442,8 @@ typedef struct MPIDI_Win_request {
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    context_t     context;          /* fixed field, do not move */
+    int           event_id; /* fixed field, do not move */
     MPID_Request *parent;       /* Parent request           */
 } MPIDI_Chunk_request;
 
@@ -539,7 +541,7 @@ extern void  MPIDI_OFI_build_nodemap(uint32_t       *in_nodeids,
                                      int             sz,
                                      MPID_Node_id_t *sz_out);
 extern void  MPIDI_OFI_Index_datatypes();
-
+extern int MPIU_Info_alloc(MPID_Info **info_p_p);
 /* Prototypes for inliner */
 extern int MPIR_Datatype_init_names(void);
 extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,

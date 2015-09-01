@@ -276,8 +276,8 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_Huge_chunk_t *hc = (MPIDI_Huge_chunk_t *)req;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GETHUGE_CALLBACK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GETHUGE_CALLBACK);
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
 
     if(hc->localreq && hc->cur_offset!=0) {
         size_t bytesSent  = hc->cur_offset - MPIDI_Global.max_send;
@@ -307,11 +307,53 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
     }
 
 fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
+#undef FUNCNAME
+#define FUNCNAME chunk_done_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int chunk_done_event(cq_tagged_entry_t *wc,
+                                   MPID_Request      *req)
+{
+  int mpi_errno = MPI_SUCCESS;
+  int c;
+  MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
+  MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
+
+  MPIDI_Chunk_request *creq = (MPIDI_Chunk_request *)req;
+  MPID_cc_decr(creq->parent->cc_ptr, &c);
+  MPIU_Assert(c >= 0);
+  if(c == 0)MPIDI_Request_release(creq->parent);
+  MPIU_Free(creq);
+  MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
+  return mpi_errno;
+}
+
+#undef FUNCNAME
+#define FUNCNAME rma_done_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int rma_done_event(cq_tagged_entry_t *wc,
+                                 MPID_Request      *in_req)
+{
+  int   mpi_errno = MPI_SUCCESS;
+  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
+  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
+
+  MPIDI_Win_request *req = (MPIDI_Win_request *)in_req;
+  MPIDI_Win_datatype_unmap(&req->noncontig->target_dt);
+  MPIDI_Win_datatype_unmap(&req->noncontig->origin_dt);
+  MPIDI_Win_datatype_unmap(&req->noncontig->result_dt);
+  MPIDI_Win_request_complete(req);
+
+  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
+  return mpi_errno;
+}
 
 
 static inline MPID_Request *devreq_to_req(void *context)
@@ -347,6 +389,12 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
         break;
     case MPIDI_EVENT_CONTROL:
         MPIU_RC_POP(control_event(wc,req));
+        break;
+    case MPIDI_EVENT_CHUNK_DONE:
+        MPIU_RC_POP(chunk_done_event(wc,req));
+        break;
+    case MPIDI_EVENT_RMA_DONE:
+        MPIU_RC_POP(rma_done_event(wc,req));
         break;
     case MPIDI_EVENT_ABORT:
     default:

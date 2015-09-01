@@ -1,10 +1,12 @@
 #! /bin/bash
 
-if test ! -z "`which gindent`" ; then
-	indent=gindent
-else
-	indent=indent
-fi
+#if test ! -z "`which gindent`" ; then
+#	indent=gindent
+#else
+#	indent=indent
+#fi
+
+indent=indent
 
 indent_code()
 {

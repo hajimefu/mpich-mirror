@@ -37,17 +37,6 @@ static inline int MPIDI_netmod_recv_init(void *buf,
     return MPI_SUCCESS;
 }
 
-
-static inline int MPIDI_netmod_mrecv(void *buf,
-                                     int count,
-                                     MPI_Datatype datatype,
-                                     MPID_Request * message, MPI_Status * status)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-
 static inline int MPIDI_netmod_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
