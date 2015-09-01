@@ -66,6 +66,7 @@ static inline int MPIDI_netmod_ofi_send_am_hdr(int64_t rank, int handler_id, con
 
     iov[1].iov_base = AMREQ_OFI(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
+    AMREQ_OFI(sreq, pack_buffer) = NULL;
 
     FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 2, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
