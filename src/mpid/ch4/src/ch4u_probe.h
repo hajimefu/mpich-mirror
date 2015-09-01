@@ -57,6 +57,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
     }
     else {
         *flag = 0;
+        MPIDI_Progress_test();
     }
     /* MPIDI_CS_EXIT(); */
 
@@ -79,7 +80,6 @@ __CH4_INLINE__ int MPIDI_CH4U_Probe(int source,
 
     while (!flag) {
         MPIU_RC_POP(MPIDI_CH4U_Iprobe(source, tag, comm, context_offset, &flag, status));
-        MPIDI_Progress_test();
     }
 
   fn_exit:
@@ -141,6 +141,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
     }
     else {
         *flag = 0;
+        MPIDI_Progress_test();
     }
     /* MPIDI_CS_EXIT(); */
 
@@ -164,7 +165,6 @@ __CH4_INLINE__ int MPIDI_CH4U_Mprobe(int source,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MPROBE);
     while (!flag) {
         MPIDI_CH4U_Improbe(source, tag, comm, context_offset, &flag, message, status);
-        MPIDI_Progress_test();
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
     return mpi_errno;
