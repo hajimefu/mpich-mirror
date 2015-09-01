@@ -13,6 +13,8 @@
 
 #include "ch4_impl.h"
 
+extern int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **newcomm_ptr);
+
 __CH4_INLINE__ int MPIDI_Comm_AS_enabled(MPID_Comm * comm)
 {
     MPIU_Assert(0);
@@ -61,6 +63,34 @@ __CH4_INLINE__ int MPIDI_Comm_get_all_failed_procs(MPID_Comm * comm_ptr, MPID_Gr
 {
     MPIU_Assert(0);
     return 0;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_Comm_split_type
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ int MPIDI_Comm_split_type(MPID_Comm  *comm_ptr,
+                                         int         split_type,
+                                         int         key,
+                                         MPID_Info  *info_ptr,
+                                         MPID_Comm **newcomm_ptr)
+{
+    int            mpi_errno = MPI_SUCCESS;
+    int            idx;
+    MPID_Node_id_t node_id;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+
+    if(split_type == MPI_COMM_TYPE_SHARED) {
+        MPIDI_netmod_comm_get_lpid(comm_ptr,comm_ptr->rank,&idx,FALSE);
+        MPIDI_netmod_get_node_id(comm_ptr, comm_ptr->rank, &node_id);
+        mpi_errno              = MPIR_Comm_split_impl(comm_ptr,node_id,key,newcomm_ptr);
+    } else
+        mpi_errno              = MPIR_Comm_split_impl(comm_ptr, MPI_UNDEFINED, key, newcomm_ptr);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+    return mpi_errno;
 }
 
 #undef FUNCNAME

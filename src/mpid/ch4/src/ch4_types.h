@@ -69,6 +69,7 @@ typedef struct MPIDI_CH4_Global_t {
     int is_initialized;
     MPID_Comm **comms;
     int active_progress_hooks;
+    MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
 
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
