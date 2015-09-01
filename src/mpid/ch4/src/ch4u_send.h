@@ -115,7 +115,7 @@ static inline int ch4_nm_psend(const void *buf,
     *request = sreq;
 
     sreq->kind = MPID_PREQUEST_SEND;
-    sreq->comm = comm;
+    MPIU_CH4U_REQUEST(sreq, util_comm) = comm;
     match_bits = MPID_CH4U_init_send_tag(comm->context_id + context_offset, rank, tag);
 
     MPIU_CH4U_REQUEST(sreq, buffer) = (void *) buf;
@@ -273,7 +273,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Startall(int count, MPID_Request * requests[])
         tag = MPIDI_CH4U_Get_tag(MPIU_CH4U_REQUEST(preq, tag));
         rank = MPIDI_CH4U_Get_source(MPIU_CH4U_REQUEST(preq, tag));
         context_offset = MPIDI_CH4U_Get_context(MPIU_CH4U_REQUEST(preq, tag) -
-                                                preq->comm->context_id);
+                                                MPIU_CH4U_REQUEST(preq, util_comm)->context_id);
         datatype = MPIU_CH4U_REQUEST(preq, datatype);
 
         switch (MPIU_CH4U_REQUEST(preq, p_type)) {
@@ -282,28 +282,32 @@ __CH4_INLINE__ int MPIDI_CH4U_Startall(int count, MPID_Request * requests[])
             mpi_errno = MPIDI_Irecv(MPIU_CH4U_REQUEST(preq, buffer),
                                     MPIU_CH4U_REQUEST(preq, count),
                                     datatype, rank, tag,
-                                    preq->comm, context_offset, &preq->partner_request);
+                                    MPIU_CH4U_REQUEST(preq, util_comm),
+                                    context_offset, &preq->partner_request);
             break;
 
         case MPIDI_PTYPE_SEND:
             mpi_errno = MPIDI_Isend(MPIU_CH4U_REQUEST(preq, buffer),
                                     MPIU_CH4U_REQUEST(preq, count),
                                     datatype, rank, tag,
-                                    preq->comm, context_offset, &preq->partner_request);
+                                    MPIU_CH4U_REQUEST(preq, util_comm),
+                                    context_offset, &preq->partner_request);
             break;
 
         case MPIDI_PTYPE_SSEND:
             mpi_errno = MPIDI_Issend(MPIU_CH4U_REQUEST(preq, buffer),
                                      MPIU_CH4U_REQUEST(preq, count),
                                      datatype, rank, tag,
-                                     preq->comm, context_offset, &preq->partner_request);
+                                     MPIU_CH4U_REQUEST(preq, util_comm),
+                                     context_offset, &preq->partner_request);
             break;
 
         case MPIDI_PTYPE_BSEND:
             mpi_errno = MPIR_Bsend_isend(MPIU_CH4U_REQUEST(preq, buffer),
                                          MPIU_CH4U_REQUEST(preq, count),
                                          datatype, rank, tag,
-                                         preq->comm, BSEND_INIT, &preq->partner_request);
+                                         MPIU_CH4U_REQUEST(preq, util_comm),
+                                         BSEND_INIT, &preq->partner_request);
 
             if (preq->partner_request != NULL)
                 MPIU_Object_add_ref(preq->partner_request);

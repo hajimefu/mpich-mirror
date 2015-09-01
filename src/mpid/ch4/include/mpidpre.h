@@ -59,6 +59,7 @@ typedef struct MPIDI_CH4U_Devreq_t {
 
     /* persistent send fields */
     MPIDI_ptype   p_type;
+    struct MPID_Comm    *util_comm;
 
     /* mrecv fields */
     void         *mrcv_buffer;
