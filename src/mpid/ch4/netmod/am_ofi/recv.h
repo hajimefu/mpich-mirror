@@ -33,8 +33,7 @@ static inline int MPIDI_netmod_recv_init(void *buf,
                                          MPID_Comm * comm,
                                          int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    return MPIDI_CH4U_Recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_imrecv(void *buf,
@@ -42,8 +41,7 @@ static inline int MPIDI_netmod_imrecv(void *buf,
                                       MPI_Datatype datatype,
                                       MPID_Request * message, MPID_Request ** rreqp)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    return MPIDI_CH4U_Imrecv(buf, count, datatype, message, rreqp);
 }
 
 static inline int MPIDI_netmod_irecv(void *buf,
