@@ -29,6 +29,12 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_IPROBE);
 
+    if (unlikely(source == MPI_PROC_NULL)) {
+        MPIR_Status_set_procnull(status);
+        *flag = true;
+        goto fn_exit;
+    }
+
     comm_idx = MPIDI_CH4U_Get_context_index(comm->context_id);
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
 
@@ -54,6 +60,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
     }
     /* MPIDI_CS_EXIT(); */
 
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_IPROBE);
     return mpi_errno;
 }
@@ -100,6 +107,12 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_IMPROBE);
 
+    if (unlikely(source == MPI_PROC_NULL)) {
+        MPIR_Status_set_procnull(status);
+        *flag = true;
+        goto fn_exit;
+    }
+
     comm_idx = MPIDI_CH4U_Get_context_index(comm->context_id);
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
 
@@ -131,6 +144,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
     }
     /* MPIDI_CS_EXIT(); */
 
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_IMPROBE);
     return mpi_errno;
 }
