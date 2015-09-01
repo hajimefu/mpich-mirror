@@ -18,7 +18,7 @@ extern void MPIR_Info_get_valuelen_impl(MPID_Info *info_ptr, const char *key, in
 extern void MPIR_Info_get_nkeys_impl(MPID_Info *info_ptr, int *nkeys);
 extern int  MPIR_Info_get_nthkey_impl(MPID_Info *info, int n, char *key);
 extern int  MPIR_Bcast_impl(void *buffer, int count, MPI_Datatype datatype, int root,
-                            MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
+                            MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
 extern int MPIR_Comm_create(MPID_Comm **);
 
 static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
@@ -125,8 +125,8 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
         else
             for(i=0; i<count; i++)
                 MPIDI_CH4_RC_POP(MPIDI_mpi_to_pmi_keyvals(info_ptrs[i],
-                                                    &info_keyval_vectors[i],
-                                                    &info_keyval_sizes[i]));
+                                                          &info_keyval_vectors[i],
+                                                          &info_keyval_sizes[i]));
 
         preput_keyval_vector.key = MPIDI_PARENT_PORT_KVSKEY;
         preput_keyval_vector.val = port_name;
@@ -160,18 +160,18 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
     if(errcodes != MPI_ERRCODES_IGNORE) {
         MPIR_Errflag_t errflag = MPIR_ERR_NONE;
         MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&should_accept,1,MPI_INT,
-                                   root,comm_ptr,&errflag));
+                                         root,comm_ptr,&errflag));
         MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&pmi_errno,1,MPI_INT,
-                                   root,comm_ptr,&errflag));
+                                         root,comm_ptr,&errflag));
         MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&total_num_processes,1,MPI_INT,
-                                   root, comm_ptr, &errflag));
+                                         root, comm_ptr, &errflag));
         MPIDI_CH4_RC_POP(MPIR_Bcast_impl(errcodes, total_num_processes, MPI_INT,
-                                   root, comm_ptr,&errflag));
+                                         root, comm_ptr,&errflag));
     }
 
     if(should_accept)
         MPIDI_CH4_RC_POP(MPIDI_Comm_accept(port_name, NULL, root,
-                                     comm_ptr, intercomm));
+                                           comm_ptr, intercomm));
     else {
         if((pmi_errno == PMI_SUCCESS) && (errcodes[0] != 0))
             MPIR_Comm_create(intercomm);
@@ -204,20 +204,22 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
-                                      MPID_Info * info,
-                                      int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                      MPID_Info *info,
+                                      int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CONNECT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CONNECT);
     mpi_errno = MPIDI_netmod_comm_connect(port_name, info, root, comm, newcomm_ptr);
-    if (mpi_errno != MPI_SUCCESS) {
+
+    if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CONNECT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
@@ -225,19 +227,21 @@ __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
 #define FUNCNAME MPIDI_Comm_disconnect
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_disconnect(MPID_Comm * comm_ptr)
+__CH4_INLINE__ int MPIDI_Comm_disconnect(MPID_Comm *comm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DISCONNECT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DISCONNECT);
     mpi_errno = MPIDI_netmod_comm_disconnect(comm_ptr);
-    if (mpi_errno != MPI_SUCCESS) {
+
+    if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DISCONNECT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
@@ -245,19 +249,21 @@ __CH4_INLINE__ int MPIDI_Comm_disconnect(MPID_Comm * comm_ptr)
 #define FUNCNAME MPIDI_Open_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Open_port(MPID_Info * info_ptr, char *port_name)
+__CH4_INLINE__ int MPIDI_Open_port(MPID_Info *info_ptr, char *port_name)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OPEN_PORT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OPEN_PORT);
     mpi_errno = MPIDI_netmod_open_port(info_ptr, port_name);
-    if (mpi_errno != MPI_SUCCESS) {
+
+    if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OPEN_PORT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
@@ -271,13 +277,15 @@ __CH4_INLINE__ int MPIDI_Close_port(const char *port_name)
     MPIDI_STATE_DECL(MPID_STATE_CH4_CLOSE_PORT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CLOSE_PORT);
     mpi_errno = MPIDI_netmod_close_port(port_name);
-    if (mpi_errno != MPI_SUCCESS) {
+
+    if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_CLOSE_PORT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
@@ -286,20 +294,22 @@ __CH4_INLINE__ int MPIDI_Close_port(const char *port_name)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Comm_accept(const char *port_name,
-                                     MPID_Info * info,
-                                     int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                     MPID_Info *info,
+                                     int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_ACCEPT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_ACCEPT);
     mpi_errno = MPIDI_netmod_comm_accept(port_name, info, root, comm, newcomm_ptr);
-    if (mpi_errno != MPI_SUCCESS) {
+
+    if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_ACCEPT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
