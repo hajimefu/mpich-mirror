@@ -44,6 +44,10 @@ typedef enum {
 #define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
 #define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
 
+#define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
+#define MPIDI_MAX_KVS_VALUE_LEN  4096
+
+
 typedef struct MPIDI_CH4U_Devreq_t {
     void         *buffer;
     uint64_t      count;

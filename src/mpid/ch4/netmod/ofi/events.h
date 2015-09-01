@@ -355,6 +355,39 @@ static inline int rma_done_event(cq_tagged_entry_t *wc,
   return mpi_errno;
 }
 
+#undef FUNCNAME
+#define FUNCNAME accept_probe_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int accept_probe_event(cq_tagged_entry_t *wc,
+                                     MPID_Request      *rreq)
+{
+  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
+  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
+  MPIDI_Dynproc_req *ctrl = (MPIDI_Dynproc_req *)rreq;
+  ctrl->source = get_source(wc->tag);
+  ctrl->tag    = get_tag(wc->tag);
+  ctrl->msglen = wc->len;
+  ctrl->done   = 1;
+  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
+  return MPI_SUCCESS;
+}
+
+#undef FUNCNAME
+#define FUNCNAME dynproc_done_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int dynproc_done_event(cq_tagged_entry_t *wc,
+                                     MPID_Request      *rreq)
+{
+  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DYNPROC_DONE_EVENT);
+  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DYNPROC_DONE_EVENT);
+  MPIDI_Dynproc_req *ctrl = (MPIDI_Dynproc_req *)rreq;
+  ctrl->done++;
+  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DYNPROC_DONE_EVENT);
+  return MPI_SUCCESS;
+}
+
 
 static inline MPID_Request *devreq_to_req(void *context)
 {
@@ -395,6 +428,12 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
         break;
     case MPIDI_EVENT_RMA_DONE:
         MPIU_RC_POP(rma_done_event(wc,req));
+        break;
+    case MPIDI_EVENT_DYNPROC_DONE:
+        MPIU_RC_POP(dynproc_done_event(wc,req));
+        break;
+    case MPIDI_EVENT_ACCEPT_PROBE:
+        MPIU_RC_POP(accept_probe_event(wc,req));
         break;
     case MPIDI_EVENT_ABORT:
     default:

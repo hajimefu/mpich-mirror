@@ -37,7 +37,7 @@ static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
                                     MPID_Comm * comm_world, MPID_Comm * comm_self,
-                                    int num_contexts, void **netmod_contexts)
+                                    int spawned,int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno;
     int str_errno, maxlen, i, fi_version;

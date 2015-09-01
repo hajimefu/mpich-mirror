@@ -62,8 +62,6 @@ EXTERN_C_BEGIN
 #define COMM_TO_PHYS(comm,rank)  MPIDI_Addr_table->table[COMM_TO_INDEX(comm,rank)].dest
 #define TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
 #endif
-#define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
-#define MPIDI_MAX_KVS_VALUE_LEN  4096
 #define MPIDI_MAP_NOT_FOUND      ((void*)(-1UL))
 #define MPIDI_FI_MAJOR_VERSION 1
 #define MPIDI_FI_MINOR_VERSION 0
@@ -153,7 +151,9 @@ enum {
     MPIDI_EVENT_GET_HUGE,
     MPIDI_EVENT_CONTROL,
     MPIDI_EVENT_CHUNK_DONE,
-    MPIDI_EVENT_RMA_DONE
+    MPIDI_EVENT_RMA_DONE,
+    MPIDI_EVENT_DYNPROC_DONE,
+    MPIDI_EVENT_ACCEPT_PROBE
 };
 
 enum {
