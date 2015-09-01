@@ -190,7 +190,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIDI_CH4U_gpid_local[i] = FALSE;
 #endif
 
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     /* shm mechanism has to be choosen before netmod initialization phase because of
        shm functions dynamic binding and a fact that netmod initialization uses
        a collective operation whcih may involve shm related functions like progress engine */
@@ -202,7 +202,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                                   MPIR_Process.comm_self, has_parent,
                                   1, &netmod_contexts);
 
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     mpi_errno = MPIDI_shm_init(rank, size);
 #endif
 #if 0
