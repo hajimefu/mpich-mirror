@@ -15,6 +15,7 @@
 #include "types.h"
 #include "mpidch4u.h"
 #include "ch4_impl.h"
+#include "iovec_util.h"
 
 /* The purpose of this hacky #ifdef is to tag                */
 /* select MPI util functions with always inline.  A better   */
@@ -438,7 +439,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         MPIDI_Chunk_request *creq;                              \
         MPID_cc_incr(sigreq->cc_ptr, &tmp);                     \
         creq=(MPIDI_Chunk_request*)MPIU_Malloc(sizeof(*creq));  \
-        creq->callback = chunk_done_callback;                   \
+        creq->event_id = MPIDI_EVENT_RMA_DONE;                  \
         creq->parent   = sigreq;                                \
         msg.context    = &creq->context;                        \
         CONDITIONAL_GLOBAL_CNTR_INCR;                           \
@@ -631,66 +632,6 @@ static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
   if(dt->map != &dt->__map)
     MPIU_Free(dt->map);
-}
-
-#undef FUNCNAME
-#define FUNCNAME rma_done_callback
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int rma_done_callback(cq_tagged_entry_t *wc,
-                                    MPID_Request      *in_req)
-{
-  int   mpi_errno = MPI_SUCCESS;
-  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_RMA_DONE_CALLBACK);
-  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_RMA_DONE_CALLBACK);
-
-  MPIDI_Win_request *req = (MPIDI_Win_request *)in_req;
-  MPIDI_Win_datatype_unmap(&req->noncontig->target_dt);
-  MPIDI_Win_datatype_unmap(&req->noncontig->origin_dt);
-  MPIDI_Win_datatype_unmap(&req->noncontig->result_dt);
-  MPIDI_Win_request_complete(req);
-
-  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_RMA_DONE_CALLBACK);
-  return mpi_errno;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_Progress_win_counter_fence
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
-{
-  int      mpi_errno = MPI_SUCCESS;
-  uint64_t tcount, donecount;
-  MPIDI_Win_request *r;
-
-  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
-  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
-
-  tcount    = MPIDI_Global.cntr;
-  MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-  donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
-  MPIU_Assert(donecount <= tcount);
-  while(tcount > donecount) {
-    MPIU_Assert(donecount <= tcount);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-    PROGRESS();
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-    donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
-  }
-  r = WIN_OFI(win)->syncQ;
-  while(r)  {
-    MPIDI_Win_request *next = r->next;
-    rma_done_callback(NULL,(MPID_Request *)r);
-    r = next;
-  }
-  WIN_OFI(win)->syncQ = NULL;
-fn_exit:
-  MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
-  return mpi_errno;
-fn_fail:
-  goto fn_exit;
 }
 
 #endif

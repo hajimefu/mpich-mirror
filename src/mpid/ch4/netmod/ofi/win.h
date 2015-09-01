@@ -109,7 +109,44 @@ fn_fail:
   goto fn_exit;
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_Progress_win_counter_fence
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
+{
+  int      mpi_errno = MPI_SUCCESS;
+  uint64_t tcount, donecount;
+  MPIDI_Win_request *r;
 
+  MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+  MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+
+  tcount    = MPIDI_Global.cntr;
+  MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
+  donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+  MPIU_Assert(donecount <= tcount);
+  while(tcount > donecount) {
+    MPIU_Assert(donecount <= tcount);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
+    PROGRESS();
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
+    donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+  }
+  r = WIN_OFI(win)->syncQ;
+  while(r)  {
+    MPIDI_Win_request *next = r->next;
+    rma_done_event(NULL,(MPID_Request *)r);
+    r = next;
+  }
+  WIN_OFI(win)->syncQ = NULL;
+fn_exit:
+  MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
+  MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+  return mpi_errno;
+fn_fail:
+  goto fn_exit;
+}
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_win_set_info

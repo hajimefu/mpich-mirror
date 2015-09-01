@@ -152,6 +152,8 @@ enum {
     MPIDI_EVENT_SSEND_ACK,
     MPIDI_EVENT_GET_HUGE,
     MPIDI_EVENT_CONTROL,
+    MPIDI_EVENT_CHUNK_DONE,
+    MPIDI_EVENT_RMA_DONE
 };
 
 enum {
@@ -432,7 +434,7 @@ typedef struct MPIDI_Win_request {
     MPIU_OBJECT_HEADER;
     char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
     context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    int       event_id; /* fixed field, do not move */
     struct MPIDI_Win_request *next;
     int target_rank;
     MPIDI_Win_noncontig *noncontig;
@@ -440,8 +442,8 @@ typedef struct MPIDI_Win_request {
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    context_t     context;          /* fixed field, do not move */
+    int           event_id; /* fixed field, do not move */
     MPID_Request *parent;       /* Parent request           */
 } MPIDI_Chunk_request;
 
