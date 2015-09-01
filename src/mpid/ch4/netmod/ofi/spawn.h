@@ -13,12 +13,6 @@
 
 #include "impl.h"
 
-
-extern int  MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char *value, int *flag);
-extern void MPIR_Info_get_nkeys_impl(MPID_Info *info_ptr, int *nkeys);
-extern void MPIR_Info_get_valuelen_impl(MPID_Info *info_ptr, const char *key, int *valuelen, int *flag);
-extern void MPIR_Info_get_nkeys_impl(MPID_Info *info_ptr, int *nkeys);
-extern int  MPIR_Info_get_nthkey_impl(MPID_Info *info, int n, char *key);
 #define MPIDI_PORT_NAME_TAG_KEY "tag"
 #define MPIDI_CONNENTRY_TAG_KEY "connentry"
 
@@ -27,59 +21,6 @@ extern int  MPIR_Info_get_nthkey_impl(MPID_Info *info, int n, char *key);
 #else
 #define TABLE_INDEX_INCR()
 #endif
-
-static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
-                                           PMI_keyval_t **kv_ptr,
-                                           int           *nkeys_ptr)
-{
-    char key[MPI_MAX_INFO_KEY];
-    PMI_keyval_t *kv = 0;
-    int           i, nkeys = 0, vallen, flag, mpi_errno=MPI_SUCCESS;
-
-    if(!info_ptr || info_ptr->handle == MPI_INFO_NULL)
-        goto fn_exit;
-
-    MPIR_Info_get_nkeys_impl(info_ptr, &nkeys);
-
-    if(nkeys == 0) goto fn_exit;
-
-    kv = (PMI_keyval_t *)MPIU_Malloc(nkeys * sizeof(PMI_keyval_t));
-
-    for(i=0; i<nkeys; i++) {
-        MPI_RC_POP(MPIR_Info_get_nthkey_impl(info_ptr,i,key));
-        MPIR_Info_get_valuelen_impl(info_ptr,key,&vallen,&flag);
-        kv[i].key = (const char *)MPIU_Strdup(key);
-        kv[i].val = (char *)MPIU_Malloc(vallen + 1);
-        MPIR_Info_get_impl(info_ptr, key, vallen+1, kv[i].val, &flag);
-    }
-
-fn_fail:
-fn_exit:
-    *kv_ptr    = kv;
-    *nkeys_ptr = nkeys;
-    return mpi_errno;
-}
-
-static inline void MPIDI_free_pmi_keyvals(PMI_keyval_t **kv,
-                                          int            size,
-                                          int           *counts)
-{
-    int i,j;
-
-    for(i=0; i<size; i++) {
-        for(j=0; j<counts[i]; j++) {
-            if(kv[i][j].key != NULL)
-                MPIU_Free((char *)kv[i][j].key);
-
-            if(kv[i][j].val != NULL)
-                MPIU_Free(kv[i][j].val);
-        }
-
-        if(kv[i] != NULL)
-            MPIU_Free(kv[i]);
-    }
-
-}
 
 static inline void MPIDI_free_port_name_tag(int tag)
 {

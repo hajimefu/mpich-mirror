@@ -13,6 +13,14 @@
 
 #include "ch4_types.h"
 
+
+#define MPIDI_CH4_RC_POP(FUNC)                                  \
+  do                                                            \
+    {                                                           \
+      mpi_errno = FUNC;                                         \
+      if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);      \
+    } while (0)
+
 /* Forward declarations used to resolve dependencies in inline builds */
 /* Any MPIR_XXX functions used in CH4 need to have prototypes here    */
 /* Todo:  Is this really the right place for the forward declarations */

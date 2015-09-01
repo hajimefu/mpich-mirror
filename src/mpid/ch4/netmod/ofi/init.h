@@ -35,15 +35,18 @@ static inline int MPIDI_Create_endpoint(info_t * prov_use,
 #define FUNCNAME MPIDI_netmod_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_init(int rank,
-                                    int size,
-                                    int appnum,
-                                    int *tag_ub,
-                                    MPID_Comm * comm_world,
-                                    MPID_Comm * comm_self, int num_contexts, void **netmod_contexts)
+static inline int MPIDI_netmod_init(int         rank,
+                                    int         size,
+                                    int         appnum,
+                                    int        *tag_ub,
+                                    MPID_Comm  *comm_world,
+                                    MPID_Comm  *comm_self,
+                                    int         spawned,
+                                    int         num_contexts,
+                                    void      **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
-    int thr_err=0, str_errno, maxlen, iov_len, spawned = 0;
+    int thr_err=0, str_errno, maxlen, iov_len;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;

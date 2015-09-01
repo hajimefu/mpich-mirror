@@ -9,6 +9,7 @@ MPIDI_NETMOD_API(int,init,
                  (int*)       tag_ub,
                  (MPID_Comm*) comm_world,
                  (MPID_Comm*) comm_self,
+                 (int)        spawned,
                  (int)        num_contexts,
                  (void**)     netmod_contexts); /* multiple communication contexts enable fine-grained progress */
 

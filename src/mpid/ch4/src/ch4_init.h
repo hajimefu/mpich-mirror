@@ -196,7 +196,8 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     mpi_errno = MPIDI_netmod_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
-                                  MPIR_Process.comm_self, 1, &netmod_contexts);
+                                  MPIR_Process.comm_self, has_parent,
+                                  1, &netmod_contexts);
 
 #if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
     mpi_errno = MPIDI_shm_init(rank, size);
