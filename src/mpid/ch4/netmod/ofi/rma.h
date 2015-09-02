@@ -720,7 +720,9 @@ static inline int do_accumulate(const void    *origin_addr,
         {basic_type=tt=ot=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
+#ifdef HAVE_FORTRAN_BINDING
         case MPI_2DOUBLE_PRECISION:
+#endif
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif
@@ -887,7 +889,9 @@ static inline int do_get_accumulate(const void    *origin_addr,
         {basic_type=tt=ot=rt=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
+#ifdef HAVE_FORTRAN_BINDING
         case MPI_2DOUBLE_PRECISION:
+#endif
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif
