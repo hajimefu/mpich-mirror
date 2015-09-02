@@ -64,6 +64,22 @@ static inline int MPIDI_netmod_init(int         rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
 
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Chunk_request,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Huge_chunk_t,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Ctrl_req,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Ssendack_request,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Dynproc_req,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+                            offsetof(MPIDI_Win_request,context));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_netmod_ofi_request_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request)>=sizeof(MPIDI_Win_request));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFIGpid_t));
+
     *tag_ub = (1 << MPID_TAG_SHIFT) - 1;
 
     MPID_Thread_mutex_create(&MPIDI_THREAD_UTIL_MUTEX, &thr_err);
