@@ -62,10 +62,11 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     else {
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         nbytes = in_data_sz;
+        count = nbytes/dt_sz;
     }
     MPIR_STATUS_SET_COUNT(rreq->status, nbytes);
     MPIU_CH4U_REQUEST(rreq, datatype) = datatype;
-    MPIU_CH4U_REQUEST(rreq, count) = count;
+    MPIU_CH4U_REQUEST(rreq, count) = nbytes;
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_sz, dt_ptr, dt_true_lb);
 
@@ -73,7 +74,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
         segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
-        MPID_Segment_init(buf, nbytes/dt_sz, datatype, segment_ptr, 0);
+        MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
 
         last = nbytes;
         MPID_Segment_unpack(segment_ptr, 0, &last, MPIU_CH4U_REQUEST(rreq, buffer));
@@ -87,11 +88,11 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     }
     else {
         MPIU_Memcpy((char *) buf + dt_true_lb, MPIU_CH4U_REQUEST(rreq, buffer), nbytes);
-        MPIU_Free(MPIU_CH4U_REQUEST(rreq, buffer));
     }
 
     MPIU_CH4U_REQUEST(rreq, status) &= ~MPIDI_CH4U_REQ_UNEXPECTED;
-
+    MPIU_Free(MPIU_CH4U_REQUEST(rreq, buffer));
+        
     rreq->status.MPI_SOURCE = MPIDI_CH4I_get_source(MPIU_CH4U_REQUEST(rreq, tag));
     rreq->status.MPI_TAG = MPIDI_CH4I_get_tag(MPIU_CH4U_REQUEST(rreq, tag));
 
@@ -140,7 +141,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     if (rreq) {
         *request = rreq;
         MPIDU_RC_POP(MPIDI_CH4I_handle_unexpected(buf, count, datatype,
-                                                 root_comm, context_id, rreq));
+                                                  root_comm, context_id, rreq));
         goto fn_exit;
     }
 
