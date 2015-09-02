@@ -136,7 +136,12 @@ static inline int MPIDI_CH4U_Unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     }
 
     MPIU_Free(MPIU_CH4U_REQUEST(rreq, buffer));
-    MPIU_Object_release_ref(rreq, &c);
+    rreq->kind = MPID_REQUEST_RECV;
+
+    MPIDI_Request_complete(rreq);
+    if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
+        MPIU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
+    }
 
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_UNEXP_MRECV_CMPL_HANDLER);

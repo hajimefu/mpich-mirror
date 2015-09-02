@@ -53,7 +53,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
         unexp_req->status.MPI_TAG =
             MPIDI_CH4U_Get_tag(MPIU_CH4U_REQUEST(unexp_req, tag));
         MPIR_STATUS_SET_COUNT(unexp_req->status, MPIU_CH4U_REQUEST(unexp_req, count));
-        *status = unexp_req->status;
+
+        status->MPI_TAG = unexp_req->status.MPI_TAG;
+        status->MPI_SOURCE = unexp_req->status.MPI_SOURCE;
+        MPIR_STATUS_SET_COUNT(*status, MPIU_CH4U_REQUEST(unexp_req, count));
     }
     else {
         *flag = 0;
@@ -137,7 +140,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
             MPIDI_CH4U_Get_tag(MPIU_CH4U_REQUEST(unexp_req, tag));
         MPIR_STATUS_SET_COUNT(unexp_req->status, MPIU_CH4U_REQUEST(unexp_req, count));
         MPIU_CH4U_REQUEST(unexp_req, status) |= MPIDI_CH4U_REQ_UNEXP_DQUED;
-        *status = unexp_req->status;
+
+        status->MPI_TAG = unexp_req->status.MPI_TAG;
+        status->MPI_SOURCE = unexp_req->status.MPI_SOURCE;
+        MPIR_STATUS_SET_COUNT(*status, MPIU_CH4U_REQUEST(unexp_req, count));
     }
     else {
         *flag = 0;
