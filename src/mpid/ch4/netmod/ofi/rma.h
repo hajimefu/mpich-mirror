@@ -51,7 +51,7 @@ static inline int MPIDI_Query_dt(MPI_Datatype   dt,
     if(*count == MPIDI_QUERY_COMPARE_ATOMIC_COUNT)
         *count = MPIDI_Global.win_op_table[dt_index][op_index].max_compare_atomic_count;
 
-    if(*fi_dt==-1 || *fi_op==-1)
+    if( ((int) *fi_dt) == -1 || ((int) *fi_op) == -1)
         rc = -1;
     else
         rc = MPI_SUCCESS;
