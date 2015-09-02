@@ -204,7 +204,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   do                                                            \
     {                                                           \
       mpi_errno = FUNC;                                         \
-      if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);      \
+      if (unlikely(mpi_errno!=MPI_SUCCESS)) MPIR_ERR_POP(mpi_errno);    \
     } while (0)
 
 #define MPIU_STR_RC(FUNC,STR)                                   \

@@ -22,18 +22,17 @@ static inline int get_huge_event(cq_tagged_entry_t *wc, MPID_Request *req);
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int peek_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS;
     size_t count;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
-    REQ_OFI(rreq, util_id) = 1;
+    REQ_OFI(rreq, util_id)  = 1;
     rreq->status.MPI_SOURCE = get_source(wc->tag);
-    rreq->status.MPI_TAG = get_tag(wc->tag);
-    count = wc->len;
-    rreq->status.MPI_ERROR = MPI_SUCCESS;
+    rreq->status.MPI_TAG    = get_tag(wc->tag);
+    count                   = wc->len;
+    rreq->status.MPI_ERROR  = MPI_SUCCESS;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
-    return mpi_errno;
+    return MPI_SUCCESS;
 }
 
 
@@ -43,16 +42,16 @@ static inline int peek_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int      mpi_errno = MPI_SUCCESS;
     MPI_Aint last;
-    size_t count;
+    size_t   count;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_EVENT);
 
-    rreq->status.MPI_ERROR = MPI_SUCCESS;
+    rreq->status.MPI_ERROR  = MPI_SUCCESS;
     rreq->status.MPI_SOURCE = get_source(wc->tag);
-    rreq->status.MPI_TAG = get_tag(wc->tag);
-    count = wc->len;
+    rreq->status.MPI_TAG    = get_tag(wc->tag);
+    count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
 
     if (REQ_OFI(rreq, pack_buffer)) {
@@ -62,10 +61,11 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
         MPID_Segment_free(REQ_OFI(rreq, segment_ptr));
 
         if (last != (MPI_Aint)count) {
-            mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
-                                             __FUNCTION__, __LINE__,
-                                             MPI_ERR_TYPE, "**dtypemismatch", 0);
-            rreq->status.MPI_ERROR = mpi_errno;
+            rreq->status.MPI_ERROR =
+                MPIR_Err_create_code(MPI_SUCCESS,
+                                     MPIR_ERR_RECOVERABLE,
+                                     __FUNCTION__, __LINE__,
+                                     MPI_ERR_TYPE, "**dtypemismatch", 0);
         }
     }
 
@@ -101,7 +101,6 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS;
     MPIDI_Huge_recv_t *recv;
     MPIDI_Huge_chunk_t *hc;
     MPID_Comm *comm_ptr;
@@ -137,7 +136,7 @@ static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     get_huge_event(NULL, (MPID_Request *) hc);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
-    return mpi_errno;
+    return MPI_SUCCESS;
 }
 
 
@@ -147,7 +146,6 @@ static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int send_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
 {
-    int mpi_errno = MPI_SUCCESS;
     int c;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_EVENT);
@@ -164,7 +162,7 @@ static inline int send_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
     }   /* c != 0, ssend */
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_EVENT);
-    return mpi_errno;
+    return MPI_SUCCESS;
 }
 
 #undef FUNCNAME
@@ -219,11 +217,11 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int ssend_ack_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno;
     MPIDI_Ssendack_request *req = (MPIDI_Ssendack_request *) sreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND_ACK_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SSEND_ACK_EVENT);
-    send_event(NULL, req->signal_req);
+    mpi_errno = send_event(NULL, req->signal_req);
     MPIDI_Ssendack_request_tls_free(req);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND_ACK_EVENT);
     return mpi_errno;
@@ -320,7 +318,6 @@ fn_fail:
 static inline int chunk_done_event(cq_tagged_entry_t *wc,
                                    MPID_Request      *req)
 {
-  int mpi_errno = MPI_SUCCESS;
   int c;
   MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
   MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
@@ -331,7 +328,7 @@ static inline int chunk_done_event(cq_tagged_entry_t *wc,
   if(c == 0)MPIDI_Request_release(creq->parent);
   MPIU_Free(creq);
   MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
-  return mpi_errno;
+  return MPI_SUCCESS;
 }
 
 #undef FUNCNAME
@@ -341,7 +338,6 @@ static inline int chunk_done_event(cq_tagged_entry_t *wc,
 static inline int rma_done_event(cq_tagged_entry_t *wc,
                                  MPID_Request      *in_req)
 {
-  int   mpi_errno = MPI_SUCCESS;
   MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
   MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
 
@@ -352,7 +348,7 @@ static inline int rma_done_event(cq_tagged_entry_t *wc,
   MPIDI_Win_request_complete(req);
 
   MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
-  return mpi_errno;
+  return MPI_SUCCESS;
 }
 
 #undef FUNCNAME
@@ -388,7 +384,6 @@ static inline int dynproc_done_event(cq_tagged_entry_t *wc,
   return MPI_SUCCESS;
 }
 
-
 static inline MPID_Request *devreq_to_req(void *context)
 {
     char *base = (char *) context;
@@ -400,40 +395,40 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
     int mpi_errno;
     switch(REQ_OFI(req,event_id)) {
     case MPIDI_EVENT_PEEK:
-        MPI_RC_POP(peek_event(wc,req));
+        mpi_errno = peek_event(wc,req);
         break;
     case MPIDI_EVENT_RECV:
-        MPI_RC_POP(recv_event(wc,req));
+        mpi_errno = recv_event(wc,req);
         break;
     case MPIDI_EVENT_RECV_HUGE:
-        MPI_RC_POP(recv_huge_event(wc,req));
+        mpi_errno = recv_huge_event(wc,req);
         break;
     case MPIDI_EVENT_SEND:
-        MPI_RC_POP(send_event(wc,req));
+        mpi_errno = send_event(wc,req);
         break;
     case MPIDI_EVENT_SEND_HUGE:
-        MPI_RC_POP(send_huge_event(wc,req));
+        mpi_errno = send_huge_event(wc,req);
         break;
     case MPIDI_EVENT_SSEND_ACK:
-        MPI_RC_POP(ssend_ack_event(wc,req));
+        mpi_errno = ssend_ack_event(wc,req);
         break;
     case MPIDI_EVENT_GET_HUGE:
-        MPI_RC_POP(get_huge_event(wc,req));
+        mpi_errno = get_huge_event(wc,req);
         break;
     case MPIDI_EVENT_CONTROL:
-        MPI_RC_POP(control_event(wc,req));
+        mpi_errno = control_event(wc,req);
         break;
     case MPIDI_EVENT_CHUNK_DONE:
-        MPI_RC_POP(chunk_done_event(wc,req));
+        mpi_errno = chunk_done_event(wc,req);
         break;
     case MPIDI_EVENT_RMA_DONE:
-        MPI_RC_POP(rma_done_event(wc,req));
+        mpi_errno = rma_done_event(wc,req);
         break;
     case MPIDI_EVENT_DYNPROC_DONE:
-        MPI_RC_POP(dynproc_done_event(wc,req));
+        mpi_errno = dynproc_done_event(wc,req);
         break;
     case MPIDI_EVENT_ACCEPT_PROBE:
-        MPI_RC_POP(accept_probe_event(wc,req));
+        mpi_errno = accept_probe_event(wc,req);
         break;
     case MPIDI_EVENT_ABORT:
     default:
@@ -441,10 +436,7 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
         MPIU_Assert(0);
         break;
     }
-fn_exit:
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #endif /* NETMOD_OFI_EVENTS_H_INCLUDED */
