@@ -142,7 +142,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                               char ***argv,
                               int requested, int *provided, int *has_args, int *has_env)
 {
-    int pmi_errno, mpi_errno = MPI_SUCCESS, rank, has_parent, size, appnum, i;
+    int pmi_errno, mpi_errno = MPI_SUCCESS, rank, has_parent, size, appnum, i,thr_err;
     void *netmod_contexts;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4_INIT);
@@ -176,6 +176,8 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                              "**pmi_get_appnum %d", pmi_errno);
     }
 
+    MPID_Thread_mutex_create(&MPIDI_CH4_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
     MPIDI_CH4_Global.comms = (MPID_Comm **) MPIU_Calloc(1, sizeof(MPID_Comm *)
                                                         * MPIR_CONTEXT_INT_BITS *
                                                         MPIR_CONTEXT_ID_BITS);
@@ -266,7 +268,7 @@ __CH4_INLINE__ int MPIDI_InitCompleted(void)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Finalize(void)
 {
-    int mpi_errno;
+    int mpi_errno, thr_err;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FINALIZE);
     mpi_errno = MPIDI_netmod_finalize();
@@ -283,7 +285,8 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-
+    MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_FINALIZE);
     return mpi_errno;

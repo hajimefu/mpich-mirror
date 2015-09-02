@@ -68,10 +68,10 @@ typedef struct MPIDI_CH4_Global_t {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
     MPID_Comm **comms;
-    int active_progress_hooks;
+    OPA_int_t            active_progress_hooks;
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
-
+    MPID_Thread_mutex_t  m[2];
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4U_Devreq_t *posted_list;
     MPIDI_CH4U_Devreq_t *unexp_list;
@@ -80,6 +80,9 @@ typedef struct MPIDI_CH4_Global_t {
     void *netmod_context[8];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
+
+#define MPIDI_CH4_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
+#define MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
 
