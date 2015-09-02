@@ -122,8 +122,8 @@ static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
 
-    tcount    = MPIDI_Global.cntr;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
+    tcount    = MPIDI_Global.cntr;
     donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
     MPIU_Assert(donecount <= tcount);
 

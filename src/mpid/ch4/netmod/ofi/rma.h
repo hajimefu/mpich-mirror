@@ -237,8 +237,9 @@ static inline int do_put(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        SETUP_CHUNK_CONTEXT();
-        FI_RC_RETRY(fi_writemsg(ep, &msg, flags), rdma_write);
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+                     fi_writemsg(ep, &msg, flags),
+                     rdma_write);
     }
 
 fn_exit:
@@ -283,14 +284,13 @@ static inline int MPIDI_netmod_put(const void *origin_addr,
         MPIR_ERR_CHKANDJUMP((origin_bytes != target_bytes),
                             mpi_errno,MPI_ERR_SIZE,"**rmasize");
         EPOCH_START_CHECK();
-        MPIDI_Global.cntr++;
-        FI_RC_RETRY(fi_inject_write(G_TXC_CTR(0),                                  /* endpoint     */
-                                    (char *)origin_addr+origin_true_lb,            /* local buffer */
-                                    target_bytes,                                  /* bytes        */
-                                    _comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR),       /* Destination  */
-                                    (uint64_t)(char *)WINFO_BASE(win,target_rank)+
-                                    target_disp*WINFO_DISP_UNIT(win,target_rank)+target_true_lb,  /* remote maddr */
-                                    WINFO_MR_KEY(win,target_rank)),rdma_inject_write);
+        FI_RC_RETRY2(GLOBAL_CNTR_INCR(),
+                     fi_inject_write(G_TXC_CTR(0),(char *)origin_addr+origin_true_lb,
+                                     target_bytes,_comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR),
+                                     (uint64_t)(char *)WINFO_BASE(win,target_rank)+
+                                     target_disp*WINFO_DISP_UNIT(win,target_rank)+target_true_lb,
+                                     WINFO_MR_KEY(win,target_rank)),
+                     rdma_inject_write);
     } else {
         mpi_errno = do_put(origin_addr,
                            origin_count,
@@ -371,8 +371,9 @@ static inline int do_get_lw(void               *origin_addr,
     riov.addr         = (uint64_t)tbuffer;
     riov.len          = target_dt.size;
     riov.key          = WINFO_MR_KEY(win,target_rank);
-    MPIDI_Global.cntr++;
-    FI_RC_RETRY(fi_readmsg(G_TXC_CTR(0), &msg, 0), rdma_write);
+    FI_RC_RETRY2(GLOBAL_CNTR_INCR(),
+                 fi_readmsg(G_TXC_CTR(0), &msg, 0),
+                 rdma_write);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_GET_LW);
     return mpi_errno;
@@ -487,8 +488,9 @@ static inline int do_get(void          *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        SETUP_CHUNK_CONTEXT();
-        FI_RC_RETRY(fi_readmsg(ep, &msg, flags), rdma_write);
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+                     fi_readmsg(ep, &msg, flags),
+                     rdma_write);
     }
 
 fn_exit:
@@ -638,10 +640,11 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     msg.op            = fi_op;
     msg.context       = NULL;
     msg.data          = 0;
-    MPIDI_Global.cntr++;
-    FI_RC_RETRY(fi_compare_atomicmsg(G_TXC_CTR(0),&msg,
-                                     &comparev,NULL,1,
-                                     &resultv,NULL,1,0),atomicto);
+    FI_RC_RETRY2(GLOBAL_CNTR_INCR(),
+                 fi_compare_atomicmsg(G_TXC_CTR(0),&msg,
+                                      &comparev,NULL,1,
+                                      &resultv,NULL,1,0),
+                 atomicto);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMPARE_AND_SWAP);
     return mpi_errno;
@@ -798,8 +801,9 @@ static inline int do_accumulate(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = (rma_ioc_t *)targetv;
         msg.rma_iov_count = tout;
-        SETUP_CHUNK_CONTEXT();
-        FI_RC_RETRY(fi_atomicmsg(ep, &msg, flags), rdma_atomicto);
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+                     fi_atomicmsg(ep, &msg, flags),
+                     rdma_atomicto);
     }
 
 fn_exit:
@@ -999,9 +1003,10 @@ static inline int do_get_accumulate(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = (rma_ioc_t *)targetv;
         msg.rma_iov_count = tout;
-        SETUP_CHUNK_CONTEXT();
-        FI_RC_RETRY(fi_fetch_atomicmsg(ep, &msg,(ioc_t *)resultv,
-                                       NULL,rout,flags), rdma_readfrom);
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+                     fi_fetch_atomicmsg(ep, &msg,(ioc_t *)resultv,
+                                        NULL,rout,flags),
+                     rdma_readfrom);
     }
 
 fn_exit:

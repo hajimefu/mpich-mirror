@@ -164,6 +164,28 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
+#define FI_RC_RETRY2(FUNC1,FUNC2,STR)                       \
+    do {                                                    \
+    ssize_t _ret;                                           \
+    do {                                                    \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        FUNC1;                                              \
+        _ret = FUNC2;                                       \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        if(likely(_ret==0)) break;                          \
+        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
+                         mpi_errno,                         \
+                         MPI_ERR_OTHER,                     \
+                         "**ofid_"#STR,                     \
+                         "**ofid_"#STR" %s %d %s %s",       \
+                         __SHORT_FILE__,                    \
+                         __LINE__,                          \
+                         FCNAME,                            \
+                         fi_strerror(-_ret));               \
+        PROGRESS();                                         \
+    } while (_ret == -FI_EAGAIN);                           \
+    } while (0)
+
 #define FI_RC_RETRY_NOLOCK(FUNC,STR)                          \
   do                                                          \
     {                                                         \
@@ -426,9 +448,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   })
 
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-#define CONDITIONAL_GLOBAL_CNTR_INCR
+#define CONDITIONAL_GLOBAL_CNTR_INCR()
+#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
 #else
-#define CONDITIONAL_GLOBAL_CNTR_INCR MPIDI_Global.cntr++
+#define CONDITIONAL_GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
+#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
 #endif
 
 #define SETUP_CHUNK_CONTEXT()                                   \
@@ -442,9 +466,9 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         creq->event_id = MPIDI_EVENT_CHUNK_DONE;                \
         creq->parent   = sigreq;                                \
         msg.context    = &creq->context;                        \
-        CONDITIONAL_GLOBAL_CNTR_INCR;                           \
+        CONDITIONAL_GLOBAL_CNTR_INCR();                         \
       }                                                         \
-    else MPIDI_Global.cntr++;                                   \
+    else GLOBAL_CNTR_INCR();                                    \
   })
 
 #define GET_BASIC_TYPE(a,b)                             \
