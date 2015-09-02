@@ -187,7 +187,7 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
 
     /* MPIDI_CS_ENTER(); */
-    match_req = MPIDI_CH4U_Dequeue_posted(msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
+    match_req = MPIDI_CH4I_dequeue_posted(msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
 
     if (!match_req) {
         MPIU_CH4U_REQUEST(rreq, status) &= ~MPIDI_CH4U_REQ_BUSY;
@@ -195,7 +195,7 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
         goto fn_exit;
     }
 
-    MPIDI_CH4U_Delete_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
+    MPIDI_CH4I_delete_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
     /* MPIDI_CS_EXIT(); */
 
     match_req->status.MPI_SOURCE = MPIDI_CH4U_Get_source(msg_tag);
@@ -321,7 +321,7 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
 
     /* MPIDI_CS_ENTER(); */
-    rreq = MPIDI_CH4U_Dequeue_posted(hdr->msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
+    rreq = MPIDI_CH4I_dequeue_posted(hdr->msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
     /* MPIDI_CS_EXIT(); */
 
     if (rreq == NULL) {
@@ -334,7 +334,7 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
         MPIU_CH4U_REQUEST(rreq, status) |= MPIDI_CH4U_REQ_BUSY;
         MPIU_CH4U_REQUEST(rreq, status) |= MPIDI_CH4U_REQ_UNEXPECTED;
         /* MPIDI_CS_ENTER(); */
-        MPIDI_CH4U_Enqueue_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
+        MPIDI_CH4I_enqueue_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
         /* MPIDI_CS_EXIT(); */
     }
 

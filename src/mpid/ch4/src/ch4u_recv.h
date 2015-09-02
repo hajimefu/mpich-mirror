@@ -133,7 +133,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
 
     /* MPIDI_CS_ENTER() */
-    rreq = MPIDI_CH4U_Dequeue_unexp_strict(match_bits, mask_bits,
+    rreq = MPIDI_CH4I_dequeue_unexp_strict(match_bits, mask_bits,
                                            &MPIU_CH4U_COMM(root_comm, unexp_list));
     /* MPIDI_CS_EXIT() */
 
@@ -169,7 +169,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     MPIU_RC_POP(MPIDI_CH4I_prepare_recv_req(buf, count, datatype, rreq));
 
     /* MPIDI_CS_ENTER(); */
-    MPIDI_CH4U_Enqueue_posted(rreq, &MPIU_CH4U_COMM(root_comm, posted_list));
+    MPIDI_CH4I_enqueue_posted(rreq, &MPIU_CH4U_COMM(root_comm, posted_list));
     /* MPIDI_CS_EXIT(); */
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DO_IRECV);
@@ -355,7 +355,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Cancel_recv(MPID_Request * rreq)
     msg_tag = MPIU_CH4U_REQUEST(rreq, tag);
     comm_idx = MPIDI_CH4U_Get_context_index(MPIDI_CH4U_Get_context(msg_tag));
     root_comm = MPIDI_CH4_Global.comms[comm_idx];
-    found = MPIDI_CH4U_Delete_posted(&rreq->dev.ch4.ch4u, &MPIU_CH4U_COMM(root_comm, posted_list));
+    found = MPIDI_CH4I_delete_posted(&rreq->dev.ch4.ch4u, &MPIU_CH4U_COMM(root_comm, posted_list));
 
     if (found) {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);

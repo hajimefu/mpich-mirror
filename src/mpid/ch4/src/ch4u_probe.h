@@ -42,7 +42,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Iprobe(int source,
                                         context_offset, source, tag);
 
     /* MPIDI_CS_ENTER(); */
-    unexp_req = MPIDI_CH4U_Find_unexp(match_bits, mask_bits,
+    unexp_req = MPIDI_CH4I_find_unexp(match_bits, mask_bits,
                                       &MPIU_CH4U_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
@@ -123,7 +123,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Improbe(int source,
                                         context_offset, source, tag);
 
     /* MPIDI_CS_ENTER(); */
-    unexp_req = MPIDI_CH4U_Dequeue_unexp(match_bits, mask_bits,
+    unexp_req = MPIDI_CH4I_dequeue_unexp(match_bits, mask_bits,
                                          &MPIU_CH4U_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
