@@ -17,7 +17,7 @@ static inline int MPIDI_netmod_probe(int source,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPI_Status * status)
 {
-    return MPIDI_CH4U_Probe(source, tag, comm, context_offset, status);
+    return MPIDI_CH4U_probe(source, tag, comm, context_offset, status);
 }
 
 static inline int MPIDI_netmod_improbe(int source,
@@ -26,7 +26,7 @@ static inline int MPIDI_netmod_improbe(int source,
                                        int context_offset,
                                        int *flag, MPID_Request ** message, MPI_Status * status)
 {
-    return MPIDI_CH4U_Improbe(source, tag, comm, context_offset, flag, message, status);
+    return MPIDI_CH4U_improbe(source, tag, comm, context_offset, flag, message, status);
 }
 
 static inline int MPIDI_netmod_iprobe(int source,
@@ -34,7 +34,7 @@ static inline int MPIDI_netmod_iprobe(int source,
                                       MPID_Comm * comm,
                                       int context_offset, int *flag, MPI_Status * status)
 {
-    return MPIDI_CH4U_Iprobe(source, tag, comm, context_offset, flag, status);
+    return MPIDI_CH4U_iprobe(source, tag, comm, context_offset, flag, status);
 }
 
 #endif /* NETMOD_STUB_PROBE_H_INCLUDED */

@@ -179,10 +179,10 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Recv
+#define FUNCNAME MPIDI_CH4U_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Recv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_recv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -203,10 +203,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Recv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Recv_init
+#define FUNCNAME MPIDI_CH4U_recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Recv_init(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_recv_init(void *buf,
                                         int count,
                                         MPI_Datatype datatype,
                                         int rank,
@@ -242,10 +242,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Recv_init(void *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Imrecv
+#define FUNCNAME MPIDI_CH4U_imrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Imrecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_imrecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      MPID_Request * message, MPID_Request ** rreqp)
@@ -285,10 +285,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Imrecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Mrecv
+#define FUNCNAME MPIDI_CH4U_mrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Mrecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_mrecv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     MPID_Request * message, MPI_Status * status)
@@ -317,10 +317,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Mrecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Irecv
+#define FUNCNAME MPIDI_CH4U_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Irecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_irecv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -340,10 +340,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Irecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Cancel_Recv
+#define FUNCNAME MPIDI_CH4U_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Cancel_recv(MPID_Request * rreq)
+__CH4_INLINE__ int MPIDI_CH4U_cancel_recv(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, found, comm_idx;
     MPID_Comm *root_comm;

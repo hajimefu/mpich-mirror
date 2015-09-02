@@ -174,7 +174,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->local_size = size;
     MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
 
-    MPIDU_RC_POP(MPIDI_CH4U_Init(comm_world, comm_self, num_contexts, netmod_contexts));
+    MPIDU_RC_POP(MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts));
 
     optlen = MPIDI_MIN_MSG_SZ;
     FI_RC(fi_setopt(&MPIDI_Global.ep->fid, FI_OPT_ENDPOINT,
@@ -386,12 +386,12 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 
 static inline int MPIDI_netmod_free_mem(void *ptr)
 {
-    return MPIDI_CH4U_Free_mem(ptr);
+    return MPIDI_CH4U_free_mem(ptr);
 }
 
 static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
-    return MPIDI_CH4U_Alloc_mem(size, info_ptr);
+    return MPIDI_CH4U_alloc_mem(size, info_ptr);
 }
 
 #undef FUNCNAME

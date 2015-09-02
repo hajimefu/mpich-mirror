@@ -445,10 +445,10 @@ static inline int MPIDI_CH4U_am_ssend_ack_target_handler(void *am_hdr, size_t am
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Init_comm
+#define FUNCNAME MPIDI_CH4U_init_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Init_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
@@ -466,10 +466,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Init_comm(MPID_Comm * comm)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Init_comm
+#define FUNCNAME MPIDI_CH4U_destroy_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Destroy_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
@@ -488,10 +488,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Destroy_comm(MPID_Comm * comm)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Init
+#define FUNCNAME MPIDI_CH4U_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Init(MPID_Comm * comm_world, MPID_Comm * comm_self,
+__CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
                                    int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -515,8 +515,8 @@ __CH4_INLINE__ int MPIDI_CH4U_Init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4I_am_ssend_ack_origin_cmpl_handler,
                                              &MPIDI_CH4U_am_ssend_ack_target_handler));
 
-    MPIDU_RC_POP(MPIDI_CH4U_Init_comm(comm_world));
-    MPIDU_RC_POP(MPIDI_CH4U_Init_comm(comm_self));
+    MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_world));
+    MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_self));
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
   fn_exit:
     return mpi_errno;
@@ -525,10 +525,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Init(MPID_Comm * comm_world, MPID_Comm * comm_self
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Alloc_mem
+#define FUNCNAME MPIDI_CH4U_alloc_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void *MPIDI_CH4U_Alloc_mem(size_t size, MPID_Info * info_ptr)
+__CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
@@ -539,10 +539,10 @@ __CH4_INLINE__ void *MPIDI_CH4U_Alloc_mem(size_t size, MPID_Info * info_ptr)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Free_mem
+#define FUNCNAME MPIDI_CH4U_free_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Free_mem(void *ptr)
+__CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);

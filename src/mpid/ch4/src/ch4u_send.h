@@ -133,10 +133,10 @@ static inline int MPIDI_CH4I_psend(const void *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Send
+#define FUNCNAME MPIDI_CH4U_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Send(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_send(const void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -153,10 +153,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Send(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Isend
+#define FUNCNAME MPIDI_CH4U_isend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Isend(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_isend(const void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -175,10 +175,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Isend(const void *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Rsend
+#define FUNCNAME MPIDI_CH4U_rsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Rsend(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_rsend(const void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -196,10 +196,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Rsend(const void *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Irsend
+#define FUNCNAME MPIDI_CH4U_irsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Irsend(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_irsend(const void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -216,10 +216,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Irsend(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Ssend
+#define FUNCNAME MPIDI_CH4U_ssend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Ssend(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_ssend(const void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -236,10 +236,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Ssend(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Issend
+#define FUNCNAME MPIDI_CH4U_issend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Issend(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_issend(const void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -256,10 +256,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Issend(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Startall
+#define FUNCNAME MPIDI_CH4U_startall
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Startall(int count, MPID_Request * requests[])
+__CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPID_Request * requests[])
 {
     int mpi_errno = MPI_SUCCESS, i;
     int rank, tag, context_offset;
@@ -345,10 +345,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Startall(int count, MPID_Request * requests[])
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Send_init
+#define FUNCNAME MPIDI_CH4U_send_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Send_init(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_send_init(const void *buf,
                                         int count,
                                         MPI_Datatype datatype,
                                         int rank,
@@ -366,10 +366,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Send_init(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Ssend_init
+#define FUNCNAME MPIDI_CH4U_ssend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Ssend_init(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_ssend_init(const void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -387,10 +387,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Ssend_init(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Bsend_init
+#define FUNCNAME MPIDI_CH4U_bsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Bsend_init(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_bsend_init(const void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -408,10 +408,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Bsend_init(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Rsend_init
+#define FUNCNAME MPIDI_CH4U_rsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Rsend_init(const void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_rsend_init(const void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -429,10 +429,10 @@ __CH4_INLINE__ int MPIDI_CH4U_Rsend_init(const void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_Cancel_send
+#define FUNCNAME MPIDI_CH4U_cancel_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_Cancel_send(MPID_Request * sreq)
+__CH4_INLINE__ int MPIDI_CH4U_cancel_send(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CANCEL_SEND);

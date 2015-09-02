@@ -228,7 +228,7 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
     MPIDI_Map_set(MPIDI_Global.comm_map, mapid, comm);
     COMM_OFI(comm)->window_instance = 0;
-    MPIDI_CH4U_Init_comm(comm);
+    MPIDI_CH4U_init_comm(comm);
 
     /* Do not handle intercomms */
     if (comm->comm_kind == MPID_INTERCOMM)
@@ -247,7 +247,7 @@ static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_COMM_DESTROY);
 
-    MPIDI_CH4U_Destroy_comm(comm);
+    MPIDI_CH4U_destroy_comm(comm);
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
     MPIDI_Map_erase(MPIDI_Global.comm_map, mapid);

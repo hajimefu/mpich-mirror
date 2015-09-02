@@ -20,7 +20,7 @@ static inline int MPIDI_netmod_send(const void *buf,
                                     int tag,
                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Send(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_rsend(const void *buf,
@@ -30,7 +30,7 @@ static inline int MPIDI_netmod_rsend(const void *buf,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Rsend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_rsend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 
@@ -42,7 +42,7 @@ static inline int MPIDI_netmod_irsend(const void *buf,
                                       int tag,
                                       MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Irsend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_irsend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_ssend(const void *buf,
@@ -52,12 +52,12 @@ static inline int MPIDI_netmod_ssend(const void *buf,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_startall(int count, MPID_Request * requests[])
 {
-    return MPIDI_CH4U_Startall(count, requests);
+    return MPIDI_CH4U_startall(count, requests);
 }
 
 static inline int MPIDI_netmod_send_init(const void *buf,
@@ -68,7 +68,7 @@ static inline int MPIDI_netmod_send_init(const void *buf,
                                          MPID_Comm * comm,
                                          int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Send_init(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_send_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_ssend_init(const void *buf,
@@ -79,7 +79,7 @@ static inline int MPIDI_netmod_ssend_init(const void *buf,
                                           MPID_Comm * comm,
                                           int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Ssend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_ssend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_bsend_init(const void *buf,
@@ -90,7 +90,7 @@ static inline int MPIDI_netmod_bsend_init(const void *buf,
                                           MPID_Comm * comm,
                                           int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Bsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_bsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_rsend_init(const void *buf,
@@ -101,7 +101,7 @@ static inline int MPIDI_netmod_rsend_init(const void *buf,
                                           MPID_Comm * comm,
                                           int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Rsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_rsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_isend(const void *buf,
@@ -111,7 +111,7 @@ static inline int MPIDI_netmod_isend(const void *buf,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Isend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_issend(const void *buf,
@@ -121,12 +121,12 @@ static inline int MPIDI_netmod_issend(const void *buf,
                                       int tag,
                                       MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4U_Issend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_netmod_cancel_send(MPID_Request * sreq)
 {
-    return MPIDI_CH4U_Cancel_send(sreq);
+    return MPIDI_CH4U_cancel_send(sreq);
 }
 
 #endif /* NETMOD_AM_OFI_SEND_H_INCLUDED */
