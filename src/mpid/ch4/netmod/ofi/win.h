@@ -755,7 +755,7 @@ static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint size,
     int  fd, rc, first;
     char shm_key[64];
     void *map_ptr;
-    sprintf(shm_key, "/mpi-%X-%lX",
+    sprintf(shm_key, "/mpi-%X-%llX",
             MPIDI_Global.jobid,
             WIN_OFI(win)->win_id);
 
