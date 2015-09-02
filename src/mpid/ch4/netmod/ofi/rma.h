@@ -92,7 +92,7 @@ static inline int MPIDI_valid_group_rank(int         lpid,
     int size = grp->size;
     int z;
 
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z);
+    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VALID_GROUP_RANK);
     return (z < size);
