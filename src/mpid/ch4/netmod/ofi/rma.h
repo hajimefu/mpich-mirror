@@ -1027,10 +1027,9 @@ static inline int MPIDI_netmod_raccumulate(const void *origin_addr,
                                            MPID_Win *win,
                                            MPID_Request **request)
 {
-    MPID_Request *rreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RACCUMULATE);
-
+    MPID_Request *rreq;
     int mpi_errno = do_accumulate((void *)origin_addr,
                                   origin_count,
                                   origin_datatype,

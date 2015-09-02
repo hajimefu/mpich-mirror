@@ -439,7 +439,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         MPIDI_Chunk_request *creq;                              \
         MPID_cc_incr(sigreq->cc_ptr, &tmp);                     \
         creq=(MPIDI_Chunk_request*)MPIU_Malloc(sizeof(*creq));  \
-        creq->event_id = MPIDI_EVENT_RMA_DONE;                  \
+        creq->event_id = MPIDI_EVENT_CHUNK_DONE;                \
         creq->parent   = sigreq;                                \
         msg.context    = &creq->context;                        \
         CONDITIONAL_GLOBAL_CNTR_INCR;                           \

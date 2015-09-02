@@ -81,7 +81,7 @@ static inline int MPIDI_CH4I_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     uint64_t msg_tag;
     size_t message_sz;
     MPI_Aint last;
-    int dt_contig, c;
+    int dt_contig;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
     MPIDI_msg_sz_t data_sz, dt_sz;
