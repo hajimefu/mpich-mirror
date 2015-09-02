@@ -58,3 +58,11 @@ int MPID_Abort(MPID_Comm * comm, int mpi_errno, int exit_code, const char *error
 
 #define MPID_Abort MPID_TMP
 #endif
+
+/* Another weird ADI that doesn't follow convention */
+static void init_comm()__attribute__((constructor));
+static void init_comm()
+{
+  MPID_Comm_fns             = &MPIDI_CH4_Global.MPID_Comm_fns_store;
+  MPID_Comm_fns->split_type =  MPIDI_Comm_split_type;
+}
