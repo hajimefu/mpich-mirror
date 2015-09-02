@@ -37,24 +37,24 @@ static inline int MPIDI_CH4I_do_send(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_SEND);
 
-    sreq = MPIDI_CH4U_Create_req();
+    sreq = MPIDI_CH4I_create_req();
     MPIU_Assert(sreq);
     sreq->kind = MPID_REQUEST_SEND;
 
     *request = sreq;
-    match_bits = MPID_CH4U_init_send_tag(comm->context_id + context_offset, comm->rank, tag);
+    match_bits = MPIDI_CH4I_init_send_tag(comm->context_id + context_offset, comm->rank, tag);
 
     am_hdr.msg_tag = match_bits;
     if (type == MPIDI_CH4U_AM_SSEND_REQ) {
         ssend_req.hdr = am_hdr;
         ssend_req.sreq_ptr = (uint64_t) sreq;
         MPID_cc_incr(sreq->cc_ptr, &c);
-        MPIU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SSEND_REQ,
+        MPIDU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SSEND_REQ,
                                          &ssend_req, sizeof(ssend_req),
                                          buf, count, datatype, sreq, NULL));
     }
     else {
-        MPIU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SEND,
+        MPIDU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SEND,
                                          &am_hdr, sizeof(am_hdr),
                                          buf, count, datatype, sreq, NULL));
     }
@@ -82,7 +82,7 @@ static inline int MPIDI_CH4I_send(const void *buf, int count, MPI_Datatype datat
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
         if (!noreq) {
-            *request = MPIDI_CH4U_Create_req();
+            *request = MPIDI_CH4I_create_req();
             (*request)->kind = MPID_REQUEST_SEND;
             MPIDI_Request_complete((*request));
         }
@@ -111,12 +111,12 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_NM_PSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_NM_PSEND);
 
-    sreq = MPIDI_CH4U_Create_req();
+    sreq = MPIDI_CH4I_create_req();
     *request = sreq;
 
     sreq->kind = MPID_PREQUEST_SEND;
     MPIU_CH4U_REQUEST(sreq, util_comm) = comm;
-    match_bits = MPID_CH4U_init_send_tag(comm->context_id + context_offset, rank, tag);
+    match_bits = MPIDI_CH4I_init_send_tag(comm->context_id + context_offset, rank, tag);
 
     MPIU_CH4U_REQUEST(sreq, buffer) = (void *) buf;
     MPIU_CH4U_REQUEST(sreq, count) = count;
@@ -270,9 +270,9 @@ __CH4_INLINE__ int MPIDI_CH4U_Startall(int count, MPID_Request * requests[])
 
     for (i = 0; i < count; i++) {
         MPID_Request *const preq = requests[i];
-        tag = MPIDI_CH4U_Get_tag(MPIU_CH4U_REQUEST(preq, tag));
-        rank = MPIDI_CH4U_Get_source(MPIU_CH4U_REQUEST(preq, tag));
-        context_offset = MPIDI_CH4U_Get_context(MPIU_CH4U_REQUEST(preq, tag) -
+        tag = MPIDI_CH4I_get_tag(MPIU_CH4U_REQUEST(preq, tag));
+        rank = MPIDI_CH4I_get_source(MPIU_CH4U_REQUEST(preq, tag));
+        context_offset = MPIDI_CH4I_get_context(MPIU_CH4U_REQUEST(preq, tag) -
                                                 MPIU_CH4U_REQUEST(preq, util_comm)->context_id);
         datatype = MPIU_CH4U_REQUEST(preq, datatype);
 

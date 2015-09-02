@@ -123,7 +123,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     FI_RC(fi_av_open(MPIDI_Global.domain, &av_attr, &MPIDI_Global.av, NULL), avopen);
 
-    MPI_RC_POP(MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
+    MPIDU_RC_POP(MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
                                      MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep));
 
     MPIDI_Global.addrnamelen = FI_NAME_MAX;
@@ -165,16 +165,16 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->rank = 0;
     comm->remote_size = 1;
     comm->local_size = 1;
-    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
     COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
 
     comm = MPIR_Process.comm_world;
     comm->rank = rank;
     comm->remote_size = size;
     comm->local_size = size;
-    MPI_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
 
-    MPIU_RC_POP(MPIDI_CH4U_Init(comm_world, comm_self, num_contexts, netmod_contexts));
+    MPIDU_RC_POP(MPIDI_CH4U_Init(comm_world, comm_self, num_contexts, netmod_contexts));
 
     optlen = MPIDI_MIN_MSG_SZ;
     FI_RC(fi_setopt(&MPIDI_Global.ep->fid, FI_OPT_ENDPOINT,
@@ -198,7 +198,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     nodemap = (uint32_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(*nodemap));
     nodemap[MPIR_Process.comm_world->rank] = gethostid();
 
-    MPI_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
+    MPIDU_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
                                    sizeof(*nodemap), MPI_BYTE, MPIR_Process.comm_world, &errflag));
     MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size
                                                            * sizeof(*MPIDI_Global.node_map));
@@ -238,7 +238,7 @@ static inline int MPIDI_netmod_finalize(void)
 
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
-    MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
+    MPIDU_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
                                    MPI_SUM, MPIR_Process.comm_world, &errflag));
 
     FI_RC(fi_close(&MPIDI_Global.mr->fid), mr_unreg);

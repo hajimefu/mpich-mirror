@@ -51,7 +51,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_gather_info(void *base, MPI_Aint size, int dis
                                     sizeof(MPIDI_CH4U_win_basic_info_t), MPI_BYTE,
                                     (*win_ptr)->comm_ptr, &errflag);
     if (mpi_errno) {
-        MPIU_RC_POP(mpi_errno);
+        MPIDU_RC_POP(mpi_errno);
     }
   fn_exit:
     MPIDI_RMA_FUNC_EXIT(MPID_STATE_MPIDI_CH4U_WIN_GATHER_INFO);
@@ -281,7 +281,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_create(void *base,
 
     mpi_errno = MPIDI_CH4U_Win_gather_info(base, length, disp_unit, info, comm_ptr, win_ptr);
     if (mpi_errno != MPI_SUCCESS)
-        MPIU_RC_POP(mpi_errno);
+        MPIDU_RC_POP(mpi_errno);
 
     if (MPIU_CH4U_WIN(*win_ptr, info_args).alloc_shm == TRUE) {
         /* TODO */
@@ -400,7 +400,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_allocate_no_shm(MPI_Aint size, int disp_unit,
 
     mpi_errno = MPIDI_CH4U_Win_gather_info(*base_pp, size, disp_unit, info, comm_ptr, win_ptr);
     if (mpi_errno != MPI_SUCCESS) {
-        MPIU_RC_POP(mpi_errno);
+        MPIDU_RC_POP(mpi_errno);
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH4U_WIN_ALLOCATE_NO_SHM);
@@ -429,7 +429,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_allocate(MPI_Aint size,
     }
     mpi_errno = MPIDI_CH4U_Win_allocate_no_shm(size, disp_unit, info, comm, baseptr, win);
     if (mpi_errno != MPI_SUCCESS)
-        MPIU_RC_POP(mpi_errno);
+        MPIDU_RC_POP(mpi_errno);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_ALLOCATE);
     return mpi_errno;
@@ -492,7 +492,7 @@ __CH4_INLINE__ int MPIDI_CH4U_Win_create_dynamic(MPID_Info * info,
 
     mpi_errno = MPIDI_CH4U_Win_gather_info(MPI_BOTTOM, 0, 1, info, comm, win);
     if (mpi_errno != MPI_SUCCESS)
-        MPIU_RC_POP(mpi_errno);
+        MPIDU_RC_POP(mpi_errno);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_CREATE_DYNAMIC);
     return mpi_errno;

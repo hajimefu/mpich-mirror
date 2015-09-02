@@ -33,11 +33,11 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     if(likely(ret > 0))
-        MPIU_RC_POP(handle_cq_entries(wc,ret));
+        MPI_RC_POP(handle_cq_entries(wc,ret));
     else if (ret == -FI_EAGAIN)
         goto fn_exit;
     else if (ret < 0)
-        MPIU_RC_POP(handle_cq_error(ret));
+        MPI_RC_POP(handle_cq_error(ret));
 
   fn_exit:
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -54,7 +54,7 @@ static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num)
     MPID_Request *req;
     for (i = 0; i < num; i++) {
         req = devreq_to_req(wc[i].op_context);
-        MPIU_RC_POP(dispatch_function(&wc[i],req));
+        MPI_RC_POP(dispatch_function(&wc[i],req));
     }
 fn_exit:
     return mpi_errno;

@@ -39,7 +39,7 @@ static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
     kv = (PMI_keyval_t *)MPIU_Malloc(nkeys * sizeof(PMI_keyval_t));
 
     for(i=0; i<nkeys; i++) {
-        MPIDI_CH4_RC_POP(MPIR_Info_get_nthkey_impl(info_ptr,i,key));
+        MPIDU_RC_POP(MPIR_Info_get_nthkey_impl(info_ptr,i,key));
         MPIR_Info_get_valuelen_impl(info_ptr,key,&vallen,&flag);
         kv[i].key = (const char *)MPIU_Strdup(key);
         kv[i].val = (char *)MPIU_Malloc(vallen + 1);
@@ -110,7 +110,7 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
         for(i=0; i<total_num_processes; i++)
             pmi_errcodes[i] = 0;
 
-        MPIDI_CH4_RC_POP(MPIDI_Open_port(NULL, port_name));
+        MPIDU_RC_POP(MPIDI_Open_port(NULL, port_name));
 
         info_keyval_sizes   = (int *)          MPIU_Malloc(count*sizeof(int));
         MPIR_ERR_CHKANDJUMP(!info_keyval_sizes, mpi_errno, MPI_ERR_OTHER, "**nomem");
@@ -124,7 +124,7 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
             }
         else
             for(i=0; i<count; i++)
-                MPIDI_CH4_RC_POP(MPIDI_mpi_to_pmi_keyvals(info_ptrs[i],
+                MPIDU_RC_POP(MPIDI_mpi_to_pmi_keyvals(info_ptrs[i],
                                                           &info_keyval_vectors[i],
                                                           &info_keyval_sizes[i]));
 
@@ -159,18 +159,18 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
 
     if(errcodes != MPI_ERRCODES_IGNORE) {
         MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-        MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&should_accept,1,MPI_INT,
+        MPIDU_RC_POP(MPIR_Bcast_impl(&should_accept,1,MPI_INT,
                                          root,comm_ptr,&errflag));
-        MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&pmi_errno,1,MPI_INT,
+        MPIDU_RC_POP(MPIR_Bcast_impl(&pmi_errno,1,MPI_INT,
                                          root,comm_ptr,&errflag));
-        MPIDI_CH4_RC_POP(MPIR_Bcast_impl(&total_num_processes,1,MPI_INT,
+        MPIDU_RC_POP(MPIR_Bcast_impl(&total_num_processes,1,MPI_INT,
                                          root, comm_ptr, &errflag));
-        MPIDI_CH4_RC_POP(MPIR_Bcast_impl(errcodes, total_num_processes, MPI_INT,
+        MPIDU_RC_POP(MPIR_Bcast_impl(errcodes, total_num_processes, MPI_INT,
                                          root, comm_ptr,&errflag));
     }
 
     if(should_accept)
-        MPIDI_CH4_RC_POP(MPIDI_Comm_accept(port_name, NULL, root,
+        MPIDU_RC_POP(MPIDI_Comm_accept(port_name, NULL, root,
                                            comm_ptr, intercomm));
     else {
         if((pmi_errno == PMI_SUCCESS) && (errcodes[0] != 0))
@@ -178,7 +178,7 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
     }
 
     if(comm_ptr->rank == root)
-        MPIDI_CH4_RC_POP(MPIDI_Close_port(port_name));
+        MPIDU_RC_POP(MPIDI_Close_port(port_name));
 
 fn_exit:
 

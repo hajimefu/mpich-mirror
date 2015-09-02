@@ -191,13 +191,6 @@
 			 #STR);				\
     } while (0)
 
-#define MPI_RC_POP(FUNC)					\
-    do								\
-    {								\
-	mpi_errno = FUNC;					\
-	if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);	\
-    } while (0)
-
 #define MPIU_STR_RC(FUNC,STR)				\
     do							\
     {							\

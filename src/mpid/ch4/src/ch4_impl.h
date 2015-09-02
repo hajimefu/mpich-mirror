@@ -13,8 +13,7 @@
 
 #include "ch4_types.h"
 
-
-#define MPIDI_CH4_RC_POP(FUNC)                                  \
+#define MPIDU_RC_POP(FUNC)                                      \
   do                                                            \
     {                                                           \
       mpi_errno = FUNC;                                         \
@@ -27,23 +26,23 @@
 int MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char *value, int *flag);
 
 /* Static inlines */
-static inline int MPIDI_CH4U_Get_source(uint64_t match_bits)
+static inline int MPIDI_CH4I_get_source(uint64_t match_bits)
 {
     return ((int) ((match_bits & MPIDI_CH4U_SOURCE_MASK) >> MPIDI_CH4U_TAG_SHIFT));
 }
 
-static inline int MPIDI_CH4U_Get_tag(uint64_t match_bits)
+static inline int MPIDI_CH4I_get_tag(uint64_t match_bits)
 {
     return ((int) (match_bits & MPIDI_CH4U_TAG_MASK));
 }
 
-static inline int MPIDI_CH4U_Get_context(uint64_t match_bits)
+static inline int MPIDI_CH4I_get_context(uint64_t match_bits)
 {
     return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >>
                    (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
 }
 
-static inline int MPIDI_CH4U_Get_context_index(uint64_t context_id)
+static inline int MPIDI_CH4I_get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
     raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX, context_id);
@@ -53,7 +52,7 @@ static inline int MPIDI_CH4U_Get_context_index(uint64_t context_id)
     return gen_id;
 }
 
-static inline MPID_Request *MPIDI_CH4U_Create_req()
+static inline MPID_Request *MPIDI_CH4I_create_req()
 {
     MPID_Request *req = MPIDI_netmod_request_create();
     MPIU_CH4U_REQUEST(req, status) = 0;
@@ -180,7 +179,7 @@ static inline MPID_Request *MPIDI_CH4U_Create_req()
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPID_CH4U_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4I_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
@@ -191,7 +190,7 @@ static inline uint64_t MPID_CH4U_init_send_tag(MPIU_Context_id_t contextid, int 
     return match_bits;
 }
 
-static inline uint64_t MPID_CH4U_init_recvtag(uint64_t * mask_bits,
+static inline uint64_t MPIDI_CH4I_init_recvtag(uint64_t * mask_bits,
                                               MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;
@@ -215,11 +214,5 @@ static inline uint64_t MPID_CH4U_init_recvtag(uint64_t * mask_bits,
 
     return match_bits;
 }
-
-#define MPIU_RC_POP(FUNC)					\
-    do {							\
-	mpi_errno = FUNC;					\
-	if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);	\
-	} while (0)
 
 #endif /* MPIDCH4_IMPL_H_INCLUDED */

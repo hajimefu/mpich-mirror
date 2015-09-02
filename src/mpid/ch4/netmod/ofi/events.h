@@ -400,40 +400,40 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
     int mpi_errno;
     switch(REQ_OFI(req,event_id)) {
     case MPIDI_EVENT_PEEK:
-        MPIU_RC_POP(peek_event(wc,req));
+        MPI_RC_POP(peek_event(wc,req));
         break;
     case MPIDI_EVENT_RECV:
-        MPIU_RC_POP(recv_event(wc,req));
+        MPI_RC_POP(recv_event(wc,req));
         break;
     case MPIDI_EVENT_RECV_HUGE:
-        MPIU_RC_POP(recv_huge_event(wc,req));
+        MPI_RC_POP(recv_huge_event(wc,req));
         break;
     case MPIDI_EVENT_SEND:
-        MPIU_RC_POP(send_event(wc,req));
+        MPI_RC_POP(send_event(wc,req));
         break;
     case MPIDI_EVENT_SEND_HUGE:
-        MPIU_RC_POP(send_huge_event(wc,req));
+        MPI_RC_POP(send_huge_event(wc,req));
         break;
     case MPIDI_EVENT_SSEND_ACK:
-        MPIU_RC_POP(ssend_ack_event(wc,req));
+        MPI_RC_POP(ssend_ack_event(wc,req));
         break;
     case MPIDI_EVENT_GET_HUGE:
-        MPIU_RC_POP(get_huge_event(wc,req));
+        MPI_RC_POP(get_huge_event(wc,req));
         break;
     case MPIDI_EVENT_CONTROL:
-        MPIU_RC_POP(control_event(wc,req));
+        MPI_RC_POP(control_event(wc,req));
         break;
     case MPIDI_EVENT_CHUNK_DONE:
-        MPIU_RC_POP(chunk_done_event(wc,req));
+        MPI_RC_POP(chunk_done_event(wc,req));
         break;
     case MPIDI_EVENT_RMA_DONE:
-        MPIU_RC_POP(rma_done_event(wc,req));
+        MPI_RC_POP(rma_done_event(wc,req));
         break;
     case MPIDI_EVENT_DYNPROC_DONE:
-        MPIU_RC_POP(dynproc_done_event(wc,req));
+        MPI_RC_POP(dynproc_done_event(wc,req));
         break;
     case MPIDI_EVENT_ACCEPT_PROBE:
-        MPIU_RC_POP(accept_probe_event(wc,req));
+        MPI_RC_POP(accept_probe_event(wc,req));
         break;
     case MPIDI_EVENT_ABORT:
     default:

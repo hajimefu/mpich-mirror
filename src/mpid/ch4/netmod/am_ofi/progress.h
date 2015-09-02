@@ -242,7 +242,7 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
     }
 
     handler_id = AMREQ_OFI(sreq, msg_hdr).handler_id;
-    MPI_RC_POP(MPIDI_Global.send_cmpl_handlers[handler_id] (sreq));
+    MPIDU_RC_POP(MPIDI_Global.send_cmpl_handlers[handler_id] (sreq));
 
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_LMT_ACK);
@@ -287,7 +287,7 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
         MPIU_Free(AMREQ_OFI(sreq, pack_buffer));
     }
 
-    MPI_RC_POP(MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq));
+    MPIDU_RC_POP(MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq));
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
     return mpi_errno;
@@ -310,19 +310,19 @@ static inline int MPIDI_netmod_handle_recv_completion(struct fi_cq_data_entry *c
     am_hdr = (MPIDI_AM_OFI_hdr_t *) cq_entry->buf;
     switch (am_hdr->am_type) {
     case MPIDI_AMTYPE_SHORT_HDR:
-        MPI_RC_POP(MPIDI_netmod_handle_short_am_hdr(am_hdr, source));
+        MPIDU_RC_POP(MPIDI_netmod_handle_short_am_hdr(am_hdr, source));
         break;
 
     case MPIDI_AMTYPE_SHORT:
-        MPI_RC_POP(MPIDI_netmod_handle_short_am(am_hdr, source));
+        MPIDU_RC_POP(MPIDI_netmod_handle_short_am(am_hdr, source));
         break;
 
     case MPIDI_AMTYPE_LMT_REQ:
-        MPI_RC_POP(MPIDI_netmod_handle_long_am(am_hdr, source));
+        MPIDU_RC_POP(MPIDI_netmod_handle_long_am(am_hdr, source));
         break;
 
     case MPIDI_AMTYPE_LMT_ACK:
-        MPI_RC_POP(MPIDI_netmod_handle_lmt_ack(am_hdr, source));
+        MPIDU_RC_POP(MPIDI_netmod_handle_lmt_ack(am_hdr, source));
         break;
 
     default:
@@ -383,7 +383,7 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
         goto fn_exit;
 
     rreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
-    MPI_RC_POP(MPIDI_netmod_dispatch_lmt_ack(source, ofi_req, netmod_context));
+    MPIDU_RC_POP(MPIDI_netmod_dispatch_lmt_ack(source, ofi_req, netmod_context));
     ofi_req->cmpl_handler_fn(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
@@ -437,19 +437,19 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 
         found = 1;
         if (cq_entry.flags & FI_SEND) {
-            MPI_RC_POP(MPIDI_netmod_handle_send_completion(&cq_entry));
+            MPIDU_RC_POP(MPIDI_netmod_handle_send_completion(&cq_entry));
 
         }
         else if (cq_entry.flags & FI_RECV) {
-            MPI_RC_POP(MPIDI_netmod_handle_recv_completion(&cq_entry, source, netmod_context));
+            MPIDU_RC_POP(MPIDI_netmod_handle_recv_completion(&cq_entry, source, netmod_context));
 
             if (cq_entry.flags & FI_MULTI_RECV) {
-                MPI_RC_POP(MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context));
+                MPIDU_RC_POP(MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context));
             }
 
         }
         else if (cq_entry.flags & FI_READ) {
-            MPI_RC_POP(MPIDI_netmod_handle_read_completion(&cq_entry, source, netmod_context));
+            MPIDU_RC_POP(MPIDI_netmod_handle_read_completion(&cq_entry, source, netmod_context));
 
         }
         else {
