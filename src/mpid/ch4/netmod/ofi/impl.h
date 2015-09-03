@@ -167,9 +167,9 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define FI_RC_RETRY2(FUNC1,FUNC2,STR)                       \
     do {                                                    \
     ssize_t _ret;                                           \
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);       \
+    FUNC1;                                                  \
     do {                                                    \
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
-        FUNC1;                                              \
         _ret = FUNC2;                                       \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
@@ -183,6 +183,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                          FCNAME,                            \
                          fi_strerror(-_ret));               \
         PROGRESS();                                         \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
