@@ -165,14 +165,14 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->rank = 0;
     comm->remote_size = 1;
     comm->local_size = 1;
-    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
-    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
+    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
+    COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
 
     comm = MPIR_Process.comm_world;
     comm->rank = rank;
     comm->remote_size = size;
     comm->local_size = size;
-    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
 
     MPIDU_RC_POP(MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts));
 
@@ -280,7 +280,7 @@ static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
     else if (is_remote)
         *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
     else
-        *lpid_ptr = COMM_OFI(comm_ptr)->local_vcrt->vcr_table[idx].addr_idx;
+        *lpid_ptr = COMM_OFI(comm_ptr).local_vcrt->vcr_table[idx].addr_idx;
 
     return MPI_SUCCESS;
 }
@@ -376,10 +376,10 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
                                                            int size, const int lpids[])
 {
     int i;
-    MPIDI_VCRT_Create(size, &COMM_OFI(newcomm_ptr)->vcrt);
+    MPIDI_VCRT_Create(size, &COMM_OFI(newcomm_ptr).vcrt);
 
     for (i = 0; i < size; i++)
-        COMM_OFI(newcomm_ptr)->vcrt->vcr_table[i].addr_idx = lpids[i];
+        COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
 
     return 0;
 }

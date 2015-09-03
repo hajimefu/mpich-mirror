@@ -20,4 +20,9 @@ typedef struct {
     int dummy;
 } MPIDI_shm_stub_request_t;
 
+typedef struct MPIDI_shm_stub_comm_t {
+    int dummy;
+} MPIDI_shm_stub_comm_t;
+
+
 #endif

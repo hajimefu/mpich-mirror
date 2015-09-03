@@ -100,7 +100,7 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
 
     /* context id lower bits, window instance upper bits */
     WIN_OFI(win)->win_id = 1+(((uint64_t)comm_ptr->context_id) |
-                              ((uint64_t)((COMM_OFI(comm_ptr)->window_instance)++)<<32));
+                              ((uint64_t)((COMM_OFI(comm_ptr).window_instance)++)<<32));
     MPIDI_OFI_Map_set(MPIDI_Global.win_map,WIN_OFI(win)->win_id,win);
 
 fn_exit:

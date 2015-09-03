@@ -21,6 +21,7 @@
 #include <rdma/fi_atomic.h>
 #include <rdma/fi_cm.h>
 #include <rdma/fi_errno.h>
+#include "../ofi/ofi_pre_common.h"
 
 struct MPID_Comm;
 struct MPID_Request;
@@ -78,5 +79,8 @@ typedef struct {
 typedef struct {
     int dummy;
 } MPIDI_netmod_am_ofi_request_t;
+
+
+typedef MPIDI_netmod_ofi_comm_t MPIDI_netmod_am_ofi_comm_t;
 
 #endif

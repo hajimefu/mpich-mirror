@@ -20,4 +20,8 @@ typedef struct {
     int dummy;
 } MPIDI_netmod_stub_request_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_netmod_stub_comm_t;
+
 #endif

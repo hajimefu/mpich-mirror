@@ -492,8 +492,8 @@ __CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
 
     comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
     if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4u.posted_list == NULL);
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4u.unexp_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.posted_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.unexp_list == NULL);
         MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = NULL;
     }
 
