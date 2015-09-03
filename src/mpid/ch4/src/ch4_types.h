@@ -60,6 +60,11 @@ typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
     uint64_t sreq_ptr;
 } MPIDI_CH4U_Ssend_ack_msg_t;
 
+typedef struct MPIDI_CH4_Comm_req_list_t {
+    MPID_Comm *comm;
+    MPIDI_CH4U_Devreq_t *unexp_list;
+} MPIDI_CH4_Comm_req_list_t;
+
 typedef struct MPIDI_CH4_Global_t {
     MPID_Request *request_test;
     MPID_Comm *comm_test;
@@ -67,7 +72,7 @@ typedef struct MPIDI_CH4_Global_t {
     int pname_len;
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
-    MPID_Comm **comms;
+    MPIDI_CH4_Comm_req_list_t *comm_req_lists;
     int active_progress_hooks;
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];

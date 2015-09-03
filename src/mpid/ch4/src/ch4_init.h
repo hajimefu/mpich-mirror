@@ -176,9 +176,10 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                              "**pmi_get_appnum %d", pmi_errno);
     }
 
-    MPIDI_CH4_Global.comms = (MPID_Comm **) MPIU_Calloc(1, sizeof(MPID_Comm *)
-                                                        * MPIR_CONTEXT_INT_BITS *
-                                                        MPIR_CONTEXT_ID_BITS);
+    MPIDI_CH4_Global.comm_req_lists = (MPIDI_CH4_Comm_req_list_t *) 
+        MPIU_Calloc(MPIR_CONTEXT_INT_BITS * MPIR_CONTEXT_ID_BITS, 
+                    sizeof(MPIDI_CH4_Comm_req_list_t *));
+
 #if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
     /* Create and initialize the locality array */
     /* TODO: This doesn't support dynamic processes */
@@ -275,7 +276,7 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     mpi_errno = MPIDI_shm_finalize();
 #endif
 
-    MPIU_Free(MPIDI_CH4_Global.comms);
+    MPIU_Free(MPIDI_CH4_Global.comm_req_lists);
 #if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
     MPIU_Free(MPIDI_CH4U_gpid_local);
 #endif

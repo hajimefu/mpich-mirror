@@ -131,7 +131,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
 
     match_bits = MPIDI_CH4I_init_recvtag(&mask_bits, context_id, rank, tag);
     comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER() */
     rreq = MPIDI_CH4I_dequeue_unexp_strict(match_bits, mask_bits,
@@ -355,7 +355,7 @@ __CH4_INLINE__ int MPIDI_CH4U_cancel_recv(MPID_Request * rreq)
 
     msg_tag = MPIU_CH4U_REQUEST(rreq, tag);
     comm_idx = MPIDI_CH4I_get_context_index(MPIDI_CH4I_get_context(msg_tag));
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
     found = MPIDI_CH4I_delete_posted(&rreq->dev.ch4.ch4u, &MPIU_CH4U_COMM(root_comm, posted_list));
 
     if (found) {

@@ -159,7 +159,7 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, c;
     MPID_Comm *root_comm;
-    MPID_Request *match_req;
+    MPID_Request *match_req = NULL;
     uint64_t msg_tag;
     size_t count;
     MPI_Aint last;
@@ -184,10 +184,11 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
 
     msg_tag = MPIU_CH4U_REQUEST(rreq, tag);
     comm_idx = MPIDI_CH4I_get_context_index(MPIDI_CH4I_get_context(msg_tag));
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER(); */
-    match_req = MPIDI_CH4I_dequeue_posted(msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
+    if (root_comm)
+        match_req = MPIDI_CH4I_dequeue_posted(msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
 
     if (!match_req) {
         MPIU_CH4U_REQUEST(rreq, status) &= ~MPIDI_CH4U_REQ_BUSY;
@@ -304,7 +305,7 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
                                                     cmpl_handler_fn, MPID_Request ** req)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
-    MPID_Request *rreq;
+    MPID_Request *rreq = NULL;
     MPID_Comm *root_comm;
     size_t data_sz;
 
@@ -318,11 +319,13 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_SEND_HANDLER);
 
     comm_idx = MPIDI_CH4I_get_context_index(MPIDI_CH4I_get_context(hdr->msg_tag));
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
-    /* MPIDI_CS_ENTER(); */
-    rreq = MPIDI_CH4I_dequeue_posted(hdr->msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
-    /* MPIDI_CS_EXIT(); */
+    if (root_comm) {
+        /* MPIDI_CS_ENTER(); */
+        rreq = MPIDI_CH4I_dequeue_posted(hdr->msg_tag, &MPIU_CH4U_COMM(root_comm, posted_list));
+        /* MPIDI_CS_EXIT(); */
+    }
 
     if (rreq == NULL) {
         rreq = MPIDI_CH4I_create_req();
@@ -334,7 +337,10 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
         MPIU_CH4U_REQUEST(rreq, status) |= MPIDI_CH4U_REQ_BUSY;
         MPIU_CH4U_REQUEST(rreq, status) |= MPIDI_CH4U_REQ_UNEXPECTED;
         /* MPIDI_CS_ENTER(); */
-        MPIDI_CH4I_enqueue_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
+        if (root_comm)
+            MPIDI_CH4I_enqueue_unexp(rreq, &MPIU_CH4U_COMM(root_comm, unexp_list));
+        else
+            MPIDI_CH4I_enqueue_unexp(rreq, &MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list);
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -455,10 +461,19 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
     comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
-    if (!MPIDI_CH4_Global.comms[comm_idx]) {
+    if (!MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
         MPIU_CH4U_COMM(comm, posted_list) = NULL;
         MPIU_CH4U_COMM(comm, unexp_list) = NULL;
-        MPIDI_CH4_Global.comms[comm_idx] = comm;
+        MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = comm;
+        if (MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list) {
+            MPIDI_CH4U_Devreq_t *curr, *tmp;
+            MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, 
+                                curr, tmp) {
+                MPL_DL_DELETE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, curr);
+                MPL_DL_APPEND(MPIU_CH4U_COMM(comm, unexp_list), curr);
+            }
+            MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list = NULL;
+        }
     }
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
@@ -476,10 +491,10 @@ __CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
     comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
-    if (MPIDI_CH4_Global.comms[comm_idx]) {
-        MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.posted_list == NULL);
-        MPIU_Assert(MPIDI_CH4_Global.comms[comm_idx]->dev.ch4u.unexp_list == NULL);
-        MPIDI_CH4_Global.comms[comm_idx] = NULL;
+    if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4u.posted_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4u.unexp_list == NULL);
+        MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = NULL;
     }
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);

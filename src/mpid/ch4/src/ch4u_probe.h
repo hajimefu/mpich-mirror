@@ -36,7 +36,7 @@ __CH4_INLINE__ int MPIDI_CH4U_iprobe(int source,
     }
 
     comm_idx = MPIDI_CH4I_get_context_index(comm->context_id);
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     match_bits = MPIDI_CH4I_init_recvtag(&mask_bits, root_comm->recvcontext_id +
                                         context_offset, source, tag);
@@ -117,7 +117,7 @@ __CH4_INLINE__ int MPIDI_CH4U_improbe(int source,
     }
 
     comm_idx = MPIDI_CH4I_get_context_index(comm->context_id);
-    root_comm = MPIDI_CH4_Global.comms[comm_idx];
+    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     match_bits = MPIDI_CH4I_init_recvtag(&mask_bits, root_comm->recvcontext_id +
                                         context_offset, source, tag);
