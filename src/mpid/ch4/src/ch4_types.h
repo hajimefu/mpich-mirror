@@ -62,7 +62,7 @@ typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
     MPID_Comm *comm;
-    MPIDI_CH4U_Devreq_t *unexp_list;
+    MPIDI_CH4U_Dev_rreq_t *unexp_list;
 } MPIDI_CH4_Comm_req_list_t;
 
 typedef struct MPIDI_CH4_Global_t {
@@ -78,8 +78,8 @@ typedef struct MPIDI_CH4_Global_t {
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
     MPID_Thread_mutex_t  m[2];
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
-    MPIDI_CH4U_Devreq_t *posted_list;
-    MPIDI_CH4U_Devreq_t *unexp_list;
+    MPIDI_CH4U_Dev_rreq_t *posted_list;
+    MPIDI_CH4U_Dev_rreq_t *unexp_list;
 #endif
 
     void *netmod_context[8];

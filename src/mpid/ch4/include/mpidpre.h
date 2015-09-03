@@ -47,28 +47,40 @@ typedef enum {
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
 
-
-typedef struct MPIDI_CH4U_Devreq_t {
-    void         *buffer;
-    uint64_t      count;
-    uint64_t      tag;
-    uint64_t      ignore;
-    MPI_Datatype  datatype;
-    struct iovec *iov;
-    struct MPIDI_CH4U_Devreq_t *prev, *next;
-
-    uint64_t      peer_req_ptr;
-    void         *reply_token;
-    uint64_t      status;
-
+typedef struct MPIDI_CH4U_Dev_sreq_t {
     /* persistent send fields */
-    MPIDI_ptype   p_type;
     struct MPID_Comm    *util_comm;
+} MPIDI_CH4U_Dev_sreq_t;
 
+typedef struct MPIDI_CH4U_Dev_rreq_t {
     /* mrecv fields */
     void         *mrcv_buffer;
     uint64_t      mrcv_count;
     MPI_Datatype  mrcv_datatype;
+
+    uint64_t      ignore;
+    void         *reply_token;
+    uint64_t      peer_req_ptr;
+
+    struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
+} MPIDI_CH4U_Dev_rreq_t;
+
+typedef struct MPIDI_CH4U_Devreq_t {
+
+    union {
+        MPIDI_CH4U_Dev_sreq_t sreq;
+        MPIDI_CH4U_Dev_rreq_t rreq;
+    };
+
+    void         *buffer;
+    uint64_t      count;
+    uint64_t      tag;
+
+    MPI_Datatype  datatype;
+    struct iovec *iov;
+
+    uint64_t      status;
+    MPIDI_ptype   p_type;
 
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
@@ -128,8 +140,8 @@ typedef struct {
 #define MPIU_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
 
 typedef struct MPIDI_CH4U_Devcomm_t {
-    MPIDI_CH4U_Devreq_t *posted_list;
-    MPIDI_CH4U_Devreq_t *unexp_list;
+    MPIDI_CH4U_Dev_rreq_t *posted_list;
+    MPIDI_CH4U_Dev_rreq_t *unexp_list;
 } MPIDI_CH4U_Devcomm_t;
 
 typedef struct {

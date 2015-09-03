@@ -60,8 +60,8 @@ static inline int MPIDI_CH4I_reply_ssend(MPID_Request * rreq)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_REPLY_SSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_REPLY_SSEND);
     MPID_cc_incr(rreq->cc_ptr, &c);
-    ack_msg.sreq_ptr = MPIU_CH4U_REQUEST(rreq, peer_req_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, reply_token),
+    ack_msg.sreq_ptr = MPIU_CH4U_REQUEST(rreq, rreq.peer_req_ptr);
+    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, rreq.reply_token),
                                                MPIDI_CH4U_AM_SSEND_ACK, &ack_msg, sizeof(ack_msg),
                                                rreq));
   fn_exit:
@@ -97,9 +97,9 @@ static inline int MPIDI_CH4I_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     rreq->status.MPI_SOURCE = MPIDI_CH4I_get_source(msg_tag);
     rreq->status.MPI_TAG = MPIDI_CH4I_get_tag(msg_tag);
 
-    buf = MPIU_CH4U_REQUEST(rreq, mrcv_buffer);
-    count = MPIU_CH4U_REQUEST(rreq, mrcv_count);
-    datatype = MPIU_CH4U_REQUEST(rreq, mrcv_datatype);
+    buf = MPIU_CH4U_REQUEST(rreq, rreq.mrcv_buffer);
+    count = MPIU_CH4U_REQUEST(rreq, rreq.mrcv_count);
+    datatype = MPIU_CH4U_REQUEST(rreq, rreq.mrcv_datatype);
 
     message_sz = MPIU_CH4U_REQUEST(rreq, count);
     MPID_Datatype_get_size_macro(datatype, dt_sz);
@@ -406,8 +406,8 @@ static inline int MPIDI_CH4I_am_ssend_target_handler(void *am_hdr,
                                                   reply_token, data, p_data_sz,
                                                   is_contig, cmpl_handler_fn, req));
     MPIU_Assert(req);
-    MPIU_CH4U_REQUEST(*req, peer_req_ptr) = msg_hdr->sreq_ptr;
-    MPIU_CH4U_REQUEST(*req, reply_token) = reply_token;
+    MPIU_CH4U_REQUEST(*req, rreq.peer_req_ptr) = msg_hdr->sreq_ptr;
+    MPIU_CH4U_REQUEST(*req, rreq.reply_token) = reply_token;
     MPIU_CH4U_REQUEST(*req, status) |= MPIDI_CH4U_REQ_PEER_SSEND;
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_SSEND_HANDLER);
@@ -466,7 +466,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
         MPIU_CH4U_COMM(comm, unexp_list) = NULL;
         MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = comm;
         if (MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list) {
-            MPIDI_CH4U_Devreq_t *curr, *tmp;
+            MPIDI_CH4U_Dev_rreq_t *curr, *tmp;
             MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, 
                                 curr, tmp) {
                 MPL_DL_DELETE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, curr);
