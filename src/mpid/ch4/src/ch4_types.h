@@ -73,7 +73,7 @@ typedef struct MPIDI_CH4_Global_t {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
     MPIDI_CH4_Comm_req_list_t *comm_req_lists;
-    int active_progress_hooks;
+    OPA_int_t active_progress_hooks;
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
     MPID_Thread_mutex_t  m[2];
