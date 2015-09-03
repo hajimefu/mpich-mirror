@@ -38,7 +38,7 @@
 #define FUNCNAME MPID_nem_cell_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPID_nem_cell_init(MPID_nem_cell_ptr_t cell)
+static inline void MPID_nem_cell_init(MPID_nem_cell_ptr_t cell,int rank)
 {
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_CELL_INIT);
 
@@ -46,6 +46,7 @@ static inline void MPID_nem_cell_init(MPID_nem_cell_ptr_t cell)
 
     MPID_NEM_SET_REL_NULL(cell->next);
     memset((void *) &cell->pkt, 0, sizeof(MPID_nem_pkt_header_t));
+    cell->my_rank = rank;
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPID_NEM_CELL_INIT);
 }

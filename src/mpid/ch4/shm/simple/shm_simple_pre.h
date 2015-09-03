@@ -30,7 +30,8 @@ typedef struct {
 } MPIDI_shm_simple_request_t;
 
 typedef struct MPIDI_shm_simple_comm_t {
-    int dummy;
+    struct MPIDI_SHM_VCRT *vcrt;
+    struct MPIDI_SHM_VCRT *local_vcrt;
 } MPIDI_shm_simple_comm_t;
 
 #endif

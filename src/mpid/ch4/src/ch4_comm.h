@@ -106,6 +106,12 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
+#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+    mpi_errno = MPIDI_shm_comm_create(comm);
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POP(mpi_errno);
+    }
+#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CREATE);
     return mpi_errno;
@@ -126,6 +132,12 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
+#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+    mpi_errno = MPIDI_shm_comm_destroy(comm);
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POP(mpi_errno);
+    }
+#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);
     return mpi_errno;

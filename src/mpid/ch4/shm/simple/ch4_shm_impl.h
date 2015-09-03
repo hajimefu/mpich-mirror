@@ -35,21 +35,16 @@
 /* shm specific object data                      */
 /* ---------------------------------------------------- */
 /* VCR Table Data */
-typedef struct {
+typedef struct MPIDI_SHM_VCR {
     unsigned int pg_rank;
-} MPIDI_shm_vcr_t;
-#define VCR_SHM(vcr)   ((MPIDI_shm_vcr_t*)(vcr)->pad)
+} MPIDI_SHM_VCR;
 
-typedef struct {
+struct MPIDI_SHM_VCRT {
     MPIU_OBJECT_HEADER;
-    unsigned size;                             /**< Number of entries in the table */
-    MPIDI_shm_vcr_t vcr_table[0];       /**< Array of virtual connection references */
-} MPIDI_shm_vcrt_t;
-
-typedef struct {
-    MPIDI_shm_vcrt_t *vcrt;
-} MPIDI_shm_comm_t;
-#define COMM_SHM(comm) ((MPIDI_shm_comm_t*)(comm)->dev.pad)
+    unsigned size;                /**< Number of entries in the table */
+    MPIDI_SHM_VCR vcr_table[0];       /**< Array of virtual connection references */
+};
+typedef struct MPIDI_SHM_VCRT *MPID_SHM_VCRT;
 
 #define REQ_SHM(req) (&(req)->dev.ch4.shm.simple)
 /* ---------------------------------------------------- */
@@ -200,4 +195,7 @@ int MPID_nem_barrier_vars_init(MPID_nem_barrier_vars_t * barrier_region);
 int MPID_nem_barrier_init(MPID_nem_barrier_t * barrier_region, int init_values);
 int MPID_nem_barrier(void);
 int MPIDI_CH3I_Seg_destroy(void);
+
+#define COMM_SHM_SIMPLE(comm,field)  ((comm)->dev.ch4.shm.simple).field
+
 #endif /* NETMOD_SHM_IMPL_H_INCLUDED */

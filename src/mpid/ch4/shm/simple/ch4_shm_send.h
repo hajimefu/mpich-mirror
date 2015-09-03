@@ -91,7 +91,9 @@ static inline int MPIDI_shm_send(const void *buf,
     if (data_sz <= EAGER_THRESHOLD) {
         /* eager message */
         /* Try fastbox */
-        int local_rank = MPID_nem_mem_region.local_ranks[rank];
+        int grank = COMM_SHM_SIMPLE(comm,vcrt)->vcr_table[rank].pg_rank;
+#if 0
+        int local_rank = MPID_nem_mem_region.local_ranks[grank];
         MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.out[local_rank]->mpich;
         if (!MPID_nem_fbox_is_full((MPID_nem_fbox_common_ptr_t) fbox)) {
             ENVELOPE_SET(&fbox->cell, comm->rank, tag, comm->context_id + context_offset);
@@ -101,14 +103,16 @@ static inline int MPIDI_shm_send(const void *buf,
             *request = NULL;
             goto fn_exit;
         }
+#endif
         /* Try freeQ */
         if (!MPID_nem_queue_empty(MPID_nem_mem_region.my_freeQ)) {
             MPID_nem_cell_ptr_t cell;
             MPID_nem_queue_dequeue(MPID_nem_mem_region.my_freeQ, &cell);
             ENVELOPE_SET(cell, comm->rank, tag, comm->context_id + context_offset);
             cell->pkt.mpich.datalen = data_sz;
+            cell->pkt.mpich.type = TYPE_EAGER;
             MPIU_Memcpy((void *) cell->pkt.mpich.p.payload, send_buffer, data_sz);
-            MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[rank], cell);
+            MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
             *request = NULL;
             goto fn_exit;
         }

@@ -21,7 +21,6 @@
 static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count)
 {
     int mpi_errno = MPI_SUCCESS;
-    int local_rank;
     int in_cell = 0, in_fbox = 0;
     MPID_nem_fbox_mpich_t *fbox;
     MPID_nem_cell_ptr_t cell = NULL;
@@ -37,6 +36,8 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                           REQ_SHM(sreq)->rank, REQ_SHM(sreq)->tag, REQ_SHM(sreq)->context_id));
         goto match_l;
     }
+#if 0
+    int local_rank;
     /* try to receive from fastbox */
     for (local_rank = 0; local_rank < MPID_nem_mem_region.num_local; local_rank++) {
         if (local_rank != MPID_nem_mem_region.local_rank) {
@@ -52,6 +53,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             }
         }
     }
+#endif
     /* try to receive from recvq */
     if (MPID_nem_mem_region.my_recvQ && !MPID_nem_queue_empty(MPID_nem_mem_region.my_recvQ)) {
         MPID_nem_queue_dequeue(MPID_nem_mem_region.my_recvQ, &cell);
@@ -149,19 +151,20 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
   release_cell_l:
     if (in_cell) {
         /* release cell */
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                             (MPIU_DBG_FDEST, "About to release cell %d,%d,%d in_fbox=%d\n", cell->rank, cell->tag,
-                              cell->context_id, in_fbox));
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "About to release cell %d,%d,%d in_fbox=%d\n", cell->rank, cell->tag,
+                          cell->context_id, in_fbox));
         if (in_fbox)
             OPA_store_release_int(&(fbox->flag.value), 0);
-        else
-            MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->rank], cell);
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                             (MPIU_DBG_FDEST, "Cell released\n"));
+        else {
+            MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->my_rank], cell);
+        }
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                         (MPIU_DBG_FDEST, "Cell released\n"));
     }
     else {
         /* destroy unexpected req */
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL, (MPIU_DBG_FDEST, "About to release unexpected %p\n", sreq));
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL, (MPIU_DBG_FDEST, "About to release unexpected %p\n", sreq));
         MPIU_Free(REQ_SHM(sreq)->user_buf);
         REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_recvq_unexpected, mpi_errno);
     }
@@ -197,6 +200,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
                           cell->context_id));
         char *recv_buffer = (char *) cell->pkt.mpich.p.payload;
         int data_sz = REQ_SHM(sreq)->data_sz;
+        int grank = COMM_SHM_SIMPLE(sreq->comm,vcrt)->vcr_table[dest].pg_rank;
         if (data_sz <= (int)EAGER_THRESHOLD) {
             /* eager message */
             MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, REQ_SHM(sreq)->data_sz);
@@ -217,7 +221,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
             REQ_SHM(sreq)->user_buf += EAGER_THRESHOLD;
             cell->pkt.mpich.type = TYPE_LMT;
         }
-        MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[dest], cell);
+        MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
         (*completion_count)++;
     }
   fn_exit:

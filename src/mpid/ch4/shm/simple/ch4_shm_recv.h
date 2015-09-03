@@ -88,12 +88,13 @@ static inline int MPIDI_shm_recv(void *buf,
                              (MPIU_DBG_FDEST, "Matching done in irecv %d,%d,%d\n", rank, tag,
                               comm->context_id + context_offset));
             recv_buffer = (char *) buf + dt_true_lb;
-            MPIU_Memcpy(recv_buffer, (void *) REQ_SHM(req)->user_buf, REQ_SHM(req)->data_sz);
+            data_sz = MIN(data_sz,REQ_SHM(req)->data_sz);
+            MPIU_Memcpy(recv_buffer, (void *) REQ_SHM(req)->user_buf, data_sz);
             /* set status */
             if (status != MPI_STATUS_IGNORE) {
                 status->MPI_SOURCE = REQ_SHM(req)->rank;
                 status->MPI_TAG = REQ_SHM(req)->tag;
-                MPIR_STATUS_SET_COUNT(*status, REQ_SHM(req)->data_sz);
+                MPIR_STATUS_SET_COUNT(*status, data_sz);
             }
             /* dequeue unexpected req */
             MPIU_Free((void *) REQ_SHM(req)->user_buf);
@@ -104,22 +105,22 @@ static inline int MPIDI_shm_recv(void *buf,
         prev_req = req;
         req = REQ_SHM(req)->next;
     }
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "No match to unexpected in irecv %d,%d,%d\n", rank, tag,
-                          comm->context_id + context_offset));
+    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                     (MPIU_DBG_FDEST, "No match to unexpected in irecv %d,%d,%d\n", rank, tag,
+                      comm->context_id + context_offset));
 
+#if 0
     /* try to receive immediately from fastbox */
     if (rank != MPI_ANY_SOURCE) {
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "Try match to fastbox in irecv %d,%d,%d\n", rank, tag,
-                          comm->context_id + context_offset));
-        int local_rank = MPID_nem_mem_region.local_ranks[rank];
+        int grank = COMM_SHM_SIMPLE(comm,vcrt)->vcr_table[rank].pg_rank;
+        int local_rank = MPID_nem_mem_region.local_ranks[grank];
         MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "fastbox %p local_rank %d in irecv\n", fbox, local_rank ));
+                         (MPIU_DBG_FDEST, "Try match to fastbox %d in irecv %d,%d,%d\n", local_rank, rank, tag,
+                          comm->context_id + context_offset));
         if (OPA_load_int(&fbox->flag.value)) {
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "fastbox local_rank %d flag is set in irecv\n", local_rank ));
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                             (MPIU_DBG_FDEST, "fastbox local_rank %d flag is set in irecv\n", local_rank ));
             if (ENVELOPE_MATCH(&fbox->cell, rank, tag, comm->context_id + context_offset)) {
                 MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                                  (MPIU_DBG_FDEST, "Matching in irecv %d,%d,%d\n", rank, tag,
@@ -136,17 +137,17 @@ static inline int MPIDI_shm_recv(void *buf,
                 /* release fastbox */
                 OPA_store_release_int(&(fbox->flag.value), 0);
                 *request = NULL;
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "fastbox released in irecv %d,%d,%d\n", rank, tag,
-                          comm->context_id + context_offset));
+                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                                 (MPIU_DBG_FDEST, "fastbox released in irecv %d,%d,%d\n", rank, tag,
+                                  comm->context_id + context_offset));
                 goto fn_exit;
             }
         }
     }
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "No match to fastbox in irecv %d,%d,%d\n", rank, tag,
-                          comm->context_id + context_offset));
-
+    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                     (MPIU_DBG_FDEST, "No match to fastbox in irecv %d,%d,%d\n", rank, tag,
+                      comm->context_id + context_offset));
+#endif
     /* failed to receive immediately */
     /* create a request */
     mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);

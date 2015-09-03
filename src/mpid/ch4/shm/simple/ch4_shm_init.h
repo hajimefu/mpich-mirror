@@ -131,7 +131,7 @@ static inline int MPIDI_shm_init(int rank, int size)
 
     /* Init and enqueue our free cells */
     for (i = 0; i < MPID_NEM_NUM_CELLS; ++i) {
-        MPID_nem_cell_init(&(MPID_nem_mem_region.Elements[i]));
+        MPID_nem_cell_init(&(MPID_nem_mem_region.Elements[i]),rank);
         MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[rank],
                                &(MPID_nem_mem_region.Elements[i]));
     }

@@ -88,11 +88,12 @@ typedef struct MPID_nem_cell {
 #if (MPID_NEM_CELL_HEAD_LEN > SIZEOF_OPA_PTR_T)
     char padding[MPID_NEM_CELL_HEAD_LEN - sizeof(MPID_nem_cell_rel_ptr_t)];
 #endif
+    int my_rank;
     int rank;
     int tag;
     int context_id;
 #if MPID_NEM_CACHE_LINE_LEN != 0
-    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 3 * sizeof(int)]; /* should be 64-16-16-12 = 20 */
+    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 4 * sizeof(int)]; /* should be 64-16-16-16 = 16 */
 #endif
     volatile MPID_nem_pkt_t pkt;
 } MPID_nem_cell_t;
