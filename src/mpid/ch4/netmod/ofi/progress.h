@@ -14,8 +14,8 @@
 #include "impl.h"
 #include "events.h"
 #define NUM_CQ_ENTRIES 8
-static inline int handle_cq_error(int ret);
-static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num);
+static inline int handle_cq_error(ssize_t ret);
+static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num);
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_progress
@@ -23,9 +23,9 @@ static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num);
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 {
-    int ret,mpi_errno = MPI_SUCCESS;
+    int                mpi_errno;
     cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
-
+    ssize_t            ret;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
 
@@ -33,24 +33,21 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     if(likely(ret > 0))
-        MPI_RC_POP(handle_cq_entries(wc,ret));
+        mpi_errno = handle_cq_entries(wc,ret);
     else if (ret == -FI_EAGAIN)
-        goto fn_exit;
-    else if (ret < 0)
-        MPI_RC_POP(handle_cq_error(ret));
+        mpi_errno = MPI_SUCCESS;
+    else
+        mpi_errno = handle_cq_error(ret);
 
-  fn_exit:
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
-static inline int handle_cq_entries(cq_tagged_entry_t * wc,int num)
+static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num)
 {
-    int i,mpi_errno;
+    int i, mpi_errno;
     MPID_Request *req;
     for (i = 0; i < num; i++) {
         req = devreq_to_req(wc[i].op_context);
@@ -66,7 +63,7 @@ fn_fail:
 #define FUNCNAME handle_cq_error
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int handle_cq_error(int ret)
+static inline int handle_cq_error(ssize_t ret)
 {
     int mpi_errno = MPI_SUCCESS;
     cq_err_entry_t e;

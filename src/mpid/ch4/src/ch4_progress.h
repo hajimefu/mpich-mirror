@@ -23,14 +23,20 @@ __CH4_INLINE__ int MPIDI_Progress_test(void)
     MPIDI_STATE_DECL(MPID_STATE_CH4_PROGRESS_TEST);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_PROGRESS_TEST);
 
-    if(MPIDI_CH4_Global.active_progress_hooks) {
+
+    if(OPA_load_int(&MPIDI_CH4_Global.active_progress_hooks)) {
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
         for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
             if (MPIDI_CH4_Global.progress_hooks[i].active == TRUE) {
                 MPIU_Assert(MPIDI_CH4_Global.progress_hooks[i].func_ptr != NULL);
                 mpi_errno = MPIDI_CH4_Global.progress_hooks[i].func_ptr(&made_progress);
-                if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+                if (mpi_errno) {
+                    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+                    MPIR_ERR_POP(mpi_errno);
+                }
             }
         }
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
     }
     /* todo: progress unexp_list */
     mpi_errno = MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
@@ -82,6 +88,7 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_REGISTER);
 
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     for (i = 0; i < MAX_PROGRESS_HOOKS; i++) {
         if (MPIDI_CH4_Global.progress_hooks[i].func_ptr == NULL) {
             MPIDI_CH4_Global.progress_hooks[i].func_ptr = progress_fn;
@@ -93,10 +100,12 @@ __CH4_INLINE__ int MPIDI_Progress_register(int (*progress_fn) (int *), int *id)
     if (i >= MAX_PROGRESS_HOOKS)
         goto fn_fail;
 
-    MPIDI_CH4_Global.active_progress_hooks++;
+    OPA_incr_int(&MPIDI_CH4_Global.active_progress_hooks);
+
     (*id) = i;
 
 fn_exit:
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     return mpi_errno;
 fn_fail:
@@ -116,13 +125,15 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
 
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIU_Assert(id >= 0 &&
                 id < MAX_PROGRESS_HOOKS &&
                 MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].func_ptr = NULL;
     MPIDI_CH4_Global.progress_hooks[id].active = FALSE;
 
-    MPIDI_CH4_Global.active_progress_hooks--;
+    OPA_decr_int(&MPIDI_CH4_Global.active_progress_hooks);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
     return mpi_errno;
 }
@@ -137,11 +148,13 @@ __CH4_INLINE__ int MPIDI_Progress_activate(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
 
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
                 MPIDI_CH4_Global.progress_hooks[id].active == FALSE &&
                 MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].active = TRUE;
 
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
     return mpi_errno;
 }
@@ -156,11 +169,13 @@ __CH4_INLINE__ int MPIDI_Progress_deactivate(int id)
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
 
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
                 MPIDI_CH4_Global.progress_hooks[id].active == TRUE &&
                 MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].active = FALSE;
 
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
     return mpi_errno;
 }
