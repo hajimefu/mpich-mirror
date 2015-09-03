@@ -39,6 +39,44 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #undef ILU
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
+
+
+#define COMM_TO_INDEX(comm,rank) COMM_OFI(comm).vcrt->vcr_table[rank].addr_idx
+#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
+#define COMM_TO_EP(comm,rank)  COMM_OFI(comm).vcrt->vcr_table[rank].ep_idx
+#define MPIDI_MAX_ENDPOINTS 256
+#define MPIDI_MAX_ENDPOINTS_BITS 8
+#define G_TXC_TAG(x) MPIDI_Global.ctx[x].tx_tag
+#define G_TXC_RMA(x) MPIDI_Global.ctx[x].tx_rma
+#define G_TXC_MSG(x) MPIDI_Global.ctx[x].tx_msg
+#define G_TXC_CTR(x) MPIDI_Global.ctx[x].tx_ctr
+#define G_RXC_TAG(x) MPIDI_Global.ctx[x].rx_tag
+#define G_RXC_RMA(x) MPIDI_Global.ctx[x].rx_rma
+#define G_RXC_MSG(x) MPIDI_Global.ctx[x].rx_msg
+#define G_RXC_CTR(x) MPIDI_Global.ctx[x].rx_ctr
+#else
+#define COMM_TO_EP(comm,rank) 0
+#define MPIDI_MAX_ENDPOINTS 0
+#define MPIDI_MAX_ENDPOINTS_BITS 0
+#define G_TXC_TAG(x) MPIDI_Global.ep
+#define G_TXC_RMA(x) MPIDI_Global.ep
+#define G_TXC_MSG(x) MPIDI_Global.ep
+#define G_TXC_CTR(x) MPIDI_Global.ep
+#define G_RXC_TAG(x) MPIDI_Global.ep
+#define G_RXC_RMA(x) MPIDI_Global.ep
+#define G_RXC_MSG(x) MPIDI_Global.ep
+#define G_RXC_CTR(x) MPIDI_Global.ep
+#endif
+#ifdef MPIDI_USE_AV_TABLE
+#define COMM_TO_PHYS(comm,rank)  ((fi_addr_t)(uintptr_t)COMM_TO_INDEX(comm,rank))
+#define TO_PHYS(rank)            ((fi_addr_t)(uintptr_t)rank)
+#else
+#define COMM_TO_PHYS(comm,rank)  MPIDI_Addr_table->table[COMM_TO_INDEX(comm,rank)].dest
+#define TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
+#endif
+#define REQ_OFI(req,field) ((req)->dev.ch4.netmod.ofi.field)
+#define COMM_OFI(comm)     ((comm)->dev.ch4.netmod.ofi)
+
 /*
  * Helper routines and macros for request completion
  */

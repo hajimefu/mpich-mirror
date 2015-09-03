@@ -144,11 +144,22 @@ typedef struct MPIDI_CH4U_Devcomm_t {
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
 } MPIDI_CH4U_Devcomm_t;
 
-typedef struct {
-    MPIDI_CH4U_Devcomm_t ch4u;
-    uint64_t pad[256 / 8];
+typedef struct MPIDI_Devcomm_t {
+    struct {
+        /* The first fields are used by the CH4U apis */
+        MPIDI_CH4U_Devcomm_t ch4u;
+
+        /* Used by the netmod direct apis */
+        union {
+            MPIDI_CH4_NETMOD_COMM_DECL
+        }netmod;
+
+        union {
+            MPIDI_CH4_SHM_COMM_DECL
+        }shm;
+    }ch4;
 } MPIDI_Devcomm_t;
-#define MPIU_CH4U_COMM(comm,field) ((comm)->dev.ch4u).field
+#define MPIU_CH4U_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
 
 typedef struct {
     uint32_t pad[4 / 4];

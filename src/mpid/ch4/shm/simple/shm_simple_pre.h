@@ -29,4 +29,8 @@ typedef struct {
     MPI_Datatype datatype;
 } MPIDI_shm_simple_request_t;
 
+typedef struct MPIDI_shm_simple_comm_t {
+    int dummy;
+} MPIDI_shm_simple_comm_t;
+
 #endif

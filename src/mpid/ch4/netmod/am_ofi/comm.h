@@ -140,29 +140,29 @@ static inline int alloc_tables(MPID_Comm * comm)
 
         if (mapper->dir == MPIR_COMM_MAP_DIR_L2L) {
             if (src_comm->comm_kind == MPID_INTRACOMM && comm->comm_kind == MPID_INTRACOMM) {
-                dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             }
             else if (src_comm->comm_kind == MPID_INTRACOMM && comm->comm_kind == MPID_INTERCOMM)
-                dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->local_vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).local_vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             else if (src_comm->comm_kind == MPID_INTERCOMM && comm->comm_kind == MPID_INTRACOMM) {
-                dup_vcrt(COMM_OFI(src_comm)->local_vcrt, &COMM_OFI(comm)->vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).local_vcrt, &COMM_OFI(comm).vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             }
             else
-                dup_vcrt(COMM_OFI(src_comm)->local_vcrt, &COMM_OFI(comm)->local_vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).local_vcrt, &COMM_OFI(comm).local_vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR_R2L */
             MPIU_Assert(src_comm->comm_kind == MPID_INTERCOMM);
 
             if (comm->comm_kind == MPID_INTRACOMM) {
-                dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).vcrt, mapper,
                          mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
             }
             else
-                dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->local_vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).local_vcrt, mapper,
                          mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
         }
 
@@ -189,15 +189,15 @@ static inline int alloc_tables(MPID_Comm * comm)
 
         if (mapper->dir == MPIR_COMM_MAP_DIR_L2R) {
             if (src_comm->comm_kind == MPID_INTRACOMM)
-                dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             else
-                dup_vcrt(COMM_OFI(src_comm)->local_vcrt, &COMM_OFI(comm)->vcrt, mapper,
+                dup_vcrt(COMM_OFI(src_comm).local_vcrt, &COMM_OFI(comm).vcrt, mapper,
                          mapper->src_comm->local_size, vcrt_size, vcrt_offset);
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR_R2R */
             MPIU_Assert(src_comm->comm_kind == MPID_INTERCOMM);
-            dup_vcrt(COMM_OFI(src_comm)->vcrt, &COMM_OFI(comm)->vcrt, mapper,
+            dup_vcrt(COMM_OFI(src_comm).vcrt, &COMM_OFI(comm).vcrt, mapper,
                      mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
         }
 
@@ -207,8 +207,8 @@ static inline int alloc_tables(MPID_Comm * comm)
     if (comm->comm_kind == MPID_INTERCOMM) {
         /* setup the vcrt for the local_comm in the intercomm */
         if (comm->local_comm) {
-            COMM_OFI(comm->local_comm)->vcrt = COMM_OFI(comm)->local_vcrt;
-            addref_vcrt(COMM_OFI(comm)->local_vcrt);
+            COMM_OFI(comm->local_comm).vcrt = COMM_OFI(comm).local_vcrt;
+            addref_vcrt(COMM_OFI(comm).local_vcrt);
         }
     }
 
@@ -227,7 +227,7 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
     MPIDI_Map_set(MPIDI_Global.comm_map, mapid, comm);
-    COMM_OFI(comm)->window_instance = 0;
+    COMM_OFI(comm).window_instance = 0;
     MPIDI_CH4U_init_comm(comm);
 
     /* Do not handle intercomms */
@@ -251,13 +251,13 @@ static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
     MPIDI_Map_erase(MPIDI_Global.comm_map, mapid);
-    mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm)->vcrt);
+    mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm).vcrt);
 
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     if (comm->comm_kind == MPID_INTERCOMM) {
-        mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm)->local_vcrt);
+        mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm).local_vcrt);
 
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);

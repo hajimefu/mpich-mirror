@@ -21,6 +21,7 @@
 #include <rdma/fi_atomic.h>
 #include <rdma/fi_cm.h>
 #include <rdma/fi_errno.h>
+#include "../ofi/ofi_pre_common.h"
 
 struct MPID_Comm;
 struct MPID_Request;
@@ -47,7 +48,7 @@ typedef struct MPIDI_AM_OFI_hdr_t {
     uint8_t am_type;
     uint8_t pad[3];
     uint64_t data_sz;
-    uint8_t payload[];
+    uint8_t *payload;
 } MPIDI_AM_OFI_hdr_t;
 #define MPIDI_AM_OFI_MSG_HDR_SZ (sizeof(MPIDI_AM_OFI_hdr_t))
 
@@ -78,5 +79,8 @@ typedef struct {
 typedef struct {
     int dummy;
 } MPIDI_netmod_am_ofi_request_t;
+
+
+typedef MPIDI_netmod_ofi_comm_t MPIDI_netmod_am_ofi_comm_t;
 
 #endif

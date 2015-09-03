@@ -51,7 +51,7 @@ static inline int MPIDI_Query_dt(MPI_Datatype   dt,
     if(*count == MPIDI_QUERY_COMPARE_ATOMIC_COUNT)
         *count = MPIDI_Global.win_op_table[dt_index][op_index].max_compare_atomic_count;
 
-    if(*fi_dt==-1 || *fi_op==-1)
+    if( ((int) *fi_dt) == -1 || ((int) *fi_op) == -1)
         rc = -1;
     else
         rc = MPI_SUCCESS;
@@ -92,7 +92,7 @@ static inline int MPIDI_valid_group_rank(int         lpid,
     int size = grp->size;
     int z;
 
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z);
+    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VALID_GROUP_RANK);
     return (z < size);
@@ -720,7 +720,9 @@ static inline int do_accumulate(const void    *origin_addr,
         {basic_type=tt=ot=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
+#ifdef HAVE_FORTRAN_BINDING
         case MPI_2DOUBLE_PRECISION:
+#endif
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif
@@ -887,7 +889,9 @@ static inline int do_get_accumulate(const void    *origin_addr,
         {basic_type=tt=ot=rt=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
+#ifdef HAVE_FORTRAN_BINDING
         case MPI_2DOUBLE_PRECISION:
+#endif
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif

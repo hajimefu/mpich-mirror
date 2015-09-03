@@ -135,14 +135,14 @@ __ALWAYS_INLINE__ int send_normal(const void *buf,
         c = 1;
         REQ_OFI(sreq, event_id) = MPIDI_EVENT_SEND_HUGE;
         MPID_cc_incr(sreq->cc_ptr, &c);
-        ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm)->huge_send_counters, rank);
+        ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm).huge_send_counters, rank);
 
         if (ptr == MPIDI_MAP_NOT_FOUND) {
             ptr = MPIU_Malloc(sizeof(int));
             cntr = (MPIDI_Hugecntr *) ptr;
             cntr->outstanding = 0;
             cntr->counter = 0;
-            MPIDI_OFI_Map_set(COMM_OFI(comm)->huge_send_counters, rank, ptr);
+            MPIDI_OFI_Map_set(COMM_OFI(comm).huge_send_counters, rank, ptr);
         }
 
         cntr = (MPIDI_Hugecntr *) ptr;

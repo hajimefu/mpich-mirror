@@ -123,10 +123,10 @@ static inline int MPIDI_dynproc_create_ic(const char      *port_name,
     tmp_comm_ptr->comm_kind            = MPID_INTERCOMM;
     tmp_comm_ptr->local_comm           = comm_ptr;
     tmp_comm_ptr->is_low_group         = is_low_group;
-    COMM_OFI(tmp_comm_ptr)->local_vcrt = COMM_OFI(comm_ptr)->vcrt;
+    COMM_OFI(tmp_comm_ptr).local_vcrt = COMM_OFI(comm_ptr).vcrt;
 
     mpi_errno = MPIDI_OFI_VCRT_Create(tmp_comm_ptr->remote_size,
-                                      &COMM_OFI(tmp_comm_ptr)->vcrt);
+                                      &COMM_OFI(tmp_comm_ptr).vcrt);
     start = MPIDI_Addr_table->size;
     MPIDI_Global.node_map = (MPID_Node_id_t *)MPIU_Realloc(MPIDI_Global.node_map,
                                                            (entries+start)*sizeof(MPID_Node_id_t));
@@ -144,7 +144,7 @@ static inline int MPIDI_dynproc_create_ic(const char      *port_name,
     MPIDI_Addr_table->size += entries;
 
     for(i=0; i<entries; i++) {
-        COMM_OFI(tmp_comm_ptr)->vcrt->vcr_table[i].addr_idx += start;
+        COMM_OFI(tmp_comm_ptr).vcrt->vcr_table[i].addr_idx += start;
     }
 
     FI_RC(fi_av_insert(MPIDI_Global.av,addr_table,entries,
@@ -153,7 +153,7 @@ static inline int MPIDI_dynproc_create_ic(const char      *port_name,
 
     MPI_RC_POP(MPIR_Comm_dup_impl(tmp_comm_ptr, newcomm));
 
-    MPIDI_OFI_VCRT_Release(COMM_OFI(tmp_comm_ptr)->vcrt);
+    MPIDI_OFI_VCRT_Release(COMM_OFI(tmp_comm_ptr).vcrt);
     MPIU_Handle_obj_free(&MPID_Comm_mem, tmp_comm_ptr);
 
     MPIU_Free(addr_table);

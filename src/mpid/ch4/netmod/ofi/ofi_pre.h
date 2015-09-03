@@ -13,6 +13,7 @@
 #define NETMOD_OFI_PRE_H_INCLUDED
 
 #include <mpi.h>
+#include "mpihandlemem.h"
 #include <rdma/fabric.h>
 #include <rdma/fi_endpoint.h>
 #include <rdma/fi_domain.h>
@@ -21,6 +22,7 @@
 #include <rdma/fi_atomic.h>
 #include <rdma/fi_cm.h>
 #include <rdma/fi_errno.h>
+#include "ofi_pre_common.h"
 
 typedef struct fid_ep *fid_base_ep_t;
 typedef struct fid_ep *fid_ep_t;
@@ -72,6 +74,5 @@ typedef struct {
 typedef struct {
     int dummy;
 } MPIDI_netmod_ofi_amrequest_t;
-
 
 #endif

@@ -29,39 +29,6 @@ EXTERN_C_BEGIN
 #ifndef MAX
 #define MAX(x,y) ((x)>(y))?(x):(y))
 #endif
-#define COMM_TO_INDEX(comm,rank) COMM_OFI(comm)->vcrt->vcr_table[rank].addr_idx
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-#define COMM_TO_EP(comm,rank)  COMM_OFI(comm)->vcrt->vcr_table[rank].ep_idx
-#define MPIDI_MAX_ENDPOINTS 256
-#define MPIDI_MAX_ENDPOINTS_BITS 8
-#define G_TXC_TAG(x) MPIDI_Global.ctx[x].tx_tag
-#define G_TXC_RMA(x) MPIDI_Global.ctx[x].tx_rma
-#define G_TXC_MSG(x) MPIDI_Global.ctx[x].tx_msg
-#define G_TXC_CTR(x) MPIDI_Global.ctx[x].tx_ctr
-#define G_RXC_TAG(x) MPIDI_Global.ctx[x].rx_tag
-#define G_RXC_RMA(x) MPIDI_Global.ctx[x].rx_rma
-#define G_RXC_MSG(x) MPIDI_Global.ctx[x].rx_msg
-#define G_RXC_CTR(x) MPIDI_Global.ctx[x].rx_ctr
-#else
-#define COMM_TO_EP(comm,rank) 0
-#define MPIDI_MAX_ENDPOINTS 0
-#define MPIDI_MAX_ENDPOINTS_BITS 0
-#define G_TXC_TAG(x) MPIDI_Global.ep
-#define G_TXC_RMA(x) MPIDI_Global.ep
-#define G_TXC_MSG(x) MPIDI_Global.ep
-#define G_TXC_CTR(x) MPIDI_Global.ep
-#define G_RXC_TAG(x) MPIDI_Global.ep
-#define G_RXC_RMA(x) MPIDI_Global.ep
-#define G_RXC_MSG(x) MPIDI_Global.ep
-#define G_RXC_CTR(x) MPIDI_Global.ep
-#endif
-#ifdef MPIDI_USE_AV_TABLE
-#define COMM_TO_PHYS(comm,rank)  ((fi_addr_t)(uintptr_t)COMM_TO_INDEX(comm,rank))
-#define TO_PHYS(rank)            ((fi_addr_t)(uintptr_t)rank)
-#else
-#define COMM_TO_PHYS(comm,rank)  MPIDI_Addr_table->table[COMM_TO_INDEX(comm,rank)].dest
-#define TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
-#endif
 #define MPIDI_MAP_NOT_FOUND      ((void*)(-1UL))
 #define MPIDI_FI_MAJOR_VERSION 1
 #define MPIDI_FI_MINOR_VERSION 0
@@ -160,24 +127,6 @@ enum {
     MPIDI_REQUEST_LOCK,
     MPIDI_REQUEST_LOCKALL,
 };
-
-/* VCR Table Data */
-typedef struct MPIDI_VCR {
-    unsigned is_local:1;
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-    unsigned ep_idx:MPIDI_MAX_ENDPOINTS_BITS;
-#endif
-    unsigned addr_idx:(31 - MPIDI_MAX_ENDPOINTS_BITS);
-} MPIDI_VCR;
-#define VCR_OFI(vcr)   ((MPIDI_VCR*)(vcr)->pad)
-
-struct MPIDI_VCRT {
-    MPIU_OBJECT_HEADER;
-    unsigned size;                /**< Number of entries in the table */
-    MPIDI_VCR vcr_table[0];       /**< Array of virtual connection references */
-};
-#define MPIDI_VCRT_HDR_SIZE offsetof(struct MPIDI_VCRT, vcr_table)
-typedef struct MPIDI_VCRT *MPID_VCRT;
 
 
 /* Physical address table data */
@@ -308,17 +257,6 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
 } MPIDI_Global_t;
-#define REQ_OFI(req,field) ((req)->dev.ch4.netmod.ofi.field)
-
-typedef struct {
-    MPID_VCRT  vcrt;
-    MPID_VCRT  local_vcrt;
-    uint32_t   window_instance;
-    void      *huge_send_counters;
-    void      *huge_recv_counters;
-} MPIDI_OFIComm_t;
-#define COMM_OFI(comm) ((MPIDI_OFIComm_t*)(comm)->dev.pad)
-
 
 typedef struct {
     char addr[30];

@@ -362,8 +362,8 @@ static inline int MPIDI_netmod_init(int         rank,
     comm->rank = 0;
     comm->remote_size = 1;
     comm->local_size = 1;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
-    COMM_OFI(comm)->vcrt->vcr_table[0].addr_idx = rank;
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
+    COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_WORLD and VCRT */
@@ -372,7 +372,7 @@ static inline int MPIDI_netmod_init(int         rank,
     comm->rank = rank;
     comm->remote_size = size;
     comm->local_size = size;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm)->vcrt));
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
 
     /* -------------------------------- */
     /* Calculate per-node map           */
@@ -538,7 +538,7 @@ static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
     else if (is_remote)
         *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
     else
-        *lpid_ptr = COMM_OFI(comm_ptr)->local_vcrt->vcr_table[idx].addr_idx;
+        *lpid_ptr = COMM_OFI(comm_ptr).local_vcrt->vcr_table[idx].addr_idx;
 
     return MPI_SUCCESS;
 }
@@ -634,10 +634,10 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
                                                            int size, const int lpids[])
 {
     int i;
-    MPIDI_OFI_VCRT_Create(size, &COMM_OFI(newcomm_ptr)->vcrt);
+    MPIDI_OFI_VCRT_Create(size, &COMM_OFI(newcomm_ptr).vcrt);
 
     for (i = 0; i < size; i++)
-        COMM_OFI(newcomm_ptr)->vcrt->vcr_table[i].addr_idx = lpids[i];
+        COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
 
     return 0;
 }

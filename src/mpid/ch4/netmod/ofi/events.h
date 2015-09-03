@@ -109,14 +109,14 @@ static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 
     /* Look up the receive sequence number and chunk queue */
     comm_ptr = REQ_OFI(rreq, util_comm);
-    recv = (MPIDI_Huge_recv_t *) MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
+    recv = (MPIDI_Huge_recv_t *) MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                       get_source(wc->tag));
 
     if (recv == MPIDI_MAP_NOT_FOUND) {
         recv = (MPIDI_Huge_recv_t *) MPIU_Malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_OFI_Map_create(&recv->chunk_q);
-        MPIDI_OFI_Map_set(COMM_OFI(comm_ptr)->huge_recv_counters, get_source(wc->tag), recv);
+        MPIDI_OFI_Map_set(COMM_OFI(comm_ptr).huge_recv_counters, get_source(wc->tag), recv);
     }
 
     /* Look up the receive in the chunk queue */
@@ -184,14 +184,14 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
         void *ptr;
         MPIDI_Hugecntr *cntr;
         comm = REQ_OFI(sreq, util_comm);
-        ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm)->huge_send_counters, REQ_OFI(sreq, util_id));
+        ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm).huge_send_counters, REQ_OFI(sreq, util_id));
         MPIU_Assert(ptr != MPIDI_MAP_NOT_FOUND);
         cntr = (MPIDI_Hugecntr *) ptr;
         cntr->outstanding--;
 
         if (cntr->outstanding == 0) {
             MPIDI_Send_control_t ctrl;
-            MPIDI_OFI_Map_erase(COMM_OFI(comm)->huge_send_counters, REQ_OFI(sreq, util_id));
+            MPIDI_OFI_Map_erase(COMM_OFI(comm).huge_send_counters, REQ_OFI(sreq, util_id));
             MPIU_Free(ptr);
             ctrl.type = MPIDI_CTRL_HUGE_CLEANUP;
             MPI_RC_POP(do_control_send(&ctrl, NULL, 0, REQ_OFI(sreq, util_id), comm, NULL));

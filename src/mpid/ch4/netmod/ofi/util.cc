@@ -303,10 +303,10 @@ static inline void MPIDI_Gethuge_cleanup(MPIDI_Send_control_t *info)
     comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,mapid);
 
     /* Look up the per destination receive queue object */
-    recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
+    recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
     MPIDI_OFI_Map_destroy(recv->chunk_q);
-    MPIDI_OFI_Map_erase(COMM_OFI(comm_ptr)->huge_recv_counters,info->origin_rank);
+    MPIDI_OFI_Map_erase(COMM_OFI(comm_ptr).huge_recv_counters,info->origin_rank);
     MPIU_Free(recv);
 }
 
@@ -319,14 +319,14 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,
                                                               info->comm_id);
     /* Look up the per destination receive queue object */
-    recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr)->huge_recv_counters,
+    recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
 
     if(recv == MPIDI_MAP_NOT_FOUND) {
         recv        = (MPIDI_Huge_recv_t *)MPIU_Malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_OFI_Map_create(&recv->chunk_q);
-        MPIDI_OFI_Map_set(COMM_OFI(comm_ptr)->huge_recv_counters,
+        MPIDI_OFI_Map_set(COMM_OFI(comm_ptr).huge_recv_counters,
                           info->origin_rank, recv);
     }
 

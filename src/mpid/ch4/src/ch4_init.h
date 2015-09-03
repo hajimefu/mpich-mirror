@@ -190,20 +190,31 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIDI_CH4U_gpid_local[i] = FALSE;
 #endif
 
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     /* shm mechanism has to be choosen before netmod initialization phase because of
        shm functions dynamic binding and a fact that netmod initialization uses
        a collective operation whcih may involve shm related functions like progress engine */
-    MPIDI_choose_shm();
+    mpi_errno = MPIDI_choose_shm();
+
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POPFATAL(mpi_errno);
+    }
 #endif
 
     mpi_errno = MPIDI_netmod_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
                                   MPIR_Process.comm_self, has_parent,
                                   1, &netmod_contexts);
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POPFATAL(mpi_errno);
+    }
 
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     mpi_errno = MPIDI_shm_init(rank, size);
+
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POPFATAL(mpi_errno);
+    }
 #endif
 #if 0
 #if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
