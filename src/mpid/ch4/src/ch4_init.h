@@ -148,7 +148,12 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     void *netmod_contexts;
     MPIDI_STATE_DECL(MPID_STATE_CH4_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_INIT);
-
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    int i;
+    MPIDI_CH4U_locality_t *locality_world, *locality_self;
+    MPIU_CHKLMEM_DECL(2);
+#endif
+    
     MPIDI_choose_netmod();
     pmi_errno = PMI_Init(&has_parent);
 
@@ -198,9 +203,6 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIR_Process.comm_world->local_size  = size;
 
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    int i;
-    MPIDI_CH4U_locality_t *locality_world, *locality_self;
-    MPIU_CHKLMEM_DECL(2);
     MPIU_CHKLMEM_MALLOC(locality_world,
                         MPIDI_CH4U_locality_t*,
                         size*sizeof(MPIDI_CH4U_locality_t),

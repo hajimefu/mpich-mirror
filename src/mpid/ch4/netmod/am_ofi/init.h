@@ -41,7 +41,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno;
     int str_errno, maxlen, i, fi_version;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;
     struct fi_info *hints, *prov, *prov_use;
@@ -52,7 +51,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     char valS[MPIDI_KVSAPPSTRLEN], *val;
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
-    uint32_t *nodemap;
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request) >=
                             (offsetof(MPID_Request, dev.ch4.ch4u.netmod_am) +
