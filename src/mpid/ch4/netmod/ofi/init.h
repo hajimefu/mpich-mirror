@@ -21,9 +21,14 @@ static inline int MPIDI_Create_endpoint(info_t * prov_use,
                                         fid_cq_t p2p_cq,
                                         fid_cntr_t rma_ctr,
                                         fid_mr_t mr, fid_av_t av, fid_base_ep_t * ep, int index);
+static inline int MPIDI_OFI_build_nodemap(int             myrank,
+                                          MPID_Comm      *comm,
+                                          int             sz,
+                                          MPID_Node_id_t *out_nodemap,
+                                          MPID_Node_id_t *sz_out);
 
 #define CHOOSE_PROVIDER(prov, prov_use,errstr)                          \
-  do {                                                                   \
+    do {                                                                \
     info_t *p = prov;                                                   \
     MPIR_ERR_CHKANDJUMP4(p==NULL, mpi_errno,MPI_ERR_OTHER,"**ofid_addrinfo", \
                          "**ofid_addrinfo %s %d %s %s",__SHORT_FILE__,  \
@@ -47,7 +52,6 @@ static inline int MPIDI_netmod_init(int         rank,
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen, iov_len;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     info_t *hints, *prov, *prov_use;
     uint64_t mr_flags;
@@ -58,7 +62,6 @@ static inline int MPIDI_netmod_init(int         rank,
     char valS[MPIDI_KVSAPPSTRLEN], *val;
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
-    uint32_t *nodemap;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
@@ -371,19 +374,17 @@ static inline int MPIDI_netmod_init(int         rank,
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
-    nodemap = (uint32_t *) MPIU_Malloc(comm_world->local_size * sizeof(*nodemap));
-    nodemap[comm_world->rank] = gethostid();
-    MPI_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
-                                   sizeof(*nodemap), MPI_BYTE, comm_world, &errflag));
-    MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(comm_world->local_size
-                                                           * sizeof(*MPIDI_Global.node_map));
-    MPIDI_OFI_build_nodemap(nodemap, MPIDI_Global.node_map,
-                            comm_world->local_size, &MPIDI_Global.max_node_id);
-    MPIU_Free(nodemap);
+    MPIDI_Global.node_map = (MPID_Node_id_t *)
+        MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+    MPIDI_OFI_build_nodemap(comm_world->rank,
+                            comm_world,
+                            comm_world->local_size,
+                            MPIDI_Global.node_map,
+                            &MPIDI_Global.max_node_id);
 
     for(i=0; i<comm_world->local_size; i++)
         COMM_OFI(comm_world).vcrt->vcr_table[i].is_local =
-            (nodemap[i] == nodemap[comm_world->rank])?1:0;
+            (MPIDI_Global.node_map[i] == MPIDI_Global.node_map[comm_world->rank])?1:0;
 
     MPIR_Datatype_init_names();
     MPIDI_OFI_Index_datatypes();
@@ -759,6 +760,69 @@ static inline int MPIDI_Choose_provider(info_t * prov, info_t ** prov_use)
 
     return i;
 }
+
+typedef struct node_map_t{
+    uint32_t node_id;
+    int      rank;
+}node_map_t;
+
+static inline int MPIDI_OFI_cmpfunc (const void * a, const void * b)
+{
+    node_map_t *n_a, *n_b;
+    n_a = (node_map_t*)a;
+    n_b = (node_map_t*)b;
+    return ( n_a->node_id - n_b->node_id);
+}
+
+static inline int MPIDI_OFI_build_nodemap(int             myrank,
+                                          MPID_Comm      *comm,
+                                          int             sz,
+                                          MPID_Node_id_t *out_nodemap,
+                                          MPID_Node_id_t *sz_out)
+{
+    int             i,mpi_errno,idx,*nodeids;
+    node_map_t     *node_map;
+    MPIR_Errflag_t  errflag = MPIR_ERR_NONE;
+
+    MPIU_CHKLMEM_DECL(2);
+
+    MPIU_CHKLMEM_MALLOC(nodeids,int *,sz*sizeof(int),
+                        mpi_errno,"initial node list");
+    MPIU_CHKLMEM_MALLOC(node_map,node_map_t*,sz*sizeof(node_map_t),
+                        mpi_errno,"node map");
+
+    nodeids[myrank] = gethostid();
+    MPI_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE,
+                                   0,
+                                   MPI_DATATYPE_NULL,
+                                   nodeids,
+                                   sizeof(*nodeids),
+                                   MPI_BYTE,
+                                   comm,
+                                   &errflag));
+
+    *sz_out = -1;
+    for(i=0;i<sz;i++) {
+        node_map[i].node_id=nodeids[i];
+        node_map[i].rank=i;
+    }
+    qsort(node_map, sz, sizeof(node_map_t), MPIDI_OFI_cmpfunc);
+
+    idx=0;
+    out_nodemap[0]=0;
+    for(i=1;i<sz;i++) {
+        if(node_map[i-1].node_id != node_map[i].node_id)
+            idx++;
+        out_nodemap[node_map[i].rank]=idx;
+    }
+    *sz_out = idx+1;
+fn_exit:
+    MPIU_CHKLMEM_FREEALL();
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
 
 
 #endif /* NETMOD_OFI_INIT_H_INCLUDED */
