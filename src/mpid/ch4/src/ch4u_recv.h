@@ -63,7 +63,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     else {
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         nbytes = in_data_sz;
-        count = nbytes/dt_sz;
+        count = dt_sz ? nbytes/dt_sz : 0;
     }
     MPIR_STATUS_SET_COUNT(rreq->status, nbytes);
     MPIU_CH4U_REQUEST(rreq, datatype) = datatype;
