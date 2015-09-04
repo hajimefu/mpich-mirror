@@ -139,9 +139,17 @@ typedef struct {
 } MPIDI_Devwin_t;
 #define MPIU_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
 
+typedef struct {
+    unsigned is_local : 1;
+    unsigned index    : 31;
+}MPIDI_CH4U_locality_t;
+
 typedef struct MPIDI_CH4U_Devcomm_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    MPIDI_CH4U_locality_t *locality;
+#endif
 } MPIDI_CH4U_Devcomm_t;
 
 typedef struct MPIDI_Devcomm_t {

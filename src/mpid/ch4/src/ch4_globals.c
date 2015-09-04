@@ -42,9 +42,6 @@ MPIDI_shm_native_funcs_t *MPIDI_shm_native_func;
 pthread_mutex_t MPIDI_Mutex_lock[MPIDI_NUM_LOCKS];
 #endif
 
-/* Array to hold locality information indexed by gpid */
-int *MPIDI_CH4U_gpid_local;
-
 /* The MPID_Abort ADI is strangely defined by the upper layers */
 /* We should fix the upper layer to define MPID_Abort like any */
 /* Other ADI */

@@ -13,6 +13,8 @@
 
 #include "ch4_impl.h"
 
+extern int MPIR_Comm_commit( MPID_Comm * );
+
 /*
 === BEGIN_MPI_T_CVAR_INFO_BLOCK ===
 
@@ -85,7 +87,7 @@ static inline int MPIDI_choose_shm(void)
 {
 
     int mpi_errno = MPI_SUCCESS;
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     int i;
     MPIDI_STATE_DECL(MPID_STATE_CH4_CHOOSE_SHM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CHOOSE_SHM);
@@ -144,9 +146,11 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 {
     int pmi_errno, mpi_errno = MPI_SUCCESS, rank, has_parent, size, appnum, i,thr_err;
     void *netmod_contexts;
-
+    MPIDI_CH4U_locality_t *locality_world, *locality_self;
     MPIDI_STATE_DECL(MPID_STATE_CH4_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_INIT);
+    MPIU_CHKLMEM_DECL(2);
+
 
     MPIDI_choose_netmod();
     pmi_errno = PMI_Init(&has_parent);
@@ -182,22 +186,46 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIU_Calloc(MPIR_CONTEXT_INT_BITS * MPIR_CONTEXT_ID_BITS,
                     sizeof(MPIDI_CH4_Comm_req_list_t *));
 
-#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    MPIDI_CH4U_gpid_local = (int *) MPIU_Malloc(sizeof(int) * size);
-    for (i = 0; i < size; i++)
-        MPIDI_CH4U_gpid_local[i] = FALSE;
+    /* ---------------------------------- */
+    /* Initialize MPI_COMM_SELF           */
+    /* ---------------------------------- */
+    MPIR_Process.comm_self->rank        = 0;
+    MPIR_Process.comm_self->remote_size = 1;
+    MPIR_Process.comm_self->local_size  = 1;
+
+    /* ---------------------------------- */
+    /* Initialize MPI_COMM_WORLD          */
+    /* ---------------------------------- */
+    MPIR_Process.comm_world->rank        = rank;
+    MPIR_Process.comm_world->remote_size = size;
+    MPIR_Process.comm_world->local_size  = size;
+
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    MPIU_CHKLMEM_MALLOC(locality_world,
+                        MPIDI_CH4U_locality_t*,
+                        size*sizeof(MPIDI_CH4U_locality_t),
+                        mpi_errno,
+                        "locality_world");
+    MPIU_CHKLMEM_MALLOC(locality_self,
+                        MPIDI_CH4U_locality_t*,
+                        1*sizeof(MPIDI_CH4U_locality_t),
+                        mpi_errno,
+                        "locality_self");
+    MPIU_CH4U_COMM(MPIR_Process.comm_world,locality) = locality_world;
+    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)  = locality_self;
+    for(i=0;i<size; i++) {
+        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
+        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].index    = i;
+    }
+    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[0].is_local = 0;
+    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[0].index    = MPIR_Process.comm_self->rank;
 #endif
 
-#if defined(MPIDI_BUILD_CH4_SHM)
-    /* shm mechanism has to be choosen before netmod initialization phase because of
-       shm functions dynamic binding and a fact that netmod initialization uses
-       a collective operation whcih may involve shm related functions like progress engine */
-    mpi_errno = MPIDI_choose_shm();
 
+    mpi_errno = MPIDI_choose_shm();
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
     }
-#endif
 
     mpi_errno = MPIDI_netmod_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
@@ -207,14 +235,11 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIR_ERR_POPFATAL(mpi_errno);
     }
 
-#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    /* Create and initialize the locality array     */
-    /* TODO: This doesn't support dynamic processes */
-    /* TODO: We need to build the locality map      */
-    /*       without using the netmod!              */
-    /*       Use PMI or some other mechanism        */
-    for (i = 0; i < size; i++)
-        MPIDI_CH4U_gpid_local[i] = MPIDI_netmod_rank_is_local(i, MPIR_Process.comm_world);
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    for(i=0;i<size; i++)
+        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local =
+            MPIDI_netmod_rank_is_local(i, MPIR_Process.comm_world);
+    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[i].is_local = 1;
 #endif
 
 #if defined(MPIDI_BUILD_CH4_SHM)
@@ -236,6 +261,10 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIR_Process.attrs.wtime_is_global = 1;
     MPIR_Process.attrs.io = MPI_ANY_SOURCE;
 
+    MPIR_Comm_commit(MPIR_Process.comm_self);
+    MPIR_Comm_commit(MPIR_Process.comm_world);
+
+
     /* -------------------------------- */
     /* Return MPICH Parameters          */
     /* -------------------------------- */
@@ -256,6 +285,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIDI_CH4_Global.is_initialized = 0;
 
   fn_exit:
+    MPIU_CHKLMEM_FREEALL();
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_INIT);
     return mpi_errno;
   fn_fail:
@@ -284,20 +314,13 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     int mpi_errno, thr_err;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FINALIZE);
-    mpi_errno = MPIDI_netmod_finalize();
 
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
-    mpi_errno = MPIDI_shm_finalize();
+    MPIDU_RC_POP(MPIDI_netmod_finalize());
+#if defined(MPIDI_BUILD_CH4_SHM)
+    MPIDU_RC_POP(MPIDI_shm_finalize());
 #endif
 
     MPIU_Free(MPIDI_CH4_Global.comm_req_lists);
-#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    MPIU_Free(MPIDI_CH4U_gpid_local);
-#endif
-
-    if (mpi_errno != MPI_SUCCESS) {
-        MPIR_ERR_POP(mpi_errno);
-    }
     MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
   fn_exit:

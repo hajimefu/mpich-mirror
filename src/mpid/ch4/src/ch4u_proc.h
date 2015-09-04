@@ -19,22 +19,33 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
-    /* TODO: map comm's rank to lpid first, rank = gpid only for COMM_WORLD and dups */
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     ret = MPIDI_netmod_rank_is_local(rank, comm);
 #else
-    int gpid;
-    if(comm->handle != MPI_COMM_WORLD)
-    {
-        /* This doesn't work yet, UNIMPLEMENTED! */
-        MPIU_Assert(0);
-    }
-    gpid = rank;
-    ret = MPIDI_CH4U_gpid_local[gpid];
+    ret = MPIU_CH4U_COMM(comm,locality)[rank].is_local;
 #endif
 
     MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
     return ret;
 }
+
+
+static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPID_Comm * comm)
+{
+    int ret;
+    MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
+    MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
+
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
+    int lpid;
+    ret = MPIDI_netmod_comm_get_lpid(comm, rank, &lpid, FALSE);
+#else
+    ret = MPIU_CH4U_COMM(comm,locality)[rank].index;
+#endif
+
+    MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
+    return ret;
+}
+
 
 #endif /*MPIDCH4U_PROC_H_INCLUDED */

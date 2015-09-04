@@ -196,6 +196,4 @@ int MPID_nem_barrier_init(MPID_nem_barrier_t * barrier_region, int init_values);
 int MPID_nem_barrier(void);
 int MPIDI_CH3I_Seg_destroy(void);
 
-#define COMM_SHM_SIMPLE(comm,field)  ((comm)->dev.ch4.shm.simple).field
-
 #endif /* NETMOD_SHM_IMPL_H_INCLUDED */

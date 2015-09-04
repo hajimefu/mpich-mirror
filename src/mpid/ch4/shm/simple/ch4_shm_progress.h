@@ -200,7 +200,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
                           cell->context_id));
         char *recv_buffer = (char *) cell->pkt.mpich.p.payload;
         int data_sz = REQ_SHM(sreq)->data_sz;
-        int grank = COMM_SHM_SIMPLE(sreq->comm,vcrt)->vcr_table[dest].pg_rank;
+        int grank = MPIDI_CH4U_rank_to_lpid(dest, sreq->comm);
         if (data_sz <= (int)EAGER_THRESHOLD) {
             /* eager message */
             MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, REQ_SHM(sreq)->data_sz);
