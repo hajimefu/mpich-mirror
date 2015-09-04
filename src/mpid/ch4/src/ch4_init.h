@@ -153,7 +153,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIDI_CH4U_locality_t *locality_world, *locality_self;
     MPIU_CHKLMEM_DECL(2);
 #endif
-    
+
     MPIDI_choose_netmod();
     pmi_errno = PMI_Init(&has_parent);
 
