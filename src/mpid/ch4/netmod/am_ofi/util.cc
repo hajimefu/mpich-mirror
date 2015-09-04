@@ -118,45 +118,6 @@ void *MPIDI_Map_lookup(void     *_map,
     return rc;
 }
 
-void MPIDI_build_nodemap(uint32_t       *in_nodeids,
-                         MPID_Node_id_t *out_nodemap,
-                         int             sz,
-                         MPID_Node_id_t *sz_out)
-{
-    typedef std::multimap<uint32_t,uint32_t> nodemap;
-    typedef std::pair<uint32_t,uint32_t>     nodepair;
-    typedef nodemap::iterator                mapiter;
-    typedef std::pair<mapiter, mapiter>      mappair;
-
-    nodemap m;
-    int i;
-
-    for(i=0; i<sz; i++)
-	m.insert(nodepair(in_nodeids[i],i));
-
-    for(i=0; i<sz; i++)
-	out_nodemap[i] = 0xFFFF;
-
-    MPID_Node_id_t node_id = 0;
-
-    for(mapiter it = m.begin(), end=m.end();
-	it != end;
-	it = m.upper_bound(it->first)) {
-	mappair p;
-	p = m.equal_range(it->first);
-
-	for(mapiter it2 = p.first;
-	    it2 != p.second;
-	    it2++)
-	    out_nodemap[it2->second] = node_id;
-
-	node_id++;
-	MPIU_Assert(node_id != 0xFFFF);
-    }
-
-    *sz_out = node_id;
-}
-
 /* MPI Datatype Processing for RMA */
 #define isS_INT(x) ( (x)==MPI_INTEGER ||                                \
 		     (x) == MPI_INT32_T || (x) == MPI_INTEGER4 ||       \

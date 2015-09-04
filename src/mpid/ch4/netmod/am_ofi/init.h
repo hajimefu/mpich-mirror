@@ -195,16 +195,13 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
         FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i], FI_MULTI_RECV), prepost);
     }
 
-    nodemap = (uint32_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(*nodemap));
-    nodemap[MPIR_Process.comm_world->rank] = gethostid();
-
-    MPIDU_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
-                                   sizeof(*nodemap), MPI_BYTE, MPIR_Process.comm_world, &errflag));
-    MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size
-                                                           * sizeof(*MPIDI_Global.node_map));
-    MPIDI_build_nodemap(nodemap, MPIDI_Global.node_map,
-                        MPIR_Process.comm_world->local_size, &MPIDI_Global.max_node_id);
-    MPIU_Free(nodemap);
+    MPIDI_Global.node_map = (MPID_Node_id_t *)
+        MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+    MPIDI_CH4U_build_nodemap(comm_world->rank,
+                             comm_world,
+                             comm_world->local_size,
+                             MPIDI_Global.node_map,
+                             &MPIDI_Global.max_node_id);
 
     MPIR_Datatype_init_names();
     /* todo: spawn */
