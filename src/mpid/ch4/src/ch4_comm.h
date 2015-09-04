@@ -106,13 +106,27 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     mpi_errno = MPIDI_shm_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
 #endif
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    int i;
+    MPIU_CH4U_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
+        MPIU_Malloc(comm->local_size * sizeof(MPIDI_CH4U_locality_t));
+    for(i=0;i<comm->local_size; i++)
+    {
+        int is_local, lpid;
+        is_local = MPIDI_netmod_rank_is_local(i, comm);
+        MPIDI_netmod_comm_get_lpid(comm, i, &lpid, FALSE);
 
+        MPIU_CH4U_COMM(comm,locality)[i].is_local = is_local;
+        MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+    }
+
+#endif
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CREATE);
     return mpi_errno;
@@ -133,11 +147,14 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-#if defined(MPIDI_BUILD_CH4_SHM) || defined(MPIDI_CH4_EXCLUSIVE_SHM)
+#if defined(MPIDI_BUILD_CH4_SHM)
     mpi_errno = MPIDI_shm_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
+#endif
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    MPIU_Free(MPIU_CH4U_COMM(comm,locality));
 #endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);

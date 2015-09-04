@@ -357,9 +357,6 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
     /* ---------------------------------- */
-    comm_self->rank = 0;
-    comm_self->remote_size = 1;
-    comm_self->local_size  = 1;
     MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_self->remote_size, &COMM_OFI(comm_self).vcrt));
     COMM_OFI(comm_self).vcrt->vcr_table[0].addr_idx = rank;
     COMM_OFI(comm_self).vcrt->vcr_table[0].is_local = 1;
@@ -367,9 +364,6 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ---------------------------------- */
     /* Initialize MPI_COMM_WORLD and VCRT */
     /* ---------------------------------- */
-    comm_world->rank = rank;
-    comm_world->remote_size = size;
-    comm_world->local_size = size;
     MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
     for(i=0; i<comm_world->local_size; i++)
         COMM_OFI(comm_world).vcrt->vcr_table[i].addr_idx = i;
@@ -393,9 +387,6 @@ static inline int MPIDI_netmod_init(int         rank,
 
     MPIR_Datatype_init_names();
     MPIDI_OFI_Index_datatypes();
-
-    MPIR_Comm_commit(comm_world);
-    MPIR_Comm_commit(comm_self);
 
     /* -------------------------------- */
     /* Initialize Dynamic Tasking       */

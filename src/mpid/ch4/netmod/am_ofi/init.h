@@ -207,9 +207,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     MPIU_Free(nodemap);
 
     MPIR_Datatype_init_names();
-    MPIR_Comm_commit(MPIR_Process.comm_world);
-    MPIR_Comm_commit(MPIR_Process.comm_self);
-
     /* todo: spawn */
 
   fn_exit:

@@ -81,23 +81,11 @@ typedef struct MPIDI_CH4_Global_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
 #endif
-
     void *netmod_context[8];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 
 #define MPIDI_CH4_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
-
-#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-
-/* Define a data structure for CH4 to keep locality information for each
- * process. This is only used if the netmod doesn't explicitly turn it off. */
-extern int *MPIDI_CH4U_gpid_local;      /* For now, this is implemented as a flat
-                                         * integer array indexed by gpid. This will
-                                         * probably be reimplemented with something more
-                                         * efficient. */
-
-#endif
 
 #endif /* MPIDCH4_TYPES_H_INCLUDED */

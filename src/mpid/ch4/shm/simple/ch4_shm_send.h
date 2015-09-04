@@ -91,7 +91,7 @@ static inline int MPIDI_shm_send(const void *buf,
     if (data_sz <= EAGER_THRESHOLD) {
         /* eager message */
         /* Try fastbox */
-        int grank = COMM_SHM_SIMPLE(comm,vcrt)->vcr_table[rank].pg_rank;
+        int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
 #if 0
         int local_rank = MPID_nem_mem_region.local_ranks[grank];
         MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.out[local_rank]->mpich;

@@ -112,7 +112,7 @@ static inline int MPIDI_shm_recv(void *buf,
 #if 0
     /* try to receive immediately from fastbox */
     if (rank != MPI_ANY_SOURCE) {
-        int grank = COMM_SHM_SIMPLE(comm,vcrt)->vcr_table[rank].pg_rank;
+        int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
         int local_rank = MPID_nem_mem_region.local_ranks[grank];
         MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
