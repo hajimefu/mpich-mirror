@@ -49,7 +49,6 @@ static inline int MPIDI_netmod_init(int         rank,
     int thr_err=0, str_errno, maxlen, iov_len;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
-    MPID_Comm *comm;
     info_t *hints, *prov, *prov_use;
     uint64_t mr_flags;
     cq_attr_t cq_attr;
@@ -358,47 +357,45 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
     /* ---------------------------------- */
-    comm = MPIR_Process.comm_self;
-    comm->rank = 0;
-    comm->remote_size = 1;
-    comm->local_size = 1;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
-    COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
+    comm_self->rank = 0;
+    comm_self->remote_size = 1;
+    comm_self->local_size  = 1;
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_self->remote_size, &COMM_OFI(comm_self).vcrt));
+    COMM_OFI(comm_self).vcrt->vcr_table[0].addr_idx = rank;
+    COMM_OFI(comm_self).vcrt->vcr_table[0].is_local = 1;
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_WORLD and VCRT */
     /* ---------------------------------- */
-    comm = MPIR_Process.comm_world;
-    comm->rank = rank;
-    comm->remote_size = size;
-    comm->local_size = size;
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
+    comm_world->rank = rank;
+    comm_world->remote_size = size;
+    comm_world->local_size = size;
+    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
+    for(i=0; i<comm_world->local_size; i++)
+        COMM_OFI(comm_world).vcrt->vcr_table[i].addr_idx = i;
 
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
-    nodemap = (uint32_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(*nodemap));
-    nodemap[MPIR_Process.comm_world->rank] = gethostid();
+    nodemap = (uint32_t *) MPIU_Malloc(comm_world->local_size * sizeof(*nodemap));
+    nodemap[comm_world->rank] = gethostid();
     MPI_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
-                                   sizeof(*nodemap), MPI_BYTE, MPIR_Process.comm_world, &errflag));
-#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    /* Populate the locality array */
-    for( i = 0; i < MPIR_Process.comm_world->local_size; i++ )
-    {
-        MPIDI_CH4U_gpid_local[i] = nodemap[i] == nodemap[MPIR_Process.comm_world->rank] ? TRUE: FALSE;
-    }
-#endif
-    MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size
+                                   sizeof(*nodemap), MPI_BYTE, comm_world, &errflag));
+    MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(comm_world->local_size
                                                            * sizeof(*MPIDI_Global.node_map));
     MPIDI_OFI_build_nodemap(nodemap, MPIDI_Global.node_map,
-                            MPIR_Process.comm_world->local_size, &MPIDI_Global.max_node_id);
+                            comm_world->local_size, &MPIDI_Global.max_node_id);
     MPIU_Free(nodemap);
+
+    for(i=0; i<comm_world->local_size; i++)
+        COMM_OFI(comm_world).vcrt->vcr_table[i].is_local =
+            (nodemap[i] == nodemap[comm_world->rank])?1:0;
 
     MPIR_Datatype_init_names();
     MPIDI_OFI_Index_datatypes();
 
-    MPIR_Comm_commit(MPIR_Process.comm_world);
-    MPIR_Comm_commit(MPIR_Process.comm_self);
+    MPIR_Comm_commit(comm_world);
+    MPIR_Comm_commit(comm_self);
 
     /* -------------------------------- */
     /* Initialize Dynamic Tasking       */
@@ -407,10 +404,9 @@ static inline int MPIDI_netmod_init(int         rank,
         char parent_port[MPIDI_MAX_KVS_VALUE_LEN];
         PMI_RC(PMI_KVS_Get(MPIDI_Global.kvsname,
                            MPIDI_PARENT_PORT_KVSKEY, parent_port, MPIDI_MAX_KVS_VALUE_LEN), pmi);
-        MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, MPIR_Process.comm_world, &comm));
-        MPIR_Process.comm_parent = comm;
+        MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
         MPIU_Assert(MPIR_Process.comm_parent != NULL);
-        MPIU_Strncpy(comm->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
+        MPIU_Strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
 
   fn_exit:
@@ -637,8 +633,10 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
     MPIDI_OFI_VCRT_Create(size, &COMM_OFI(newcomm_ptr).vcrt);
 
     for (i = 0; i < size; i++)
+    {
         COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
-
+        COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].is_local = 0;
+    }
     return 0;
 }
 

@@ -12,7 +12,7 @@
 #define MPIDCH4_SEND_H_INCLUDED
 
 #include "ch4_impl.h"
-
+#include "ch4u_proc.h"
 #undef FUNCNAME
 #define FUNCNAME MPIDI_Send
 #undef FCNAME
@@ -31,7 +31,7 @@ __CH4_INLINE__ int MPIDI_Send(const void *buf,
     mpi_errno = MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
@@ -67,7 +67,7 @@ __CH4_INLINE__ int MPIDI_Isend(const void *buf,
     mpi_errno = MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
@@ -103,7 +103,7 @@ __CH4_INLINE__ int MPIDI_Rsend(const void *buf,
     mpi_errno = MPIDI_netmod_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
@@ -139,7 +139,7 @@ __CH4_INLINE__ int MPIDI_Irsend(const void *buf,
     mpi_errno = MPIDI_netmod_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
@@ -174,7 +174,7 @@ __CH4_INLINE__ int MPIDI_Ssend(const void *buf,
     mpi_errno = MPIDI_netmod_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =
@@ -209,7 +209,7 @@ __CH4_INLINE__ int MPIDI_Issend(const void *buf,
     mpi_errno = MPIDI_netmod_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno =
             MPIDI_shm_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
@@ -279,7 +279,7 @@ __CH4_INLINE__ int MPIDI_Send_init(const void *buf,
                                        comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_send_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
     else
@@ -316,7 +316,7 @@ __CH4_INLINE__ int MPIDI_Ssend_init(const void *buf,
                                         comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_ssend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else
@@ -353,7 +353,7 @@ __CH4_INLINE__ int MPIDI_Bsend_init(const void *buf,
                                         comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_bsend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else
@@ -390,7 +390,7 @@ __CH4_INLINE__ int MPIDI_Rsend_init(const void *buf,
                                         comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_netmod_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_rsend_init(buf, count, datatype, rank, tag,
                                          comm, context_offset, request);
     else

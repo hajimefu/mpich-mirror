@@ -112,7 +112,8 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
         MPIR_ERR_POP(mpi_errno);
     }
 #endif
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CREATE);
     return mpi_errno;
   fn_fail:

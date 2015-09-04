@@ -183,8 +183,6 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                     sizeof(MPIDI_CH4_Comm_req_list_t *));
 
 #if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    /* Create and initialize the locality array */
-    /* TODO: This doesn't support dynamic processes */
     MPIDI_CH4U_gpid_local = (int *) MPIU_Malloc(sizeof(int) * size);
     for (i = 0; i < size; i++)
         MPIDI_CH4U_gpid_local[i] = FALSE;
@@ -209,19 +207,22 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIR_ERR_POPFATAL(mpi_errno);
     }
 
+#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
+    /* Create and initialize the locality array     */
+    /* TODO: This doesn't support dynamic processes */
+    /* TODO: We need to build the locality map      */
+    /*       without using the netmod!              */
+    /*       Use PMI or some other mechanism        */
+    for (i = 0; i < size; i++)
+        MPIDI_CH4U_gpid_local[i] = MPIDI_netmod_rank_is_local(i, MPIR_Process.comm_world);
+#endif
+
 #if defined(MPIDI_BUILD_CH4_SHM)
     mpi_errno = MPIDI_shm_init(rank, size);
 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
     }
-#endif
-#if 0
-#if defined(MPIDI_BUILD_CH4_LOCALITY_INFO)
-    /* Populate the locality array */
-    for (i = 0; i < size; i++)
-        MPIDI_CH4U_gpid_local[i] = FALSE;
-#endif
 #endif
 
     MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;

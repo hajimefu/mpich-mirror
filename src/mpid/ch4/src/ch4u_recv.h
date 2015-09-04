@@ -12,6 +12,7 @@
 #define MPIDCH4U_RECV_H_INCLUDED
 
 #include "ch4_impl.h"
+#include "ch4u_proc.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_prepare_recv_req

@@ -25,7 +25,7 @@ EXTERN_C_BEGIN
 int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
 {
     struct MPIDI_VCRT *vcrt;
-    int i,mpi_errno;
+    int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
 
@@ -36,10 +36,6 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
         MPIU_Object_set_ref(vcrt, 1);
         vcrt->size = size;
         *vcrt_ptr = vcrt;
-
-        for(i=0; i<size; i++)
-            vcrt->vcr_table[i].addr_idx = i;
-
         mpi_errno = MPI_SUCCESS;
     } else
         mpi_errno = MPIR_ERR_MEMALLOCFAILED;

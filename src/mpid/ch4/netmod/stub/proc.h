@@ -19,7 +19,8 @@ static inline int MPIDI_netmod_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_STATE_DECL(MPIDI_NETMOD_RANK_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_NETMOD_RANK_IS_LOCAL);
 
-    ret = MPIDI_CH4U_rank_is_local(rank, comm);
+    MPIU_Assert(0);
+    ret = 0;
 
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;

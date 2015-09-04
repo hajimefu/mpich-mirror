@@ -48,7 +48,7 @@ static inline int MPIDI_shm_init(int rank, int size)
     MPIU_CHKPMEM_MALLOC(local_ranks, int *, size * sizeof(int), mpi_errno, "mem_region local ranks");
     for( i = 0; i < size; i++ )
     {
-        if( MPIDI_CH4U_gpid_local[i] )
+        if( MPIDI_CH4U_rank_is_local(i, MPIR_Process.comm_world) )
         {
             if( i == rank ) {
                 local_rank = num_local;
