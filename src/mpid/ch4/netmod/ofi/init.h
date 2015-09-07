@@ -362,8 +362,6 @@ static inline int MPIDI_netmod_init(int         rank,
     /* Initialize MPI_COMM_WORLD and VCRT */
     /* ---------------------------------- */
     MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
-    for(i=0; i<comm_world->local_size; i++)
-        COMM_OFI(comm_world).vcrt->vcr_table[i].addr_idx = i;
 
     /* -------------------------------- */
     /* Calculate per-node map           */
