@@ -12,6 +12,7 @@
 #define MPIDCH4_IMPL_H_INCLUDED
 
 #include "ch4_types.h"
+#include <mpidch4.h>
 
 #define MPIDU_RC_POP(FUNC)                                      \
   do                                                            \
@@ -52,9 +53,30 @@ static inline int MPIDI_CH4I_get_context_index(uint64_t context_id)
     return gen_id;
 }
 
+extern MPIU_Object_alloc_t MPIDI_Request_mem;
+static inline MPID_Request *MPIDI_CH4I_request_alloc_and_init(int count)
+{
+    MPID_Request *req;
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    MPIU_Assert(req != NULL);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPID_cc_set(&req->cc, 1);
+    req->cc_ptr = &req->cc;
+    MPIU_Object_set_ref(req, count);
+    req->greq_fns = NULL;
+    MPIR_STATUS_SET_COUNT(req->status, 0);
+    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
+    req->status.MPI_SOURCE = MPI_UNDEFINED;
+    req->status.MPI_TAG = MPI_UNDEFINED;
+    req->status.MPI_ERROR = MPI_SUCCESS;
+    req->comm = NULL;
+    return req;
+}
+
+
 static inline MPID_Request *MPIDI_CH4I_create_req()
 {
-    MPID_Request *req = MPIDI_netmod_request_create();
+    MPID_Request *req = MPIDI_CH4I_request_alloc_and_init(2);
     MPIU_CH4U_REQUEST(req, status) = 0;
     return req;
 }

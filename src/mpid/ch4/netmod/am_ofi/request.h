@@ -39,18 +39,21 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
     MPIU_Assert(count >= 0);
     if (count == 0) {
         MPIU_Assert(MPID_cc_is_complete(&req->cc));
+
         if (req->comm)
             MPIR_Comm_release(req->comm);
+
         if (req->greq_fns)
             MPIU_Free(req->greq_fns);
-        MPIDI_Request_tls_free(req);
+
+        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
     }
 }
 
 static inline MPID_Request *MPIDI_netmod_request_create(void)
 {
     MPID_Request *req;
-    MPIDI_Request_alloc_and_init(req, 2);
+    MPIDI_Request_alloc_and_init(req, 1);
     return req;
 }
 
