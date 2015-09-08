@@ -85,7 +85,7 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
                                                 const void *data, size_t data_sz,
                                                 MPID_Request * sreq)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS, c;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
     MPIDI_OFI_lmt_msg_pyld_t *lmt_info;
     struct iovec iov[3];
@@ -115,6 +115,8 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     iov[2].iov_base = lmt_info;
     iov[2].iov_len = sizeof(*lmt_info);
 
+    MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
+    MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
     FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
@@ -156,6 +158,7 @@ static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
 
     iov[2].iov_base = (void *) data;
     iov[2].iov_len = count;
+
     FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);

@@ -227,7 +227,7 @@ static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_addr_t source)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS, c;
     MPID_Request *sreq;
     MPIDI_OFI_Ack_msg_pyld_t *ack_msg;
     int handler_id;
@@ -241,6 +241,7 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
         MPIU_Free(AMREQ_OFI(sreq, pack_buffer));
     }
 
+    MPID_cc_decr(sreq->cc_ptr, &c);
     handler_id = AMREQ_OFI(sreq, msg_hdr).handler_id;
     MPIDU_RC_POP(MPIDI_Global.send_cmpl_handlers[handler_id] (sreq));
 
@@ -251,24 +252,13 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
     goto fn_exit;
 }
 
-static inline int MPIDI_AMOFI_IS_CTRL_MSG(uint8_t msg_type)
-{
-    switch (msg_type) {
-    case MPIDI_AMTYPE_LMT_REQ:
-    case MPIDI_AMTYPE_LMT_ACK:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_handle_send_completion
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *cq_entry)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS, c;
     MPID_Request *sreq;
     MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
@@ -277,12 +267,26 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
 
     ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
+    sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
     msg_hdr = &ofi_req->msg_hdr;
 
-    if (MPIDI_AMOFI_IS_CTRL_MSG(msg_hdr->am_type))
+    switch (msg_hdr->am_type) {
+
+    case MPIDI_AMTYPE_LMT_ACK:
         goto fn_exit;
 
-    sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
+    case MPIDI_AMTYPE_LMT_REQ:
+        MPID_cc_decr(sreq->cc_ptr, &c);
+        MPIU_Assert(c >= 0);
+        if (c == 0) {
+            MPIDI_Request_release(sreq);
+        }
+        goto fn_exit;
+
+    default:
+        break;
+    }
+
     if (AMREQ_OFI(sreq, pack_buffer)) {
         MPIU_Free(AMREQ_OFI(sreq, pack_buffer));
     }
