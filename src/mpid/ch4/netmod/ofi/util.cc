@@ -1,3 +1,4 @@
+/* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 /*
  *  (C) 2006 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
@@ -25,7 +26,7 @@ EXTERN_C_BEGIN
 int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
 {
     struct MPIDI_VCRT *vcrt;
-    int mpi_errno;
+    int i,mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
 
@@ -36,6 +37,10 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
         MPIU_Object_set_ref(vcrt, 1);
         vcrt->size = size;
         *vcrt_ptr = vcrt;
+
+        for(i=0; i<size; i++)
+            vcrt->vcr_table[i].addr_idx = i;
+
         mpi_errno = MPI_SUCCESS;
     } else
         mpi_errno = MPIR_ERR_MEMALLOCFAILED;
@@ -112,45 +117,6 @@ void *MPIDI_OFI_Map_lookup(void     *_map,
         rc = (*m)[id];
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
     return rc;
-}
-
-void MPIDI_OFI_build_nodemap(uint32_t       *in_nodeids,
-                             MPID_Node_id_t *out_nodemap,
-                             int             sz,
-                             MPID_Node_id_t *sz_out)
-{
-    typedef std::multimap<uint32_t,uint32_t> nodemap;
-    typedef std::pair<uint32_t,uint32_t>     nodepair;
-    typedef nodemap::iterator                mapiter;
-    typedef std::pair<mapiter, mapiter>      mappair;
-
-    nodemap m;
-    int i;
-
-    for(i=0; i<sz; i++)
-        m.insert(nodepair(in_nodeids[i],i));
-
-    for(i=0; i<sz; i++)
-        out_nodemap[i] = 0xFFFF;
-
-    MPID_Node_id_t node_id = 0;
-
-    for(mapiter it = m.begin(), end=m.end();
-        it != end;
-        it = m.upper_bound(it->first)) {
-        mappair p;
-        p = m.equal_range(it->first);
-
-        for(mapiter it2 = p.first;
-            it2 != p.second;
-            it2++)
-            out_nodemap[it2->second] = node_id;
-
-        node_id++;
-        MPIU_Assert(node_id != 0xFFFF);
-    }
-
-    *sz_out = node_id;
 }
 
 static inline int

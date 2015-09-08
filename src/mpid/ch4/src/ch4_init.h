@@ -144,13 +144,15 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                               char ***argv,
                               int requested, int *provided, int *has_args, int *has_env)
 {
-    int pmi_errno, mpi_errno = MPI_SUCCESS, rank, has_parent, size, appnum, i,thr_err;
+    int pmi_errno, mpi_errno = MPI_SUCCESS, rank, has_parent, size, appnum,thr_err;
     void *netmod_contexts;
-    MPIDI_CH4U_locality_t *locality_world, *locality_self;
     MPIDI_STATE_DECL(MPID_STATE_CH4_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_INIT);
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+    int i;
+    MPIDI_CH4U_locality_t *locality_world, *locality_self;
     MPIU_CHKLMEM_DECL(2);
-
+#endif
 
     MPIDI_choose_netmod();
     pmi_errno = PMI_Init(&has_parent);
@@ -285,7 +287,9 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIDI_CH4_Global.is_initialized = 0;
 
   fn_exit:
+#ifdef MPIDI_CH4_EXCLUSIVE_SHM
     MPIU_CHKLMEM_FREEALL();
+#endif
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_INIT);
     return mpi_errno;
   fn_fail:

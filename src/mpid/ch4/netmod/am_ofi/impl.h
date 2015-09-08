@@ -274,8 +274,6 @@ extern void MPIDI_Map_set(void *_map, uint64_t id, void *val);
 extern void MPIDI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_Map_lookup(void *_map, uint64_t id);
 
-extern void MPIDI_build_nodemap(uint32_t * in_nodeids,
-                                MPID_Node_id_t * out_nodemap, int sz, MPID_Node_id_t * sz_out);
 extern void MPIDI_Index_datatypes();
 
 /* Prototypes for inliner */

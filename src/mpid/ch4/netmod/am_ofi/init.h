@@ -41,7 +41,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno;
     int str_errno, maxlen, i, fi_version;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;
     struct fi_info *hints, *prov, *prov_use;
@@ -52,7 +51,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     char valS[MPIDI_KVSAPPSTRLEN], *val;
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
-    uint32_t *nodemap;
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request) >=
                             (offsetof(MPID_Request, dev.ch4.ch4u.netmod_am) +
@@ -195,16 +193,13 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
         FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i], FI_MULTI_RECV), prepost);
     }
 
-    nodemap = (uint32_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(*nodemap));
-    nodemap[MPIR_Process.comm_world->rank] = gethostid();
-
-    MPIDU_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, nodemap,
-                                   sizeof(*nodemap), MPI_BYTE, MPIR_Process.comm_world, &errflag));
-    MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size
-                                                           * sizeof(*MPIDI_Global.node_map));
-    MPIDI_build_nodemap(nodemap, MPIDI_Global.node_map,
-                        MPIR_Process.comm_world->local_size, &MPIDI_Global.max_node_id);
-    MPIU_Free(nodemap);
+    MPIDI_Global.node_map = (MPID_Node_id_t *)
+        MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+    MPIDI_CH4U_build_nodemap(comm_world->rank,
+                             comm_world,
+                             comm_world->local_size,
+                             MPIDI_Global.node_map,
+                             &MPIDI_Global.max_node_id);
 
     MPIR_Datatype_init_names();
     /* todo: spawn */
