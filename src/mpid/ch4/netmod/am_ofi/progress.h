@@ -27,7 +27,8 @@ static inline int MPIDI_netmod_handle_short_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_
     MPIDI_msg_sz_t data_sz, in_data_sz;
     MPIDI_netmod_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
-    int i, is_contig, done, curr_len, rem, iov_len;
+    int i, is_contig, iov_len;
+    size_t done, curr_len, rem;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SHORT_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM);
@@ -112,7 +113,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
                                             fi_addr_t source, MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    int done = 0, curr_len, rem = 0;
+    size_t done = 0, curr_len, rem = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_RDMA_READ);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_RDMA_READ);
