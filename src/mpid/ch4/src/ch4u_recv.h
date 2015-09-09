@@ -165,6 +165,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
         goto fn_exit;
     }
 
+    dtype_add_ref_if_not_builtin(datatype);
     MPIU_CH4U_REQUEST(rreq, tag) = match_bits;
     MPIU_CH4U_REQUEST(rreq, rreq.ignore) = mask_bits;
     MPIU_CH4U_REQUEST(rreq, datatype) = datatype;

@@ -246,6 +246,7 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
         MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
     }
 
+    dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(match_req, datatype));
     MPIU_Free(MPIU_CH4U_REQUEST(rreq, buffer));
     MPIU_Object_release_ref(rreq, &c);
     MPIDI_Request_complete(rreq);
@@ -283,6 +284,8 @@ static inline int MPIDI_CH4I_am_recv_cmpl_handler(MPID_Request * rreq)
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
         MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
     }
+
+    dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(rreq, datatype));
     MPIDI_Request_complete(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_RECV_CMPL_HANDLER);
