@@ -36,7 +36,7 @@ static inline int shm_do_isend(const void *buf,
                                MPI_Datatype datatype,
                                int rank,
                                int tag,
-                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               MPID_Comm * comm, int context_offset, MPID_Request ** request, int type)
 {
     int dt_contig, mpi_errno = MPI_SUCCESS;
     MPI_Aint dt_true_lb;
@@ -56,8 +56,10 @@ static inline int shm_do_isend(const void *buf,
     REQ_SHM(sreq)->user_count = count;
     REQ_SHM(sreq)->datatype = datatype;
     REQ_SHM(sreq)->data_sz = data_sz;
+    REQ_SHM(sreq)->type = type;
     REQ_SHM(sreq)->dest = rank;
     REQ_SHM(sreq)->next = NULL;
+    REQ_SHM(sreq)->pending = NULL;
     REQ_SHM(sreq)->segment_ptr = NULL;
     if( !dt_contig ) {
         REQ_SHM(sreq)->segment_ptr = MPID_Segment_alloc( );
@@ -121,6 +123,7 @@ static inline int MPIDI_shm_send(const void *buf,
             cell->pkt.mpich.datalen = data_sz;
             cell->pkt.mpich.type = TYPE_EAGER;
             MPIU_Memcpy((void *) cell->pkt.mpich.p.payload, (char*)buf+dt_true_lb, data_sz);
+            cell->pending = NULL;
             MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
             *request = NULL;
             goto fn_exit;
@@ -128,7 +131,7 @@ static inline int MPIDI_shm_send(const void *buf,
     }
     /* Long message or */
     /* Failed to send immediately - create and return request */
-    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_STANDARD);
 
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND);
@@ -167,10 +170,14 @@ static inline int MPIDI_shm_ssend(const void *buf,
                                   int tag,
                                   MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    int err = MPI_SUCCESS;
-    MPIU_Assert(0);
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISSEND);
 
-    return err;
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
+    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_SYNC);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
+    return mpi_errno;
 }
 
 static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
@@ -239,7 +246,7 @@ static inline int MPIDI_shm_isend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISEND);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
-    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_STANDARD);
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
     return mpi_errno;
@@ -252,9 +259,14 @@ static inline int MPIDI_shm_issend(const void *buf,
                                    int tag,
                                    MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    int err = MPI_SUCCESS;
-    MPIU_Assert(0);
-    return err;
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISSEND);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
+    mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_SYNC);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
+    return mpi_errno;
 }
 
 static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)

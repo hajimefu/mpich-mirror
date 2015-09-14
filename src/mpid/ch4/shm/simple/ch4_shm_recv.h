@@ -61,6 +61,8 @@ static inline int shm_do_irecv(void *buf,
     }
     /* enqueue rreq */
     REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
+    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+            (MPIU_DBG_FDEST, "Enqueued rreq %d,%d,%d\n", rank, tag, comm->context_id + context_offset));
     *request = rreq;
 
 fn_exit:

@@ -92,8 +92,9 @@ typedef struct MPID_nem_cell {
     int rank;
     int tag;
     int context_id;
+    MPID_Request* pending;
 #if MPID_NEM_CACHE_LINE_LEN != 0
-    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 4 * sizeof(int)]; /* should be 64-16-16-16 = 16 */
+    char padding[MPID_NEM_CACHE_LINE_LEN - MPID_NEM_CELL_HEAD_LEN - MPID_NEM_MPICH_HEAD_LEN - 4 * sizeof(int) - sizeof(MPID_Request*)]; /* should be 64-16-16-16-8 = 8 */
 #endif
     volatile MPID_nem_pkt_t pkt;
 } MPID_nem_cell_t;

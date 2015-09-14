@@ -18,18 +18,18 @@ struct MPID_Request;
 
 typedef struct {
     struct MPID_Request *next;
+    struct MPID_Request *pending;
     int dest;
     int rank;
     int tag;
     int context_id;
     char *user_buf;
-    int data_sz;
+    MPIDI_msg_sz_t data_sz;
     int type;
     int user_count;
     MPI_Datatype datatype;
     /* segment, segment_first, and segment_size are used when processing
        non-contiguous datatypes */
-    /*    MPID_Segment   segment; */
     struct MPID_Segment *segment_ptr;
     MPIDI_msg_sz_t segment_first;
     MPIDI_msg_sz_t segment_size;
