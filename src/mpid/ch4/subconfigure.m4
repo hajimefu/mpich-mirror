@@ -141,7 +141,7 @@ AC_ARG_ENABLE(ch4-netmod-direct,
     ],,enable_ch4_netmod_direct=yes)
 
 
-if test "$ch4_nets_array_sz" == "1" && test "$enable_ch4_netmod_direct" =="yes" ;  then
+if test "$ch4_nets_array_sz" == "1" && test "$enable_ch4_netmod_direct" == "yes" ;  then
    PAC_APPEND_FLAG([-DNETMOD_DIRECT=__netmod_direct_${ch4_netmods}__], [CPPFLAGS])
 fi
 
