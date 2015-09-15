@@ -5,7 +5,7 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
     AM_COND_IF([BUILD_CH4],[
         for net in $ch4_netmods ; do
             AS_CASE([$net],[am_ofi],[build_ch4_netmod_am_ofi=yes])
-	    if test $net == "am_ofi" ; then
+	    if test $net = "am_ofi" ; then
 	       if test "$build_ch4_locality_info" != "yes" ; then
 	       	  AC_DEFINE(MPIDI_BUILD_CH4_LOCALITY_INFO, 1, [CH4 should build locality info])
 		  build_ch4_locality_info="yes"
