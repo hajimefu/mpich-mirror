@@ -75,8 +75,9 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         MPID_Request* pending = in_cell ? cell->pending : REQ_SHM(sreq)->pending;
         if (type == TYPE_ACK) {
             /* ACK message doesn't have a matching receive! */
+            int c;
             MPIU_Assert(pending);
-            pending->cc--;
+            MPID_cc_decr(pending->cc_ptr, &c);
             MPIDI_Request_release(pending);
             goto release_cell_l;
         }
@@ -269,8 +270,9 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
             /* increase req cc in order to release req only after ACK, do it once per SYNC request */
             /* non-NULL pending req signal receiver about sending ACK back */
             /* the pending req should be sent back for sender to decrease cc, for it is dequeued already */
+            int c;
             cell->pending = sreq;
-            sreq->cc++;
+            MPID_cc_incr(sreq->cc_ptr, &c);
             REQ_SHM(sreq)->type = TYPE_STANDARD;
         }
         if (data_sz <= EAGER_THRESHOLD) {
