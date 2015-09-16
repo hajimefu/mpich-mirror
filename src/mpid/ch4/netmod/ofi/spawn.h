@@ -35,7 +35,7 @@ static inline void MPIDI_free_port_name_tag(int tag)
 
 static inline int MPIDI_get_port_name_tag(int *port_name_tag)
 {
-    int i, j;
+    unsigned i, j;
     int mpi_errno = MPI_SUCCESS;
 
     for(i = 0; i < MPIR_MAX_CONTEXT_MASK; i++)

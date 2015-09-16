@@ -237,7 +237,7 @@ static inline int MPIDI_netmod_win_start(MPID_Group *group, int assert, MPID_Win
 
     MPIR_Group_add_ref(group);
 
-    PROGRESS_WHILE(group->size != WIN_OFI(win)->sync.pw.count);
+    PROGRESS_WHILE(group->size != (int)WIN_OFI(win)->sync.pw.count);
 
     WIN_OFI(win)->sync.pw.count = 0;
 
@@ -358,7 +358,7 @@ static inline int MPIDI_netmod_win_wait(MPID_Win *win)
     MPID_Group *group;
     group = WIN_OFI(win)->sync.pw.group;
 
-    PROGRESS_WHILE(group->size != WIN_OFI(win)->sync.sc.count);
+    PROGRESS_WHILE(group->size != (int)WIN_OFI(win)->sync.sc.count);
 
     WIN_OFI(win)->sync.sc.count = 0;
     WIN_OFI(win)->sync.pw.group = NULL;
@@ -390,7 +390,7 @@ static inline int MPIDI_netmod_win_test(MPID_Win *win, int *flag)
     MPID_Group *group;
     group = WIN_OFI(win)->sync.pw.group;
 
-    if(group->size == WIN_OFI(win)->sync.sc.count) {
+    if(group->size == (int)WIN_OFI(win)->sync.sc.count) {
         WIN_OFI(win)->sync.sc.count = 0;
         WIN_OFI(win)->sync.pw.group = NULL;
         *flag          = 1;
@@ -714,23 +714,24 @@ static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint size,
                                                    MPID_Comm *comm_ptr,
                                                    void **base_ptr, MPID_Win **win_ptr)
 {
-    int            mpi_errno = MPI_SUCCESS;
+    int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
-
     void           *baseP      = NULL;
     MPIDI_Win_info *winfo      = NULL;
     MPID_Win       *win        = NULL;
     ssize_t         total_size = 0LL;
-    int             i          = 0;
+    MPI_Aint        *sizes, size_out   = 0;
+    char shm_key[64];
+    void *map_ptr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
 
     mpi_errno = MPIDI_Win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
                                MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
     WIN_OFI(win)->sizes   = (MPI_Aint *)MPIU_Malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
-    MPI_Aint     *sizes   = WIN_OFI(win)->sizes;
+    sizes                 = WIN_OFI(win)->sizes;
     sizes[comm_ptr->rank] = size;
     mpi_errno             = MPIR_Allgather_impl(MPI_IN_PLACE,
                                                 0,
@@ -752,10 +753,7 @@ static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint size,
 
     if(total_size == 0) goto fn_zero;
 
-    int  fd, rc, first;
-    char shm_key[64];
-    void *map_ptr;
-    sprintf(shm_key, "/mpi-%X-%llX",
+    sprintf(shm_key, "/mpi-%X-%" PRIx64,
             MPIDI_Global.jobid,
             WIN_OFI(win)->win_id);
 
@@ -843,9 +841,6 @@ static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint size,
 
     /* Scan for my offset into the buffer             */
     /* Could use exscan if this is expensive at scale */
-    MPI_Aint size_out;
-    size_out = 0;
-
     for(i=0; i<comm_ptr->rank; i++)
         size_out+=sizes[i];
 
@@ -1211,7 +1206,7 @@ static inline int MPIDI_netmod_win_lock_all(int assert, MPID_Win *win)
             lockQ[i].done = 1;
     }
 
-    PROGRESS_WHILE(size != WIN_OFI(win)->sync.lock.remote.allLocked);
+    PROGRESS_WHILE(size != (int)WIN_OFI(win)->sync.lock.remote.allLocked);
 
     WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_LOCK_ALL;
 

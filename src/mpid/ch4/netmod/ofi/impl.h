@@ -402,15 +402,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 })
 
 #else /* HAVE_ERROR_CHECKING */
-#define EPOCH_CHECK1()
-#define EPOCH_CHECK2()
-#define EPOCH_START_CHECK()
-#define EPOCH_FENCE_CHECK()
-#define EPOCH_POST_CHECK()
-#define EPOCH_LOCK_CHECK()
-#define EPOCH_FREE_CHECK()
-#define EPOCH_ORIGIN_CHECK(epoch_type)
-#define EPOCH_TARGET_CHECK(epoch_type)
+#define EPOCH_CHECK1()       if(0) goto fn_fail;
+#define EPOCH_CHECK2()       if(0) goto fn_fail;
+#define EPOCH_START_CHECK()  if(0) goto fn_fail;
+#define EPOCH_FENCE_CHECK()  if(0) goto fn_fail;
+#define EPOCH_POST_CHECK()   if(0) goto fn_fail;
+#define EPOCH_LOCK_CHECK()   if(0) goto fn_fail;
+#define EPOCH_FREE_CHECK()   if(0) goto fn_fail;
+#define EPOCH_ORIGIN_CHECK(epoch_type) if(0) goto fn_fail;
+#define EPOCH_TARGET_CHECK(epoch_type) if(0) goto fn_fail;
 #endif /* HAVE_ERROR_CHECKING */
 
 #define EPOCH_FENCE_EVENT()                                        \
@@ -483,7 +483,10 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         *signal                  = sigreq;                      \
         ep                       = G_TXC_RMA(0);                \
       }                                                         \
-    else ep = G_TXC_CTR(0);                                     \
+    else {                                                      \
+        ep = G_TXC_CTR(0);                                      \
+        sigreq = NULL;                                          \
+    }                                                           \
   })
 
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS

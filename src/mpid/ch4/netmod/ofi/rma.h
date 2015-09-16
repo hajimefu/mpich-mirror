@@ -75,6 +75,8 @@ static inline void MPIDI_Win_datatype_basic(int           count,
                                 dt->size,
                                 dt->pointer,
                                 dt->true_lb);
+    else
+        memset(&dt, 0, sizeof(*dt));
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_BASIC);
 }
@@ -223,7 +225,7 @@ static inline int do_put(const void    *origin_addr,
         size_t    omax;
         size_t    tmax;
         size_t    tout, oout;
-        int       i;
+        unsigned  i;
         omax=tmax=1;
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
@@ -473,7 +475,7 @@ static inline int do_get(void          *origin_addr,
         iovec_t   originv[1];
         rma_iov_t targetv[1];
         size_t    omax,tmax,tout,oout;
-        int       i;
+        unsigned  i;
         omax=tmax=1;
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
@@ -634,7 +636,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     msg.desc      = &desc;
     msg.iov_count     = 1;
     msg.addr          = _comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR);
-    msg.rma_iov       = (rma_ioc_t *)&targetv;
+    msg.rma_iov       = &targetv;
     msg.rma_iov_count = 1;
     msg.datatype      = fi_dt;
     msg.op            = fi_op;
@@ -779,15 +781,15 @@ static inline int do_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        iovec_t   originv[1];
-        rma_iov_t targetv[1];
+        ioc_t     originv[1];
+        rma_ioc_t targetv[1];
         size_t    omax;
         size_t    tmax;
         size_t    tout, oout;
-        int       i;
+        unsigned  i;
         omax=tmax=1;
-        rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,omax,
-                                  targetv,tmax,&oout,&tout);
+        rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,(iovec_t*)originv,omax,
+                                  (rma_iov_t*)targetv,tmax,&oout,&tout);
 
         if(rc==MPIDI_IOV_DONE) break;
 
@@ -795,13 +797,13 @@ static inline int do_accumulate(const void    *origin_addr,
 
         for(i=0; i<tout; i++) targetv[i].key = WINFO_MR_KEY(win,target_rank);
 
-        for(i=0; i<oout; i++)((ioc_t *)&originv[i])->count/=dt_size;
+        for(i=0; i<oout; i++)originv[i].count/=dt_size;
 
-        for(i=0; i<tout; i++)((rma_ioc_t *)&targetv[i])->count/=dt_size;
+        for(i=0; i<tout; i++)targetv[i].count/=dt_size;
 
-        msg.msg_iov       = (ioc_t *)originv;
+        msg.msg_iov       = originv;
         msg.iov_count     = oout;
-        msg.rma_iov       = (rma_ioc_t *)targetv;
+        msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
         FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
                      fi_atomicmsg(ep, &msg, flags),
@@ -972,43 +974,43 @@ static inline int do_get_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        iovec_t   originv[1]= {{0}};
-        iovec_t   resultv[1]= {{0}};
-        rma_iov_t targetv[1]= {{0}};
+        ioc_t     originv[1]= {{0}};
+        ioc_t     resultv[1]= {{0}};
+        rma_ioc_t targetv[1]= {{0}};
         size_t    omax,rmax,tmax;
         size_t    tout,rout,oout;
+        unsigned  i;
+
         omax=rmax=tmax=1;
 
         if(op != MPI_NO_OP)
-            rc = MPIDI_Merge_iov_list2(&req->noncontig->iovs,originv,
-                                       omax,resultv,rmax,targetv,tmax,
+            rc = MPIDI_Merge_iov_list2(&req->noncontig->iovs,(iovec_t*)originv,
+                                       omax,(iovec_t*)resultv,rmax,(rma_iov_t*)targetv,tmax,
                                        &oout,&rout,&tout);
         else {
             oout = 0;
-            rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,resultv,
-                                      rmax,targetv,tmax,&rout,&tout);
+            rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,(iovec_t*)resultv,
+                                      rmax,(rma_iov_t*)targetv,tmax,&rout,&tout);
         }
 
         if(rc==MPIDI_IOV_DONE) break;
 
         MPIU_Assert(rc != MPIDI_IOV_ERROR);
-        int i;
+        for(i=0; i<oout; i++)originv[i].count/=dt_size;
 
-        for(i=0; i<oout; i++)((ioc_t *)&originv[i])->count/=dt_size;
-
-        for(i=0; i<rout; i++)((rma_ioc_t *)&resultv[i])->count/=dt_size;
+        for(i=0; i<rout; i++)resultv[i].count/=dt_size;
 
         for(i=0; i<tout; i++) {
-            ((rma_ioc_t *)&targetv[i])->count/=dt_size;
-            ((rma_ioc_t *)&targetv[i])->key = WINFO_MR_KEY(win,target_rank);
+            targetv[i].count/=dt_size;
+            targetv[i].key = WINFO_MR_KEY(win,target_rank);
         }
 
-        msg.msg_iov       = (ioc_t *)originv;
+        msg.msg_iov       = originv;
         msg.iov_count     = oout;
-        msg.rma_iov       = (rma_ioc_t *)targetv;
+        msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
         FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
-                     fi_fetch_atomicmsg(ep, &msg,(ioc_t *)resultv,
+                     fi_fetch_atomicmsg(ep, &msg,resultv,
                                         NULL,rout,flags),
                      rdma_readfrom);
     }

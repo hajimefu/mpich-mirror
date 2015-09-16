@@ -241,9 +241,9 @@ int MPIDI_Merge_iov_list(MPIDI_Iovec_state_t *iov_state,
 {
     int rc;
     uintptr_t origin_addr,target_addr;
-    uintptr_t origin_last_addr,target_last_addr;
+    uintptr_t origin_last_addr=0,target_last_addr=0;
     int       origin_idx=0, target_idx=0;
-    size_t    len,last_len;
+    size_t    len,last_len=0;
     CH4_COMPILE_TIME_ASSERT(offsetof(iovec_t,iov_base)==offsetof(rma_iov_t,addr));
     CH4_COMPILE_TIME_ASSERT(offsetof(iovec_t,iov_len)==offsetof(rma_iov_t,len));
 
@@ -294,9 +294,9 @@ int MPIDI_Merge_iov_list2(MPIDI_Iovec_state_t *iov_state,
 {
     int rc;
     uintptr_t origin_addr,result_addr,target_addr;
-    uintptr_t origin_last_addr,result_last_addr,target_last_addr;
+    uintptr_t origin_last_addr=0,result_last_addr=0,target_last_addr=0;
     int       origin_idx=0, result_idx=0, target_idx=0;
-    size_t    len,last_len;
+    size_t    len,last_len=0;
 
     rc = MPIDI_Next_iovec_state2(iov_state,&origin_last_addr,&result_last_addr,&target_last_addr, &last_len);
     assert(rc!=MPIDI_IOV_ERROR);
