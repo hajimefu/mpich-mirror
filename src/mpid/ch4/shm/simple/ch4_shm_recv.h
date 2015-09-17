@@ -182,6 +182,8 @@ static inline int MPIDI_shm_recv(void *buf,
     return mpi_errno;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_shm_recv)
 static inline int MPIDI_shm_recv_init(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
@@ -189,8 +191,28 @@ static inline int MPIDI_shm_recv_init(void *buf,
                                       int tag,
                                       MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq = NULL;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_RECV_INIT);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_RECV_INIT);
+
+    MPIDI_Request_create_rreq(rreq);
+    MPIU_Object_set_ref(rreq, 1);
+    rreq->kind = MPID_PREQUEST_RECV;
+    rreq->comm = comm;
+    MPIR_Comm_add_ref(comm);
+    ENVELOPE_SET(REQ_SHM(rreq), rank, tag, comm->context_id + context_offset);
+    REQ_SHM(rreq)->user_buf = (char*)buf;
+    REQ_SHM(rreq)->user_count = count;
+    REQ_SHM(rreq)->datatype = datatype;
+    *request = rreq;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_RECV_INIT);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 

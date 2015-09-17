@@ -163,6 +163,8 @@ static inline int MPIDI_shm_irsend(const void *buf,
     return MPI_SUCCESS;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_SHM_SSEND)
 static inline int MPIDI_shm_ssend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
@@ -180,12 +182,44 @@ static inline int MPIDI_shm_ssend(const void *buf,
     return mpi_errno;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_SHM_STARTALL)
 static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int i, mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_STARTALL);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_STARTALL);
+    for( i = 0; i < count; i++ ) {
+        MPID_Request* req = requests[i];
+        if( req->kind == MPID_PREQUEST_SEND ) {
+            mpi_errno = shm_do_isend(REQ_SHM(req)->user_buf, REQ_SHM(req)->user_count,
+                    REQ_SHM(req)->datatype, REQ_SHM(req)->dest, REQ_SHM(req)->tag, 
+                    req->comm, REQ_SHM(req)->context_id - req->comm->context_id, 
+                    &req->partner_request, REQ_SHM(req)->type);
+        }
+        else if( req->kind == MPID_PREQUEST_RECV ) {
+            mpi_errno = shm_do_irecv(REQ_SHM(req)->user_buf, REQ_SHM(req)->user_count,
+                    REQ_SHM(req)->datatype, REQ_SHM(req)->rank, REQ_SHM(req)->tag, 
+                    req->comm, REQ_SHM(req)->context_id - req->comm->context_id, 
+                    &req->partner_request);
+        }
+        else
+        {
+            MPIU_Assert(0);
+        }
+        req->cc_ptr = &req->partner_request->cc;
+    }
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_STARTALL);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_SHM_SEND_INIT)
 static inline int MPIDI_shm_send_init(const void *buf,
                                       int count,
                                       MPI_Datatype datatype,
@@ -193,10 +227,33 @@ static inline int MPIDI_shm_send_init(const void *buf,
                                       int tag,
                                       MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *sreq = NULL;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_SEND_INIT);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    MPIDI_Request_create_sreq(sreq);
+    MPIU_Object_set_ref(sreq, 1);
+    sreq->kind = MPID_PREQUEST_SEND;
+    sreq->comm = comm;
+    MPIR_Comm_add_ref(comm);
+    ENVELOPE_SET(REQ_SHM(sreq), comm->rank, tag, comm->context_id + context_offset);
+    REQ_SHM(sreq)->user_buf = (char *) buf;
+    REQ_SHM(sreq)->user_count = count;
+    REQ_SHM(sreq)->dest = rank;
+    REQ_SHM(sreq)->datatype = datatype;
+    REQ_SHM(sreq)->type = TYPE_STANDARD;
+    *request = sreq;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_SHM_SSEND_INIT)
 static inline int MPIDI_shm_ssend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
@@ -205,8 +262,29 @@ static inline int MPIDI_shm_ssend_init(const void *buf,
                                        MPID_Comm * comm,
                                        int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *sreq = NULL;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_SEND_INIT);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    MPIDI_Request_create_sreq(sreq);
+    MPIU_Object_set_ref(sreq, 1);
+    sreq->kind = MPID_PREQUEST_SEND;
+    sreq->comm = comm;
+    MPIR_Comm_add_ref(comm);
+    ENVELOPE_SET(REQ_SHM(sreq), comm->rank, tag, comm->context_id + context_offset);
+    REQ_SHM(sreq)->user_buf = (char *) buf;
+    REQ_SHM(sreq)->user_count = count;
+    REQ_SHM(sreq)->dest = rank;
+    REQ_SHM(sreq)->datatype = datatype;
+    REQ_SHM(sreq)->type = TYPE_SYNC;
+    *request = sreq;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline int MPIDI_shm_bsend_init(const void *buf,
