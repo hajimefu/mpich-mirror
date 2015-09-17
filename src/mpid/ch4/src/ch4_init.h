@@ -241,7 +241,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     for(i=0;i<size; i++)
         MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local =
             MPIDI_netmod_rank_is_local(i, MPIR_Process.comm_world);
-    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[i].is_local = 1;
+    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[0].is_local = 1;
 #endif
 
 #if defined(MPIDI_BUILD_CH4_SHM)
