@@ -6,13 +6,14 @@ jenkins_configure=""
 queue=""
 netmod=""
 
-XFAIL_CONF="maint/jenkins/xfail.conf"
+SKIP_TEST_CONF="maint/jenkins/skip_test.conf"
+TEST_SUMMARY="test/mpi/summary.junit.xml"
 
 #####################################################################
 ## Initialization
 #####################################################################
 
-while getopts ":f:j:c:o:q:m:" opt; do
+while getopts ":f:j:c:o:q:m:s:" opt; do
     case "$opt" in
         j)
             jobname=$OPTARG ;;
@@ -25,7 +26,9 @@ while getopts ":f:j:c:o:q:m:" opt; do
         m)
             netmod=$OPTARG ;;
         f)
-            XFAIL_CONF=$OPTARG ;;
+            SKIP_TEST_CONF=$OPTARG ;;
+        s)
+            TEST_SUMMARY=$OPTARG ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
             exit 1
@@ -36,12 +39,7 @@ done
 ## Main (
 #####################################################################
 
-if test ! -f "$XFAIL_CONF" ; then
-    echo "Cannot find $XFAIL_CONF. No XFAIL will be applied"
-    exit 0
-fi
-
-XFAILCond() {
+SkipTestCond() {
     local job="$1"
     local comp="$2"
     local option="$3"
@@ -74,9 +72,24 @@ XFAILCond() {
     echo "$state"
 }
 
-SCRIPT="apply-xfail.sh"
-if [[ -f $SCRIPT ]]; then
-    rm $SCRIPT
+SkipTest() {
+    TEST_SUMMARY_DIR=$(dirname $TEST_SUMMARY)
+    if [[ -d "$TEST_SUMMARY_DIR" ]]; then
+        mkdir -p "$TEST_SUMMARY_DIR"
+    fi
+    cat > "$TEST_SUMMARY" << "EOF"
+<testsuites>
+<testsuite failures="0" errors="0" skipped="0" tests="1" date="$date" name="summary_junit_xml">
+<testcase name="none"/>
+<system-out/>
+<system-err/>
+</testsuite>
+</testsuites>
+EOF
+}
+
+if [[ -f "$TEST_SUMMARY" ]]; then
+    rm "$TEST_SUMMARY"
 fi
 
 while read -r line; do
@@ -90,13 +103,10 @@ while read -r line; do
     fi
 
     arr=( $(echo $line) )
-    if [[ "0" == $(XFAILCond "${arr[1]}" "${arr[2]}" "${arr[3]}" "${arr[4]}" "${arr[5]}") ]]; then
-        echo "${arr[@]:5}" >> $SCRIPT
+    if [[ "0" == $(SkipTestCond "${arr[1]}" "${arr[2]}" "${arr[3]}" "${arr[4]}" "${arr[5]}") ]]; then
+        SkipTest
+        exit 0
     fi
-done < "$XFAIL_CONF"
-
-if [[ -f $SCRIPT ]]; then
-    source $SCRIPT
-fi
+done < "$SKIP_TEST_CONF"
 
 exit 0
