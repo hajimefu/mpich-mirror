@@ -115,12 +115,12 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
     int i;
     MPIU_CH4U_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
-        MPIU_Malloc(comm->local_size * sizeof(MPIDI_CH4U_locality_t));
-    for(i=0;i<comm->local_size; i++)
+        MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4U_locality_t));
+    for(i=0;i<comm->remote_size; i++)
     {
         int is_local, lpid;
         is_local = MPIDI_netmod_rank_is_local(i, comm);
-        MPIDI_netmod_comm_get_lpid(comm, i, &lpid, FALSE);
+        MPIDI_netmod_comm_get_lpid(comm, i, &lpid, TRUE);
 
         MPIU_CH4U_COMM(comm,locality)[i].is_local = is_local;
         MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
