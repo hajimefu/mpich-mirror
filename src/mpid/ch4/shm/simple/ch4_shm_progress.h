@@ -32,9 +32,6 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
     MPID_Request *prev_sreq = NULL;
   unexpected_l:
     if (sreq != NULL) {
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "Found unexpected in progress req %d,%d,%d\n",
-                          REQ_SHM(sreq)->rank, REQ_SHM(sreq)->tag, REQ_SHM(sreq)->context_id));
         goto match_l;
     }
 #if 0
@@ -58,9 +55,6 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
     /* try to receive from recvq */
     if (MPID_nem_mem_region.my_recvQ && !MPID_nem_queue_empty(MPID_nem_mem_region.my_recvQ)) {
         MPID_nem_queue_dequeue(MPID_nem_mem_region.my_recvQ, &cell);
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "Found cell in progress %d,%d,%d\n", cell->rank,
-                          cell->tag, cell->context_id));
         in_cell = 1;
         goto match_l;
     }
@@ -85,14 +79,12 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             int sender_rank, tag, context_id;
             ENVELOPE_GET(REQ_SHM(req), sender_rank, tag, context_id);
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                             (MPIU_DBG_FDEST, "Matching in progress req %d,%d,%d\n", sender_rank,
-                              tag, context_id));
+                             (MPIU_DBG_FDEST, "Posted from grank %d to %d in progress %d,%d,%d\n",
+                              MPIDI_CH4U_rank_to_lpid(sender_rank, req->comm), MPID_nem_mem_region.rank,
+                              sender_rank, tag, context_id));
             if ((in_cell && ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
                 (sreq && ENVELOPE_MATCH(REQ_SHM(sreq), sender_rank, tag, context_id))) {
                 char *recv_buffer = (char *) REQ_SHM(req)->user_buf;
-                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                                 (MPIU_DBG_FDEST, "Matching in progress done %d,%d,%d, type %d, pending %p\n",
-                                  sender_rank, tag, context_id, type, pending));
                 if (pending) {
                     /* we must send ACK */
                     MPID_Request* req_ack = NULL;
@@ -168,9 +160,6 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         if (in_cell) {
             /* free the cell, move to unexpected queue */
             MPID_Request *rreq;
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                    (MPIU_DBG_FDEST, "Unexpected %d,%d,%d\n", cell->rank, cell->tag,
-                     cell->context_id));
             MPIDI_Request_create_rreq(rreq);
             MPIU_Object_set_ref(rreq, 1);
             /* set status */
@@ -193,14 +182,14 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             /* enqueue rreq */
             REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_unexpected);
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                    (MPIU_DBG_FDEST, "Unexpected enqueued %d,%d,%d\n", cell->rank, cell->tag,
-                     cell->context_id));
+                    (MPIU_DBG_FDEST, "Unexpected from grank %d to %d in progress %d,%d,%d\n",
+                     cell->my_rank, MPID_nem_mem_region.rank,
+                     cell->rank, cell->tag, cell->context_id));
         }
         else {
             /* examine another message in unexpected queue */
             prev_sreq = sreq;
             sreq = REQ_SHM(sreq)->next;
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL, (MPIU_DBG_FDEST, "Next unexpected %p\n", sreq));
             goto unexpected_l;
         }
     }
@@ -208,8 +197,8 @@ release_cell_l:
     if (in_cell) {
         /* release cell */
         MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                (MPIU_DBG_FDEST, "About to release cell %d,%d,%d in_fbox=%d\n", cell->rank, cell->tag,
-                 cell->context_id, in_fbox));
+                         (MPIU_DBG_FDEST, "Received from grank %d to %d in progress %d,%d,%d\n", cell->my_rank,
+                          MPID_nem_mem_region.rank, cell->rank, cell->tag, cell->context_id));
         cell->pending = NULL;
 #if 0
         if (in_fbox)
@@ -219,12 +208,9 @@ release_cell_l:
         {
             MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->my_rank], cell);
         }
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                (MPIU_DBG_FDEST, "Cell released\n"));
     }
     else {
         /* destroy unexpected req */
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL, (MPIU_DBG_FDEST, "About to release unexpected %p\n", sreq));
         REQ_SHM(sreq)->pending = NULL;
         MPIU_Free(REQ_SHM(sreq)->user_buf);
         REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_recvq_unexpected, mpi_errno);
@@ -256,9 +242,6 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
         MPID_nem_queue_dequeue(MPID_nem_mem_region.my_freeQ, &cell);
         ENVELOPE_GET(REQ_SHM(sreq), cell->rank, cell->tag, cell->context_id);
         dest = REQ_SHM(sreq)->dest;
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                (MPIU_DBG_FDEST, "Sending %d,%d,%d\n", cell->rank, cell->tag,
-                 cell->context_id));
         char *recv_buffer = (char *) cell->pkt.mpich.p.payload;
         MPIDI_msg_sz_t data_sz = REQ_SHM(sreq)->data_sz;
         /*
@@ -322,6 +305,9 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
             REQ_SHM(sreq)->data_sz -= EAGER_THRESHOLD;
             cell->pkt.mpich.type = TYPE_LMT;
         }
+        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                (MPIU_DBG_FDEST, "Sent to grank %d from %d in progress %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
+                 cell->context_id));
         MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
         (*completion_count)++;
     }

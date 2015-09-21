@@ -63,6 +63,7 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
 { \
     int incomplete__; \
     MPID_cc_decr((req_)->cc_ptr, &incomplete__); \
+    dtype_release_if_not_builtin(REQ_SHM(req_)->datatype); \
     if (!incomplete__) \
         MPIDI_Request_release(req_);	\
 }

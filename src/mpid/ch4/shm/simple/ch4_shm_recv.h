@@ -59,10 +59,13 @@ static inline int shm_do_irecv(void *buf,
         REQ_SHM(rreq)->segment_first = 0;
         REQ_SHM(rreq)->segment_size = data_sz;
     }
+    dtype_add_ref_if_not_builtin(datatype);
     /* enqueue rreq */
     REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
     MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-            (MPIU_DBG_FDEST, "Enqueued rreq %d,%d,%d\n", rank, tag, comm->context_id + context_offset));
+            (MPIU_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
+             MPIDI_CH4U_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
+             rank, tag, comm->context_id + context_offset));
     *request = rreq;
 
 fn_exit:

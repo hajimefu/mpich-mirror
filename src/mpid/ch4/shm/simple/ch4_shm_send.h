@@ -70,6 +70,7 @@ static inline int shm_do_isend(const void *buf,
         REQ_SHM(sreq)->segment_first = 0;
         REQ_SHM(sreq)->segment_size = data_sz;
     }
+    dtype_add_ref_if_not_builtin(datatype);
     /* enqueue sreq */
     REQ_SHM_ENQUEUE(sreq, MPIDI_shm_sendq);
     *request = sreq;
@@ -128,6 +129,9 @@ static inline int MPIDI_shm_send(const void *buf,
             cell->pending = NULL;
             MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
             *request = NULL;
+            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+                    (MPIU_DBG_FDEST, "Sent to grank %d from %d in send %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
+                     cell->context_id));
             goto fn_exit;
         }
     }
