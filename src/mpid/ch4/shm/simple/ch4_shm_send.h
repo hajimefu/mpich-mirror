@@ -13,6 +13,8 @@
 
 #include "ch4_shm_impl.h"
 #include "ch4_impl.h"
+#include <mpibsend.h>
+#include <../mpi/pt2pt/bsendutil.h>
 /* ---------------------------------------------------- */
 /* general queues                                       */
 /* ---------------------------------------------------- */
@@ -191,24 +193,61 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_STARTALL);
     for( i = 0; i < count; i++ ) {
-        MPID_Request* req = requests[i];
-        if( req->kind == MPID_PREQUEST_SEND ) {
-            mpi_errno = shm_do_isend(REQ_SHM(req)->user_buf, REQ_SHM(req)->user_count,
-                    REQ_SHM(req)->datatype, REQ_SHM(req)->dest, REQ_SHM(req)->tag, 
-                    req->comm, REQ_SHM(req)->context_id - req->comm->context_id, 
-                    &req->partner_request, REQ_SHM(req)->type);
+        MPID_Request* preq = requests[i];
+        if( preq->kind == MPID_PREQUEST_SEND ) {
+            if( REQ_SHM(preq)->type != TYPE_BUFFERED ) {
+                mpi_errno = shm_do_isend(REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
+                        REQ_SHM(preq)->datatype, REQ_SHM(preq)->dest, REQ_SHM(preq)->tag,
+                        preq->comm, REQ_SHM(preq)->context_id - preq->comm->context_id,
+                        &preq->partner_request, REQ_SHM(preq)->type);
+            }
+            else {
+                mpi_errno = MPIR_Bsend_isend( REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
+                        REQ_SHM(preq)->datatype, REQ_SHM(preq)->dest, REQ_SHM(preq)->tag,
+                        preq->comm, BSEND_INIT, &preq->partner_request);
+
+                if (preq->partner_request != NULL)
+                    MPIU_Object_add_ref(preq->partner_request);
+
+                /*
+                MPI_Request sreq_handle;
+
+                mpi_errno = MPIR_Ibsend_impl(REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
+                        REQ_SHM(preq)->datatype, REQ_SHM(preq)->dest, REQ_SHM(preq)->tag, preq->comm,
+                        &sreq_handle);
+                if (mpi_errno == MPI_SUCCESS)
+                {
+                    MPID_Request_get_ptr(sreq_handle, preq->partner_request);
+                }
+                */
+            }
         }
-        else if( req->kind == MPID_PREQUEST_RECV ) {
-            mpi_errno = shm_do_irecv(REQ_SHM(req)->user_buf, REQ_SHM(req)->user_count,
-                    REQ_SHM(req)->datatype, REQ_SHM(req)->rank, REQ_SHM(req)->tag, 
-                    req->comm, REQ_SHM(req)->context_id - req->comm->context_id, 
-                    &req->partner_request);
+        else if( preq->kind == MPID_PREQUEST_RECV ) {
+            mpi_errno = shm_do_irecv(REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
+                    REQ_SHM(preq)->datatype, REQ_SHM(preq)->rank, REQ_SHM(preq)->tag,
+                    preq->comm, REQ_SHM(preq)->context_id - preq->comm->context_id,
+                    &preq->partner_request);
         }
         else
         {
             MPIU_Assert(0);
         }
-        req->cc_ptr = &req->partner_request->cc;
+        if (mpi_errno == MPI_SUCCESS) {
+            preq->status.MPI_ERROR = MPI_SUCCESS;
+
+            if (REQ_SHM(preq)->type == TYPE_BUFFERED) {
+                preq->cc_ptr = &preq->cc;
+                MPIDI_Request_set_completed(preq);
+            }
+            else
+                preq->cc_ptr = &preq->partner_request->cc;
+        }
+        else {
+            preq->partner_request = NULL;
+            preq->status.MPI_ERROR = mpi_errno;
+            preq->cc_ptr = &preq->cc;
+            MPIDI_Request_set_completed(preq);
+        }
     }
 
 fn_exit:
@@ -295,8 +334,29 @@ static inline int MPIDI_shm_bsend_init(const void *buf,
                                        MPID_Comm * comm,
                                        int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *sreq = NULL;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_SEND_INIT);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    MPIDI_Request_create_sreq(sreq);
+    MPIU_Object_set_ref(sreq, 1);
+    sreq->kind = MPID_PREQUEST_SEND;
+    sreq->comm = comm;
+    MPIR_Comm_add_ref(comm);
+    ENVELOPE_SET(REQ_SHM(sreq), comm->rank, tag, comm->context_id + context_offset);
+    REQ_SHM(sreq)->user_buf = (char *) buf;
+    REQ_SHM(sreq)->user_count = count;
+    REQ_SHM(sreq)->dest = rank;
+    REQ_SHM(sreq)->datatype = datatype;
+    REQ_SHM(sreq)->type = TYPE_BUFFERED;
+    *request = sreq;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline int MPIDI_shm_rsend_init(const void *buf,

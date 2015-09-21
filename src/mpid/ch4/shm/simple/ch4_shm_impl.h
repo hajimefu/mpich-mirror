@@ -136,8 +136,8 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
 #define TYPE_EAGER 1
 #define TYPE_LMT 2
 #define TYPE_SYNC 3
-#define TYPE_RTS 4
-#define TYPE_CTS 5
+#define TYPE_BUFFERED 4
+#define TYPE_READY 5
 #define TYPE_ACK 6
 
 /*
