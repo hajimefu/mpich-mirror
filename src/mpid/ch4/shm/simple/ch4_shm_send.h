@@ -74,6 +74,10 @@ static inline int shm_do_isend(const void *buf,
     /* enqueue sreq */
     REQ_SHM_ENQUEUE(sreq, MPIDI_shm_sendq);
     *request = sreq;
+    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
+            (MPIU_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
+             MPIDI_CH4U_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
+             comm->rank, tag, comm->context_id + context_offset));
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_SHM_DO_ISEND);

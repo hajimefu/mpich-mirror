@@ -177,6 +177,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             else {
                 REQ_SHM(rreq)->user_buf = NULL;
             }
+            REQ_SHM(rreq)->datatype = MPI_BYTE;
             REQ_SHM(rreq)->next = NULL;
             REQ_SHM(rreq)->pending = cell->pending;
             /* enqueue rreq */
