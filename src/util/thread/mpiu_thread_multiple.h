@@ -12,7 +12,8 @@
 #define MPIU_THREAD_CHECK_BEGIN if (MPIR_ThreadInfo.isThreaded) {
 #define MPIU_THREAD_CHECK_END   }
 
-#define MPIUI_THREAD_CS_ENTER_REAL(lockname, mutex)                      \
+/* Nonrecursive mutex macros */
+#define MPIUI_THREAD_CS_ENTER_NONRECURSIVE(lockname, mutex)             \
     do {                                                                \
         int err_;                                                       \
         MPIU_THREAD_CHECK_BEGIN;                                        \
@@ -21,7 +22,7 @@
         MPIU_THREAD_CHECK_END;                                          \
     } while (0)
 
-#define MPIUI_THREAD_CS_EXIT_REAL(lockname, mutex)                       \
+#define MPIUI_THREAD_CS_EXIT_NONRECURSIVE(lockname, mutex)              \
     do {                                                                \
         int err_;                                                       \
         MPIU_THREAD_CHECK_BEGIN;                                        \
@@ -30,13 +31,51 @@
         MPIU_THREAD_CHECK_END;                                          \
     } while (0)
 
-#define MPIUI_THREAD_CS_YIELD_REAL(lockname, mutex)                      \
+#define MPIUI_THREAD_CS_YIELD_NONRECURSIVE(lockname, mutex)             \
     do {                                                                \
         MPIU_THREAD_CHECK_BEGIN;                                        \
         MPIU_DBG_MSG_S(THREAD, TYPICAL, "yielding %s", lockname);       \
         MPIU_Thread_yield(&mutex);                                      \
         MPIU_THREAD_CHECK_END;                                          \
     } while (0)
+
+
+/* Recursive mutex macros */
+/* We don't need to protect the depth variable since it is thread
+ * private and sequentially accessed within a thread */
+#define MPIUI_THREAD_CS_ENTER_RECURSIVE(lockname, mutex)                \
+    do {                                                                \
+        int depth_;                                                     \
+        MPIU_THREADPRIV_DECL;                                           \
+        MPIU_THREADPRIV_GET;                                            \
+                                                                        \
+        MPIU_THREAD_CHECK_BEGIN;                                        \
+        depth_ = MPIU_THREADPRIV_FIELD(lock_depth);                     \
+        MPIU_DBG_MSG_S(THREAD, TYPICAL, "recursive locking %s", lockname); \
+        if (depth_ == 0) {                                              \
+            MPIUI_THREAD_CS_ENTER_NONRECURSIVE(lockname, mutex);        \
+        }                                                               \
+        MPIU_THREADPRIV_FIELD(lock_depth) += 1;                         \
+        MPIU_THREAD_CHECK_END;                                          \
+    } while (0)
+
+#define MPIUI_THREAD_CS_EXIT_RECURSIVE(lockname, mutex)                 \
+    do {                                                                \
+        int depth_;                                                     \
+        MPIU_THREADPRIV_DECL;                                           \
+        MPIU_THREADPRIV_GET;                                            \
+                                                                        \
+        MPIU_THREAD_CHECK_BEGIN;                                        \
+        depth_ = MPIU_THREADPRIV_FIELD(lock_depth);                     \
+        MPIU_DBG_MSG_S(THREAD, TYPICAL, "recursive unlocking %s", lockname); \
+        if (depth_ == 1) {                                              \
+            MPIUI_THREAD_CS_EXIT_NONRECURSIVE(lockname, mutex);         \
+        }                                                               \
+        MPIU_THREADPRIV_FIELD(lock_depth) -= 1;                         \
+        MPIU_THREAD_CHECK_END;                                          \
+    } while (0)
+
+#define MPIUI_THREAD_CS_YIELD_RECURSIVE MPIUI_THREAD_CS_YIELD_NONRECURSIVE
 
 #define MPIU_THREAD_CS_ENTER(name, mutex) MPIUI_THREAD_CS_ENTER_##name(mutex)
 #define MPIU_THREAD_CS_EXIT(name, mutex) MPIUI_THREAD_CS_EXIT_##name(mutex)
