@@ -77,6 +77,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         }
         while (req) {
             int sender_rank, tag, context_id;
+            MPI_Count count;
             ENVELOPE_GET(REQ_SHM(req), sender_rank, tag, context_id);
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                              (MPIU_DBG_FDEST, "Posted from grank %d to %d in progress %d,%d,%d\n",
@@ -125,8 +126,8 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     /* set status */
                     req->status.MPI_SOURCE = sender_rank;
                     req->status.MPI_TAG = tag;
-                    MPIR_STATUS_SET_COUNT(req->status,
-                                          (MPIR_STATUS_GET_COUNT(req->status) + data_sz));
+                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
+                    MPIR_STATUS_SET_COUNT(req->status,count);
                     /* dequeue rreq */
                     REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_shm_recvq_posted,
                                                   mpi_errno);
@@ -145,8 +146,8 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     }
                     REQ_SHM(req)->data_sz -= EAGER_THRESHOLD;
                     REQ_SHM(req)->user_buf += EAGER_THRESHOLD;
-                    MPIR_STATUS_SET_COUNT(req->status,
-                                          (MPIR_STATUS_GET_COUNT(req->status) + EAGER_THRESHOLD));
+                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)EAGER_THRESHOLD;
+                    MPIR_STATUS_SET_COUNT(req->status,count);
                 }
                 else {
                     MPIU_Assert(0);
