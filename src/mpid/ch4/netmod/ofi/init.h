@@ -143,13 +143,15 @@ static inline int MPIDI_netmod_init(int         rank,
     /* FI_EP_RDM:  Reliable datagram                                            */
     /* ------------------------------------------------------------------------ */
     hints->addr_format = FI_FORMAT_UNSPEC;
-    hints->domain_attr->threading = FI_THREAD_ENDPOINT;
-    hints->domain_attr->control_progress = FI_PROGRESS_AUTO;
-    hints->domain_attr->data_progress = FI_PROGRESS_AUTO;
+    hints->domain_attr->threading = FI_THREAD_DOMAIN;
+    hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
+    hints->domain_attr->data_progress = FI_PROGRESS_MANUAL;
     hints->domain_attr->resource_mgmt = FI_RM_ENABLED;
     hints->domain_attr->av_type = FI_AV_UNSPEC;
     hints->domain_attr->mr_mode = FI_MR_SCALABLE;
     hints->tx_attr->op_flags = FI_DELIVERY_COMPLETE | FI_COMPLETION;
+    hints->tx_attr->msg_order = FI_ORDER_SAS;
+    hints->tx_attr->comp_order = FI_ORDER_NONE;
     hints->rx_attr->op_flags = FI_COMPLETION;
     hints->ep_attr->type = FI_EP_RDM;
 
