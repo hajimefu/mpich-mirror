@@ -87,7 +87,6 @@ dnl Parse the device arguments
        AC_MSG_NOTICE([Enabling static link of libfabric])
     fi
 ])
-    AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI_STATIC],[test "$do_static_fabric" = "true"])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI],[test "X$build_ch4_netmod_ofi" = "Xyes"])
 ])dnl
 
@@ -99,6 +98,23 @@ AM_COND_IF([BUILD_CH4_NETMOD_OFI],[
     PAC_PUSH_FLAG(LIBS)
     PAC_CHECK_HEADER_LIB_FATAL(ofi, rdma/fabric.h, fabric, fi_getinfo)
     PAC_POP_FLAG(LIBS)
+    if [test "$enable_sharedlibs" = "osx-gcc" ]; then
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib], [LDFLAGS])
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib], [LDFLAGS])
+    else
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+    fi
+
+    if [test "$do_static_fabric" = "true"]; then
+       PAC_APPEND_FLAG([-lstdc++ -lpthread -ldl -lrt],[WRAPPER_LIBS])
+       PAC_APPEND_FLAG([-L${with_ofi}/lib],[WRAPPER_STATIC_LDFLAGS])
+       PAC_APPEND_FLAG([-lfabric],[WRAPPER_STATIC_LIBS])
+       PAC_APPEND_FLAG([-lstdc++ -lpthread -ldl -lrt],[LIBS])
+    else
+       PAC_APPEND_FLAG([-lfabric -lstdc++ -lpthread -ldl -lrt],[WRAPPER_LIBS])
+       PAC_APPEND_FLAG([-lfabric -lstdc++ -lpthread -ldl -lrt],[LIBS])
+    fi
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_OFI,...)
 ])dnl end _BODY
 
