@@ -149,12 +149,15 @@ static inline int MPIDI_dynproc_create_ic(const char      *port_name,
 
     FI_RC(fi_av_insert(MPIDI_Global.av,addr_table,entries,
                        addr,0ULL,NULL),avmap);
-    *newcomm = tmp_comm_ptr;
+/*    *newcomm = tmp_comm_ptr;  not needed to be intialized */
+    MPIR_Comm_commit(tmp_comm_ptr);
 
     MPI_RC_POP(MPIR_Comm_dup_impl(tmp_comm_ptr, newcomm));
 
-    MPIDI_OFI_VCRT_Release(COMM_OFI(tmp_comm_ptr).vcrt);
-    MPIU_Handle_obj_free(&MPID_Comm_mem, tmp_comm_ptr);
+/*    MPIDI_OFI_VCRT_Release(COMM_OFI(tmp_comm_ptr).vcrt);
+    MPIU_Handle_obj_free(&MPID_Comm_mem, tmp_comm_ptr);  this is done in comm_release */
+    tmp_comm_ptr->local_comm = NULL; /* avoid freeing local comm with comm_release */
+    MPIR_Comm_release(tmp_comm_ptr);
 
     MPIU_Free(addr_table);
     MPIU_Free(node_table);
