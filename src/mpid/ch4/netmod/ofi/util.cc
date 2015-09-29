@@ -40,6 +40,8 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
 
         for(i=0; i<size; i++)
             vcrt->vcr_table[i].addr_idx = i;
+        for(i=0; i<size; i++)
+            vcrt->vcr_table[i].is_local = 0;
 
         mpi_errno = MPI_SUCCESS;
     } else
