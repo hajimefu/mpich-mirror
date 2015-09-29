@@ -533,7 +533,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /* Common Utility functions used by the
  * C and C++ components
  */
-static inline MPID_Request *MPIDI_Request_alloc_and_init(int count)
+__ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 {
     MPID_Request *req;
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
