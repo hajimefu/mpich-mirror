@@ -128,6 +128,12 @@ enum {
     MPIDI_REQUEST_LOCKALL,
 };
 
+enum {
+    MPIDI_PEEK_START,
+    MPIDI_PEEK_NOT_FOUND,
+    MPIDI_PEEK_FOUND
+};
+
 
 /* Physical address table data */
 typedef struct {

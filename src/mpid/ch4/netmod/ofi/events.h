@@ -25,7 +25,7 @@ static inline int peek_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     size_t count;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
-    REQ_OFI(rreq, util_id)  = 1;
+    REQ_OFI(rreq, util_id)  = MPIDI_PEEK_FOUND;
     rreq->status.MPI_SOURCE = get_source(wc->tag);
     rreq->status.MPI_TAG    = get_tag(wc->tag);
     count                   = wc->len;
@@ -35,6 +35,32 @@ static inline int peek_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     return MPI_SUCCESS;
 }
 
+#undef FUNCNAME
+#define FUNCNAME peek_empty_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int peek_empty_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
+{
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EMPTY_EVENT);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EMPTY_EVENT);
+    MPIDI_Dynproc_req *ctrl;
+
+    switch(REQ_OFI(rreq, event_id)){
+    case MPIDI_EVENT_PEEK:
+        REQ_OFI(rreq, util_id)  = MPIDI_PEEK_NOT_FOUND;
+        rreq->status.MPI_ERROR  = MPI_SUCCESS;
+        break;
+    case MPIDI_EVENT_ACCEPT_PROBE:
+        ctrl       = (MPIDI_Dynproc_req *)rreq;
+        ctrl->done = MPIDI_PEEK_NOT_FOUND;
+        break;
+    default:
+        MPIU_Assert(0);
+        break;
+    }
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EMPTY_EVENT);
+    return MPI_SUCCESS;
+}
 
 #undef FUNCNAME
 #define FUNCNAME recv_event
@@ -364,7 +390,7 @@ static inline int accept_probe_event(cq_tagged_entry_t *wc,
   ctrl->source = get_source(wc->tag);
   ctrl->tag    = get_tag(wc->tag);
   ctrl->msglen = wc->len;
-  ctrl->done   = 1;
+  ctrl->done   = MPIDI_PEEK_FOUND;
   MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
   return MPI_SUCCESS;
 }

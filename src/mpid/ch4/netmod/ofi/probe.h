@@ -22,9 +22,11 @@ static inline int do_iprobe(int source,
                             MPID_Comm * comm,
                             int context_offset,
                             int *flag,
-                            MPI_Status * status, MPID_Request ** message, uint64_t peek_flags)
+                            MPI_Status * status,
+                            MPID_Request ** message,
+                            uint64_t peek_flags)
 {
-    int ret, mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
     fi_addr_t remote_proc;
     uint64_t match_bits, mask_bits;
     MPID_Request r, *rreq;      /* don't need to init request, output only */
@@ -53,7 +55,7 @@ static inline int do_iprobe(int source,
     match_bits = init_recvtag(&mask_bits, comm->context_id + context_offset, source, tag);
 
     REQ_OFI(rreq, event_id) = MPIDI_EVENT_PEEK;
-    REQ_OFI(rreq, util_id) = 0;
+    REQ_OFI(rreq, util_id)  = MPIDI_PEEK_START;
 
     msg.msg_iov = NULL;
     msg.desc = NULL;
@@ -64,29 +66,22 @@ static inline int do_iprobe(int source,
     msg.context = (void *) &(REQ_OFI(rreq, context));
     msg.data = 0;
 
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-    ret = fi_trecvmsg(G_RXC_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-    if (ret == -ENOMSG) {
+    FI_RC(fi_trecvmsg(G_RXC_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION), trecv);
+    PROGRESS_WHILE(REQ_OFI(rreq, util_id) == MPIDI_PEEK_START);
+
+    switch (REQ_OFI(rreq, util_id)) {
+    case  MPIDI_PEEK_NOT_FOUND:
         *flag = 0;
-        if (message)
-            MPIU_Handle_obj_free(&MPIDI_Request_mem, rreq);
+        if (message) MPIU_Handle_obj_free(&MPIDI_Request_mem, rreq);
         goto fn_exit;
-    }
-    MPIR_ERR_CHKANDJUMP4((ret < 0), mpi_errno, MPI_ERR_OTHER, "**ofid_peek",
-                         "**ofid_peek %s %d %s %s", __SHORT_FILE__,
-                         __LINE__, FCNAME, fi_strerror(-ret));
-    PROGRESS_WHILE(0 == REQ_OFI(rreq, util_id));
-    if (REQ_OFI(rreq, util_id) == 1) {
+        break;
+    case  MPIDI_PEEK_FOUND:
         MPIR_Request_extract_status(rreq, status);
         *flag = 1;
-        if (message)
-            *message = rreq;
-    }
-    else {
-        *flag = 0;
-        if (message)
-            MPIU_Handle_obj_free(&MPIDI_Request_mem, rreq);
+        if (message) *message = rreq;
+        break;
+    default:
+        MPIU_Assert(0);
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);

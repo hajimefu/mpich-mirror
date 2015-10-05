@@ -220,11 +220,10 @@ static inline int MPIDI_dynproc_exch_map(int              root,
     MPIDI_Dynproc_req req[2];
     uint64_t          match_bits    = 0;
     uint64_t          mask_bits     = 0;
-    ssize_t           ret           = 0;
     msg_tagged_t      msg;
-    req[0].done            = 0;
+    req[0].done            = MPIDI_PEEK_START;
     req[0].event_id        = MPIDI_EVENT_ACCEPT_PROBE;
-    req[1].done            = 0;
+    req[1].done            = MPIDI_PEEK_START;
     req[1].event_id        = MPIDI_EVENT_ACCEPT_PROBE;
     match_bits             = init_recvtag(&mask_bits,port_id,
                                           MPI_ANY_SOURCE,
@@ -245,19 +244,10 @@ static inline int MPIDI_dynproc_exch_map(int              root,
         msg.context   = (void *) &req[0].context;
         msg.data      = 0;
 
-        while(req[0].done != 1) {
-            MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-            ret = fi_trecvmsg(G_RXC_TAG(0),&msg,FI_PEEK|FI_COMPLETION);
-            MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-
-            if(ret == 0)
-                PROGRESS_WHILE(req[0].done == 0);
-            else if(ret == -FI_ENOMSG)
-                continue;
-            else
-                MPIR_ERR_SETFATALANDJUMP4(mpi_errno,MPI_ERR_OTHER,"**ofid_peek",
-                                          "**ofid_peek %s %d %s %s",__SHORT_FILE__,
-                                          __LINE__,FCNAME,fi_strerror(errno));
+        while(req[0].done != MPIDI_PEEK_FOUND) {
+            req[0].done = MPIDI_PEEK_START;
+            FI_RC(fi_trecvmsg(G_RXC_TAG(0),&msg,FI_PEEK|FI_COMPLETION),trecv);
+            PROGRESS_WHILE(req[0].done == MPIDI_PEEK_START);
         }
 
         *out_table_size    = req[0].msglen;

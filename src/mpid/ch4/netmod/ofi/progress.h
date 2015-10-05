@@ -70,40 +70,44 @@ static inline int handle_cq_error(ssize_t ret)
     MPID_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
-    if (ret == -FI_EAVAIL) {
+    switch (ret) {
+    case -FI_EAVAIL:
         fi_cq_readerr(MPIDI_Global.p2p_cq, &e, 0);
-        if (e.err == FI_ETRUNC) {
-            /* This error message should only be delivered on send
-             * events.  We want to ignore truncation errors
-             * on the sender side, but complete the request anyways
-             * Other kinds of requests, this is fatal.
-             */
+        switch (e.err) {
+        case FI_ETRUNC:
             req = devreq_to_req(e.op_context);
-            if (req->kind == MPID_REQUEST_SEND)
+            switch(req->kind) {
+            case MPID_REQUEST_SEND:
                 mpi_errno = dispatch_function(NULL,req);
-            else if (req->kind == MPID_REQUEST_RECV) {
+                break;
+            case MPID_REQUEST_RECV:
                 mpi_errno = dispatch_function((cq_tagged_entry_t *) &e, req);
                 req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
-            }
-            else
+                break;
+            default:
                 MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
                                           "**ofid_poll %s %d %s %s", __SHORT_FILE__,
                                           __LINE__, FCNAME, fi_strerror(e.err));
-        }
-        else if (e.err == FI_ECANCELED) {
+            }
+            break;
+        case FI_ECANCELED:
             req = devreq_to_req(e.op_context);
             MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
+            break;
+        case FI_ENOMSG:
+            req = devreq_to_req(e.op_context);
+            peek_empty_event(NULL, req);
+            break;
         }
-        else
-            MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
-                                      "**ofid_poll %s %d %s %s", __SHORT_FILE__, __LINE__,
-                                      FCNAME, fi_strerror(e.err));
-    }
-    else
+        break;
+    default:
         MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
                                   "**ofid_poll %s %d %s %s", __SHORT_FILE__, __LINE__,
                                   FCNAME, fi_strerror(errno));
+        break;
+    }
 fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
