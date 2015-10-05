@@ -107,14 +107,13 @@ AM_COND_IF([BUILD_CH4_NETMOD_OFI],[
     fi
 
     if [test "$do_static_fabric" = "true"]; then
-       PAC_APPEND_FLAG([-lstdc++ -lpthread -ldl -lrt],[WRAPPER_LIBS])
        PAC_APPEND_FLAG([-L${with_ofi}/lib],[WRAPPER_STATIC_LDFLAGS])
        PAC_APPEND_FLAG([-lfabric],[WRAPPER_STATIC_LIBS])
-       PAC_APPEND_FLAG([-lstdc++ -lpthread -ldl -lrt],[LIBS])
     else
-       PAC_APPEND_FLAG([-lfabric -lstdc++ -lpthread -ldl -lrt],[WRAPPER_LIBS])
-       PAC_APPEND_FLAG([-lfabric -lstdc++ -lpthread -ldl -lrt],[LIBS])
+       PAC_APPEND_FLAG([-L${with_ofi}/lib -lfabric],[LIBS])
     fi
+    PAC_APPEND_FLAG([-lstdc++ -ldl -lpthread],[LIBS])
+
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_OFI,...)
 ])dnl end _BODY
 

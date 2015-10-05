@@ -99,9 +99,9 @@ int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_
     /* remote node or service.  this does not necessarily allocate resources.   */
     /* Pass NULL for name/service because we want a list of providers supported */
     /* ------------------------------------------------------------------------ */
-    hints->domain_attr->threading        = FI_THREAD_ENDPOINT;
-    hints->domain_attr->control_progress = FI_PROGRESS_AUTO;
-    hints->domain_attr->data_progress    = FI_PROGRESS_AUTO;
+    hints->domain_attr->threading        = FI_THREAD_DOMAIN;
+    hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
+    hints->domain_attr->data_progress    = FI_PROGRESS_MANUAL;
     char *provname;
     provname                             = MPIR_CVAR_OFI_USE_PROVIDER?
       MPIU_Strdup(MPIR_CVAR_OFI_USE_PROVIDER):NULL;

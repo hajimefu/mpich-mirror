@@ -231,13 +231,13 @@ final_libs="@MPICH_MPICXX_LIBS@"
 final_static_libs="@WRAPPER_STATIC_LDFLAGS@ @WRAPPER_STATIC_LIBS@"
 if test "@INTERLIB_DEPS@" = "no" -o "${interlib_deps}" = "no" ; then
     final_ldflags="${final_ldflags} @LDFLAGS@"
-    final_libs="${final_libs} @LIBS@ @WRAPPER_LIBS@"
+    final_libs="${final_libs}  @WRAPPER_LIBS@"
 fi
 if [ "$final_static_libs" != " " ] ; then
    if [ "$static_linking" = yes ] ; then
-       final_libs="${final_libs} ${final_static_libs} @LIBS@ @WRAPPER_LIBS@"
+       final_libs="${final_libs} ${final_static_libs}  @WRAPPER_LIBS@"
    else
-       final_libs="${final_libs} ${wl}-Bstatic ${final_static_libs} ${wl}-Bdynamic @LIBS@ @WRAPPER_LIBS@"
+       final_libs="${final_libs} ${wl}-Bstatic ${final_static_libs} ${wl}-Bdynamic  @WRAPPER_LIBS@"
    fi
 fi
 
