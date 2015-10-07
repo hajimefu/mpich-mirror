@@ -65,11 +65,17 @@ typedef struct MPIDI_CH4U_Dev_rreq_t {
     struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
 } MPIDI_CH4U_Dev_rreq_t;
 
+typedef struct MPIDI_CH4U_Dev_put_req_t {
+    MPI_Datatype datatype;
+    uint64_t win_id;
+} MPIDI_CH4U_Dev_put_req_t;
+
 typedef struct MPIDI_CH4U_Devreq_t {
 
     union {
         MPIDI_CH4U_Dev_sreq_t sreq;
         MPIDI_CH4U_Dev_rreq_t rreq;
+        MPIDI_CH4U_Dev_put_req_t put_req;
     };
 
     void         *buffer;
@@ -112,32 +118,93 @@ typedef struct {
 #define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4.ch4u).netmod_am)
 #define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.ch4.netmod)
 
-typedef struct MPIDI_CH4U_win_basic_info_t {
-    uint64_t base;
+typedef struct MPIDI_CH4I_win_info_t {
+    uint64_t base_addr;
     uint64_t size;
     uint64_t disp_unit;
-    uint64_t win_ptr;
-} MPIDI_CH4U_win_basic_info_t;
+} MPIDI_CH4I_win_info_t;
 
-typedef struct MPIDI_CH4U_win_info_args_t {
-    int no_locks;               /* valid flavor = all */
+#define MPIDI_CH4I_ACCU_ORDER_RAR (1)
+#define MPIDI_CH4I_ACCU_ORDER_RAW (1 << 1)
+#define MPIDI_CH4I_ACCU_ORDER_WAR (1 << 2)
+#define MPIDI_CH4I_ACCU_ORDER_WAW (1 << 3)
+
+typedef enum {
+    MPIDI_CH4I_ACCU_SAME_OP,
+    MPIDI_CH4I_ACCU_SAME_OP_NO_OP
+} MPIDI_CH4I_win_info_accumulate_ops;
+
+typedef struct MPIDI_CH4I_win_info_args_t {
+    int no_locks;
+    int same_size;
     int accumulate_ordering;
-    int accumulate_ops;
-    int same_size;              /* valid flavor = allocate */
-    int alloc_shared_noncontig; /* valid flavor = allocate shared */
-    int alloc_shm;              /* valid flavor = allocate */
-} MPIDI_CH4U_win_info_args_t;
+    int alloc_shared_noncontig;
+    MPIDI_CH4I_win_info_accumulate_ops accumulate_ops;
+} MPIDI_CH4I_win_info_args_t;
 
-typedef struct MPIDI_CH4U_win_t {
-    MPIDI_CH4U_win_basic_info_t *basic_info_table;
-    MPIDI_CH4U_win_info_args_t info_args;
-} MPIDI_CH4U_win_t;
+struct MPIDI_CH4I_win_lock {
+    struct MPIDI_CH4I_win_lock *next;
+    unsigned rank;
+    uint16_t mtype;
+    uint16_t type;
+};
+
+struct MPIDI_CH4I_win_queue {
+    struct MPIDI_CH4I_win_lock *head;
+    struct MPIDI_CH4I_win_lock *tail;
+};
+
+typedef struct MPIDI_CH4I_winLock_info {
+    unsigned peer;
+    int lock_type;
+    struct MPID_Win *win;
+    volatile unsigned done;
+} MPIDI_CH4I_winLock_info;
+
+typedef struct MPIDI_CH4I_win_sync_lock {
+    struct {
+        volatile unsigned locked;
+        volatile unsigned allLocked;
+    } remote;
+    struct {
+        struct MPIDI_CH4I_win_queue requested;
+        int type;
+        unsigned count;
+    } local;
+} MPIDI_CH4I_win_sync_lock;
+
+typedef struct MPIDI_CH4I_win_sync_pscw {
+    struct MPID_Group *group;
+    volatile unsigned count;
+} MPIDI_CH4I_win_sync_pscw;
+
+typedef struct MPIDI_CH4I_win_sync_t {
+    volatile int origin_epoch_type;
+    volatile int target_epoch_type;
+    MPIDI_CH4I_win_sync_pscw sc, pw;
+    MPIDI_CH4I_win_sync_lock lock;
+} MPIDI_CH4I_win_sync_t;
+
+typedef struct MPIDI_CH4I_win_t {
+    uint64_t win_id;
+    void *mmap_addr;
+    int64_t mmap_sz;
+    size_t outstanding_ops;
+    MPI_Aint *sizes;
+    void *msgQ;
+    void *syncQ; /* todo */
+    int count;
+    MPIDI_CH4I_win_sync_t sync;
+    MPIDI_CH4I_win_info_t *info_table;
+    MPIDI_CH4I_win_info_args_t info_args;
+} MPIDI_CH4I_win_t;
 
 typedef struct {
-    MPIDI_CH4U_win_t ch4u;
+    MPIDI_CH4I_win_t ch4u;
     uint64_t pad[192 / 8];
 } MPIDI_Devwin_t;
 #define MPIU_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
+#define MPIU_CH4U_WINFO(win,rank) (MPIDI_CH4I_win_info_t*) &(MPIU_CH4U_WIN(win, info_table)[rank])
 
 typedef struct {
     unsigned is_local : 1;
@@ -147,6 +214,7 @@ typedef struct {
 typedef struct MPIDI_CH4U_Devcomm_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
+    uint32_t   window_instance;
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
     MPIDI_CH4U_locality_t *locality;
 #endif

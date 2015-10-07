@@ -26,8 +26,11 @@ noinst_HEADERS += src/mpid/ch4/src/ch4_comm.h     \
                   src/mpid/ch4/src/ch4u_init.h    \
                   src/mpid/ch4/src/ch4u_proc.h    \
                   src/mpid/ch4/src/ch4u_recvq.h   \
+                  src/mpid/ch4/src/ch4u_util.h 	  \
+                  src/mpid/ch4/src/ch4u_symheap.h \
                   src/mpid/ch4/src/ch4u_send.h
 
 mpi_core_sources += src/mpid/ch4/src/ch4_globals.c        \
                     src/mpid/ch4/src/mpid_ch4_net_array.c \
-                    src/mpid/ch4/src/mpid_ch4_shm_array.c
+                    src/mpid/ch4/src/mpid_ch4_shm_array.c \
+                    src/mpid/ch4/src/ch4u_map.cc

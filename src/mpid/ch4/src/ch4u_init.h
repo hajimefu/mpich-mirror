@@ -478,7 +478,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
             MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list = NULL;
         }
     }
-
+    MPIU_CH4U_COMM(comm, window_instance) = 0;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
     return mpi_errno;
 }

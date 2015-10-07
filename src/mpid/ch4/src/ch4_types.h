@@ -33,6 +33,8 @@
 #define MPIDI_CH4U_TAG_SHIFT     (28)
 #define MPIDI_CH4U_SOURCE_SHIFT  (16)
 
+#define MPIDI_CH4I_MAP_NOT_FOUND      ((void*)(-1UL))
+
 #define MAX_NETMOD_CONTEXTS 8
 #define MAX_PROGRESS_HOOKS 4
 typedef int (*progress_func_ptr_t) (int *made_progress);
@@ -45,7 +47,33 @@ typedef enum {
     MPIDI_CH4U_AM_SEND = 0,
     MPIDI_CH4U_AM_SSEND_REQ,
     MPIDI_CH4U_AM_SSEND_ACK,
+
+    MPIDI_CH4U_AM_WIN_CTRL,
+    MPIDI_CH4U_AM_PUT,
+    MPIDI_CH4U_AM_GET,
+    MPIDI_CH4U_AM_ACC,
+    MPIDI_CH4U_AM_CSWAP,
+    MPIDI_CH4U_AM_FETCH_OP,
 } MPIDI_CH4U_AM_TYPE;
+
+typedef enum {
+    MPIDI_CH4U_WIN_COMPLETE,
+    MPIDI_CH4U_WIN_POST,
+    MPIDI_CH4U_WIN_LOCK,
+    MPIDI_CH4U_WIN_UNLOCK,
+    MPIDI_CH4U_WIN_LOCKALL,
+    MPIDI_CH4U_WIN_UNLOCKALL,
+} MPIDI_CH4U_WIN_CTRL_MSG_TYPE;
+
+enum {
+    MPIDI_CH4I_EPOTYPE_NONE = 0,          /**< No epoch in affect */
+    MPIDI_CH4I_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
+    MPIDI_CH4I_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
+    MPIDI_CH4I_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
+    MPIDI_CH4I_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
+    MPIDI_CH4I_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
+    MPIDI_CH4I_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
+};
 
 typedef struct MPIDI_CH4U_AM_Hdr_t {
     uint64_t msg_tag;
@@ -59,6 +87,19 @@ typedef struct MPIDI_CH4U_Ssend_req_msg_t {
 typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
     uint64_t sreq_ptr;
 } MPIDI_CH4U_Ssend_ack_msg_t;
+
+typedef struct MPIDI_CH4U_win_cntrl_msg_t {
+    uint64_t win_id;
+    uint32_t origin_rank;
+    int16_t lock_type;
+    int16_t type;
+} MPIDI_CH4U_win_cntrl_msg_t;
+
+typedef struct MPIDI_CH4U_put_msg_t {
+    uint64_t addr;
+    uint64_t len;
+    MPI_Datatype datatype;
+} MPIDI_CH4U_put_msg_t;
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
     MPID_Comm *comm;
@@ -77,6 +118,8 @@ typedef struct MPIDI_CH4_Global_t {
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
     MPID_Thread_mutex_t  m[2];
+    void *win_map;
+    int jobid;
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
