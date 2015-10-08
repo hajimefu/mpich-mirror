@@ -240,6 +240,7 @@ typedef struct {
     uint64_t max_send;
     uint64_t max_write;
     uint64_t max_short_send;
+    size_t iov_limit;
     int cur_ctrlblock;
     int num_ctrlblock;
     uint64_t lkey;

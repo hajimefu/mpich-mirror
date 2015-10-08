@@ -173,6 +173,7 @@ static inline int MPIDI_netmod_init(int         rank,
     MPIDI_Global.max_buffered_write = prov_use->tx_attr->inject_size;
     MPIDI_Global.max_send = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.max_write = prov_use->ep_attr->max_msg_size;
+    MPIDI_Global.iov_limit = prov_use->tx_attr->iov_limit;
 
     /* ------------------------------------------------------------------------ */
     /* Open fabric                                                              */

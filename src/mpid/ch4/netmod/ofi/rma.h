@@ -219,14 +219,16 @@ static inline int do_put(const void    *origin_addr,
                            req->noncontig->target_dt.map);
     rc = MPIDI_IOV_EAGAIN;
 
+
     while(rc==MPIDI_IOV_EAGAIN) {
-        iovec_t   originv[1];
-        rma_iov_t targetv[1];
         size_t    omax;
         size_t    tmax;
         size_t    tout, oout;
         unsigned  i;
-        omax=tmax=1;
+        omax=tmax=MPIDI_Global.iov_limit;
+        iovec_t   originv[omax];
+        rma_iov_t targetv[tmax];
+
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
 
