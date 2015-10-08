@@ -10,8 +10,6 @@
  */
 #ifndef NETMOD_DIRECT_H_INCLUDED
 #define NETMOD_DIRECT_H_INCLUDED
-#include <mpidimpl.h>
-#include "netmod.h"
 #include "init.h"
 #include "probe.h"
 #include "progress.h"

@@ -153,11 +153,20 @@ MPIDI_CH4_API(int, Comm_create, MPID_Comm *);
 MPIDI_CH4_API(int, Comm_destroy, MPID_Comm *);
 
 
+/* Include netmod prototypes */
 #include <netmod.h>
 #ifdef MPIDI_BUILD_CH4_SHM
 #include "ch4_shm.h"
-#else
 #endif
+
+/* Include netmod and shm implementations  */
+/* Prototypes are split from impl to avoid */
+/* circular dependencies                   */
+#include <netmod_impl.h>
+#ifdef MPIDI_BUILD_CH4_SHM
+#include "ch4_shm_impl.h"
+#endif
+
 #include "ch4_init.h"
 #include "ch4_probe.h"
 #include "ch4_send.h"
