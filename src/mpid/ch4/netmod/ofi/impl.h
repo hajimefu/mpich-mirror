@@ -288,6 +288,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     req = MPIDI_Request_alloc_and_init(2);        \
   })
 
+#define SENDREQ_CREATE_LW(req)                     \
+  ({                                               \
+    req = MPIDI_Request_alloc_and_init_send_lw(1); \
+  })
+
 
 #define WINREQ_CREATE(req)                     \
   ({                                           \
@@ -557,7 +562,24 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     return req;
 }
 
-
+__ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
+{
+    MPID_Request *req;
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    if (req == NULL)
+        MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
+    MPIU_Assert(req != NULL);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPID_cc_set(&req->cc, 0);
+    req->cc_ptr  = &req->cc;
+    MPIU_Object_set_ref(req, count);
+    req->greq_fns          = NULL;
+    req->status.MPI_ERROR  = MPI_SUCCESS;
+    req->kind              = MPID_REQUEST_SEND;
+    req->comm              = NULL;
+    req->errflag           = MPIR_ERR_NONE;
+    return req;
+}
 
 static inline fi_addr_t _comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
 {
