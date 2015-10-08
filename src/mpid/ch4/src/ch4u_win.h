@@ -163,7 +163,7 @@ static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
     /* context id lower bits, window instance upper bits */
     MPIU_CH4U_WIN(win, win_id) = 1 + (((uint64_t)comm_ptr->context_id) |
                                       ((uint64_t)((MPIU_CH4U_COMM(comm_ptr, window_instance))++)<<32));
-    MPIDI_CH4I_map_set(MPIDI_CH4_Global.win_map, MPIU_CH4U_WIN(win, win_id), win);
+    //MPIDI_CH4I_map_set(MPIDI_CH4_Global.win_map, MPIU_CH4U_WIN(win, win_id), win);
 
 fn_exit:
     return mpi_errno;

@@ -63,7 +63,7 @@ typedef struct {
 } MPIDI_OFI_lmt_msg_t;
 
 #ifndef MPIDI_MAX_AM_HDR_SZ
-#define MPIDI_MAX_AM_HDR_SZ 16
+#define MPIDI_MAX_AM_HDR_SZ 128
 #endif
 
 typedef struct {

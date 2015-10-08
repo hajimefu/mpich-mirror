@@ -81,6 +81,13 @@ static inline MPID_Request *MPIDI_CH4I_create_req()
     return req;
 }
 
+static inline MPID_Request *MPIDI_CH4I_create_win_req()
+{
+    MPID_Request *req = MPIDI_CH4I_request_alloc_and_init(1);
+    MPIU_CH4U_REQUEST(req, status) = 0;
+    return req;
+}
+
 #define dtype_add_ref_if_not_builtin(datatype_)                         \
     do {								\
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\
@@ -293,9 +300,7 @@ static inline uint64_t MPIDI_CH4I_init_recvtag(uint64_t * mask_bits,
 #define MPIDI_CH4I_EPOCH_START_CHECK()                                  \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_START && \
-            !MPIDI_valid_group_rank(COMM_TO_INDEX(win->comm_ptr,target_rank), \
-                                    MPIU_CH4U_WIN(win, sync).sc.group)) \
+        if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_START) \
             MPIR_ERR_SETANDSTMT(mpi_errno,                              \
                                 MPI_ERR_RMA_SYNC,                       \
                                 goto fn_fail,                           \

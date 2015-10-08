@@ -54,6 +54,7 @@ typedef enum {
     MPIDI_CH4U_AM_ACC,
     MPIDI_CH4U_AM_CSWAP,
     MPIDI_CH4U_AM_FETCH_OP,
+    MPIDI_CH4U_AM_RMA_ACK,
 } MPIDI_CH4U_AM_TYPE;
 
 typedef enum {
@@ -95,9 +96,14 @@ typedef struct MPIDI_CH4U_win_cntrl_msg_t {
     int16_t type;
 } MPIDI_CH4U_win_cntrl_msg_t;
 
+typedef struct MPIDI_CH4U_rma_ack_msg_t {
+    uint64_t preq_ptr;
+} MPIDI_CH4U_rma_ack_msg_t;
+
 typedef struct MPIDI_CH4U_put_msg_t {
+    uint64_t preq_ptr;
     uint64_t addr;
-    uint64_t len;
+    uint64_t count;
     MPI_Datatype datatype;
 } MPIDI_CH4U_put_msg_t;
 
