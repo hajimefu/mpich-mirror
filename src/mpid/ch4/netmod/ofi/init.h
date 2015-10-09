@@ -153,7 +153,7 @@ static inline int MPIDI_netmod_init(int         rank,
     hints->tx_attr->msg_order = FI_ORDER_SAS;
     hints->tx_attr->comp_order = FI_ORDER_NONE;
     hints->rx_attr->op_flags = FI_COMPLETION;
-    hints->rx_attr->total_buffered_recv = (1 << 26);
+    hints->rx_attr->total_buffered_recv = 0; /* FI_RM_ENABLED ensures buffering of unexpected messages */
     hints->ep_attr->type = FI_EP_RDM;
 
     /* ------------------------------------------------------------------------ */
