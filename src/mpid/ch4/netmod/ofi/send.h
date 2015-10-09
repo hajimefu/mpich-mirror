@@ -26,9 +26,12 @@
 #define FUNCNAME send_lightweight
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int send_lightweight(const void *buf,MPIDI_msg_sz_t data_sz,
-                                       int rank, int tag, MPID_Comm * comm,
-                                       int context_offset)
+__ALWAYS_INLINE__ int send_lightweight(const void     *buf,
+                                       MPIDI_msg_sz_t  data_sz,
+                                       int             rank,
+                                       int             tag,
+                                       MPID_Comm      *comm,
+                                       int             context_offset)
 {
     int mpi_errno = MPI_SUCCESS;
     uint64_t match_bits;
@@ -36,9 +39,40 @@ __ALWAYS_INLINE__ int send_lightweight(const void *buf,MPIDI_msg_sz_t data_sz,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
     match_bits = init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
     FI_RC_RETRY(fi_tinject(G_TXC_TAG(0), buf, data_sz,
-                           _comm_to_phys(comm, rank, MPIDI_API_TAG), match_bits), tinject);
+                           _comm_to_phys(comm, rank, MPIDI_API_TAG),
+                           match_bits), tinject);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME send_lightweight_request
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__ALWAYS_INLINE__ int send_lightweight_request(const void     *buf,
+                                               MPIDI_msg_sz_t  data_sz,
+                                               int             rank,
+                                               int             tag,
+                                               MPID_Comm      *comm,
+                                               int             context_offset,
+                                               MPID_Request  **request)
+{
+    int mpi_errno = MPI_SUCCESS;
+    uint64_t match_bits;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
+    MPID_Request *r;
+    SENDREQ_CREATE_LW(r);
+    *request = r;
+    match_bits = init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
+    FI_RC_RETRY(fi_tinject(G_TXC_TAG(0), buf, data_sz,
+                           _comm_to_phys(comm, rank, MPIDI_API_TAG),
+                           match_bits), tinject);
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -48,17 +82,12 @@ __ALWAYS_INLINE__ int send_lightweight(const void *buf,MPIDI_msg_sz_t data_sz,
 #define FUNCNAME send_normal
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int send_normal(const void *buf,
-                              int count,
-                              MPI_Datatype datatype,
-                              int rank,
-                              int tag,
-                              MPID_Comm * comm,
-                              int context_offset,
-                              MPID_Request ** request,
-                              int dt_contig,
-                              MPIDI_msg_sz_t data_sz,
-                              MPID_Datatype * dt_ptr, MPI_Aint dt_true_lb, uint64_t type)
+__ALWAYS_INLINE__ int send_normal(SENDPARAMS,
+                                  int              dt_contig,
+                                  MPIDI_msg_sz_t   data_sz,
+                                  MPID_Datatype   *dt_ptr,
+                                  MPI_Aint         dt_true_lb,
+                                  uint64_t         type)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq = NULL;
@@ -181,7 +210,6 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NM_SEND);
-
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
 
@@ -194,15 +222,18 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
         goto fn_exit;
     }
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
-
-    if (likely(noreq && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send)))
-        mpi_errno = send_lightweight((char *) buf + dt_true_lb, data_sz,
-                                     rank, tag, comm, context_offset);
+    if (likely(!syncflag && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send)))
+        if(noreq)
+            mpi_errno = send_lightweight((char *) buf + dt_true_lb, data_sz,
+                                         rank, tag, comm, context_offset);
+        else
+            mpi_errno = send_lightweight_request((char *) buf + dt_true_lb, data_sz,
+                                                 rank, tag, comm, context_offset,
+                                                 request);
     else
         mpi_errno = send_normal(buf, count, datatype, rank, tag, comm,
                                 context_offset, request, dt_contig,
                                 data_sz, dt_ptr, dt_true_lb, syncflag);
-
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NM_SEND);
     return mpi_errno;
@@ -212,11 +243,7 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
 #define FUNCNAME nm_psend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int nm_psend(const void *buf,
-                           int count,
-                           MPI_Datatype datatype,
-                           int rank,
-                           int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request)
+__ALWAYS_INLINE__ int nm_psend(SENDPARAMS)
 {
     MPID_Request *sreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_PSEND);
