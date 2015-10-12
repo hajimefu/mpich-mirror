@@ -622,7 +622,9 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
     for (i = 0; i < size; i++)
     {
         COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
-        COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].is_local = 0;
+        COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].is_local =
+            (MPIDI_Global.node_map[MPIR_Process.comm_world->rank] ==
+             MPIDI_Global.node_map[lpids[i]]);
     }
     return 0;
 }
