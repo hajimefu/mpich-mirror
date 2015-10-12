@@ -228,6 +228,8 @@ static inline int MPIDI_netmod_finalize(void)
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_Comm *comm;
 
+    MPIDI_CH4U_finalize();
+
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
     MPIDU_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,

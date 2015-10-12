@@ -14,6 +14,27 @@
 #include "ch4_types.h"
 #include <mpidch4.h>
 
+static inline int MPIDI_CH4I_win_lock_advance(MPID_Win *win);
+static inline void MPIDI_CH4I_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t  *info,
+                                                MPID_Win                   *win,
+                                                unsigned                    peer);
+static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+                                                MPID_Win                   *win,
+                                                unsigned                    peer);
+static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+                                              MPID_Win                   *win,
+                                              unsigned                    peer);
+static inline void MPIDI_CH4I_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+                                                MPID_Win                   *win,
+                                                unsigned                    peer);
+static inline void MPIDI_CH4I_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+                                            MPID_Win                   *win,
+                                            unsigned                    peer);
+static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_t *info,
+                                                 MPID_Win                   *win,
+                                                 unsigned                    peer);
+
+
 #define MPIDU_RC_POP(FUNC)                                      \
   do                                                            \
     {                                                           \

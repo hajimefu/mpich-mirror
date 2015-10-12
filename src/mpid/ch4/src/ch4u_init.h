@@ -12,6 +12,7 @@
 #define MPIDCH4U_INIT_H_INCLUDED
 
 #include "ch4_impl.h"
+#include "ch4u_util.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_am_send_origin_cmpl_handler
@@ -575,6 +576,73 @@ static inline int MPIDI_CH4I_am_rma_ack_target_handler(void *am_hdr, size_t am_h
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_win_ctrl_target_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_win_ctrl_target_handler(void *am_hdr, size_t am_hdr_sz,
+                                                        void *reply_token, void **data,
+                                                        size_t * p_data_sz, int *is_contig,
+                                                        MPIDI_netmod_am_completion_handler_fn *
+                                                        cmpl_handler_fn, MPID_Request ** req)
+{
+    int mpi_errno = MPI_SUCCESS, sender_rank;
+    MPIDI_CH4U_win_cntrl_msg_t *msg_hdr = (MPIDI_CH4U_win_cntrl_msg_t *) am_hdr;
+    MPID_Win *win;
+    MPID_Request *preq;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_WIN_CTRL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_WIN_CTRL_HANDLER);
+
+    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    sender_rank = msg_hdr->origin_rank;
+
+    switch (msg_hdr->type) {
+
+    case MPIDI_CH4U_WIN_LOCK:
+    case MPIDI_CH4U_WIN_LOCKALL:
+        MPIDI_CH4I_win_lock_req_proc(msg_hdr, win, sender_rank);
+        break;
+
+    case MPIDI_CH4U_WIN_LOCK_ACK:
+    case MPIDI_CH4U_WIN_LOCKALL_ACK:
+        MPIDI_CH4I_win_lock_ack_proc(msg_hdr, win, sender_rank);
+        break;
+
+    case MPIDI_CH4U_WIN_UNLOCK:
+    case MPIDI_CH4U_WIN_UNLOCKALL:
+        MPIDI_CH4I_win_unlock_proc(msg_hdr, win, sender_rank);
+        break;
+
+    case MPIDI_CH4U_WIN_UNLOCK_ACK:
+    case MPIDI_CH4U_WIN_UNLOCKALL_ACK:
+        MPIDI_CH4I_win_unlock_done_cb(msg_hdr, win, sender_rank);
+        break;
+
+    case MPIDI_CH4U_WIN_COMPLETE:
+        MPIDI_CH4I_win_complete_proc(msg_hdr, win, sender_rank);
+        break;
+
+    case MPIDI_CH4U_WIN_POST:
+        MPIDI_CH4I_win_post_proc(msg_hdr, win, sender_rank);
+        break;
+
+    default:
+        fprintf(stderr, "not implemented: %d\n", msg_hdr->type);
+    }
+
+    if (req)
+        *req = NULL;
+    if (cmpl_handler_fn)
+        *cmpl_handler_fn = NULL;
+    
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_WIN_CTRL_HANDLER);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4U_init_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -732,14 +800,31 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4I_am_rma_ack_origin_cmpl_handler,
                                              &MPIDI_CH4I_am_rma_ack_target_handler));
 
+    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_WIN_CTRL,
+                                              NULL,
+                                              &MPIDI_CH4I_am_win_ctrl_target_handler));
+
 
     MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_world));
     MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_self));
+    MPIDI_CH4I_map_create(&MPIDI_CH4_Global.win_map);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
   fn_exit:
     return mpi_errno;
   fn_fail:
     goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4U_init
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ void MPIDI_CH4U_finalize()
+{
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
+    MPIDI_CH4I_map_destroy(MPIDI_CH4_Global.win_map);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
 }
 
 #undef FUNCNAME
