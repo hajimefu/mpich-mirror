@@ -95,12 +95,18 @@ static inline int MPIDI_netmod_handle_short_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_
 static inline int MPIDI_netmod_handle_short_am_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_addr_t source)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq = NULL;
+    MPIDI_netmod_am_completion_handler_fn cmpl_handler_fn = NULL;
+
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
 
     MPIDI_Global.am_handlers[msg_hdr->handler_id] (msg_hdr->payload, msg_hdr->am_hdr_sz,
-                                                   (void *) source, NULL, NULL, NULL, NULL, NULL);
-
+                                                   (void *) source, NULL, NULL, NULL, 
+                                                   &cmpl_handler_fn, &rreq);
+    if (cmpl_handler_fn) {
+        cmpl_handler_fn(rreq);
+    }
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
     return mpi_errno;
 }

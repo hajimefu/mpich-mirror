@@ -71,12 +71,21 @@ typedef struct MPIDI_CH4U_Dev_put_req_t {
     void *reply_token;
 } MPIDI_CH4U_Dev_put_req_t;
 
+typedef struct MPIDI_CH4U_Dev_get_req_t {
+    uint64_t win_ptr;
+    uint64_t greq_ptr;
+    uint64_t addr;
+    int count;
+    MPI_Datatype datatype;
+} MPIDI_CH4U_Dev_get_req_t;
+
 typedef struct MPIDI_CH4U_Devreq_t {
 
     union {
         MPIDI_CH4U_Dev_sreq_t sreq;
         MPIDI_CH4U_Dev_rreq_t rreq;
         MPIDI_CH4U_Dev_put_req_t preq;
+        MPIDI_CH4U_Dev_get_req_t greq;
     };
 
     void         *buffer;
