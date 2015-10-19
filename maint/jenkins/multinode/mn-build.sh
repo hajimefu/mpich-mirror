@@ -4,9 +4,17 @@
 #     See COPYRIGHT in top-level directory.
 #
 
+# This script only run on the first node. The mpiexec will automatically spawned
+if test ! $SLURM_NODEID -eq 0; then
+    exit 0
+fi
+
+mount | grep autotest
+
 hostname
 
 WORKSPACE=""
+TMP_WORKSPACE=""
 compiler="gnu"
 jenkins_configure="default"
 queue="ib64"
@@ -20,7 +28,7 @@ BUILD_MODE="per-commit"
 ## Initialization
 #####################################################################
 
-while getopts ":h:c:o:q:m:n:b:" opt; do
+while getopts ":h:c:o:q:m:n:b:t:" opt; do
     case "$opt" in
         h)
             WORKSPACE=$OPTARG ;;
@@ -43,6 +51,8 @@ while getopts ":h:c:o:q:m:n:b:" opt; do
             N_MAKE_JOBS=$OPTARG ;;
         b)
             GIT_BRANCH=$OPTARG ;;
+        t)
+            TMP_WORKSPACE=$OPTARG ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
             exit 1
@@ -77,7 +87,10 @@ case "$BUILD_MODE" in
 esac
 
 
-TMP_WORKSPACE=$(mktemp -d /sandbox/jenkins.tmp.XXXXXXXX)
+if test -d "$TMP_WORKSPACE"; then
+    rm -rf "$TMP_WORKSPACE"
+fi
+mkdir -p "$TMP_WORKSPACE"
 SRC=$WORKSPACE
 TMP_SRC=$TMP_WORKSPACE
 
@@ -438,13 +451,12 @@ SetConfigOpt() {
             exit 1
     esac
 
-    if test "$jenkins_configure" != "shmem" ; then
-      config_opt="$config_opt --enable-nemesis-dbg-localoddeven"
-    fi
-
     if test "$queue" = "osx" -a "$FC" = "ifort"; then
         config_opt="$config_opt lv_cv_ld_force_load=no"
     fi
+
+    # ROMIO is always disabled on multinode tests
+    config_opt="$config_opt --disable-romio"
 
     export config_opt
     echo "$config_opt"
@@ -483,62 +495,16 @@ if test "${pipestatus[-2]}" != "0"; then
 fi
 cat m.txt mi.txt | ./maint/clmake > filtered-make.txt 2>&1
 
-#####################################################################
-## Run tests
-#####################################################################
-
-# Preparation
-case "$jenkins_configure" in
-    "mpd")
-        $TMP_SRC/_inst/bin/mpd &
-        sleep 1
-        ;;
-    "async")
-        MPIR_CVAR_ASYNC_PROGRESS=1
-        export MPIR_CVAR_ASYNC_PROGRESS
-        ;;
-    "multithread")
-        MPIR_CVAR_DEFAULT_THREAD_LEVEL=MPI_THREAD_MULTIPLE
-        export MPIR_CVAR_DEFAULT_THREAD_LEVEL
-        ;;
-esac
-
-case "$netmod" in
-    "mxm")
-        MXM_LOG_LEVEL=error
-        export MXM_LOG_LEVEL
-        ;;
-    "ofi" | "portals4")
-        MXM_LOG_LEVEL=error
-        export MXM_LOG_LEVEL
-        ;;
-esac
-
-# run only the minimum level of datatype tests when it is per-commit job
-if [[ "$BUILD_MODE" = "per-commit" ]]; then
-    MPITEST_DATATYPE_TEST_LEVEL=min
-    export MPITEST_DATATYPE_TEST_LEVEL
-fi
-
-make testing
-
-# Cleanup
-case "$jenkins_configure" in
-    "mpd")
-        $TMP_SRC/_inst/bin/mpdallexit
-        ;;
-    "async")
-        unset MPIR_CVAR_ASYNC_PROGRESS
-        ;;
-esac
-
-#####################################################################
-## Copy Test results and Cleanup
-#####################################################################
-
-CollectResults
-
+# Make the binaries of tests before rsync back to NFS
+pushd test/mpi
+make -j$N_MAKE_JOBS
 popd
+
+tar cf $TMP_WORKSPACE/mpich-test-pack.tar *
+cp $TMP_WORKSPACE/mpich-test-pack.tar $WORKSPACE
+rm $TMP_WORKSPACE/mpich-test-pack.tar
+popd
+
 rm -rf $TMP_WORKSPACE
 exit 0
 

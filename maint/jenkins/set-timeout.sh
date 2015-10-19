@@ -7,16 +7,17 @@
 jobname=""
 compiler=""
 jenkins_configure=""
-queue=""
+n_nodes="1"
+ppn="1"
 netmod=""
 
-XFAIL_CONF="maint/jenkins/xfail.conf"
+TIMEOUT_CONF="maint/jenkins/multinode/timeout.conf"
 
 #####################################################################
 ## Initialization
 #####################################################################
 
-while getopts ":f:j:c:o:q:m:" opt; do
+while getopts ":f:j:c:o:n:p:m:" opt; do
     case "$opt" in
         j)
             jobname=$OPTARG ;;
@@ -24,12 +25,14 @@ while getopts ":f:j:c:o:q:m:" opt; do
             compiler=$OPTARG ;;
         o)
             jenkins_configure=$OPTARG ;;
-        q)
-            queue=$OPTARG ;;
+        n)
+            n_nodes=$OPTARG ;;
+        p)
+            ppn=$OPTARG ;;
         m)
             netmod=$OPTARG ;;
         f)
-            XFAIL_CONF=$OPTARG ;;
+            TIMEOUT_CONF=$OPTARG ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
             exit 1
@@ -40,17 +43,18 @@ done
 ## Main (
 #####################################################################
 
-if test ! -f "$XFAIL_CONF" ; then
-    echo "Cannot find $XFAIL_CONF. No XFAIL will be applied"
+if test ! -f "$TIMEOUT_CONF" ; then
+    echo "Cannot find $TIMEOUT_CONF. No TIMEOUT will be calculated"
     exit 0
 fi
 
-XFAILCond() {
+TimeoutCond() {
     local job="$1"
     local comp="$2"
     local option="$3"
     local nmod="$4"
-    local q="$5"
+    local _n_nodes="$5"
+    local _ppn="$6"
 
     local state=0
 
@@ -71,36 +75,32 @@ XFAILCond() {
         if [[ ! "$netmod" == "$nmod" ]]; then state=1; fi
     fi
 
-    if [[ ! "$q" == "*" ]]; then
-        if [[ ! "$queue" == "$q" ]]; then state=1; fi
+    if [[ ! "$_n_nodes" == "*" ]]; then
+        if [[ ! "$n_nodes" == "$_n_nodes" ]]; then state=1; fi
+    fi
+
+    if [[ ! "$_ppn" == "*" ]]; then
+        if [[ ! "$ppn" == "$_ppn" ]]; then state=1; fi
     fi
 
     echo "$state"
 }
 
-SCRIPT="apply-xfail.sh"
-if [[ -f $SCRIPT ]]; then
-    rm $SCRIPT
-fi
-
 while read -r line; do
     #clean leading whitespaces
     line=$(echo "$line" | sed "s/^ *//g")
     line=$(echo "$line" | sed "s/ *$//g")
-    echo $line
+    # echo $line
     # skip comment line
     if test -x "$line" -o "${line:1}" = "#" ; then
         continue
     fi
 
     arr=( $(echo $line) )
-    if [[ "0" == $(XFAILCond "${arr[1]}" "${arr[2]}" "${arr[3]}" "${arr[4]}" "${arr[5]}") ]]; then
-        echo "${arr[@]:5}" >> $SCRIPT
+    if [[ "0" == $(TimeoutCond "${arr[1]}" "${arr[2]}" "${arr[3]}" "${arr[4]}" "${arr[5]}" "${arr[6]}") ]]; then
+        echo "${arr[@]:6}"
+        exit 0
     fi
-done < "$XFAIL_CONF"
-
-if [[ -f $SCRIPT ]]; then
-    source $SCRIPT
-fi
+done < "$TIMEOUT_CONF"
 
 exit 0

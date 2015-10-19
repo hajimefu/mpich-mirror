@@ -1,4 +1,10 @@
 #!/bin/zsh -x
+#
+# (C) 2015 by Argonne National Laboratory.
+#     See COPYRIGHT in top-level directory.
+#
+
+hostname
 
 WORKSPACE=""
 build_mpi="mpich-master"
