@@ -49,12 +49,13 @@ typedef enum {
     MPIDI_CH4U_AM_SSEND_ACK,
 
     MPIDI_CH4U_AM_WIN_CTRL,
-    MPIDI_CH4U_AM_PUT,
+    MPIDI_CH4U_AM_PUT_REQ,
     MPIDI_CH4U_AM_PUT_ACK,
     MPIDI_CH4U_AM_GET_REQ,
     MPIDI_CH4U_AM_GET_ACK,
     MPIDI_CH4U_AM_ACC,
-    MPIDI_CH4U_AM_CSWAP,
+    MPIDI_CH4U_AM_CSWAP_REQ,
+    MPIDI_CH4U_AM_CSWAP_ACK,
     MPIDI_CH4U_AM_FETCH_OP,
 } MPIDI_CH4U_AM_TYPE;
 
@@ -122,6 +123,16 @@ typedef struct MPIDI_CH4U_get_req_msg_t {
 typedef struct MPIDI_CH4U_get_ack_msg_t {
     uint64_t greq_ptr;
 } MPIDI_CH4U_get_ack_msg_t;
+
+typedef struct MPIDI_CH4U_cswap_req_msg_t {
+    uint64_t req_ptr;
+    uint64_t addr;
+    MPI_Datatype datatype;
+} MPIDI_CH4U_cswap_req_msg_t;
+
+typedef struct MPIDI_CH4U_cswap_ack_msg_t {
+    uint64_t req_ptr;
+} MPIDI_CH4U_cswap_ack_msg_t;
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
     MPID_Comm *comm;

@@ -57,7 +57,6 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
         goto fn_exit;
     }
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
     if (target_rank == win->comm_ptr->rank) {
         if (request) MPIDI_Request_release(sreq);
         return MPIR_Localcopy(origin_addr,
@@ -68,6 +67,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
                               target_datatype);
     }
 
+    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
@@ -78,7 +78,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     MPIU_CH4U_WIN(win, outstanding_ops)++;
     /* MPIDI_CS_EXIT(); */
 
-    MPIDU_RC_POP(MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_PUT,
+    MPIDU_RC_POP(MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_PUT_REQ,
                                       &am_hdr, sizeof(am_hdr), origin_addr,
                                       origin_count, origin_datatype, sreq, NULL));
   fn_exit:
@@ -137,7 +137,6 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     MPIU_CH4U_REQUEST(sreq, greq.count) = origin_count;
     MPIU_CH4U_REQUEST(sreq, greq.datatype) = origin_datatype;
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
     if (target_rank == win->comm_ptr->rank) {
         if (request) MPIDI_Request_release(sreq);
         return MPIR_Localcopy((char *)win->base + offset,
@@ -148,6 +147,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
                               origin_datatype);
     }
 
+    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
@@ -299,12 +299,65 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
                                                int target_rank,
                                                MPI_Aint target_disp, MPID_Win * win)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int                rc, mpi_errno = MPI_SUCCESS, c;
+    size_t             offset;
+    MPID_Request      *sreq = NULL;
+    MPIDI_CH4U_cswap_req_msg_t am_hdr;
+    MPIDI_CH4I_win_info_t *winfo;
+    int dt_contig, data_sz, dt_true_lb;
+    MPID_Datatype *dt_ptr;
+    void *p_data;
+
     MPIDI_STATE_DECL(MPID_STATE_CH4U_COMPARE_AND_SWAP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_COMPARE_AND_SWAP);
-    MPIU_Assert(0);
+
+    MPIDI_CH4I_EPOCH_CHECK1();
+
+    winfo = MPIU_CH4U_WINFO(win, target_rank);
+    offset   = target_disp * winfo->disp_unit;
+
+    sreq = MPIDI_CH4I_create_win_req();
+    MPIU_Assert(sreq);
+    sreq->kind = MPID_WIN_REQUEST;
+
+    MPIDI_Datatype_get_info(1, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    if (data_sz == 0) {
+        MPID_cc_decr(sreq->cc_ptr, &c);
+        MPIU_Assert(c >= 0);
+        MPIDI_Request_release(sreq);
+        goto fn_exit;
+    }
+
+    p_data = MPIU_Malloc(data_sz * 2);
+    MPIU_Assert(p_data);
+    MPIU_Memcpy(p_data, (char *)origin_addr + dt_true_lb, data_sz);
+    MPIU_Memcpy((char *)p_data + data_sz, (char *)compare_addr + dt_true_lb, data_sz);
+
+    MPIU_CH4U_REQUEST(sreq, creq.win_ptr) = (uint64_t) win;
+    MPIU_CH4U_REQUEST(sreq, creq.addr) = (uint64_t)((char *) result_addr + dt_true_lb);
+    MPIU_CH4U_REQUEST(sreq, creq.datatype) = datatype;
+    MPIU_CH4U_REQUEST(sreq, creq.result_addr) = result_addr;
+    MPIU_CH4U_REQUEST(sreq, creq.data) = p_data;
+
+    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIDI_CH4I_EPOCH_START_CHECK();
+
+    am_hdr.addr = winfo->base_addr + offset;
+    am_hdr.datatype = datatype;
+    am_hdr.req_ptr = (uint64_t) sreq;
+
+    /* MPIDI_CS_ENTER(); */
+    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    /* MPIDI_CS_EXIT(); */
+
+    MPIDU_RC_POP(MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_CSWAP_REQ,
+                                      &am_hdr, sizeof(am_hdr),
+                                      (char *)p_data - dt_true_lb, 2, datatype, sreq, NULL));
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_COMPARE_AND_SWAP);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FUNCNAME

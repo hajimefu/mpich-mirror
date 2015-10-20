@@ -79,6 +79,16 @@ typedef struct MPIDI_CH4U_Dev_get_req_t {
     MPI_Datatype datatype;
 } MPIDI_CH4U_Dev_get_req_t;
 
+typedef struct MPIDI_CH4U_Dev_cswap_req_t {
+    uint64_t win_ptr;
+    uint64_t creq_ptr;
+    void *reply_token;
+    uint64_t addr;
+    MPI_Datatype datatype;
+    void *data;
+    void *result_addr;
+} MPIDI_CH4U_Dev_cswap_req_t;
+
 typedef struct MPIDI_CH4U_Devreq_t {
 
     union {
@@ -86,6 +96,7 @@ typedef struct MPIDI_CH4U_Devreq_t {
         MPIDI_CH4U_Dev_rreq_t rreq;
         MPIDI_CH4U_Dev_put_req_t preq;
         MPIDI_CH4U_Dev_get_req_t greq;
+        MPIDI_CH4U_Dev_cswap_req_t creq;
     };
 
     void         *buffer;
