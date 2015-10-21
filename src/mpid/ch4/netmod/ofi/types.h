@@ -38,6 +38,7 @@ EXTERN_C_BEGIN
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
 #define MPIDI_MAX_AM_HANDLERS 		(16)
 #define MPIDI_CACHELINE_SIZE        (64)
+#define MPIDI_IOV_MAX               1
 
 #ifndef MPIDI_MAX_AM_HDR_SZ
 #define MPIDI_MAX_AM_HDR_SZ		    (16)
@@ -368,11 +369,38 @@ typedef struct MPIDI_Iovec_state {
     size_t buf_limit;
 } MPIDI_Iovec_state_t;
 
+typedef struct MPIDI_Iovec_array {
+    struct {
+        iovec_t   originv[MPIDI_IOV_MAX];
+        rma_iov_t targetv[MPIDI_IOV_MAX];
+        struct MPIDI_Iovec_array *next;
+    }put_get;
+    struct {
+        ioc_t     originv[MPIDI_IOV_MAX];
+        ioc_t     resultv[MPIDI_IOV_MAX];
+        ioc_t     comparev[MPIDI_IOV_MAX];
+        rma_ioc_t targetv[MPIDI_IOV_MAX];
+        struct MPIDI_Iovec_array *next;
+    }cas;
+    struct {
+        ioc_t     originv[MPIDI_IOV_MAX];
+        rma_ioc_t targetv[MPIDI_IOV_MAX];
+        struct MPIDI_Iovec_array *next;
+    }accumulate;
+    struct {
+        ioc_t     originv[MPIDI_IOV_MAX];
+        ioc_t     resultv[MPIDI_IOV_MAX];
+        rma_ioc_t targetv[MPIDI_IOV_MAX];
+        struct MPIDI_Iovec_array *next;
+    }get_accumulate;
+} MPIDI_Iovec_array_t;
+
 typedef struct MPIDI_Win_noncontig {
     MPIDI_Iovec_state_t iovs;
-    MPIDI_Win_dt origin_dt;
-    MPIDI_Win_dt result_dt;
-    MPIDI_Win_dt target_dt;
+    MPIDI_Win_dt        origin_dt;
+    MPIDI_Win_dt        result_dt;
+    MPIDI_Win_dt        target_dt;
+    MPIDI_Iovec_array_t buf;
 } MPIDI_Win_noncontig;
 
 typedef struct MPIDI_Win_request {

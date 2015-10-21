@@ -37,7 +37,6 @@ __ALWAYS_INLINE__ int do_irecv(void *buf,
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
-    iovec_t iov;
     msg_tagged_t msg;
     char *recv_buf;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_IRECV);
@@ -101,17 +100,17 @@ __ALWAYS_INLINE__ int do_irecv(void *buf,
                                                                                        MPIDI_API_TAG),
                              match_bits, mask_bits, (void *) &(REQ_OFI(rreq, context))), trecv);
     else {
-        iov.iov_base = recv_buf;
-        iov.iov_len = data_sz;
+        REQ_OFI(rreq,util.iov).iov_base = recv_buf;
+        REQ_OFI(rreq,util.iov).iov_len  = data_sz;
 
-        msg.msg_iov = &iov;
-        msg.desc = NULL;
+        msg.msg_iov   = &REQ_OFI(rreq,util.iov);
+        msg.desc      = NULL;
         msg.iov_count = 1;
-        msg.tag = match_bits;
-        msg.ignore = mask_bits;
-        msg.context = (void *) &(REQ_OFI(rreq, context));
-        msg.data = 0;
-        msg.addr = FI_ADDR_UNSPEC;
+        msg.tag       = match_bits;
+        msg.ignore    = mask_bits;
+        msg.context   = (void *) &(REQ_OFI(rreq, context));
+        msg.data      = 0;
+        msg.addr      = FI_ADDR_UNSPEC;
 
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
         FI_RC_RETRY(fi_trecvmsg(G_RXC_TAG(0), &msg, flags), trecv);
@@ -152,13 +151,14 @@ __ALWAYS_INLINE__ int MPIDI_netmod_recv(void *buf,
 #define FUNCNAME MPIDI_netmod_recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void *buf,
-                                         int count,
-                                         MPI_Datatype datatype,
-                                         int rank,
-                                         int tag,
-                                         MPID_Comm * comm,
-                                         int context_offset, MPID_Request ** request)
+__ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void          *buf,
+                                             int            count,
+                                             MPI_Datatype   datatype,
+                                             int            rank,
+                                             int            tag,
+                                             MPID_Comm     *comm,
+                                             int            context_offset,
+                                             MPID_Request **request)
 {
     MPID_Request *rreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
@@ -171,18 +171,18 @@ __ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void *buf,
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
 
-    REQ_OFI(rreq, p_buf) = (void *) buf;
-    REQ_OFI(rreq, p_count) = count;
-    REQ_OFI(rreq, datatype) = datatype;
-    REQ_OFI(rreq, p_rank) = rank;
-    REQ_OFI(rreq, p_tag) = tag;
-    REQ_OFI(rreq, util_comm) = comm;
-    REQ_OFI(rreq, util_id) = comm->context_id + context_offset;
-    rreq->partner_request = NULL;
+    REQ_OFI(rreq, util.persist.buf)   = (void *) buf;
+    REQ_OFI(rreq, util.persist.count) = count;
+    REQ_OFI(rreq, datatype)           = datatype;
+    REQ_OFI(rreq, util.persist.rank)  = rank;
+    REQ_OFI(rreq, util.persist.tag)   = tag;
+    REQ_OFI(rreq, util_comm)          = comm;
+    REQ_OFI(rreq, util_id)            = comm->context_id + context_offset;
+    rreq->partner_request             = NULL;
 
     MPIDI_Request_complete(rreq);
 
-    REQ_OFI(rreq, p_type) = MPIDI_PTYPE_RECV;
+    REQ_OFI(rreq, util.persist.type) = MPIDI_PTYPE_RECV;
 
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
         MPID_Datatype *dt_ptr;

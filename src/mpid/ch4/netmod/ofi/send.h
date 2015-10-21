@@ -255,14 +255,14 @@ __ALWAYS_INLINE__ int nm_psend(SENDPARAMS)
     MPIR_Comm_add_ref(comm);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
-    REQ_OFI(sreq, p_buf) = (void *) buf;
-    REQ_OFI(sreq, p_count) = count;
-    REQ_OFI(sreq, datatype) = datatype;
-    REQ_OFI(sreq, p_rank) = rank;
-    REQ_OFI(sreq, p_tag) = tag;
-    REQ_OFI(sreq, util_comm) = comm;
-    REQ_OFI(sreq, util_id) = comm->context_id + context_offset;
-    sreq->partner_request = NULL;
+    REQ_OFI(sreq, util.persist.buf)   = (void *) buf;
+    REQ_OFI(sreq, util.persist.count) = count;
+    REQ_OFI(sreq, datatype)           = datatype;
+    REQ_OFI(sreq, util.persist.rank)  = rank;
+    REQ_OFI(sreq, util.persist.tag)   = tag;
+    REQ_OFI(sreq, util_comm)          = comm;
+    REQ_OFI(sreq, util_id)            = comm->context_id + context_offset;
+    sreq->partner_request             = NULL;
     MPIDI_Request_complete(sreq);
 
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
@@ -278,11 +278,11 @@ __ALWAYS_INLINE__ int nm_psend(SENDPARAMS)
 #define STARTALL_CASE(CASELABEL,FUNC,CONTEXTID) \
   case CASELABEL:                               \
   {                                             \
-    rc = FUNC(REQ_OFI(preq,p_buf),              \
-              REQ_OFI(preq,p_count),            \
+    rc = FUNC(REQ_OFI(preq,util.persist.buf),              \
+              REQ_OFI(preq,util.persist.count),            \
               REQ_OFI(preq,datatype),           \
-              REQ_OFI(preq,p_rank),             \
-              REQ_OFI(preq,p_tag),              \
+              REQ_OFI(preq,util.persist.rank),             \
+              REQ_OFI(preq,util.persist.tag),              \
               preq->comm,                       \
               REQ_OFI(preq,util_id) -           \
               CONTEXTID,                        \
@@ -390,17 +390,17 @@ __ALWAYS_INLINE__ int MPIDI_netmod_startall(int count, MPID_Request * requests[]
     for (i = 0; i < count; i++) {
         MPID_Request *const preq = requests[i];
 
-        switch (REQ_OFI(preq, p_type)) {
+        switch (REQ_OFI(preq, util.persist.type)) {
             STARTALL_CASE(MPIDI_PTYPE_RECV, MPIDI_Irecv, preq->comm->recvcontext_id);
             STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_Isend, preq->comm->context_id);
             STARTALL_CASE(MPIDI_PTYPE_SSEND, MPIDI_Issend, preq->comm->context_id);
 
         case MPIDI_PTYPE_BSEND:{
-                rc = MPIR_Bsend_isend(REQ_OFI(preq, p_buf),
-                                      REQ_OFI(preq, p_count),
+                rc = MPIR_Bsend_isend(REQ_OFI(preq, util.persist.buf),
+                                      REQ_OFI(preq, util.persist.count),
                                       REQ_OFI(preq, datatype),
-                                      REQ_OFI(preq, p_rank),
-                                      REQ_OFI(preq, p_tag),
+                                      REQ_OFI(preq, util.persist.rank),
+                                      REQ_OFI(preq, util.persist.tag),
                                       preq->comm, BSEND_INIT, &preq->partner_request);
 
                 if (preq->partner_request != NULL)
@@ -412,13 +412,13 @@ __ALWAYS_INLINE__ int MPIDI_netmod_startall(int count, MPID_Request * requests[]
         default:
             rc = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL, __FUNCTION__,
                                       __LINE__, MPI_ERR_INTERN, "**ch3|badreqtype",
-                                      "**ch3|badreqtype %d", REQ_OFI(preq, p_type));
+                                      "**ch3|badreqtype %d", REQ_OFI(preq, util.persist.type));
         }
 
         if (rc == MPI_SUCCESS) {
             preq->status.MPI_ERROR = MPI_SUCCESS;
 
-            if (REQ_OFI(preq, p_type) == MPIDI_PTYPE_BSEND) {
+            if (REQ_OFI(preq, util.persist.type) == MPIDI_PTYPE_BSEND) {
                 preq->cc_ptr = &preq->cc;
                 MPIDI_Request_set_completed(preq);
             }
@@ -447,7 +447,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_send_init(SENDPARAMS)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_INIT);
     mpi_errno = nm_psend(SENDARGS);
-    REQ_OFI((*request), p_type) = MPIDI_PTYPE_SEND;
+    REQ_OFI((*request), util.persist.type) = MPIDI_PTYPE_SEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_INIT);
     return mpi_errno;
 }
@@ -462,7 +462,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_ssend_init(SENDPARAMS)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SSEND_INIT);
     mpi_errno = nm_psend(SENDARGS);
-    REQ_OFI((*request), p_type) = MPIDI_PTYPE_SSEND;
+    REQ_OFI((*request), util.persist.type) = MPIDI_PTYPE_SSEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND_INIT);
     return mpi_errno;
 }
@@ -477,7 +477,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_bsend_init(SENDPARAMS)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_BSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_BSEND_INIT);
     mpi_errno = nm_psend(SENDARGS);
-    REQ_OFI((*request), p_type) = MPIDI_PTYPE_BSEND;
+    REQ_OFI((*request), util.persist.type) = MPIDI_PTYPE_BSEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_BSEND_INIT);
     return mpi_errno;
 }
@@ -492,7 +492,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_rsend_init(SENDPARAMS)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RSEND_INIT);
     mpi_errno = nm_psend(SENDARGS);
-    REQ_OFI((*request), p_type) = MPIDI_PTYPE_SEND;
+    REQ_OFI((*request), util.persist.type) = MPIDI_PTYPE_SEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RSEND_INIT);
     return mpi_errno;
 }

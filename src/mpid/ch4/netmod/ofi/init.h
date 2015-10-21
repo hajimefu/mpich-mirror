@@ -87,17 +87,16 @@ static inline int MPIDI_netmod_init(int         rank,
     /* Hints to filter providers                                                */
     /* See man fi_getinfo for a list                                            */
     /* of all filters                                                           */
-    /* mode:  Select capabilities ADI is prepared to support.                   */
-    /*        In this case, ADI will pass in context into                       */
-    /*        communication calls.                                              */
-    /*        Note that we do not fill in FI_LOCAL_MR, which means this ADI     */
-    /*        does not support exchange of memory regions on communication      */
-    /*        calls. OFI requires that all communication calls use a registered */
-    /*        mr but in our case this ADI is written to only support            */
-    /*        transfers on a dynamic memory region that spans all of memory.    */
-    /*        So, we do not set the FI_LOCAL_MR mode bit, and we set the        */
-    /*        FI_SCALABLE_MR on the domain to  tell OFI our requirement and     */
-    /*        filter providers appropriately                                    */
+    /* mode:  Select capabilities that this netmod will support                 */
+    /*        FI_CONTEXT:  This netmod will pass in context into communication  */
+    /*        to optimize storage locality between MPI requests and OFI opaque  */
+    /*        data structures.                                                  */
+    /*        FI_ASYNC_IOV:  MPICH will provide storage for iovecs on           */
+    /*        communication calls, avoiding the OFI provider needing to require */
+    /*        a copy.                                                           */
+    /*        FI_LOCAL_MR unset:  Note that we do not set FI_LOCAL_MR,          */
+    /*        which means this netmod does not support exchange of memory       */
+    /*        regions on communication calls.                                   */
     /* caps:     Capabilities required from the provider.  The bits specified   */
     /*           with buffered receive, cancel, and remote complete implements  */
     /*           MPI semantics.                                                 */
@@ -105,7 +104,7 @@ static inline int MPIDI_netmod_init(int         rank,
     /*           RMA|Atomics:  supports MPI 1-sided                             */
     /*           MSG|MULTI_RECV:  Supports synchronization protocol for 1-sided */
     /*           We expect to register all memory up front for use with this    */
-    /*           endpoint, so the ADI requires dynamic memory regions           */
+    /*           endpoint, so the netmod requires dynamic memory regions        */
     /* ------------------------------------------------------------------------ */
 
     /* ------------------------------------------------------------------------ */
@@ -115,12 +114,12 @@ static inline int MPIDI_netmod_init(int         rank,
     hints = fi_allocinfo();
     MPIU_Assert(hints != NULL);
 
-    hints->mode = FI_CONTEXT;   /* We can handle contexts  */
-    hints->caps = FI_TAGGED;    /* Tag matching interface  */
-    hints->caps |= FI_MSG;      /* Message Queue apis      */
-    hints->caps |= FI_MULTI_RECV;       /* Shared receive buffer   */
-    hints->caps |= FI_RMA;      /* RMA(read/write)         */
-    hints->caps |= FI_ATOMICS;  /* Atomics capabilities    */
+    hints->mode = FI_CONTEXT|FI_ASYNC_IOV;   /* We can handle contexts  */
+    hints->caps = FI_TAGGED;                 /* Tag matching interface  */
+    hints->caps |= FI_MSG;                   /* Message Queue apis      */
+    hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
+    hints->caps |= FI_RMA;                   /* RMA(read/write)         */
+    hints->caps |= FI_ATOMICS;               /* Atomics capabilities    */
 
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
@@ -134,8 +133,8 @@ static inline int MPIDI_netmod_init(int         rank,
     /* domain_attr:  domain attribute requirements                              */
     /* op_flags:     persistent flag settings for an endpoint                   */
     /* endpoint type:  see FI_EP_RDM                                            */
-    /* Filters applied (for this ADI, we need providers that can support):      */
-    /* THREAD_ENDPOINT:  Progress serialization is handled by ADI (locking)     */
+    /* Filters applied (for this netmod, we need providers that can support):   */
+    /* THREAD_DOMAIN:  Progress serialization is handled by netmod (locking)    */
     /* PROGRESS_AUTO:  request providers that make progress without requiring   */
     /*                 the ADI to dedicate a thread to advance the state        */
     /* FI_DELIVERY_COMPLETE:  RMA operations are visible in remote memory       */
@@ -173,7 +172,7 @@ static inline int MPIDI_netmod_init(int         rank,
     MPIDI_Global.max_buffered_write = prov_use->tx_attr->inject_size;
     MPIDI_Global.max_send = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.max_write = prov_use->ep_attr->max_msg_size;
-    MPIDI_Global.iov_limit = prov_use->tx_attr->iov_limit;
+    MPIDI_Global.iov_limit = MIN(prov_use->tx_attr->iov_limit,MPIDI_IOV_MAX);
 
     /* ------------------------------------------------------------------------ */
     /* Open fabric                                                              */

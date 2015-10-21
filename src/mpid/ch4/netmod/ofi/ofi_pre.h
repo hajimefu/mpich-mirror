@@ -64,11 +64,16 @@ typedef struct {
     struct MPID_Segment *segment_ptr;
     char                *pack_buffer;
     /* persistent send fields */
-    int                  p_type;
-    int                  p_rank;
-    int                  p_tag;
-    int                  p_count;
-    void                *p_buf;
+    union {
+        struct {
+            int   type;
+            int   rank;
+            int   tag;
+            int   count;
+            void *buf;
+        } persist;
+        struct iovec iov;
+    }util;
 } MPIDI_netmod_ofi_request_t;
 
 typedef struct {

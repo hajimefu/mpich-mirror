@@ -225,9 +225,9 @@ static inline int do_put(const void    *origin_addr,
         size_t    tmax;
         size_t    tout, oout;
         unsigned  i;
-        omax=tmax=MPIDI_Global.iov_limit;
-        iovec_t   originv[omax];
-        rma_iov_t targetv[tmax];
+        iovec_t   *originv=req->noncontig->buf.put_get.originv;
+        rma_iov_t *targetv=req->noncontig->buf.put_get.targetv;
+        omax=tmax=1;
 
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
@@ -474,8 +474,8 @@ static inline int do_get(void          *origin_addr,
     rc = MPIDI_IOV_EAGAIN;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        iovec_t   originv[1];
-        rma_iov_t targetv[1];
+        iovec_t   *originv=req->noncontig->buf.put_get.originv;
+        rma_iov_t *targetv=req->noncontig->buf.put_get.targetv;
         size_t    omax,tmax,tout,oout;
         unsigned  i;
         omax=tmax=1;
@@ -587,7 +587,8 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
                                                 int target_rank,
-                                                MPI_Aint target_disp, MPID_Win *win)
+                                                MPI_Aint target_disp,
+                                                MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     fi_op_t fi_op;
@@ -635,7 +636,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     void *desc;
     desc = fi_mr_desc(MPIDI_Global.mr);
     msg.msg_iov       = &originv;
-    msg.desc      = &desc;
+    msg.desc          = &desc;
     msg.iov_count     = 1;
     msg.addr          = _comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR);
     msg.rma_iov       = &targetv;
@@ -783,8 +784,8 @@ static inline int do_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        ioc_t     originv[1];
-        rma_ioc_t targetv[1];
+        ioc_t     *originv=req->noncontig->buf.accumulate.originv;
+        rma_ioc_t *targetv=req->noncontig->buf.accumulate.targetv;
         size_t    omax;
         size_t    tmax;
         size_t    tout, oout;
@@ -976,12 +977,12 @@ static inline int do_get_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        ioc_t     originv[1]= {{0}};
-        ioc_t     resultv[1]= {{0}};
-        rma_ioc_t targetv[1]= {{0}};
-        size_t    omax,rmax,tmax;
-        size_t    tout,rout,oout;
-        unsigned  i;
+        ioc_t     *originv=req->noncontig->buf.get_accumulate.originv;
+        ioc_t     *resultv=req->noncontig->buf.get_accumulate.resultv;
+        rma_ioc_t *targetv=req->noncontig->buf.get_accumulate.targetv;
+        size_t     omax,rmax,tmax;
+        size_t     tout,rout,oout;
+        unsigned   i;
 
         omax=rmax=tmax=1;
 
