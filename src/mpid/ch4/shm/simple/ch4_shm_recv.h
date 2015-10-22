@@ -87,100 +87,13 @@ static inline int MPIDI_shm_recv(void *buf,
 {
     int mpi_errno = MPI_SUCCESS, dt_contig __attribute__ ((__unused__));
     MPIDI_msg_sz_t data_sz __attribute__ ((__unused__));
-    MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
-    char *recv_buffer;
     MPIDI_STATE_DECL(MPIDI_SHM_RECV);
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_RECV);
 
-#if 0
-    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
-
-    /* search in unexpected queue, short messages only */
-    /*
-     * TODO: possibly breaks ordering
-     * suppose irecv put a matching req in the queue, and there's already unexpected by this moment
-     * then this blocking recv handles the unexpected out-of-order
-     * Either remove this from recv, or add it to irecv
-     */
-    MPID_Request *req = MPIDI_shm_recvq_unexpected.head;
-    MPID_Request *prev_req = NULL;
-    while (req) {
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "Matching to unexpected in irecv %d,%d,%d\n", rank, tag,
-                          comm->context_id + context_offset));
-        /* check message type and matching info */
-        if ((REQ_SHM(req)->type == TYPE_EAGER) && ENVELOPE_MATCH(REQ_SHM(req), rank, tag, comm->context_id + context_offset)) {
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                             (MPIU_DBG_FDEST, "Matching done in irecv %d,%d,%d\n", rank, tag,
-                              comm->context_id + context_offset));
-            recv_buffer = (char *) buf + dt_true_lb;
-            data_sz = MIN(data_sz,REQ_SHM(req)->data_sz);
-            MPIU_Memcpy(recv_buffer, (void *) REQ_SHM(req)->user_buf, data_sz);
-            /* set status */
-            if (status != MPI_STATUS_IGNORE) {
-                status->MPI_SOURCE = REQ_SHM(req)->rank;
-                status->MPI_TAG = REQ_SHM(req)->tag;
-                MPIR_STATUS_SET_COUNT(*status, data_sz);
-            }
-            /* dequeue unexpected req */
-            MPIU_Free((void *) REQ_SHM(req)->user_buf);
-            REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_shm_recvq_unexpected, mpi_errno);
-            *request = NULL;
-            goto fn_exit;
-        }
-        prev_req = req;
-        req = REQ_SHM(req)->next;
-    }
-    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                     (MPIU_DBG_FDEST, "No match to unexpected in irecv %d,%d,%d\n", rank, tag,
-                      comm->context_id + context_offset));
-#endif
-#if 0
-    /* try to receive immediately from fastbox */
-    if (rank != MPI_ANY_SOURCE) {
-        int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
-        int local_rank = MPID_nem_mem_region.local_ranks[grank];
-        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
-        MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                         (MPIU_DBG_FDEST, "Try match to fastbox %d in irecv %d,%d,%d\n", local_rank, rank, tag,
-                          comm->context_id + context_offset));
-        if (OPA_load_int(&fbox->flag.value)) {
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                             (MPIU_DBG_FDEST, "fastbox local_rank %d flag is set in irecv\n", local_rank ));
-            if (ENVELOPE_MATCH(&fbox->cell, rank, tag, comm->context_id + context_offset)) {
-                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                                 (MPIU_DBG_FDEST, "Matching in irecv %d,%d,%d\n", rank, tag,
-                                  comm->context_id + context_offset));
-                recv_buffer = (char *) buf + dt_true_lb;
-                MPIU_Memcpy(recv_buffer, (void *) fbox->cell.pkt.mpich.p.payload,
-                            fbox->cell.pkt.mpich.datalen);
-                /* set status */
-                if (status != MPI_STATUS_IGNORE) {
-                    status->MPI_SOURCE = fbox->cell.rank;
-                    status->MPI_TAG = fbox->cell.tag;
-                    MPIR_STATUS_SET_COUNT(*status, fbox->cell.pkt.mpich.datalen);
-                }
-                /* release fastbox */
-                OPA_store_release_int(&(fbox->flag.value), 0);
-                *request = NULL;
-                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                                 (MPIU_DBG_FDEST, "fastbox released in irecv %d,%d,%d\n", rank, tag,
-                                  comm->context_id + context_offset));
-                goto fn_exit;
-            }
-        }
-    }
-    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                     (MPIU_DBG_FDEST, "No match to fastbox in irecv %d,%d,%d\n", rank, tag,
-                      comm->context_id + context_offset));
-#endif
-    /* failed to receive immediately */
     /* create a request */
     mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_SHM_RECV);
     return mpi_errno;
 }
@@ -211,11 +124,8 @@ static inline int MPIDI_shm_recv_init(void *buf,
     REQ_SHM(rreq)->datatype = datatype;
     *request = rreq;
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_RECV_INIT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 

@@ -108,20 +108,8 @@ static inline int MPIDI_shm_send(const void *buf,
     /* try to send immediately, contig, short message */
     if (dt_contig && data_sz <= EAGER_THRESHOLD) {
         /* eager message */
-        /* Try fastbox */
         int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
-#if 0
-        int local_rank = MPID_nem_mem_region.local_ranks[grank];
-        MPID_nem_fbox_mpich_t *fbox = &MPID_nem_mem_region.mailboxes.out[local_rank]->mpich;
-        if (!MPID_nem_fbox_is_full((MPID_nem_fbox_common_ptr_t) fbox)) {
-            ENVELOPE_SET(&fbox->cell, comm->rank, tag, comm->context_id + context_offset);
-            fbox->cell.pkt.mpich.datalen = data_sz;
-            MPIU_Memcpy((void *) fbox->cell.pkt.mpich.p.payload, (char*)buf+dt_true_lb, data_sz);
-            OPA_store_release_int(&(fbox->flag.value), 1);
-            *request = NULL;
-            goto fn_exit;
-        }
-#endif
+
         /* Try freeQ */
         if (!MPID_nem_queue_empty(MPID_nem_mem_region.my_freeQ)) {
             MPID_nem_cell_ptr_t cell;
@@ -258,11 +246,8 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
         }
     }
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_STARTALL);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FCNAME
@@ -292,11 +277,8 @@ static inline int MPIDI_shm_send_init(const void *buf,
     REQ_SHM(sreq)->type = TYPE_STANDARD;
     *request = sreq;
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FCNAME
@@ -327,11 +309,8 @@ static inline int MPIDI_shm_ssend_init(const void *buf,
     REQ_SHM(sreq)->type = TYPE_SYNC;
     *request = sreq;
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_shm_bsend_init(const void *buf,
@@ -360,11 +339,8 @@ static inline int MPIDI_shm_bsend_init(const void *buf,
     REQ_SHM(sreq)->type = TYPE_BUFFERED;
     *request = sreq;
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND_INIT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 static inline int MPIDI_shm_rsend_init(const void *buf,

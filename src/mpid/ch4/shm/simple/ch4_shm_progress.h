@@ -22,8 +22,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_msg_sz_t data_sz;
-    int in_cell = 0, in_fbox = 0;
-    MPID_nem_fbox_mpich_t *fbox;
+    int in_cell = 0;
     MPID_nem_cell_ptr_t cell = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
@@ -34,24 +33,6 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
     if (sreq != NULL) {
         goto match_l;
     }
-#if 0
-    int local_rank;
-    /* try to receive from fastbox */
-    for (local_rank = 0; local_rank < MPID_nem_mem_region.num_local; local_rank++) {
-        if (local_rank != MPID_nem_mem_region.local_rank) {
-            fbox = &MPID_nem_mem_region.mailboxes.in[local_rank]->mpich;
-            if (OPA_load_int(&fbox->flag.value)) {
-                cell = &fbox->cell;
-                MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                                 (MPIU_DBG_FDEST, "Found fastbox in progress %d,%d,%d\n",
-                                  cell->rank, cell->tag, cell->context_id));
-                in_cell = 1;
-                in_fbox = 1;
-                goto match_l;
-            }
-        }
-    }
-#endif
     /* try to receive from recvq */
     if (MPID_nem_mem_region.my_recvQ && !MPID_nem_queue_empty(MPID_nem_mem_region.my_recvQ)) {
         MPID_nem_queue_dequeue(MPID_nem_mem_region.my_recvQ, &cell);
@@ -202,11 +183,6 @@ release_cell_l:
                          (MPIU_DBG_FDEST, "Received from grank %d to %d in progress %d,%d,%d\n", cell->my_rank,
                           MPID_nem_mem_region.rank, cell->rank, cell->tag, cell->context_id));
         cell->pending = NULL;
-#if 0
-        if (in_fbox)
-            OPA_store_release_int(&(fbox->flag.value), 0);
-        else
-#endif
         {
             MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->my_rank], cell);
         }

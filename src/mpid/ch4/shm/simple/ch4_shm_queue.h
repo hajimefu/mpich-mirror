@@ -20,19 +20,8 @@
  * assertion macros because we don't usually want to assert several
  * times per queue operation.  These assertions serve more as structured
  * comments that can easily transformed into being real assertions */
-#if 0
-#define MPID_nem_q_assert(a_) \
-    do {                                                             \
-        if (unlikely(!(a_))) {                                       \
-            MPID_nem_q_assert_fail(#a_, __FILE__, __LINE__);         \
-        }                                                            \
-    } while (0)
-#define MPID_nem_q_assert_fail(a_str_, file_, line_) \
-    do {/*nothing*/} while (0)
-#else
 #define MPID_nem_q_assert(a_) \
     do {/*nothing*/} while (0)
-#endif
 
 #undef FUNCNAME
 #define FUNCNAME MPID_nem_cell_init

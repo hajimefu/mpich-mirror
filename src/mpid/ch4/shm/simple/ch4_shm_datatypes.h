@@ -17,9 +17,6 @@
 #  define MPID_NEM_CELL_HEAD_LEN  8     /* We use this to keep elements 64-bit aligned */
 #endif
 
-#if 0
-#define MPID_NEM_CELL_PAYLOAD_LEN (MPID_NEM_CELL_LEN - MPID_NEM_CELL_HEAD_LEN)
-#endif
 /* cell header with matching info now is cache line */
 #define MPID_NEM_CELL_PAYLOAD_LEN (MPID_NEM_CELL_LEN - MPID_NEM_CACHE_LINE_LEN + MPID_NEM_MPICH_HEAD_LEN)
 

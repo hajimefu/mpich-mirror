@@ -24,11 +24,8 @@ static inline int MPIDI_shm_comm_create(MPID_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_SHM_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_SHM_COMM_CREATE);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_SHM_COMM_CREATE);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -41,11 +38,8 @@ static inline int MPIDI_shm_comm_destroy(MPID_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_SHM_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_SHM_COMM_DESTROY);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_SHM_COMM_DESTROY);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 
