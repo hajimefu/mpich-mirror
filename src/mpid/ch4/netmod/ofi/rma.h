@@ -76,7 +76,7 @@ static inline void MPIDI_Win_datatype_basic(int           count,
                                 dt->pointer,
                                 dt->true_lb);
     else
-        memset(&dt, 0, sizeof(*dt));
+        memset(dt, 0, sizeof(*dt));
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_BASIC);
 }
