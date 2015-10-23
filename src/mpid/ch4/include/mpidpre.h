@@ -69,6 +69,7 @@ typedef struct MPIDI_CH4U_Dev_put_req_t {
     uint64_t win_ptr;
     uint64_t preq_ptr;
     void *reply_token;
+    void *dt_iov;
 } MPIDI_CH4U_Dev_put_req_t;
 
 typedef struct MPIDI_CH4U_Dev_get_req_t {
@@ -77,6 +78,7 @@ typedef struct MPIDI_CH4U_Dev_get_req_t {
     uint64_t addr;
     int count;
     MPI_Datatype datatype;
+    void *dt_iov;
 } MPIDI_CH4U_Dev_get_req_t;
 
 typedef struct MPIDI_CH4U_Dev_cswap_req_t {
@@ -89,6 +91,18 @@ typedef struct MPIDI_CH4U_Dev_cswap_req_t {
     void *result_addr;
 } MPIDI_CH4U_Dev_cswap_req_t;
 
+typedef struct MPIDI_CH4U_Dev_acc_req_t {
+    uint64_t win_ptr;
+    uint64_t req_ptr;
+    void *reply_token;
+    MPI_Datatype origin_datatype;
+    MPI_Datatype target_datatype;
+    int origin_count;
+    int target_count;
+    void *target_addr;
+    MPI_Op op;
+} MPIDI_CH4U_Dev_acc_req_t;
+
 typedef struct MPIDI_CH4U_Devreq_t {
 
     union {
@@ -97,6 +111,7 @@ typedef struct MPIDI_CH4U_Devreq_t {
         MPIDI_CH4U_Dev_put_req_t preq;
         MPIDI_CH4U_Dev_get_req_t greq;
         MPIDI_CH4U_Dev_cswap_req_t creq;
+        MPIDI_CH4U_Dev_acc_req_t areq;
     };
 
     void         *buffer;

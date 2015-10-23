@@ -27,6 +27,7 @@ MPIDI_netmod_funcs_t MPIDI_netmod_ofi_funcs = {
     MPIDI_netmod_inject_am_hdr,
     MPIDI_netmod_send_am,
     MPIDI_netmod_send_amv,
+    MPIDI_netmod_send_amv_hdr,
     MPIDI_netmod_send_am_hdr_reply,
     MPIDI_netmod_inject_am_hdr_reply,
     MPIDI_netmod_send_am_reply,

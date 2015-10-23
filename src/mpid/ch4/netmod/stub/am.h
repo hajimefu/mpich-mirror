@@ -60,6 +60,17 @@ static inline int MPIDI_netmod_send_amv(int rank,
     return MPI_SUCCESS;
 }
 
+static inline int MPIDI_netmod_send_amv_hdr(int rank,
+                                        MPID_Comm * comm,
+                                        int handler_id,
+                                        struct iovec *am_hdr,
+                                        size_t iov_len,
+                                        MPID_Request * sreq, void *netmod_context)
+{
+    MPIU_Assert(0);
+    return MPI_SUCCESS;
+}
+
 static inline int MPIDI_netmod_send_am_hdr_reply(void *reply_token,
                                                  int handler_id,
                                                  const void *am_hdr,

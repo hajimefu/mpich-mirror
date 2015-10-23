@@ -103,6 +103,16 @@ MPIDI_NETMOD_API(int,send_amv,
                  (MPID_Request *) sreq,
                  (void *)         netmod_context);
 
+/* vector version of active message send hdr */
+MPIDI_NETMOD_API(int,send_amv_hdr,
+                 (int)            rank,
+                 (MPID_Comm *)    comm,
+                 (int)            handler_id,
+                 (struct iovec *) am_hdrs,
+                 (size_t)         iov_len,
+                 (MPID_Request *) sreq,
+                 (void *)         netmod_context);
+
 /* active message send am hdr reply */
 MPIDI_NETMOD_API(int,send_am_hdr_reply,
                  (void *)         reply_token,     /* local pointer to netmod specific information */

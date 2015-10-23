@@ -47,6 +47,7 @@ typedef struct MPIDI_netmod_funcs {
     MPIDI_netmod_inject_am_hdr_t inject_am_hdr;
     MPIDI_netmod_send_am_t send_am;
     MPIDI_netmod_send_amv_t send_amv;
+    MPIDI_netmod_send_amv_hdr_t send_amv_hdr;
     MPIDI_netmod_send_am_hdr_reply_t send_am_hdr_reply;
     MPIDI_netmod_inject_am_hdr_reply_t inject_am_hdr_reply;
     MPIDI_netmod_send_am_reply_t send_am_reply;
