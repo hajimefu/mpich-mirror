@@ -99,7 +99,10 @@ typedef struct MPIDI_CH4U_Dev_acc_req_t {
     MPI_Datatype target_datatype;
     int origin_count;
     int target_count;
+    int n_iov;
     void *target_addr;
+    void *dt_iov;
+    void *data;
     MPI_Op op;
 } MPIDI_CH4U_Dev_acc_req_t;
 

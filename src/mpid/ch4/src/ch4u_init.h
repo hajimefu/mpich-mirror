@@ -64,6 +64,20 @@ static inline int MPIDI_CH4I_am_put_ack_origin_cmpl_handler(MPID_Request * req)
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_acc_ack_origin_cmpl_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_acc_ack_origin_cmpl_handler(MPID_Request * req)
+{
+    int mpi_errno = MPI_SUCCESS, c;
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_ACK_TX_HANDLER);
+    MPIDI_Request_complete(req);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_ACK_TX_HANDLER);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_am_cswap_ack_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -148,6 +162,10 @@ static inline int MPIDI_CH4I_am_acc_origin_cmpl_handler(MPID_Request * sreq)
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_TX_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_TX_HANDLER);
+
+    if (MPIU_CH4U_REQUEST(sreq, areq.dt_iov)) {
+        MPIU_Free(MPIU_CH4U_REQUEST(sreq, areq.dt_iov));
+    }
 
     MPID_cc_decr(sreq->cc_ptr, &c);
     MPIU_Assert(c >= 0);
@@ -253,6 +271,30 @@ static inline int MPIDI_CH4I_ack_cswap(MPID_Request * rreq)
                                             rreq));
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_CSWAP);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_ack_acc
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_ack_acc(MPID_Request * rreq)
+{
+    int mpi_errno = MPI_SUCCESS, c;
+    MPIDI_CH4U_acc_ack_msg_t ack_msg;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACK_ACC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACK_ACC);
+
+    MPID_cc_incr(rreq->cc_ptr, &c);
+    ack_msg.req_ptr = MPIU_CH4U_REQUEST(rreq, areq.req_ptr);
+    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, areq.reply_token),
+                                                MPIDI_CH4U_AM_ACC_ACK, &ack_msg, sizeof(ack_msg),
+                                                rreq));
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_ACC);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -552,24 +594,205 @@ static inline int MPIDI_CH4I_am_cswap_cmpl_handler(MPID_Request * rreq)
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_do_accumulate_op
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_do_accumulate_op(void *source_buf, int source_count, MPI_Datatype source_dtp,
+                                   void *target_buf, int target_count, MPI_Datatype target_dtp,
+                                   MPI_Aint stream_offset, MPI_Op acc_op)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPI_User_function *uop = NULL;
+    MPI_Aint source_dtp_size = 0, source_dtp_extent = 0;
+    int is_empty_source = FALSE;
+    MPIDI_STATE_DECL(MPID_STATE_DO_ACCUMULATE_OP);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_DO_ACCUMULATE_OP);
+
+    /* first Judge if source buffer is empty */
+    if (acc_op == MPI_NO_OP)
+        is_empty_source = TRUE;
+
+    if (is_empty_source == FALSE) {
+        MPIU_Assert(MPIR_DATATYPE_IS_PREDEFINED(source_dtp));
+        MPID_Datatype_get_size_macro(source_dtp, source_dtp_size);
+        MPID_Datatype_get_extent_macro(source_dtp, source_dtp_extent);
+    }
+
+    if (HANDLE_GET_KIND(acc_op) == HANDLE_KIND_BUILTIN) {
+        /* get the function by indexing into the op table */
+        uop = MPIR_OP_HDL_TO_FN(acc_op);
+    }
+    else {
+        /* --BEGIN ERROR HANDLING-- */
+        mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
+                                         FCNAME, __LINE__, MPI_ERR_OP,
+                                         "**opnotpredefined", "**opnotpredefined %d", acc_op);
+        return mpi_errno;
+        /* --END ERROR HANDLING-- */
+    }
+
+
+    if (is_empty_source == TRUE || MPIR_DATATYPE_IS_PREDEFINED(target_dtp)) {
+        /* directly apply op if target dtp is predefined dtp OR source buffer is empty */
+        MPI_Aint real_stream_offset;
+        void *curr_target_buf;
+
+        if (is_empty_source == FALSE) {
+            MPIU_Assert(source_dtp == target_dtp);
+            real_stream_offset = (stream_offset / source_dtp_size) * source_dtp_extent;
+            curr_target_buf = (void *) ((char *) target_buf + real_stream_offset);
+        }
+        else {
+            curr_target_buf = target_buf;
+        }
+
+        (*uop) (source_buf, curr_target_buf, &source_count, &source_dtp);
+    }
+    else {
+        /* derived datatype */
+        MPID_Segment *segp;
+        DLOOP_VECTOR *dloop_vec;
+        MPI_Aint first, last;
+        int vec_len, i, count;
+        MPI_Aint type_extent, type_size;
+        MPI_Datatype type;
+        MPID_Datatype *dtp;
+        MPI_Aint curr_len;
+        void *curr_loc;
+        int accumulated_count;
+
+        segp = MPID_Segment_alloc();
+        /* --BEGIN ERROR HANDLING-- */
+        if (!segp) {
+            mpi_errno =
+                MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE, FCNAME, __LINE__,
+                                     MPI_ERR_OTHER, "**nomem", 0);
+            MPIDI_FUNC_EXIT(MPID_STATE_DO_ACCUMULATE_OP);
+            return mpi_errno;
+        }
+        /* --END ERROR HANDLING-- */
+        MPID_Segment_init(NULL, target_count, target_dtp, segp, 0);
+        first = stream_offset;
+        last = first + source_count * source_dtp_size;
+
+        MPID_Datatype_get_ptr(target_dtp, dtp);
+        vec_len = dtp->max_contig_blocks * target_count + 1;
+        /* +1 needed because Rob says so */
+        dloop_vec = (DLOOP_VECTOR *)
+            MPIU_Malloc(vec_len * sizeof(DLOOP_VECTOR));
+        /* --BEGIN ERROR HANDLING-- */
+        if (!dloop_vec) {
+            mpi_errno =
+                MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE, FCNAME, __LINE__,
+                                     MPI_ERR_OTHER, "**nomem", 0);
+            MPIDI_FUNC_EXIT(MPID_STATE_DO_ACCUMULATE_OP);
+            return mpi_errno;
+        }
+        /* --END ERROR HANDLING-- */
+
+        MPID_Segment_pack_vector(segp, first, &last, dloop_vec, &vec_len);
+
+        type = dtp->basic_type;
+        MPIU_Assert(type != MPI_DATATYPE_NULL);
+
+        MPIU_Assert(type == source_dtp);
+        type_size = source_dtp_size;
+        type_extent = source_dtp_extent;
+
+        i = 0;
+        curr_loc = dloop_vec[0].DLOOP_VECTOR_BUF;
+        curr_len = dloop_vec[0].DLOOP_VECTOR_LEN;
+        accumulated_count = 0;
+        while (i != vec_len) {
+            if (curr_len < type_size) {
+                MPIU_Assert(i != vec_len);
+                i++;
+                curr_len += dloop_vec[i].DLOOP_VECTOR_LEN;
+                continue;
+            }
+
+            MPIU_Assign_trunc(count, curr_len / type_size, int);
+
+            (*uop) ((char *) source_buf + type_extent * accumulated_count,
+                    (char *) target_buf + MPIU_PtrToAint(curr_loc), &count, &type);
+
+            if (curr_len % type_size == 0) {
+                i++;
+                if (i != vec_len) {
+                    curr_loc = dloop_vec[i].DLOOP_VECTOR_BUF;
+                    curr_len = dloop_vec[i].DLOOP_VECTOR_LEN;
+                }
+            }
+            else {
+                curr_loc = (void *) ((char *) curr_loc + type_extent * count);
+                curr_len -= type_size * count;
+            }
+
+            accumulated_count += count;
+        }
+
+        MPID_Segment_free(segp);
+        MPIU_Free(dloop_vec);
+    }
+
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_DO_ACCUMULATE_OP);
+
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_am_acc_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4I_am_acc_cmpl_handler(MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS, c;
+    int mpi_errno = MPI_SUCCESS, c, i;
     uint64_t dt_contig, data_sz, dt_true_lb;
     MPID_Datatype *dt_ptr;
+    MPI_Aint basic_sz, count;
+    struct iovec *iov;
+    char *src_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_CMPL_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_CMPL_HANDLER);
 
+    MPID_Datatype_get_size_macro(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
+                                 basic_sz);
     
     /* MPIDI_CS_ENTER(); */
+
+    if (MPIU_CH4U_REQUEST(rreq, areq.dt_iov) == NULL) {
+        MPIDU_RC_POP(MPIDI_CH4I_do_accumulate_op(MPIU_CH4U_REQUEST(rreq, areq.data),
+                                      MPIU_CH4U_REQUEST(rreq, areq.origin_count),
+                                      MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
+                                      MPIU_CH4U_REQUEST(rreq, areq.target_addr),
+                                      MPIU_CH4U_REQUEST(rreq, areq.target_count),
+                                      MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
+                                      MPIU_CH4U_REQUEST(rreq, areq.op)));
+    } else {
+        iov = (struct iovec *)MPIU_CH4U_REQUEST(rreq, areq.dt_iov);
+        src_ptr = (char *)MPIU_CH4U_REQUEST(rreq, areq.data);
+        for (i = 0; i < MPIU_CH4U_REQUEST(rreq, areq.n_iov); i++) {
+            count = iov[i].iov_len / basic_sz;
+            MPIU_Assert(count > 0);
+            MPIDU_RC_POP(MPIDI_CH4I_do_accumulate_op(src_ptr, count,
+                                          MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
+                                          iov[i].iov_base, count,
+                                          MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
+                                          MPIU_CH4U_REQUEST(rreq, areq.op)));
+            src_ptr += count * basic_sz;
+        }
+        MPIU_Free(iov);
+    }
     
     /* MPIDI_CS_EXIT(); */
 
-    MPIDU_RC_POP(MPIDI_CH4I_ack_cswap(rreq));
+    MPIU_Free(MPIU_CH4U_REQUEST(rreq, areq.data));
+    MPIDU_RC_POP(MPIDI_CH4I_ack_acc(rreq));
     MPID_cc_decr(rreq->cc_ptr, &c);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_CMPL_HANDLER);
@@ -848,6 +1071,51 @@ static inline int MPIDI_CH4I_am_put_ack_target_handler(void *am_hdr, size_t am_h
         *cmpl_handler_fn = NULL;
     
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_ACK_HANDLER);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_acc_ack_target_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_acc_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+                                                       void *reply_token, void **data,
+                                                       size_t * p_data_sz, int *is_contig,
+                                                       MPIDI_netmod_am_completion_handler_fn *
+                                                       cmpl_handler_fn, MPID_Request ** req)
+{
+    int mpi_errno = MPI_SUCCESS, c;
+    MPIDI_CH4U_acc_ack_msg_t *msg_hdr = (MPIDI_CH4U_acc_ack_msg_t *) am_hdr;
+    MPID_Win *win;
+    MPID_Request *areq;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_ACK_HANDLER);
+
+    areq = (MPID_Request *)msg_hdr->req_ptr;
+    win = (MPID_Win *) MPIU_CH4U_REQUEST(areq, areq.win_ptr);
+
+    if (MPIU_CH4U_REQUEST(areq, areq.dt_iov)) {
+        MPIU_Free(MPIU_CH4U_REQUEST(areq, areq.dt_iov));
+    }
+
+    MPID_cc_decr(areq->cc_ptr, &c);
+    MPIU_Assert(c >= 0);
+
+    if (c == 0) {
+        MPIDI_Request_release(areq);
+    }
+
+    /* MPIDI_CS_ENTER(); */
+    MPIU_CH4U_WIN(win, outstanding_ops)--;
+    /* MPIDI_CS_EXIT(); */
+
+    if (req)
+        *req = NULL;
+    if (cmpl_handler_fn)
+        *cmpl_handler_fn = NULL;
+    
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_ACK_HANDLER);
     return mpi_errno;
 }
 
@@ -1140,6 +1408,7 @@ static inline int MPIDI_CH4I_am_acc_target_handler(void *am_hdr,
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
     void *p_data;
+    struct iovec *iov, *dt_iov;
 
     MPIDI_CH4U_acc_req_msg_t *msg_hdr = (MPIDI_CH4U_acc_req_msg_t *) am_hdr;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
@@ -1155,8 +1424,10 @@ static inline int MPIDI_CH4I_am_acc_target_handler(void *am_hdr,
     p_data = MPIU_Malloc(data_sz);
     MPIU_Assert(p_data);
 
+    /* todo: pkt header should contain data_sz ? */
+
     *cmpl_handler_fn = MPIDI_CH4I_am_acc_cmpl_handler;
-    *is_contig = dt_contig;
+    *is_contig = 1;
     *p_data_sz = data_sz;
     *data = p_data;
 
@@ -1168,10 +1439,26 @@ static inline int MPIDI_CH4I_am_acc_target_handler(void *am_hdr,
     MPIU_CH4U_REQUEST(*req, areq.target_count) = msg_hdr->target_count;
     MPIU_CH4U_REQUEST(*req, areq.target_addr) = (void *)msg_hdr->target_addr;
     MPIU_CH4U_REQUEST(*req, areq.op) = msg_hdr->op;
-    MPIU_CH4U_REQUEST(*req, creq.data) = p_data;
+    MPIU_CH4U_REQUEST(*req, areq.data) = p_data;
+    MPIU_CH4U_REQUEST(*req, areq.n_iov) = msg_hdr->n_iov;
 
+    if (!msg_hdr->n_iov) {
+        MPIU_CH4U_REQUEST(rreq, areq.dt_iov) = NULL;
+        goto fn_exit;
+    }
+
+    dt_iov = (struct iovec *) MPIU_Malloc(sizeof(struct iovec) * msg_hdr->n_iov);
+    MPIU_Assert(dt_iov);
+
+    iov = (struct iovec *) ((char *) msg_hdr + sizeof(*msg_hdr));
+    MPIU_Memcpy(dt_iov, iov, sizeof(struct iovec) * msg_hdr->n_iov);
+    MPIU_CH4U_REQUEST(rreq, areq.dt_iov) = dt_iov;
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -1220,7 +1507,7 @@ static inline int MPIDI_CH4I_am_get_target_handler(void *am_hdr,
         goto fn_exit;
     }
         
-    iov = (struct iovec *)((char *)am_hdr + sizeof(*msg_hdr));        
+    iov = (struct iovec *)((char *)am_hdr + sizeof(*msg_hdr));
     data_sz = 0;
     for(i = 0; i < msg_hdr->n_iov; i++) {
         data_sz += iov[i].iov_len;
@@ -1396,6 +1683,10 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_REQ,
                                               &MPIDI_CH4I_am_acc_origin_cmpl_handler,
                                               &MPIDI_CH4I_am_acc_target_handler));
+
+    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_ACK,
+                                              &MPIDI_CH4I_am_acc_ack_origin_cmpl_handler,
+                                              &MPIDI_CH4I_am_acc_ack_target_handler));
 
     MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_WIN_CTRL,
                                               NULL,
