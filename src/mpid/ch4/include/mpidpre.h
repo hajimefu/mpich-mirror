@@ -103,7 +103,11 @@ typedef struct MPIDI_CH4U_Dev_acc_req_t {
     void *target_addr;
     void *dt_iov;
     void *data;
+    size_t data_sz;
     MPI_Op op;
+    void *result_addr;
+    int result_count;
+    MPI_Datatype result_datatype;
 } MPIDI_CH4U_Dev_acc_req_t;
 
 typedef struct MPIDI_CH4U_Devreq_t {
