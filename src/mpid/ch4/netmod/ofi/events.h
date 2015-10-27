@@ -312,7 +312,7 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
         if(bytesToGet == 0ULL) {
             MPIDI_Send_control_t ctrl;
             hc->wc.len = hc->cur_offset;
-            hc->done_fn(&hc->wc, hc->localreqq);
+            hc->done_fn(&hc->wc, hc->localreq);
             ctrl.type = MPIDI_CTRL_HUGEACK;
             MPI_RC_POP(do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
                                        hc->comm_ptr,hc->remote_info.ackreq));
