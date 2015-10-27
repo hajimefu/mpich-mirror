@@ -690,10 +690,12 @@ static inline int do_control_win(MPIDI_Win_control_t * control,
 #define FUNCNAME do_control_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_send(MPIDI_Send_control_t * control,
-                                  char *send_buf,
-                                  size_t msgsize,
-                                  int rank, MPID_Comm * comm_ptr, MPID_Request * ackreq)
+static inline int do_control_send(MPIDI_Send_control_t *control,
+                                  char                 *send_buf,
+                                  size_t                msgsize,
+                                  int                   rank,
+                                  MPID_Comm            *comm_ptr,
+                                  MPID_Request         *ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
@@ -706,9 +708,9 @@ static inline int do_control_send(MPIDI_Send_control_t * control,
     control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq = ackreq;
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    FI_RC_RETRY(fi_inject(G_TXC_MSG(0),
-                          control, sizeof(*control),
-                          _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG)), inject);
+    FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),control, sizeof(*control),
+                                 _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG)),
+                       inject);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;

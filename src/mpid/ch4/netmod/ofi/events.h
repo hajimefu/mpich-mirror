@@ -105,8 +105,9 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
                                         MPID_SYNC_SEND_ACK);
         MPID_Comm *c = REQ_OFI(rreq, util_comm);
         int r = rreq->status.MPI_SOURCE;
-        FI_RC_RETRY(fi_tinject(G_TXC_TAG(0), NULL, 0, _comm_to_phys(c, r, MPIDI_API_TAG),
-                               ss_bits), tsendsync);
+        FI_RC_RETRY_NOLOCK(fi_tinject(G_TXC_TAG(0), NULL, 0,
+                                      _comm_to_phys(c, r, MPIDI_API_TAG),
+                                      ss_bits), tsendsync);
 
     }
 
@@ -274,9 +275,9 @@ static inline int control_event(cq_tagged_entry_t *wc,
     }
 
     if(wc->flags & FI_MULTI_RECV) {
-        FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0),
-                               &MPIDI_Global.msg[MPIDI_Global.cur_ctrlblock],
-                               FI_MULTI_RECV|FI_COMPLETION),repost);
+        FI_RC_RETRY_NOLOCK(fi_recvmsg(G_RXC_MSG(0),
+                                      &MPIDI_Global.msg[MPIDI_Global.cur_ctrlblock],
+                                      FI_MULTI_RECV|FI_COMPLETION),repost);
         MPIDI_Global.cur_ctrlblock++;
 
         if(MPIDI_Global.cur_ctrlblock == MPIDI_Global.num_ctrlblock)
@@ -311,7 +312,7 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
         if(bytesToGet == 0ULL) {
             MPIDI_Send_control_t ctrl;
             hc->wc.len = hc->cur_offset;
-            hc->done_fn(&hc->wc, hc->localreq);
+            hc->done_fn(&hc->wc, hc->localreqq);
             ctrl.type = MPIDI_CTRL_HUGEACK;
             MPI_RC_POP(do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
                                        hc->comm_ptr,hc->remote_info.ackreq));
@@ -319,14 +320,14 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
             goto fn_exit;
         }
 
-        FI_RC_RETRY(fi_read(G_TXC_RMA(0),                                           /* endpoint     */
-                            (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
-                            bytesToGet,                                             /* bytes        */
-                            NULL,                                                   /* descriptor   */
-                            _comm_to_phys(hc->comm_ptr,hc->remote_info.origin_rank,MPIDI_API_MSG), /* Destination  */
-                            (uint64_t)hc->remote_info.send_buf+hc->cur_offset,      /* remote maddr */
-                            MPIDI_Global.lkey,                                      /* Key          */
-                            (void *)&hc->context),rdma_readfrom);                   /* Context      */
+        FI_RC_RETRY_NOLOCK(fi_read(G_TXC_RMA(0),                                           /* endpoint     */
+                                   (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
+                                   bytesToGet,                                             /* bytes        */
+                                   NULL,                                                   /* descriptor   */
+                                   _comm_to_phys(hc->comm_ptr,hc->remote_info.origin_rank,MPIDI_API_MSG), /* Destination  */
+                                   (uint64_t)hc->remote_info.send_buf+hc->cur_offset,      /* remote maddr */
+                                   MPIDI_Global.lkey,                                      /* Key          */
+                                   (void *)&hc->context),rdma_readfrom);                   /* Context      */
         hc->cur_offset+=bytesToGet;
     }
 

@@ -166,6 +166,7 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         MPID_cc_incr(sreq->cc_ptr, &c);
         ptr = MPIDI_OFI_Map_lookup(COMM_OFI(comm).huge_send_counters, rank);
 
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
         if (ptr == MPIDI_MAP_NOT_FOUND) {
             ptr = MPIU_Malloc(sizeof(int));
             cntr = (MPIDI_Hugecntr *) ptr;
@@ -181,13 +182,14 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         MPIU_Assert(cntr->counter != USHRT_MAX);
         REQ_OFI(sreq, util_comm) = comm;
         REQ_OFI(sreq, util_id) = rank;
-        FI_RC_RETRY(fi_tsend(G_TXC_TAG(0), send_buf,
-                             MPIDI_Global.max_send, MPIDI_Global.mr, _comm_to_phys(comm, rank,
-                                                                                   MPIDI_API_TAG),
-                             match_bits, (void *) &(REQ_OFI(sreq, context))), tsend);
+        FI_RC_RETRY_NOLOCK(fi_tsend(G_TXC_TAG(0), send_buf,
+                                    MPIDI_Global.max_send, MPIDI_Global.mr, _comm_to_phys(comm, rank,
+                                                                                          MPIDI_API_TAG),
+                                    match_bits, (void *) &(REQ_OFI(sreq, context))), tsend);
         ctrl.type = MPIDI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
         MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     }
 
   fn_exit:

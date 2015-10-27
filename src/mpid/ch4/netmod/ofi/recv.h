@@ -20,14 +20,16 @@ enum recv_mode {
 #define FUNCNAME do_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int do_irecv(void *buf,
-                           int count,
-                           MPI_Datatype datatype,
-                           int rank,
-                           int tag,
-                           MPID_Comm * comm,
-                           int context_offset,
-                           MPID_Request ** request, enum recv_mode mode, uint64_t flags)
+__ALWAYS_INLINE__ int do_irecv(void          *buf,
+                               int            count,
+                               MPI_Datatype   datatype,
+                               int            rank,
+                               int            tag,
+                               MPID_Comm     *comm,
+                               int            context_offset,
+                               MPID_Request **request,
+                               enum recv_mode mode,
+                               uint64_t       flags)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;

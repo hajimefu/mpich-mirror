@@ -31,13 +31,15 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
+
     if(likely(ret > 0))
         mpi_errno = handle_cq_entries(wc,ret);
     else if (ret == -FI_EAGAIN)
         mpi_errno = MPI_SUCCESS;
     else
         mpi_errno = handle_cq_error(ret);
+
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
 
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
