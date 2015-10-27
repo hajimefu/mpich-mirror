@@ -684,11 +684,15 @@ __CH4_INLINE__ int MPIDI_CH4U_fetch_and_op(const void *origin_addr,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FETCH_AND_OP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FETCH_AND_OP);
-
-    MPIU_Assert(0);
-
+    MPIDU_RC_POP(MPIDI_CH4U_get_accumulate(origin_addr, 1, datatype,
+                                           result_addr, 1, datatype,
+                                           target_rank, target_disp, 1, datatype,
+                                           op, win));
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FETCH_AND_OP);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #endif /* MPIDCH4U_RMA_H_INCLUDED */
