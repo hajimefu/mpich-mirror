@@ -270,14 +270,16 @@ __ALWAYS_INLINE__ int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
 
     if (ret == 0) {
-        while (!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
+        while ((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPID_cc_is_complete(&rreq->cc))) {
             if ((mpi_errno = MPIDI_Progress_test()) != MPI_SUCCESS)
                 goto fn_exit;
         }
 
-        MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
-        MPIR_STATUS_SET_COUNT(rreq->status, 0);
-        MPIDI_Request_complete(rreq);
+        if (MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
+            MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
+            MPIR_STATUS_SET_COUNT(rreq->status, 0);
+            MPIDI_Request_complete(rreq);
+        }
     }
 
   fn_exit:
