@@ -59,21 +59,28 @@ static inline void *generate_random_addr(size_t size)
    */
 #define MAP_POINTER ((random_int&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
   char            random_state[256];
-  char           *oldstate;
   size_t          page_sz, random_int;
   size_t          mapsize     = get_mapsize(size,&page_sz);
   uintptr_t       map_pointer;
   struct timeval  ts;
   int             iter = 100;
+  int32_t         rh, rl;
+  struct random_data rbuf;
+
+  /* rbuf must be zero-cleared otherwise it results in SIGSEGV in glibc
+     (http://stackoverflow.com/questions/4167034/c-initstate-r-crashing) */
+  memset(&rbuf, 0, sizeof(rbuf));
 
   gettimeofday(&ts, NULL);
-  initstate(ts.tv_usec,random_state,256);
-  oldstate    = setstate(random_state);
-  random_int  = random()<<32|random();
+
+  initstate_r(ts.tv_usec,random_state,sizeof(random_state),&rbuf);
+  random_r(&rbuf, &rh); random_r(&rbuf, &rl);
+  random_int  = rh<<32|rl;
   map_pointer = MAP_POINTER;
 
   while(check_maprange_ok((void *)map_pointer,mapsize) == 0) {
-    random_int  = random()<<32|random();
+    random_r(&rbuf, &rh); random_r(&rbuf, &rl);
+    random_int  = rh<<32|rl;
     map_pointer = MAP_POINTER;
     iter--;
 
@@ -81,7 +88,6 @@ static inline void *generate_random_addr(size_t size)
       return (void *)-1ULL;
   }
 
-  setstate(oldstate);
   return (void *)map_pointer;
 }
 
