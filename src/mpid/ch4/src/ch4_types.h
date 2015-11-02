@@ -181,6 +181,21 @@ typedef struct MPIDI_CH4_Global_t {
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 
+typedef struct MPIU_buf_pool_t {
+    int size;
+    int num;
+    void *memory_region;
+    struct MPIU_buf_pool_t *next;
+    struct MPIU_buf_t *head;
+    pthread_mutex_t lock;
+} MPIU_buf_pool_t;
+
+typedef struct MPIU_buf_t {
+    struct MPIU_buf_t *next;
+    MPIU_buf_pool_t *pool;
+    char data[];
+} MPIU_buf_t;
+
 #define MPIDI_CH4_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
 

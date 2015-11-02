@@ -109,6 +109,15 @@ static inline MPID_Request *MPIDI_CH4I_create_win_req()
     return req;
 }
 
+static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
+{
+    int count;
+    MPID_cc_decr(req->cc_ptr, &count);
+    MPIU_Assert(count >= 0);
+    if (count == 0)
+        MPIDI_Request_release(req);
+}
+
 #define dtype_add_ref_if_not_builtin(datatype_)                         \
     do {								\
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\

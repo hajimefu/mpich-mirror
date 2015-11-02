@@ -100,7 +100,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
         MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
     }
-    MPIDI_Request_complete(rreq);
+    MPIDI_CH4I_complete_req(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_HANDLE_UNEXPECTED);
     return mpi_errno;
@@ -161,7 +161,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         rreq->status.MPI_SOURCE = rank;
         rreq->status.MPI_TAG = tag;
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4I_complete_req(rreq);
         goto fn_exit;
     }
 
@@ -235,7 +235,7 @@ __CH4_INLINE__ int MPIDI_CH4U_recv_init(void *buf,
     MPIU_CH4U_REQUEST(rreq, tag) =
         MPIDI_CH4I_init_send_tag(comm->context_id + context_offset, rank, tag);
     rreq->partner_request = NULL;
-    MPIDI_Request_complete(rreq);
+    MPIDI_CH4I_complete_req(rreq);
     MPIU_CH4U_REQUEST(rreq, p_type) = MPIDI_PTYPE_RECV;
     dtype_add_ref_if_not_builtin(datatype);
 
@@ -366,7 +366,7 @@ __CH4_INLINE__ int MPIDI_CH4U_cancel_recv(MPID_Request * rreq)
     if (found) {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
         MPIR_STATUS_SET_COUNT(rreq->status, 0);
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4I_complete_req(rreq);
     }
     else {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, FALSE);
