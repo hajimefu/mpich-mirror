@@ -39,10 +39,8 @@ EXTERN_C_BEGIN
 #define MPIDI_MAX_AM_HANDLERS 		(16)
 #define MPIDI_CACHELINE_SIZE        (64)
 #define MPIDI_IOV_MAX               1
-
-#ifndef MPIDI_MAX_AM_HDR_SZ
-#define MPIDI_MAX_AM_HDR_SZ		    (16)
-#endif
+#define MPIDI_BUF_POOL_SZ  (1024)
+#define MPIDI_BUF_POOL_NUM (1024)
 
 /* Macros and inlines */
 /* match/ignore bit manipulation
@@ -264,6 +262,7 @@ typedef struct {
     char kvsname[MPIDI_KVSAPPSTRLEN];
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
+    MPIU_buf_pool_t *buf_pool;
 } MPIDI_Global_t;
 
 typedef struct {

@@ -172,6 +172,8 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->local_size = size;
     MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
 
+    MPIDI_Global.buf_pool = 
+        MPIU_CH4U_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
     MPIDU_RC_POP(MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts));
 
     optlen = MPIDI_MIN_MSG_SZ;
@@ -256,6 +258,7 @@ static inline int MPIDI_netmod_finalize(void)
 
     MPIDI_Map_destroy(MPIDI_Global.win_map);
     MPIDI_Map_destroy(MPIDI_Global.comm_map);
+    MPIU_CH4U_destroy_buf_pool(MPIDI_Global.buf_pool);
 
     PMI_Finalize();
 

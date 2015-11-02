@@ -57,4 +57,13 @@ static inline MPID_Request *MPIDI_netmod_request_create(void)
     return req;
 }
 
+static inline void MPIDI_netmod_am_ofi_req_complete(MPID_Request *req)
+{
+    int count;
+    MPID_cc_decr(req->cc_ptr, &count);
+    MPIU_Assert(count >= 0);
+    if (count == 0)
+        MPIDI_Request_release(req);
+}
+
 #endif /* NETMOD_AM_OFI_REQUEST_H_INCLUDED */

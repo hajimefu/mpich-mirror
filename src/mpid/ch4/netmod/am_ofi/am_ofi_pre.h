@@ -63,23 +63,32 @@ typedef struct {
 } MPIDI_OFI_lmt_msg_t;
 
 #ifndef MPIDI_MAX_AM_HDR_SZ
-#define MPIDI_MAX_AM_HDR_SZ 256
+#define MPIDI_MAX_AM_HDR_SZ 128
 #endif
 
 typedef struct {
-    struct fi_context  context;  /* fixed field, do not move */
-    MPIDI_AM_OFI_hdr_t msg_hdr;
-    uint8_t am_hdr[MPIDI_MAX_AM_HDR_SZ];
     MPIDI_OFI_lmt_msg_pyld_t lmt_info;
     uint64_t lmt_cntr;
-    void *pack_buffer;
+
+    union {
+        void *pack_buffer;
+        void *rreq_ptr;
+    };
+
     int (*cmpl_handler_fn) (struct MPID_Request * req);
+    void *am_hdr;
+    MPIDI_AM_OFI_hdr_t msg_hdr;
+    uint8_t am_hdr_buf[MPIDI_MAX_AM_HDR_SZ];
+} MPIDI_am_ofi_req_hdr_t;
+
+typedef struct {
+    struct fi_context  context;  /* fixed field, do not move */
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
 } MPIDI_netmod_am_ofi_amrequest_t;
 
 typedef struct {
     int dummy;
 } MPIDI_netmod_am_ofi_request_t;
-
 
 typedef MPIDI_netmod_ofi_comm_t MPIDI_netmod_am_ofi_comm_t;
 
