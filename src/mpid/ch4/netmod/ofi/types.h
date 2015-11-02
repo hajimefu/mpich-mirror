@@ -319,18 +319,6 @@ typedef struct {
 } MPIDI_Send_control_t;
 
 typedef struct {
-    MPID_Datatype *pointer;
-    MPI_Datatype type;
-    int count;
-    int contig;
-    MPI_Aint true_lb;
-    MPIDI_msg_sz_t size;
-    int num_contig;
-    DLOOP_VECTOR *map;
-    DLOOP_VECTOR __map;
-} MPIDI_Win_dt;
-
-typedef struct {
     void *addr;
     void *result_addr;
     void *req;
@@ -348,76 +336,92 @@ typedef struct MPIDI_dummy {
 #define MPIDI_OBJECT_HEADER_SZ offsetof(struct MPIDI_dummy,  pad)
 
 typedef struct MPIDI_Iovec_state {
-    uintptr_t target_base_addr;
-    uintptr_t origin_base_addr;
-    uintptr_t result_base_addr;
-    size_t target_count;
-    size_t origin_count;
-    size_t result_count;
-    iovec_t *target_iov;
-    iovec_t *origin_iov;
-    iovec_t *result_iov;
-    size_t target_idx;
-    uintptr_t target_addr;
-    uintptr_t target_size;
-    size_t origin_idx;
-    uintptr_t origin_addr;
-    uintptr_t origin_size;
-    size_t result_idx;
-    uintptr_t result_addr;
-    uintptr_t result_size;
-    size_t buf_limit;
+    uintptr_t  target_base_addr;
+    uintptr_t  origin_base_addr;
+    uintptr_t  result_base_addr;
+    size_t     target_count;
+    size_t     origin_count;
+    size_t     result_count;
+    iovec_t   *target_iov;
+    iovec_t   *origin_iov;
+    iovec_t   *result_iov;
+    size_t     target_idx;
+    uintptr_t  target_addr;
+    uintptr_t  target_size;
+    size_t     origin_idx;
+    uintptr_t  origin_addr;
+    uintptr_t  origin_size;
+    size_t     result_idx;
+    uintptr_t  result_addr;
+    uintptr_t  result_size;
+    size_t     buf_limit;
 } MPIDI_Iovec_state_t;
 
+typedef struct {
+    MPID_Datatype  *pointer;
+    MPI_Datatype    type;
+    int             count;
+    int             contig;
+    MPI_Aint        true_lb;
+    MPIDI_msg_sz_t  size;
+    int             num_contig;
+    DLOOP_VECTOR   *map;
+    DLOOP_VECTOR    __map;
+} MPIDI_Win_dt;
+
 typedef struct MPIDI_Iovec_array {
-    struct {
-        iovec_t   originv[MPIDI_IOV_MAX];
-        rma_iov_t targetv[MPIDI_IOV_MAX];
-        struct MPIDI_Iovec_array *next;
-    }put_get;
-    struct {
-        ioc_t     originv[MPIDI_IOV_MAX];
-        ioc_t     resultv[MPIDI_IOV_MAX];
-        ioc_t     comparev[MPIDI_IOV_MAX];
-        rma_ioc_t targetv[MPIDI_IOV_MAX];
-        struct MPIDI_Iovec_array *next;
-    }cas;
-    struct {
-        ioc_t     originv[MPIDI_IOV_MAX];
-        rma_ioc_t targetv[MPIDI_IOV_MAX];
-        struct MPIDI_Iovec_array *next;
-    }accumulate;
-    struct {
-        ioc_t     originv[MPIDI_IOV_MAX];
-        ioc_t     resultv[MPIDI_IOV_MAX];
-        rma_ioc_t targetv[MPIDI_IOV_MAX];
-        struct MPIDI_Iovec_array *next;
-    }get_accumulate;
+    char                      pad[MPIDI_REQUEST_HDR_SIZE];
+    context_t                 context;   /* fixed field, do not move */
+    int                       event_id;  /* fixed field, do not move */
+    struct MPIDI_Iovec_array *next;
+    union {
+        struct {
+            iovec_t   *originv;
+            rma_iov_t *targetv;
+        }put_get;
+        struct {
+            ioc_t     *originv;
+            rma_ioc_t *targetv;
+            ioc_t     *resultv;
+            ioc_t     *comparev;
+        }cas;
+        struct {
+            ioc_t     *originv;
+            rma_ioc_t *targetv;
+        }accumulate;
+        struct {
+            ioc_t     *originv;
+            rma_ioc_t *targetv;
+            ioc_t     *resultv;
+        }get_accumulate;
+    }iov;
+    char iov_store[0]; /* Flexible array, do not move */
 } MPIDI_Iovec_array_t;
+
 
 typedef struct MPIDI_Win_noncontig {
     MPIDI_Iovec_state_t iovs;
     MPIDI_Win_dt        origin_dt;
-    MPIDI_Win_dt        result_dt;
     MPIDI_Win_dt        target_dt;
-    MPIDI_Iovec_array_t buf;
+    MPIDI_Win_dt        result_dt;
+    MPIDI_Iovec_array_t buf; /* Do not move me, flexible array */
 } MPIDI_Win_noncontig;
 
 typedef struct MPIDI_Win_request {
     MPIU_OBJECT_HEADER;
-    char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
-    context_t context;          /* fixed field, do not move */
-    int       event_id; /* fixed field, do not move */
+    char                      pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
+    context_t                 context;          /* fixed field, do not move */
+    int                       event_id;         /* fixed field, do not move */
     struct MPIDI_Win_request *next;
-    int target_rank;
-    MPIDI_Win_noncontig *noncontig;
+    int                       target_rank;
+    MPIDI_Win_noncontig      *noncontig;
 } MPIDI_Win_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t     context;          /* fixed field, do not move */
-    int           event_id; /* fixed field, do not move */
-    MPID_Request *parent;       /* Parent request           */
+    int           event_id;         /* fixed field, do not move */
+    MPID_Request *parent;           /* Parent request           */
 } MPIDI_Chunk_request;
 
 typedef struct {

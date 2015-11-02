@@ -99,12 +99,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   MPIU_Assert(count >= 0);                            \
   if (count == 0)                                     \
     {                                                 \
+      MPIDI_Win_datatype_unmap(&req->noncontig->target_dt); \
+      MPIDI_Win_datatype_unmap(&req->noncontig->origin_dt); \
+      MPIDI_Win_datatype_unmap(&req->noncontig->result_dt); \
       MPIU_Free(req->noncontig);                      \
       MPIDI_Win_request_tls_free(req);                \
     }                                                 \
   })
 
-#define MPIDI_Win_request_alloc_and_init(req,count)             \
+#define MPIDI_Win_request_alloc_and_init(req,count,extra)       \
   ({                                                            \
     MPIDI_Win_request_tls_alloc(req);                           \
     MPIU_Assert(req != NULL);                                   \
@@ -114,7 +117,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,                \
            sizeof(MPIDI_Win_request)-                           \
            MPIDI_REQUEST_HDR_SIZE);                             \
-    req->noncontig = (MPIDI_Win_noncontig*)MPIU_Calloc(1,sizeof(*(req->noncontig))); \
+    req->noncontig = (MPIDI_Win_noncontig*)MPIU_Calloc(1,(extra)+sizeof(*(req->noncontig))); \
   })
 
 #define MPIDI_Ssendack_request_tls_alloc(req)                           \
@@ -293,19 +296,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     req = MPIDI_Request_alloc_and_init_send_lw(1); \
   })
 
-
-#define WINREQ_CREATE(req)                     \
-  ({                                           \
-    MPIDI_Win_request_alloc_and_init(req,1);   \
-  })
-
 #define SSENDACKREQ_CREATE(req)            \
   ({                                       \
     MPIDI_Ssendack_request_tls_alloc(req); \
   })
 
 #ifdef HAVE_ERROR_CHECKING
-#define EPOCH_CHECK1()                                                               \
+#define MPIDI_EPOCH_CHECK_SYNC(win, mpi_errno, stmt)                                 \
 ({                                                                                   \
   MPID_BEGIN_ERROR_CHECKS;                                                           \
   if(WIN_OFI(win)->sync.origin_epoch_type == WIN_OFI(win)->sync.target_epoch_type && \
@@ -316,21 +313,20 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     }                                                                                \
   if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_NONE ||                    \
      WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_POST)                      \
-      MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                               \
-                          goto fn_fail, "**rmasync");                                \
+      MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,stmt,"**rmasync")              \
   MPID_END_ERROR_CHECKS;                                                             \
 })
 
-#define EPOCH_CHECK2()                                             \
+#define MPIDI_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)                 \
 ({                                                                 \
   MPID_BEGIN_ERROR_CHECKS;                                         \
   if(WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE &&  \
      WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE) \
       MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,             \
-                          goto fn_fail, "**rmasync");              \
+                          stmt, "**rmasync");                      \
 })
 
-#define EPOCH_START_CHECK()                                             \
+#define MPIDI_EPOCH_CHECK_START(win,mpi_errno,stmt)                                  \
 ({                                                                                   \
   MPID_BEGIN_ERROR_CHECKS;                                                           \
   if (WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_START &&                  \
@@ -338,87 +334,87 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               WIN_OFI(win)->sync.sc.group))                          \
       MPIR_ERR_SETANDSTMT(mpi_errno,                                                 \
                           MPI_ERR_RMA_SYNC,                                          \
-                          goto fn_fail,                                              \
+                          stmt,                                                      \
                           "**rmasync");                                              \
   MPID_END_ERROR_CHECKS;                                                             \
 })
 
-#define EPOCH_FENCE_CHECK()                                                        \
+#define MPIDI_EPOCH_FENCE_CHECK(win,mpi_errno,stmt)                                \
 ({                                                                                 \
   MPID_BEGIN_ERROR_CHECKS;                                                         \
   if(WIN_OFI(win)->sync.origin_epoch_type != WIN_OFI(win)->sync.target_epoch_type) \
     MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                               \
-                        goto fn_fail, "**rmasync");                                \
+                        stmt, "**rmasync");                                        \
   if (!(massert & MPI_MODE_NOPRECEDE) &&                                           \
       WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_FENCE &&                \
       WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE &&              \
       WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE)                   \
     MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                               \
-                        goto fn_fail, "**rmasync");                                \
+                        stmt, "**rmasync");                                        \
   MPID_END_ERROR_CHECKS;                                                           \
 })
 
-#define EPOCH_POST_CHECK()                                         \
+#define MPIDI_EPOCH_POST_CHECK(win,mpi_errno,stmt)                 \
 ({                                                                 \
   MPID_BEGIN_ERROR_CHECKS;                                         \
   if(WIN_OFI(win)->sync.target_epoch_type != MPID_EPOTYPE_NONE &&  \
      WIN_OFI(win)->sync.target_epoch_type != MPID_EPOTYPE_REFENCE) \
     MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,               \
-                        goto fn_fail, "**rmasync");                \
+                        stmt, "**rmasync");                        \
   MPID_END_ERROR_CHECKS;                                           \
 })
 
-#define EPOCH_LOCK_CHECK()                                            \
+#define MPIDI_EPOCH_LOCK_CHECK(win,mpi_errno,stmt)                    \
 ({                                                                    \
   MPID_BEGIN_ERROR_CHECKS;                                            \
   if((WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_LOCK) &&   \
      (WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_LOCK_ALL)) \
     MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                  \
-                        goto fn_fail, "**rmasync");                   \
+                        stmt, "**rmasync");                           \
   MPID_END_ERROR_CHECKS;                                              \
 })
 
-#define EPOCH_FREE_CHECK()                                                           \
+#define MPIDI_EPOCH_FREE_CHECK(win,mpi_errno,stmt)                                   \
 ({                                                                                   \
   MPID_BEGIN_ERROR_CHECKS;                                                           \
   if(WIN_OFI(win)->sync.origin_epoch_type != WIN_OFI(win)->sync.target_epoch_type || \
      (WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE &&                   \
       WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE))                 \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC, return mpi_errno, "**rmasync"); \
+    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC, stmt, "**rmasync"); \
   MPID_END_ERROR_CHECKS;                                                             \
 })
 
-#define EPOCH_ORIGIN_CHECK(epoch_type)                   \
-({                                                       \
-  MPID_BEGIN_ERROR_CHECKS;                               \
-  if(WIN_OFI(win)->sync.origin_epoch_type != epoch_type) \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,     \
-                        return mpi_errno, "**rmasync");  \
-  MPID_END_ERROR_CHECKS;                                 \
+#define MPIDI_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt)  \
+({                                                                  \
+  MPID_BEGIN_ERROR_CHECKS;                                          \
+  if(WIN_OFI(win)->sync.origin_epoch_type != epoch_type)            \
+    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                \
+                        stmt, "**rmasync");                         \
+  MPID_END_ERROR_CHECKS;                                            \
 })
 
-#define EPOCH_TARGET_CHECK(epoch_type)                   \
-({                                                       \
-  MPID_BEGIN_ERROR_CHECKS;                               \
-  if(WIN_OFI(win)->sync.target_epoch_type != epoch_type) \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,     \
-                        return mpi_errno, "**rmasync");  \
-  MPID_END_ERROR_CHECKS;                                 \
+#define MPIDI_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) \
+({                                                                 \
+  MPID_BEGIN_ERROR_CHECKS;                                         \
+  if(WIN_OFI(win)->sync.target_epoch_type != epoch_type)           \
+    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,               \
+                        stmt, "**rmasync");                        \
+  MPID_END_ERROR_CHECKS;                                           \
 })
 
 #else /* HAVE_ERROR_CHECKING */
-#define EPOCH_CHECK1()       if(0) goto fn_fail;
-#define EPOCH_CHECK2()       if(0) goto fn_fail;
-#define EPOCH_START_CHECK()  if(0) goto fn_fail;
-#define EPOCH_FENCE_CHECK()  if(0) goto fn_fail;
-#define EPOCH_POST_CHECK()   if(0) goto fn_fail;
-#define EPOCH_LOCK_CHECK()   if(0) goto fn_fail;
-#define EPOCH_FREE_CHECK()   if(0) goto fn_fail;
-#define EPOCH_ORIGIN_CHECK(epoch_type) if(0) goto fn_fail;
-#define EPOCH_TARGET_CHECK(epoch_type) if(0) goto fn_fail;
+#define MPIDI_EPOCH_CHECK_SYNC(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
+#define MPIDI_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)                 if(0) goto fn_fail;
+#define MPIDI_EPOCH_CHECK_START(win,mpi_errno,stmt)                if(0) goto fn_fail;
+#define MPIDI_EPOCH_FENCE_CHECK(win_ofi, mpi_errno, stmt)          if(0) goto fn_fail;
+#define MPIDI_EPOCH_POST_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
+#define MPIDI_EPOCH_LOCK_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
+#define MPIDI_EPOCH_FREE_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
+#define MPIDI_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
+#define MPIDI_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
 #endif /* HAVE_ERROR_CHECKING */
 
-#define EPOCH_FENCE_EVENT()                                        \
+#define MPIDI_EPOCH_FENCE_EVENT(win,massert)                       \
 ({                                                                 \
   if(massert & MPI_MODE_NOSUCCEED)                                 \
     {                                                              \
@@ -432,7 +428,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     }                                                              \
 })
 
-#define EPOCH_TARGET_EVENT()                                       \
+#define MPIDI_EPOCH_TARGET_EVENT(win)                              \
 ({                                                                 \
   if(WIN_OFI(win)->sync.target_epoch_type == MPID_EPOTYPE_REFENCE) \
     WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_REFENCE;   \
@@ -440,7 +436,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_NONE;      \
 })
 
-#define EPOCH_ORIGIN_EVENT()                                       \
+#define MPIDI_EPOCH_ORIGIN_EVENT(win)                                       \
 ({                                                                 \
   if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_REFENCE) \
     WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_REFENCE;   \
@@ -477,63 +473,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   _v;                                                                   \
 })
 
-#define SETUP_SIGNAL_REQUEST()                                  \
-  ({                                                            \
-    if(signal)                                                  \
-      {                                                         \
-        REQ_CREATE(sigreq);                                     \
-        sigreq->kind             = MPID_WIN_REQUEST;            \
-        MPID_cc_set(sigreq->cc_ptr, 0);                         \
-        flags                    = FI_COMPLETION;               \
-        *signal                  = sigreq;                      \
-        ep                       = G_TXC_RMA(0);                \
-      }                                                         \
-    else {                                                      \
-        ep = G_TXC_CTR(0);                                      \
-        sigreq = NULL;                                          \
-    }                                                           \
-  })
-
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-#define CONDITIONAL_GLOBAL_CNTR_INCR()
-#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
-#else
-#define CONDITIONAL_GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
-#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
-#endif
-
-#define SETUP_CHUNK_CONTEXT()                                   \
-  ({                                                            \
-    if(signal)                                                  \
-      {                                                         \
-        int tmp;                                                \
-        MPIDI_Chunk_request *creq;                              \
-        MPID_cc_incr(sigreq->cc_ptr, &tmp);                     \
-        creq=(MPIDI_Chunk_request*)MPIU_Malloc(sizeof(*creq));  \
-        creq->event_id = MPIDI_EVENT_CHUNK_DONE;                \
-        creq->parent   = sigreq;                                \
-        msg.context    = &creq->context;                        \
-        CONDITIONAL_GLOBAL_CNTR_INCR();                         \
-      }                                                         \
-    else GLOBAL_CNTR_INCR();                                    \
-  })
-
-#define GET_BASIC_TYPE(a,b)                             \
-  ({                                                    \
-    if (MPIR_DATATYPE_IS_PREDEFINED(a))                 \
-      b = a;                                            \
-    else {                                              \
-      MPID_Datatype *dt_ptr;                            \
-      MPID_Datatype_get_ptr(a,dt_ptr);                  \
-      b = dt_ptr->basic_type;                           \
-    }                                                   \
-  })
-
 /*  Prototypes */
-#define MPIDI_QUERY_ATOMIC_COUNT 0
-#define MPIDI_QUERY_FETCH_ATOMIC_COUNT 1
-#define MPIDI_QUERY_COMPARE_ATOMIC_COUNT 2
-
 
 /* Common Utility functions used by the
  * C and C++ components

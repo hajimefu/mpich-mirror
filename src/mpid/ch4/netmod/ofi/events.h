@@ -369,9 +369,6 @@ static inline int rma_done_event(cq_tagged_entry_t *wc,
   MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
 
   MPIDI_Win_request *req = (MPIDI_Win_request *)in_req;
-  MPIDI_Win_datatype_unmap(&req->noncontig->target_dt);
-  MPIDI_Win_datatype_unmap(&req->noncontig->origin_dt);
-  MPIDI_Win_datatype_unmap(&req->noncontig->result_dt);
   MPIDI_Win_request_complete(req);
 
   MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);

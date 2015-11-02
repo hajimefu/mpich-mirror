@@ -13,6 +13,61 @@
 
 #include "impl.h"
 
+#define MPIDI_QUERY_ATOMIC_COUNT 0
+#define MPIDI_QUERY_FETCH_ATOMIC_COUNT 1
+#define MPIDI_QUERY_COMPARE_ATOMIC_COUNT 2
+
+#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
+#define CONDITIONAL_GLOBAL_CNTR_INCR()
+#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
+#else
+#define CONDITIONAL_GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
+#define GLOBAL_CNTR_INCR() MPIDI_Global.cntr++
+#endif
+
+#define SETUP_CHUNK_CONTEXT(sigreq)                             \
+  ({                                                            \
+      if(sigreq)                                                \
+      {                                                         \
+        int tmp;                                                \
+        MPIDI_Chunk_request *creq;                              \
+        MPID_cc_incr((*sigreq)->cc_ptr, &tmp);                  \
+        creq=(MPIDI_Chunk_request*)MPIU_Malloc(sizeof(*creq));  \
+        creq->event_id = MPIDI_EVENT_CHUNK_DONE;                \
+        creq->parent   = *sigreq;                               \
+        msg.context    = &creq->context;                        \
+        CONDITIONAL_GLOBAL_CNTR_INCR();                         \
+      }                                                         \
+    else GLOBAL_CNTR_INCR();                                    \
+  })
+
+#define SETUP_SIGNAL_REQUEST(sigreq,flags,ep)                   \
+  ({                                                            \
+      if(sigreq)                                                \
+      {                                                         \
+        REQ_CREATE((*(sigreq)));                                \
+        (*sigreq)->kind             = MPID_WIN_REQUEST;         \
+        MPID_cc_set((*(sigreq))->cc_ptr, 0);                    \
+        *(flags)                    = FI_COMPLETION;            \
+        *(ep)                       = G_TXC_RMA(0);             \
+      }                                                         \
+    else {                                                      \
+        *(ep) = G_TXC_CTR(0);                                   \
+        *(flags)                    = 0ULL;                     \
+    }                                                           \
+  })
+
+#define GET_BASIC_TYPE(a,b)                             \
+  ({                                                    \
+    if (MPIR_DATATYPE_IS_PREDEFINED(a))                 \
+      b = a;                                            \
+    else {                                              \
+      MPID_Datatype *dt_ptr;                            \
+      MPID_Datatype_get_ptr(a,dt_ptr);                  \
+      b = dt_ptr->basic_type;                           \
+    }                                                   \
+  })
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_Query_dt
 #undef FCNAME
@@ -110,7 +165,6 @@ static inline void MPIDI_Win_datatype_map(MPIDI_Win_dt *dt)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_MAP);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_MAP);
 
-
     if(dt->contig) {
         dt->num_contig              = 1;
         dt->map                     = &dt->__map;
@@ -132,8 +186,138 @@ static inline void MPIDI_Win_datatype_map(MPIDI_Win_dt *dt)
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_MAP);
 }
 
+
+
+__ALWAYS_INLINE__ int MPIDI_Allocate_win_request_put_get(int                 origin_count,
+                                                         int                 target_count,
+                                                         int                 target_rank,
+                                                         MPI_Datatype        origin_datatype,
+                                                         MPI_Datatype        target_datatype,
+                                                         MPIDI_Win_request **winreq,
+                                                         uint64_t           *flags,
+                                                         fid_ep_t           *ep,
+                                                         MPID_Request      **sigreq)
+{
+    int   mpi_errno = MPI_SUCCESS;
+    size_t o_size, t_size;
+    MPIDI_Win_request *req;
+
+    o_size=sizeof(iovec_t);
+    t_size=sizeof(rma_iov_t);
+    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    *winreq = req;
+
+    req->noncontig->buf.iov.put_get.originv = (iovec_t*)&req->noncontig->buf.iov_store[0];
+    req->noncontig->buf.iov.put_get.targetv = (rma_iov_t*)&req->noncontig->buf.iov_store[o_size];
+    SETUP_SIGNAL_REQUEST(sigreq, flags, ep);
+    MPIDI_Win_datatype_basic(origin_count,
+                             origin_datatype,
+                             &req->noncontig->origin_dt);
+    MPIDI_Win_datatype_basic(target_count,
+                             target_datatype,
+                             &req->noncontig->target_dt);
+    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size),
+                        mpi_errno,MPI_ERR_SIZE,"**rmasize");
+
+    MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
+    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
+    req->target_rank = target_rank;
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+__ALWAYS_INLINE__ int MPIDI_Allocate_win_request_accumulate(int                 origin_count,
+                                                            int                 target_count,
+                                                            int                 target_rank,
+                                                            MPI_Datatype        origin_datatype,
+                                                            MPI_Datatype        target_datatype,
+                                                            MPIDI_Win_request **winreq,
+                                                            uint64_t           *flags,
+                                                            fid_ep_t           *ep,
+                                                            MPID_Request      **sigreq)
+{
+    int   mpi_errno = MPI_SUCCESS;
+    size_t o_size, t_size;
+    MPIDI_Win_request *req;
+
+    o_size=sizeof(ioc_t);
+    t_size=sizeof(rma_ioc_t);
+    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    *winreq = req;
+
+    req->noncontig->buf.iov.accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
+    req->noncontig->buf.iov.accumulate.targetv = (rma_ioc_t*)&req->noncontig->buf.iov_store[o_size];
+    SETUP_SIGNAL_REQUEST(sigreq, flags, ep);
+    MPIDI_Win_datatype_basic(origin_count,
+                             origin_datatype,
+                             &req->noncontig->origin_dt);
+    MPIDI_Win_datatype_basic(target_count,
+                             target_datatype,
+                             &req->noncontig->target_dt);
+    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size),
+                        mpi_errno,MPI_ERR_SIZE,"**rmasize");
+
+    MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
+    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
+    req->target_rank = target_rank;
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+__ALWAYS_INLINE__ int MPIDI_Allocate_win_request_get_accumulate(int                 origin_count,
+                                                                int                 target_count,
+                                                                int                 result_count,
+                                                                int                 target_rank,
+                                                                MPI_Op              op,
+                                                                MPI_Datatype        origin_datatype,
+                                                                MPI_Datatype        target_datatype,
+                                                                MPI_Datatype        result_datatype,
+                                                                MPIDI_Win_request **winreq,
+                                                                uint64_t           *flags,
+                                                                fid_ep_t           *ep,
+                                                                MPID_Request      **sigreq)
+{
+    int   mpi_errno = MPI_SUCCESS;
+    size_t o_size, t_size, r_size;
+    MPIDI_Win_request *req;
+
+    o_size=sizeof(ioc_t);
+    t_size=sizeof(rma_ioc_t);
+    r_size=sizeof(ioc_t);
+    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size+r_size);
+    *winreq = req;
+
+    req->noncontig->buf.iov.get_accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
+    req->noncontig->buf.iov.get_accumulate.targetv = (rma_ioc_t*)&req->noncontig->buf.iov_store[o_size];
+    req->noncontig->buf.iov.get_accumulate.resultv = (ioc_t*)&req->noncontig->buf.iov_store[o_size+t_size];
+    SETUP_SIGNAL_REQUEST(sigreq, flags, ep);
+    MPIDI_Win_datatype_basic(origin_count,origin_datatype,&req->noncontig->origin_dt);
+    MPIDI_Win_datatype_basic(target_count,target_datatype,&req->noncontig->target_dt);
+    MPIDI_Win_datatype_basic(result_count,result_datatype,&req->noncontig->result_dt);
+
+    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size && op != MPI_NO_OP),
+                        mpi_errno, MPI_ERR_SIZE, "**rmasize");
+    MPIR_ERR_CHKANDJUMP((req->noncontig->result_dt.size != req->noncontig->target_dt.size),
+                        mpi_errno, MPI_ERR_SIZE, "**rmasize");
+
+    if(op != MPI_NO_OP) MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
+    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
+    MPIDI_Win_datatype_map(&req->noncontig->result_dt);
+
+    req->target_rank = target_rank;
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_do_put
+#define FUNCNAME do_put
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int do_put(const void    *origin_addr,
@@ -144,46 +328,46 @@ static inline int do_put(const void    *origin_addr,
                          int            target_count,
                          MPI_Datatype   target_datatype,
                          MPID_Win      *win,
-                         MPID_Request **signal)
+                         MPID_Request **sigreq)
 {
     int                rc,mpi_errno = MPI_SUCCESS;
     MPIDI_Win_request *req;
-    size_t             offset;
-    uint64_t           flags=0ULL;
-    MPID_Request      *sigreq;
+    size_t             offset,omax,tmax,tout,oout;
+    uint64_t           flags;
     fid_ep_t           ep;
+    msg_rma_t          msg;
+    void              *desc;
+    unsigned           i;
+    iovec_t           *originv;
+    rma_iov_t         *targetv;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_PUT);
-    EPOCH_CHECK1();
 
-    WINREQ_CREATE(req);
-    SETUP_SIGNAL_REQUEST();
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
-
-    MPIDI_Win_datatype_basic(origin_count,
-                             origin_datatype,
-                             &req->noncontig->origin_dt);
-    MPIDI_Win_datatype_basic(target_count,
-                             target_datatype,
-                             &req->noncontig->target_dt);
-    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size),
-                        mpi_errno,MPI_ERR_SIZE,"**rmasize");
+    MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
+                                                  target_count,
+                                                  target_rank,
+                                                  origin_datatype,
+                                                  target_datatype,
+                                                  &req,&flags,&ep,sigreq));
 
     if((req->noncontig->origin_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         goto fn_exit;
     }
 
+    offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
+
     if(target_rank == win->comm_ptr->rank) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         return MPIR_Localcopy(origin_addr,
                               origin_count,
@@ -192,21 +376,14 @@ static inline int do_put(const void    *origin_addr,
                               target_count,
                               target_datatype);
     }
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
 
-    EPOCH_START_CHECK();
-    req->target_rank = target_rank;
-
-    MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
-    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
-
-    msg_rma_t msg;
-    void *desc;
     desc = fi_mr_desc(MPIDI_Global.mr);
-    req->event_id = MPIDI_EVENT_ABORT;
-    msg.desc      = &desc;
-    msg.addr      = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
-    msg.context   = NULL;
-    msg.data      = 0;
+    req->event_id          = MPIDI_EVENT_ABORT;
+    msg.desc               = &desc;
+    msg.addr               = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
+    msg.context            = NULL;
+    msg.data               = 0;
     req->next              = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ    = req;
     MPIDI_Init_iovec_state(&req->noncontig->iovs,
@@ -219,15 +396,10 @@ static inline int do_put(const void    *origin_addr,
                            req->noncontig->target_dt.map);
     rc = MPIDI_IOV_EAGAIN;
 
-
     while(rc==MPIDI_IOV_EAGAIN) {
-        size_t    omax;
-        size_t    tmax;
-        size_t    tout, oout;
-        unsigned  i;
-        iovec_t   *originv=req->noncontig->buf.put_get.originv;
-        rma_iov_t *targetv=req->noncontig->buf.put_get.targetv;
-        omax=tmax=1;
+        originv   = req->noncontig->buf.iov.put_get.originv;
+        targetv   = req->noncontig->buf.iov.put_get.targetv;
+        omax=tmax = 1;
 
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
@@ -241,7 +413,7 @@ static inline int do_put(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(sigreq),
                      fi_writemsg(ep, &msg, flags),
                      rdma_write);
     }
@@ -284,10 +456,10 @@ static inline int MPIDI_netmod_put(const void *origin_addr,
        target_rank != MPI_PROC_NULL       &&
        target_rank != win->comm_ptr->rank &&
        (origin_bytes<=MPIDI_Global.max_buffered_write)) {
-        EPOCH_CHECK1();
+        MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
         MPIR_ERR_CHKANDJUMP((origin_bytes != target_bytes),
                             mpi_errno,MPI_ERR_SIZE,"**rmasize");
-        EPOCH_START_CHECK();
+        MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
         FI_RC_RETRY2(GLOBAL_CNTR_INCR(),
                      fi_inject_write(G_TXC_CTR(0),(char *)origin_addr+origin_true_lb,
                                      target_bytes,_comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR),
@@ -327,13 +499,18 @@ static inline int do_get_lw(void               *origin_addr,
                             MPI_Datatype        target_datatype,
                             MPID_Win           *win)
 {
-    int          mpi_errno = MPI_SUCCESS;
-    MPIDI_Win_dt origin_dt, target_dt;
-    size_t       offset;
+    int           mpi_errno = MPI_SUCCESS;
+    MPIDI_Win_dt  origin_dt, target_dt;
+    size_t        offset;
+    void         *buffer,*tbuffer,*desc;
+    rma_iov_t     riov;
+    iovec_t       iov;
+    msg_rma_t     msg;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_GET_LW);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_GET_LW);
-    EPOCH_CHECK1();
+
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
     offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
     MPIDI_Win_datatype_basic(origin_count,origin_datatype,&origin_dt);
@@ -352,15 +529,11 @@ static inline int do_get_lw(void               *origin_addr,
                               origin_count,
                               origin_datatype);
 
-    void *buffer,*tbuffer;
+
     buffer  = (char *)origin_addr + origin_dt.true_lb;
     tbuffer = (char *)WINFO_BASE(win,target_rank) + offset + target_dt.true_lb;
 
-    EPOCH_START_CHECK();
-    rma_iov_t riov;
-    iovec_t   iov;
-    msg_rma_t msg;
-    void     *desc;
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
     desc = fi_mr_desc(MPIDI_Global.mr);
     msg.desc          = &desc;
     msg.msg_iov       = &iov;
@@ -397,47 +570,44 @@ static inline int do_get(void          *origin_addr,
                          int            target_count,
                          MPI_Datatype   target_datatype,
                          MPID_Win      *win,
-                         MPID_Request **signal)
+                         MPID_Request **sigreq)
 {
     int                rc, mpi_errno = MPI_SUCCESS;
     MPIDI_Win_request *req;
-    size_t             offset;
-    uint64_t           flags=0ULL;
-    MPID_Request      *sigreq;
+    size_t             offset,omax,tmax,tout,oout;
+    uint64_t           flags;
     fid_ep_t           ep;
+    msg_rma_t          msg;
+    void              *desc;
+    iovec_t           *originv;
+    rma_iov_t         *targetv;
+    unsigned           i;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_GET);
 
-    EPOCH_CHECK1();
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    WINREQ_CREATE(req);
-    SETUP_SIGNAL_REQUEST();
-
-    offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
-
-    MPIDI_Win_datatype_basic(origin_count,
-                             origin_datatype,
-                             &req->noncontig->origin_dt);
-    MPIDI_Win_datatype_basic(target_count,
-                             target_datatype,
-                             &req->noncontig->target_dt);
-    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size),
-                        mpi_errno, MPI_ERR_SIZE, "**rmasize");
+    MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
+                                                  target_rank,
+                                                  origin_datatype,target_datatype,
+                                                  &req,&flags,&ep,sigreq));
 
     if((req->noncontig->origin_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         goto fn_exit;
     }
 
+    offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
+
     if(target_rank == win->comm_ptr->rank) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         return MPIR_Localcopy((char *)win->base + offset,
                               target_count,
@@ -447,20 +617,14 @@ static inline int do_get(void          *origin_addr,
                               origin_datatype);
     }
 
-    EPOCH_START_CHECK();
-    req->target_rank = target_rank;
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
 
-    MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
-    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
-
-    req->event_id = MPIDI_EVENT_ABORT;
-    msg_rma_t  msg;
-    void      *desc;
-    desc = fi_mr_desc(MPIDI_Global.mr);
-    msg.desc      = &desc;
-    msg.addr      = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
-    msg.context   = NULL;
-    msg.data      = 0;
+    desc                   = fi_mr_desc(MPIDI_Global.mr);
+    req->event_id          = MPIDI_EVENT_ABORT;
+    msg.desc               = &desc;
+    msg.addr               = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
+    msg.context            = NULL;
+    msg.data               = 0;
     req->next              = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ    = req;
     MPIDI_Init_iovec_state(&req->noncontig->iovs,
@@ -474,10 +638,8 @@ static inline int do_get(void          *origin_addr,
     rc = MPIDI_IOV_EAGAIN;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        iovec_t   *originv=req->noncontig->buf.put_get.originv;
-        rma_iov_t *targetv=req->noncontig->buf.put_get.targetv;
-        size_t    omax,tmax,tout,oout;
-        unsigned  i;
+        originv=req->noncontig->buf.iov.put_get.originv;
+        targetv=req->noncontig->buf.iov.put_get.targetv;
         omax=tmax=1;
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,originv,
                                   omax,targetv,tmax,&oout,&tout);
@@ -492,7 +654,7 @@ static inline int do_get(void          *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(sigreq),
                      fi_readmsg(ep, &msg, flags),
                      rdma_write);
     }
@@ -508,12 +670,14 @@ fn_fail:
 #define FUNCNAME MPIDI_netmod_get
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_get(void *origin_addr,
-                                   int origin_count,
-                                   MPI_Datatype origin_datatype,
-                                   int target_rank,
-                                   MPI_Aint target_disp,
-                                   int target_count, MPI_Datatype target_datatype, MPID_Win *win)
+static inline int MPIDI_netmod_get(void         *origin_addr,
+                                   int           origin_count,
+                                   MPI_Datatype  origin_datatype,
+                                   int           target_rank,
+                                   MPI_Aint      target_disp,
+                                   int           target_count,
+                                   MPI_Datatype  target_datatype,
+                                   MPID_Win     *win)
 {
     int origin_contig,target_contig, mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET);
@@ -551,14 +715,15 @@ static inline int MPIDI_netmod_get(void *origin_addr,
 #define FUNCNAME MPIDI_netmod_rput
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rput(const void *origin_addr,
-                                    int origin_count,
-                                    MPI_Datatype origin_datatype,
-                                    int target_rank,
-                                    MPI_Aint target_disp,
-                                    int target_count,
-                                    MPI_Datatype target_datatype,
-                                    MPID_Win *win, MPID_Request **request)
+static inline int MPIDI_netmod_rput(const void   *origin_addr,
+                                    int           origin_count,
+                                    MPI_Datatype  origin_datatype,
+                                    int           target_rank,
+                                    MPI_Aint      target_disp,
+                                    int           target_count,
+                                    MPI_Datatype  target_datatype,
+                                    MPID_Win      *win,
+                                    MPID_Request **request)
 {
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RPUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RPUT);
@@ -590,16 +755,20 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
                                                 MPI_Aint target_disp,
                                                 MPID_Win *win)
 {
-    int mpi_errno = MPI_SUCCESS;
-    fi_op_t fi_op;
-    fi_datatype_t fi_dt;
+    int            mpi_errno = MPI_SUCCESS;
+    fi_op_t        fi_op;
+    fi_datatype_t  fi_dt;
+    MPIDI_Win_dt   origin_dt, target_dt, result_dt;
+    size_t         offset,max_size,dt_size;
+    void          *buffer, *tbuffer, *rbuffer,*desc;
+    ioc_t          originv, resultv, comparev;
+    rma_ioc_t      targetv;
+    msg_atomic_t   msg;
+
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMPARE_AND_SWAP);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMPARE_AND_SWAP);
 
-    EPOCH_CHECK1();
-
-    MPIDI_Win_dt origin_dt, target_dt, result_dt;
-    size_t       offset;
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
     offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
@@ -610,18 +779,15 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     if((origin_dt.size==0) ||(target_rank==MPI_PROC_NULL))
         goto fn_exit;
 
-    void *buffer, *tbuffer, *rbuffer;
     buffer  = (char *)origin_addr + origin_dt.true_lb;
     rbuffer = (char *)result_addr + result_dt.true_lb;
     tbuffer = (char *)WINFO_BASE(win,target_rank) + offset;
 
-    EPOCH_START_CHECK();
-    size_t max_size,dt_size;
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+
     max_size=MPIDI_QUERY_COMPARE_ATOMIC_COUNT;
     MPIDI_Query_dt(datatype,&fi_dt,MPI_OP_NULL,&fi_op,&max_size,&dt_size);
 
-    ioc_t     originv, resultv, comparev;
-    rma_ioc_t targetv;
     originv.addr   = (void *)buffer;
     originv.count  = 1;
     resultv.addr   = (void *)rbuffer;
@@ -632,8 +798,6 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     targetv.count  = 1;
     targetv.key    = WINFO_MR_KEY(win,target_rank);;
 
-    msg_atomic_t msg;
-    void *desc;
     desc = fi_mr_desc(MPIDI_Global.mr);
     msg.msg_iov       = &originv;
     msg.desc          = &desc;
@@ -670,49 +834,48 @@ static inline int do_accumulate(const void    *origin_addr,
                                 MPI_Datatype   target_datatype,
                                 MPI_Op         op,
                                 MPID_Win      *win,
-                                MPID_Request **signal)
+                                MPID_Request **sigreq)
 {
     int                rc,acccheck=0,mpi_errno = MPI_SUCCESS;
-    uint64_t           flags=0;
-    MPI_Datatype       tt,ot;
+    uint64_t           flags;
     MPIDI_Win_request *req;
-    size_t             offset;
-    MPID_Request      *sigreq;
+    size_t             offset,max_size, dt_size,omax,tmax,tout,oout;
     fid_ep_t           ep;
+    MPI_Datatype       basic_type;
+    fi_op_t            fi_op;
+    fi_datatype_t      fi_dt;
+    msg_atomic_t       msg;
+    void              *desc;
+    ioc_t             *originv;
+    rma_ioc_t         *targetv;
+    unsigned           i;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_ACCUMULATE);
 
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    WINREQ_CREATE(req);
-    SETUP_SIGNAL_REQUEST();
-
-    EPOCH_CHECK1();
-
-    offset = target_disp * WINFO_DISP_UNIT(win, target_rank);
-    ot=origin_datatype;
-    tt=target_datatype;
-
-    MPIDI_Win_datatype_basic(origin_count,ot,&req->noncontig->origin_dt);
-    MPIDI_Win_datatype_basic(target_count,tt,&req->noncontig->target_dt);
-    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size),
-                        mpi_errno,MPI_ERR_SIZE,"**rmasize");
+    MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
+                                                     target_count,
+                                                     target_rank,
+                                                     origin_datatype,
+                                                     target_datatype,
+                                                     &req,&flags,&ep,sigreq));
 
     if((req->noncontig->origin_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         return MPI_SUCCESS;
     }
 
-    EPOCH_START_CHECK();
-    req->target_rank = target_rank;
+    offset = target_disp * WINFO_DISP_UNIT(win, target_rank);
 
-    MPI_Datatype basic_type;
-    GET_BASIC_TYPE(tt, basic_type);
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
 
+    GET_BASIC_TYPE(target_datatype, basic_type);
     switch(basic_type) {
         /* 8 byte types */
         case MPI_FLOAT_INT:
@@ -722,7 +885,7 @@ static inline int do_accumulate(const void    *origin_addr,
         case MPI_2REAL:
         case MPI_2INTEGER:
 #endif
-        {basic_type=tt=ot=MPI_LONG_LONG; acccheck=1; break;}
+        {basic_type=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
 #ifdef HAVE_FORTRAN_BINDING
@@ -731,7 +894,7 @@ static inline int do_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif
-        {basic_type=tt=ot=MPI_DOUBLE_COMPLEX; acccheck=1; break;}
+        {basic_type=MPI_DOUBLE_COMPLEX; acccheck=1; break;}
 
         /* Types with pads or too large to handle*/
         case MPI_DATATYPE_NULL:
@@ -750,17 +913,14 @@ static inline int do_accumulate(const void    *origin_addr,
                         mpi_errno,MPI_ERR_TYPE,
                         goto fn_fail, "**rmatypenotatomic");
 
-    fi_op_t       fi_op;
-    fi_datatype_t fi_dt;
-    size_t        max_size, dt_size;
-    max_size=MPIDI_QUERY_ATOMIC_COUNT;
-    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
-    MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
+    max_size               = MPIDI_QUERY_ATOMIC_COUNT;
+
     MPIDI_Query_dt(basic_type,&fi_dt,op,&fi_op,&max_size,&dt_size);
+
     req->event_id          = MPIDI_EVENT_ABORT;
     req->next              = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ    = req;
-    max_size = max_size*dt_size;
+    max_size               = max_size*dt_size;
     MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
                         goto fn_fail, "**rmatypenotatomic");
 
@@ -772,8 +932,7 @@ static inline int do_accumulate(const void    *origin_addr,
                            max_size,
                            req->noncontig->origin_dt.map,
                            req->noncontig->target_dt.map);
-    msg_atomic_t msg;
-    void *desc;
+
     desc = fi_mr_desc(MPIDI_Global.mr);
     rc = MPIDI_IOV_EAGAIN;
     msg.desc          = &desc;
@@ -784,12 +943,8 @@ static inline int do_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        ioc_t     *originv=req->noncontig->buf.accumulate.originv;
-        rma_ioc_t *targetv=req->noncontig->buf.accumulate.targetv;
-        size_t    omax;
-        size_t    tmax;
-        size_t    tout, oout;
-        unsigned  i;
+        originv=req->noncontig->buf.iov.accumulate.originv;
+        targetv=req->noncontig->buf.iov.accumulate.targetv;
         omax=tmax=1;
         rc = MPIDI_Merge_iov_list(&req->noncontig->iovs,(iovec_t*)originv,omax,
                                   (rma_iov_t*)targetv,tmax,&oout,&tout);
@@ -808,7 +963,7 @@ static inline int do_accumulate(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(sigreq),
                      fi_atomicmsg(ep, &msg, flags),
                      rdma_atomicto);
     }
@@ -836,52 +991,52 @@ static inline int do_get_accumulate(const void    *origin_addr,
                                     MPI_Datatype   target_datatype,
                                     MPI_Op         op,
                                     MPID_Win      *win,
-                                    MPID_Request **signal)
+                                    MPID_Request **sigreq)
 {
     int                rc, acccheck=0,mpi_errno = MPI_SUCCESS;
-    uint64_t           flags=0ULL;
-    MPI_Datatype       tt,ot,rt;
+    uint64_t           flags;
     MPIDI_Win_request *req;
-    size_t             offset;
-    MPID_Request      *sigreq;
+    size_t             offset,max_size,dt_size,omax,rmax,tmax,tout,rout,oout;
     fid_ep_t           ep;
+    MPI_Datatype       rt,basic_type,basic_type_res;
+    fi_op_t            fi_op;
+    fi_datatype_t      fi_dt;
+    msg_atomic_t       msg;
+    void              *desc;
+    ioc_t             *originv,*resultv;
+    rma_ioc_t         *targetv;
+    unsigned           i;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
-    WINREQ_CREATE(req);
-    SETUP_SIGNAL_REQUEST();
 
-    EPOCH_CHECK1();
+    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
-    ot=origin_datatype;
-    tt=target_datatype;
-    rt=result_datatype;
-
-    MPIDI_Win_datatype_basic(origin_count,ot,&req->noncontig->origin_dt);
-    MPIDI_Win_datatype_basic(target_count,tt,&req->noncontig->target_dt);
-    MPIDI_Win_datatype_basic(result_count,rt,&req->noncontig->result_dt);
-
-    MPIR_ERR_CHKANDJUMP((req->noncontig->origin_dt.size != req->noncontig->target_dt.size && op != MPI_NO_OP),
-                        mpi_errno, MPI_ERR_SIZE, "**rmasize");
-    MPIR_ERR_CHKANDJUMP((req->noncontig->result_dt.size != req->noncontig->target_dt.size),
-                        mpi_errno, MPI_ERR_SIZE, "**rmasize");
+    MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
+                                                         target_count,
+                                                         result_count,
+                                                         target_rank,
+                                                         op,
+                                                         origin_datatype,
+                                                         target_datatype,
+                                                         result_datatype,
+                                                         &req,&flags,&ep,sigreq));
 
     if((req->noncontig->result_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(signal) MPIDI_Request_release(sigreq);
+        if(sigreq) MPIDI_Request_release(*sigreq);
 
         goto fn_exit;
     }
 
-    EPOCH_START_CHECK();
-    req->target_rank     = target_rank;
+    offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
-    MPI_Datatype basic_type;
-    GET_BASIC_TYPE(tt, basic_type);
+    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
 
+    GET_BASIC_TYPE(target_datatype, basic_type);
+    rt=result_datatype;
     switch(basic_type) {
         /* 8 byte types */
         case MPI_FLOAT_INT:
@@ -891,7 +1046,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
         case MPI_2REAL:
         case MPI_2INTEGER:
 #endif
-        {basic_type=tt=ot=rt=MPI_LONG_LONG; acccheck=1; break;}
+        {basic_type=rt=MPI_LONG_LONG; acccheck=1; break;}
 
         /* 16-byte types */
 #ifdef HAVE_FORTRAN_BINDING
@@ -900,7 +1055,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2COMPLEX:
 #endif
-        {basic_type=tt=ot=rt=MPI_DOUBLE_COMPLEX; acccheck=1; break;}
+        {basic_type=rt=MPI_DOUBLE_COMPLEX; acccheck=1; break;}
 
         /* Types with pads or too large to handle*/
         case MPI_DATATYPE_NULL:
@@ -919,27 +1074,15 @@ static inline int do_get_accumulate(const void    *origin_addr,
                         mpi_errno,MPI_ERR_TYPE,
                         goto fn_fail, "**rmatypenotatomic");
 
-    MPI_Datatype basic_type_res;
     GET_BASIC_TYPE(rt, basic_type_res);
-
     MPIU_Assert(basic_type_res != MPI_DATATYPE_NULL);
 
-    fi_op_t       fi_op;
-    fi_datatype_t fi_dt;
-    size_t        max_size,dt_size;
-    max_size = MPIDI_QUERY_FETCH_ATOMIC_COUNT;
-    MPIDI_Win_datatype_map(&req->noncontig->target_dt);
-
-    if(op != MPI_NO_OP) MPIDI_Win_datatype_map(&req->noncontig->origin_dt);
-
-    MPIDI_Win_datatype_map(&req->noncontig->result_dt);
+    max_size            = MPIDI_QUERY_FETCH_ATOMIC_COUNT;
     MPIDI_Query_dt(basic_type_res,&fi_dt,op,&fi_op,&max_size,&dt_size);
     req->event_id       = MPIDI_EVENT_RMA_DONE;
     req->next           = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ = req;
-
-
-    max_size = max_size*dt_size;
+    max_size            = max_size*dt_size;
     MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
                         goto fn_fail, "**rmatypenotatomic");
 
@@ -965,10 +1108,8 @@ static inline int do_get_accumulate(const void    *origin_addr,
                                req->noncontig->result_dt.map,
                                req->noncontig->target_dt.map);
 
-    msg_atomic_t  msg;
-    void *desc;
-    desc = fi_mr_desc(MPIDI_Global.mr);
-    rc = MPIDI_IOV_EAGAIN;
+    desc              = fi_mr_desc(MPIDI_Global.mr);
+    rc                = MPIDI_IOV_EAGAIN;
     msg.desc          = &desc;
     msg.addr          = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
     msg.context       = NULL;
@@ -977,14 +1118,10 @@ static inline int do_get_accumulate(const void    *origin_addr,
     msg.op            = fi_op;
 
     while(rc==MPIDI_IOV_EAGAIN) {
-        ioc_t     *originv=req->noncontig->buf.get_accumulate.originv;
-        ioc_t     *resultv=req->noncontig->buf.get_accumulate.resultv;
-        rma_ioc_t *targetv=req->noncontig->buf.get_accumulate.targetv;
-        size_t     omax,rmax,tmax;
-        size_t     tout,rout,oout;
-        unsigned   i;
-
-        omax=rmax=tmax=1;
+        originv        = req->noncontig->buf.iov.get_accumulate.originv;
+        targetv        = req->noncontig->buf.iov.get_accumulate.targetv;
+        resultv        = req->noncontig->buf.iov.get_accumulate.resultv;
+        omax=rmax=tmax = 1;
 
         if(op != MPI_NO_OP)
             rc = MPIDI_Merge_iov_list2(&req->noncontig->iovs,(iovec_t*)originv,
@@ -1012,7 +1149,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
         msg.iov_count     = oout;
         msg.rma_iov       = targetv;
         msg.rma_iov_count = tout;
-        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(),
+        FI_RC_RETRY2(SETUP_CHUNK_CONTEXT(sigreq),
                      fi_fetch_atomicmsg(ep, &msg,resultv,
                                         NULL,rout,flags),
                      rdma_readfrom);
