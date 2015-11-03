@@ -12,6 +12,7 @@
 #define NETMOD_AM_OFI_AM_H_INCLUDED
 
 #include "impl.h"
+#include "request.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_reg_hdr_handler
@@ -39,69 +40,6 @@ static inline int MPIDI_netmod_reg_hdr_handler(int handler_id,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_am_ofi_init_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
-                                               size_t am_hdr_sz,
-                                               MPID_Request *sreq,
-                                               int is_reply)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-
-    if (!is_reply) {
-        req_hdr = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
-        MPIU_Assert(req_hdr);
-        AMREQ_OFI(sreq, req_hdr) = req_hdr;
-    } else {
-        req_hdr = AMREQ_OFI(sreq, req_hdr);
-    }
-
-    if (am_hdr_sz > MPIDI_MAX_AM_HDR_SZ) {
-        req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
-        MPIU_Assert(req_hdr->am_hdr);
-    } else {
-        req_hdr->am_hdr = &req_hdr->am_hdr_buf[0];
-    }
-    
-    if (am_hdr)
-        MPIU_Memcpy(req_hdr->am_hdr, am_hdr, am_hdr_sz);
-
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
-{
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-
-    req_hdr = AMREQ_OFI(sreq, req_hdr);
-    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
-        MPIU_Free(req_hdr->am_hdr);
-    }
-    MPIU_CH4U_release_buf(req_hdr);
-
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    return;
-  fn_fail:
-    goto fn_exit;
-}
-
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_ofi_do_send_am_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -111,7 +49,6 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank, int handler_id, 
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
     struct iovec iov[2];
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -152,7 +89,6 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
     MPIDI_OFI_lmt_msg_pyld_t *lmt_info;
     struct iovec iov[3];
 
@@ -199,7 +135,6 @@ static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
     struct iovec iov[3];
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
@@ -440,7 +375,6 @@ static inline int MPIDI_netmod_send_am_hdr_reply(void *reply_token,
                                                  size_t am_hdr_sz, MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
 
@@ -528,7 +462,6 @@ static inline int MPIDI_netmod_inject_am_hdr(int rank,
 {
     int mpi_errno = MPI_SUCCESS, is_allocated;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
     char *data_buf;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);

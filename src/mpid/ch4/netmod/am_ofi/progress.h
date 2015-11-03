@@ -12,6 +12,7 @@
 #define NETMOD_AM_OFI_PROGRESS_H_INCLUDED
 
 #include "impl.h"
+#include "request.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_handle_short_am
@@ -174,7 +175,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_addr_t source)
 {
-    int mpi_errno = MPI_SUCCESS, is_contig = 0, is_allocated, c;
+    int mpi_errno = MPI_SUCCESS, is_contig = 0, c;
     MPID_Request *rreq;
     void *p_data;
     size_t data_sz, rem, done, curr_len, in_data_sz;
@@ -268,7 +269,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_addr_t source)
 {
-    int mpi_errno = MPI_SUCCESS, c;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
     MPIDI_OFI_Ack_msg_pyld_t *ack_msg;
     int handler_id;
@@ -300,7 +301,7 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *cq_entry)
 {
-    int mpi_errno = MPI_SUCCESS, c;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
     MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
@@ -415,7 +416,7 @@ static inline int MPIDI_netmod_dispatch_lmt_ack(fi_addr_t source,
 static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *cq_entry,
                                                       fi_addr_t source, void *netmod_context)
 {
-    int mpi_errno = MPI_SUCCESS, c;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq;
     MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
 

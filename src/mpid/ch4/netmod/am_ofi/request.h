@@ -66,4 +66,60 @@ static inline void MPIDI_netmod_am_ofi_req_complete(MPID_Request *req)
         MPIDI_Request_release(req);
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
+{
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+
+    req_hdr = AMREQ_OFI(sreq, req_hdr);
+    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
+        MPIU_Free(req_hdr->am_hdr);
+    }
+    MPIU_CH4U_release_buf(req_hdr);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    return;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_am_ofi_init_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
+                                               size_t am_hdr_sz,
+                                               MPID_Request *sreq,
+                                               int is_reply)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+
+    if (!is_reply) {
+        req_hdr = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        MPIU_Assert(req_hdr);
+        AMREQ_OFI(sreq, req_hdr) = req_hdr;
+    } else {
+        req_hdr = AMREQ_OFI(sreq, req_hdr);
+    }
+
+    if (am_hdr_sz > MPIDI_MAX_AM_HDR_SZ) {
+        req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
+        MPIU_Assert(req_hdr->am_hdr);
+    } else {
+        req_hdr->am_hdr = &req_hdr->am_hdr_buf[0];
+    }
+    
+    if (am_hdr)
+        MPIU_Memcpy(req_hdr->am_hdr, am_hdr, am_hdr_sz);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+    return mpi_errno;
+}
+
 #endif /* NETMOD_AM_OFI_REQUEST_H_INCLUDED */
