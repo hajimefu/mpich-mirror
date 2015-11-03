@@ -140,16 +140,16 @@
 		    == MPID_SSENDACK_REQUEST);		\
     })
 
-#define PROGRESS()						\
+#define MPIDI_NM_PROGRESS()						\
     ({								\
 	mpi_errno = MPIDI_Progress_test();			\
 	if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);	\
     })
 
-#define PROGRESS_WHILE(cond)			\
+#define MPIDI_NM_PROGRESS_WHILE(cond)			\
     ({						\
 	while (cond)				\
-	    PROGRESS();				\
+	    MPIDI_NM_PROGRESS();				\
     })
 
 #define MPIU_CH4_OFI_ERR  MPIR_ERR_CHKANDJUMP4
@@ -188,7 +188,7 @@
 			     __LINE__,                                  \
 			     FCNAME,                                    \
 			     fi_strerror(-_ret));                       \
-	    PROGRESS();                                                 \
+	    MPIDI_NM_PROGRESS();                                                 \
 	} while (_ret == -FI_EAGAIN);                                   \
     } while (0)
 
@@ -208,7 +208,7 @@
 			     __LINE__,					\
 			     FCNAME,					\
 			     fi_strerror(-_ret));			\
-	    PROGRESS();							\
+	    MPIDI_NM_PROGRESS();							\
 	} while (_ret == -FI_EAGAIN);					\
     } while (0)
 

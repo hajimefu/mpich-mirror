@@ -247,7 +247,7 @@ static inline int MPIDI_dynproc_exch_map(int              root,
         while(req[0].done != MPIDI_PEEK_FOUND) {
             req[0].done = MPIDI_PEEK_START;
             FI_RC(fi_trecvmsg(G_RXC_TAG(0),&msg,FI_PEEK|FI_COMPLETION),trecv);
-            PROGRESS_WHILE(req[0].done == MPIDI_PEEK_START);
+            MPIDI_NM_PROGRESS_WHILE(req[0].done == MPIDI_PEEK_START);
         }
 
         *out_table_size    = req[0].msglen;
@@ -279,7 +279,7 @@ static inline int MPIDI_dynproc_exch_map(int              root,
                              mask_bits,
                              &req[1].context),trecv);
 
-        PROGRESS_WHILE(!req[0].done || !req[1].done);
+        MPIDI_NM_PROGRESS_WHILE(!req[0].done || !req[1].done);
         memcpy(conname, *out_addr_table+req[0].source*MPIDI_Global.addrnamelen, MPIDI_Global.addrnamelen);
     }
 
@@ -332,7 +332,7 @@ static inline int MPIDI_dynproc_exch_map(int              root,
                              match_bits,
                              (void *) &req[1].context),tsend);
 
-        PROGRESS_WHILE(!req[0].done || !req[1].done);
+        MPIDI_NM_PROGRESS_WHILE(!req[0].done || !req[1].done);
 
         MPIU_Free(my_addr_table);
         MPIU_Free(my_node_table);

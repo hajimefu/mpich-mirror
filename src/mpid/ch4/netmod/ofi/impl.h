@@ -155,16 +155,16 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   } while (0)
 
 
-#define PROGRESS()                                       \
+#define MPIDI_NM_PROGRESS()                              \
   ({                                                     \
     mpi_errno = MPIDI_Progress_test();                   \
     if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno); \
   })
 
-#define PROGRESS_WHILE(cond)                          \
+#define MPIDI_NM_PROGRESS_WHILE(cond)                 \
   ({                                                  \
-  while (cond)                                         \
-       PROGRESS();                                    \
+  while (cond)                                        \
+       MPIDI_NM_PROGRESS();                           \
   })
 
 #define MPIU_CH4_OFI_ERR  MPIR_ERR_CHKANDJUMP4
@@ -201,7 +201,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                          __LINE__,                          \
                          FCNAME,                            \
                          fi_strerror(-_ret));               \
-        PROGRESS();                                         \
+        MPIDI_NM_PROGRESS();                                \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
@@ -223,7 +223,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                          __LINE__,                          \
                          FCNAME,                            \
                          fi_strerror(-_ret));               \
-        PROGRESS();                                         \
+        MPIDI_NM_PROGRESS();                                \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
@@ -246,12 +246,12 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                           FCNAME,                             \
                           fi_strerror(-_ret));                \
          MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);     \
-         PROGRESS();                                          \
+         MPIDI_NM_PROGRESS();                                 \
          MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);    \
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
-#define MPIDI_NM_PMI_RC_POP(FUNC,STR)                            \
+#define MPIDI_NM_PMI_RC_POP(FUNC,STR)               \
   do                                                \
     {                                               \
       pmi_errno  = FUNC;                            \
