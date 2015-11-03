@@ -148,9 +148,8 @@ WinLockAdvance(MPID_Win *win)
 
         if(lock->mtype == MPIDI_REQUEST_LOCK) {
             MPIDI_Win_control_t info;
-            info.type       = MPIDI_CTRL_LOCKACK,
-                 mpi_errno = do_control_win(&info,lock->rank,win,1);
-
+            info.type   = MPIDI_CTRL_LOCKACK;
+            mpi_errno   = do_control_win(&info,lock->rank,win,1,0);
             if(mpi_errno != MPI_SUCCESS)
                 MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                     goto fn_fail, "**rmasync");
@@ -158,7 +157,7 @@ WinLockAdvance(MPID_Win *win)
         } else if(lock->mtype == MPIDI_REQUEST_LOCKALL) {
             MPIDI_Win_control_t info;
             info.type = MPIDI_CTRL_LOCKALLACK;
-            mpi_errno = do_control_win(&info,lock->rank,win,1);
+            mpi_errno = do_control_win(&info,lock->rank,win,1,0);
         } else
             MPIU_Assert(0);
 
@@ -224,8 +223,7 @@ static inline void WinUnlock_proc(const MPIDI_Win_control_t *info,
 
     MPIDI_Win_control_t new_info;
     new_info.type = MPIDI_CTRL_UNLOCKACK;
-
-    do_control_win(&new_info,peer,win,1);
+    do_control_win(&new_info,peer,win,1,0);
 }
 
 static inline void WinComplete_proc(const MPIDI_Win_control_t *info,

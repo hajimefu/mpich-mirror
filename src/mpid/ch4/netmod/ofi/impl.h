@@ -228,6 +228,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
+
 #define FI_RC_RETRY_NOLOCK(FUNC,STR)                          \
   do                                                          \
     {                                                         \
@@ -235,7 +236,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
      do {                                                     \
          _ret = FUNC;                                         \
          if (likely(_ret==0)) break;                          \
-         MPIU_CH4_OFI_ERR(_ret!=FI_EAGAIN,                    \
+         MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                   \
                           mpi_errno,                          \
                           MPI_ERR_OTHER,                      \
                           "**ofid_"#STR,                      \
@@ -244,8 +245,9 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                           __LINE__,                           \
                           FCNAME,                             \
                           fi_strerror(-_ret));                \
+         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);     \
          PROGRESS();                                          \
-         if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno); \
+         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);    \
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
@@ -601,8 +603,11 @@ static inline int get_source(uint64_t match_bits)
 #define FUNCNAME do_control_win
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_win(MPIDI_Win_control_t * control,
-                                 int rank, MPID_Win * win, int use_comm)
+static inline int do_control_win(MPIDI_Win_control_t *control,
+                                 int                  rank,
+                                 MPID_Win            *win,
+                                 int                  use_comm,
+                                 int                  use_lock)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
@@ -614,11 +619,16 @@ static inline int do_control_win(MPIDI_Win_control_t * control,
     control->origin_rank = win->comm_ptr->rank;
 
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    /* Should already be holding a lock, so call the non-locking version */
-    FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),
-                                 control, sizeof(*control),
-                                 use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                                 _to_phys(rank, MPIDI_API_MSG)), inject);
+    if(use_lock)
+        FI_RC_RETRY(fi_inject(G_TXC_MSG(0),
+                              control, sizeof(*control),
+                              use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
+                              _to_phys(rank, MPIDI_API_MSG)), inject);
+    else
+        FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),
+                                     control, sizeof(*control),
+                                     use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
+                                     _to_phys(rank, MPIDI_API_MSG)), inject);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;

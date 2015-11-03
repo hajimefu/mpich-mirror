@@ -157,6 +157,21 @@ static inline MPID_Request *MPIDI_CH4I_create_req()
       }                                                                 \
     })
 
+#define MPIDI_Datatype_check_size(_datatype,_count,_data_sz_out)        \
+    ({                                                                  \
+        if (IS_BUILTIN(_datatype))                                      \
+        {                                                               \
+            (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *               \
+                MPID_Datatype_get_basic_size(_datatype);                \
+        }                                                               \
+        else                                                            \
+        {                                                               \
+            MPID_Datatype *_dt_ptr;                                     \
+            MPID_Datatype_get_ptr((_datatype), (_dt_ptr));              \
+            (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+        }                                                               \
+    })
+
 #define MPIDI_Datatype_check_contig_size_lb(_datatype,_count,           \
                                             _dt_contig_out,             \
                                             _data_sz_out,               \

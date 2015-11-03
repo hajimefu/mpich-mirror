@@ -279,7 +279,7 @@ static inline int MPIDI_netmod_win_complete(MPID_Win *win)
 
     for(index=0; index < group->size; ++index) {
         peer      = group->lrank_to_lpid[index].lpid;
-        mpi_errno = do_control_win(&msg, peer, win, 0);
+        mpi_errno = do_control_win(&msg, peer, win, 0, 1);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -325,7 +325,7 @@ static inline int MPIDI_netmod_win_post(MPID_Group *group, int assert, MPID_Win 
 
     for(index=0; index < group->size; ++index) {
         int peer  = group->lrank_to_lpid[index].lpid;
-        mpi_errno = do_control_win(&msg, peer, win, 0);
+        mpi_errno = do_control_win(&msg, peer, win, 0, 1);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -428,7 +428,7 @@ static inline int MPIDI_netmod_win_lock(int lock_type, int rank, int assert, MPI
     msg.type      = MPIDI_CTRL_LOCKREQ;
     msg.lock_type = lock_type;
 
-    mpi_errno     = do_control_win(&msg, rank, win,1);
+    mpi_errno     = do_control_win(&msg, rank, win,1, 1);
 
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -464,7 +464,7 @@ static inline int MPIDI_netmod_win_unlock(int rank, MPID_Win *win)
 
     MPIDI_Win_control_t msg;
     msg.type  = MPIDI_CTRL_UNLOCK;
-    mpi_errno = do_control_win(&msg, rank, win, 1);
+    mpi_errno = do_control_win(&msg, rank, win, 1, 1);
 
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -1029,7 +1029,7 @@ static inline int MPIDI_netmod_win_unlock_all(MPID_Win *win)
         lockQ[i].peer = i;
         lockQ[i].win  = win;
         msg.type      = MPIDI_CTRL_UNLOCKALL;
-        mpi_errno     = do_control_win(&msg, lockQ[i].peer, win, 1);
+        mpi_errno     = do_control_win(&msg, lockQ[i].peer, win, 1, 1);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -1191,7 +1191,7 @@ static inline int MPIDI_netmod_win_lock_all(int assert, MPID_Win *win)
 
         msg.type           = MPIDI_CTRL_LOCKALLREQ;
         msg.lock_type      = MPI_LOCK_SHARED;
-        mpi_errno          = do_control_win(&msg, lockQ[i].peer, lockQ[i].win, 1);
+        mpi_errno          = do_control_win(&msg, lockQ[i].peer, lockQ[i].win, 1, 1);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
