@@ -153,6 +153,8 @@ typedef struct MPIDI_CH4U_Devreq_t {
 typedef struct {
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
     int is_local;
+    /* Anysource handling. Netmod and shm specific requests are cross referenced. */
+    struct MPID_Request *anysource_partner_request;
 #endif
     union {
         /* The first fields are used by the CH4U apis */

@@ -45,6 +45,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         /* traverse posted receive queue */
         MPID_Request *req = MPIDI_shm_recvq_posted.head;
         MPID_Request *prev_req = NULL;
+        int is_netmod_request_cancelled = 0;
         char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
         int type = in_cell ? cell->pkt.mpich.type : REQ_SHM(sreq)->type;
         MPID_Request* pending = in_cell ? cell->pending : REQ_SHM(sreq)->pending;
@@ -66,6 +67,26 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                               sender_rank, tag, context_id));
             if ((in_cell && ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
                 (sreq && ENVELOPE_MATCH(REQ_SHM(sreq), sender_rank, tag, context_id))) {
+
+                /* Request matched */
+
+                is_netmod_request_cancelled = 0;
+
+                if (MPIU_CH4_REQUEST(req, anysource_partner_request))
+                {
+                    MPIDI_netmod_anysource_matched(MPIU_CH4_REQUEST(req, anysource_partner_request),
+                                                   &is_netmod_request_cancelled);
+
+                    /* Decouple requests */
+                    MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(req, anysource_partner_request), anysource_partner_request) = NULL;
+                    MPIU_CH4_REQUEST(req, anysource_partner_request) = NULL;
+
+                    if (!is_netmod_request_cancelled)
+                    {
+                        break;
+                    }
+                }
+
                 char *recv_buffer = (char *) REQ_SHM(req)->user_buf;
                 if (pending) {
                     /* we must send ACK */

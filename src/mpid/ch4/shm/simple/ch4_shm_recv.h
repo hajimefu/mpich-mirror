@@ -41,8 +41,14 @@ static inline int shm_do_irecv(void *buf,
 
     MPIDI_FUNC_ENTER(MPID_STATE_SHM_DO_IRECV);
 
-    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_Request_create_rreq(rreq);
+    if (unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Status_set_procnull(rreq->status);
+        *request = rreq;
+        goto fn_exit;
+    }
+
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     ENVELOPE_SET(REQ_SHM(rreq), rank, tag, comm->context_id + context_offset);
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
@@ -168,9 +174,44 @@ static inline int MPIDI_shm_irecv(void *buf,
     return mpi_errno;
 }
 
+#undef FCNAME
+#define FCNAME DECL_FUNC(MPIDI_shm_cancel_recv)
 static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
 {
-    MPIU_Assert(0);
+    MPID_Request *req = MPIDI_shm_recvq_posted.head;
+    MPID_Request *prev_req = NULL;
+
+    while (req) {
+
+        if (req == rreq)
+        {
+            /* Remove request from shm posted receive queue */
+
+            if (prev_req)
+            {
+                REQ_SHM(prev_req)->next = REQ_SHM(req)->next;
+            }
+            else
+            {
+                MPIDI_shm_recvq_posted.head = REQ_SHM(req)->next;
+            }
+
+            if (req == MPIDI_shm_recvq_posted.tail)
+            {
+                MPIDI_shm_recvq_posted.tail = prev_req;
+            }
+
+            MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
+            MPIR_STATUS_SET_COUNT(req->status, 0);
+            MPIDI_Request_complete(req);
+
+            break;
+        }
+
+        prev_req = req;
+        req = REQ_SHM(req)->next;
+    }
+
     return MPI_SUCCESS;
 }
 

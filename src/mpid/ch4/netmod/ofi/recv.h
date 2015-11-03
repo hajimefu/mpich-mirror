@@ -264,14 +264,20 @@ __ALWAYS_INLINE__ int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
 
+#ifndef MPIDI_BUILD_CH4_SHM
     MPIDI_NM_PROGRESS();
+#endif /* MPIDI_BUILD_CH4_SHM */
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     ret = fi_cancel((fid_t) G_RXC_TAG(0), &(REQ_OFI(rreq, context)));
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
 
     if (ret == 0) {
         while ((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPID_cc_is_complete(&rreq->cc))) {
+#ifndef MPIDI_BUILD_CH4_SHM
             if ((mpi_errno = MPIDI_Progress_test()) != MPI_SUCCESS)
+#else /* MPIDI_BUILD_CH4_SHM */
+            if ((mpi_errno = MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
+#endif /* MPIDI_BUILD_CH4_SHM */
                 goto fn_exit;
         }
 
