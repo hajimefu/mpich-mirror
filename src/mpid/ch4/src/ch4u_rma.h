@@ -31,9 +31,8 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     MPIDI_CH4U_put_msg_t am_hdr;
     uint64_t offset;
     MPIDI_CH4I_win_info_t *winfo;
-    uint64_t dt_contig, data_sz, dt_true_lb;
+    size_t data_sz;
     MPI_Aint last;
-    MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
     struct iovec *dt_iov, am_iov[2];
 
@@ -52,7 +51,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
         *request = sreq;
 
     MPIU_CH4U_REQUEST(sreq, preq.win_ptr) = (uint64_t) win;
-    MPIDI_Datatype_get_info(origin_count, origin_datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0) {
         MPID_cc_decr(sreq->cc_ptr, &c);
         MPIU_Assert(c >= 0);
@@ -136,13 +135,12 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
                          MPID_Win      *win,
                          MPID_Request **request)
 {
-    int                rc, mpi_errno = MPI_SUCCESS, c, n_iov;
+    int                mpi_errno = MPI_SUCCESS, c, n_iov;
     size_t             offset;
     MPID_Request      *sreq = NULL;
     MPIDI_CH4U_get_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
-    uint64_t dt_contig, data_sz, dt_true_lb;
-    MPID_Datatype *dt_ptr;
+    size_t data_sz;
     MPI_Aint last;
     MPID_Segment *segment_ptr;
     struct iovec *dt_iov, am_iov[2];
@@ -161,7 +159,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     if (request)
         *request = sreq;
 
-    MPIDI_Datatype_get_info(origin_count, origin_datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0) {
         MPID_cc_decr(sreq->cc_ptr, &c);
         MPIU_Assert(c >= 0);
@@ -170,7 +168,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     }
     
     MPIU_CH4U_REQUEST(sreq, greq.win_ptr) = (uint64_t) win;
-    MPIU_CH4U_REQUEST(sreq, greq.addr) = (uint64_t)((char *) origin_addr + dt_true_lb);
+    MPIU_CH4U_REQUEST(sreq, greq.addr) = (uint64_t)((char *) origin_addr);
     MPIU_CH4U_REQUEST(sreq, greq.count) = origin_count;
     MPIU_CH4U_REQUEST(sreq, greq.datatype) = origin_datatype;
 
@@ -352,16 +350,16 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
                                             int do_get,
                                             MPID_Request *sreq)
 {
-    int                rc, mpi_errno = MPI_SUCCESS, c, n_iov;
+    int                mpi_errno = MPI_SUCCESS, c, n_iov;
     size_t             offset;
     MPIDI_CH4U_acc_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
-    uint64_t dt_contig, data_sz, dt_true_lb;
-    MPID_Datatype *dt_ptr;
+    uint64_t data_sz;
     MPI_Aint last;
     MPID_Segment *segment_ptr;
     struct iovec *dt_iov, am_iov[2];
     int op_type;
+    MPID_Datatype *dt_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_ACCUMULATE);
@@ -372,7 +370,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     offset = target_disp * winfo->disp_unit;
 
     op_type = (do_get == 1) ? MPIDI_CH4U_AM_GET_ACC_REQ : MPIDI_CH4U_AM_ACC_REQ;
-    MPIDI_Datatype_get_info(origin_count, origin_datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_get_size_dt_ptr(origin_datatype, origin_count, data_sz, dt_ptr);
     if (data_sz == 0) {
         MPID_cc_decr(sreq->cc_ptr, &c);
         MPIU_Assert(c >= 0);
@@ -408,7 +406,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
         goto fn_exit;
     }
 
-    MPIDI_Datatype_get_info(target_count, target_datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_check_size(target_datatype, target_count, data_sz);
     am_hdr.target_datatype = dt_ptr->basic_type;
 
     segment_ptr = MPID_Segment_alloc();
@@ -610,13 +608,12 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
                                                int target_rank,
                                                MPI_Aint target_disp, MPID_Win * win)
 {
-    int                rc, mpi_errno = MPI_SUCCESS, c;
+    int                mpi_errno = MPI_SUCCESS, c;
     size_t             offset;
     MPID_Request      *sreq = NULL;
     MPIDI_CH4U_cswap_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
-    uint64_t dt_contig, data_sz, dt_true_lb;
-    MPID_Datatype *dt_ptr;
+    size_t data_sz;
     void *p_data;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_COMPARE_AND_SWAP);
@@ -631,7 +628,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     MPIU_Assert(sreq);
     sreq->kind = MPID_WIN_REQUEST;
 
-    MPIDI_Datatype_get_info(1, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Datatype_check_size(datatype, 1, data_sz);
     if (data_sz == 0) {
         MPID_cc_decr(sreq->cc_ptr, &c);
         MPIU_Assert(c >= 0);
@@ -641,11 +638,11 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
 
     p_data = MPIU_Malloc(data_sz * 2);
     MPIU_Assert(p_data);
-    MPIU_Memcpy(p_data, (char *)origin_addr + dt_true_lb, data_sz);
-    MPIU_Memcpy((char *)p_data + data_sz, (char *)compare_addr + dt_true_lb, data_sz);
+    MPIU_Memcpy(p_data, (char *)origin_addr, data_sz);
+    MPIU_Memcpy((char *)p_data + data_sz, (char *)compare_addr, data_sz);
 
     MPIU_CH4U_REQUEST(sreq, creq.win_ptr) = (uint64_t) win;
-    MPIU_CH4U_REQUEST(sreq, creq.addr) = (uint64_t)((char *) result_addr + dt_true_lb);
+    MPIU_CH4U_REQUEST(sreq, creq.addr) = (uint64_t)((char *) result_addr);
     MPIU_CH4U_REQUEST(sreq, creq.datatype) = datatype;
     MPIU_CH4U_REQUEST(sreq, creq.result_addr) = result_addr;
     MPIU_CH4U_REQUEST(sreq, creq.data) = p_data;
@@ -663,7 +660,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
 
     MPIDU_RC_POP(MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_CSWAP_REQ,
                                       &am_hdr, sizeof(am_hdr),
-                                      (char *)p_data - dt_true_lb, 2, datatype, sreq, NULL));
+                                      (char *)p_data, 2, datatype, sreq, NULL));
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_COMPARE_AND_SWAP);
     return mpi_errno;

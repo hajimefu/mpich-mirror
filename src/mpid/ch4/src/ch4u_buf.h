@@ -88,7 +88,6 @@ static inline void *MPIU_CH4I_get_head_buf(MPIU_buf_pool_t *pool)
 static inline void *MPIU_CH4U_get_buf_safe(MPIU_buf_pool_t *pool)
 {
     void *buf;
-    MPIU_buf_t *curr;
     MPIU_buf_pool_t *curr_pool;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_BUF_SAFE);

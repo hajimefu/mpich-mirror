@@ -14,27 +14,6 @@
 #include "ch4_types.h"
 #include <mpidch4.h>
 
-static inline int MPIDI_CH4I_win_lock_advance(MPID_Win *win);
-static inline void MPIDI_CH4I_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t  *info,
-                                                MPID_Win                   *win,
-                                                unsigned                    peer);
-static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
-                                                MPID_Win                   *win,
-                                                unsigned                    peer);
-static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
-                                              MPID_Win                   *win,
-                                              unsigned                    peer);
-static inline void MPIDI_CH4I_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
-                                                MPID_Win                   *win,
-                                                unsigned                    peer);
-static inline void MPIDI_CH4I_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
-                                            MPID_Win                   *win,
-                                            unsigned                    peer);
-static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_t *info,
-                                                 MPID_Win                   *win,
-                                                 unsigned                    peer);
-
-
 #define MPIDU_RC_POP(FUNC)                                      \
   do                                                            \
     {                                                           \
@@ -157,6 +136,22 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
 	    (_dt_contig_out) = (_dt_ptr)->is_contig;			\
 	    (_dt_true_lb)    = (_dt_ptr)->true_lb;			\
+	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+	}								\
+    })
+
+#define MPIDI_Datatype_get_size_dt_ptr(_count, _datatype,               \
+                                       _data_sz_out, _dt_ptr)           \
+    ({									\
+	if (IS_BUILTIN(_datatype))					\
+	{								\
+	    (_dt_ptr)        = NULL;					\
+	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *		\
+		MPID_Datatype_get_basic_size(_datatype);		\
+	}								\
+	else								\
+	{								\
+	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
 	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
 	}								\
     })
