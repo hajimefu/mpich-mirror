@@ -212,7 +212,7 @@
 	} while (_ret == -FI_EAGAIN);					\
     } while (0)
 
-#define PMI_RC(FUNC,STR)				\
+#define MPIDI_NM_PMI_RC_POP(FUNC,STR)				\
     do							\
     {							\
 	pmi_errno  = FUNC;				\

@@ -344,12 +344,12 @@ static inline int do_put(const void    *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_PUT);
 
-    MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
-                                                  target_count,
-                                                  target_rank,
-                                                  origin_datatype,
-                                                  target_datatype,
-                                                  &req,&flags,&ep,sigreq));
+    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
+                                                           target_count,
+                                                           target_rank,
+                                                           origin_datatype,
+                                                           target_datatype,
+                                                           &req,&flags,&ep,sigreq));
 
     offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
@@ -502,10 +502,10 @@ static inline int do_get(void          *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_GET);
 
-    MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
-                                                  target_rank,
-                                                  origin_datatype,target_datatype,
-                                                  &req,&flags,&ep,sigreq));
+    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
+                                                           target_rank,
+                                                           origin_datatype,target_datatype,
+                                                           &req,&flags,&ep,sigreq));
 
     offset                 = target_disp * WINFO_DISP_UNIT(win,target_rank);
     desc                   = fi_mr_desc(MPIDI_Global.mr);
@@ -815,12 +815,12 @@ static inline int do_accumulate(const void    *origin_addr,
 
     MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
-                                                     target_count,
-                                                     target_rank,
-                                                     origin_datatype,
-                                                     target_datatype,
-                                                     &req,&flags,&ep,sigreq));
+    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
+                                                              target_count,
+                                                              target_rank,
+                                                              origin_datatype,
+                                                              target_datatype,
+                                                              &req,&flags,&ep,sigreq));
 
     if((req->noncontig->origin_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
@@ -972,15 +972,15 @@ static inline int do_get_accumulate(const void    *origin_addr,
 
     MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
-                                                         target_count,
-                                                         result_count,
-                                                         target_rank,
-                                                         op,
-                                                         origin_datatype,
-                                                         target_datatype,
-                                                         result_datatype,
-                                                         &req,&flags,&ep,sigreq));
+    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
+                                                                  target_count,
+                                                                  result_count,
+                                                                  target_rank,
+                                                                  op,
+                                                                  origin_datatype,
+                                                                  target_datatype,
+                                                                  result_datatype,
+                                                                  &req,&flags,&ep,sigreq));
 
     if((req->noncontig->result_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {

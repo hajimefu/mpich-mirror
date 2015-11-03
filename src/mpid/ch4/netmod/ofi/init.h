@@ -267,11 +267,11 @@ static inline int MPIDI_netmod_init(int         rank,
     /* and the resources consumed by it, such as address vectors, counters,     */
     /* completion queues, etc.                                                  */
     /* ------------------------------------------------------------------------ */
-    MPI_RC_POP(MPIDI_Create_endpoint(prov_use,
-                                     MPIDI_Global.domain,
-                                     MPIDI_Global.p2p_cq,
-                                     MPIDI_Global.rma_ctr,
-                                     MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep, 0));
+    MPIDI_NM_MPI_RC_POP(MPIDI_Create_endpoint(prov_use,
+                                              MPIDI_Global.domain,
+                                              MPIDI_Global.p2p_cq,
+                                              MPIDI_Global.rma_ctr,
+                                              MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep, 0));
 
     /* ---------------------------------- */
     /* Get our endpoint name and publish  */
@@ -288,13 +288,13 @@ static inline int MPIDI_netmod_init(int         rank,
     memset(val, 0, maxlen);
     MPIU_STR_RC(MPIU_Str_add_binary_arg(&val, &maxlen, "OFI", (char *) &MPIDI_Global.addrname,
                                         MPIDI_Global.addrnamelen), buscard_len);
-    PMI_RC(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
 
     val = valS;
     sprintf(keyS, "OFI-%d", rank);
-    PMI_RC(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
-    PMI_RC(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
-    PMI_RC(PMI_Barrier(), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_Barrier(), pmi);
 
     /* -------------------------------- */
     /* Create our address table from    */
@@ -305,7 +305,7 @@ static inline int MPIDI_netmod_init(int         rank,
 
     for (i = 0; i < size; i++) {
         sprintf(keyS, "OFI-%d", i);
-        PMI_RC(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+        MPIDI_NM_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
         MPIU_STR_RC(MPIU_Str_get_binary_arg
                     (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
                      MPIDI_Global.addrnamelen, &maxlen), buscard_len);
@@ -357,14 +357,14 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
     /* ---------------------------------- */
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_self->remote_size, &COMM_OFI(comm_self).vcrt));
+    MPIDI_NM_MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_self->remote_size, &COMM_OFI(comm_self).vcrt));
     COMM_OFI(comm_self).vcrt->vcr_table[0].addr_idx = rank;
     COMM_OFI(comm_self).vcrt->vcr_table[0].is_local = 1;
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_WORLD and VCRT */
     /* ---------------------------------- */
-    MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
+    MPIDI_NM_MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
 
     /* -------------------------------- */
     /* Calculate per-node map           */
@@ -389,9 +389,11 @@ static inline int MPIDI_netmod_init(int         rank,
     /* -------------------------------- */
     if (spawned) {
         char parent_port[MPIDI_MAX_KVS_VALUE_LEN];
-        PMI_RC(PMI_KVS_Get(MPIDI_Global.kvsname,
-                           MPIDI_PARENT_PORT_KVSKEY, parent_port, MPIDI_MAX_KVS_VALUE_LEN), pmi);
-        MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
+        MPIDI_NM_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname,
+                                        MPIDI_PARENT_PORT_KVSKEY,
+                                        parent_port,
+                                        MPIDI_MAX_KVS_VALUE_LEN), pmi);
+        MPIDI_NM_MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
         MPIU_Assert(MPIR_Process.comm_parent != NULL);
         MPIU_Strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
@@ -430,8 +432,8 @@ static inline int MPIDI_netmod_finalize(void)
 
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
-    MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
-                                   MPI_SUM, MPIR_Process.comm_world, &errflag));
+    MPIDI_NM_MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
+                                            MPI_SUM, MPIR_Process.comm_world, &errflag));
 
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS
 

@@ -251,7 +251,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
-#define PMI_RC(FUNC,STR)                            \
+#define MPIDI_NM_PMI_RC_POP(FUNC,STR)                            \
   do                                                \
     {                                               \
       pmi_errno  = FUNC;                            \
@@ -266,11 +266,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                        #STR);                       \
     } while (0)
 
-#define MPI_RC_POP(FUNC)                                        \
-  do                                                            \
-    {                                                           \
-      mpi_errno = FUNC;                                         \
-      if (unlikely(mpi_errno!=MPI_SUCCESS)) MPIR_ERR_POP(mpi_errno);    \
+#define MPIDI_NM_MPI_RC_POP(FUNC)                                    \
+  do                                                                 \
+    {                                                                \
+      mpi_errno = FUNC;                                              \
+      if (unlikely(mpi_errno!=MPI_SUCCESS)) MPIR_ERR_POP(mpi_errno); \
     } while (0)
 
 #define MPIU_STR_RC(FUNC,STR)                                   \

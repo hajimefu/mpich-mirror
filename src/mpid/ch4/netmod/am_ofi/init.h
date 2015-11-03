@@ -136,20 +136,20 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     MPIU_STR_RC(MPIU_Str_add_binary_arg(&val, &maxlen, "OFI",
                                         (char *) &MPIDI_Global.addrname,
                                         MPIDI_Global.addrnamelen), buscard_len);
-    PMI_RC(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
 
     val = valS;
     sprintf(keyS, "OFI-%d", rank);
-    PMI_RC(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
-    PMI_RC(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
-    PMI_RC(PMI_Barrier(), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
+    MPIDI_NM_PMI_RC_POP(PMI_Barrier(), pmi);
 
     table = (char *) MPIU_Malloc(size * MPIDI_Global.addrnamelen);
     maxlen = MPIDI_KVSAPPSTRLEN;
 
     for (i = 0; i < size; i++) {
         sprintf(keyS, "OFI-%d", i);
-        PMI_RC(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+        MPIDI_NM_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
         MPIU_STR_RC(MPIU_Str_get_binary_arg(valS, "OFI",
                                             (char *) &table[i * MPIDI_Global.addrnamelen],
                                             MPIDI_Global.addrnamelen, &maxlen), buscard_len);
