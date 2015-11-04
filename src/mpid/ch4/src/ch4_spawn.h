@@ -39,7 +39,8 @@ static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
     kv = (PMI_keyval_t *)MPIU_Malloc(nkeys * sizeof(PMI_keyval_t));
 
     for(i=0; i<nkeys; i++) {
-        MPIDU_RC_POP(MPIR_Info_get_nthkey_impl(info_ptr,i,key));
+        mpi_errno = MPIR_Info_get_nthkey_impl(info_ptr,i,key);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         MPIR_Info_get_valuelen_impl(info_ptr,key,&vallen,&flag);
         kv[i].key = (const char *)MPIU_Strdup(key);
         kv[i].val = (char *)MPIU_Malloc(vallen + 1);
@@ -110,7 +111,8 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
         for(i=0; i<total_num_processes; i++)
             pmi_errcodes[i] = 0;
 
-        MPIDU_RC_POP(MPIDI_Open_port(NULL, port_name));
+        mpi_errno = MPIDI_Open_port(NULL, port_name);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
         info_keyval_sizes   = (int *)          MPIU_Malloc(count*sizeof(int));
         MPIR_ERR_CHKANDJUMP(!info_keyval_sizes, mpi_errno, MPI_ERR_OTHER, "**nomem");
@@ -123,10 +125,12 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
                 info_keyval_sizes[i]   = 0;
             }
         else
-            for(i=0; i<count; i++)
-                MPIDU_RC_POP(MPIDI_mpi_to_pmi_keyvals(info_ptrs[i],
-                                                          &info_keyval_vectors[i],
-                                                          &info_keyval_sizes[i]));
+            for(i=0; i<count; i++) {
+                mpi_errno = MPIDI_mpi_to_pmi_keyvals(info_ptrs[i],
+                                                     &info_keyval_vectors[i],
+                                                     &info_keyval_sizes[i]);
+                if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+            }
 
         preput_keyval_vector.key = MPIDI_PARENT_PORT_KVSKEY;
         preput_keyval_vector.val = port_name;
@@ -159,26 +163,36 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
 
     if(errcodes != MPI_ERRCODES_IGNORE) {
         MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-        MPIDU_RC_POP(MPIR_Bcast_impl(&should_accept,1,MPI_INT,
-                                         root,comm_ptr,&errflag));
-        MPIDU_RC_POP(MPIR_Bcast_impl(&pmi_errno,1,MPI_INT,
-                                         root,comm_ptr,&errflag));
-        MPIDU_RC_POP(MPIR_Bcast_impl(&total_num_processes,1,MPI_INT,
-                                         root, comm_ptr, &errflag));
-        MPIDU_RC_POP(MPIR_Bcast_impl(errcodes, total_num_processes, MPI_INT,
-                                         root, comm_ptr,&errflag));
+        mpi_errno = MPIR_Bcast_impl(&should_accept,1,MPI_INT,
+                                    root,comm_ptr,&errflag);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+        mpi_errno = MPIR_Bcast_impl(&pmi_errno,1,MPI_INT,
+                                    root,comm_ptr,&errflag);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+        mpi_errno = MPIR_Bcast_impl(&total_num_processes,1,MPI_INT,
+                                    root, comm_ptr, &errflag);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+        mpi_errno = MPIR_Bcast_impl(errcodes, total_num_processes, MPI_INT,
+                                    root, comm_ptr,&errflag);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
-    if(should_accept)
-        MPIDU_RC_POP(MPIDI_Comm_accept(port_name, NULL, root,
-                                           comm_ptr, intercomm));
-    else {
+    if (should_accept) {
+        mpi_errno = MPIDI_Comm_accept(port_name, NULL, root,
+                                      comm_ptr, intercomm);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+    } else {
         if((pmi_errno == PMI_SUCCESS) && (errcodes[0] != 0))
             MPIR_Comm_create(intercomm);
     }
 
-    if(comm_ptr->rank == root)
-        MPIDU_RC_POP(MPIDI_Close_port(port_name));
+    if (comm_ptr->rank == root) {
+        mpi_errno = MPIDI_Close_port(port_name);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+    }
 
 fn_exit:
 

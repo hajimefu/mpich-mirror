@@ -194,9 +194,11 @@ static inline int MPIDI_CH4I_reply_ssend(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_REPLY_SSEND);
     MPID_cc_incr(rreq->cc_ptr, &c);
     ack_msg.sreq_ptr = MPIU_CH4U_REQUEST(rreq, rreq.peer_req_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, rreq.reply_token),
+
+    mpi_errno = MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, rreq.reply_token),
                                                MPIDI_CH4U_AM_SSEND_ACK, &ack_msg, sizeof(ack_msg),
-                                               rreq));
+                                               rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_REPLY_SSEND);
     return mpi_errno;
@@ -216,9 +218,11 @@ static inline int MPIDI_CH4I_ack_put(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACK_PUT);
     MPID_cc_incr(rreq->cc_ptr, &c);
     ack_msg.preq_ptr = MPIU_CH4U_REQUEST(rreq, preq.preq_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, preq.reply_token),
-                                                MPIDI_CH4U_AM_PUT_ACK, &ack_msg, sizeof(ack_msg),
-                                                rreq));
+
+    mpi_errno = MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, preq.reply_token),
+                                               MPIDI_CH4U_AM_PUT_ACK, &ack_msg, sizeof(ack_msg),
+                                               rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_PUT);
     return mpi_errno;
@@ -245,12 +249,14 @@ static inline int MPIDI_CH4I_ack_cswap(MPID_Request * rreq)
 
     MPID_cc_incr(rreq->cc_ptr, &c);
     ack_msg.req_ptr = MPIU_CH4U_REQUEST(rreq, creq.creq_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_reply(MPIU_CH4U_REQUEST(rreq, creq.reply_token),
-                                            MPIDI_CH4U_AM_CSWAP_ACK, 
-                                            &ack_msg, sizeof(ack_msg),
-                                            result_addr, 1, 
-                                            MPIU_CH4U_REQUEST(rreq, creq.datatype),
-                                            rreq));
+
+    mpi_errno = MPIDI_netmod_send_am_reply(MPIU_CH4U_REQUEST(rreq, creq.reply_token),
+                                           MPIDI_CH4U_AM_CSWAP_ACK, 
+                                           &ack_msg, sizeof(ack_msg),
+                                           result_addr, 1, 
+                                           MPIU_CH4U_REQUEST(rreq, creq.datatype),
+                                           rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_CSWAP);
     return mpi_errno;
@@ -272,9 +278,11 @@ static inline int MPIDI_CH4I_ack_acc(MPID_Request * rreq)
 
     MPID_cc_incr(rreq->cc_ptr, &c);
     ack_msg.req_ptr = MPIU_CH4U_REQUEST(rreq, areq.req_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, areq.reply_token),
-                                                MPIDI_CH4U_AM_ACC_ACK, &ack_msg, sizeof(ack_msg),
-                                                rreq));
+
+    mpi_errno = MPIDI_netmod_send_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, areq.reply_token),
+                                               MPIDI_CH4U_AM_ACC_ACK, &ack_msg, sizeof(ack_msg),
+                                               rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_ACC);
     return mpi_errno;
@@ -296,12 +304,14 @@ static inline int MPIDI_CH4I_ack_get_acc(MPID_Request * rreq)
 
     MPID_cc_incr(rreq->cc_ptr, &c);
     ack_msg.req_ptr = MPIU_CH4U_REQUEST(rreq, areq.req_ptr);
-    MPIDU_RC_POP(MPIDI_netmod_send_am_reply(MPIU_CH4U_REQUEST(rreq, areq.reply_token),
-                                            MPIDI_CH4U_AM_GET_ACC_ACK,
-                                            &ack_msg, sizeof(ack_msg),
-                                            MPIU_CH4U_REQUEST(rreq, areq.data),
-                                            MPIU_CH4U_REQUEST(rreq, areq.data_sz),
-                                            MPI_BYTE, rreq));
+
+    mpi_errno = MPIDI_netmod_send_am_reply(MPIU_CH4U_REQUEST(rreq, areq.reply_token),
+                                           MPIDI_CH4U_AM_GET_ACC_ACK,
+                                           &ack_msg, sizeof(ack_msg),
+                                           MPIU_CH4U_REQUEST(rreq, areq.data),
+                                           MPIU_CH4U_REQUEST(rreq, areq.data_sz),
+                                           MPI_BYTE, rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACK_GET_ACC);
     return mpi_errno;
@@ -377,7 +387,8 @@ static inline int MPIDI_CH4I_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     rreq->kind = MPID_REQUEST_RECV;
 
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
+        mpi_errno = MPIDI_CH4I_reply_ssend(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4I_complete_req(rreq);
 
@@ -481,7 +492,8 @@ static inline int MPIDI_CH4I_unexp_cmpl_handler(MPID_Request * rreq)
 
     MPIU_CH4U_REQUEST(rreq, status) &= ~MPIDI_CH4U_REQ_UNEXPECTED;
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
+        mpi_errno = MPIDI_CH4I_reply_ssend(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
     dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(match_req, datatype));
@@ -512,7 +524,8 @@ static inline int MPIDI_CH4I_am_recv_cmpl_handler(MPID_Request * rreq)
     }
 
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_UNEXPECTED) {
-        MPIDU_RC_POP(MPIDI_CH4I_unexp_cmpl_handler(rreq));
+        mpi_errno = MPIDI_CH4I_unexp_cmpl_handler(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         goto fn_exit;
     }
 
@@ -520,7 +533,8 @@ static inline int MPIDI_CH4I_am_recv_cmpl_handler(MPID_Request * rreq)
     rreq->status.MPI_TAG = MPIDI_CH4I_get_tag(MPIU_CH4U_REQUEST(rreq, tag));
 
     if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        MPIDU_RC_POP(MPIDI_CH4I_reply_ssend(rreq));
+        mpi_errno = MPIDI_CH4I_reply_ssend(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
     dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(rreq, datatype));
@@ -578,7 +592,8 @@ static inline int MPIDI_CH4I_am_put_cmpl_handler(MPID_Request * rreq)
         MPIU_Free(MPIU_CH4U_REQUEST(rreq, preq.dt_iov));
     }
 
-    MPIDU_RC_POP(MPIDI_CH4I_ack_put(rreq));
+    mpi_errno = MPIDI_CH4I_ack_put(rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     MPIDI_CH4I_complete_req(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_CMPL_HANDLER);
@@ -617,7 +632,8 @@ static inline int MPIDI_CH4I_am_cswap_cmpl_handler(MPID_Request * rreq)
     
     /* MPIDI_CS_EXIT(); */
 
-    MPIDU_RC_POP(MPIDI_CH4I_ack_cswap(rreq));
+    mpi_errno = MPIDI_CH4I_ack_cswap(rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     MPIDI_CH4I_complete_req(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_CSWAP_CMPL_HANDLER);
@@ -804,13 +820,14 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
                         basic_sz * MPIU_CH4U_REQUEST(rreq, areq.target_count));
         }
         
-        MPIDU_RC_POP(MPIDI_CH4I_do_accumulate_op(MPIU_CH4U_REQUEST(rreq, areq.data),
-                                      MPIU_CH4U_REQUEST(rreq, areq.origin_count),
-                                      MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
-                                      MPIU_CH4U_REQUEST(rreq, areq.target_addr),
-                                      MPIU_CH4U_REQUEST(rreq, areq.target_count),
-                                      MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
-                                      MPIU_CH4U_REQUEST(rreq, areq.op)));
+        mpi_errno = MPIDI_CH4I_do_accumulate_op(MPIU_CH4U_REQUEST(rreq, areq.data),
+                                                MPIU_CH4U_REQUEST(rreq, areq.origin_count),
+                                                MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
+                                                MPIU_CH4U_REQUEST(rreq, areq.target_addr),
+                                                MPIU_CH4U_REQUEST(rreq, areq.target_count),
+                                                MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
+                                                MPIU_CH4U_REQUEST(rreq, areq.op));
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     } else {
         iov = (struct iovec *)MPIU_CH4U_REQUEST(rreq, areq.dt_iov);
         src_ptr = (char *)MPIU_CH4U_REQUEST(rreq, areq.data);
@@ -823,11 +840,12 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
                 offset += count * basic_sz;
             }
 
-            MPIDU_RC_POP(MPIDI_CH4I_do_accumulate_op(src_ptr, count,
-                                          MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
-                                          iov[i].iov_base, count,
-                                          MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
-                                          MPIU_CH4U_REQUEST(rreq, areq.op)));
+            mpi_errno = MPIDI_CH4I_do_accumulate_op(src_ptr, count,
+                                                    MPIU_CH4U_REQUEST(rreq, areq.origin_datatype),
+                                                    iov[i].iov_base, count,
+                                                    MPIU_CH4U_REQUEST(rreq, areq.target_datatype), 0,
+                                                    MPIU_CH4U_REQUEST(rreq, areq.op));
+            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             src_ptr += count * basic_sz;
         }
         MPIU_Free(iov);
@@ -838,9 +856,11 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
 
     if (original) {
         MPIU_CH4U_REQUEST(rreq, areq.data) = original;
-        MPIDU_RC_POP(MPIDI_CH4I_ack_get_acc(rreq));
+        mpi_errno = MPIDI_CH4I_ack_get_acc(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     } else {
-        MPIDU_RC_POP(MPIDI_CH4I_ack_acc(rreq));
+        mpi_errno = MPIDI_CH4I_ack_acc(rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4I_complete_req(rreq);
   fn_exit:
@@ -859,7 +879,8 @@ static inline int MPIDI_CH4I_am_acc_cmpl_handler(MPID_Request * rreq)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    MPIDU_RC_POP(MPIDI_CH4I_handle_acc_cmpl(rreq, 0));
+    mpi_errno = MPIDI_CH4I_handle_acc_cmpl(rreq, 0);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
     return mpi_errno;
@@ -876,7 +897,8 @@ static inline int MPIDI_CH4I_am_get_acc_cmpl_handler(MPID_Request * rreq)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_GET_ACC_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_GET_ACC_HANDLER);
-    MPIDU_RC_POP(MPIDI_CH4I_handle_acc_cmpl(rreq, 1));
+    mpi_errno = MPIDI_CH4I_handle_acc_cmpl(rreq, 1);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_GET_ACC_HANDLER);
     return mpi_errno;
@@ -1047,9 +1069,11 @@ static inline int MPIDI_CH4I_am_ssend_target_handler(void *am_hdr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_SSEND_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_SSEND_HANDLER);
 
-    MPIDU_RC_POP(MPIDI_CH4I_am_send_target_handler(am_hdr, sizeof(MPIDI_CH4U_AM_Hdr_t),
+    mpi_errno = MPIDI_CH4I_am_send_target_handler(am_hdr, sizeof(MPIDI_CH4U_AM_Hdr_t),
                                                   reply_token, data, p_data_sz,
-                                                  is_contig, cmpl_handler_fn, req));
+                                                  is_contig, cmpl_handler_fn, req);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
     MPIU_Assert(req);
     MPIU_CH4U_REQUEST(*req, rreq.peer_req_ptr) = msg_hdr->sreq_ptr;
     MPIU_CH4U_REQUEST(*req, rreq.reply_token) = reply_token;
@@ -1304,11 +1328,14 @@ static inline int MPIDI_CH4I_win_lock_advance(MPID_Win *win)
         else
             MPIU_Assert(0);
 
-        MPIDU_RC_POP(MPIDI_netmod_inject_am_hdr(lock->rank, win->comm_ptr,
-                                                MPIDI_CH4U_AM_WIN_CTRL,
-                                                &msg, sizeof (msg), NULL));
+        mpi_errno = MPIDI_netmod_inject_am_hdr(lock->rank, win->comm_ptr,
+                                               MPIDI_CH4U_AM_WIN_CTRL,
+                                               &msg, sizeof (msg), NULL);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         MPIU_Free(lock);
-        MPIDU_RC_POP(MPIDI_CH4I_win_lock_advance(win));
+        
+        mpi_errno = MPIDI_CH4I_win_lock_advance(win);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
 fn_exit:
@@ -1395,10 +1422,10 @@ static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_UNLOCK_ACK;
 
-    MPIDU_RC_POP(MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
-                                            MPIDI_CH4U_AM_WIN_CTRL,
-                                            &msg, sizeof (msg), NULL));
-
+    mpi_errno = MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
+                                           MPIDI_CH4U_AM_WIN_CTRL,
+                                           &msg, sizeof (msg), NULL);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_UNLOCK_ACK_PROC);
     return;
@@ -1775,9 +1802,11 @@ static inline int MPIDI_CH4I_am_acc_target_handler(void *am_hdr,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    MPIDU_RC_POP(MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
-                                               data, p_data_sz, is_contig,
-                                               cmpl_handler_fn, req, 0));
+
+    mpi_errno = MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
+                                              data, p_data_sz, is_contig,
+                                              cmpl_handler_fn, req, 0);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
     return mpi_errno;
@@ -1801,9 +1830,11 @@ static inline int MPIDI_CH4I_am_get_acc_target_handler(void *am_hdr,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    MPIDU_RC_POP(MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
-                                               data, p_data_sz, is_contig,
-                                               cmpl_handler_fn, req, 1));
+    
+    mpi_errno = MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
+                                              data, p_data_sz, is_contig,
+                                              cmpl_handler_fn, req, 1);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
     return mpi_errno;
@@ -1844,11 +1875,13 @@ static inline int MPIDI_CH4I_am_get_target_handler(void *am_hdr,
     
     if (!msg_hdr->n_iov) {
         MPIU_CH4U_REQUEST(rreq, greq.dt_iov) = NULL;
-        MPIDU_RC_POP(MPIDI_netmod_send_am_reply(reply_token,
-                                                MPIDI_CH4U_AM_GET_ACK,
-                                                &get_ack, sizeof(get_ack),
-                                                (void *)msg_hdr->addr, msg_hdr->count,
-                                                msg_hdr->datatype, rreq));
+
+        mpi_errno = MPIDI_netmod_send_am_reply(reply_token,
+                                               MPIDI_CH4U_AM_GET_ACK,
+                                               &get_ack, sizeof(get_ack),
+                                               (void *)msg_hdr->addr, msg_hdr->count,
+                                               msg_hdr->datatype, rreq);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         goto fn_exit;
     }
         
@@ -1868,10 +1901,12 @@ static inline int MPIDI_CH4I_am_get_target_handler(void *am_hdr,
     }
 
     MPIU_CH4U_REQUEST(rreq, greq.dt_iov) = p_data;
-    MPIDU_RC_POP(MPIDI_netmod_send_am_reply(reply_token,
-                                            MPIDI_CH4U_AM_GET_ACK,
-                                            &get_ack, sizeof(get_ack),
-                                            p_data, data_sz, MPI_BYTE, rreq));
+
+    mpi_errno = MPIDI_netmod_send_am_reply(reply_token,
+                                           MPIDI_CH4U_AM_GET_ACK,
+                                           &get_ack, sizeof(get_ack),
+                                           p_data, data_sz, MPI_BYTE, rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_GET_HANDLER);
     return mpi_errno;
@@ -1989,65 +2024,82 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_CH4_Global.unexp_list = NULL;
 #endif
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SEND,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SEND,
                                              &MPIDI_CH4I_am_send_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_send_target_handler));
+                                             &MPIDI_CH4I_am_send_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SSEND_REQ,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SSEND_REQ,
                                              &MPIDI_CH4I_am_send_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_ssend_target_handler));
+                                             &MPIDI_CH4I_am_ssend_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SSEND_ACK,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SSEND_ACK,
                                              &MPIDI_CH4I_am_ssend_ack_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_ssend_ack_target_handler));
+                                             &MPIDI_CH4I_am_ssend_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_REQ,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_REQ,
                                              &MPIDI_CH4I_am_put_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_put_target_handler));
+                                             &MPIDI_CH4I_am_put_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_ACK,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_ACK,
                                              &MPIDI_CH4I_am_put_ack_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_put_ack_target_handler));
+                                             &MPIDI_CH4I_am_put_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_REQ,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_REQ,
                                              &MPIDI_CH4I_am_get_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_get_target_handler));
+                                             &MPIDI_CH4I_am_get_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACK,
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACK,
                                              &MPIDI_CH4I_am_get_ack_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_get_ack_target_handler));
+                                             &MPIDI_CH4I_am_get_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_CSWAP_REQ,
-                                              &MPIDI_CH4I_am_cswap_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_cswap_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_CSWAP_REQ,
+                                             &MPIDI_CH4I_am_cswap_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_cswap_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_CSWAP_ACK,
-                                              &MPIDI_CH4I_am_cswap_ack_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_cswap_ack_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_CSWAP_ACK,
+                                             &MPIDI_CH4I_am_cswap_ack_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_cswap_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_REQ,
-                                              &MPIDI_CH4I_am_acc_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_acc_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_REQ,
+                                             &MPIDI_CH4I_am_acc_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_acc_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_ACK,
-                                              &MPIDI_CH4I_am_acc_ack_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_acc_ack_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_ACK,
+                                             &MPIDI_CH4I_am_acc_ack_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_acc_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_REQ,
-                                              &MPIDI_CH4I_am_acc_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_get_acc_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_REQ,
+                                             &MPIDI_CH4I_am_acc_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_get_acc_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_ACK,
-                                              &MPIDI_CH4I_am_get_acc_ack_origin_cmpl_handler,
-                                              &MPIDI_CH4I_am_get_acc_ack_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_ACK,
+                                             &MPIDI_CH4I_am_get_acc_ack_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_get_acc_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_WIN_CTRL,
-                                              NULL,
-                                              &MPIDI_CH4I_am_win_ctrl_target_handler));
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_WIN_CTRL,
+                                             NULL,
+                                             &MPIDI_CH4I_am_win_ctrl_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
+    mpi_errno = MPIDI_CH4U_init_comm(comm_world);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_world));
-    MPIDU_RC_POP(MPIDI_CH4U_init_comm(comm_self));
+    mpi_errno = MPIDI_CH4U_init_comm(comm_self);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
     MPIDI_CH4I_map_create(&MPIDI_CH4_Global.win_map);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
   fn_exit:

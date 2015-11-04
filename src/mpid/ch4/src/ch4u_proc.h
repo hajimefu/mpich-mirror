@@ -85,14 +85,16 @@ static inline int MPIDI_CH4U_build_nodemap(int             myrank,
                         mpi_errno,"node map");
 
     nodeids[myrank] = gethostid();
-    MPIDU_RC_POP(MPIR_Allgather_impl(MPI_IN_PLACE,
-                                     0,
-                                     MPI_DATATYPE_NULL,
-                                     nodeids,
-                                     sizeof(*nodeids),
-                                     MPI_BYTE,
-                                     comm,
-                                     &errflag));
+
+    mpi_errno = MPIR_Allgather_impl(MPI_IN_PLACE,
+				    0,
+				    MPI_DATATYPE_NULL,
+				    nodeids,
+				    sizeof(*nodeids),
+				    MPI_BYTE,
+				    comm,
+				    &errflag);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     *sz_out = -1;
     for(i=0;i<sz;i++) {

@@ -319,9 +319,11 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     MPIDI_STATE_DECL(MPID_STATE_CH4_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FINALIZE);
 
-    MPIDU_RC_POP(MPIDI_netmod_finalize());
+    mpi_errno = MPIDI_netmod_finalize();
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #if defined(MPIDI_BUILD_CH4_SHM)
-    MPIDU_RC_POP(MPIDI_shm_finalize());
+    mpi_errno = MPIDI_shm_finalize();
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #endif
 
     MPIU_Free(MPIDI_CH4_Global.comm_req_lists);

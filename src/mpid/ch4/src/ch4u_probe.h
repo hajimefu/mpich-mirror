@@ -82,7 +82,8 @@ __CH4_INLINE__ int MPIDI_CH4U_probe(int source,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PROBE);
 
     while (!flag) {
-        MPIDU_RC_POP(MPIDI_CH4U_iprobe(source, tag, comm, context_offset, &flag, status));
+        mpi_errno = MPIDI_CH4U_iprobe(source, tag, comm, context_offset, &flag, status);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
   fn_exit:

@@ -54,7 +54,8 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank, int handler_id, 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
 
-    MPIDU_RC_POP(MPIDI_netmod_am_ofi_init_req(am_hdr, am_hdr_sz, sreq, is_reply));
+    mpi_errno = MPIDI_netmod_am_ofi_init_req(am_hdr, am_hdr_sz, sreq, is_reply);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
@@ -184,7 +185,8 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
 
-    MPIDU_RC_POP(MPIDI_netmod_am_ofi_init_req(am_hdr, am_hdr_sz, sreq, is_reply));
+    mpi_errno = MPIDI_netmod_am_ofi_init_req(am_hdr, am_hdr_sz, sreq, is_reply);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     send_buf = (char *) buf + dt_true_lb;

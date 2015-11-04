@@ -49,14 +49,17 @@ static inline int MPIDI_CH4I_do_send(const void *buf,
         ssend_req.hdr = am_hdr;
         ssend_req.sreq_ptr = (uint64_t) sreq;
         MPID_cc_incr(sreq->cc_ptr, &c);
-        MPIDU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SSEND_REQ,
+
+        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SSEND_REQ,
                                          &ssend_req, sizeof(ssend_req),
-                                         buf, count, datatype, sreq, NULL));
+                                         buf, count, datatype, sreq, NULL);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     else {
-        MPIDU_RC_POP(MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SEND,
+        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SEND,
                                          &am_hdr, sizeof(am_hdr),
-                                         buf, count, datatype, sreq, NULL));
+                                         buf, count, datatype, sreq, NULL);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
   fn_exit:

@@ -121,8 +121,9 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     FI_RC(fi_av_open(MPIDI_Global.domain, &av_attr, &MPIDI_Global.av, NULL), avopen);
 
-    MPIDU_RC_POP(MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
-                                     MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep));
+    mpi_errno = MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
+                                     MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Global.addrnamelen = FI_NAME_MAX;
     FI_RC(fi_getname((fid_t) MPIDI_Global.ep, MPIDI_Global.addrname,
@@ -163,18 +164,24 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->rank = 0;
     comm->remote_size = 1;
     comm->local_size = 1;
-    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
+
+    mpi_errno = MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
 
     comm = MPIR_Process.comm_world;
     comm->rank = rank;
     comm->remote_size = size;
     comm->local_size = size;
-    MPIDU_RC_POP(MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt));
+    
+    mpi_errno = MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Global.buf_pool = 
         MPIU_CH4U_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
-    MPIDU_RC_POP(MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts));
+
+    mpi_errno = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     optlen = MPIDI_MIN_MSG_SZ;
     FI_RC(fi_setopt(&MPIDI_Global.ep->fid, FI_OPT_ENDPOINT,
@@ -234,8 +241,10 @@ static inline int MPIDI_netmod_finalize(void)
 
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
-    MPIDU_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
-                                   MPI_SUM, MPIR_Process.comm_world, &errflag));
+
+    mpi_errno = MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
+                                    MPI_SUM, MPIR_Process.comm_world, &errflag);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     FI_RC(fi_close(&MPIDI_Global.mr->fid), mr_unreg);
     FI_RC(fi_close(&MPIDI_Global.ep->fid), epclose);
