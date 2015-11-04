@@ -154,7 +154,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
         curr_len = MIN(rem, MPIDI_Global.max_send);
 
         /* TODO: get context from pool */
-        am_req = MPIU_Malloc(sizeof(*am_req));
+        am_req = (MPIDI_netmod_am_ofi_amrequest_t *)MPIU_Malloc(sizeof(*am_req));
         MPIU_Assert(am_req);
         
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
@@ -440,7 +440,7 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
     if (ofi_req->req_hdr->lmt_cntr)
         goto fn_exit;
 
-    rreq = ofi_req->req_hdr->rreq_ptr;
+    rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
     mpi_errno = MPIDI_netmod_dispatch_lmt_ack(source, 
                                               AMREQ_OFI_HDR(rreq, lmt_info.sreq_ptr),
                                               netmod_context);
