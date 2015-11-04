@@ -16,7 +16,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include "ofi_pre.h"
-#include "mpidch4u.h"
+#include "ch4_types.h"
 
 EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
