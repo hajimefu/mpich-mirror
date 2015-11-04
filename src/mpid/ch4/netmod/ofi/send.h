@@ -188,7 +188,7 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
                                     match_bits, (void *) &(REQ_OFI(sreq, context))), tsend);
         ctrl.type = MPIDI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
-        MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
+        MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     }
 

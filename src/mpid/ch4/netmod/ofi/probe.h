@@ -67,7 +67,7 @@ static inline int do_iprobe(int source,
     msg.data = 0;
 
     FI_RC(fi_trecvmsg(G_RXC_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION), trecv);
-    PROGRESS_WHILE(REQ_OFI(rreq, util_id) == MPIDI_PEEK_START);
+    MPIDI_NM_PROGRESS_WHILE(REQ_OFI(rreq, util_id) == MPIDI_PEEK_START);
 
     switch (REQ_OFI(rreq, util_id)) {
     case  MPIDI_PEEK_NOT_FOUND:
@@ -106,7 +106,7 @@ static inline int MPIDI_netmod_probe(int source,
         mpi_errno = MPIDI_Iprobe(source, tag, comm, context_offset, &flag, status);
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
-        PROGRESS();
+        MPIDI_NM_PROGRESS();
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
