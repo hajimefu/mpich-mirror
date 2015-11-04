@@ -280,8 +280,8 @@ static inline int MPIDI_netmod_send_amv(int rank,
                                         MPI_Datatype datatype,
                                         MPID_Request * sreq, void *netmod_context)
 {
-    int mpi_errno = MPI_SUCCESS, i, is_allocated;
-    size_t am_hdr_sz = 0;
+    int mpi_errno = MPI_SUCCESS, is_allocated;
+    size_t am_hdr_sz = 0, i;
     char *am_hdr_buf;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AMV);
@@ -293,10 +293,10 @@ static inline int MPIDI_netmod_send_amv(int rank,
 
     /* TODO: avoid the malloc here, use the am_hdr directly */
     if (am_hdr_sz > MPIDI_BUF_POOL_SZ) {
-        am_hdr_buf = MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *)MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -329,8 +329,8 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
                                             size_t iov_len,
                                             MPID_Request * sreq, void *netmod_context)
 {
-    int mpi_errno = MPI_SUCCESS, i, is_allocated;
-    size_t am_hdr_sz = 0;
+    int mpi_errno = MPI_SUCCESS, is_allocated;
+    size_t am_hdr_sz = 0, i;
     char *am_hdr_buf;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AMV_HDR);
@@ -342,10 +342,10 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
 
     /* TODO: avoid the malloc here, use the am_hdr directly */
     if (am_hdr_sz > MPIDI_BUF_POOL_SZ) {
-        am_hdr_buf = MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -413,8 +413,8 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
                                               const void *data, MPI_Count count,
                                               MPI_Datatype datatype, MPID_Request * sreq)
 {
-    int mpi_errno = MPI_SUCCESS, i, is_allocated;
-    size_t am_hdr_sz = 0;
+    int mpi_errno = MPI_SUCCESS, is_allocated;
+    size_t am_hdr_sz = 0, i;
     char *am_hdr_buf;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AMV_REPLY);
@@ -426,10 +426,10 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
 
     /* TODO: avoid the malloc here, use the am_hdr directly */
     if (am_hdr_sz > MPIDI_BUF_POOL_SZ) {
-        am_hdr_buf = MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -472,10 +472,10 @@ static inline int MPIDI_netmod_inject_am_hdr(int rank,
     MPIU_Assert(am_hdr_sz + sizeof(*msg_hdr) < MPIDI_Global.max_buffered_send);
 
     if (am_hdr_sz + sizeof(*msg_hdr) > MPIDI_BUF_POOL_SZ) {
-        data_buf = MPIU_Malloc(am_hdr_sz + sizeof(*msg_hdr));
+        data_buf = (char *) MPIU_Malloc(am_hdr_sz + sizeof(*msg_hdr));
         is_allocated = 1;
     } else {
-        data_buf = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        data_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -516,10 +516,10 @@ static inline int MPIDI_netmod_inject_am_hdr_reply(void *reply_token,
 
     MPIU_Assert(am_hdr_sz + sizeof(*msg_hdr) < MPIDI_Global.max_buffered_send);
     if (am_hdr_sz + sizeof(*msg_hdr) > MPIDI_BUF_POOL_SZ) {
-        data_buf = MPIU_Malloc(am_hdr_sz + sizeof(*msg_hdr));
+        data_buf = (char *) MPIU_Malloc(am_hdr_sz + sizeof(*msg_hdr));
         is_allocated = 1;
     } else {
-        data_buf = MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        data_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
