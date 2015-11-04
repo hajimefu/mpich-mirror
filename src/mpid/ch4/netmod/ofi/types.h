@@ -514,29 +514,7 @@ extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
 extern int   MPIDI_OFI_control_dispatch(void *buf);
 extern void  MPIDI_OFI_Index_datatypes();
-extern int MPIU_Info_alloc(MPID_Info **info_p_p);
-/* Prototypes for inliner */
-extern int MPIR_Datatype_init_names(void);
-extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                               void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                               MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
-extern int MPIR_Barrier_impl(MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
-extern int MPIR_Comm_commit(MPID_Comm *);
-extern int MPIR_Comm_split_impl(MPID_Comm * comm_ptr, int color, int key, MPID_Comm ** newcomm_ptr);
-extern int MPIR_Allreduce_impl(const void *sendbuf, void *recvbuf, int count,
-                               MPI_Datatype datatype, MPI_Op op, MPID_Comm * comm_ptr,
-                               MPIR_Errflag_t * errflag);
-extern int MPIR_Bcast_impl(void *buffer, int count, MPI_Datatype datatype, int root,
-                           MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
-extern int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtype,
-                          void *recvbuf, MPI_Aint recvcount, MPI_Datatype recvtype);
-extern int MPIR_Info_set_impl(MPID_Info * info_ptr, const char *key, const char *value);
-extern int MPIR_Bcast_intra(void *buffer, int count, MPI_Datatype datatype, int
-                            root, MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
-extern int MPIDU_Sched_progress(int *made_progress);
-extern int MPIR_Comm_create(MPID_Comm **);
-extern int MPIR_Comm_dup_impl(MPID_Comm * comm_ptr, MPID_Comm ** newcomm_ptr);
-extern int MPIR_Comm_free_impl(MPID_Comm * comm_ptr);
+extern int   MPIR_Datatype_init_names(void);
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

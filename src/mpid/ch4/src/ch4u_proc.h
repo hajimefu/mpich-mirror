@@ -13,13 +13,6 @@
 
 #include "ch4_types.h"
 
-extern int MPIR_Allgather_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                               void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                               MPID_Comm * comm_ptr, MPIR_Errflag_t * errflag);
-
-
-
-
 static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
 {
     int ret;

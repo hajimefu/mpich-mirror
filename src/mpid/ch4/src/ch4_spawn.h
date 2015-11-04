@@ -13,14 +13,6 @@
 
 #include "ch4_impl.h"
 
-extern int  MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char *value, int *flag);
-extern void MPIR_Info_get_valuelen_impl(MPID_Info *info_ptr, const char *key, int *valuelen, int *flag);
-extern void MPIR_Info_get_nkeys_impl(MPID_Info *info_ptr, int *nkeys);
-extern int  MPIR_Info_get_nthkey_impl(MPID_Info *info, int n, char *key);
-extern int  MPIR_Bcast_impl(void *buffer, int count, MPI_Datatype datatype, int root,
-                            MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
-extern int MPIR_Comm_create(MPID_Comm **);
-
 static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
                                            PMI_keyval_t **kv_ptr,
                                            int           *nkeys_ptr)

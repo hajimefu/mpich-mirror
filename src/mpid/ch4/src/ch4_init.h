@@ -13,8 +13,6 @@
 
 #include "ch4_impl.h"
 
-extern int MPIR_Comm_commit( MPID_Comm * );
-
 /*
 === BEGIN_MPI_T_CVAR_INFO_BLOCK ===
 
