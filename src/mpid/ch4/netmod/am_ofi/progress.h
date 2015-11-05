@@ -125,9 +125,10 @@ static inline int MPIDI_netmod_handle_short_am_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr,
 
     if (cmpl_handler_fn) {
         cmpl_handler_fn(rreq);
-        MPIDI_netmod_am_ofi_clear_req(rreq);
-        MPIDI_netmod_am_ofi_req_complete(rreq);
     }
+
+    MPIDI_netmod_am_ofi_clear_req(rreq);
+    MPIDI_netmod_am_ofi_req_complete(rreq);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
@@ -468,7 +469,8 @@ static inline int MPIDI_netmod_repost_buffer(void *buf, void *netmod_context)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
 
-    FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf, FI_MULTI_RECV), repost);
+    FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf,
+                           FI_MULTI_RECV | FI_COMPLETION), repost);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
     return mpi_errno;
