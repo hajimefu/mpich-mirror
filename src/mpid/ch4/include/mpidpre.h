@@ -76,8 +76,10 @@ typedef struct MPIDI_CH4U_Dev_get_req_t {
     uint64_t win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
-    int count;
     MPI_Datatype datatype;
+    int count;
+    int n_iov;
+    void *reply_token;
     void *dt_iov;
 } MPIDI_CH4U_Dev_get_req_t;
 
