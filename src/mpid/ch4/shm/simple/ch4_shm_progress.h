@@ -126,8 +126,15 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     }
                     REQ_SHM(req)->data_sz = data_sz;
                     /* set status */
-                    req->status.MPI_SOURCE = sender_rank;
-                    req->status.MPI_TAG = tag;
+
+                    if (in_cell) {
+                        req->status.MPI_SOURCE = cell->rank;
+                        req->status.MPI_TAG = cell->tag;
+                    }
+                    else {
+                        req->status.MPI_SOURCE = sender_rank;
+                        req->status.MPI_TAG = tag;
+                    }
                     count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
                     MPIR_STATUS_SET_COUNT(req->status,count);
                     /* dequeue rreq */
