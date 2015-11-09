@@ -158,8 +158,8 @@ static inline int recv_huge_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 
     recv->seqno++;
     hc->localreq = rreq;
-    hc->done_fn = recv_event;
-    hc->wc = *wc;
+    hc->done_fn  = recv_event;
+    hc->wc       = *wc;
     get_huge_event(NULL, (MPID_Request *) hc);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
@@ -218,7 +218,13 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
 
         if (cntr->outstanding == 0) {
             MPIDI_Send_control_t ctrl;
+            uint64_t key;
+            int      key_back;
             MPIDI_OFI_Map_erase(COMM_OFI(comm).huge_send_counters, REQ_OFI(sreq, util_id));
+            key          = fi_mr_key(cntr->mr);
+            key_back     = (key >> MPIDI_HUGE_RMA_SHIFT);
+            MPIDI_OFI_Index_allocator_free(COMM_OFI(comm).rma_id_allocator,key_back);
+            FI_RC_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
             MPIU_Free(ptr);
             ctrl.type = MPIDI_CTRL_HUGE_CLEANUP;
             MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl, NULL, 0, REQ_OFI(sreq, util_id), comm, NULL));
@@ -299,8 +305,9 @@ fn_fail:
 static inline int get_huge_event(cq_tagged_entry_t *wc,
                                  MPID_Request      *req)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int                 mpi_errno = MPI_SUCCESS;
     MPIDI_Huge_chunk_t *hc = (MPIDI_Huge_chunk_t *)req;
+    uint64_t            remote_key;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
 
@@ -319,14 +326,14 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
             MPIU_Free(hc);
             goto fn_exit;
         }
-
+        remote_key = hc->remote_info.rma_key << MPIDI_HUGE_RMA_SHIFT;
         FI_RC_RETRY_NOLOCK(fi_read(G_TXC_RMA(0),                                           /* endpoint     */
                                    (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
                                    bytesToGet,                                             /* bytes        */
                                    NULL,                                                   /* descriptor   */
                                    _comm_to_phys(hc->comm_ptr,hc->remote_info.origin_rank,MPIDI_API_MSG), /* Destination  */
-                                   (uint64_t)hc->remote_info.send_buf+hc->cur_offset,      /* remote maddr */
-                                   MPIDI_Global.lkey,                                      /* Key          */
+                                   hc->cur_offset,                                         /* remote maddr */
+                                   remote_key,                                             /* Key          */
                                    (void *)&hc->context),rdma_readfrom);                   /* Context      */
         hc->cur_offset+=bytesToGet;
     }
@@ -417,49 +424,53 @@ static inline MPID_Request *devreq_to_req(void *context)
 static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
 {
     int mpi_errno;
-    switch(REQ_OFI(req,event_id)) {
-    case MPIDI_EVENT_PEEK:
-        mpi_errno = peek_event(wc,req);
-        break;
-    case MPIDI_EVENT_RECV:
-        mpi_errno = recv_event(wc,req);
-        break;
-    case MPIDI_EVENT_RECV_HUGE:
-        mpi_errno = recv_huge_event(wc,req);
-        break;
-    case MPIDI_EVENT_SEND:
+
+    if(likely(REQ_OFI(req,event_id) == MPIDI_EVENT_SEND)) {
         mpi_errno = send_event(wc,req);
-        break;
-    case MPIDI_EVENT_SEND_HUGE:
-        mpi_errno = send_huge_event(wc,req);
-        break;
-    case MPIDI_EVENT_SSEND_ACK:
-        mpi_errno = ssend_ack_event(wc,req);
-        break;
-    case MPIDI_EVENT_GET_HUGE:
-        mpi_errno = get_huge_event(wc,req);
-        break;
-    case MPIDI_EVENT_CONTROL:
-        mpi_errno = control_event(wc,req);
-        break;
-    case MPIDI_EVENT_CHUNK_DONE:
-        mpi_errno = chunk_done_event(wc,req);
-        break;
-    case MPIDI_EVENT_RMA_DONE:
+        goto fn_exit;
+    } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_RECV)) {
+        mpi_errno = recv_event(wc,req);
+        goto fn_exit;
+    } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_RMA_DONE)) {
         mpi_errno = rma_done_event(wc,req);
-        break;
-    case MPIDI_EVENT_DYNPROC_DONE:
-        mpi_errno = dynproc_done_event(wc,req);
-        break;
-    case MPIDI_EVENT_ACCEPT_PROBE:
-        mpi_errno = accept_probe_event(wc,req);
-        break;
-    case MPIDI_EVENT_ABORT:
-    default:
-        mpi_errno = MPI_SUCCESS;
-        MPIU_Assert(0);
-        break;
+        goto fn_exit;
+    } else if (unlikely(1)) {
+        switch(REQ_OFI(req,event_id)) {
+        case MPIDI_EVENT_CONTROL:
+            mpi_errno = control_event(wc,req);
+            break;
+        case MPIDI_EVENT_PEEK:
+            mpi_errno = peek_event(wc,req);
+            break;
+        case MPIDI_EVENT_RECV_HUGE:
+            mpi_errno = recv_huge_event(wc,req);
+            break;
+        case MPIDI_EVENT_SEND_HUGE:
+            mpi_errno = send_huge_event(wc,req);
+            break;
+        case MPIDI_EVENT_SSEND_ACK:
+            mpi_errno = ssend_ack_event(wc,req);
+            break;
+        case MPIDI_EVENT_GET_HUGE:
+            mpi_errno = get_huge_event(wc,req);
+            break;
+        case MPIDI_EVENT_CHUNK_DONE:
+            mpi_errno = chunk_done_event(wc,req);
+            break;
+        case MPIDI_EVENT_DYNPROC_DONE:
+            mpi_errno = dynproc_done_event(wc,req);
+            break;
+        case MPIDI_EVENT_ACCEPT_PROBE:
+            mpi_errno = accept_probe_event(wc,req);
+            break;
+        case MPIDI_EVENT_ABORT:
+        default:
+            mpi_errno = MPI_SUCCESS;
+            MPIU_Assert(0);
+            break;
+        }
     }
+fn_exit:
     return mpi_errno;
 }
 

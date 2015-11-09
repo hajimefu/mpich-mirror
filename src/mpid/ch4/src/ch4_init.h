@@ -411,8 +411,10 @@ __CH4_INLINE__ int MPIDI_Get_processor_name(char *name, int namelen, int *result
 #define FUNCNAME MPIDI_Abort
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Abort(MPID_Comm * comm,
-                               int mpi_errno, int exit_code, const char *error_msg)
+__CH4_INLINE__ int MPIDI_Abort(MPID_Comm *comm,
+                               int        mpi_errno,
+                               int        exit_code,
+                               const char *error_msg)
 {
     char sys_str[MPI_MAX_ERROR_STRING + 5] = "";
     char comm_str[MPI_MAX_ERROR_STRING] = "";
@@ -440,15 +442,14 @@ __CH4_INLINE__ int MPIDI_Abort(MPID_Comm * comm,
         MPIR_Err_get_string(mpi_errno, msg, MPI_MAX_ERROR_STRING, NULL);
         snprintf(sys_str, sizeof(msg), " (%s)", msg);
     }
-
-    snprintf(error_str, sizeof(error_str), "Abort(%d)%s%s: %s%s\n",
+    MPL_snprintf(error_str, sizeof(error_str), "Abort(%d)%s%s: %s%s\n",
              exit_code, world_str, comm_str, error_msg, sys_str);
     MPL_error_printf("%s", error_str);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ABORT);
     fflush(stderr);
     fflush(stdout);
-    exit(1);
+    PMI_Abort(exit_code, error_msg);
     return 0;
 }
 

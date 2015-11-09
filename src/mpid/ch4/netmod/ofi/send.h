@@ -116,13 +116,13 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         MPID_cc_incr(sreq->cc_ptr, &c);
         ssend_match = init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
         ssend_match |= MPID_SYNC_SEND_ACK;
-        FI_RC_RETRY(fi_trecv(G_RXC_TAG(0),      /* Socket      */
-                             NULL,      /* recvbuf     */
-                             0, /* data sz     */
-                             MPIDI_Global.mr,   /* data descr  */
+        FI_RC_RETRY(fi_trecv(G_RXC_TAG(0),      /* endpoint    */
+                             NULL,              /* recvbuf     */
+                             0,                 /* data sz     */
+                             NULL,              /* memregion descr  */
                              _comm_to_phys(comm, rank, MPIDI_API_TAG),  /* remote proc */
                              ssend_match,       /* match bits  */
-                             0ULL,      /* mask bits   */
+                             0ULL,              /* mask bits   */
                              (void *) &(ackreq->context)), trecvsync);
     }
 
@@ -153,12 +153,14 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         send_event(NULL, sreq);
     }
     else if (data_sz <= MPIDI_Global.max_send)
-        FI_RC_RETRY(fi_tsend(G_TXC_TAG(0), send_buf,
-                             data_sz, MPIDI_Global.mr, _comm_to_phys(comm, rank, MPIDI_API_TAG),
-                             match_bits, (void *) &(REQ_OFI(sreq, context))), tsend);
+        FI_RC_RETRY(fi_tsend(G_TXC_TAG(0), send_buf,data_sz, NULL,
+                             _comm_to_phys(comm, rank, MPIDI_API_TAG),
+                             match_bits, (void *) &(REQ_OFI(sreq, context))),
+                    tsend);
     else if (unlikely(1)) {
         MPIDI_Send_control_t ctrl;
         int c;
+        uint64_t rma_key;
         MPIDI_Hugecntr *cntr;
         void *ptr;
         c = 1;
@@ -168,12 +170,25 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
 
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
         if (ptr == MPIDI_MAP_NOT_FOUND) {
-            ptr = MPIU_Malloc(sizeof(int));
+            ptr = MPIU_Malloc(sizeof(MPIDI_Hugecntr));
             cntr = (MPIDI_Hugecntr *) ptr;
             cntr->outstanding = 0;
             cntr->counter = 0;
             MPIDI_OFI_Map_set(COMM_OFI(comm).huge_send_counters, rank, ptr);
         }
+
+        ctrl.rma_key = MPIDI_OFI_Index_allocator_alloc(COMM_OFI(comm).rma_id_allocator);
+        MPIU_Assert(ctrl.rma_key <= MPIDI_MAX_HUGE_RMAS);
+        rma_key  = ctrl.rma_key<<MPIDI_HUGE_RMA_SHIFT;
+        FI_RC_NOLOCK(fi_mr_reg(MPIDI_Global.domain,     /* In:  Domain Object       */
+                               send_buf,                /* In:  Lower memory address*/
+                               data_sz,                 /* In:  Length              */
+                               FI_REMOTE_READ,          /* In:  Expose MR for read  */
+                               0ULL,                    /* In:  offset(not used)    */
+                               rma_key,                 /* In:  requested key       */
+                               0ULL,                    /* In:  flags               */
+                               &cntr->mr,               /* Out: memregion object    */
+                               NULL), mr_reg);          /* In:  context             */
 
         cntr = (MPIDI_Hugecntr *) ptr;
         cntr->outstanding++;
@@ -181,11 +196,13 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         MPIU_Assert(cntr->outstanding != USHRT_MAX);
         MPIU_Assert(cntr->counter != USHRT_MAX);
         REQ_OFI(sreq, util_comm) = comm;
-        REQ_OFI(sreq, util_id) = rank;
+        REQ_OFI(sreq, util_id)   = rank;
         FI_RC_RETRY_NOLOCK(fi_tsend(G_TXC_TAG(0), send_buf,
-                                    MPIDI_Global.max_send, MPIDI_Global.mr, _comm_to_phys(comm, rank,
-                                                                                          MPIDI_API_TAG),
-                                    match_bits, (void *) &(REQ_OFI(sreq, context))), tsend);
+                                    MPIDI_Global.max_send,
+                                    NULL,
+                                    _comm_to_phys(comm, rank,MPIDI_API_TAG),
+                                    match_bits, (void *) &(REQ_OFI(sreq, context))),
+                           tsend);
         ctrl.type = MPIDI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
         MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));

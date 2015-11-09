@@ -29,7 +29,8 @@ static inline int MPIDI_Choose_provider(struct fi_info *prov, struct fi_info **p
 static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
                                         struct fid_domain *domain,
                                         struct fid_cq *cq,
-                                        struct fid_mr *mr, struct fid_av *av, struct fid_ep **ep);
+                                        struct fid_av *av,
+                                        struct fid_ep **ep);
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_init
@@ -44,7 +45,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     char *table = NULL, *provname = NULL;
     MPID_Comm *comm;
     struct fi_info *hints, *prov, *prov_use;
-    uint64_t mr_flags;
     struct fi_cq_attr cq_attr;
     fi_addr_t *mapped_table;
     struct fi_av_attr av_attr;
@@ -89,18 +89,6 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     FI_RC(fi_fabric(prov_use->fabric_attr, &MPIDI_Global.fabric, NULL), fabric);
     FI_RC(fi_domain(MPIDI_Global.fabric, prov_use, &MPIDI_Global.domain, NULL), opendomain);
 
-#ifdef MPIDI_USE_MR_OFFSET
-    mr_flags = FI_MR_OFFSET;
-#else
-    mr_flags = 0ULL;
-#endif
-
-    FI_RC(fi_mr_reg(MPIDI_Global.domain, 0, UINTPTR_MAX,
-                    FI_REMOTE_READ | FI_SEND | FI_RECV, 0ULL, 0ULL,
-                    mr_flags, &MPIDI_Global.mr, NULL), mr_reg);
-    MPIDI_Global.lkey = fi_mr_key(MPIDI_Global.mr);
-    MPIU_Assert(MPIDI_Global.lkey == 0);
-
     memset(&cq_attr, 0, sizeof(cq_attr));
     cq_attr.format = FI_CQ_FORMAT_DATA;
     FI_RC(fi_cq_open(MPIDI_Global.domain, &cq_attr, &MPIDI_Global.am_cq, NULL), opencq);
@@ -122,7 +110,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     FI_RC(fi_av_open(MPIDI_Global.domain, &av_attr, &MPIDI_Global.av, NULL), avopen);
 
     mpi_errno = MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
-                                     MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep);
+                                      MPIDI_Global.av, &MPIDI_Global.ep);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Global.addrnamelen = FI_NAME_MAX;
@@ -246,7 +234,6 @@ static inline int MPIDI_netmod_finalize(void)
                                     MPI_SUM, MPIR_Process.comm_world, &errflag);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    FI_RC(fi_close(&MPIDI_Global.mr->fid), mr_unreg);
     FI_RC(fi_close(&MPIDI_Global.ep->fid), epclose);
     FI_RC(fi_close(&MPIDI_Global.av->fid), avclose);
     FI_RC(fi_close(&MPIDI_Global.am_cq->fid), cqclose);
@@ -404,10 +391,11 @@ static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
 #define FUNCNAME MPIDI_Create_endpoint
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
-                                        struct fid_domain *domain,
-                                        struct fid_cq *cq, struct fid_mr *mr,
-                                        struct fid_av *av, struct fid_ep **ep)
+static inline int MPIDI_Create_endpoint(struct fi_info     *prov_use,
+                                        struct fid_domain  *domain,
+                                        struct fid_cq      *cq,
+                                        struct fid_av      *av,
+                                        struct fid_ep     **ep)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -417,7 +405,6 @@ static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
     FI_RC(fi_endpoint(domain, prov_use, ep, NULL), ep);
     FI_RC(fi_ep_bind(*ep, &cq->fid, FI_SEND | FI_RECV | FI_WRITE | FI_READ), cq_bind);
     FI_RC(fi_ep_bind(*ep, &av->fid, 0), av_bind);
-    FI_RC(fi_ep_bind(*ep, &mr->fid, FI_REMOTE_READ | FI_REMOTE_WRITE), mr_bind);
     FI_RC(fi_enable(*ep), ep_enable);
 
   fn_exit:

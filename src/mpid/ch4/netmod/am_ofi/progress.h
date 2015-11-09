@@ -156,11 +156,12 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
         /* TODO: get context from pool */
         am_req = (MPIDI_netmod_am_ofi_amrequest_t *)MPIU_Malloc(sizeof(*am_req));
         MPIU_Assert(am_req);
-        
+
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
+#warning "Jithin:  Need LKEY"
         FI_RC_RETRY(fi_read(MPIDI_Global.ep, (char *) dst + done,
                             curr_len, NULL, source, src + done,
-                            MPIDI_Global.lkey, &am_req->context), read);
+                            0ULL, &am_req->context), read);
         done += curr_len;
         rem -= curr_len;
     }

@@ -16,11 +16,13 @@
 #include "pmi.h"
 
 static inline int MPIDI_Choose_provider(info_t * prov, info_t ** prov_use);
-static inline int MPIDI_Create_endpoint(info_t * prov_use,
-                                        fid_domain_t domain,
-                                        fid_cq_t p2p_cq,
-                                        fid_cntr_t rma_ctr,
-                                        fid_mr_t mr, fid_av_t av, fid_base_ep_t * ep, int index);
+static inline int MPIDI_Create_endpoint(info_t        *prov_use,
+                                        fid_domain_t   domain,
+                                        fid_cq_t       p2p_cq,
+                                        fid_cntr_t     rma_ctr,
+                                        fid_av_t       av,
+                                        fid_base_ep_t *ep,
+                                        int            index);
 #define CHOOSE_PROVIDER(prov, prov_use,errstr)                          \
     do {                                                                \
     info_t *p = prov;                                                   \
@@ -48,7 +50,6 @@ static inline int MPIDI_netmod_init(int         rank,
     int thr_err=0, str_errno, maxlen, iov_len;
     char *table = NULL, *provname = NULL;
     info_t *hints, *prov, *prov_use;
-    uint64_t mr_flags;
     cq_attr_t cq_attr;
     cntr_attr_t cntr_attr;
     fi_addr_t *mapped_table;
@@ -168,11 +169,12 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ------------------------------------------------------------------------ */
     /* Set global attributes attributes based on the provider choice            */
     /* ------------------------------------------------------------------------ */
-    MPIDI_Global.max_buffered_send = prov_use->tx_attr->inject_size;
+    MPIDI_Global.max_buffered_send  = prov_use->tx_attr->inject_size;
     MPIDI_Global.max_buffered_write = prov_use->tx_attr->inject_size;
-    MPIDI_Global.max_send = prov_use->ep_attr->max_msg_size;
-    MPIDI_Global.max_write = prov_use->ep_attr->max_msg_size;
-    MPIDI_Global.iov_limit = MIN(prov_use->tx_attr->iov_limit,MPIDI_IOV_MAX);
+    MPIDI_Global.max_send           = prov_use->ep_attr->max_msg_size;
+    MPIDI_Global.max_write          = prov_use->ep_attr->max_msg_size;
+    MPIDI_Global.iov_limit          = MIN(prov_use->tx_attr->iov_limit,MPIDI_IOV_MAX);
+    MPIDI_Global.max_mr_key         = prov_use->domain_attr->mr_key_size;
 
     /* ------------------------------------------------------------------------ */
     /* Open fabric                                                              */
@@ -198,25 +200,6 @@ static inline int MPIDI_netmod_init(int         rank,
     /*     * counters for rma operations                                        */
     /*     * address vector of other endpoint addresses                         */
     /* ------------------------------------------------------------------------ */
-    /* ------------------------------------------------------------------------ */
-    /* Construct:  Memory region                                                */
-    /* ------------------------------------------------------------------------ */
-#ifdef MPIDI_USE_MR_OFFSET
-    mr_flags = FI_MR_OFFSET;
-#else
-    mr_flags = 0ULL;
-#endif
-    FI_RC(fi_mr_reg(MPIDI_Global.domain,        /* In:  Domain Object       */
-                    0,  /* In:  Lower memory address */
-                    UINTPTR_MAX,        /* In:  Upper memory address */
-                    FI_REMOTE_READ | FI_REMOTE_WRITE |  /* In:  Expose MR for read/write */
-                    FI_SEND | FI_RECV, 0ULL,    /* In:  base MR offset      */
-                    0ULL,       /* In:  requested key       */
-                    mr_flags,   /* In:  flags               */
-                    &MPIDI_Global.mr,   /* Out: memregion object    */
-                    NULL), mr_reg);     /* In:  context             */
-    MPIDI_Global.lkey = fi_mr_key(MPIDI_Global.mr);
-    MPIU_Assert(MPIDI_Global.lkey == 0);
 
     /* ------------------------------------------------------------------------ */
     /* Construct:  Completion Queues                                            */
@@ -271,7 +254,8 @@ static inline int MPIDI_netmod_init(int         rank,
                                               MPIDI_Global.domain,
                                               MPIDI_Global.p2p_cq,
                                               MPIDI_Global.rma_ctr,
-                                              MPIDI_Global.mr, MPIDI_Global.av, &MPIDI_Global.ep, 0));
+                                              MPIDI_Global.av,
+                                              &MPIDI_Global.ep, 0));
 
     /* ---------------------------------- */
     /* Get our endpoint name and publish  */
@@ -340,16 +324,16 @@ static inline int MPIDI_netmod_init(int         rank,
                     FI_OPT_ENDPOINT, FI_OPT_MIN_MULTI_RECV, &optlen, sizeof(optlen)), setopt);
 
     for (i = 0; i < MPIDI_Global.num_ctrlblock; i++) {
-        MPIDI_Global.iov[i].iov_base = MPIU_Malloc(iov_len);
+        MPIDI_Global.iov[i].iov_base         = MPIU_Malloc(iov_len);
         MPIU_Assert(MPIDI_Global.iov[i].iov_base != NULL);
-        MPIDI_Global.iov[i].iov_len = iov_len;
-        MPIDI_Global.msg[i].msg_iov = &MPIDI_Global.iov[i];
-        MPIDI_Global.msg[i].desc = (void **) &MPIDI_Global.mr;
-        MPIDI_Global.msg[i].iov_count = 1;
-        MPIDI_Global.msg[i].addr = FI_ADDR_UNSPEC;
-        MPIDI_Global.msg[i].context = &MPIDI_Global.control_req[i].context;
+        MPIDI_Global.iov[i].iov_len          = iov_len;
+        MPIDI_Global.msg[i].msg_iov          = &MPIDI_Global.iov[i];
+        MPIDI_Global.msg[i].desc             = NULL;
+        MPIDI_Global.msg[i].iov_count        = 1;
+        MPIDI_Global.msg[i].addr             = FI_ADDR_UNSPEC;
+        MPIDI_Global.msg[i].context          = &MPIDI_Global.control_req[i].context;
         MPIDI_Global.control_req[i].event_id = MPIDI_EVENT_CONTROL;
-        MPIDI_Global.msg[i].data = 0;
+        MPIDI_Global.msg[i].data             = 0;
         FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0), &MPIDI_Global.msg[i],
                                FI_MULTI_RECV | FI_COMPLETION), prepost);
     }
@@ -455,7 +439,6 @@ static inline int MPIDI_netmod_finalize(void)
         FI_RC(fi_cancel((fid_t) MPIDI_Global.ep, &MPIDI_Global.control_req[i].context), ctrlcancel);
 
 #endif
-    FI_RC(fi_close((fid_t) MPIDI_Global.mr), mr_unreg);
     FI_RC(fi_close((fid_t) MPIDI_Global.ep), epclose);
     FI_RC(fi_close((fid_t) MPIDI_Global.av), avclose);
     FI_RC(fi_close((fid_t) MPIDI_Global.p2p_cq), cqclose);
@@ -636,11 +619,13 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 #define FUNCNAME MPIDI_Create_endpoint
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_Create_endpoint(info_t * prov_use,
-                                        fid_domain_t domain,
-                                        fid_cq_t p2p_cq,
-                                        fid_cntr_t rma_ctr,
-                                        fid_mr_t mr, fid_av_t av, fid_base_ep_t * ep, int index)
+static inline int MPIDI_Create_endpoint(info_t        *prov_use,
+                                        fid_domain_t   domain,
+                                        fid_cq_t       p2p_cq,
+                                        fid_cntr_t     rma_ctr,
+                                        fid_av_t       av,
+                                        fid_base_ep_t *ep,
+                                        int            index)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -718,21 +703,15 @@ static inline int MPIDI_Create_endpoint(info_t * prov_use,
     FI_RC(fi_enable(G_RXC_RMA(index)), ep_enable);
     FI_RC(fi_enable(G_RXC_MSG(index)), ep_enable);
     FI_RC(fi_enable(G_RXC_CTR(index)), ep_enable);
-
-    FI_RC(fi_ep_bind(G_TXC_RMA(0), (fid_t) mr, FI_REMOTE_READ | FI_REMOTE_WRITE), bind);
-    FI_RC(fi_ep_bind(G_RXC_RMA(0), (fid_t) mr, FI_REMOTE_READ | FI_REMOTE_WRITE), bind);
-    FI_RC(fi_ep_bind(G_TXC_CTR(0), (fid_t) mr, FI_REMOTE_READ | FI_REMOTE_WRITE), bind);
-    FI_RC(fi_ep_bind(G_RXC_CTR(0), (fid_t) mr, FI_REMOTE_READ | FI_REMOTE_WRITE), bind);
 #else
     /* ---------------------------------------------------------- */
-    /* Bind the MR, CQs, counters,  and AV to the endpoint object */
+    /* Bind the CQs, counters,  and AV to the endpoint object     */
     /* ---------------------------------------------------------- */
     FI_RC(fi_endpoint(domain, prov_use, ep, NULL), ep);
     FI_RC(fi_ep_bind(*ep, (fid_t) p2p_cq, FI_SEND | FI_RECV | FI_SELECTIVE_COMPLETION), bind);
     FI_RC(fi_ep_bind(*ep, (fid_t) rma_ctr, FI_READ | FI_WRITE), bind);
     FI_RC(fi_ep_bind(*ep, (fid_t) av, 0), bind);
     FI_RC(fi_enable(*ep), ep_enable);
-    FI_RC(fi_ep_bind(*ep, (fid_t) mr, FI_REMOTE_READ | FI_REMOTE_WRITE), bind);
 #endif /* MPIDI_USE_SCALABLE_ENDPOINTS */
 
   fn_exit:

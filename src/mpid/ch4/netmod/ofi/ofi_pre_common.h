@@ -42,9 +42,10 @@ typedef struct MPIDI_VCRT *MPID_VCRT;
 typedef struct {
     MPID_VCRT  vcrt;
     MPID_VCRT  local_vcrt;
-    uint32_t   window_instance;
     void      *huge_send_counters;
     void      *huge_recv_counters;
+    void      *win_id_allocator;
+    void      *rma_id_allocator;
 } MPIDI_netmod_ofi_comm_t;
 
 #include "ofi_pre_common.h"

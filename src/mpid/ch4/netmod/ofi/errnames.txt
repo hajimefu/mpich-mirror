@@ -79,3 +79,5 @@
 **ofid_prepost %s %d %s %s:OFI preposting receives failed (%s:%d:%s:%s)
 **ofid_ctrlcancel:OFI Control cancel failed
 **ofid_ctrlcancel %s %d %s %s:OFI control cancel failed (%s:%d:%s:%s)
+**ofid_cntr_wait:OFI Counter wait failed
+**ofid_cntr_wait %s %d %s %s:OFI OFI Counter wait failed (%s:%d:%s:%s)

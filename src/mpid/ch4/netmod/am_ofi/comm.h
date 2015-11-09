@@ -227,7 +227,6 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
     MPIDI_Map_set(MPIDI_Global.comm_map, mapid, comm);
-    COMM_OFI(comm).window_instance = 0;
     MPIDI_CH4U_init_comm(comm);
 
     /* Do not handle intercomms */

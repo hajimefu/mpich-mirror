@@ -61,6 +61,20 @@ EXTERN_C_BEGIN
 #define MPID_DYNPROC_SEND  (0x4000000000000000ULL)
 #define MPID_TAG_SHIFT     (28)
 #define MPID_SOURCE_SHIFT  (16)
+
+/* RMA Key Space division
+ *    |                  |                  |                    |
+ *    ...     Context ID |   Huge RMA       |  Window Instance   |
+ *    |                  |                  |                    |
+ */
+#define MPIDI_MAX_WINDOWS_BITS  (5)
+#define MPIDI_MAX_HUGE_RMA_BITS (5)
+#define MPIDI_MAX_HUGE_RMAS     (2<<(MPIDI_MAX_HUGE_RMA_BITS-1))
+#define MPIDI_MAX_WINDOWS       (2<<(MPIDI_MAX_WINDOWS_BITS-1))
+#define MPIDI_HUGE_RMA_SHIFT    (MPIDI_MAX_WINDOWS_BITS)
+#define MPIDI_CONTEXT_SHIFT     (MPIDI_MAX_WINDOWS_BITS+MPIDI_MAX_HUGE_RMA_BITS)
+
+
 /* Typedefs */
 typedef struct iovec iovec_t;
 typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
@@ -228,7 +242,6 @@ typedef struct {
     fid_cq_t p2p_cq;
     fid_cq_t am_cq;
     fid_cntr_t rma_ctr;
-    fid_mr_t mr;
     fid_av_t av;
     iovec_t *iov;
     MPIDI_cacheline_mutex_t mutexes[4];
@@ -240,10 +253,10 @@ typedef struct {
     uint64_t max_send;
     uint64_t max_write;
     uint64_t max_short_send;
+    uint64_t max_mr_key;
     size_t iov_limit;
     int cur_ctrlblock;
     int num_ctrlblock;
-    uint64_t lkey;
     int control_init;
     control_event_fn control_fn[16];
     MPID_Node_id_t *node_map;
@@ -299,23 +312,24 @@ typedef struct MPIDI_WinLock_info {
 
 /* These control structures have to be the same size */
 typedef struct {
-    int16_t type;
-    int16_t lock_type;
-    int origin_rank;
+    int16_t  type;
+    int16_t  lock_type;
+    int      origin_rank;
     uint64_t win_id;
-    int dummy[5];
+    int      dummy[8];
 } MPIDI_Win_control_t;
 #define MPID_MIN_CTRL_MSG_SZ (sizeof(MPIDI_Win_control_t))
 
 typedef struct {
-    int16_t type;
-    int16_t seqno;
-    int origin_rank;
-    char *send_buf;
-    size_t msgsize;
-    int comm_id;
-    int endpoint_id;
+    int16_t       type;
+    int16_t       seqno;
+    int           origin_rank;
     MPID_Request *ackreq;
+    char         *send_buf;
+    size_t        msgsize;
+    int           comm_id;
+    int           endpoint_id;
+    int           rma_key;
 } MPIDI_Send_control_t;
 
 typedef struct {
@@ -325,7 +339,7 @@ typedef struct {
     MPID_Win *win;
     MPI_Datatype type;
     MPI_Op op;
-    int origin_endpoint;
+    int    origin_endpoint;
     size_t len;
 } MPIDI_Win_MsgInfo;
 
@@ -425,15 +439,15 @@ typedef struct {
 } MPIDI_Chunk_request;
 
 typedef struct {
-    char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
-    event_event_fn done_fn;
-    MPIDI_Send_control_t remote_info;
-    size_t cur_offset;
-    MPID_Comm *comm_ptr;
-    MPID_Request *localreq;
-    cq_tagged_entry_t wc;
+    char                  pad[MPIDI_REQUEST_HDR_SIZE];
+    context_t             context;          /* fixed field, do not move */
+    int                   event_id; /* fixed field, do not move */
+    event_event_fn        done_fn;
+    MPIDI_Send_control_t  remote_info;
+    size_t                cur_offset;
+    MPID_Comm            *comm_ptr;
+    MPID_Request         *localreq;
+    cq_tagged_entry_t     wc;
 } MPIDI_Huge_chunk_t;
 
 typedef struct {
@@ -444,6 +458,7 @@ typedef struct {
 typedef struct MPIDI_Hugecntr {
     uint16_t counter;
     uint16_t outstanding;
+    fid_mr_t mr;
 } MPIDI_Hugecntr;
 
 typedef struct MPIDI_Win_info_args {
@@ -484,16 +499,18 @@ typedef struct MPIDI_Win_sync_t {
 } MPIDI_Win_sync_t;
 
 typedef struct {
-    void *winfo;
-    MPIDI_Win_info_args info_args;
-    MPIDI_Win_sync_t sync;
-    uint64_t win_id;
-    void *mmap_addr;
-    int64_t mmap_sz;
-    MPI_Aint *sizes;
-    MPIDI_Win_request *syncQ;
-    void *msgQ;
-    int count;
+    void                *winfo;
+    MPIDI_Win_sync_t     sync;
+    fid_mr_t             mr;
+    uint64_t             mr_key;
+    uint64_t             win_id;
+    void                *mmap_addr;
+    int64_t              mmap_sz;
+    MPI_Aint            *sizes;
+    MPIDI_Win_request   *syncQ;
+    void                *msgQ;
+    int                  count;
+    MPIDI_Win_info_args  info_args;
 } MPIDI_OFIWin_t;
 #define WIN_OFI(win) ((MPIDI_OFIWin_t*)(win)->dev.pad)
 
@@ -514,6 +531,11 @@ extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
 extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
 extern int   MPIDI_OFI_control_dispatch(void *buf);
 extern void  MPIDI_OFI_Index_datatypes();
+extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
+
 extern int   MPIR_Datatype_init_names(void);
 
 EXTERN_C_END

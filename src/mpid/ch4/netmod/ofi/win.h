@@ -15,22 +15,102 @@
 #include "symheap.h"
 #include <opa_primitives.h>
 
-static inline int MPIDI_Win_allgather(MPID_Win  *win)
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_Win_allgather
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_Win_allgather(MPID_Win        *win,
+                                      void            *base,
+                                      int              disp_unit,
+                                      int              do_optimize)
 {
-    int            mpi_errno = MPI_SUCCESS;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-    MPID_Comm *comm_ptr = win->comm_ptr;
-    mpi_errno = MPIR_Allgather_impl(MPI_IN_PLACE,
-                                    0,
-                                    MPI_DATATYPE_NULL,
-                                    WIN_OFI(win)->winfo,
-                                    sizeof(MPIDI_Win_info),
-                                    MPI_BYTE,
-                                    comm_ptr,
-                                    &errflag);
+    int             i,first,same_disp,mpi_errno = MPI_SUCCESS;
+    MPIR_Errflag_t  errflag      = MPIR_ERR_NONE;
+    MPID_Comm      *comm_ptr     = win->comm_ptr;
+    MPIDI_Win_info *my_winfo        = NULL;
+    int raw_prefix,idx,bitpos, gen_id;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
+
+    /* Calculate a canonical context id */
+    raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX,comm_ptr->context_id);
+    idx        = raw_prefix / MPIR_CONTEXT_INT_BITS;
+    bitpos     = raw_prefix % MPIR_CONTEXT_INT_BITS;
+    gen_id     = (idx*MPIR_CONTEXT_INT_BITS) + (31-bitpos);
+
+    int       total_bits_avail      = MPIDI_Global.max_mr_key * 8;
+    uint64_t  window_instance       = ((uint64_t)WIN_OFI(win)->win_id)>>32;
+    int       bits_for_instance_id  = MPIDI_MAX_WINDOWS_BITS;
+    int       bits_for_context_id;
+    uint64_t  max_context_allowed;
+    uint64_t  max_instance_allowed;
+
+    bits_for_context_id   = total_bits_avail - MPIDI_MAX_WINDOWS_BITS - MPIDI_MAX_HUGE_RMA_BITS;
+    max_context_allowed   = 2<<(bits_for_context_id-1);
+    max_instance_allowed  = 2<<(bits_for_instance_id-1);
+
+    MPIR_ERR_CHKANDSTMT(gen_id >= max_context_allowed,mpi_errno,MPI_ERR_OTHER,
+                        goto fn_fail,"**ofid_mr_reg");
+    MPIR_ERR_CHKANDSTMT(window_instance >= max_instance_allowed,mpi_errno,MPI_ERR_OTHER,
+                        goto fn_fail,"**ofid_mr_reg");
+
+    /* Context id in lower bits, instance in upper bits */
+    WIN_OFI(win)->mr_key = (gen_id<<MPIDI_CONTEXT_SHIFT) | window_instance;
+
+    FI_RC(fi_mr_reg(MPIDI_Global.domain,                /* In:  Domain Object       */
+                    base,                               /* In:  Lower memory address*/
+                    win->size,                          /* In:  Length              */
+                    FI_REMOTE_READ | FI_REMOTE_WRITE,   /* In:  Expose MR for read  */
+                    0ULL,                               /* In:  offset(not used)    */
+                    WIN_OFI(win)->mr_key,               /* In:  requested key       */
+                    0ULL,                               /* In:  flags               */
+                    &WIN_OFI(win)->mr,                  /* Out: memregion object    */
+                    NULL), mr_reg);                     /* In:  context             */
+
+    WIN_OFI(win)->winfo = (MPIDI_Win_info *)MPIU_Malloc(comm_ptr->local_size*sizeof(MPIDI_Win_info));
+    MPIR_ERR_CHKANDSTMT(WIN_OFI(win)->winfo == NULL,mpi_errno,MPI_ERR_NO_MEM,
+                        goto fn_fail,"**nomem");
+    my_winfo = (MPIDI_Win_info *)WINFO(win,0);
+    my_winfo->base_addr = base;
+    my_winfo->disp_unit = disp_unit;
+
+    my_winfo = (MPIDI_Win_info *)WINFO(win,comm_ptr->rank);
+    my_winfo->base_addr = base;
+    my_winfo->disp_unit = disp_unit;
+    mpi_errno        = MPIR_Allgather_impl(MPI_IN_PLACE,
+                                           0,
+                                           MPI_DATATYPE_NULL,
+                                           WIN_OFI(win)->winfo,
+                                           sizeof(MPIDI_Win_info),
+                                           MPI_BYTE,
+                                           comm_ptr,
+                                           &errflag);
+    if(do_optimize) {
+        first     = WINFO_DISP_UNIT(win,0);
+        same_disp = 1;
+        for(i=1;i<comm_ptr->local_size;i++) {
+            if(WINFO_DISP_UNIT(win,i) != first)
+                same_disp=0;
+                break;
+        }
+        if(same_disp) {
+            MPIU_Free(WIN_OFI(win)->winfo);
+            WIN_OFI(win)->winfo = NULL;
+        }
+    }
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_ALLGATHER);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_Win_init
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_Win_init(MPI_Aint     length,
                                  int          disp_unit,
                                  MPID_Win   **win_ptr,
@@ -39,13 +119,16 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
                                  int          create_flavor,
                                  int          model)
 {
-    int             mpi_errno = MPI_SUCCESS;
-    int             rank, size;
+    int       mpi_errno = MPI_SUCCESS;
+    uint64_t  window_instance;
+    MPID_Win *win;
+    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_OFIWin_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_OFIdt_t));
 
-    MPID_Win *win = (MPID_Win *)MPIU_Handle_obj_alloc(&MPID_Win_mem);
+    win = (MPID_Win *)MPIU_Handle_obj_alloc(&MPID_Win_mem);
     MPIR_ERR_CHKANDSTMT(win == NULL,
                         mpi_errno,
                         MPI_ERR_NO_MEM,
@@ -54,15 +137,8 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
     *win_ptr = win;
 
     memset(WIN_OFI(win), 0, sizeof(*WIN_OFI(win)));
-    win->comm_ptr = comm_ptr;
-    size          = comm_ptr->local_size;
-    rank          = comm_ptr->rank;
     MPIR_Comm_add_ref(comm_ptr);
-
-    WIN_OFI(win)->winfo = (MPIDI_Win_info *)MPIU_Calloc(size,sizeof(MPIDI_Win_info));
-
-    MPIR_ERR_CHKANDSTMT(WIN_OFI(win)->winfo == NULL,mpi_errno,MPI_ERR_NO_MEM,
-                        goto fn_fail,"**nomem");
+    win->comm_ptr            = comm_ptr;
     win->errhandler          = NULL;
     win->base                = NULL;
     win->size                = length;
@@ -93,17 +169,12 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
     WIN_OFI(win)->info_args.alloc_shared_noncontig = 0;
     WIN_OFI(win)->mmap_sz                          = 0;
     WIN_OFI(win)->mmap_addr                        = NULL;
-    MPIDI_Win_info *winfo;
-    winfo            = (MPIDI_Win_info *)WINFO(win,rank);
-    winfo->disp_unit = disp_unit;
-    /* Fill out MR later, if required */
-
     /* context id lower bits, window instance upper bits */
-    WIN_OFI(win)->win_id = 1+(((uint64_t)comm_ptr->context_id) |
-                              ((uint64_t)((COMM_OFI(comm_ptr).window_instance)++)<<32));
+    window_instance = MPIDI_OFI_Index_allocator_alloc(COMM_OFI(win->comm_ptr).win_id_allocator);
+    WIN_OFI(win)->win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
     MPIDI_OFI_Map_set(MPIDI_Global.win_map,WIN_OFI(win)->win_id,win);
-
 fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -116,6 +187,8 @@ fn_fail:
 static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
 {
     int      mpi_errno = MPI_SUCCESS;
+    int      itercount = 0;
+    int      ret;
     uint64_t tcount, donecount;
     MPIDI_Win_request *r;
 
@@ -125,6 +198,7 @@ static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     tcount    = MPIDI_Global.cntr;
     donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+
     MPIU_Assert(donecount <= tcount);
 
     while(tcount > donecount) {
@@ -133,6 +207,20 @@ static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
         MPIDI_NM_PROGRESS();
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
         donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+        itercount++;
+        if(itercount == 1000) {
+            ret=fi_cntr_wait(MPIDI_Global.rma_ctr,tcount,0);
+            MPIU_CH4_OFI_ERR(ret < 0 && ret != -FI_ETIMEDOUT,
+                             mpi_errno,
+                             MPI_ERR_RMA_RANGE,
+                             "**ofid_cntr_wait",
+                             "**ofid_cntr_wait %s %d %s %s",
+                             __SHORT_FILE__,
+                             __LINE__,
+                             FCNAME,
+                             fi_strerror(-ret));
+            itercount = 0;
+        }
     }
 
     r = WIN_OFI(win)->syncQ;
@@ -304,7 +392,8 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_win_post(MPID_Group *group, int assert, MPID_Win *win)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int peer, index, mpi_errno = MPI_SUCCESS;
+    MPIDI_Win_control_t msg;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_POST);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_POST);
@@ -318,20 +407,16 @@ static inline int MPIDI_netmod_win_post(MPID_Group *group, int assert, MPID_Win 
 
     WIN_OFI(win)->sync.pw.group = group;
     MPIU_Assert(group != NULL);
-    MPIDI_Win_control_t msg;
+
     msg.type = MPIDI_CTRL_POST;
-
-    int index;
-
     for(index=0; index < group->size; ++index) {
-        int peer  = group->lrank_to_lpid[index].lpid;
+        peer      = group->lrank_to_lpid[index].lpid;
         mpi_errno = do_control_win(&msg, peer, win, 0, 1);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
     }
-
     WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_POST;
 
 fn_exit:
@@ -566,6 +651,7 @@ static inline int MPIDI_netmod_win_free(MPID_Win **win_ptr)
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     MPID_Win      *win       = *win_ptr;
+    uint32_t       window_instance;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FREE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FREE);
 
@@ -592,7 +678,15 @@ static inline int MPIDI_netmod_win_free(MPID_Win **win_ptr)
     if(WIN_OFI(win)->msgQ)
         MPIU_Free(WIN_OFI(win)->msgQ);
 
-    MPIU_Free(WIN_OFI(win)->winfo);
+    if(WIN_OFI(win)->winfo)
+        MPIU_Free(WIN_OFI(win)->winfo);
+
+    window_instance       = (uint32_t)(WIN_OFI(win)->win_id>>32);
+    MPIDI_OFI_Index_allocator_free(COMM_OFI(win->comm_ptr).win_id_allocator,
+                                   window_instance);
+
+    FI_RC(fi_close(&WIN_OFI(win)->mr->fid), mr_unreg);
+
     MPIR_Comm_release(win->comm_ptr);
     MPIU_Handle_obj_free(&MPID_Win_mem, win);
 
@@ -634,17 +728,16 @@ fn_fail:
 #define FUNCNAME MPIDI_netmod_win_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_create(void *base,
-                                          MPI_Aint length,
-                                          int disp_unit,
-                                          MPID_Info *info,
-                                          MPID_Comm *comm_ptr, MPID_Win **win_ptr)
+static inline int MPIDI_netmod_win_create(void       *base,
+                                          MPI_Aint    length,
+                                          int         disp_unit,
+                                          MPID_Info  *info,
+                                          MPID_Comm  *comm_ptr,
+                                          MPID_Win  **win_ptr)
 {
     int             mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
     MPID_Win       *win;
-    int             rank;
-    MPIDI_Win_info *winfo;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE);
@@ -661,12 +754,8 @@ static inline int MPIDI_netmod_win_create(void *base,
 
     win              = *win_ptr;
     win->base        = base;
-    rank             = comm_ptr->rank;
-    winfo            = (MPIDI_Win_info *)WINFO(win,rank);
-    winfo->base_addr = base;
-    winfo->disp_unit = disp_unit;
 
-    mpi_errno = MPIDI_Win_allgather(win);
+    mpi_errno = MPIDI_Win_allgather(win,base,disp_unit,1);
 
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
@@ -704,21 +793,21 @@ fn_fail:
 #define FUNCNAME MPIDI_netmod_win_allocate_shared
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint size,
-                                                   int disp_unit,
-                                                   MPID_Info *info_ptr,
-                                                   MPID_Comm *comm_ptr,
-                                                   void **base_ptr, MPID_Win **win_ptr)
+static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint    size,
+                                                   int         disp_unit,
+                                                   MPID_Info  *info_ptr,
+                                                   MPID_Comm  *comm_ptr,
+                                                   void      **base_ptr,
+                                                   MPID_Win  **win_ptr)
 {
     int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP      = NULL;
-    MPIDI_Win_info *winfo      = NULL;
     MPID_Win       *win        = NULL;
     ssize_t         total_size = 0LL;
-    MPI_Aint        *sizes, size_out   = 0;
-    char shm_key[64];
-    void *map_ptr;
+    MPI_Aint       *sizes, size_out = 0;
+    char            shm_key[64];
+    void           *map_ptr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
 
@@ -846,10 +935,7 @@ fn_zero:
     win->base        =  baseP;
     win->size        =  size;
 
-    winfo            = (MPIDI_Win_info *)WINFO(win,comm_ptr->rank);
-    winfo->base_addr = baseP;
-    winfo->disp_unit = disp_unit;
-    mpi_errno        = MPIDI_Win_allgather(win);
+    mpi_errno = MPIDI_Win_allgather(win,baseP,disp_unit,0);
 
     if(mpi_errno != MPI_SUCCESS)
         return mpi_errno;
@@ -891,8 +977,10 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_win_shared_query(MPID_Win *win,
-                                                int rank,
-                                                MPI_Aint *size, int *disp_unit, void *baseptr)
+                                                int       rank,
+                                                MPI_Aint *size,
+                                                int      *disp_unit,
+                                                void     *baseptr)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -903,7 +991,7 @@ static inline int MPIDI_netmod_win_shared_query(MPID_Win *win,
     if(rank < 0)
         offset = 0;
 
-    *(void **)baseptr = WINFO_BASE(win, offset);
+    *(void **)baseptr = WINFO_BASE_FORCE(win, offset);
     *size             = WIN_OFI(win)->sizes[offset];
     *disp_unit        = WINFO_DISP_UNIT(win,offset);
 
@@ -916,19 +1004,20 @@ static inline int MPIDI_netmod_win_shared_query(MPID_Win *win,
 #define FUNCNAME MPIDI_netmod_win_allocate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_allocate(MPI_Aint size,
-                                            int disp_unit,
-                                            MPID_Info *info,
-                                            MPID_Comm *comm, void *baseptr, MPID_Win **win_ptr)
+static inline int MPIDI_netmod_win_allocate(MPI_Aint     size,
+                                            int          disp_unit,
+                                            MPID_Info   *info,
+                                            MPID_Comm   *comm,
+                                            void        *baseptr,
+                                            MPID_Win   **win_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
+    void           *baseP;
+    MPID_Win       *win;
+
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
-
-    void           *baseP;
-    MPIDI_Win_info *winfo;
-    MPID_Win       *win;
 
     mpi_errno = MPIDI_Win_init(size,disp_unit,win_ptr, info, comm,
                                MPI_WIN_FLAVOR_ALLOCATE, MPI_WIN_UNIFIED);
@@ -939,13 +1028,9 @@ static inline int MPIDI_netmod_win_allocate(MPI_Aint size,
 
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
-    win              = *win_ptr;
-    win->base        =  baseP;
-    winfo            = (MPIDI_Win_info *)WINFO(win,comm->rank);
-    winfo->base_addr =  baseP;
-    winfo->disp_unit =  disp_unit;
-
-    mpi_errno= MPIDI_Win_allgather(win);
+    win       = *win_ptr;
+    win->base =  baseP;
+    mpi_errno = MPIDI_Win_allgather(win,baseP,disp_unit,1);
 
     if(mpi_errno != MPI_SUCCESS)
         goto fn_fail;
@@ -1059,16 +1144,15 @@ static inline int MPIDI_netmod_win_create_dynamic(MPID_Info *info,
                                                   MPID_Comm *comm,
                                                   MPID_Win **win_ptr)
 {
-    int            mpi_errno = MPI_SUCCESS;
-    int            rc        = MPI_SUCCESS;
-    MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
-
+    int             mpi_errno = MPI_SUCCESS;
+    int             rc        = MPI_SUCCESS;
+    MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
+    MPID_Win       *win;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
 
-    MPID_Win       *win;
-
-    rc = MPIDI_Win_init(0,1,win_ptr, info, comm,
+    rc = MPIDI_Win_init(UINTPTR_MAX-(uintptr_t)MPI_BOTTOM,
+                        1,win_ptr, info, comm,
                         MPI_WIN_FLAVOR_DYNAMIC,
                         MPI_WIN_UNIFIED);
 
@@ -1078,7 +1162,7 @@ static inline int MPIDI_netmod_win_create_dynamic(MPID_Info *info,
     win       = *win_ptr;
     win->base =  MPI_BOTTOM;
 
-    rc = MPIDI_Win_allgather(win);
+    rc = MPIDI_Win_allgather(win,win->base,1,1);
 
     if(rc != MPI_SUCCESS)
         goto fn_fail;

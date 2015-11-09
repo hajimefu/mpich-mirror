@@ -235,7 +235,8 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
     MPIDI_OFI_Map_set(MPIDI_Global.comm_map, mapid, comm);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_recv_counters);
-    COMM_OFI(comm).window_instance = 0;
+    MPIDI_OFI_Index_allocator_create(&COMM_OFI(comm).win_id_allocator,0);
+    MPIDI_OFI_Index_allocator_create(&COMM_OFI(comm).rma_id_allocator,1);
 
     /* Do not handle intercomms */
     if (comm->comm_kind == MPID_INTERCOMM)
@@ -262,6 +263,8 @@ static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
     MPIDI_OFI_Map_erase(MPIDI_Global.comm_map, mapid);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_recv_counters);
+    MPIDI_OFI_Index_allocator_destroy(COMM_OFI(comm).win_id_allocator);
+    MPIDI_OFI_Index_allocator_destroy(COMM_OFI(comm).rma_id_allocator);
 
     mpi_errno = MPIDI_OFI_VCRT_Release(COMM_OFI(comm).vcrt);
 

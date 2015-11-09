@@ -97,7 +97,7 @@ __ALWAYS_INLINE__ int do_irecv(void          *buf,
         FI_RC_RETRY(fi_trecv(G_RXC_TAG(0),
                              recv_buf,
                              data_sz,
-                             MPIDI_Global.mr,
+                             NULL,
                              (MPI_ANY_SOURCE == rank) ? FI_ADDR_UNSPEC : _comm_to_phys(comm, rank,
                                                                                        MPIDI_API_TAG),
                              match_bits, mask_bits, (void *) &(REQ_OFI(rreq, context))), trecv);

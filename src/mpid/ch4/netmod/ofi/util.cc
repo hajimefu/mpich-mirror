@@ -14,6 +14,9 @@
 #include <map>
 #include <queue>
 #include <new>
+#include <algorithm>
+#include <functional>
+#include <vector>
 #include <mpidimpl.h>
 #include "impl.h"
 #include "events.h"
@@ -119,6 +122,58 @@ void *MPIDI_OFI_Map_lookup(void     *_map,
         rc = (*m)[id];
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
     return rc;
+}
+
+
+typedef struct index_allocator_t {
+    int              high;
+    std::vector<int> free_pool;
+} index_allocator_t;
+
+void MPIDI_OFI_Index_allocator_create(void **_indexmap, int start)
+{
+    index_allocator_t *alloc;
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+    *_indexmap  = (void *)MPIU_Malloc(sizeof(index_allocator_t));
+    alloc       = (index_allocator_t *)(*_indexmap);
+    alloc->high = start;
+    new(&alloc->free_pool)std::vector<int>();
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+}
+
+int MPIDI_OFI_Index_allocator_alloc(void *_indexmap)
+{
+    index_allocator_t *alloc = (index_allocator_t*)_indexmap;
+    int back;
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+    if (alloc->free_pool.empty()) {
+        int alloc_high=alloc->high++;
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+        return alloc_high;
+    }
+    std::pop_heap(alloc->free_pool.begin(), alloc->free_pool.end(), std::greater<int>());
+    back = alloc->free_pool.back();
+    alloc->free_pool.pop_back();
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+    return back;
+
+}
+void MPIDI_OFI_Index_allocator_free(void *_indexmap, int index)
+{
+    index_allocator_t *alloc = (index_allocator_t*)_indexmap;
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+    alloc->free_pool.push_back(index);
+    std::push_heap(alloc->free_pool.begin(), alloc->free_pool.end(), std::greater<int>());
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+}
+
+void MPIDI_OFI_Index_allocator_destroy(void *_indexmap)
+{
+    index_allocator_t *alloc = (index_allocator_t*)_indexmap;
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_UTIL_MUTEX);
+    alloc->free_pool.~vector();
+    MPIU_Free(_indexmap);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_UTIL_MUTEX);
 }
 
 static inline int

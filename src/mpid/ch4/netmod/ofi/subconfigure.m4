@@ -32,7 +32,6 @@ dnl Parse the device arguments
     args_array=$ofi_netmod_args
     do_scalable_endpoints=false
     do_direct_provider=false
-    do_mr_offset=false
     do_av_table=false
     do_static_fabric=false
     echo "Parsing Arguments for OFI Netmod"
@@ -50,10 +49,6 @@ dnl Parse the device arguments
               do_direct_provider=true
               echo " ---> CH4::OFI Direct OFI Provider requested : $arg"
               ;;
-      mr-offset)
-              do_mr_offset=true
-              echo " ---> CH4::OFI Provider Memory Registration: $arg"
-              ;;
       static-fabric)
               do_static_fabric=true
               echo " ---> CH4::OFI Static library: $arg"
@@ -70,11 +65,6 @@ dnl Parse the device arguments
     if [test "$do_av_table" = "true"]; then
        AC_MSG_NOTICE([Enabling OFI netmod AV table])
        PAC_APPEND_FLAG([-DMPIDI_USE_AV_TABLE], [CPPFLAGS])
-    fi
-
-    if [test "$do_mr_offset" = "true"]; then
-       AC_MSG_NOTICE([Enabling OFI netmod MR offset mode])
-       PAC_APPEND_FLAG([-DMPIDI_USE_MR_OFFSET], [CPPFLAGS])
     fi
 
     if [test "$do_direct_provider" = "true"]; then

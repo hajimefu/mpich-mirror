@@ -336,7 +336,6 @@ static inline int do_put(const void    *origin_addr,
     uint64_t           flags;
     fid_ep_t           ep;
     msg_rma_t          msg;
-    void              *desc;
     unsigned           i;
     iovec_t           *originv;
     rma_iov_t         *targetv;
@@ -353,9 +352,8 @@ static inline int do_put(const void    *origin_addr,
 
     offset   = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
-    desc = fi_mr_desc(MPIDI_Global.mr);
     req->event_id          = MPIDI_EVENT_ABORT;
-    msg.desc               = &desc;
+    msg.desc               = NULL;
     msg.addr               = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
     msg.context            = NULL;
     msg.data               = 0;
@@ -370,7 +368,6 @@ static inline int do_put(const void    *origin_addr,
                            req->noncontig->origin_dt.map,
                            req->noncontig->target_dt.map);
     rc = MPIDI_IOV_EAGAIN;
-
     while(rc==MPIDI_IOV_EAGAIN) {
         originv   = req->noncontig->buf.iov.put_get.originv;
         targetv   = req->noncontig->buf.iov.put_get.targetv;
@@ -494,7 +491,6 @@ static inline int do_get(void          *origin_addr,
     uint64_t           flags;
     fid_ep_t           ep;
     msg_rma_t          msg;
-    void              *desc;
     iovec_t           *originv;
     rma_iov_t         *targetv;
     unsigned           i;
@@ -508,9 +504,8 @@ static inline int do_get(void          *origin_addr,
                                                            &req,&flags,&ep,sigreq));
 
     offset                 = target_disp * WINFO_DISP_UNIT(win,target_rank);
-    desc                   = fi_mr_desc(MPIDI_Global.mr);
     req->event_id          = MPIDI_EVENT_ABORT;
-    msg.desc               = &desc;
+    msg.desc               = NULL;
     msg.addr               = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
     msg.context            = NULL;
     msg.data               = 0;
@@ -525,7 +520,6 @@ static inline int do_get(void          *origin_addr,
                            req->noncontig->origin_dt.map,
                            req->noncontig->target_dt.map);
     rc = MPIDI_IOV_EAGAIN;
-
     while(rc==MPIDI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.put_get.originv;
         targetv=req->noncontig->buf.iov.put_get.targetv;
@@ -572,7 +566,6 @@ static inline int MPIDI_netmod_get(void         *origin_addr,
     MPIDI_Win_dt   origin_dt, target_dt;
     MPIDI_msg_sz_t origin_bytes;
     size_t         offset;
-    void          *desc;
     rma_iov_t      riov;
     iovec_t        iov;
     msg_rma_t      msg;
@@ -606,8 +599,8 @@ static inline int MPIDI_netmod_get(void         *origin_addr,
         MPIDI_Win_datatype_basic(target_count,target_datatype,&target_dt);
         MPIR_ERR_CHKANDJUMP((origin_dt.size != target_dt.size),
                             mpi_errno, MPI_ERR_SIZE, "**rmasize");
-        desc              = fi_mr_desc(MPIDI_Global.mr);
-        msg.desc          = &desc;
+
+        msg.desc          = NULL;
         msg.msg_iov       = &iov;
         msg.iov_count     = 1;
         msg.addr          = _comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR);
@@ -720,7 +713,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     fi_datatype_t  fi_dt;
     MPIDI_Win_dt   origin_dt, target_dt, result_dt;
     size_t         offset,max_size,dt_size;
-    void          *buffer, *tbuffer, *rbuffer,*desc;
+    void          *buffer, *tbuffer, *rbuffer;
     ioc_t          originv, resultv, comparev;
     rma_ioc_t      targetv;
     msg_atomic_t   msg;
@@ -758,9 +751,8 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     targetv.count  = 1;
     targetv.key    = WINFO_MR_KEY(win,target_rank);;
 
-    desc = fi_mr_desc(MPIDI_Global.mr);
     msg.msg_iov       = &originv;
-    msg.desc          = &desc;
+    msg.desc          = NULL;
     msg.iov_count     = 1;
     msg.addr          = _comm_to_phys(win->comm_ptr,target_rank,MPIDI_API_CTR);
     msg.rma_iov       = &targetv;
@@ -805,7 +797,6 @@ static inline int do_accumulate(const void    *origin_addr,
     fi_op_t            fi_op;
     fi_datatype_t      fi_dt;
     msg_atomic_t       msg;
-    void              *desc;
     ioc_t             *originv;
     rma_ioc_t         *targetv;
     unsigned           i;
@@ -893,15 +884,13 @@ static inline int do_accumulate(const void    *origin_addr,
                            req->noncontig->origin_dt.map,
                            req->noncontig->target_dt.map);
 
-    desc = fi_mr_desc(MPIDI_Global.mr);
-    rc = MPIDI_IOV_EAGAIN;
-    msg.desc          = &desc;
+    msg.desc          = NULL;
     msg.addr          = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
     msg.context       = NULL;
     msg.data          = 0;
     msg.datatype      = fi_dt;
     msg.op            = fi_op;
-
+    rc                = MPIDI_IOV_EAGAIN;
     while(rc==MPIDI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.accumulate.originv;
         targetv=req->noncontig->buf.iov.accumulate.targetv;
@@ -962,7 +951,6 @@ static inline int do_get_accumulate(const void    *origin_addr,
     fi_op_t            fi_op;
     fi_datatype_t      fi_dt;
     msg_atomic_t       msg;
-    void              *desc;
     ioc_t             *originv,*resultv;
     rma_ioc_t         *targetv;
     unsigned           i;
@@ -1068,15 +1056,13 @@ static inline int do_get_accumulate(const void    *origin_addr,
                                req->noncontig->result_dt.map,
                                req->noncontig->target_dt.map);
 
-    desc              = fi_mr_desc(MPIDI_Global.mr);
-    rc                = MPIDI_IOV_EAGAIN;
-    msg.desc          = &desc;
+    msg.desc          = NULL;
     msg.addr          = _comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_API_CTR);
     msg.context       = NULL;
     msg.data          = 0;
     msg.datatype      = fi_dt;
     msg.op            = fi_op;
-
+    rc                = MPIDI_IOV_EAGAIN;
     while(rc==MPIDI_IOV_EAGAIN) {
         originv        = req->noncontig->buf.iov.get_accumulate.originv;
         targetv        = req->noncontig->buf.iov.get_accumulate.targetv;

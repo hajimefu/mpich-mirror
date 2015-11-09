@@ -184,6 +184,20 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                          fi_strerror(-_ret));               \
     } while (0)
 
+#define FI_RC_NOLOCK(FUNC,STR)                              \
+    do {                                                    \
+        ssize_t _ret = FUNC;                                \
+        MPIU_CH4_OFI_ERR(_ret<0,                            \
+                         mpi_errno,                         \
+                         MPI_ERR_OTHER,                     \
+                         "**ofid_"#STR,                     \
+                         "**ofid_"#STR" %s %d %s %s",       \
+                         __SHORT_FILE__,                    \
+                         __LINE__,                          \
+                         FCNAME,                            \
+                         fi_strerror(-_ret));               \
+    } while (0)
+
 #define FI_RC_RETRY(FUNC,STR)                               \
     do {                                                    \
     ssize_t _ret;                                           \
@@ -457,6 +471,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define WINFO_BASE(w,rank)                                              \
 ({                                                                      \
   void *_p;                                                             \
+  _p = NULL;                                                            \
+  _p;                                                                   \
+})
+
+#define WINFO_BASE_FORCE(w,rank)                                        \
+({                                                                      \
+  void *_p;                                                             \
   _p = (((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]).base_addr;         \
   _p;                                                                   \
 })
@@ -464,14 +485,26 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define WINFO_DISP_UNIT(w,rank)                                         \
 ({                                                                      \
   uint32_t _v;                                                          \
-  _v = (((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]).disp_unit;         \
+  if(WIN_OFI(w)->winfo) {                                               \
+      _v = (((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]).disp_unit;     \
+  }                                                                     \
+  else {                                                                \
+      _v = w->disp_unit;                                                \
+  }                                                                     \
   _v;                                                                   \
 })
 
 #define WINFO_MR_KEY(w,rank)                                            \
 ({                                                                      \
   uint64_t _v;                                                          \
-  _v = MPIDI_Global.lkey;                                               \
+  _v = WIN_OFI(w)->mr_key;                                              \
+  _v;                                                                   \
+})
+
+#define WINFO_MR(w,target)                                              \
+({                                                                      \
+  void* _v;                                                             \
+  _v = fi_mr_desc(WIN_OFI(w)->mr);                                      \
   _v;                                                                   \
 })
 
