@@ -68,8 +68,8 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     hints->addr_format = FI_FORMAT_UNSPEC;
     hints->domain_attr->threading = FI_THREAD_ENDPOINT;
-    hints->domain_attr->control_progress = FI_PROGRESS_AUTO;
-    hints->domain_attr->data_progress = FI_PROGRESS_AUTO;
+    hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
+    hints->domain_attr->data_progress = FI_PROGRESS_MANUAL;
     hints->domain_attr->resource_mgmt = FI_RM_ENABLED;
     hints->domain_attr->av_type = FI_AV_UNSPEC;
     hints->domain_attr->mr_mode = FI_MR_SCALABLE;
