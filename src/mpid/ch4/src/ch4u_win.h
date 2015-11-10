@@ -247,6 +247,9 @@ fn_fail:
 static inline int MPIDI_CH4U_win_complete(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_win_cntrl_msg_t msg;
+    int index, peer;
+    MPID_Group *group;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_COMPLETE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_COMPLETE);
@@ -254,22 +257,18 @@ static inline int MPIDI_CH4U_win_complete(MPID_Win *win)
     mpi_errno = MPIDI_CH4I_progress_win_fence(win);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPID_Group *group;
     group = MPIU_CH4U_WIN(win, sync).sc.group;
     MPIU_Assert(group != NULL);
-    MPIDI_CH4U_win_cntrl_msg_t msg;
 
     msg.win_id = MPIU_CH4U_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_COMPLETE;
 
-    int index, peer;
     for(index = 0; index < group->size; ++index) {
         peer      = group->lrank_to_lpid[index].lpid;
         mpi_errno = MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
                                                MPIDI_CH4U_AM_WIN_CTRL,
                                                &msg, sizeof (msg), NULL);
-
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
@@ -292,6 +291,8 @@ fn_fail:
 static inline int MPIDI_CH4U_win_post(MPID_Group *group, int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_win_cntrl_msg_t msg;
+    int index, peer;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_POST);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_POST);
@@ -305,26 +306,21 @@ static inline int MPIDI_CH4U_win_post(MPID_Group *group, int assert, MPID_Win *w
     
     MPIU_CH4U_WIN(win, sync).pw.group = group;
     MPIU_Assert(group != NULL);
-    MPIDI_CH4U_win_cntrl_msg_t msg;
 
     msg.win_id = MPIU_CH4U_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_POST;
 
-    int index;
     for(index=0; index < group->size; ++index) {
-        int peer  = group->lrank_to_lpid[index].lpid;
+        peer  = group->lrank_to_lpid[index].lpid;
         mpi_errno = MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
                                                MPIDI_CH4U_AM_WIN_CTRL,
                                                &msg, sizeof (msg), NULL);
-
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
     }
-
     MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_POST;
-
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_POST);
     return mpi_errno;
@@ -339,16 +335,13 @@ fn_fail:
 static inline int MPIDI_CH4U_win_wait(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPID_Group *group;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_WAIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_WAIT);
 
-
     MPIDI_CH4I_EPOCH_TARGET_CHECK(MPIDI_CH4I_EPOTYPE_POST);
-
-    MPID_Group *group;
     group = MPIU_CH4U_WIN(win, sync).pw.group;
-
     MPIDI_CH4I_PROGRESS_WHILE(group->size != (int)MPIU_CH4U_WIN(win, sync).sc.count);
 
     MPIU_CH4U_WIN(win, sync).sc.count = 0;
@@ -444,6 +437,8 @@ fn_fail:
 static inline int MPIDI_CH4U_win_unlock(int rank, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_win_cntrl_msg_t msg;
+
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK);
 
@@ -453,11 +448,9 @@ static inline int MPIDI_CH4U_win_unlock(int rank, MPID_Win *win)
     mpi_errno = MPIDI_CH4I_progress_win_fence(win);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDI_CH4U_win_cntrl_msg_t msg;
     msg.win_id = MPIU_CH4U_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_UNLOCK;
-
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
                                            MPIDI_CH4U_AM_WIN_CTRL,
                                            &msg, sizeof (msg), NULL);

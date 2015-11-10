@@ -62,7 +62,7 @@ static inline int MPIDI_CH4I_am_put_ack_origin_cmpl_handler(MPID_Request * req)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4I_am_get_cmpl_handler(MPID_Request * req)
 {
-    int mpi_errno = MPI_SUCCESS, i;
+    int mpi_errno = MPI_SUCCESS, i, c;
     size_t data_sz, offset;
     MPIDI_CH4U_get_ack_msg_t get_ack;
     struct iovec *iov;
@@ -71,8 +71,8 @@ static inline int MPIDI_CH4I_am_get_cmpl_handler(MPID_Request * req)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_GET_CMPL_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_GET_CMPL_HANDLER);
 
+    MPID_cc_incr(req->cc_ptr, &c);
     get_ack.greq_ptr = MPIU_CH4U_REQUEST(req, greq.greq_ptr);
-
     if (MPIU_CH4U_REQUEST(req, greq.n_iov) == 0) {
         mpi_errno = MPIDI_netmod_send_am_reply(MPIU_CH4U_REQUEST(req, greq.reply_token),
                                                MPIDI_CH4U_AM_GET_ACK,
@@ -81,10 +81,11 @@ static inline int MPIDI_CH4I_am_get_cmpl_handler(MPID_Request * req)
                                                MPIU_CH4U_REQUEST(req, greq.count),
                                                MPIU_CH4U_REQUEST(req, greq.datatype),
                                                req);
+        MPIDI_CH4I_complete_req(req);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         goto fn_exit;
     }
-        
+
     iov = (struct iovec *)MPIU_CH4U_REQUEST(req, greq.dt_iov);
 
     data_sz = 0;
@@ -108,6 +109,7 @@ static inline int MPIDI_CH4I_am_get_cmpl_handler(MPID_Request * req)
                                            MPIDI_CH4U_AM_GET_ACK,
                                            &get_ack, sizeof(get_ack),
                                            p_data, data_sz, MPI_BYTE, req);
+    MPIDI_CH4I_complete_req(req);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
@@ -1601,7 +1603,7 @@ static inline int MPIDI_CH4I_am_win_ctrl_target_handler(void *am_hdr, size_t am_
         break;
 
     default:
-        fprintf(stderr, "not implemented: %d\n", msg_hdr->type);
+        fprintf(stderr, "invalid message type: %d\n", msg_hdr->type);
     }
 
     if (req)

@@ -76,6 +76,9 @@ typedef struct {
     };
 
     int (*cmpl_handler_fn) (struct MPID_Request * req);
+    uint16_t am_hdr_sz;
+    uint8_t pad[6];
+
     void *am_hdr;
     MPIDI_AM_OFI_hdr_t msg_hdr;
     uint8_t am_hdr_buf[MPIDI_MAX_AM_HDR_SZ];
