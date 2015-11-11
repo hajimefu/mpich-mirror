@@ -52,6 +52,29 @@ static inline MPID_Request *MPIDI_netmod_request_alloc_and_init(int count)
     return req;
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
+{
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+
+    req_hdr = AMREQ_OFI(sreq, req_hdr);
+    if (!req_hdr)
+        return;
+
+    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
+        MPIU_Free(req_hdr->am_hdr);
+    }
+    MPIU_CH4U_release_buf(req_hdr);
+    AMREQ_OFI(sreq, req_hdr) = NULL;
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    return;
+}
+
 static inline void MPIDI_netmod_request_release(MPID_Request * req)
 {
     int count;
@@ -60,6 +83,7 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
     MPIU_Assert(count >= 0);
     if (count == 0) {
         MPIU_Assert(MPID_cc_is_complete(&req->cc));
+        MPIDI_netmod_am_ofi_clear_req(req);
 
         if (req->comm)
             MPIR_Comm_release(req->comm);
@@ -74,7 +98,6 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
 static inline MPID_Request *MPIDI_netmod_request_create(void)
 {
     MPID_Request *req = MPIDI_netmod_request_alloc_and_init(1);
-    //MPIDI_Request_alloc_and_init(req, 1);
     return req;
 }
 
@@ -85,26 +108,6 @@ static inline void MPIDI_netmod_am_ofi_req_complete(MPID_Request *req)
     MPIU_Assert(count >= 0);
     if (count == 0)
         MPIDI_Request_release(req);
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
-{
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-
-    req_hdr = AMREQ_OFI(sreq, req_hdr);
-    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
-        MPIU_Free(req_hdr->am_hdr);
-    }
-    MPIU_CH4U_release_buf(req_hdr);
-    AMREQ_OFI(sreq, req_hdr) = NULL;
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    return;
 }
 
 #undef FUNCNAME

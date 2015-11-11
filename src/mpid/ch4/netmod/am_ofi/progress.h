@@ -186,7 +186,6 @@ static inline int MPIDI_netmod_handle_long_am(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
     AMREQ_OFI_HDR(rreq, cmpl_handler_fn) = cmpl_handler_fn;
     if ((!p_data || !data_sz) && cmpl_handler_fn) {
         cmpl_handler_fn(rreq);
-        MPIDI_netmod_am_ofi_clear_req(rreq);
         MPIDI_netmod_am_ofi_req_complete(rreq);
         goto fn_exit;
     }
@@ -271,7 +270,6 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
     }
 
     handler_id = AMREQ_OFI_HDR(sreq, msg_hdr).handler_id;
-    MPIDI_netmod_am_ofi_clear_req(sreq);
     MPIDI_netmod_am_ofi_req_complete(sreq);
     mpi_errno = MPIDI_Global.send_cmpl_handlers[handler_id] (sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -304,7 +302,6 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
     switch (msg_hdr->am_type) {
 
     case MPIDI_AMTYPE_LMT_ACK:
-        MPIDI_netmod_am_ofi_clear_req(sreq);
         MPIDI_netmod_am_ofi_req_complete(sreq);
         goto fn_exit;
 
@@ -320,7 +317,6 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
         MPIU_Free(AMREQ_OFI_HDR(sreq, pack_buffer));
     }
 
-    MPIDI_netmod_am_ofi_clear_req(sreq);
     MPIDI_netmod_am_ofi_req_complete(sreq);
 
     mpi_errno = MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq);
@@ -430,7 +426,6 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
                                               netmod_context);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDI_netmod_am_ofi_clear_req(rreq);
     MPIDI_netmod_am_ofi_req_complete(rreq);
     ofi_req->req_hdr->cmpl_handler_fn(rreq);
   fn_exit:
