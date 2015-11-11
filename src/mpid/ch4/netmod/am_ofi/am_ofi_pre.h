@@ -70,10 +70,8 @@ typedef struct {
     MPIDI_OFI_lmt_msg_pyld_t lmt_info;
     uint64_t lmt_cntr;
 
-    union {
-        void *pack_buffer;
-        void *rreq_ptr;
-    };
+    void *pack_buffer;
+    void *rreq_ptr;
 
     int (*cmpl_handler_fn) (struct MPID_Request * req);
     uint16_t am_hdr_sz;

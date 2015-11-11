@@ -298,15 +298,12 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
     ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
     sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
     msg_hdr = &ofi_req->req_hdr->msg_hdr;
+    MPIDI_netmod_am_ofi_req_complete(sreq);
 
     switch (msg_hdr->am_type) {
 
     case MPIDI_AMTYPE_LMT_ACK:
-        MPIDI_netmod_am_ofi_req_complete(sreq);
-        goto fn_exit;
-
     case MPIDI_AMTYPE_LMT_REQ:
-        MPIDI_netmod_am_ofi_req_complete(sreq);
         goto fn_exit;
 
     default:
@@ -315,9 +312,8 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
 
     if (AMREQ_OFI_HDR(sreq, pack_buffer)) {
         MPIU_Free(AMREQ_OFI_HDR(sreq, pack_buffer));
+        AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
     }
-
-    MPIDI_netmod_am_ofi_req_complete(sreq);
 
     mpi_errno = MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
