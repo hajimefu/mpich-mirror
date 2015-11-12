@@ -139,6 +139,7 @@ static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
         if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0])
             MPIU_Free(req_hdr->am_hdr);
         req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
+        MPIU_Assert(req_hdr->am_hdr);
         req_hdr->am_hdr_sz = am_hdr_sz;
     }
 
