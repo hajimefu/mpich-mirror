@@ -426,7 +426,9 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     }
 
     MPIDI_Datatype_check_size(target_datatype, target_count, data_sz);
-    am_hdr.target_datatype = dt_ptr->basic_type;
+    am_hdr.target_datatype = 
+        (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) ?
+        origin_datatype : dt_ptr->basic_type;
 
     segment_ptr = MPID_Segment_alloc();
     MPIU_Assert(segment_ptr);
