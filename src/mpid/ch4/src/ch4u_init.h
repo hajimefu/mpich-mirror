@@ -222,10 +222,6 @@ static inline int MPIDI_CH4I_am_acc_origin_cmpl_handler(MPID_Request * sreq)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_TX_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_TX_HANDLER);
-
-    if (MPIU_CH4U_REQUEST(sreq, areq.dt_iov)) {
-        MPIU_Free(MPIU_CH4U_REQUEST(sreq, areq.dt_iov));
-    }
     MPIDI_CH4I_complete_req(sreq);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_TX_HANDLER);
     return mpi_errno;
