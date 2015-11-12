@@ -1686,7 +1686,7 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
         MPIU_CH4U_REQUEST(rreq, preq.dt_iov) = dt_iov;
         *is_contig = 0;
         *data = iov;
-        *p_data_sz = n_iov;
+        *p_data_sz = msg_hdr->n_iov;
         goto fn_exit;
     }
 
@@ -1706,7 +1706,7 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
         MPID_Segment_init((void *)msg_hdr->addr, msg_hdr->count, msg_hdr->datatype,
                           segment_ptr, 0);
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) & n_iov);
+        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) &n_iov);
         MPIU_Assert(n_iov > 0);
         MPIU_CH4U_REQUEST(rreq, iov) = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIU_CH4U_REQUEST(rreq, iov));
