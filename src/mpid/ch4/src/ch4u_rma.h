@@ -386,7 +386,8 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     offset = target_disp * winfo->disp_unit;
 
     op_type = (do_get == 1) ? MPIDI_CH4U_AM_GET_ACC_REQ : MPIDI_CH4U_AM_ACC_REQ;
-    MPIDI_Datatype_get_size_dt_ptr(origin_datatype, origin_count, data_sz, dt_ptr);
+    MPIDI_Datatype_get_size_dt_ptr(origin_count, origin_datatype, data_sz, dt_ptr);
+
     if (data_sz == 0) {
         MPID_cc_decr(sreq->cc_ptr, &c);
         MPIU_Assert(c >= 0);
