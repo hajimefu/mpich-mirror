@@ -106,8 +106,22 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     lmt_info->src_offset = (uint64_t) data;
     lmt_info->sreq_ptr = (uint64_t) sreq;
 
+    MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
+    MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
+
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);
+
+    if ((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) > MPIDI_MAX_SHORT_SEND_SZ) {
+        msg_hdr->am_type = MPIDI_AMTYPE_LMT_HDR_REQ;
+        lmt_info->am_hdr_src = (uint64_t) am_hdr;
+
+        iov[1].iov_base = lmt_info;
+        iov[1].iov_len = sizeof(*lmt_info);
+
+        FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 2, rank, &AMREQ_OFI(sreq, context)), sendv);
+        goto fn_exit;
+    }
 
     iov[1].iov_base = AMREQ_OFI_HDR(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
@@ -115,8 +129,6 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     iov[2].iov_base = lmt_info;
     iov[2].iov_len = sizeof(*lmt_info);
 
-    MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
-    MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
     FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
@@ -211,7 +223,7 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
         AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
     }
 
-    mpi_errno = (data_sz <= MPIDI_MAX_SHORT_SEND_SZ) ?
+    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_AM_OFI_hdr_t)) < MPIDI_MAX_SHORT_SEND_SZ) ?
         MPIDI_netmod_ofi_send_am_short(rank, handler_id,am_hdr, am_hdr_sz, send_buf, data_sz, sreq) :
         MPIDI_netmod_ofi_send_am_long(rank, handler_id, am_hdr, am_hdr_sz, send_buf, data_sz, sreq);
   fn_exit:
