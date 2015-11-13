@@ -26,7 +26,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
                                     MPI_Datatype target_datatype,
                                     MPID_Win * win, MPID_Request ** request)
 {
-    int mpi_errno = MPI_SUCCESS, c, n_iov;
+    int mpi_errno = MPI_SUCCESS, n_iov, c;
     MPID_Request *sreq = NULL;
     MPIDI_CH4U_put_msg_t am_hdr;
     uint64_t offset;
@@ -53,14 +53,12 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     MPIU_CH4U_REQUEST(sreq, preq.win_ptr) = (uint64_t) win;
     MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0) {
-        MPID_cc_decr(sreq->cc_ptr, &c);
-        MPIU_Assert(c >= 0);
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
 
     if (target_rank == win->comm_ptr->rank) {
-        if (request) MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         return MPIR_Localcopy(origin_addr,
                               origin_count,
                               origin_datatype,
@@ -69,8 +67,8 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
                               target_datatype);
     }
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
+    MPID_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
@@ -140,7 +138,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
                          MPID_Win      *win,
                          MPID_Request **request)
 {
-    int                mpi_errno = MPI_SUCCESS, c, n_iov;
+    int                mpi_errno = MPI_SUCCESS, n_iov, c;
     size_t             offset;
     MPID_Request      *sreq = NULL;
     MPIDI_CH4U_get_req_msg_t am_hdr;
@@ -166,9 +164,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
 
     MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0) {
-        MPID_cc_decr(sreq->cc_ptr, &c);
-        MPIU_Assert(c >= 0);
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
     
@@ -178,7 +174,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     MPIU_CH4U_REQUEST(sreq, greq.datatype) = origin_datatype;
 
     if (target_rank == win->comm_ptr->rank) {
-        if (request) MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         return MPIR_Localcopy((char *)win->base + offset,
                               target_count,
                               target_datatype,
@@ -187,8 +183,8 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
                               origin_datatype);
     }
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
+    MPID_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
@@ -391,15 +387,13 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     MPIDI_Datatype_get_size_dt_ptr(origin_count, origin_datatype, data_sz, dt_ptr);
 
     if (data_sz == 0) {
-        MPID_cc_decr(sreq->cc_ptr, &c);
-        MPIU_Assert(c >= 0);
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
 
     MPIU_CH4U_REQUEST(sreq, areq.win_ptr) = (uint64_t) win;
-    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
+    MPID_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.req_ptr = (uint64_t) sreq;
     am_hdr.origin_count = origin_count;
@@ -663,9 +657,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
 
     MPIDI_Datatype_check_size(datatype, 1, data_sz);
     if (data_sz == 0) {
-        MPID_cc_decr(sreq->cc_ptr, &c);
-        MPIU_Assert(c >= 0);
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
 
@@ -680,8 +672,8 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     MPIU_CH4U_REQUEST(sreq, creq.result_addr) = result_addr;
     MPIU_CH4U_REQUEST(sreq, creq.data) = p_data;
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4I_EPOCH_START_CHECK();
+    MPID_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.datatype = datatype;
