@@ -32,6 +32,8 @@ typedef enum {
     MPIDI_AMTYPE_LMT_REQ,
     MPIDI_AMTYPE_LMT_HDR_REQ,
     MPIDI_AMTYPE_LMT_ACK,
+    MPIDI_AMTYPE_LONG_HDR_REQ,
+    MPIDI_AMTYPE_LONG_HDR_ACK
 } MPIDI_amtype;
 
 typedef struct {
