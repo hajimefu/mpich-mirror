@@ -166,6 +166,9 @@ typedef struct MPIDI_CH4_Global_t {
     int pname_len;
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    MPID_Node_id_t *node_map, max_node_id;
+#endif
     MPIDI_CH4_Comm_req_list_t *comm_req_lists;
     OPA_int_t active_progress_hooks;
     MPID_CommOps         MPID_Comm_fns_store;

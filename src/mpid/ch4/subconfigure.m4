@@ -173,12 +173,15 @@ changequote([,])
 if test "$ch4_shm_level" != "no" ; then
     AC_DEFINE([MPIDI_BUILD_CH4_SHM], [1],
         [Define if CH4 will build the default shared memory implementation as opposed to only using a netmod implementation])
-
 fi
 
 if test "$ch4_shm_level" = "exclusive" ; then
-    AC_DEFINE([MPIDI_CH4_EXCLUSIVE_SHM], [1],
-        [Define if CH4 will be providing the exclusive implementation of shared memory])
+    # This variable is set only when the user wants CH4 to handle all shared memory operations
+    AC_DEFINE(MPIDI_CH4_EXCLUSIVE_SHM, 1, [Define if CH4 will be providing the exclusive implementation of shared memory])
+
+    # This variable can be set either when the user asks for CH4 exclusive shared memory
+    # or when the netmod doesn't want to implement its own locality information
+    AC_DEFINE(MPIDI_BUILD_CH4_LOCALITY_INFO, 1, [CH4 should build locality info])
 fi
 
 # $ch4_shm - contains the shm mods

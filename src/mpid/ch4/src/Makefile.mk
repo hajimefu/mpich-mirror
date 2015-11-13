@@ -15,6 +15,7 @@ noinst_HEADERS += src/mpid/ch4/src/ch4_comm.h     \
                   src/mpid/ch4/src/ch4_types.h    \
                   src/mpid/ch4/src/ch4_impl.h     \
                   src/mpid/ch4/src/ch4_probe.h    \
+                  src/mpid/ch4/src/ch4_proc.h     \
                   src/mpid/ch4/src/ch4_recv.h     \
                   src/mpid/ch4/src/ch4_rma.h      \
                   src/mpid/ch4/src/ch4_spawn.h    \

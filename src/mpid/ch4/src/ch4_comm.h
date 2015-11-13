@@ -83,8 +83,8 @@ __CH4_INLINE__ int MPIDI_Comm_split_type(MPID_Comm  *comm_ptr,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPLIT_TYPE);
 
     if(split_type == MPI_COMM_TYPE_SHARED) {
-        MPIDI_netmod_comm_get_lpid(comm_ptr,comm_ptr->rank,&idx,FALSE);
-        MPIDI_netmod_get_node_id(comm_ptr, comm_ptr->rank, &node_id);
+        MPIDI_Comm_get_lpid(comm_ptr,comm_ptr->rank,&idx,FALSE);
+        MPIDI_Get_node_id(comm_ptr, comm_ptr->rank, &node_id);
         mpi_errno              = MPIR_Comm_split_impl(comm_ptr,node_id,key,newcomm_ptr);
     } else
         mpi_errno              = MPIR_Comm_split_impl(comm_ptr, MPI_UNDEFINED, key, newcomm_ptr);
@@ -112,18 +112,32 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
         MPIR_ERR_POP(mpi_errno);
     }
 #endif
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    int i;
-    MPIU_CH4U_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
-        MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4U_locality_t));
-    for(i=0;i<comm->remote_size; i++)
-    {
-        int is_local, lpid;
-        is_local = MPIDI_netmod_rank_is_local(i, comm);
-        MPIDI_netmod_comm_get_lpid(comm, i, &lpid, TRUE);
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    if (comm != MPIR_Process.comm_world && comm != MPIR_Process.comm_self) {
+        int i, lpid, is_local;
 
-        MPIU_CH4U_COMM(comm,locality)[i].is_local = is_local;
-        MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+        MPIU_CH4U_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
+            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4U_locality_t));
+
+        /* For now, we'll only deal with locality for intracommunicators. For
+         * intercommunicators, we'll just set all locality to remote. */
+        if (comm->comm_kind == MPID_INTRACOMM) {
+            for (i = 0; i < comm->remote_size; i++) {
+                MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
+                is_local = MPIDI_CH4_rank_is_local(lpid, MPIR_Process.comm_world);
+
+                MPIU_CH4U_COMM(comm,locality)[i].is_local = is_local;
+                MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+            }
+        } else {
+            /* TODO - Set up locality information for intercommunicators. */
+            for (i = 0; i < comm->remote_size; i++) {
+                MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
+
+                MPIU_CH4U_COMM(comm,locality)[i].is_local = 0;
+                MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+            }
+        }
     }
 
 #endif
@@ -153,7 +167,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
         MPIR_ERR_POP(mpi_errno);
     }
 #endif
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPIU_Free(MPIU_CH4U_COMM(comm,locality));
 #endif
   fn_exit:

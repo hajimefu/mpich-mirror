@@ -156,6 +156,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     mpi_errno = MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
+    COMM_OFI(comm).vcrt->vcr_table[0].is_local = 1;
 
     comm = MPIR_Process.comm_world;
     comm->rank = rank;
@@ -197,6 +198,10 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
                              comm_world->local_size,
                              MPIDI_Global.node_map,
                              &MPIDI_Global.max_node_id);
+
+    for(i=0; i<comm_world->local_size; i++)
+        COMM_OFI(comm_world).vcrt->vcr_table[i].is_local =
+            (MPIDI_Global.node_map[i] == MPIDI_Global.node_map[comm_world->rank])?1:0;
 
     MPIR_Datatype_init_names();
     /* todo: spawn */

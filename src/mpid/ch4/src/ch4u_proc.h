@@ -19,10 +19,17 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
-#ifndef MPIDI_CH4_EXCLUSIVE_SHM
-    ret = MPIDI_netmod_rank_is_local(rank, comm);
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    if (NULL == MPIU_CH4U_COMM(comm,locality)) {
+        ret = 0;
+    } else {
+        ret = MPIU_CH4U_COMM(comm,locality)[rank].is_local;
+
+        MPIU_DBG_MSG_FMT(CH4, VERBOSE, (MPIU_DBG_FDEST,
+                    "Rank %d %s local", rank, ret ? "is" : "is not"));
+    }
 #else
-    ret = MPIU_CH4U_COMM(comm,locality)[rank].is_local;
+    ret = 0;
 #endif
 
     MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
@@ -36,11 +43,10 @@ static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPID_Comm * comm)
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
-#ifndef MPIDI_CH4_EXCLUSIVE_SHM
-    int lpid;
-    ret = MPIDI_netmod_comm_get_lpid(comm, rank, &lpid, FALSE);
-#else
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     ret = MPIU_CH4U_COMM(comm,locality)[rank].index;
+#else
+    ret = -1;
 #endif
 
     MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
@@ -109,6 +115,32 @@ fn_exit:
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+}
+
+static inline int MPIDI_CH4U_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
+{
+    int mpi_errno = MPI_SUCCESS;
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    *id_p = MPIDI_CH4_Global.node_map[MPIU_CH4U_COMM(comm,locality)[rank].index];
+#else
+    /* If the locality info isn't being built, this function shouldn't be getting called. */
+    MPIR_ERR_SET(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_locality");
+#endif
+
+    return mpi_errno;
+}
+
+static inline int MPIDI_CH4U_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
+{
+    int mpi_errno = MPI_SUCCESS;
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    *max_id_p = MPIDI_CH4_Global.max_node_id;
+#else
+    /* If the locality info isn't being built, this function shouldn't be getting called. */
+    MPIR_ERR_SET(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_locality");
+#endif
+
+    return mpi_errno;
 }
 
 #endif /*MPIDCH4U_PROC_H_INCLUDED */

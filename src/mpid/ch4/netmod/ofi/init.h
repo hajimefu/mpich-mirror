@@ -384,6 +384,9 @@ static inline int MPIDI_netmod_init(int         rank,
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
+    /* If the user configures with ch4 exclusive shared memory we will still
+     * build this information because it is used by the mapper later when
+     * tranlating gpids to lpids */
     MPIDI_Global.node_map = (MPID_Node_id_t *)
         MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
     MPIDI_CH4U_build_nodemap(comm_world->rank,

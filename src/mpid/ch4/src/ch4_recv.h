@@ -33,7 +33,7 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
         MPIDI_netmod_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
 #else
     int r;
-    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4_rank_is_local(rank, comm)))
         mpi_errno =
             MPIDI_shm_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
     else
@@ -72,7 +72,7 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
                                        comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_recv_init(buf, count, datatype, rank, tag,
                                         comm, context_offset, request);
     else
@@ -111,7 +111,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, &rreq);
 #else
-    if (MPIDI_CH4U_rank_is_local(message->status.MPI_SOURCE, message->comm))
+    if (MPIDI_CH4_rank_is_local(message->status.MPI_SOURCE, message->comm))
         mpi_errno = MPIDI_shm_imrecv(buf, count, datatype, message, &rreq);
     else
         mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, &rreq);
@@ -149,7 +149,7 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, rreqp);
 #else
-    if (MPIDI_CH4U_rank_is_local(message->status.MPI_SOURCE, message->comm))
+    if (MPIDI_CH4_rank_is_local(message->status.MPI_SOURCE, message->comm))
         mpi_errno = MPIDI_shm_imrecv(buf, count, datatype, message, rreqp);
     else
         mpi_errno = MPIDI_netmod_imrecv(buf, count, datatype, message, rreqp);
@@ -182,7 +182,7 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
     mpi_errno = MPIDI_netmod_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
     int r;
-    if ((r = MPIDI_CH4U_rank_is_local(rank, comm)))
+    if ((r = MPIDI_CH4_rank_is_local(rank, comm)))
         mpi_errno = MPIDI_shm_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
     else
         mpi_errno =

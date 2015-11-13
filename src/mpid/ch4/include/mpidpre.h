@@ -258,7 +258,7 @@ typedef struct MPIDI_CH4U_Devcomm_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
     uint32_t   window_instance;
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
+#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPIDI_CH4U_locality_t *locality;
 #endif
 } MPIDI_CH4U_Devcomm_t;

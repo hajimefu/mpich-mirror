@@ -5,12 +5,6 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
     AM_COND_IF([BUILD_CH4],[
         for net in $ch4_netmods ; do
             AS_CASE([$net],[stub],[build_ch4_netmod_stub=yes])
-	    if test $net = "stub" ; then
-	       if test "$build_ch4_locality_info" != "yes" ; then
-	       	  AC_DEFINE(MPIDI_BUILD_CH4_LOCALITY_INFO, 1, [CH4 should build locality info])
-		  build_ch4_locality_info="yes"
-	       fi
-	    fi
         done
     ])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_STUB],[test "X$build_ch4_netmod_stub" = "Xyes"])
@@ -20,6 +14,7 @@ AC_DEFUN([PAC_SUBCFG_BODY_]PAC_SUBCFG_AUTO_SUFFIX,[
 AM_COND_IF([BUILD_CH4_NETMOD_STUB],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch4:stub])
     AC_DEFINE([ENABLE_COMM_OVERRIDES], 1, [define to add per-vc function pointers to override send and recv functions])
+    AC_DEFINE(MPIDI_BUILD_CH4_LOCALITY_INFO, 1, [CH4 should build locality info])
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_STUB,...)
 ])dnl end _BODY
 

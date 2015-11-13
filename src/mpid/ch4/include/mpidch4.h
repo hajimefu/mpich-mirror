@@ -152,6 +152,11 @@ MPIDI_CH4_API(int, Create_intercomm_from_lpids, MPID_Comm *, int, const int[]);
 MPIDI_CH4_API(int, Comm_create, MPID_Comm *);
 MPIDI_CH4_API(int, Comm_destroy, MPID_Comm *);
 
+/* This function is not exposed to the upper layers but functions in a way
+ * similar to the functions above. Other CH4-level functions should call this
+ * function to query locality. This function will determine whether to call the
+ * netmod or CH4U locality functions. */
+__CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 
 /* Include netmod prototypes */
 #include <netmod.h>
@@ -177,6 +182,7 @@ MPIDI_CH4_API(int, Comm_destroy, MPID_Comm *);
 #include "ch4_rma.h"
 #include "ch4_progress.h"
 #include "ch4_spawn.h"
+#include "ch4_proc.h"
 
 #define MPID_Abort                       MPIDI_Abort
 #define MPID_Accumulate                  MPIDI_Accumulate
