@@ -1037,7 +1037,7 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
     size_t data_sz;
 
     int dt_contig, n_iov;
-    MPI_Aint dt_true_lb, last;
+    MPI_Aint dt_true_lb, last, num_iov;
     MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
 
@@ -1093,7 +1093,8 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
                           MPIU_CH4U_REQUEST(rreq, datatype), segment_ptr, 0);
 
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) & n_iov);
+        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIU_CH4U_REQUEST(rreq, iov) = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIU_CH4U_REQUEST(rreq, iov));
@@ -1269,7 +1270,7 @@ static inline int MPIDI_CH4I_am_get_acc_ack_target_handler(void *am_hdr, size_t 
 
     size_t data_sz;
     int dt_contig, n_iov;
-    MPI_Aint dt_true_lb, last;
+    MPI_Aint dt_true_lb, last, num_iov;
     MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
 
@@ -1301,7 +1302,8 @@ static inline int MPIDI_CH4I_am_get_acc_ack_target_handler(void *am_hdr, size_t 
                           segment_ptr, 0);
 
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) &n_iov);
+        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIU_CH4U_REQUEST(areq, iov) = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIU_CH4U_REQUEST(areq, iov));
@@ -1660,7 +1662,7 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
     struct iovec *iov, *dt_iov;
 
     int dt_contig, n_iov;
-    MPI_Aint dt_true_lb, last;
+    MPI_Aint dt_true_lb, last, num_iov;
     MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
 
@@ -1706,7 +1708,8 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
         MPID_Segment_init((void *)msg_hdr->addr, msg_hdr->count, msg_hdr->datatype,
                           segment_ptr, 0);
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) &n_iov);
+        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIU_CH4U_REQUEST(rreq, iov) = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIU_CH4U_REQUEST(rreq, iov));
@@ -1968,7 +1971,7 @@ static inline int MPIDI_CH4I_am_get_ack_target_handler(void *am_hdr,
     size_t data_sz;
 
     int dt_contig, n_iov;
-    MPI_Aint dt_true_lb, last;
+    MPI_Aint dt_true_lb, last, num_iov;
     MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
 
@@ -2004,7 +2007,8 @@ static inline int MPIDI_CH4I_am_get_ack_target_handler(void *am_hdr,
                           MPIU_CH4U_REQUEST(rreq, greq.datatype),
                           segment_ptr, 0);
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, (MPI_Aint *) & n_iov);
+        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIU_CH4U_REQUEST(rreq, iov) = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIU_CH4U_REQUEST(rreq, iov));
