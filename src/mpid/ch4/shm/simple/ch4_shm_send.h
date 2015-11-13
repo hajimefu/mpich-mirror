@@ -254,6 +254,7 @@ static inline int MPIDI_shm_send_init(const void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND_INIT);
     MPIDI_Request_create_sreq(sreq);
     MPIU_Object_set_ref(sreq, 1);
+    MPID_cc_set(&(sreq)->cc, 0);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
     MPIR_Comm_add_ref(comm);
@@ -381,8 +382,24 @@ static inline int MPIDI_shm_issend(const void *buf,
 
 static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    MPID_Request *req = MPIDI_shm_sendq.head;
+    MPID_Request *prev_req = NULL;
+    int mpi_errno = MPI_SUCCESS;
+
+    while (req) {
+
+        if (req == sreq) {
+            MPIR_STATUS_SET_CANCEL_BIT(sreq->status, TRUE);
+            MPIR_STATUS_SET_COUNT(sreq->status, 0);
+            MPIDI_Request_complete(sreq);
+            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_shm_sendq,mpi_errno);
+            break;
+        }
+
+        prev_req = req;
+        req = REQ_SHM(req)->next;
+    }
+    return mpi_errno;
 }
 
 #endif /* SHM_SEND_H_INCLUDED */

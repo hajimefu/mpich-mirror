@@ -121,6 +121,7 @@ static inline int MPIDI_shm_recv_init(void *buf,
 
     MPIDI_Request_create_rreq(rreq);
     MPIU_Object_set_ref(rreq, 1);
+    MPID_cc_set(&rreq->cc, 0);
     rreq->kind = MPID_PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
@@ -150,8 +151,39 @@ static inline int MPIDI_shm_imrecv(void *buf,
                                    MPI_Datatype datatype,
                                    MPID_Request * message, MPID_Request ** rreqp)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq;
+    MPID_Comm *comm;
+    int rank, tag, context_id;
+    int context_offset = 0;
+
+    MPIDI_STATE_DECL(MPIDI_SHM_IMRECV);
+    MPIDI_FUNC_ENTER(MPIDI_SHM_IMRECV);
+
+    if (message == NULL)
+    {
+        MPIDI_Request_create_null_rreq(rreq, mpi_errno, goto fn_fail);
+        *rreqp = rreq;
+        goto fn_exit;
+    }
+
+    MPIU_Assert(message != NULL);
+    MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
+
+    /* promote the request object to be a "real" recv request */
+    message->kind = MPID_REQUEST_RECV;
+
+    *rreqp = rreq = message;
+    ENVELOPE_GET(REQ_SHM(rreq), rank, tag, context_id);
+
+    comm = rreq->comm;
+    mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, rreqp);
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPIDI_SHM_IMRECV);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FCNAME

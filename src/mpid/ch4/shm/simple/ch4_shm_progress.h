@@ -132,8 +132,8 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                         req->status.MPI_TAG = cell->tag;
                     }
                     else {
-                        req->status.MPI_SOURCE = sender_rank;
-                        req->status.MPI_TAG = tag;
+                        req->status.MPI_SOURCE = sreq->status.MPI_SOURCE;
+                        req->status.MPI_TAG = sreq->status.MPI_TAG;
                     }
                     count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
                     MPIR_STATUS_SET_COUNT(req->status,count);
@@ -162,7 +162,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     MPIU_Assert(0);
                 }
                 goto release_cell_l;
-            }
+            }              /* if matched  */
             prev_req = req;
             req = REQ_SHM(req)->next;
         }

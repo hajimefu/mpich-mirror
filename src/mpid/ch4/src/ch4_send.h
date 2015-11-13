@@ -422,9 +422,9 @@ __CH4_INLINE__ int MPIDI_Cancel_send(MPID_Request * sreq)
     mpi_errno = MPIDI_netmod_cancel_send(sreq);
 #else
     if(MPIU_CH4_REQUEST(sreq, is_local))
-        mpi_errno = MPIDI_netmod_cancel_send(sreq);
-    else
         mpi_errno = MPIDI_shm_cancel_send(sreq);
+    else
+        mpi_errno = MPIDI_netmod_cancel_send(sreq);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
