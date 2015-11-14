@@ -1346,6 +1346,7 @@ static inline int MPIDI_CH4I_am_cswap_ack_target_handler(void *am_hdr, size_t am
     MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(creq, creq.datatype), 1, data_sz);
     *data = MPIU_CH4U_REQUEST(creq, creq.result_addr);
     *p_data_sz = data_sz;
+    *is_contig = 1;
 
     *req = creq;
     *cmpl_handler_fn = MPIDI_CH4I_am_cswap_ack_cmpl_handler;
