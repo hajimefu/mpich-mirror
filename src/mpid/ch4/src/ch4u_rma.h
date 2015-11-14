@@ -397,9 +397,14 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
 
     am_hdr.req_ptr = (uint64_t) sreq;
     am_hdr.origin_count = origin_count;
-    am_hdr.origin_datatype =
-        (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) ?
-        origin_datatype : dt_ptr->basic_type;
+
+    if (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) {
+        am_hdr.origin_datatype = origin_datatype;
+    } else {
+        am_hdr.origin_datatype = dt_ptr->basic_type;
+        am_hdr.origin_count = data_sz / dt_ptr->builtin_element_size;
+    }
+
     am_hdr.target_count = target_count;
     am_hdr.target_datatype = target_datatype;
     am_hdr.target_addr = winfo->base_addr + offset;
