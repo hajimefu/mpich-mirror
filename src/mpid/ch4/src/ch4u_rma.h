@@ -432,7 +432,8 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
 
         mpi_errno = MPIDI_netmod_send_am(target_rank, win->comm_ptr, op_type,
                                          &am_hdr, sizeof(am_hdr), origin_addr,
-                                         origin_count, origin_datatype, sreq, NULL);
+                                         (op == MPI_NO_OP) ? 0 : origin_count,
+                                         origin_datatype, sreq, NULL);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         goto fn_exit;
     }
@@ -467,8 +468,9 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     MPIU_CH4U_REQUEST(sreq, areq.dt_iov) = dt_iov;
 
     mpi_errno = MPIDI_netmod_send_amv(target_rank, win->comm_ptr, op_type,
-                                      &am_iov[0], 2, origin_addr, origin_count, origin_datatype,
-                                      sreq, NULL);
+                                      &am_iov[0], 2, origin_addr, 
+                                      (op == MPI_NO_OP) ? 0 : origin_count,
+                                      origin_datatype, sreq, NULL);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DO_ACCUMULATE);

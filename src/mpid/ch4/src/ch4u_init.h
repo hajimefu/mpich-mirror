@@ -859,18 +859,29 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
     MPI_Aint basic_sz, count, offset = 0;
     struct iovec *iov;
     char *src_ptr, *original = NULL;
+    size_t data_sz;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_ACC_CMPL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_HANDLE_ACC_CMPL);
 
     MPID_Datatype_get_size_macro(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
                                  basic_sz);
+
+    MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
+                              MPIU_CH4U_REQUEST(rreq, areq.target_count),
+                              data_sz);
     
     /* MPIDI_CS_ENTER(); */
 
     if (do_get) {
-        original = (char *)MPIU_Malloc(MPIU_CH4U_REQUEST(rreq, areq.data_sz));
+        original = (char *) MPIU_Malloc(data_sz);
         MPIU_Assert(original);
+    }
+
+    if (MPIU_CH4U_REQUEST(rreq, areq.op) == MPI_NO_OP) {
+        MPIU_CH4U_REQUEST(rreq, areq.origin_count) = 
+            MPIU_CH4U_REQUEST(rreq, areq.target_count);
+        MPIU_CH4U_REQUEST(rreq, areq.data_sz) = data_sz;
     }
     
     if (MPIU_CH4U_REQUEST(rreq, areq.dt_iov) == NULL) {
@@ -912,7 +923,8 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
     }
     
     /* MPIDI_CS_EXIT(); */
-    MPIU_Free(MPIU_CH4U_REQUEST(rreq, areq.data));
+    if (MPIU_CH4U_REQUEST(rreq, areq.data))
+        MPIU_Free(MPIU_CH4U_REQUEST(rreq, areq.data));
 
     if (original) {
         MPIU_CH4U_REQUEST(rreq, areq.data) = original;
@@ -1796,7 +1808,7 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;
     size_t data_sz;
-    void *p_data;
+    void *p_data = NULL;
     struct iovec *iov, *dt_iov;
 
     MPIDI_CH4U_acc_req_msg_t *msg_hdr = (MPIDI_CH4U_acc_req_msg_t *) am_hdr;
@@ -1810,8 +1822,10 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
 
     MPIDI_Datatype_check_size(msg_hdr->origin_datatype, msg_hdr->origin_count,
                               data_sz);
-    p_data = MPIU_Malloc(data_sz);
-    MPIU_Assert(p_data);
+    if (data_sz) {
+        p_data = MPIU_Malloc(data_sz);
+        MPIU_Assert(p_data);
+    }
 
     /* todo: pkt header should contain data_sz ? */
 
