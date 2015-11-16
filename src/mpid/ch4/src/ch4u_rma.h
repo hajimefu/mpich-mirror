@@ -438,10 +438,9 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
         goto fn_exit;
     }
 
-    MPIDI_Datatype_check_size(target_datatype, target_count, data_sz);
-    am_hdr.target_datatype = 
-        (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) ?
-        origin_datatype : dt_ptr->basic_type;
+    MPIDI_Datatype_get_size_dt_ptr(target_count, target_datatype, data_sz, dt_ptr);
+    am_hdr.target_datatype = dt_ptr->basic_type;
+    am_hdr.target_count = dt_ptr->n_builtin_elements;
 
     segment_ptr = MPID_Segment_alloc();
     MPIU_Assert(segment_ptr);
