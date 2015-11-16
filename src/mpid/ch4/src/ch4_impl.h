@@ -128,7 +128,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
 	}								\
     })
 
