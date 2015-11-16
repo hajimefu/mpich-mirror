@@ -176,6 +176,7 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
             cntr->counter = 0;
             MPIDI_OFI_Map_set(COMM_OFI(comm).huge_send_counters, rank, ptr);
         }
+        cntr = (MPIDI_Hugecntr *) ptr;
 
         ctrl.rma_key = MPIDI_OFI_Index_allocator_alloc(COMM_OFI(comm).rma_id_allocator);
         MPIU_Assert(ctrl.rma_key <= MPIDI_MAX_HUGE_RMAS);
@@ -190,7 +191,6 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
                                &cntr->mr,               /* Out: memregion object    */
                                NULL), mr_reg);          /* In:  context             */
 
-        cntr = (MPIDI_Hugecntr *) ptr;
         cntr->outstanding++;
         cntr->counter++;
         MPIU_Assert(cntr->outstanding != USHRT_MAX);

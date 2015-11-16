@@ -57,9 +57,10 @@ static inline void *generate_random_addr(size_t size)
    * This is not generic, probably only works properly on Linux
    * but it's not fatal since we bail after a fixed number of iterations
    */
-#define MAP_POINTER ((random_int&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
+#define MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
   char            random_state[256];
-  size_t          page_sz, random_int;
+  size_t          page_sz;
+  uint64_t        random_unsigned;
   size_t          mapsize     = get_mapsize(size,&page_sz);
   uintptr_t       map_pointer;
   struct timeval  ts;
@@ -75,12 +76,12 @@ static inline void *generate_random_addr(size_t size)
 
   initstate_r(ts.tv_usec,random_state,sizeof(random_state),&rbuf);
   random_r(&rbuf, &rh); random_r(&rbuf, &rl);
-  random_int  = rh<<32|rl;
+  random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
   map_pointer = MAP_POINTER;
 
   while(check_maprange_ok((void *)map_pointer,mapsize) == 0) {
     random_r(&rbuf, &rh); random_r(&rbuf, &rl);
-    random_int  = rh<<32|rl;
+    random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
     map_pointer = MAP_POINTER;
     iter--;
 

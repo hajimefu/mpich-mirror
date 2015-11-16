@@ -25,11 +25,13 @@ static inline int MPIDI_Win_allgather(MPID_Win        *win,
                                       int              disp_unit,
                                       int              do_optimize)
 {
-    int             i,first,same_disp,mpi_errno = MPI_SUCCESS;
+    int             i,same_disp,mpi_errno = MPI_SUCCESS;
+    uint32_t        first;
     MPIR_Errflag_t  errflag      = MPIR_ERR_NONE;
     MPID_Comm      *comm_ptr     = win->comm_ptr;
     MPIDI_Win_info *my_winfo        = NULL;
-    int raw_prefix,idx,bitpos, gen_id;
+    int raw_prefix,idx,bitpos;
+    unsigned gen_id;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
