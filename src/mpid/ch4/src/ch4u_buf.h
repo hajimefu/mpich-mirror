@@ -54,6 +54,7 @@ static inline MPIU_buf_pool_t *MPIU_CH4I_create_buf_pool(int num, int size,
         curr = curr->next;
     }
     curr->next = NULL;
+    curr->pool = parent_pool ? parent_pool : buf_pool;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CREATE_BUF_POOL);
     return buf_pool;
 }
