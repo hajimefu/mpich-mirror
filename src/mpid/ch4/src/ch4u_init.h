@@ -864,12 +864,12 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_ACC_CMPL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_HANDLE_ACC_CMPL);
 
-    MPID_Datatype_get_size_macro(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
-                                 basic_sz);
-
-    MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
-                              MPIU_CH4U_REQUEST(rreq, areq.target_count),
-                              data_sz);
+    MPID_Datatype_get_size_macro(MPIU_CH4U_REQUEST(rreq, areq.target_datatype), basic_sz);
+    data_sz = MPIU_CH4U_REQUEST(rreq, areq.data_sz);
+    if (!data_sz)
+        MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
+                                  MPIU_CH4U_REQUEST(rreq, areq.target_count),
+                                  data_sz);
     
     /* MPIDI_CS_ENTER(); */
 
@@ -931,6 +931,7 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
         mpi_errno = MPIDI_CH4I_ack_get_acc(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     } else {
+        MPIU_CH4U_REQUEST(rreq, areq.data) = NULL;
         mpi_errno = MPIDI_CH4I_ack_acc(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
