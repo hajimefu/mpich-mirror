@@ -239,8 +239,10 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
     }
 
     mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_AM_OFI_hdr_t)) < MPIDI_MAX_SHORT_SEND_SZ) ?
-        MPIDI_netmod_ofi_send_am_short(rank, handler_id,am_hdr, am_hdr_sz, send_buf, data_sz, sreq) :
-        MPIDI_netmod_ofi_send_am_long(rank, handler_id, am_hdr, am_hdr_sz, send_buf, data_sz, sreq);
+        MPIDI_netmod_ofi_send_am_short(rank, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
+                                       am_hdr_sz, send_buf, data_sz, sreq) :
+        MPIDI_netmod_ofi_send_am_long(rank, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
+                                      am_hdr_sz, send_buf, data_sz, sreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DO_SEND_AM);
     return mpi_errno;
