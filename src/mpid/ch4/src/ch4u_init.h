@@ -1793,7 +1793,7 @@ static inline int MPIDI_CH4I_am_cswap_target_handler(void *am_hdr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_am_acc_target_handler
+#define FUNCNAME MPIDI_CH4I_handle_acc_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
