@@ -110,9 +110,10 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	    (_dt_true_lb)    = (_dt_ptr)->true_lb;			\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+	    (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;    \
+	    (_dt_true_lb)    = (_dt_ptr) ? (_dt_ptr)->true_lb : 0;      \
+	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
 	}								\
     })
 
@@ -143,8 +144,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
       {								\
        MPID_Datatype *_dt_ptr;					\
        MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-       (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-       }							\
+       (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1; \
+      }                                                         \
       })
 
 #define MPIDI_Datatype_check_contig_size(_datatype,_count,              \
@@ -161,8 +162,9 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
       {                                                                 \
 	  MPID_Datatype *_dt_ptr;					\
 	  MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	  (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	  (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+	  (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;      \
+	  (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *     \
+              (_dt_ptr)->size : 0;                                      \
       }                                                                 \
     })
 
@@ -177,7 +179,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
         {                                                               \
             MPID_Datatype *_dt_ptr;                                     \
             MPID_Datatype_get_ptr((_datatype), (_dt_ptr));              \
-            (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+            (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
         }                                                               \
     })
 
@@ -197,9 +200,10 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	{								\
 	    MPID_Datatype *_dt_ptr;					\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
-	    (_dt_true_lb)    = (_dt_ptr)->true_lb;			\
+	    (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;    \
+	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
+	    (_dt_true_lb)    = (_dt_ptr) ? (_dt_ptr)->true_lb : 0;      \
 	}								\
     })
 
