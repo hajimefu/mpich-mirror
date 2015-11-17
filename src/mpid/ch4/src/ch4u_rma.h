@@ -75,6 +75,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
     am_hdr.preq_ptr = (uint64_t) sreq;
+    am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)++;
@@ -193,6 +194,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
     am_hdr.greq_ptr = (uint64_t) sreq;
+    am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)++;
@@ -415,6 +417,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     am_hdr.target_datatype = target_datatype;
     am_hdr.target_addr = winfo->base_addr + offset;
     am_hdr.op = op;
+    am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)++;
@@ -696,6 +699,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.datatype = datatype;
     am_hdr.req_ptr = (uint64_t) sreq;
+    am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)++;
