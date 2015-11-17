@@ -265,14 +265,9 @@ static inline uint64_t MPIDI_CH4I_init_recvtag(uint64_t * mask_bits,
     return match_bits;
 }
 
-static inline int MPIDI_CH4I_valid_group_rank(int         lpid,
-                                              MPID_Group *grp)
+static inline int MPIDI_CH4I_valid_comm_rank(int rank, MPID_Comm *comm)
 {
-    int size = grp->size;
-    int z;
-
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
-    return (z < size);
+    return (rank < comm->local_size);
 }
 
 #define MPIDI_CH4I_PROGRESS()                                   \
@@ -317,8 +312,7 @@ static inline int MPIDI_CH4I_valid_group_rank(int         lpid,
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
         if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_START && \
-            !MPIDI_CH4I_valid_group_rank(target_rank,                   \
-                                         MPIU_CH4U_WIN(win, sync).sc.group)) \
+            !MPIDI_CH4I_valid_comm_rank(target_rank, win->comm_ptr))    \
             MPIR_ERR_SETANDSTMT(mpi_errno,                              \
                                 MPI_ERR_RMA_SYNC,                       \
                                 goto fn_fail,                           \
