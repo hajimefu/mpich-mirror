@@ -320,7 +320,6 @@ static inline int MPIDI_netmod_send_amv(int rank,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    /* TODO: avoid the malloc here, use the am_hdr directly */
     if (am_hdr_sz > MPIDI_BUF_POOL_SZ) {
         am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
