@@ -412,8 +412,10 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     if (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) {
         am_hdr.origin_datatype = origin_datatype;
     } else {
+        uint64_t basic_type_size; /* FIXME: what is the right type to represent data type size? */
         am_hdr.origin_datatype = (dt_ptr) ? dt_ptr->basic_type : MPI_DATATYPE_NULL;
-        am_hdr.origin_count = (dt_ptr) ? data_sz / dt_ptr->builtin_element_size : 0;
+        MPID_Datatype_get_size_macro(am_hdr.origin_datatype, basic_type_size);
+        am_hdr.origin_count = (basic_type_size > 0) ? data_sz / basic_type_size : 0;
     }
 
     am_hdr.target_count = target_count;
