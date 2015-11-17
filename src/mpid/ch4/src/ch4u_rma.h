@@ -13,16 +13,6 @@
 
 #include "ch4_impl.h"
 
-static inline void MPIDI_CH4I_rma_release_req(MPID_Request *req,
-                                           MPID_Request **preq)
-{
-    int count;
-    MPID_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
-    if (count == 0 && preq == NULL)
-        MPIDI_Request_release(req);
-}
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_do_put
 #undef FCNAME
@@ -57,18 +47,20 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     sreq = MPIDI_CH4I_create_win_req();
     MPIU_Assert(sreq);
     sreq->kind = MPID_WIN_REQUEST;
-    if (request)
+    if (request) {
         *request = sreq;
+        MPIDI_Request_add_ref(sreq);
+    }
 
     MPIU_CH4U_REQUEST(sreq, preq.win_ptr) = (uint64_t) win;
     MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
-        MPIDI_CH4I_rma_release_req(sreq, request);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
 
     if (target_rank == win->comm_ptr->rank) {
-        MPIDI_CH4I_rma_release_req(sreq, request);
+        MPIDI_CH4I_complete_req(sreq);
         return MPIR_Localcopy(origin_addr,
                               origin_count,
                               origin_datatype,
@@ -169,12 +161,14 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     sreq = MPIDI_CH4I_create_win_req();
     MPIU_Assert(sreq);
     sreq->kind = MPID_WIN_REQUEST;
-    if (request)
+    if (request) {
         *request = sreq;
+        MPIDI_Request_add_ref(sreq);
+    }
 
     MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
-        MPIDI_CH4I_rma_release_req(sreq, request);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
     
@@ -184,7 +178,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     MPIU_CH4U_REQUEST(sreq, greq.datatype) = origin_datatype;
 
     if (target_rank == win->comm_ptr->rank) {
-        MPIDI_CH4I_rma_release_req(sreq, request);
+        MPIDI_CH4I_complete_req(sreq);
         return MPIR_Localcopy((char *)win->base + offset,
                               target_count,
                               target_datatype,
@@ -372,8 +366,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
                                             MPI_Datatype target_datatype, 
                                             MPI_Op op, MPID_Win * win,
                                             int do_get,
-                                            MPID_Request *sreq,
-                                            MPID_Request **request)
+                                            MPID_Request *sreq)
 {
     int                mpi_errno = MPI_SUCCESS, c, n_iov;
     size_t             offset;
@@ -400,7 +393,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
         if (do_get)
             dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(sreq, areq.result_datatype));
-        MPIDI_CH4I_rma_release_req(sreq, request);
+        MPIDI_CH4I_complete_req(sreq);
         goto fn_exit;
     }
 
@@ -492,7 +485,8 @@ __CH4_INLINE__ int MPIDI_CH4U_raccumulate(const void *origin_addr,
                                           MPI_Aint target_disp,
                                           int target_count,
                                           MPI_Datatype target_datatype,
-                                          MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                          MPI_Op op, MPID_Win * win,
+                                          MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
@@ -502,8 +496,10 @@ __CH4_INLINE__ int MPIDI_CH4U_raccumulate(const void *origin_addr,
     sreq = MPIDI_CH4I_create_win_req();
     MPIU_Assert(sreq);
     sreq->kind = MPID_WIN_REQUEST;
-    if (request)
+    if (request) {
         *request = sreq;
+        MPIDI_Request_add_ref(sreq);
+    }
 
     mpi_errno = MPIDI_CH4U_do_accumulate(origin_addr,
                                          origin_count,
@@ -512,7 +508,7 @@ __CH4_INLINE__ int MPIDI_CH4U_raccumulate(const void *origin_addr,
                                          target_disp,
                                          target_count,
                                          target_datatype, 
-                                         op, win, 0, sreq, request);
+                                         op, win, 0, sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_RACCUMULATE);
@@ -569,7 +565,8 @@ __CH4_INLINE__ int MPIDI_CH4U_rget_accumulate(const void *origin_addr,
                                               MPI_Aint target_disp,
                                               int target_count,
                                               MPI_Datatype target_datatype,
-                                              MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                              MPI_Op op, MPID_Win * win,
+                                              MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
@@ -585,8 +582,10 @@ __CH4_INLINE__ int MPIDI_CH4U_rget_accumulate(const void *origin_addr,
     MPIU_CH4U_REQUEST(sreq, areq.result_datatype) = result_datatype;
     dtype_add_ref_if_not_builtin(result_datatype);
 
-    if (request)
+    if (request) {
         *request = sreq;
+        MPIDI_Request_add_ref(sreq);
+    }
 
     mpi_errno = MPIDI_CH4U_do_accumulate(origin_addr,
                                          origin_count,
@@ -595,7 +594,7 @@ __CH4_INLINE__ int MPIDI_CH4U_rget_accumulate(const void *origin_addr,
                                          target_disp,
                                          target_count,
                                          target_datatype, 
-                                         op, win, 1, sreq, request);
+                                         op, win, 1, sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_RGET_ACCUMULATE);
