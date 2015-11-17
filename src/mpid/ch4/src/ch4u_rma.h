@@ -390,7 +390,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     op_type = (do_get == 1) ? MPIDI_CH4U_AM_GET_ACC_REQ : MPIDI_CH4U_AM_ACC_REQ;
     MPIDI_Datatype_get_size_dt_ptr(origin_count, origin_datatype, data_sz, dt_ptr);
 
-    if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
+    if ((data_sz == 0 && do_get == 0) || target_rank == MPI_PROC_NULL) {
         if (do_get)
             dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(sreq, areq.result_datatype));
         MPIDI_CH4I_complete_req(sreq);
@@ -407,8 +407,8 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     if (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) {
         am_hdr.origin_datatype = origin_datatype;
     } else {
-        am_hdr.origin_datatype = dt_ptr->basic_type;
-        am_hdr.origin_count = data_sz / dt_ptr->builtin_element_size;
+        am_hdr.origin_datatype = (dt_ptr) ? dt_ptr->basic_type : MPI_DATATYPE_NULL;
+        am_hdr.origin_count = (dt_ptr) ? data_sz / dt_ptr->builtin_element_size : 0;
     }
 
     am_hdr.target_count = target_count;
