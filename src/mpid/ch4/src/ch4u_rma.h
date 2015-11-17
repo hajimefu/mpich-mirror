@@ -398,6 +398,8 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     MPIDI_Datatype_get_size_dt_ptr(origin_count, origin_datatype, data_sz, dt_ptr);
 
     if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
+        if (do_get)
+            dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(sreq, areq.result_datatype));
         MPIDI_CH4I_rma_release_req(sreq, request);
         goto fn_exit;
     }
