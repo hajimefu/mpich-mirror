@@ -898,10 +898,6 @@ static inline int MPIDI_CH4I_handle_acc_cmpl(MPID_Request * rreq, int do_get)
 
     MPID_Datatype_get_size_macro(MPIU_CH4U_REQUEST(rreq, areq.target_datatype), basic_sz);
     data_sz = MPIU_CH4U_REQUEST(rreq, areq.data_sz);
-    if (!data_sz)
-        MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(rreq, areq.target_datatype),
-                                  MPIU_CH4U_REQUEST(rreq, areq.target_count),
-                                  data_sz);
     
     /* MPIDI_CS_ENTER(); */
 
@@ -1904,7 +1900,7 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
     MPIU_CH4U_REQUEST(*req, areq.op) = msg_hdr->op;
     MPIU_CH4U_REQUEST(*req, areq.data) = p_data;
     MPIU_CH4U_REQUEST(*req, areq.n_iov) = msg_hdr->n_iov;
-    MPIU_CH4U_REQUEST(*req, areq.data_sz) = data_sz;
+    MPIU_CH4U_REQUEST(*req, areq.data_sz) = msg_hdr->result_data_sz;
 
     if (!msg_hdr->n_iov) {
         MPIU_CH4U_REQUEST(rreq, areq.dt_iov) = NULL;

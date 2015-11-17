@@ -151,6 +151,7 @@ typedef struct MPIDI_CH4U_acc_req_msg_t {
     MPI_Datatype target_datatype;
     MPI_Op op;
     uint64_t target_addr;
+    uint64_t result_data_sz;
     int n_iov;
 } MPIDI_CH4U_acc_req_msg_t;
 

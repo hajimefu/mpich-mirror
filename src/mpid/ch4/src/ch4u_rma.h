@@ -374,7 +374,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     size_t             offset;
     MPIDI_CH4U_acc_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
-    uint64_t data_sz;
+    uint64_t data_sz, result_data_sz;
     MPI_Aint last, num_iov;
     MPID_Segment *segment_ptr;
     struct iovec *dt_iov, am_iov[2];
@@ -418,6 +418,13 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     am_hdr.target_addr = winfo->base_addr + offset;
     am_hdr.op = op;
     am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
+
+    if (do_get) {
+        MPIDI_Datatype_check_size(MPIU_CH4U_REQUEST(sreq, areq.result_datatype),
+                                  MPIU_CH4U_REQUEST(sreq, areq.result_count),
+                                  result_data_sz);
+        am_hdr.result_data_sz = result_data_sz;
+    }
 
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)++;
