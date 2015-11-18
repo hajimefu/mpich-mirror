@@ -371,7 +371,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
                                             MPID_Request *sreq)
 {
     int                mpi_errno = MPI_SUCCESS, c, n_iov;
-    size_t             offset;
+    size_t             offset, basic_type_size;
     MPIDI_CH4U_acc_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
     uint64_t data_sz, result_data_sz, target_data_sz;
@@ -412,7 +412,6 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     if (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) {
         am_hdr.origin_datatype = origin_datatype;
     } else {
-        uint64_t basic_type_size; /* FIXME: what is the right type to represent data type size? */
         am_hdr.origin_datatype = (dt_ptr) ? dt_ptr->basic_type : MPI_DATATYPE_NULL;
         MPID_Datatype_get_size_macro(am_hdr.origin_datatype, basic_type_size);
         am_hdr.origin_count = (basic_type_size > 0) ? data_sz / basic_type_size : 0;
