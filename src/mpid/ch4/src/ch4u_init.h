@@ -1497,7 +1497,7 @@ static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_LOCK_ACK_PROC);
 
     if(info->type == MPIDI_CH4U_WIN_LOCK_ACK)
-        MPIU_CH4U_WIN(win, sync).lock.remote.locked = 1;
+        MPIU_CH4U_WIN(win, sync).lock.remote.locked += 1;
     else  if(info->type == MPIDI_CH4U_WIN_LOCKALL_ACK)
         MPIU_CH4U_WIN(win, sync).lock.remote.allLocked += 1;
 
@@ -1581,13 +1581,14 @@ static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK_DONE_CB);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK_DONE_CB);
 
-    if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK)
-        MPIU_CH4U_WIN(win, sync).lock.remote.locked = 0;
-    else if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK_ALL) {
+    if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK) {
+        MPIU_CH4U_WIN(win, sync).lock.remote.locked--;
+    } else if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK_ALL) {
         MPIU_Assert((int)MPIU_CH4U_WIN(win, sync).lock.remote.allLocked > 0);
         MPIU_CH4U_WIN(win, sync).lock.remote.allLocked -= 1;
-    } else
+    } else {
         MPIU_Assert(0);
+    }
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_UNLOCK_DONE_CB);
 }

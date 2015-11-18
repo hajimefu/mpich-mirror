@@ -453,14 +453,16 @@ fn_fail:
 static inline int MPIDI_CH4U_win_lock(int lock_type, int rank, int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-
+    unsigned locked;
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_LOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_LOCK);
 
     MPIDI_CH4I_win_sync_lock *slock = &MPIU_CH4U_WIN(win, sync).lock;
-    MPIDI_CH4I_EPOCH_CHECK2();
-
     if(rank == MPI_PROC_NULL) goto fn_exit0;
+
+    if (!MPIU_CH4U_WIN(win, sync).lock.remote.locked) {
+        MPIDI_CH4I_EPOCH_CHECK2();
+    }
 
     MPIDI_CH4U_win_cntrl_msg_t msg;
     msg.win_id = MPIU_CH4U_WIN(win, win_id);
@@ -468,13 +470,14 @@ static inline int MPIDI_CH4U_win_lock(int lock_type, int rank, int assert, MPID_
     msg.type = MPIDI_CH4U_WIN_LOCK;
     msg.lock_type = lock_type;
 
+    locked = slock->remote.locked + 1;
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
                                            MPIDI_CH4U_AM_WIN_CTRL,
                                            &msg, sizeof (msg), NULL);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
-    MPIDI_CH4I_PROGRESS_WHILE(!slock->remote.locked);
+    MPIDI_CH4I_PROGRESS_WHILE(slock->remote.locked != locked);
 
 fn_exit0:
     MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_LOCK;
@@ -493,12 +496,11 @@ fn_fail:
 static inline int MPIDI_CH4U_win_unlock(int rank, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    unsigned unlocked;
     MPIDI_CH4U_win_cntrl_msg_t msg;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK);
-
-    MPIDI_CH4I_EPOCH_ORIGIN_CHECK(MPIDI_CH4I_EPOTYPE_LOCK);
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
     mpi_errno = MPIDI_CH4I_progress_win_fence(win);
@@ -507,6 +509,8 @@ static inline int MPIDI_CH4U_win_unlock(int rank, MPID_Win *win)
     msg.win_id = MPIU_CH4U_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_UNLOCK;
+    unlocked = MPIU_CH4U_WIN(win, sync).lock.remote.locked - 1;
+
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
                                            MPIDI_CH4U_AM_WIN_CTRL,
                                            &msg, sizeof (msg), NULL);
@@ -514,11 +518,14 @@ static inline int MPIDI_CH4U_win_unlock(int rank, MPID_Win *win)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
 
-    MPIDI_CH4I_PROGRESS_WHILE(MPIU_CH4U_WIN(win, sync).lock.remote.locked);
+    MPIDI_CH4I_PROGRESS_WHILE(MPIU_CH4U_WIN(win, sync).lock.remote.locked != unlocked);
 fn_exit0:
-    MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_NONE;
-    MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_NONE;
 
+    if (!MPIU_CH4U_WIN(win, sync).lock.remote.locked) {
+        MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_NONE;
+        MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_NONE;
+    }
+    
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_UNLOCK);
     return mpi_errno;
