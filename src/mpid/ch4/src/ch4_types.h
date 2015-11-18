@@ -182,6 +182,9 @@ typedef struct MPIDI_CH4_Global_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
 #endif
+    MPIDI_CH4U_Devreq_t *cmpl_list;
+    uint64_t exp_seq_no;
+    uint64_t nxt_seq_no;
     void *netmod_context[8];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;

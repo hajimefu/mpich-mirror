@@ -133,6 +133,10 @@ typedef struct MPIDI_CH4U_Devreq_t {
     uint64_t      status;
     MPIDI_ptype   p_type;
 
+    struct MPIDI_CH4U_Devreq_t *next, *prev;
+    void *cmpl_handler_fn;
+    uint64_t seq_no;
+
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
     }netmod_am;
