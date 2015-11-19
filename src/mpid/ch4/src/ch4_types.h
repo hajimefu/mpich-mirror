@@ -61,8 +61,9 @@ typedef enum {
 
     MPIDI_CH4U_AM_ACC_REQ,
     MPIDI_CH4U_AM_ACC_ACK,
-
-    MPIDI_CH4U_AM_GET_ACC_REQ,
+    MPIDI_CH4U_AM_ACC_IOV_REQ,
+    MPIDI_CH4U_AM_ACC_DAT_REQ,
+    MPIDI_CH4U_AM_ACC_IOV_ACK,
     MPIDI_CH4U_AM_GET_ACC_ACK,
 
     MPIDI_CH4U_AM_CSWAP_REQ,
@@ -167,6 +168,7 @@ typedef struct MPIDI_CH4U_acc_req_msg_t {
     int target_count;
     MPI_Datatype target_datatype;
     MPI_Op op;
+    int do_get;
     uint64_t target_addr;
     uint64_t result_data_sz;
     int n_iov;

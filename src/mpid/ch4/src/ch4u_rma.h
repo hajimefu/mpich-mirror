@@ -387,7 +387,6 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     MPI_Aint last, num_iov;
     MPID_Segment *segment_ptr;
     struct iovec *dt_iov, am_iov[2];
-    int op_type;
     MPID_Datatype *dt_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_ACCUMULATE);
@@ -398,7 +397,6 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     winfo = MPIU_CH4U_WINFO(win, target_rank);
     offset = target_disp * winfo->disp_unit;
 
-    op_type = (do_get == 1) ? MPIDI_CH4U_AM_GET_ACC_REQ : MPIDI_CH4U_AM_ACC_REQ;
     MPIDI_Datatype_get_size_dt_ptr(origin_count, origin_datatype, data_sz, dt_ptr);
     MPIDI_Datatype_check_size(target_datatype, target_count, target_data_sz);
 
@@ -417,6 +415,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
 
     am_hdr.req_ptr = (uint64_t) sreq;
     am_hdr.origin_count = origin_count;
+    am_hdr.do_get = do_get;
 
     if (HANDLE_GET_KIND(origin_datatype) == HANDLE_KIND_BUILTIN) {
         am_hdr.origin_datatype = origin_datatype;
@@ -448,7 +447,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
         am_hdr.n_iov = 0;
         MPIU_CH4U_REQUEST(sreq, areq.dt_iov) = NULL;
 
-        mpi_errno = MPIDI_netmod_send_am(target_rank, win->comm_ptr, op_type,
+        mpi_errno = MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_ACC_REQ,
                                          &am_hdr, sizeof(am_hdr), origin_addr,
                                          (op == MPI_NO_OP) ? 0 : origin_count,
                                          origin_datatype, sreq, NULL);
@@ -483,8 +482,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     am_iov[1].iov_len = sizeof(struct iovec) * am_hdr.n_iov;
 
     MPIU_CH4U_REQUEST(sreq, areq.dt_iov) = dt_iov;
-
-    mpi_errno = MPIDI_netmod_send_amv(target_rank, win->comm_ptr, op_type,
+    mpi_errno = MPIDI_netmod_send_amv(target_rank, win->comm_ptr, MPIDI_CH4U_AM_ACC_REQ,
                                       &am_iov[0], 2, origin_addr, 
                                       (op == MPI_NO_OP) ? 0 : origin_count,
                                       origin_datatype, sreq, NULL);

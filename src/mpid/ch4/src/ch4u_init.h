@@ -2139,8 +2139,7 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
                                                 size_t * p_data_sz,
                                                 int *is_contig,
                                                 MPIDI_netmod_am_completion_handler_fn *
-                                                cmpl_handler_fn, MPID_Request ** req,
-                                                int do_get)
+                                                cmpl_handler_fn, MPID_Request ** req)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;
@@ -2165,7 +2164,7 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
         MPIU_Assert(p_data);
     }
 
-    *cmpl_handler_fn = (do_get) ? MPIDI_CH4I_am_get_acc_cmpl_handler :
+    *cmpl_handler_fn = (msg_hdr->do_get) ? MPIDI_CH4I_am_get_acc_cmpl_handler :
         MPIDI_CH4I_am_acc_cmpl_handler;
     MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
 
@@ -2208,62 +2207,6 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_HANDLE_ACC_REQ);
     return mpi_errno;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_am_acc_target_handler
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4I_am_acc_target_handler(void *am_hdr,
-                                                   size_t am_hdr_sz,
-                                                   void *reply_token,
-                                                   void **data,
-                                                   size_t * p_data_sz,
-                                                   int *is_contig,
-                                                   MPIDI_netmod_am_completion_handler_fn *
-                                                   cmpl_handler_fn, MPID_Request ** req)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_HANDLER);
-
-    mpi_errno = MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
-                                              data, p_data_sz, is_contig,
-                                              cmpl_handler_fn, req, 0);
-    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_am_acc_target_handler
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4I_am_get_acc_target_handler(void *am_hdr,
-                                                       size_t am_hdr_sz,
-                                                       void *reply_token,
-                                                       void **data,
-                                                       size_t * p_data_sz,
-                                                       int *is_contig,
-                                                       MPIDI_netmod_am_completion_handler_fn *
-                                                       cmpl_handler_fn, MPID_Request ** req)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    
-    mpi_errno = MPIDI_CH4I_handle_acc_request(am_hdr, am_hdr_sz, reply_token,
-                                              data, p_data_sz, is_contig,
-                                              cmpl_handler_fn, req, 1);
-    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_HANDLER);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -2490,17 +2433,12 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
 
     mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_REQ,
                                              &MPIDI_CH4I_am_acc_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_acc_target_handler);
+                                             &MPIDI_CH4I_handle_acc_request);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_ACC_ACK,
                                              NULL,
                                              &MPIDI_CH4I_am_acc_ack_target_handler);
-    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-
-    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_REQ,
-                                             &MPIDI_CH4I_am_acc_origin_cmpl_handler,
-                                             &MPIDI_CH4I_am_get_acc_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_GET_ACC_ACK,
