@@ -162,7 +162,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     size_t data_sz;
     MPI_Aint last, num_iov;
     MPID_Segment *segment_ptr;
-    struct iovec *dt_iov, am_iov[2];
+    struct iovec *dt_iov;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_MPIDI_CH4I_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_MPIDI_CH4I_DO_GET);
@@ -241,17 +241,13 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     MPIU_Assert(last == (MPI_Aint)data_sz);
     MPIU_Free(segment_ptr);
 
-    am_iov[0].iov_base = &am_hdr;
-    am_iov[0].iov_len = sizeof(am_hdr);
-    am_iov[1].iov_base = dt_iov;
-    am_iov[1].iov_len = sizeof(struct iovec) * am_hdr.n_iov;
-
     MPIU_CH4U_REQUEST(sreq, greq.dt_iov) = dt_iov;
-
-    mpi_errno = MPIDI_netmod_send_amv_hdr(target_rank, win->comm_ptr,
-                                          MPIDI_CH4U_AM_GET_REQ, &am_iov[0], 2,
-                                          sreq, NULL);
+    mpi_errno = MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_GET_REQ,
+                                     &am_hdr, sizeof(am_hdr), dt_iov,
+                                     sizeof(struct iovec) * am_hdr.n_iov,
+                                     MPI_BYTE, sreq, NULL);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_MPIDI_CH4I_DO_GET);
     return mpi_errno;

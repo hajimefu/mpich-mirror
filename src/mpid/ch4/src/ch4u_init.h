@@ -2315,8 +2315,10 @@ static inline int MPIDI_CH4I_am_get_target_handler(void *am_hdr,
     if (msg_hdr->n_iov) {
         iov = (struct iovec *) MPIU_Malloc(msg_hdr->n_iov * sizeof(*iov)); 
         MPIU_Assert(iov);
-        MPIU_Memcpy(iov, (char *)am_hdr + sizeof(*msg_hdr),
-                    msg_hdr->n_iov * sizeof(*iov));
+
+        *data = (void *)iov;
+        *is_contig = 1;
+        *p_data_sz = msg_hdr->n_iov * sizeof(*iov);
         MPIU_CH4U_REQUEST(rreq, greq.dt_iov) = iov;
     }
             
