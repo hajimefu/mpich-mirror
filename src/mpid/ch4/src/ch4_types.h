@@ -127,10 +127,12 @@ typedef struct MPIDI_CH4U_put_iov_ack_msg_t {
     uint64_t target_preq_ptr;
     uint64_t origin_preq_ptr;
 } MPIDI_CH4U_put_iov_ack_msg_t;
+typedef MPIDI_CH4U_put_iov_ack_msg_t MPIDI_CH4U_acc_iov_ack_msg_t;
 
 typedef struct MPIDI_CH4U_put_dat_msg_t {
     uint64_t preq_ptr;
 } MPIDI_CH4U_put_dat_msg_t;
+typedef MPIDI_CH4U_put_dat_msg_t MPIDI_CH4U_acc_dat_msg_t;
 
 typedef struct MPIDI_CH4U_put_ack_msg_t {
     uint64_t preq_ptr;
