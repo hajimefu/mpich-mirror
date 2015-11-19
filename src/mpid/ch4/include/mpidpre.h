@@ -70,6 +70,10 @@ typedef struct MPIDI_CH4U_Dev_put_req_t {
     uint64_t preq_ptr;
     void *reply_token;
     void *dt_iov;
+    void *origin_addr;
+    int origin_count;
+    MPI_Datatype origin_datatype;
+    int n_iov;
 } MPIDI_CH4U_Dev_put_req_t;
 
 typedef struct MPIDI_CH4U_Dev_get_req_t {

@@ -481,7 +481,7 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
 
 static inline size_t MPIDI_netmod_am_hdr_max_sz(void)
 {
-    return MPIDI_MAX_AM_HDR_SZ;
+    return (MPIDI_MAX_SHORT_SEND_SZ - sizeof(MPIDI_AM_OFI_hdr_t));
 }
 
 static inline int MPIDI_netmod_do_inject(int64_t rank,

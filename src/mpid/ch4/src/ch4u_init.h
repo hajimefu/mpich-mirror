@@ -305,6 +305,34 @@ static inline int MPIDI_CH4I_am_acc_origin_cmpl_handler(MPID_Request * sreq)
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_data_origin_cmpl_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_data_origin_cmpl_handler(MPID_Request * sreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_DATA_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_DATA_TX_HANDLER);
+    MPIDI_CH4I_complete_req(sreq);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_DATA_TX_HANDLER);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_iov_origin_cmpl_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_iov_origin_cmpl_handler(MPID_Request * sreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_IOV_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_IOV_TX_HANDLER);
+    MPIDI_CH4I_complete_req(sreq);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_IOV_TX_HANDLER);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_am_get_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -757,6 +785,33 @@ static inline int MPIDI_CH4I_am_put_cmpl_handler(MPID_Request * rreq)
     MPIDI_CH4I_progress_cmpl_list();
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_CMPL_HANDLER);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_iov_cmpl_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_iov_cmpl_handler(MPID_Request * rreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_put_iov_ack_msg_t ack_msg;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_IOV_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_IOV_CMPL_HANDLER);
+
+    ack_msg.origin_preq_ptr = (uint64_t) MPIU_CH4U_REQUEST(rreq, preq.preq_ptr);
+    ack_msg.target_preq_ptr = (uint64_t) rreq;
+
+    mpi_errno = MPIDI_netmod_inject_am_hdr_reply(MPIU_CH4U_REQUEST(rreq, preq.reply_token),
+                                                 MPIDI_CH4U_AM_PUT_IOV_ACK,
+                                                 &ack_msg, sizeof(ack_msg));
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_IOV_CMPL_HANDLER);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -1833,6 +1888,7 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
         iov = (struct iovec *)((char *)am_hdr + sizeof(*msg_hdr));
         MPIU_Memcpy(dt_iov, iov, sizeof(struct iovec) * msg_hdr->n_iov);
         MPIU_CH4U_REQUEST(rreq, preq.dt_iov) = dt_iov;
+        MPIU_CH4U_REQUEST(rreq, preq.n_iov) = msg_hdr->n_iov;
         *is_contig = 0;
         *data = iov;
         *p_data_sz = msg_hdr->n_iov;
@@ -1874,6 +1930,142 @@ fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_HANDLER);
     return mpi_errno;
 }
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_iov_target_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_iov_target_handler(void *am_hdr,
+                                                       size_t am_hdr_sz,
+                                                       void *reply_token,
+                                                       void **data,
+                                                       size_t * p_data_sz,
+                                                       int *is_contig,
+                                                       MPIDI_netmod_am_completion_handler_fn *
+                                                       cmpl_handler_fn, MPID_Request ** req)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq = NULL;
+    struct iovec *dt_iov;
+
+    MPID_Win *win;
+    MPIDI_CH4U_put_msg_t *msg_hdr = (MPIDI_CH4U_put_msg_t *) am_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_IOV_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_IOV_HANDLER);
+
+    rreq = MPIDI_CH4I_create_win_req();
+    MPIU_Assert(rreq);
+    rreq->kind = MPID_WIN_REQUEST;
+    *req = rreq;
+
+    MPIU_CH4U_REQUEST(*req, preq.preq_ptr) = msg_hdr->preq_ptr;
+    MPIU_CH4U_REQUEST(*req, preq.reply_token) = reply_token;
+
+    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPIU_Assert(win);
+
+    /* MPIDI_CS_ENTER(); */
+    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    /* MPIDI_CS_EXIT(); */
+    MPIU_CH4U_REQUEST(rreq, preq.win_ptr) = (uint64_t) win;
+
+    *cmpl_handler_fn = MPIDI_CH4I_am_put_iov_cmpl_handler;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    
+    MPIU_Assert(msg_hdr->n_iov);
+    dt_iov = (struct iovec *)MPIU_Malloc(sizeof(struct iovec) * msg_hdr->n_iov);
+    MPIU_Assert(dt_iov);
+
+    MPIU_CH4U_REQUEST(rreq, preq.dt_iov) = dt_iov;
+    MPIU_CH4U_REQUEST(rreq, preq.n_iov) = msg_hdr->n_iov;
+    *is_contig = 1;
+    *data = dt_iov;
+    *p_data_sz = msg_hdr->n_iov * sizeof(struct iovec);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_IOV_HANDLER);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_iov_ack_target_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_iov_ack_target_handler(void *am_hdr,
+                                                       size_t am_hdr_sz,
+                                                       void *reply_token,
+                                                       void **data,
+                                                       size_t * p_data_sz,
+                                                       int *is_contig,
+                                                       MPIDI_netmod_am_completion_handler_fn *
+                                                       cmpl_handler_fn, MPID_Request ** req)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq, *origin_req;
+    MPIDI_CH4U_put_iov_ack_msg_t *msg_hdr = (MPIDI_CH4U_put_iov_ack_msg_t *) am_hdr;
+    MPIDI_CH4U_put_dat_msg_t dat_msg;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_IOV_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_IOV_ACK_HANDLER);
+
+    rreq = MPIDI_CH4I_create_win_req();
+    MPIU_Assert(rreq);
+    rreq->kind = MPID_WIN_REQUEST;
+
+    origin_req = (MPID_Request *)msg_hdr->origin_preq_ptr;
+    dat_msg.preq_ptr = msg_hdr->target_preq_ptr;
+    mpi_errno = MPIDI_netmod_send_am_reply(reply_token,
+                                           MPIDI_CH4U_AM_PUT_DAT_REQ,
+                                           &dat_msg, sizeof(dat_msg),
+                                           MPIU_CH4U_REQUEST(origin_req, preq.origin_addr),
+                                           MPIU_CH4U_REQUEST(origin_req, preq.origin_count),
+                                           MPIU_CH4U_REQUEST(origin_req, preq.origin_datatype),
+                                           rreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+    dtype_release_if_not_builtin(MPIU_CH4U_REQUEST(origin_req, preq.origin_datatype));
+
+    *cmpl_handler_fn = NULL;
+    *req = NULL;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_IOV_ACK_HANDLER);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_put_data_target_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_am_put_data_target_handler(void *am_hdr,
+                                                        size_t am_hdr_sz,
+                                                        void *reply_token,
+                                                        void **data,
+                                                        size_t * p_data_sz,
+                                                        int *is_contig,
+                                                        MPIDI_netmod_am_completion_handler_fn *
+                                                        cmpl_handler_fn, MPID_Request ** req)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *rreq;
+    MPIDI_CH4U_put_dat_msg_t *msg_hdr = (MPIDI_CH4U_put_dat_msg_t *) am_hdr;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_PUT_DATA_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_PUT_DATA_HANDLER);
+
+    rreq = (MPID_Request *) msg_hdr->preq_ptr;
+
+    *data = MPIU_CH4U_REQUEST(rreq, preq.dt_iov);
+    *is_contig = 0;
+    *p_data_sz = MPIU_CH4U_REQUEST(rreq, preq.n_iov);
+    *req = rreq;
+    *cmpl_handler_fn = MPIDI_CH4I_am_put_cmpl_handler;
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_PUT_DATA_HANDLER);
+    return mpi_errno;
+}
+
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_am_cswap_target_handler
@@ -1972,8 +2164,6 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
         p_data = MPIU_Malloc(data_sz);
         MPIU_Assert(p_data);
     }
-
-    /* todo: pkt header should contain data_sz ? */
 
     *cmpl_handler_fn = (do_get) ? MPIDI_CH4I_am_get_acc_cmpl_handler :
         MPIDI_CH4I_am_acc_cmpl_handler;
@@ -2321,6 +2511,23 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4I_am_win_ctrl_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
+
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_IOV_REQ,
+                                             &MPIDI_CH4I_am_put_iov_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_put_iov_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_IOV_ACK,
+                                             NULL,
+                                             &MPIDI_CH4I_am_put_iov_ack_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+    mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_PUT_DAT_REQ,
+                                             &MPIDI_CH4I_am_put_data_origin_cmpl_handler,
+                                             &MPIDI_CH4I_am_put_data_target_handler);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+
     mpi_errno = MPIDI_CH4U_init_comm(comm_world);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -2329,6 +2536,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
 
     MPIDI_CH4I_map_create(&MPIDI_CH4_Global.win_map);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
+
   fn_exit:
     return mpi_errno;
   fn_fail:

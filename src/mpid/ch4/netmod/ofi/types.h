@@ -37,7 +37,7 @@ EXTERN_C_BEGIN
 #define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
-#define MPIDI_MAX_AM_HANDLERS 		(16)
+#define MPIDI_MAX_AM_HANDLERS 		(24)
 #define MPIDI_CACHELINE_SIZE        (64)
 #define MPIDI_IOV_MAX               1
 #define MPIDI_BUF_POOL_SZ  (1024)
