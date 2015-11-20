@@ -1208,6 +1208,7 @@ fn_fail:
 static inline int MPIDI_CH4I_am_get_ack_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPID_Request *greq;
     MPID_Win *win;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_GET_ACK_CMPL_HANDLER);
@@ -1216,15 +1217,17 @@ static inline int MPIDI_CH4I_am_get_ack_cmpl_handler(MPID_Request * rreq)
     if (!MPIDI_CH4I_check_cmpl_order(rreq, MPIDI_CH4I_am_get_ack_cmpl_handler))
         return mpi_errno;
 
-    if (MPIU_CH4U_REQUEST(rreq, status) & MPIDI_CH4U_REQ_RCV_NON_CONTIG) {
-        MPIU_Free(MPIU_CH4U_REQUEST(rreq, iov));
+    greq = (MPID_Request *) MPIU_CH4U_REQUEST(rreq, greq.greq_ptr);
+    if (MPIU_CH4U_REQUEST(greq, status) & MPIDI_CH4U_REQ_RCV_NON_CONTIG) {
+        MPIU_Free(MPIU_CH4U_REQUEST(greq, iov));
     }
 
-    win = (MPID_Win *) MPIU_CH4U_REQUEST(rreq, greq.win_ptr);
+    win = (MPID_Win *) MPIU_CH4U_REQUEST(greq, greq.win_ptr);
     /* MPIDI_CS_ENTER(); */
     MPIU_CH4U_WIN(win, outstanding_ops)--;
     /* MPIDI_CS_EXIT(); */
 
+    MPIDI_CH4I_complete_req(greq);
     MPIDI_CH4I_complete_req(rreq);
     MPIDI_CH4I_progress_cmpl_list();
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_GET_ACK_CMPL_HANDLER);
@@ -2489,7 +2492,7 @@ static inline int MPIDI_CH4I_am_get_ack_target_handler(void *am_hdr,
                                                        cmpl_handler_fn, MPID_Request ** req)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq = NULL;
+    MPID_Request *rreq = NULL, *greq;
     size_t data_sz;
 
     int dt_contig, n_iov;
@@ -2501,22 +2504,27 @@ static inline int MPIDI_CH4I_am_get_ack_target_handler(void *am_hdr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_GET_ACK_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_AM_GET_ACK_HANDLER);
 
+    greq = MPIDI_CH4I_create_win_req();
+    MPIU_Assert(greq);
+    greq->kind = MPID_WIN_REQUEST;
+    *req = greq;
+
     rreq = (MPID_Request *) msg_hdr->greq_ptr;
     MPIU_Assert(rreq->kind == MPID_WIN_REQUEST);
+    MPIU_CH4U_REQUEST(greq, greq.greq_ptr) = (uint64_t) rreq;
 
     if (MPIU_CH4U_REQUEST(rreq, greq.dt_iov)) {
         MPIU_Free(MPIU_CH4U_REQUEST(rreq, greq.dt_iov));
     }
 
     *cmpl_handler_fn = MPIDI_CH4I_am_get_ack_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(greq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
 
     MPIDI_Datatype_get_info(MPIU_CH4U_REQUEST(rreq, greq.count),
                             MPIU_CH4U_REQUEST(rreq, greq.datatype),
                             dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     *is_contig = dt_contig;
-    *req = rreq;
 
     if (dt_contig) {
         *p_data_sz = data_sz;
