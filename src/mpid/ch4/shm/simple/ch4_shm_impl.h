@@ -171,6 +171,7 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
     req->status.MPI_TAG       = MPI_UNDEFINED;          \
     req->status.MPI_ERROR     = MPI_SUCCESS;            \
     req->comm                 = NULL;                   \
+    MPIR_REQUEST_CLEAR_DBG(req);                        \
   })
 
 #define DECL_FUNC(FUNCNAME)  MPL_QUOTE(FUNCNAME)

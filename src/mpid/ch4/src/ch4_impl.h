@@ -63,6 +63,7 @@ static inline MPID_Request *MPIDI_CH4I_request_alloc_and_init(int count)
     req->status.MPI_TAG = MPI_UNDEFINED;
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
+    MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
 

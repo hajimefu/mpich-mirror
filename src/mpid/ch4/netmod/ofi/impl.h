@@ -534,6 +534,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
     req->errflag = MPIR_ERR_NONE;
+    MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
 
@@ -553,6 +554,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
     req->kind              = MPID_REQUEST_SEND;
     req->comm              = NULL;
     req->errflag           = MPIR_ERR_NONE;
+    MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
 
