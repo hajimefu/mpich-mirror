@@ -49,7 +49,6 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank, int handler_id, 
     struct iovec iov[2];
     MPIDI_AM_OFI_hdr_t *msg_hdr;
     int mpi_errno = MPI_SUCCESS, c;
-    MPIDI_OFI_lmt_msg_pyld_t *lmt_info;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -457,7 +456,8 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
 
 static inline size_t MPIDI_netmod_am_hdr_max_sz(void)
 {
-    return (MPIDI_MAX_SHORT_SEND_SZ - sizeof(MPIDI_AM_OFI_hdr_t));
+    return (MPIDI_MAX_SHORT_SEND_SZ -
+            (sizeof(MPIDI_AM_OFI_hdr_t) + sizeof(MPIDI_OFI_lmt_msg_pyld_t)));
 }
 
 static inline int MPIDI_netmod_do_inject(int64_t rank,
