@@ -1556,11 +1556,13 @@ void MPIR_CommL_forget( MPID_Comm * );
 #define MPIR_SENDQ_FORGET(_a) MPIR_Sendq_forget(_a)
 #define MPIR_COMML_REMEMBER(_a) MPIR_CommL_remember( _a )
 #define MPIR_COMML_FORGET(_a) MPIR_CommL_forget( _a )
+#define MPIR_REQUEST_CLEAR_DBG(_r) ((_r)->dbg_next = NULL)
 #else
 #define MPIR_SENDQ_REMEMBER(a,b,c,d)
 #define MPIR_SENDQ_FORGET(a)
 #define MPIR_COMML_REMEMBER(_a) 
 #define MPIR_COMML_FORGET(_a) 
+#define MPIR_REQUEST_CLEAR_DBG(_r)
 #endif
 
 /* must come after MPID_Comm is declared/defined */
