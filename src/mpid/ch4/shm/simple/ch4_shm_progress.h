@@ -52,6 +52,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         if (type == TYPE_ACK) {
             /* ACK message doesn't have a matching receive! */
             int c;
+            MPIU_Assert(in_cell);
             MPIU_Assert(pending);
             MPID_cc_decr(pending->cc_ptr, &c);
             MPIDI_Request_release(pending);
@@ -88,20 +89,23 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 }
 
                 char *recv_buffer = (char *) REQ_SHM(req)->user_buf;
+
                 if (pending) {
                     /* we must send ACK */
+                    int srank = in_cell ? cell->rank : sreq->status.MPI_SOURCE;
                     MPID_Request* req_ack = NULL;
                     MPIDI_Request_create_sreq(req_ack);
                     MPIU_Object_set_ref(req_ack, 1);
                     req_ack->comm = req->comm;
                     MPIR_Comm_add_ref(req->comm);
+
                     ENVELOPE_SET(REQ_SHM(req_ack), req->comm->rank, tag, context_id);
                     REQ_SHM(req_ack)->user_buf = NULL;
                     REQ_SHM(req_ack)->user_count = 0;
                     REQ_SHM(req_ack)->datatype = MPI_BYTE;
                     REQ_SHM(req_ack)->data_sz = 0;
                     REQ_SHM(req_ack)->type = TYPE_ACK;
-                    REQ_SHM(req_ack)->dest = sender_rank;
+                    REQ_SHM(req_ack)->dest = srank;
                     REQ_SHM(req_ack)->next = NULL;
                     REQ_SHM(req_ack)->segment_ptr = NULL;
                     REQ_SHM(req_ack)->pending = pending;
