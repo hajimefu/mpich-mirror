@@ -24,21 +24,24 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4_PROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_PROBE);
     while (!flag) {
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
         mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
+#else
+        if (MPIDI_CH4U_rank_is_local(source, comm))
+            mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, &flag, status);
+        else
+            mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
+#endif
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-        if (!flag) {
-            mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, &flag, status);
-            if (mpi_errno != MPI_SUCCESS) {
-                MPIR_ERR_POP(mpi_errno);
-            }
-        }
-#endif
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-        MPIDI_shm_progress(0);
+#else
+        if (MPIDI_CH4U_rank_is_local(source, comm))
+            MPIDI_shm_progress(0);
+        else
+            MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #endif
     }
   fn_exit:
@@ -71,21 +74,24 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
     }
 
     while (!flag) {
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
         mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
+#else
+        if (MPIDI_CH4U_rank_is_local(source, comm))
+            mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, &flag, message, status);
+        else
+            mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
+#endif
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-        if (!flag) {
-            mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, &flag, message, status);
-            if (mpi_errno != MPI_SUCCESS) {
-                MPIR_ERR_POP(mpi_errno);
-            }
-        }
-#endif
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-        MPIDI_shm_progress(0);
+#else
+        if (MPIDI_CH4U_rank_is_local(source, comm))
+            MPIDI_shm_progress(0);
+        else
+            MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #endif
     }
   fn_exit:
@@ -117,18 +123,17 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
         goto fn_exit;
     }
 
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
+#else
+    if (MPIDI_CH4U_rank_is_local(source, comm))
+        mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, flag, message, status);
+    else
+        mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
+#endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    if (!*flag) {
-        mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, flag, message, status);
-        if (mpi_errno != MPI_SUCCESS) {
-            MPIR_ERR_POP(mpi_errno);
-        }
-    }
-#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IMPROBE);
     return mpi_errno;
@@ -149,18 +154,17 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_IPROBE);
+#ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
+#else
+    if (MPIDI_CH4U_rank_is_local(source, comm))
+        mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, flag, status);
+    else
+        mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
+#endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-#ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    if (!*flag) {
-        mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, flag, status);
-        if (mpi_errno != MPI_SUCCESS) {
-            MPIR_ERR_POP(mpi_errno);
-        }
-    }
-#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_IPROBE);
     return mpi_errno;
