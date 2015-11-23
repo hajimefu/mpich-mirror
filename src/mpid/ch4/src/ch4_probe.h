@@ -27,7 +27,12 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
         mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
 #else
-        if (MPIDI_CH4U_rank_is_local(source, comm))
+        if (unlikely(source == MPI_ANY_SOURCE)) {
+            mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, &flag, status);
+            if (!flag)
+                mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
+        }
+        else if (MPIDI_CH4U_rank_is_local(source, comm))
             mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, &flag, status);
         else
             mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
@@ -38,6 +43,10 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #else
+        if (unlikely(source == MPI_ANY_SOURCE)) {
+            MPIDI_shm_progress(0);
+            MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+        }
         if (MPIDI_CH4U_rank_is_local(source, comm))
             MPIDI_shm_progress(0);
         else
@@ -77,7 +86,12 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
         mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
 #else
-        if (MPIDI_CH4U_rank_is_local(source, comm))
+        if (unlikely(source == MPI_ANY_SOURCE)) {
+            mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, &flag, message, status);
+            if (!flag)
+                mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
+        }
+        else if (MPIDI_CH4U_rank_is_local(source, comm))
             mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, &flag, message, status);
         else
             mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
@@ -88,7 +102,11 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
         MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #else
-        if (MPIDI_CH4U_rank_is_local(source, comm))
+        if (unlikely(source == MPI_ANY_SOURCE)) {
+            MPIDI_shm_progress(0);
+            MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+        }
+        else if (MPIDI_CH4U_rank_is_local(source, comm))
             MPIDI_shm_progress(0);
         else
             MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
@@ -126,7 +144,12 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
 #else
-    if (MPIDI_CH4U_rank_is_local(source, comm))
+    if (unlikely(source == MPI_ANY_SOURCE)) {
+        mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, flag, message, status);
+        if (! *flag)
+            mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
+    }
+    else if (MPIDI_CH4U_rank_is_local(source, comm))
         mpi_errno = MPIDI_shm_improbe(source, tag, comm, context_offset, flag, message, status);
     else
         mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
@@ -157,7 +180,12 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
 #else
-    if (MPIDI_CH4U_rank_is_local(source, comm))
+    if (unlikely(source == MPI_ANY_SOURCE)) {
+        mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, flag, status);
+        if (! *flag)
+            mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
+    }
+    else if (MPIDI_CH4U_rank_is_local(source, comm))
         mpi_errno = MPIDI_shm_iprobe(source, tag, comm, context_offset, flag, status);
     else
         mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
