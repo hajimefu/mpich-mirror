@@ -322,7 +322,10 @@ __CH4_INLINE__ int MPIDI_Ssend_init(const void *buf,
     else
         mpi_errno = MPIDI_netmod_ssend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
-    if(mpi_errno == MPI_SUCCESS && *request) MPIU_CH4_REQUEST(*request, is_local) = r;
+    if(mpi_errno == MPI_SUCCESS && *request) {
+        MPIU_CH4_REQUEST(*request, is_local) = r;
+        MPIU_CH4_REQUEST(*request, anysource_partner_request) = NULL;
+    }
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
