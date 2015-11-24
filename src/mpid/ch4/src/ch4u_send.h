@@ -273,6 +273,7 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPID_Request * requests[])
 
     for (i = 0; i < count; i++) {
         MPID_Request *const preq = requests[i];
+        MPI_Request sreq_handle;
         tag = MPIDI_CH4I_get_tag(MPIU_CH4U_REQUEST(preq, tag));
         rank = MPIDI_CH4I_get_source(MPIU_CH4U_REQUEST(preq, tag));
         context_offset = MPIDI_CH4I_get_context(MPIU_CH4U_REQUEST(preq, tag) -
@@ -306,14 +307,13 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPID_Request * requests[])
             break;
 
         case MPIDI_PTYPE_BSEND:
-            mpi_errno = MPIR_Bsend_isend(MPIU_CH4U_REQUEST(preq, buffer),
+            mpi_errno = MPIR_Ibsend_impl(MPIU_CH4U_REQUEST(preq, buffer),
                                          MPIU_CH4U_REQUEST(preq, count),
                                          datatype, rank, tag,
                                          MPIU_CH4U_REQUEST(preq, sreq.util_comm),
-                                         BSEND_INIT, &preq->partner_request);
-
-            if (preq->partner_request != NULL)
-                MPIU_Object_add_ref(preq->partner_request);
+                                         &sreq_handle);
+            if (mpi_errno == MPI_SUCCESS)
+                MPID_Request_get_ptr(sreq_handle, preq->partner_request);
 
             break;
 

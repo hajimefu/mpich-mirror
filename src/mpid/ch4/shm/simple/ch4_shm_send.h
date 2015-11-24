@@ -198,24 +198,12 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
                         &preq->partner_request, REQ_SHM(preq)->type);
             }
             else {
-                mpi_errno = MPIR_Bsend_isend( REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
-                        REQ_SHM(preq)->datatype, REQ_SHM(preq)->dest, REQ_SHM(preq)->tag,
-                        preq->comm, BSEND_INIT, &preq->partner_request);
-
-                if (preq->partner_request != NULL)
-                    MPIU_Object_add_ref(preq->partner_request);
-
-                /*
                 MPI_Request sreq_handle;
-
                 mpi_errno = MPIR_Ibsend_impl(REQ_SHM(preq)->user_buf, REQ_SHM(preq)->user_count,
                         REQ_SHM(preq)->datatype, REQ_SHM(preq)->dest, REQ_SHM(preq)->tag, preq->comm,
                         &sreq_handle);
                 if (mpi_errno == MPI_SUCCESS)
-                {
                     MPID_Request_get_ptr(sreq_handle, preq->partner_request);
-                }
-                */
             }
         }
         else if( preq->kind == MPID_PREQUEST_RECV ) {

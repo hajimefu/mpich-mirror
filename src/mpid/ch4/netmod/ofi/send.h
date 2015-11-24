@@ -415,18 +415,19 @@ __ALWAYS_INLINE__ int MPIDI_netmod_startall(int count, MPID_Request * requests[]
             STARTALL_CASE(MPIDI_PTYPE_SSEND, MPIDI_Issend, preq->comm->context_id);
 
         case MPIDI_PTYPE_BSEND:{
-                rc = MPIR_Bsend_isend(REQ_OFI(preq, util.persist.buf),
-                                      REQ_OFI(preq, util.persist.count),
-                                      REQ_OFI(preq, datatype),
-                                      REQ_OFI(preq, util.persist.rank),
-                                      REQ_OFI(preq, util.persist.tag),
-                                      preq->comm, BSEND_INIT, &preq->partner_request);
+            MPI_Request sreq_handle;
+            rc = MPIR_Ibsend_impl(REQ_OFI(preq, util.persist.buf),
+                                  REQ_OFI(preq, util.persist.count),
+                                  REQ_OFI(preq, datatype),
+                                  REQ_OFI(preq, util.persist.rank),
+                                  REQ_OFI(preq, util.persist.tag),
+                                  preq->comm,
+                                  &sreq_handle);
+            if (rc == MPI_SUCCESS)
+                MPID_Request_get_ptr(sreq_handle, preq->partner_request);
 
-                if (preq->partner_request != NULL)
-                    MPIU_Object_add_ref(preq->partner_request);
-
-                break;
-            }
+            break;
+        }
 
         default:
             rc = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL, __FUNCTION__,
