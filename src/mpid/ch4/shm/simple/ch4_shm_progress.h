@@ -77,6 +77,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 {
                     MPIDI_netmod_anysource_matched(MPIU_CH4_REQUEST(req, anysource_partner_request),
                                                    &is_netmod_request_cancelled);
+                    MPIDI_Request_release(MPIU_CH4_REQUEST(req, anysource_partner_request));
 
                     /* Decouple requests */
                     MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(req, anysource_partner_request), anysource_partner_request) = NULL;
