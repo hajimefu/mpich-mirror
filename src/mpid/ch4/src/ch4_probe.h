@@ -70,7 +70,7 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
                                 MPID_Comm * comm,
                                 int context_offset, MPID_Request ** message, MPI_Status * status)
 {
-    int mpi_errno, flag = 0;
+    int mpi_errno = MPI_SUCCESS, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MPROBE);
 
@@ -129,7 +129,7 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
                                  int context_offset,
                                  int *flag, MPID_Request ** message, MPI_Status * status)
 {
-    int mpi_errno;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_IMPROBE);
 

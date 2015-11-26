@@ -152,8 +152,11 @@ static inline int MPIDI_shm_imrecv(void *buf,
                                    MPID_Request * message, MPID_Request ** rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq;
-    MPID_Comm *comm;
+    int dt_contig;
+    MPIDI_msg_sz_t data_sz;
+    MPI_Aint dt_true_lb;
+    MPID_Datatype *dt_ptr;
+    MPID_Request *rreq = NULL, *sreq = NULL;
     int rank, tag, context_id;
     int context_offset = 0;
 
@@ -168,16 +171,105 @@ static inline int MPIDI_shm_imrecv(void *buf,
     }
 
     MPIU_Assert(message != NULL);
-    MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
 
-    /* promote the request object to be a "real" recv request */
-    message->kind = MPID_REQUEST_RECV;
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    MPIDI_Request_create_rreq(rreq);
+    MPIU_Object_set_ref(rreq, 1);
+    MPID_cc_set(&rreq->cc, 0);
+    ENVELOPE_GET(REQ_SHM(message), rank, tag, context_id);
+    ENVELOPE_SET(REQ_SHM(rreq), rank, tag, context_id);
+    rreq->comm = message->comm;
+    MPIR_Comm_add_ref(message->comm);
+    REQ_SHM(rreq)->user_buf = (char*)buf + dt_true_lb;
+    REQ_SHM(rreq)->user_count = count;
+    REQ_SHM(rreq)->datatype = datatype;
+    REQ_SHM(rreq)->next = NULL;
+    REQ_SHM(rreq)->segment_ptr = NULL;
+    MPIR_STATUS_SET_COUNT(rreq->status, 0);
+    if (!dt_contig)
+    {
+        REQ_SHM(rreq)->segment_ptr = MPID_Segment_alloc();
+        MPIR_ERR_CHKANDJUMP1((REQ_SHM(rreq)->segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment_alloc");
+        MPID_Segment_init((char*)buf, REQ_SHM(rreq)->user_count, REQ_SHM(rreq)->datatype, REQ_SHM(rreq)->segment_ptr, 0);
+        REQ_SHM(rreq)->segment_first = 0;
+        REQ_SHM(rreq)->segment_size = data_sz;
+    }
 
-    *rreqp = rreq = message;
-    ENVELOPE_GET(REQ_SHM(rreq), rank, tag, context_id);
+    if (REQ_SHM(message)->pending)
+    {
+        /* Sync send - we must send ACK */
+        int srank = message->status.MPI_SOURCE;
+        MPID_Request* req_ack = NULL;
+        MPIDI_Request_create_sreq(req_ack);
+        MPIU_Object_set_ref(req_ack, 1);
+        req_ack->comm = message->comm;
+        MPIR_Comm_add_ref(message->comm);
+        ENVELOPE_SET(REQ_SHM(req_ack), message->comm->rank, tag, context_id);
+        REQ_SHM(req_ack)->user_buf = NULL;
+        REQ_SHM(req_ack)->user_count = 0;
+        REQ_SHM(req_ack)->datatype = MPI_BYTE;
+        REQ_SHM(req_ack)->data_sz = 0;
+        REQ_SHM(req_ack)->type = TYPE_ACK;
+        REQ_SHM(req_ack)->dest = srank;
+        REQ_SHM(req_ack)->next = NULL;
+        REQ_SHM(req_ack)->segment_ptr = NULL;
+        REQ_SHM(req_ack)->pending = REQ_SHM(message)->pending;
+        /* enqueue req_ack */
+        REQ_SHM_ENQUEUE(req_ack, MPIDI_shm_sendq);
+    }
 
-    comm = rreq->comm;
-    mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, rreqp);
+    for (sreq = message; sreq; ) {
+        MPID_Request* next_req = NULL;
+        char *send_buffer = REQ_SHM(sreq)->user_buf;
+        char *recv_buffer = (char *) REQ_SHM(rreq)->user_buf;
+        if (REQ_SHM(sreq)->type == TYPE_EAGER)
+        {
+            /* eager message */
+            data_sz = REQ_SHM(sreq)->data_sz;
+            if (REQ_SHM(rreq)->segment_ptr)
+            {
+                /* non-contig */
+                MPIDI_msg_sz_t last = REQ_SHM(rreq)->segment_first + data_sz;
+                MPID_Segment_unpack(REQ_SHM(rreq)->segment_ptr, REQ_SHM(rreq)->segment_first, (MPI_Aint*)&last, send_buffer);
+                MPID_Segment_free(REQ_SHM(rreq)->segment_ptr);
+            }
+            else
+                /* contig */
+                if (send_buffer)
+                    MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
+            /* set status */
+            rreq->status.MPI_SOURCE = sreq->status.MPI_SOURCE;
+            rreq->status.MPI_TAG = sreq->status.MPI_TAG;
+            count = MPIR_STATUS_GET_COUNT(rreq->status) + (MPI_Count)data_sz;
+            MPIR_STATUS_SET_COUNT(rreq->status,count);
+        }
+        else if (REQ_SHM(sreq)->type == TYPE_LMT)
+        {
+            /* long message */
+            if (REQ_SHM(rreq)->segment_ptr)
+            {
+                /* non-contig */
+                MPIDI_msg_sz_t last = REQ_SHM(rreq)->segment_first + EAGER_THRESHOLD;
+                MPID_Segment_unpack(REQ_SHM(rreq)->segment_ptr, REQ_SHM(rreq)->segment_first, (MPI_Aint*)&last, send_buffer);
+                REQ_SHM(rreq)->segment_first = last;
+            }
+            else
+                /* contig */
+                if (send_buffer)
+                    MPIU_Memcpy(recv_buffer, (void *) send_buffer, EAGER_THRESHOLD);
+            REQ_SHM(rreq)->data_sz -= EAGER_THRESHOLD;
+            REQ_SHM(rreq)->user_buf += EAGER_THRESHOLD;
+            count = MPIR_STATUS_GET_COUNT(rreq->status) + (MPI_Count)EAGER_THRESHOLD;
+            MPIR_STATUS_SET_COUNT(rreq->status,count);
+        }
+        /* destroy unexpected req */
+        REQ_SHM(sreq)->pending = NULL;
+        MPIU_Free(REQ_SHM(sreq)->user_buf);
+        next_req = REQ_SHM(sreq)->next;
+        REQ_SHM_COMPLETE(sreq);
+        sreq = next_req;
+    }
+    *rreqp = rreq;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_SHM_IMRECV);

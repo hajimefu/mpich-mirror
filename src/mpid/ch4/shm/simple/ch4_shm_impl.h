@@ -77,6 +77,18 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
     (queue).tail = req; \
 }
 
+#define REQ_SHM_DEQUEUE(req_p,prev_req,queue) \
+{ \
+    MPID_Request *next = REQ_SHM(*(req_p))->next; \
+    if ((queue).head == *(req_p)) \
+        (queue).head = next; \
+    else \
+        REQ_SHM(prev_req)->next = next; \
+    if ((queue).tail == *(req_p)) \
+        (queue).tail = prev_req; \
+    REQ_SHM(*(req_p))->next = NULL; \
+}
+
 #define REQ_SHM_DEQUEUE_AND_SET_ERROR(req_p,prev_req,queue,err) \
 { \
     MPID_Request *next = REQ_SHM(*(req_p))->next; \

@@ -38,14 +38,8 @@ static inline int MPIDI_shm_improbe(int source,
                                     int context_offset,
                                     int *flag, MPID_Request ** message, MPI_Status * status)
 {
-/*
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-*/
-    int mpi_errno=MPI_SUCCESS, comm_idx;
-    MPID_Comm *root_comm;
-    MPID_Request *req;
-    uint64_t match_bits, mask_bits;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *req, *matched_req = NULL;
     int count = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IMPROBE);
@@ -59,49 +53,52 @@ static inline int MPIDI_shm_improbe(int source,
         goto fn_exit;
     }
 
-    comm_idx = MPIDI_CH4I_get_context_index(comm->context_id);
-    //root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
-    root_comm = comm;
-
     for (req = MPIDI_shm_recvq_unexpected.head; req; req=REQ_SHM(req)->next) {
-        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, root_comm->recvcontext_id + context_offset))
+        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
         {
-            *message = req;
-            break;
-        }
-    }
-    for (req = MPIDI_shm_recvq_unexpected.head; req; req=REQ_SHM(req)->next) {
-        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, root_comm->recvcontext_id + context_offset))
-        {
-            while (req && REQ_SHM(req)->type == TYPE_LMT) {
-                count += MPIR_STATUS_GET_COUNT(req->status);
-                req = REQ_SHM(req)->next;
-            }
+            if (!matched_req)
+                matched_req = req;
             if (req && REQ_SHM(req)->type == TYPE_EAGER) {
-                *message = req;
-                count += MPIR_STATUS_GET_COUNT(req->status);
+                *message = matched_req;
+                break;
             }
-            break;
         }
     }
 
-    if (*message) {
-        (*message)->kind = MPID_REQUEST_MPROBE;
-        (*message)->comm = comm;
-        MPIR_Comm_add_ref(comm);
+    if (*message)
+    {
+        MPIDI_shm_queue_t mqueue = {NULL,NULL};
+        MPID_Request *prev_req = NULL, *next_req = NULL;
+        req = MPIDI_shm_recvq_unexpected.head;
+        while (req) {
+            next_req = REQ_SHM(req)->next;
+            if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
+            {
+                if (mqueue.head == NULL)
+                    MPIU_Assert(req == matched_req);
+                count += MPIR_STATUS_GET_COUNT(req->status);
+                REQ_SHM_DEQUEUE(&req, prev_req, MPIDI_shm_recvq_unexpected);
+                REQ_SHM_ENQUEUE(req, mqueue);
+                if (req && REQ_SHM(req)->type == TYPE_EAGER)
+                    break;
+            }
+            else
+                prev_req = req;
+            req = next_req;
+        }
         *flag = 1;
-        (*message)->status.MPI_ERROR = MPI_SUCCESS;
-        MPIR_STATUS_SET_COUNT((*message)->status, count);
-
-        status->MPI_TAG = (*message)->status.MPI_TAG;
-        status->MPI_SOURCE = (*message)->status.MPI_SOURCE;
+        matched_req->kind = MPID_REQUEST_MPROBE;
+        matched_req->comm = comm;
+        MPIR_Comm_add_ref(comm);
+        status->MPI_TAG = matched_req->status.MPI_TAG;
+        status->MPI_SOURCE = matched_req->status.MPI_SOURCE;
         MPIR_STATUS_SET_COUNT(*status, count);
     }
-    else {
+    else
+    {
         *flag = 0;
         MPIDI_Progress_test();
     }
-    /* MPIDI_CS_EXIT(); */
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_IMPROBE);
@@ -113,10 +110,8 @@ static inline int MPIDI_shm_iprobe(int source,
                                    MPID_Comm * comm,
                                    int context_offset, int *flag, MPI_Status * status)
 {
-    int mpi_errno=MPI_SUCCESS, comm_idx;
-    MPID_Comm *root_comm;
-    MPID_Request *req, *matched_req=NULL;
-    uint64_t match_bits, mask_bits;
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *req, *matched_req = NULL;
     int count = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IPROBE);
@@ -128,19 +123,14 @@ static inline int MPIDI_shm_iprobe(int source,
         goto fn_exit;
     }
 
-    comm_idx = MPIDI_CH4I_get_context_index(comm->context_id);
-    root_comm = comm;
-
-    req = MPIDI_shm_recvq_unexpected.head;
-    while (req) {
-        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, root_comm->recvcontext_id + context_offset)) {
+    for (req = MPIDI_shm_recvq_unexpected.head; req; req = REQ_SHM(req)->next) {
+        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset)) {
             count += MPIR_STATUS_GET_COUNT(req->status);
             if (REQ_SHM(req)->type == TYPE_EAGER) {
                 matched_req = req;
                 break;
             }
         }
-        req = REQ_SHM(req)->next;
     }
 
     if (matched_req) {
