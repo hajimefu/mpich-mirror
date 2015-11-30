@@ -124,7 +124,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
                                       uint64_t flags)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
-    MPID_Request *rreq = NULL;
+    MPID_Request *rreq = NULL, *unexp_req = NULL;
     uint64_t match_bits, mask_bits;
     MPIU_Context_id_t context_id = comm->recvcontext_id + context_offset;
     MPID_Comm *root_comm;
@@ -136,16 +136,20 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER() */
-    rreq = MPIDI_CH4I_dequeue_unexp_strict(match_bits, mask_bits,
-                                           &MPIU_CH4U_COMM(root_comm, unexp_list));
+    unexp_req = MPIDI_CH4I_dequeue_unexp(match_bits, mask_bits,
+                                         &MPIU_CH4U_COMM(root_comm, unexp_list));
     /* MPIDI_CS_EXIT() */
 
-    if (rreq) {
-        *request = rreq;
-        mpi_errno = MPIDI_CH4I_handle_unexpected(buf, count, datatype,
-                                                 root_comm, context_id, rreq);
-        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-        goto fn_exit;
+    if (unexp_req) {
+        if (MPIU_CH4U_REQUEST(unexp_req, status) & MPIDI_CH4U_REQ_BUSY) {
+            MPIU_CH4U_REQUEST(unexp_req, status) |= MPIDI_CH4U_REQ_MATCHED;
+        } else {
+            *request = unexp_req;
+            mpi_errno = MPIDI_CH4I_handle_unexpected(buf, count, datatype,
+                                                     root_comm, context_id, unexp_req);
+            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+            goto fn_exit;
+        }
     }
 
     if (alloc_req) {
@@ -175,9 +179,14 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     mpi_errno = MPIDI_CH4I_prepare_recv_req(buf, count, datatype, rreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    /* MPIDI_CS_ENTER(); */
-    MPIDI_CH4I_enqueue_posted(rreq, &MPIU_CH4U_COMM(root_comm, posted_list));
-    /* MPIDI_CS_EXIT(); */
+
+    if (!unexp_req) {
+        /* MPIDI_CS_ENTER(); */
+        MPIDI_CH4I_enqueue_posted(rreq, &MPIU_CH4U_COMM(root_comm, posted_list));
+        /* MPIDI_CS_EXIT(); */
+    } else {
+        MPIU_CH4U_REQUEST(unexp_req, rreq.match_req) = (uint64_t) rreq;
+    }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DO_IRECV);
     return mpi_errno;
