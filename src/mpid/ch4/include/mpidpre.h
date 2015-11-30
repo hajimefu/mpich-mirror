@@ -43,6 +43,7 @@ typedef enum {
 #define MPIDI_CH4U_REQ_UNEXP_DQUED 	  (0x1 << 3)
 #define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
 #define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
+#define MPIDI_CH4U_REQ_MATCHED (0x1 << 6)
 
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
@@ -61,6 +62,7 @@ typedef struct MPIDI_CH4U_Dev_rreq_t {
     uint64_t      ignore;
     void         *reply_token;
     uint64_t      peer_req_ptr;
+    uint64_t      match_req;
 
     struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
 } MPIDI_CH4U_Dev_rreq_t;
