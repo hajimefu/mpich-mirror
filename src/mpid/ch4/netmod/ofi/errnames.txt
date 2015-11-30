@@ -81,3 +81,5 @@
 **ofid_ctrlcancel %s %d %s %s:OFI control cancel failed (%s:%d:%s:%s)
 **ofid_cntr_wait:OFI Counter wait failed
 **ofid_cntr_wait %s %d %s %s:OFI OFI Counter wait failed (%s:%d:%s:%s)
+**ofid_rma_init:OFI RMA Initialization failed
+**ofid_rma_init %s %d %s %s:OFI RMA Initialization failed (%s:%d:%s:%s)

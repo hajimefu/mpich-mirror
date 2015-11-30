@@ -222,7 +222,7 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
             int      key_back;
             MPIDI_OFI_Map_erase(COMM_OFI(comm).huge_send_counters, REQ_OFI(sreq, util_id));
             key          = fi_mr_key(cntr->mr);
-            key_back     = (key >> MPIDI_HUGE_RMA_SHIFT);
+            key_back     = (key >> MPIDI_Global.huge_rma_shift);
             MPIDI_OFI_Index_allocator_free(COMM_OFI(comm).rma_id_allocator,key_back);
             FI_RC_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
             MPIU_Free(ptr);
@@ -326,7 +326,7 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
             MPIU_Free(hc);
             goto fn_exit;
         }
-        remote_key = hc->remote_info.rma_key << MPIDI_HUGE_RMA_SHIFT;
+        remote_key = hc->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
         FI_RC_RETRY_NOLOCK(fi_read(G_TXC_RMA(0),                                           /* endpoint     */
                                    (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
                                    bytesToGet,                                             /* bytes        */

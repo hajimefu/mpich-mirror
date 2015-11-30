@@ -179,8 +179,8 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
         cntr = (MPIDI_Hugecntr *) ptr;
 
         ctrl.rma_key = MPIDI_OFI_Index_allocator_alloc(COMM_OFI(comm).rma_id_allocator);
-        MPIU_Assert(ctrl.rma_key <= MPIDI_MAX_HUGE_RMAS);
-        rma_key  = ctrl.rma_key<<MPIDI_HUGE_RMA_SHIFT;
+        MPIU_Assert(ctrl.rma_key < MPIDI_Global.max_huge_rmas);
+        rma_key  = ctrl.rma_key<<MPIDI_Global.huge_rma_shift;
         FI_RC_NOLOCK(fi_mr_reg(MPIDI_Global.domain,     /* In:  Domain Object       */
                                send_buf,                /* In:  Lower memory address*/
                                data_sz,                 /* In:  Length              */

@@ -44,23 +44,23 @@ static inline int MPIDI_Win_allgather(MPID_Win        *win,
 
     int       total_bits_avail      = MPIDI_Global.max_mr_key * 8;
     uint64_t  window_instance       = ((uint64_t)WIN_OFI(win)->win_id)>>32;
-    int       bits_for_instance_id  = MPIDI_MAX_WINDOWS_BITS;
+    int       bits_for_instance_id  = MPIDI_Global.max_windows_bits;
     int       bits_for_context_id;
-    uint64_t  max_context_allowed;
-    uint64_t  max_instance_allowed;
+    uint64_t  max_contexts_allowed;
+    uint64_t  max_instances_allowed;
 
-    bits_for_context_id   = total_bits_avail - MPIDI_MAX_WINDOWS_BITS - MPIDI_MAX_HUGE_RMA_BITS;
-    max_context_allowed   = 2<<(bits_for_context_id-1);
-    max_instance_allowed  = 2<<(bits_for_instance_id-1);
-
-    MPIR_ERR_CHKANDSTMT(gen_id >= max_context_allowed,mpi_errno,MPI_ERR_OTHER,
+    bits_for_context_id   = total_bits_avail -
+        MPIDI_Global.max_windows_bits -
+        MPIDI_Global.max_huge_rma_bits;
+    max_contexts_allowed  = 1<<(bits_for_context_id);
+    max_instances_allowed = 1<<(bits_for_instance_id);
+    MPIR_ERR_CHKANDSTMT(gen_id >= max_contexts_allowed,mpi_errno,MPI_ERR_OTHER,
                         goto fn_fail,"**ofid_mr_reg");
-    MPIR_ERR_CHKANDSTMT(window_instance >= max_instance_allowed,mpi_errno,MPI_ERR_OTHER,
+    MPIR_ERR_CHKANDSTMT(window_instance >= max_instances_allowed,mpi_errno,MPI_ERR_OTHER,
                         goto fn_fail,"**ofid_mr_reg");
 
     /* Context id in lower bits, instance in upper bits */
-    WIN_OFI(win)->mr_key = (gen_id<<MPIDI_CONTEXT_SHIFT) | window_instance;
-
+    WIN_OFI(win)->mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
     FI_RC(fi_mr_reg(MPIDI_Global.domain,                /* In:  Domain Object       */
                     base,                               /* In:  Lower memory address*/
                     win->size,                          /* In:  Length              */

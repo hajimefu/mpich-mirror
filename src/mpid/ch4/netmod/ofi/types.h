@@ -67,12 +67,38 @@ EXTERN_C_BEGIN
  *    ...     Context ID |   Huge RMA       |  Window Instance   |
  *    |                  |                  |                    |
  */
-#define MPIDI_MAX_WINDOWS_BITS  (5)
-#define MPIDI_MAX_HUGE_RMA_BITS (5)
-#define MPIDI_MAX_HUGE_RMAS     (2<<(MPIDI_MAX_HUGE_RMA_BITS-1))
-#define MPIDI_MAX_WINDOWS       (2<<(MPIDI_MAX_WINDOWS_BITS-1))
-#define MPIDI_HUGE_RMA_SHIFT    (MPIDI_MAX_WINDOWS_BITS)
-#define MPIDI_CONTEXT_SHIFT     (MPIDI_MAX_WINDOWS_BITS+MPIDI_MAX_HUGE_RMA_BITS)
+/* 64-bit key space                         */
+/* 2M  window instances per comm           */
+/* 2M  outstanding huge RMAS per comm      */
+/* 4M  communicators                       */
+#define MPIDI_MAX_WINDOWS_BITS_64  (21)
+#define MPIDI_MAX_HUGE_RMA_BITS_64 (21)
+#define MPIDI_MAX_HUGE_RMAS_64     (1<<(MPIDI_MAX_HUGE_RMA_BITS_64))
+#define MPIDI_MAX_WINDOWS_64       (1<<(MPIDI_MAX_WINDOWS_BITS_64))
+#define MPIDI_HUGE_RMA_SHIFT_64    (MPIDI_MAX_WINDOWS_BITS_64)
+#define MPIDI_CONTEXT_SHIFT_64     (MPIDI_MAX_WINDOWS_BITS_64+MPIDI_MAX_HUGE_RMA_BITS_64)
+
+/* 32-bit key space                         */
+/* 4096 window instances per comm           */
+/* 256  outstanding huge RMAS per comm      */
+/* 4096 communicators                       */
+#define MPIDI_MAX_WINDOWS_BITS_32  (12)
+#define MPIDI_MAX_HUGE_RMA_BITS_32 (8)
+#define MPIDI_MAX_HUGE_RMAS_32     (1<<(MPIDI_MAX_HUGE_RMA_BITS_32))
+#define MPIDI_MAX_WINDOWS_32       (1<<(MPIDI_MAX_WINDOWS_BITS_32))
+#define MPIDI_HUGE_RMA_SHIFT_32    (MPIDI_MAX_WINDOWS_BITS_32)
+#define MPIDI_CONTEXT_SHIFT_32     (MPIDI_MAX_WINDOWS_BITS_32+MPIDI_MAX_HUGE_RMA_BITS_32)
+
+/* 16-bit key space                         */
+/* 64 window instances per comm             */
+/* 16 outstanding huge RMAS per comm        */
+/* 64 communicators                          */
+#define MPIDI_MAX_WINDOWS_BITS_16  (6)
+#define MPIDI_MAX_HUGE_RMA_BITS_16 (4)
+#define MPIDI_MAX_HUGE_RMAS_16     (1<<(MPIDI_MAX_HUGE_RMA_BITS_16))
+#define MPIDI_MAX_WINDOWS_16       (1<<(MPIDI_MAX_WINDOWS_BITS_16))
+#define MPIDI_HUGE_RMA_SHIFT_16    (MPIDI_MAX_WINDOWS_BITS_16)
+#define MPIDI_CONTEXT_SHIFT_16     (MPIDI_MAX_WINDOWS_BITS_16+MPIDI_MAX_HUGE_RMA_BITS_16)
 
 
 /* Typedefs */
@@ -254,6 +280,11 @@ typedef struct {
     uint64_t max_write;
     uint64_t max_short_send;
     uint64_t max_mr_key;
+    int      max_windows_bits;
+    int      max_huge_rma_bits;
+    int      max_huge_rmas;
+    int      huge_rma_shift;
+    int      context_shift;
     size_t iov_limit;
     int cur_ctrlblock;
     int num_ctrlblock;
