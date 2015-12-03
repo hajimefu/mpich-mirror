@@ -14,6 +14,8 @@
 #include "impl.h"
 #include "request.h"
 
+static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_reg_hdr_handler
 #undef FCNAME
@@ -72,7 +74,7 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank, int handler_id, 
     iov[1].iov_base = AMREQ_OFI_HDR(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
 
-    FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 2, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 2, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     return mpi_errno;
@@ -120,7 +122,7 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     iov[2].iov_base = lmt_info;
     iov[2].iov_len = sizeof(*lmt_info);
 
-    FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     return mpi_errno;
@@ -160,7 +162,7 @@ static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
     iov[2].iov_len = count;
 
     MPID_cc_incr(sreq->cc_ptr, &c);
-    FI_RC_RETRY(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
     return mpi_errno;
@@ -492,7 +494,7 @@ static inline int MPIDI_netmod_do_inject(int64_t rank,
     msg.context = NULL;
     msg.addr = (fi_addr_t)rank;
 
-    FI_RC_RETRY(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
+    FI_RC_RETRY_AM(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_INJECT);
     return mpi_errno;

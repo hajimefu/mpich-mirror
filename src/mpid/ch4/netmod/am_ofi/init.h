@@ -183,6 +183,9 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     mpi_errno = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
+    slist_init(&MPIDI_Global.cq_buff_list);
+    MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
+
     optlen = MPIDI_MIN_MSG_SZ;
     FI_RC(fi_setopt(&MPIDI_Global.ep->fid, FI_OPT_ENDPOINT,
                     FI_OPT_MIN_MULTI_RECV, &optlen, sizeof(optlen)), setopt);
