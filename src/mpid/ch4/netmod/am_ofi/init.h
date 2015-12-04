@@ -68,8 +68,8 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     hints->addr_format = FI_FORMAT_UNSPEC;
     hints->domain_attr->threading = FI_THREAD_ENDPOINT;
-    hints->domain_attr->control_progress = FI_PROGRESS_AUTO;
-    hints->domain_attr->data_progress = FI_PROGRESS_AUTO;
+    hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
+    hints->domain_attr->data_progress = FI_PROGRESS_MANUAL;
     hints->domain_attr->resource_mgmt = FI_RM_ENABLED;
     hints->domain_attr->av_type = FI_AV_UNSPEC;
     hints->domain_attr->mr_mode = FI_MR_SCALABLE;
@@ -187,7 +187,8 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
         MPIDI_Global.am_msg[i].addr = FI_ADDR_UNSPEC;
         MPIDI_Global.am_msg[i].context = &MPIDI_Global.am_msg[i];
         MPIDI_Global.am_msg[i].iov_count = 1;
-        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i], FI_MULTI_RECV), prepost);
+        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i],
+                               FI_MULTI_RECV | FI_COMPLETION), prepost);
     }
 
     MPIDI_Global.node_map = (MPID_Node_id_t *)
@@ -403,7 +404,8 @@ static inline int MPIDI_Create_endpoint(struct fi_info     *prov_use,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
 
     FI_RC(fi_endpoint(domain, prov_use, ep, NULL), ep);
-    FI_RC(fi_ep_bind(*ep, &cq->fid, FI_SEND | FI_RECV | FI_WRITE | FI_READ), cq_bind);
+    FI_RC(fi_ep_bind(*ep, &cq->fid, FI_SEND | FI_RECV | FI_WRITE | FI_READ |
+                     FI_SELECTIVE_COMPLETION), cq_bind);
     FI_RC(fi_ep_bind(*ep, &av->fid, 0), av_bind);
     FI_RC(fi_enable(*ep), ep_enable);
 

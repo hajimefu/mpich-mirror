@@ -30,12 +30,16 @@ typedef enum {
     MPIDI_AMTYPE_SHORT_HDR = 0,
     MPIDI_AMTYPE_SHORT,
     MPIDI_AMTYPE_LMT_REQ,
+    MPIDI_AMTYPE_LMT_HDR_REQ,
     MPIDI_AMTYPE_LMT_ACK,
+    MPIDI_AMTYPE_LONG_HDR_REQ,
+    MPIDI_AMTYPE_LONG_HDR_ACK
 } MPIDI_amtype;
 
 typedef struct {
     uint64_t src_offset;
     uint64_t sreq_ptr;
+    uint64_t am_hdr_src;
 } MPIDI_OFI_lmt_msg_pyld_t;
 
 typedef struct {
@@ -44,9 +48,9 @@ typedef struct {
 
 typedef struct MPIDI_AM_OFI_hdr_t {
     uint16_t handler_id;
-    uint16_t am_hdr_sz;
     uint8_t am_type;
-    uint8_t pad[3];
+    uint8_t pad[5];
+    uint64_t am_hdr_sz;
     uint64_t data_sz;
     uint8_t payload[0];
 } MPIDI_AM_OFI_hdr_t;
@@ -70,13 +74,14 @@ typedef struct {
     MPIDI_OFI_lmt_msg_pyld_t lmt_info;
     uint64_t lmt_cntr;
 
-    union {
-        void *pack_buffer;
-        void *rreq_ptr;
-    };
+    void *pack_buffer;
+    void *rreq_ptr;
+    void *am_hdr;
 
     int (*cmpl_handler_fn) (struct MPID_Request * req);
-    void *am_hdr;
+    uint16_t am_hdr_sz;
+    uint8_t pad[6];
+
     MPIDI_AM_OFI_hdr_t msg_hdr;
     uint8_t am_hdr_buf[MPIDI_MAX_AM_HDR_SZ];
 } MPIDI_am_ofi_req_hdr_t;

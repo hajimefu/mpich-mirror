@@ -31,6 +31,19 @@ __CH4_INLINE__ void MPIDI_Request_set_completed(MPID_Request * req)
     return;
 }
 
+__CH4_INLINE__ void MPIDI_Request_add_ref(MPID_Request * req)
+{
+    MPIR_Request_add_ref(req);
+    return;
+}
+
+__CH4_INLINE__ void MPIDI_Request_release_ref(MPID_Request * req)
+{
+    int inuse;
+    MPIR_Request_release_ref(req, &inuse);
+    return;
+}
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_request_release
 #undef FCNAME
