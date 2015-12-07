@@ -42,7 +42,7 @@ static inline int MPIDI_Win_allgather(MPID_Win        *win,
     bitpos     = raw_prefix % MPIR_CONTEXT_INT_BITS;
     gen_id     = (idx*MPIR_CONTEXT_INT_BITS) + (31-bitpos);
 
-    int       total_bits_avail      = MPIDI_Global.max_mr_key * 8;
+    int       total_bits_avail      = MPIDI_Global.max_mr_key_size * 8;
     uint64_t  window_instance       = ((uint64_t)WIN_OFI(win)->win_id)>>32;
     int       bits_for_instance_id  = MPIDI_Global.max_windows_bits;
     int       bits_for_context_id;

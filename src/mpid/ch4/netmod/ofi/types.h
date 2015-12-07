@@ -279,7 +279,7 @@ typedef struct {
     uint64_t max_send;
     uint64_t max_write;
     uint64_t max_short_send;
-    uint64_t max_mr_key;
+    uint64_t max_mr_key_size;
     int      max_windows_bits;
     int      max_huge_rma_bits;
     int      max_huge_rmas;

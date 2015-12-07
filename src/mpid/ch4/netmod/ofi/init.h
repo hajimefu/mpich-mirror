@@ -174,23 +174,23 @@ static inline int MPIDI_netmod_init(int         rank,
     MPIDI_Global.max_send           = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.max_write          = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.iov_limit          = MIN(prov_use->tx_attr->iov_limit,MPIDI_IOV_MAX);
-    MPIDI_Global.max_mr_key         = prov_use->domain_attr->mr_key_size;
+    MPIDI_Global.max_mr_key_size    = prov_use->domain_attr->mr_key_size;
 
-    if(MPIDI_Global.max_mr_key >= 8) {
+    if(MPIDI_Global.max_mr_key_size >= 8) {
         MPIDI_Global.max_windows_bits   = MPIDI_MAX_WINDOWS_BITS_64;
         MPIDI_Global.max_huge_rma_bits  = MPIDI_MAX_HUGE_RMA_BITS_64;
         MPIDI_Global.max_huge_rmas      = MPIDI_MAX_HUGE_RMAS_64;
         MPIDI_Global.huge_rma_shift     = MPIDI_HUGE_RMA_SHIFT_64;
         MPIDI_Global.context_shift      = MPIDI_CONTEXT_SHIFT_64;
     }
-    else if(MPIDI_Global.max_mr_key >= 4) {
+    else if(MPIDI_Global.max_mr_key_size >= 4) {
         MPIDI_Global.max_windows_bits   = MPIDI_MAX_WINDOWS_BITS_32;
         MPIDI_Global.max_huge_rma_bits  = MPIDI_MAX_HUGE_RMA_BITS_32;
         MPIDI_Global.max_huge_rmas      = MPIDI_MAX_HUGE_RMAS_32;
         MPIDI_Global.huge_rma_shift     = MPIDI_HUGE_RMA_SHIFT_32;
         MPIDI_Global.context_shift      = MPIDI_CONTEXT_SHIFT_32;
     }
-    else if(MPIDI_Global.max_mr_key >= 2) {
+    else if(MPIDI_Global.max_mr_key_size >= 2) {
         MPIDI_Global.max_windows_bits   = MPIDI_MAX_WINDOWS_BITS_16;
         MPIDI_Global.max_huge_rma_bits  = MPIDI_MAX_HUGE_RMA_BITS_16;
         MPIDI_Global.max_huge_rmas      = MPIDI_MAX_HUGE_RMAS_16;
