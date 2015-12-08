@@ -63,3 +63,20 @@ static void init_comm()
   MPID_Comm_fns             = &MPIDI_CH4_Global.MPID_Comm_fns_store;
   MPID_Comm_fns->split_type =  MPIDI_Comm_split_type;
 }
+
+
+
+/* These aliases are used because we call MPID_Request_get_ptr   */
+/* in some internal routines MPID_Request_get_ptr is a macro     */
+/* that #defines to MPID_ instead of MPIDI_.  We have the option */
+/* to copy the macros for a different namespace, but aliasing    */
+/* is probably the safer option to avoid missing symbols         */
+#ifdef MPID_Request_mem
+#undef MPID_Request_mem
+#endif
+
+#ifdef MPID_Request_direct
+#undef MPID_Request_direct
+#endif
+extern MPIU_Object_alloc_t MPID_Request_mem __attribute__((alias("MPIDI_Request_mem")));
+extern MPID_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((alias("MPIDI_Request_direct")));
