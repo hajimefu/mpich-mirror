@@ -14,6 +14,8 @@
 #include "impl.h"
 #include "request.h"
 
+static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_handle_short_am
 #undef FCNAME
@@ -141,7 +143,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
 
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
 #warning "Jithin:  Need LKEY"
-        FI_RC_RETRY(fi_read(MPIDI_Global.ep, (char *) dst + done,
+        FI_RC_RETRY_AM(fi_read(MPIDI_Global.ep, (char *) dst + done,
                             curr_len, NULL, source, src + done,
                             0ULL, &am_req->context), read);
         done += curr_len;
@@ -531,7 +533,7 @@ static inline int MPIDI_netmod_dispatch_ack(fi_addr_t source,
     msg.hdr.am_type = am_type;
     msg.pyld.sreq_ptr = sreq_ptr;
 
-    FI_RC_RETRY(fi_inject(MPIDI_Global.ep, &msg, sizeof(msg), source), inject);
+    FI_RC_RETRY_AM(fi_inject(MPIDI_Global.ep, &msg, sizeof(msg), source), inject);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DISPATCH_ACK);
     return mpi_errno;
@@ -615,7 +617,7 @@ static inline int MPIDI_netmod_repost_buffer(void *buf, void *netmod_context)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
 
-    FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf,
+    FI_RC_RETRY_AM(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf,
                            FI_MULTI_RECV | FI_COMPLETION), repost);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
@@ -628,9 +630,60 @@ static inline int MPIDI_netmod_repost_buffer(void *buf, void *netmod_context)
 #define FUNCNAME MPIDI_netmod_progress
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
+{
+    int mpi_errno = MPI_SUCCESS, ret;
+    struct fi_cq_data_entry cq_entry;
+    struct fi_cq_err_entry cq_err_entry;
+    fi_addr_t source;
+
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS);
+
+    ret = fi_cq_readfrom(MPIDI_Global.am_cq, &cq_entry, 1, &source);
+    if (ret == -FI_EAGAIN)
+        goto fn_exit;
+    
+    if (ret < 0) {
+        fi_cq_readerr(MPIDI_Global.am_cq, &cq_err_entry, 0);
+        fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
+        goto fn_fail;
+    }
+
+    if (((MPIDI_Global.cq_buff_head + 1) %
+         MPIDI_NUM_CQ_BUFFERED == MPIDI_Global.cq_buff_tail) ||
+        !slist_empty(&MPIDI_Global.cq_buff_list)) {
+        struct cq_list *list_entry = (struct cq_list *) MPIU_Malloc(sizeof(struct cq_list));
+        MPIU_Assert(list_entry);
+        list_entry->cq_entry = cq_entry;
+        list_entry->source = source;
+        slist_insert_tail(&list_entry->entry, &MPIDI_Global.cq_buff_list);
+    } else {
+        MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].cq_entry = cq_entry;
+        MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].source = source;
+        MPIDI_Global.cq_buff_head = (MPIDI_Global.cq_buff_head + 1) % MPIDI_NUM_CQ_BUFFERED;
+    }
+    
+    if ((cq_entry.flags & FI_RECV) &&
+        (cq_entry.flags & FI_MULTI_RECV)) {
+        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+    }
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_PROGRESS);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_progress
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 {
-    int mpi_errno = MPI_SUCCESS, found = 0, ret;
+    int mpi_errno = MPI_SUCCESS, found = 0, ret, buffered;
     struct fi_cq_data_entry cq_entry;
     struct fi_cq_err_entry cq_err_entry;
     fi_addr_t source;
@@ -639,14 +692,35 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS);
 
     do {
-        ret = fi_cq_readfrom(MPIDI_Global.am_cq, &cq_entry, 1, &source);
-        if (ret == -FI_EAGAIN)
-            continue;
 
-        if (ret < 0) {
-            fi_cq_readerr(MPIDI_Global.am_cq, &cq_err_entry, 0);
-            fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
-            goto fn_fail;
+        if ((MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) ||
+            !slist_empty(&MPIDI_Global.cq_buff_list)) {
+
+            if (MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) {
+                source = MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_tail].source;
+                cq_entry = MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_tail].cq_entry;
+                MPIDI_Global.cq_buff_tail = (MPIDI_Global.cq_buff_tail + 1) % MPIDI_NUM_CQ_BUFFERED;
+            } else {
+                struct cq_list *cq_list_entry;
+                struct slist_entry *entry = slist_remove_head(&MPIDI_Global.cq_buff_list);
+                cq_list_entry = container_of(entry, struct cq_list, entry);
+                source = cq_list_entry->source;
+                cq_entry = cq_list_entry->cq_entry;
+                MPIU_Free((void *)cq_list_entry);
+            }
+            buffered = 1;
+
+        } else {
+            ret = fi_cq_readfrom(MPIDI_Global.am_cq, &cq_entry, 1, &source);
+            if (ret == -FI_EAGAIN)
+                continue;
+            
+            if (ret < 0) {
+                fi_cq_readerr(MPIDI_Global.am_cq, &cq_err_entry, 0);
+                fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
+                goto fn_fail;
+            }
+            buffered = 0;
         }
 
         found = 1;
@@ -659,7 +733,7 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
             mpi_errno = MPIDI_netmod_handle_recv_completion(&cq_entry, source, netmod_context);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-            if (cq_entry.flags & FI_MULTI_RECV) {
+            if ((cq_entry.flags & FI_MULTI_RECV) && !buffered) {
                 mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context);
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             }
@@ -679,6 +753,7 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
   fn_fail:
     goto fn_exit;
 }
+
 
 static inline int MPIDI_netmod_progress_test(void)
 {
