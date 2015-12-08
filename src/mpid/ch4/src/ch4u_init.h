@@ -30,7 +30,7 @@ static inline void MPIDI_CH4I_progress_cmpl_list(void)
     /* MPIDI_CS_ENTER(); */
 do_check_again:
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.cmpl_list, curr, tmp) {
-        if (curr->seq_no == MPIDI_CH4_Global.exp_seq_no) {
+        if (curr->seq_no == OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
             MPL_DL_DELETE(MPIDI_CH4_Global.cmpl_list, curr);
             req = container_of(curr, MPID_Request, dev.ch4.ch4u);
             cmpl_handler_fn = (MPIDI_netmod_am_completion_handler_fn) curr->cmpl_handler_fn;
@@ -52,8 +52,8 @@ static inline int MPIDI_CH4I_check_cmpl_order(MPID_Request *req,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CHECK_CMPL_ORDER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CHECK_CMPL_ORDER);
 
-    if (MPIU_CH4U_REQUEST(req, seq_no) == MPIDI_CH4_Global.exp_seq_no) {
-        MPIDI_CH4_Global.exp_seq_no++;
+    if (MPIU_CH4U_REQUEST(req, seq_no) == OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
+        OPA_incr_int(&MPIDI_CH4_Global.exp_seq_no);
         return 1;
     }
 
@@ -1323,7 +1323,7 @@ static inline int MPIDI_CH4I_am_send_target_handler(void *am_hdr,
     MPIU_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
     *req = rreq;
     *cmpl_handler_fn = MPIDI_CH4I_am_recv_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_Datatype_get_info(MPIU_CH4U_REQUEST(rreq, count),
                             MPIU_CH4U_REQUEST(rreq, datatype),
@@ -1569,7 +1569,7 @@ static inline int MPIDI_CH4I_am_get_acc_ack_target_handler(void *am_hdr, size_t 
 
     *req = areq;
     *cmpl_handler_fn = MPIDI_CH4I_am_get_acc_ack_cmpl_handler;
-    MPIU_CH4U_REQUEST(areq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(areq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_ACC_ACK_HANDLER);
     return mpi_errno;
@@ -1601,7 +1601,7 @@ static inline int MPIDI_CH4I_am_cswap_ack_target_handler(void *am_hdr, size_t am
 
     *req = creq;
     *cmpl_handler_fn = MPIDI_CH4I_am_cswap_ack_cmpl_handler;
-    MPIU_CH4U_REQUEST(creq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(creq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_AM_CSWAP_ACK_HANDLER);
     return mpi_errno;
@@ -1943,7 +1943,7 @@ static inline int MPIDI_CH4I_am_put_target_handler(void *am_hdr,
     MPIU_CH4U_REQUEST(rreq, preq.win_ptr) = (uint64_t) win;
 
     *cmpl_handler_fn = MPIDI_CH4I_am_put_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     if (msg_hdr->n_iov) {
         dt_iov = (struct iovec *)MPIU_Malloc(sizeof(struct iovec) * msg_hdr->n_iov);
@@ -2034,7 +2034,7 @@ static inline int MPIDI_CH4I_am_put_iov_target_handler(void *am_hdr,
     MPIU_CH4U_REQUEST(rreq, preq.win_ptr) = (uint64_t) win;
 
     *cmpl_handler_fn = MPIDI_CH4I_am_put_iov_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIU_Assert(msg_hdr->n_iov);
     dt_iov = (struct iovec *)MPIU_Malloc(sizeof(struct iovec) * msg_hdr->n_iov);
@@ -2251,7 +2251,7 @@ static inline int MPIDI_CH4I_am_cswap_target_handler(void *am_hdr,
     *req = rreq;
 
     *cmpl_handler_fn = MPIDI_CH4I_am_cswap_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_Datatype_check_contig_size(msg_hdr->datatype, 1, dt_contig, data_sz);
     *is_contig = dt_contig;
@@ -2319,7 +2319,7 @@ static inline int MPIDI_CH4I_handle_acc_request(void *am_hdr,
 
     *cmpl_handler_fn = (msg_hdr->do_get) ? MPIDI_CH4I_am_get_acc_cmpl_handler :
         MPIDI_CH4I_am_acc_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     *is_contig = 1;
     *p_data_sz = data_sz;
@@ -2418,7 +2418,7 @@ static inline int MPIDI_CH4I_am_acc_iov_target_handler(void *am_hdr,
     *data = (void *) dt_iov;
 
     *cmpl_handler_fn = MPIDI_CH4I_am_acc_iov_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_HANDLE_ACC_IOV_REQ);
     return mpi_errno;
@@ -2452,7 +2452,7 @@ static inline int MPIDI_CH4I_am_get_target_handler(void *am_hdr,
 
     *req = rreq;
     *cmpl_handler_fn = MPIDI_CH4I_am_get_cmpl_handler;
-    MPIU_CH4U_REQUEST(rreq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
     MPIU_Assert(win);
@@ -2524,7 +2524,7 @@ static inline int MPIDI_CH4I_am_get_ack_target_handler(void *am_hdr,
     }
 
     *cmpl_handler_fn = MPIDI_CH4I_am_get_ack_cmpl_handler;
-    MPIU_CH4U_REQUEST(greq, seq_no) = MPIDI_CH4_Global.nxt_seq_no++;
+    MPIU_CH4U_REQUEST(greq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_Datatype_get_info(MPIU_CH4U_REQUEST(rreq, greq.count),
                             MPIU_CH4U_REQUEST(rreq, greq.datatype),
@@ -2603,8 +2603,8 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
 #endif
 
     MPIDI_CH4_Global.cmpl_list = NULL;
-    MPIDI_CH4_Global.exp_seq_no = 0;
-    MPIDI_CH4_Global.nxt_seq_no = 0;
+    OPA_store_int(&MPIDI_CH4_Global.exp_seq_no, 0);
+    OPA_store_int(&MPIDI_CH4_Global.nxt_seq_no, 0);
 
     mpi_errno = MPIDI_netmod_reg_hdr_handler(MPIDI_CH4U_AM_SEND,
                                              &MPIDI_CH4I_am_send_origin_cmpl_handler,
