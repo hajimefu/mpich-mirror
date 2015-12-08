@@ -1825,6 +1825,7 @@ static inline int MPIDI_CH4I_am_win_ctrl_target_handler(void *am_hdr, size_t am_
     sender_rank = msg_hdr->origin_rank;
 
     switch (msg_hdr->type) {
+        char buff[32];
 
     case MPIDI_CH4U_WIN_LOCK:
     case MPIDI_CH4U_WIN_LOCKALL:
@@ -1855,7 +1856,8 @@ static inline int MPIDI_CH4I_am_win_ctrl_target_handler(void *am_hdr, size_t am_
         break;
 
     default:
-        fprintf(stderr, "invalid message type: %d\n", msg_hdr->type);
+        MPL_snprintf(buff, sizeof(buff), "Invalid message type: %d\n", msg_hdr->type);
+        MPID_Abort(NULL, MPI_ERR_INTERN, 1, buff);
     }
 
     if (req)
