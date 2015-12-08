@@ -236,7 +236,7 @@ static inline int MPIDI_CH4I_progress_win_fence(MPID_Win *win)
 
     do {
         MPIDI_CH4I_PROGRESS();
-    } while(MPIU_CH4U_WIN(win, outstanding_ops) != 0);
+    } while(OPA_load_int(&MPIU_CH4U_WIN(win, outstanding_ops)) != 0);
         
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROGRESS_WIN_FENCE);

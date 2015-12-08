@@ -246,7 +246,7 @@ typedef struct MPIDI_CH4I_win_t {
     uint64_t win_id;
     void *mmap_addr;
     int64_t mmap_sz;
-    size_t outstanding_ops;
+    OPA_int_t outstanding_ops;
     MPI_Aint *sizes;
     void *msgQ;
     void *syncQ; /* todo */

@@ -78,7 +78,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
-    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    OPA_incr_int(&MPIU_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
 
     if (HANDLE_GET_KIND(target_datatype) == HANDLE_KIND_BUILTIN) {
@@ -209,7 +209,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
-    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    OPA_incr_int(&MPIU_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
 
     if (HANDLE_GET_KIND(target_datatype) == HANDLE_KIND_BUILTIN) {
@@ -438,7 +438,7 @@ __CH4_INLINE__ int MPIDI_CH4U_do_accumulate(const void *origin_addr,
     }
 
     /* MPIDI_CS_ENTER(); */
-    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    OPA_incr_int(&MPIU_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
 
     MPIU_CH4U_REQUEST(sreq, areq.data_sz) = data_sz;
@@ -730,7 +730,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     am_hdr.win_id = MPIU_CH4U_WIN(win, win_id);
 
     /* MPIDI_CS_ENTER(); */
-    MPIU_CH4U_WIN(win, outstanding_ops)++;
+    OPA_incr_int(&MPIU_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
 
     mpi_errno = MPIDI_netmod_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_AM_CSWAP_REQ,
