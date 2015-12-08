@@ -108,11 +108,20 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;    \
-	    (_dt_true_lb)    = (_dt_ptr) ? (_dt_ptr)->true_lb : 0;      \
-	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
-                (_dt_ptr)->size : 0;                                    \
-	}								\
+            if (_dt_ptr)                                                \
+            {                                                           \
+                (_dt_contig_out) = (_dt_ptr)->is_contig;                \
+                (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
+                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                    (_dt_ptr)->size;                                    \
+            }                                                           \
+            else                                                        \
+            {                                                           \
+                (_dt_contig_out) = 1;                                   \
+                (_dt_true_lb)    = 0;                                   \
+                (_data_sz_out)   = 0;                                   \
+            }								\
+        }                                                               \
     })
 
 #define MPIDI_Datatype_get_size_dt_ptr(_count, _datatype,               \
@@ -160,9 +169,17 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
       {                                                                 \
 	  MPID_Datatype *_dt_ptr;					\
 	  MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	  (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;      \
-	  (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *     \
-              (_dt_ptr)->size : 0;                                      \
+          if (_dt_ptr)                                                  \
+          {                                                             \
+              (_dt_contig_out) = (_dt_ptr)->is_contig;                  \
+              (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *             \
+                  (_dt_ptr)->size;                                      \
+          }                                                             \
+          else                                                          \
+          {                                                             \
+              (_dt_contig_out) = 1;                                     \
+              (_data_sz_out)   = 0;                                     \
+          }                                                             \
       }                                                                 \
     })
 
@@ -198,10 +215,19 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	{								\
 	    MPID_Datatype *_dt_ptr;					\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1;    \
-	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
-                (_dt_ptr)->size : 0;                                    \
-	    (_dt_true_lb)    = (_dt_ptr) ? (_dt_ptr)->true_lb : 0;      \
+            if (_dt_ptr)                                                \
+            {                                                           \
+                (_dt_contig_out) = (_dt_ptr)->is_contig;                \
+                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                    (_dt_ptr)->size;                                    \
+                (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
+            }                                                           \
+            else                                                        \
+            {                                                           \
+                (_dt_contig_out) = 1;                                   \
+                (_data_sz_out)   = 0;                                   \
+                (_dt_true_lb)    = 0;                                   \
+            }                                                           \
 	}								\
     })
 
