@@ -13,6 +13,7 @@
 
 #include "ch4_impl.h"
 #include "ch4i_util.h"
+#include "ch4r_buf.h"
 #include "ch4r_callbacks.h"
 #include "mpl_uthash.h"
 
@@ -87,6 +88,10 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_CH4_Global.cmpl_list = NULL;
     OPA_store_int(&MPIDI_CH4_Global.exp_seq_no, 0);
     OPA_store_int(&MPIDI_CH4_Global.nxt_seq_no, 0);
+
+    MPIDI_CH4_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4I_BUF_POOL_NUM,
+                                                           MPIDI_CH4I_BUF_POOL_SZ);
+    MPIU_Assert(MPIDI_CH4_Global.buf_pool);
 
     mpi_errno = MPIDI_CH4_NM_reg_hdr_handler(MPIDI_CH4R_SEND,
                                              &MPIDI_CH4R_send_origin_cmpl_handler,
@@ -208,6 +213,7 @@ __CH4_INLINE__ void MPIDI_CH4R_finalize()
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
     MPL_HASH_CLEAR(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash);
+    MPIDI_CH4R_destroy_buf_pool(MPIDI_CH4_Global.buf_pool);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
 }
 

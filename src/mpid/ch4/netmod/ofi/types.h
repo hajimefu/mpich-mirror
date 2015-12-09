@@ -16,8 +16,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include "ofi_pre.h"
-#include "mpidch4r.h"
 #include "ch4_types.h"
+#include "mpidch4r.h"
 #include "fi_list.h"
 
 EXTERN_C_BEGIN

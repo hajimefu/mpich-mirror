@@ -51,7 +51,6 @@ typedef enum {
 
 typedef struct MPIDI_CH4R_Dev_sreq_t {
     /* persistent send fields */
-    struct MPID_Comm    *util_comm;
 } MPIDI_CH4R_Dev_sreq_t;
 
 typedef struct MPIDI_CH4R_Dev_rreq_t {
@@ -64,6 +63,7 @@ typedef struct MPIDI_CH4R_Dev_rreq_t {
     void         *reply_token;
     uint64_t      peer_req_ptr;
     uint64_t      match_req;
+    uint64_t      request;
 
     struct MPIDI_CH4R_Dev_rreq_t *prev, *next;
 } MPIDI_CH4R_Dev_rreq_t;
@@ -121,8 +121,7 @@ typedef struct MPIDI_CH4R_Dev_acc_req_t {
     MPI_Datatype result_datatype;
 } MPIDI_CH4R_Dev_acc_req_t;
 
-typedef struct MPIDI_CH4R_Devreq_t {
-
+typedef struct MPIDI_CH4R_req_t {
     union {
         MPIDI_CH4R_Dev_sreq_t sreq;
         MPIDI_CH4R_Dev_rreq_t rreq;
@@ -132,19 +131,25 @@ typedef struct MPIDI_CH4R_Devreq_t {
         MPIDI_CH4R_Dev_acc_req_t areq;
     };
 
-    void         *buffer;
-    uint64_t      count;
-    uint64_t      tag;
-
-    MPI_Datatype  datatype;
     struct iovec *iov;
 
-    uint64_t      status;
-    MPIDI_ptype   p_type;
-
-    struct MPIDI_CH4R_Devreq_t *next, *prev;
     void *cmpl_handler_fn;
-    int seq_no;
+    uint64_t seq_no;
+    uint64_t request;
+    uint64_t      status;
+    struct MPIDI_CH4R_req_t *next, *prev;
+
+} MPIDI_CH4R_req_t;
+
+typedef struct MPIDI_CH4R_Devreq_t {
+    MPIDI_CH4R_req_t *req;
+    MPIDI_ptype   p_type;
+    void         *buffer;
+
+    uint64_t      count;
+    uint64_t      tag;
+    MPI_Datatype  datatype;
+    struct MPID_Comm    *util_comm;
 
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL

@@ -91,13 +91,13 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
         MPIU_Memcpy((char *) buf + dt_true_lb, MPIDI_CH4R_REQUEST(rreq, buffer), nbytes);
     }
 
-    MPIDI_CH4R_REQUEST(rreq, status) &= ~MPIDI_CH4R_REQ_UNEXPECTED;
+    MPIDI_CH4R_REQUEST(rreq, req->status) &= ~MPIDI_CH4R_REQ_UNEXPECTED;
     MPIU_Free(MPIDI_CH4R_REQUEST(rreq, buffer));
         
     rreq->status.MPI_SOURCE = MPIDI_CH4R_get_source(MPIDI_CH4R_REQUEST(rreq, tag));
     rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4R_REQUEST(rreq, tag));
 
-    if (MPIDI_CH4R_REQUEST(rreq, status) & MPIDI_CH4R_REQ_PEER_SSEND) {
+    if (MPIDI_CH4R_REQUEST(rreq, req->status) & MPIDI_CH4R_REQ_PEER_SSEND) {
         mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
@@ -141,8 +141,8 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     /* MPIDI_CS_EXIT() */
 
     if (unexp_req) {
-        if (MPIDI_CH4R_REQUEST(unexp_req, status) & MPIDI_CH4R_REQ_BUSY) {
-            MPIDI_CH4R_REQUEST(unexp_req, status) |= MPIDI_CH4R_REQ_MATCHED;
+        if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_BUSY) {
+            MPIDI_CH4R_REQUEST(unexp_req, req->status) |= MPIDI_CH4R_REQ_MATCHED;
         } else {
             *request = unexp_req;
             mpi_errno = MPIDI_CH4I_handle_unexpected(buf, count, datatype,
@@ -173,7 +173,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
 
     dtype_add_ref_if_not_builtin(datatype);
     MPIDI_CH4R_REQUEST(rreq, tag) = match_bits;
-    MPIDI_CH4R_REQUEST(rreq, rreq.ignore) = mask_bits;
+    MPIDI_CH4R_REQUEST(rreq, req->rreq.ignore) = mask_bits;
     MPIDI_CH4R_REQUEST(rreq, datatype) = datatype;
 
     mpi_errno = MPIDI_CH4I_prepare_recv_req(buf, count, datatype, rreq);
@@ -185,7 +185,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
         MPIDI_CH4R_enqueue_posted(rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     } else {
-        MPIDI_CH4R_REQUEST(unexp_req, rreq.match_req) = (uint64_t) rreq;
+        MPIDI_CH4R_REQUEST(unexp_req, req->rreq.match_req) = (uint64_t) rreq;
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DO_IRECV);
@@ -248,6 +248,7 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
     MPIDI_CH4R_REQUEST(rreq, buffer) = (void *) buf;
     MPIDI_CH4R_REQUEST(rreq, count) = count;
     MPIDI_CH4R_REQUEST(rreq, datatype) = datatype;
+    MPIDI_CH4R_REQUEST(rreq, util_comm) = comm;
     MPIDI_CH4R_REQUEST(rreq, tag) =
         MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, rank, tag);
     rreq->partner_request = NULL;
@@ -281,15 +282,15 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
     }
 
     MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
-    MPIDI_CH4R_REQUEST(message, rreq.mrcv_buffer) = buf;
-    MPIDI_CH4R_REQUEST(message, rreq.mrcv_count) = count;
-    MPIDI_CH4R_REQUEST(message, rreq.mrcv_datatype) = datatype;
+    MPIDI_CH4R_REQUEST(message, req->rreq.mrcv_buffer) = buf;
+    MPIDI_CH4R_REQUEST(message, req->rreq.mrcv_count) = count;
+    MPIDI_CH4R_REQUEST(message, req->rreq.mrcv_datatype) = datatype;
     *rreqp = message;
     MPIR_Comm_add_ref(message->comm);
 
     /* MPIDI_CS_ENTER(); */
-    if (MPIDI_CH4R_REQUEST(message, status) & MPIDI_CH4R_REQ_BUSY) {
-        MPIDI_CH4R_REQUEST(message, status) |= MPIDI_CH4R_REQ_UNEXP_CLAIMED;
+    if (MPIDI_CH4R_REQUEST(message, req->status) & MPIDI_CH4R_REQ_BUSY) {
+        MPIDI_CH4R_REQUEST(message, req->status) |= MPIDI_CH4R_REQ_UNEXP_CLAIMED;
     }
     else {
         mpi_errno = MPIDI_CH4R_unexp_mrecv_cmpl_handler(message);
@@ -382,7 +383,7 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER(); */
-    found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4r.rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
+    found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4r.req->rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
     /* MPIDI_CS_EXIT(); */
 
     if (found) {

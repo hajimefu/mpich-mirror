@@ -477,12 +477,13 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_Comm *comm;
 
-    MPIDI_CH4R_finalize();
-
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
     MPIDI_CH4_NMI_MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
                                             MPI_SUM, MPIR_Process.comm_world, &errflag));
+
+    MPIDI_CH4R_finalize();
+
     if (do_scalable_ep) {
         FI_RC(fi_close((fid_t) G_TXC_TAG(0)), epclose);
         FI_RC(fi_close((fid_t) G_TXC_RMA(0)), epclose);

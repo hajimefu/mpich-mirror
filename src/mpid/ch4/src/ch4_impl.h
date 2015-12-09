@@ -12,6 +12,7 @@
 #define MPIDCH4_IMPL_H_INCLUDED
 
 #include "ch4_types.h"
+#include "ch4r_buf.h"
 #include <mpidch4.h>
 
 /* Forward declarations used to resolve dependencies in inline builds */
@@ -50,7 +51,10 @@ static inline MPID_Request *MPIDI_CH4R_create_req()
 {
     MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 2);
-    MPIDI_CH4R_REQUEST(req, status) = 0;
+    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
     return req;
 }
 
@@ -58,7 +62,10 @@ static inline MPID_Request *MPIDI_CH4R_create_win_req()
 {
     MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 1);
-    MPIDI_CH4R_REQUEST(req, status) = 0;
+    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
     return req;
 }
 

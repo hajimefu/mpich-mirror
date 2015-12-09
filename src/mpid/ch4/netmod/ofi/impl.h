@@ -585,6 +585,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIDI_CH4R_REQUEST(req, req) = NULL;
     MPID_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
@@ -608,6 +609,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIDI_CH4R_REQUEST(req, req) = NULL;
     MPID_cc_set(&req->cc, 0);
     req->cc_ptr  = &req->cc;
     MPIU_Object_set_ref(req, count);

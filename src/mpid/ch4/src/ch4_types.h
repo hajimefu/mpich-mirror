@@ -37,6 +37,10 @@
 
 #define MAX_NETMOD_CONTEXTS 8
 #define MAX_PROGRESS_HOOKS 4
+
+#define MPIDI_CH4I_BUF_POOL_NUM (1024)
+#define MPIDI_CH4I_BUF_POOL_SZ (256)
+
 typedef int (*progress_func_ptr_t) (int *made_progress);
 typedef struct progress_hook_slot {
     progress_func_ptr_t func_ptr;
@@ -185,6 +189,21 @@ typedef struct MPIDI_CH4_Comm_req_list_t {
     MPIDI_CH4R_Dev_rreq_t *unexp_list;
 } MPIDI_CH4_Comm_req_list_t;
 
+typedef struct MPIU_buf_pool_t {
+    int size;
+    int num;
+    void *memory_region;
+    struct MPIU_buf_pool_t *next;
+    struct MPIU_buf_t *head;
+    pthread_mutex_t lock;
+} MPIU_buf_pool_t;
+
+typedef struct MPIU_buf_t {
+    struct MPIU_buf_t *next;
+    MPIU_buf_pool_t *pool;
+    char data[];
+} MPIU_buf_t;
+
 typedef struct MPIDI_CH4_Global_t {
     MPID_Request *request_test;
     MPID_Comm *comm_test;
@@ -206,27 +225,13 @@ typedef struct MPIDI_CH4_Global_t {
     MPIDI_CH4R_Dev_rreq_t *posted_list;
     MPIDI_CH4R_Dev_rreq_t *unexp_list;
 #endif
-    MPIDI_CH4R_Devreq_t *cmpl_list;
+    MPIDI_CH4R_req_t *cmpl_list;
     OPA_int_t exp_seq_no;
     OPA_int_t nxt_seq_no;
     void *netmod_context[8];
+    MPIU_buf_pool_t *buf_pool;
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
-
-typedef struct MPIU_buf_pool_t {
-    int size;
-    int num;
-    void *memory_region;
-    struct MPIU_buf_pool_t *next;
-    struct MPIU_buf_t *head;
-    pthread_mutex_t lock;
-} MPIU_buf_pool_t;
-
-typedef struct MPIU_buf_t {
-    struct MPIU_buf_t *next;
-    MPIU_buf_pool_t *pool;
-    char data[];
-} MPIU_buf_t;
 
 #define MPIDI_CH4I_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
