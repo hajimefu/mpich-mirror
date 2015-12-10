@@ -43,6 +43,7 @@ typedef enum {
 #define MPIDI_CH4U_REQ_UNEXP_DQUED 	  (0x1 << 3)
 #define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
 #define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
+#define MPIDI_CH4U_REQ_MATCHED (0x1 << 6)
 
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
@@ -61,6 +62,7 @@ typedef struct MPIDI_CH4U_Dev_rreq_t {
     uint64_t      ignore;
     void         *reply_token;
     uint64_t      peer_req_ptr;
+    uint64_t      match_req;
 
     struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
 } MPIDI_CH4U_Dev_rreq_t;
@@ -70,14 +72,20 @@ typedef struct MPIDI_CH4U_Dev_put_req_t {
     uint64_t preq_ptr;
     void *reply_token;
     void *dt_iov;
+    void *origin_addr;
+    int origin_count;
+    MPI_Datatype origin_datatype;
+    int n_iov;
 } MPIDI_CH4U_Dev_put_req_t;
 
 typedef struct MPIDI_CH4U_Dev_get_req_t {
     uint64_t win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
-    int count;
     MPI_Datatype datatype;
+    int count;
+    int n_iov;
+    void *reply_token;
     void *dt_iov;
 } MPIDI_CH4U_Dev_get_req_t;
 
@@ -107,6 +115,8 @@ typedef struct MPIDI_CH4U_Dev_acc_req_t {
     MPI_Op op;
     void *result_addr;
     int result_count;
+    int do_get;
+    void *origin_addr;
     MPI_Datatype result_datatype;
 } MPIDI_CH4U_Dev_acc_req_t;
 
@@ -130,6 +140,10 @@ typedef struct MPIDI_CH4U_Devreq_t {
 
     uint64_t      status;
     MPIDI_ptype   p_type;
+
+    struct MPIDI_CH4U_Devreq_t *next, *prev;
+    void *cmpl_handler_fn;
+    int seq_no;
 
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
@@ -232,7 +246,7 @@ typedef struct MPIDI_CH4I_win_t {
     uint64_t win_id;
     void *mmap_addr;
     int64_t mmap_sz;
-    size_t outstanding_ops;
+    OPA_int_t outstanding_ops;
     MPI_Aint *sizes;
     void *msgQ;
     void *syncQ; /* todo */

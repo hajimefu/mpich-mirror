@@ -49,14 +49,23 @@ typedef enum {
     MPIDI_CH4U_AM_SSEND_ACK,
 
     MPIDI_CH4U_AM_WIN_CTRL,
+
     MPIDI_CH4U_AM_PUT_REQ,
     MPIDI_CH4U_AM_PUT_ACK,
+    MPIDI_CH4U_AM_PUT_IOV_REQ,
+    MPIDI_CH4U_AM_PUT_DAT_REQ,
+    MPIDI_CH4U_AM_PUT_IOV_ACK,
+
     MPIDI_CH4U_AM_GET_REQ,
     MPIDI_CH4U_AM_GET_ACK,
+
     MPIDI_CH4U_AM_ACC_REQ,
     MPIDI_CH4U_AM_ACC_ACK,
-    MPIDI_CH4U_AM_GET_ACC_REQ,
+    MPIDI_CH4U_AM_ACC_IOV_REQ,
+    MPIDI_CH4U_AM_ACC_DAT_REQ,
+    MPIDI_CH4U_AM_ACC_IOV_ACK,
     MPIDI_CH4U_AM_GET_ACC_ACK,
+
     MPIDI_CH4U_AM_CSWAP_REQ,
     MPIDI_CH4U_AM_CSWAP_ACK,
     MPIDI_CH4U_AM_FETCH_OP,
@@ -106,6 +115,7 @@ typedef struct MPIDI_CH4U_win_cntrl_msg_t {
 } MPIDI_CH4U_win_cntrl_msg_t;
 
 typedef struct MPIDI_CH4U_put_msg_t {
+    uint64_t win_id;
     uint64_t preq_ptr;
     uint64_t addr;
     uint64_t count;
@@ -113,11 +123,23 @@ typedef struct MPIDI_CH4U_put_msg_t {
     int n_iov;
 } MPIDI_CH4U_put_msg_t;
 
+typedef struct MPIDI_CH4U_put_iov_ack_msg_t {
+    uint64_t target_preq_ptr;
+    uint64_t origin_preq_ptr;
+} MPIDI_CH4U_put_iov_ack_msg_t;
+typedef MPIDI_CH4U_put_iov_ack_msg_t MPIDI_CH4U_acc_iov_ack_msg_t;
+
+typedef struct MPIDI_CH4U_put_dat_msg_t {
+    uint64_t preq_ptr;
+} MPIDI_CH4U_put_dat_msg_t;
+typedef MPIDI_CH4U_put_dat_msg_t MPIDI_CH4U_acc_dat_msg_t;
+
 typedef struct MPIDI_CH4U_put_ack_msg_t {
     uint64_t preq_ptr;
 } MPIDI_CH4U_put_ack_msg_t;
 
 typedef struct MPIDI_CH4U_get_req_msg_t {
+    uint64_t win_id;
     uint64_t greq_ptr;
     uint64_t addr;
     uint64_t count;
@@ -130,6 +152,7 @@ typedef struct MPIDI_CH4U_get_ack_msg_t {
 } MPIDI_CH4U_get_ack_msg_t;
 
 typedef struct MPIDI_CH4U_cswap_req_msg_t {
+    uint64_t win_id;
     uint64_t req_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
@@ -140,13 +163,16 @@ typedef struct MPIDI_CH4U_cswap_ack_msg_t {
 } MPIDI_CH4U_cswap_ack_msg_t;
 
 typedef struct MPIDI_CH4U_acc_req_msg_t {
+    uint64_t win_id;
     uint64_t req_ptr;
     int origin_count;
     MPI_Datatype origin_datatype;
     int target_count;
     MPI_Datatype target_datatype;
     MPI_Op op;
+    int do_get;
     uint64_t target_addr;
+    uint64_t result_data_sz;
     int n_iov;
 } MPIDI_CH4U_acc_req_msg_t;
 
@@ -180,6 +206,9 @@ typedef struct MPIDI_CH4_Global_t {
     MPIDI_CH4U_Dev_rreq_t *posted_list;
     MPIDI_CH4U_Dev_rreq_t *unexp_list;
 #endif
+    MPIDI_CH4U_Devreq_t *cmpl_list;
+    OPA_int_t exp_seq_no;
+    OPA_int_t nxt_seq_no;
     void *netmod_context[8];
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;

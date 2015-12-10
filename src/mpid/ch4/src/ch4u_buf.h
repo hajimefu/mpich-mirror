@@ -47,13 +47,14 @@ static inline MPIU_buf_pool_t *MPIU_CH4I_create_buf_pool(int num, int size,
 
     curr = (MPIU_buf_t *)buf_pool->memory_region;
     buf_pool->head = curr;
-    for (i = 0; i < size - 1; i++) {
+    for (i = 0; i < num - 1; i++) {
         next = (MPIU_buf_t *)((char *)curr + size + sizeof(MPIU_buf_t));
         curr->next = next;
         curr->pool = parent_pool ? parent_pool : buf_pool;
         curr = curr->next;
     }
     curr->next = NULL;
+    curr->pool = parent_pool ? parent_pool : buf_pool;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CREATE_BUF_POOL);
     return buf_pool;
 }
@@ -79,7 +80,7 @@ static inline void *MPIU_CH4I_get_head_buf(MPIU_buf_pool_t *pool)
 
     curr = pool->head;
     pool->head = curr->next;
-    buf = (char *) curr + sizeof (*curr);
+    buf = curr->data;
     
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_HEAD_BUF);
     return buf;    

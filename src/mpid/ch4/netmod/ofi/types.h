@@ -17,6 +17,8 @@
 #include <stdint.h>
 #include "ofi_pre.h"
 #include "mpidch4u.h"
+#include "ch4_types.h"
+#include "fi_list.h"
 
 EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
@@ -37,11 +39,12 @@ EXTERN_C_BEGIN
 #define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
-#define MPIDI_MAX_AM_HANDLERS 		(16)
+#define MPIDI_MAX_AM_HANDLERS 		(24)
 #define MPIDI_CACHELINE_SIZE        (64)
 #define MPIDI_IOV_MAX               1
 #define MPIDI_BUF_POOL_SZ  (1024)
 #define MPIDI_BUF_POOL_NUM (1024)
+#define MPIDI_NUM_CQ_BUFFERED (1024)
 
 /* Macros and inlines */
 /* match/ignore bit manipulation
@@ -253,6 +256,18 @@ typedef union MPIDI_cacheline_mutex_t{
     char cacheline[MPIDI_CACHELINE_SIZE];
 }MPIDI_cacheline_mutex_t __attribute__ ((aligned (MPIDI_CACHELINE_SIZE)));
 
+struct cq_list {
+    struct fi_cq_data_entry cq_entry;
+    fi_addr_t source;
+    struct slist_entry entry;
+};
+
+struct cq_buff_entry {
+    struct fi_cq_data_entry cq_entry;
+    fi_addr_t source;
+};
+
+
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
 typedef struct {
@@ -308,6 +323,10 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
     MPIU_buf_pool_t *buf_pool;
+    struct cq_buff_entry cq_buffered[MPIDI_NUM_CQ_BUFFERED];
+    int cq_buff_head;
+    int cq_buff_tail;
+    struct slist cq_buff_list;
 } MPIDI_Global_t;
 
 typedef struct {

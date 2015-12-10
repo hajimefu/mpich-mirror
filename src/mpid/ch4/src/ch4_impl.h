@@ -46,38 +46,18 @@ static inline int MPIDI_CH4I_get_context_index(uint64_t context_id)
     return gen_id;
 }
 
-extern MPIU_Object_alloc_t MPIDI_Request_mem;
-static inline MPID_Request *MPIDI_CH4I_request_alloc_and_init(int count)
-{
-    MPID_Request *req;
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
-    MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPID_cc_set(&req->cc, 1);
-    req->cc_ptr = &req->cc;
-    MPIU_Object_set_ref(req, count);
-    req->greq_fns = NULL;
-    MPIR_STATUS_SET_COUNT(req->status, 0);
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->status.MPI_SOURCE = MPI_UNDEFINED;
-    req->status.MPI_TAG = MPI_UNDEFINED;
-    req->status.MPI_ERROR = MPI_SUCCESS;
-    req->comm = NULL;
-    MPIR_REQUEST_CLEAR_DBG(req);
-    return req;
-}
-
-
 static inline MPID_Request *MPIDI_CH4I_create_req()
 {
-    MPID_Request *req = MPIDI_CH4I_request_alloc_and_init(2);
+    MPID_Request *req = MPIDI_netmod_request_create();
+    MPIU_Object_set_ref(req, 2);
     MPIU_CH4U_REQUEST(req, status) = 0;
     return req;
 }
 
 static inline MPID_Request *MPIDI_CH4I_create_win_req()
 {
-    MPID_Request *req = MPIDI_CH4I_request_alloc_and_init(1);
+    MPID_Request *req = MPIDI_netmod_request_create();
+    MPIU_Object_set_ref(req, 1);
     MPIU_CH4U_REQUEST(req, status) = 0;
     return req;
 }
@@ -128,10 +108,20 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	    (_dt_true_lb)    = (_dt_ptr)->true_lb;			\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
-	}								\
+            if (_dt_ptr)                                                \
+            {                                                           \
+                (_dt_contig_out) = (_dt_ptr)->is_contig;                \
+                (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
+                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                    (_dt_ptr)->size;                                    \
+            }                                                           \
+            else                                                        \
+            {                                                           \
+                (_dt_contig_out) = 1;                                   \
+                (_dt_true_lb)    = 0;                                   \
+                (_data_sz_out)   = 0;                                   \
+            }								\
+        }                                                               \
     })
 
 #define MPIDI_Datatype_get_size_dt_ptr(_count, _datatype,               \
@@ -146,7 +136,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
 	}								\
     })
 
@@ -160,8 +151,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
       {								\
        MPID_Datatype *_dt_ptr;					\
        MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-       (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-       }							\
+       (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1; \
+      }                                                         \
       })
 
 #define MPIDI_Datatype_check_contig_size(_datatype,_count,              \
@@ -178,8 +169,17 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
       {                                                                 \
 	  MPID_Datatype *_dt_ptr;					\
 	  MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	  (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	  (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+          if (_dt_ptr)                                                  \
+          {                                                             \
+              (_dt_contig_out) = (_dt_ptr)->is_contig;                  \
+              (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *             \
+                  (_dt_ptr)->size;                                      \
+          }                                                             \
+          else                                                          \
+          {                                                             \
+              (_dt_contig_out) = 1;                                     \
+              (_data_sz_out)   = 0;                                     \
+          }                                                             \
       }                                                                 \
     })
 
@@ -194,7 +194,8 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
         {                                                               \
             MPID_Datatype *_dt_ptr;                                     \
             MPID_Datatype_get_ptr((_datatype), (_dt_ptr));              \
-            (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
+            (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+                (_dt_ptr)->size : 0;                                    \
         }                                                               \
     })
 
@@ -214,9 +215,19 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
 	{								\
 	    MPID_Datatype *_dt_ptr;					\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_dt_contig_out) = (_dt_ptr)->is_contig;			\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) * (_dt_ptr)->size; \
-	    (_dt_true_lb)    = (_dt_ptr)->true_lb;			\
+            if (_dt_ptr)                                                \
+            {                                                           \
+                (_dt_contig_out) = (_dt_ptr)->is_contig;                \
+                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                    (_dt_ptr)->size;                                    \
+                (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
+            }                                                           \
+            else                                                        \
+            {                                                           \
+                (_dt_contig_out) = 1;                                   \
+                (_data_sz_out)   = 0;                                   \
+                (_dt_true_lb)    = 0;                                   \
+            }                                                           \
 	}								\
     })
 
@@ -278,14 +289,9 @@ static inline uint64_t MPIDI_CH4I_init_recvtag(uint64_t * mask_bits,
     return match_bits;
 }
 
-static inline int MPIDI_CH4I_valid_group_rank(int         lpid,
-                                              MPID_Group *grp)
+static inline int MPIDI_CH4I_valid_comm_rank(int rank, MPID_Comm *comm)
 {
-    int size = grp->size;
-    int z;
-
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
-    return (z < size);
+    return (rank < comm->local_size);
 }
 
 #define MPIDI_CH4I_PROGRESS()                                   \
@@ -330,8 +336,7 @@ static inline int MPIDI_CH4I_valid_group_rank(int         lpid,
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
         if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_START && \
-            !MPIDI_CH4I_valid_group_rank(target_rank,                   \
-                                         MPIU_CH4U_WIN(win, sync).sc.group)) \
+            !MPIDI_CH4I_valid_comm_rank(target_rank, win->comm_ptr))    \
             MPIR_ERR_SETANDSTMT(mpi_errno,                              \
                                 MPI_ERR_RMA_SYNC,                       \
                                 goto fn_fail,                           \
