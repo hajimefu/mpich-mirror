@@ -164,6 +164,10 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 #include "ch4_shm.h"
 #endif
 
+/* Declare request functions here so netmods can refer to
+   them in the NETMOD_DIRECT mode */
+#include "ch4_request.h"
+
 /* Include netmod and shm implementations  */
 /* Prototypes are split from impl to avoid */
 /* circular dependencies                   */
@@ -176,7 +180,6 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 #include "ch4_probe.h"
 #include "ch4_send.h"
 #include "ch4_recv.h"
-#include "ch4_request.h"
 #include "ch4_comm.h"
 #include "ch4_win.h"
 #include "ch4_rma.h"
