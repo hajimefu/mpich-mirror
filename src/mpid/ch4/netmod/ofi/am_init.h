@@ -74,6 +74,7 @@ static inline int MPIDI_CH4_NM_init(int rank, int size, int appnum, int *tag_ub,
     hints->domain_attr->av_type = FI_AV_UNSPEC;
     hints->domain_attr->mr_mode = FI_MR_SCALABLE;
     hints->tx_attr->op_flags = FI_DELIVERY_COMPLETE | FI_COMPLETION;
+    hints->tx_attr->iov_limit = 3; /* control header, am header, am payload */
     hints->rx_attr->op_flags = FI_COMPLETION;
     hints->ep_attr->type = FI_EP_RDM;
 
