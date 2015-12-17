@@ -103,7 +103,7 @@ static inline int MPIDI_CH4U_build_nodemap(int             myrank,
     qsort(node_map, sz, sizeof(node_map_t), MPIDI_CH4U_cmpfunc);
 
     idx=0;
-    out_nodemap[0]=0;
+    out_nodemap[node_map[0].rank]=idx;
     for(i=1;i<sz;i++) {
         if(node_map[i-1].node_id != node_map[i].node_id)
             idx++;
