@@ -47,6 +47,10 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
+        else if (*request) {
+            MPIU_CH4_REQUEST(*request, is_local) = 1;
+            MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), is_local) = 0;
+        }
 
         MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), anysource_partner_request) = *request;
     }
@@ -109,6 +113,9 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
+
+        MPIU_CH4_REQUEST(*request, is_local) = 1;
+        MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), is_local) = 0;
 
         MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), anysource_partner_request) = *request;
     }
@@ -176,6 +183,8 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
         }
 
         MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(rreq, anysource_partner_request), anysource_partner_request) = rreq;
+        MPIU_CH4_REQUEST(rreq, is_local) = 1;
+        MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(rreq, anysource_partner_request), is_local) = 0;
     }
     else {
         int r;
@@ -287,6 +296,10 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
+        else if (*request) {
+            MPIU_CH4_REQUEST(*request, is_local) = 1;
+            MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), is_local) = 0;
+       }
 
         MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(*request, anysource_partner_request), anysource_partner_request) = *request;
     }

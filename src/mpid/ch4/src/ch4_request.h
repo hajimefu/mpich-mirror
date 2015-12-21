@@ -52,6 +52,12 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
+
+    /* persistent with ANY_SOURCE */
+    if (MPIU_CH4_REQUEST(req, anysource_partner_request) != NULL) {
+        MPID_Request_release(MPIU_CH4_REQUEST(req, anysource_partner_request));
+    }
+
     MPIDI_netmod_request_release(req);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_RELEASE);
 }

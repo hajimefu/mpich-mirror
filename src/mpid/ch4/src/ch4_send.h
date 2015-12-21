@@ -243,11 +243,18 @@ __CH4_INLINE__ int MPIDI_Startall(int count, MPID_Request * requests[])
     for(i=0; i<count; i++)
     {
         /* This is sub-optimal, can we do better? */
-        if(MPIU_CH4_REQUEST(requests[i], is_local))
-            MPIDI_shm_startall(1, &requests[i]);
+        if (MPIU_CH4_REQUEST(requests[i], anysource_partner_request)) {
+            mpi_errno = MPIDI_shm_startall(1, &requests[i]);
+            if (mpi_errno == MPI_SUCCESS) {
+                mpi_errno = MPIDI_netmod_startall(1, &MPIU_CH4_REQUEST(requests[i], anysource_partner_request));
+                MPIU_CH4_REQUEST(requests[i]->partner_request, anysource_partner_request) = MPIU_CH4_REQUEST(requests[i], anysource_partner_request)->partner_request;
+                MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(requests[i], anysource_partner_request)->partner_request, anysource_partner_request) = requests[i]->partner_request;
+            }
+        }
+        else if(MPIU_CH4_REQUEST(requests[i], is_local))
+            mpi_errno = MPIDI_shm_startall(1, &requests[i]);
         else
-            MPIDI_netmod_startall(1, &requests[i]);
-        mpi_errno = MPI_SUCCESS;
+            mpi_errno = MPIDI_netmod_startall(1, &requests[i]);
     }
 #endif
     if (mpi_errno != MPI_SUCCESS) {
@@ -286,6 +293,7 @@ __CH4_INLINE__ int MPIDI_Send_init(const void *buf,
         mpi_errno = MPIDI_netmod_send_init(buf, count, datatype, rank, tag,
                                            comm, context_offset, request);
     if(mpi_errno == MPI_SUCCESS) MPIU_CH4_REQUEST(*request, is_local) = r;
+    MPIU_CH4_REQUEST(*request, anysource_partner_request) = NULL;
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
