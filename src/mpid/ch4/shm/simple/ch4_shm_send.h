@@ -340,7 +340,30 @@ static inline int MPIDI_shm_rsend_init(const void *buf,
                                        MPID_Comm * comm,
                                        int context_offset, MPID_Request ** request)
 {
-    MPIU_Assert(0);
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *sreq = NULL;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_RSEND_INIT);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_RSEND_INIT);
+    MPIDI_Request_create_sreq(sreq);
+    MPIU_Object_set_ref(sreq, 1);
+    MPID_cc_set(&(sreq)->cc, 0);
+    sreq->kind = MPID_PREQUEST_SEND;
+    sreq->comm = comm;
+    MPIR_Comm_add_ref(comm);
+    ENVELOPE_SET(REQ_SHM(sreq), comm->rank, tag, comm->context_id + context_offset);
+    REQ_SHM(sreq)->user_buf = (char *) buf;
+    REQ_SHM(sreq)->user_count = count;
+    REQ_SHM(sreq)->dest = rank;
+    REQ_SHM(sreq)->datatype = datatype;
+    REQ_SHM(sreq)->type = TYPE_READY;
+    *request = sreq;
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_RSEND_INIT);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
     return MPI_SUCCESS;
 }
 
