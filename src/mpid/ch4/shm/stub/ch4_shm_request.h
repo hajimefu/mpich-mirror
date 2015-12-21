@@ -44,4 +44,11 @@ static inline MPID_Request *MPIDI_shm_request_create(void)
     return req;
 }
 
+static inline int MPIDI_shm_anysource_matched(MPID_Request *req,
+                                              int *is_cancelled)
+{
+    MPIU_Assert(0);
+    return 0;
+}
+
 #endif /* SHM_REQUEST_H_INCLUDED */

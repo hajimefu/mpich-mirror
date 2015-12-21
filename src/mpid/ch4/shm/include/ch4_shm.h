@@ -71,6 +71,7 @@ typedef struct MPIDI_shm_funcs {
     /* Request allocation routines */
     MPIDI_shm_request_create_t request_create;
     MPIDI_shm_request_release_t request_release;
+    MPIDI_shm_anysource_matched_t anysource_matched;
 } MPIDI_shm_funcs_t;
 
 typedef struct MPIDI_shm_native_funcs {

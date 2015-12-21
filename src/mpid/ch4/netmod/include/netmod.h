@@ -67,6 +67,7 @@ typedef struct MPIDI_netmod_funcs {
     /* Request allocation routines */
     MPIDI_netmod_request_create_t request_create;
     MPIDI_netmod_request_release_t request_release;
+    MPIDI_netmod_anysource_matched_t anysource_matched;
 } MPIDI_netmod_funcs_t;
 
 typedef struct MPIDI_netmod_native_funcs {
