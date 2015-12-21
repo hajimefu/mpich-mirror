@@ -151,23 +151,4 @@ static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
     return mpi_errno;
 }
 
-static inline int MPIDI_netmod_anysource_matched(MPID_Request * rreq,
-                                                 int * is_cancelled)
-{
-    int mpi_errno = MPI_SUCCESS;
-    ssize_t ret;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_ANYSOURCE_MATCHED);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_ANYSOURCE_MATCHED);
-
-    mpi_errno = MPIDI_netmod_cancel_recv(rreq);
-
-    *is_cancelled = MPIR_STATUS_GET_CANCEL_BIT(rreq->status);
-
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_ANYSOURCE_MATCHED);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
 #endif /* NETMOD_AM_OFI_REQUEST_H_INCLUDED */

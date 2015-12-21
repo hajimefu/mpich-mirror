@@ -43,7 +43,7 @@ static inline int shm_do_irecv(void *buf,
 
     MPIDI_Request_create_rreq(rreq);
     if (unlikely(rank == MPI_PROC_NULL)) {
-        MPIR_Status_set_procnull(rreq->status);
+        MPIR_Status_set_procnull(&(rreq->status));
         *request = rreq;
         goto fn_exit;
     }
@@ -159,7 +159,6 @@ static inline int MPIDI_shm_imrecv(void *buf,
     MPID_Datatype *dt_ptr;
     MPID_Request *rreq = NULL, *sreq = NULL;
     int rank, tag, context_id;
-    int context_offset = 0;
 
     MPIDI_STATE_DECL(MPIDI_SHM_IMRECV);
     MPIDI_FUNC_ENTER(MPIDI_SHM_IMRECV);

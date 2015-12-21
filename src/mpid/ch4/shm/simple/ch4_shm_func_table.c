@@ -46,8 +46,7 @@ MPIDI_shm_funcs_t MPIDI_shm_simple_funcs = {
     MPIDI_shm_comm_create,
     MPIDI_shm_comm_destroy,
     MPIDI_shm_request_create,
-    MPIDI_shm_request_release,
-    MPIDI_shm_anysource_matched
+    MPIDI_shm_request_release
 };
 
 MPIDI_shm_native_funcs_t MPIDI_shm_native_simple_funcs = {

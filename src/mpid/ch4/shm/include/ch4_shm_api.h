@@ -227,10 +227,6 @@ MPIDI_SHM_API(MPID_Request *,request_create,
 MPIDI_SHM_API(void,request_release,
                  (MPID_Request *) req);
 
-MPIDI_NETMOD_API(int, anysource_matched,
-                 (MPID_Request *) req,
-                 (int *)          is_cancelled);
-
 MPIDI_SHM_API_NATIVE(int,send,
                         (const void *)    buf,
                         (int)             count,

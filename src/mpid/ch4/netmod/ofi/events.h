@@ -80,20 +80,20 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
 
-#ifdef MPIDI_BUILD_CH4_SHM
     if (MPIU_CH4_REQUEST(rreq, anysource_partner_request))
     {
-        int is_shm_request_cancelled = 0;
+        int continue_matching = 0;
 
-        MPIDI_shm_anysource_matched(MPIU_CH4_REQUEST(rreq, anysource_partner_request), &is_shm_request_cancelled);
+        MPIDI_CH4U_anysource_matched(MPIU_CH4_REQUEST(rreq, anysource_partner_request), MPIDI_CH4U_NETMOD, &continue_matching);
 
         /* It is always possible to cancel a request on shm side w/o an aux thread */
 
          /* Decouple requests */
         MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(rreq, anysource_partner_request), anysource_partner_request) = NULL;
         MPIU_CH4_REQUEST(rreq, anysource_partner_request) = NULL;
+
+        if (!continue_matching) goto fn_exit;
     }
-#endif /* MPIDI_BUILD_CH4_SHM */
 
     if (REQ_OFI(rreq, pack_buffer)) {
         last = count;

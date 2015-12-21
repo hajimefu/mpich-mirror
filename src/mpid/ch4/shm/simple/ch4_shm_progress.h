@@ -45,7 +45,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         /* traverse posted receive queue */
         MPID_Request *req = MPIDI_shm_recvq_posted.head;
         MPID_Request *prev_req = NULL;
-        int is_netmod_request_cancelled = 0;
+        int continue_matching = 0;
         char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
         int type = in_cell ? cell->pkt.mpich.type : REQ_SHM(sreq)->type;
         MPID_Request* pending = in_cell ? cell->pending : REQ_SHM(sreq)->pending;
@@ -71,22 +71,19 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
 
                 /* Request matched */
 
-                is_netmod_request_cancelled = 0;
+                continue_matching = 0;
 
                 if (MPIU_CH4_REQUEST(req, anysource_partner_request))
                 {
-                    MPIDI_netmod_anysource_matched(MPIU_CH4_REQUEST(req, anysource_partner_request),
-                                                   &is_netmod_request_cancelled);
+                    MPIDI_CH4U_anysource_matched(MPIU_CH4_REQUEST(req, anysource_partner_request),
+                                                 MPIDI_CH4U_SHM, &continue_matching);
                     MPIDI_Request_release(MPIU_CH4_REQUEST(req, anysource_partner_request));
 
                     /* Decouple requests */
                     MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(req, anysource_partner_request), anysource_partner_request) = NULL;
                     MPIU_CH4_REQUEST(req, anysource_partner_request) = NULL;
 
-                    if (!is_netmod_request_cancelled)
-                    {
-                        break;
-                    }
+                    if (!continue_matching) break;
                 }
 
                 char *recv_buffer = (char *) REQ_SHM(req)->user_buf;

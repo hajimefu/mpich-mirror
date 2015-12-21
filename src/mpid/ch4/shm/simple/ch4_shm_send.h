@@ -359,12 +359,8 @@ static inline int MPIDI_shm_rsend_init(const void *buf,
     REQ_SHM(sreq)->type = TYPE_READY;
     *request = sreq;
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_RSEND_INIT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
-    return MPI_SUCCESS;
 }
 
 #undef FCNAME

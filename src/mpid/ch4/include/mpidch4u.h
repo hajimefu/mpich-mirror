@@ -21,5 +21,6 @@
 #include "ch4u_win.h"
 #include "ch4u_proc.h"
 #include "ch4u_buf.h"
+#include "ch4u_request.h"
 
 #endif /* !defined(MPICH_MPIDCH4U_H_INCLUDED) */

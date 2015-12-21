@@ -44,8 +44,7 @@ MPIDI_netmod_funcs_t MPIDI_netmod_ofi_funcs = {
     MPIDI_netmod_comm_create,
     MPIDI_netmod_comm_destroy,
     MPIDI_netmod_request_create,
-    MPIDI_netmod_request_release,
-    MPIDI_netmod_anysource_matched
+    MPIDI_netmod_request_release
 };
 
 MPIDI_netmod_native_funcs_t MPIDI_netmod_native_ofi_funcs = {

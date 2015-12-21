@@ -94,6 +94,12 @@ enum {
     MPIDI_CH4I_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
 };
 
+/* Enum for calling types between netmod and shm */
+enum {
+    MPIDI_CH4U_NETMOD = 0,
+    MPIDI_CH4U_SHM = 1
+};
+
 typedef struct MPIDI_CH4U_AM_Hdr_t {
     uint64_t msg_tag;
 } MPIDI_CH4U_AM_Hdr_t;

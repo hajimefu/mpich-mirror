@@ -54,23 +54,4 @@ static inline MPID_Request *MPIDI_netmod_request_create(void)
     return req;
 }
 
-static inline int MPIDI_netmod_anysource_matched(MPID_Request * rreq,
-                                                 int * is_cancelled)
-{
-    int mpi_errno = MPI_SUCCESS;
-    ssize_t ret;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_ANYSOURCE_MATCHED);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_ANYSOURCE_MATCHED);
-
-    mpi_errno = MPIDI_netmod_cancel_recv(rreq);
-
-    *is_cancelled = MPIR_STATUS_GET_CANCEL_BIT(rreq->status);
-
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_ANYSOURCE_MATCHED);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
 #endif /* NETMOD_OFI_REQUEST_H_INCLUDED */
