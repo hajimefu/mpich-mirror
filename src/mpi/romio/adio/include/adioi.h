@@ -219,8 +219,6 @@ struct ADIOI_Fns_struct {
 #define ADIOI_READ                26
 #define ADIOI_WRITE               27
 
-#define ADIOI_MIN(a, b) ((a) < (b) ? (a) : (b))
-#define ADIOI_MAX(a, b) ((a) > (b) ? (a) : (b))
 /* thanks stackoverflow:
  * http://stackoverflow.com/questions/3982348/implement-generic-swap-macro-in-c */
 #define ADIOI_SWAP(x, y, T) do { T temp##x##y = x; x = y; y = temp##x##y; } while (0);
@@ -942,7 +940,6 @@ char *ADIOI_Strdup( const char * );
     MPI_Info_delete((info_),((char*)key_str_))
 
 
-/* Provide a fallback snprintf for systems that do not have one */
 /* Define attribute as empty if it has no definition */
 #ifndef ATTRIBUTE
 #ifdef HAVE_GCC_ATTRIBUTE
@@ -951,19 +948,6 @@ char *ADIOI_Strdup( const char * );
 #define ATTRIBUTE(a)
 #endif
 #endif
-
-/* style: allow:snprintf:1 sig:0 */
-
-#ifdef HAVE_SNPRINTF
-#define ADIOI_Snprintf snprintf
-/* Sometimes systems don't provide prototypes for snprintf */
-#ifdef NEEDS_SNPRINTF_DECL
-extern int snprintf( char *, size_t, const char *, ... ) ATTRIBUTE((format(printf,3,4)));
-#endif
-#else
-int ADIOI_Snprintf( char *str, size_t size, const char *format, ... ) 
-     ATTRIBUTE((format(printf,3,4)));
-#endif /* HAVE_SNPRINTF */
 
 #define FPRINTF fprintf
 
@@ -1086,5 +1070,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset);
 ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
 
 #endif
+
+#include "mpl.h"
 
 #endif  /* ADIOI_INCLUDE */
