@@ -299,7 +299,7 @@ typedef struct {
 } MPIDI_Devdt_t;
 
 typedef struct {
-    uint64_t pad[32 / 8];
+    uint64_t pad[64 / 8];
 } MPIDI_Devgpid_t;
 
 #define MPID_DEV_REQUEST_DECL    MPIDI_Devreq_t  dev;

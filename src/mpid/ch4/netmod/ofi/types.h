@@ -330,7 +330,7 @@ typedef struct {
 } MPIDI_Global_t;
 
 typedef struct {
-    char addr[30];
+    char addr[62];
     MPID_Node_id_t node;
 } MPIDI_OFIGpid_t;
 #define GPID_OFI(req) ((MPIDI_OFIGpid_t*)(req)->dev.pad)
