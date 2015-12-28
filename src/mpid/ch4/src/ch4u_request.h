@@ -36,7 +36,7 @@ static inline int MPIDI_CH4U_anysource_matched(MPID_Request *rreq, int caller, i
         if (MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
             /* If the request is cancelled, copy the status object from the
              * partner request */
-            rreq->status = MPIU_CH4_REQUEST(rreq, anysource_partner_request)->status;
+            rreq->status = MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq)->status;
         }
 #endif
         *continue_matching = 1;

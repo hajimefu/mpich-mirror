@@ -158,7 +158,9 @@ typedef struct {
     /* Anysource handling. Netmod and shm specific requests are cross
      * referenced. This must be present all of the time to avoid lots of extra
      * ifdefs in the code. */
+#ifdef MPIDI_BUILD_CH4_SHM
     struct MPID_Request *anysource_partner_request;
+#endif
 
     union {
         /* The first fields are used by the CH4U apis */
@@ -180,6 +182,12 @@ typedef struct {
 #define MPIU_CH4U_REQUEST(req,field)        (((req)->dev.ch4.ch4u).field)
 #define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4.ch4u).netmod_am)
 #define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.ch4.netmod)
+
+#ifdef MPIDI_BUILD_CH4_SHM
+#define MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)  (((req)->dev).anysource_partner_request)
+#else
+#define MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)  NULL
+#endif
 
 typedef struct MPIDI_CH4I_win_info_t {
     uint64_t base_addr;

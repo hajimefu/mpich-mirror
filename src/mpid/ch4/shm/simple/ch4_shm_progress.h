@@ -73,15 +73,15 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
 
                 continue_matching = 0;
 
-                if (MPIU_CH4_REQUEST(req, anysource_partner_request))
+                if (MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req))
                 {
-                    MPIDI_CH4U_anysource_matched(MPIU_CH4_REQUEST(req, anysource_partner_request),
+                    MPIDI_CH4U_anysource_matched(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req),
                                                  MPIDI_CH4U_SHM, &continue_matching);
-                    MPIDI_Request_release(MPIU_CH4_REQUEST(req, anysource_partner_request));
+                    MPIDI_Request_release(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req));
 
                     /* Decouple requests */
-                    MPIU_CH4_REQUEST(MPIU_CH4_REQUEST(req, anysource_partner_request), anysource_partner_request) = NULL;
-                    MPIU_CH4_REQUEST(req, anysource_partner_request) = NULL;
+                    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)) = NULL;
+                    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 
                     if (!continue_matching) break;
                 }

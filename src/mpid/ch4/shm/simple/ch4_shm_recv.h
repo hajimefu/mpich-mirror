@@ -57,7 +57,7 @@ static inline int shm_do_irecv(void *buf,
     REQ_SHM(rreq)->datatype = datatype;
     REQ_SHM(rreq)->next = NULL;
     REQ_SHM(rreq)->segment_ptr = NULL;
-    MPIU_CH4_REQUEST(rreq, anysource_partner_request) = NULL;
+    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq) = NULL;
     MPIR_STATUS_SET_COUNT(rreq->status, 0);
     if( !dt_contig ) {
         REQ_SHM(rreq)->segment_ptr = MPID_Segment_alloc( );

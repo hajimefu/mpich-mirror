@@ -54,8 +54,8 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
 
     /* TODO - Should both of these calls be going to the netmod? Should one go to shm? */
-    if (NULL != MPIU_CH4_REQUEST(req, anysource_partner_request)) {
-        MPIDI_netmod_request_release(MPIU_CH4_REQUEST(req, anysource_partner_request));
+    if (NULL != MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)) {
+        MPIDI_netmod_request_release(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req));
     }
 
     MPIDI_netmod_request_release(req);
@@ -88,7 +88,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_Request_create(void)
     req = MPIDI_netmod_request_create();
 
 #ifdef MPIDI_BUILD_CH4_SHM
-    MPIU_CH4_REQUEST(req, anysource_partner_request) = NULL;
+    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 #endif
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_CREATE);
