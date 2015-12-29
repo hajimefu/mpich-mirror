@@ -55,41 +55,6 @@ typedef void (*MPIU_Thread_func_t) (void *data);
 #  error MPICH_THREAD_GRANULARITY_LOCK_FREE not implemented yet
 #endif
 
-typedef struct {
-    int thread_provided;        /* Provided level of thread support */
-
-#if defined(MPICH_IS_THREADED) && !defined(MPICH_TLS_SPECIFIER)
-    MPIU_Thread_tls_t thread_storage;   /* Id for perthread data */
-#endif
-
-    /* This is a special case for is_thread_main, which must be
-     * implemented even if MPICH itself is single threaded.  */
-#if MPICH_THREAD_LEVEL >= MPI_THREAD_SERIALIZED
-    MPIU_Thread_id_t master_thread;     /* Thread that started MPI */
-#endif
-
-#if defined MPICH_IS_THREADED
-    int isThreaded;             /* Set to true if user requested
-                                 * THREAD_MULTIPLE */
-#endif                          /* MPICH_IS_THREADED */
-
-    /* Define the mutex values used for each kind of implementation */
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL || \
-    MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
-    MPIU_Thread_mutex_t global_mutex;
-    MPIU_Thread_mutex_t memalloc_mutex; /* for MPIU_{Malloc,Free,Calloc} */
-#endif
-
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
-    MPIU_Thread_mutex_t handle_mutex;
-    MPIU_Thread_mutex_t msgq_mutex;
-    MPIU_Thread_mutex_t completion_mutex;
-    MPIU_Thread_mutex_t ctx_mutex;
-    MPIU_Thread_mutex_t pmi_mutex;
-#endif
-} MPIR_Thread_info_t;
-extern MPIR_Thread_info_t MPIR_ThreadInfo;
-
 #define MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX      MPIR_ThreadInfo.global_mutex
 #define MPIR_THREAD_POBJ_HANDLE_MUTEX         MPIR_ThreadInfo.handle_mutex
 #define MPIR_THREAD_POBJ_MSGQ_MUTEX           MPIR_ThreadInfo.msgq_mutex
