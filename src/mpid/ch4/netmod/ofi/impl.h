@@ -16,7 +16,7 @@
 #include "mpidch4u.h"
 #include "ch4_impl.h"
 #include "iovec_util.h"
-
+EXTERN_C_BEGIN
 /* The purpose of this hacky #ifdef is to tag                */
 /* select MPI util functions with always inline.  A better   */
 /* approach would be to declare them inline in a header file */
@@ -765,4 +765,5 @@ extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
 extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
 extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
 
+EXTERN_C_END
 #endif
