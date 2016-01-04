@@ -133,8 +133,11 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
         }
     }
 #endif
+  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
+  fn_fail:
+    goto fn_exit;
 }
 
 
