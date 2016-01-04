@@ -54,7 +54,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request) >=
                             (offsetof(MPID_Request, dev.ch4.ch4u.netmod_am) +
-                             sizeof(MPIDI_netmod_am_ofi_amrequest_t)));
+                             sizeof(MPIDI_netmod_ofi_amrequest_t)));
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT);
@@ -145,15 +145,15 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     }
 
     FI_RC(fi_av_insert(MPIDI_Global.av, table, size, mapped_table, 0ULL, NULL), avmap);
-    MPIDI_Map_create(&MPIDI_Global.win_map);
-    MPIDI_Map_create(&MPIDI_Global.comm_map);
+    MPIDI_OFI_Map_create(&MPIDI_Global.win_map);
+    MPIDI_OFI_Map_create(&MPIDI_Global.comm_map);
 
     comm = MPIR_Process.comm_self;
     comm->rank = 0;
     comm->remote_size = 1;
     comm->local_size = 1;
 
-    mpi_errno = MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
+    mpi_errno = MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     COMM_OFI(comm).vcrt->vcr_table[0].addr_idx = rank;
     COMM_OFI(comm).vcrt->vcr_table[0].is_local = 1;
@@ -163,7 +163,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     comm->remote_size = size;
     comm->local_size = size;
     
-    mpi_errno = MPIDI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
+    mpi_errno = MPIDI_OFI_VCRT_Create(comm->remote_size, &COMM_OFI(comm).vcrt);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Global.buf_pool = 
@@ -261,8 +261,8 @@ static inline int MPIDI_netmod_finalize(void)
     MPIU_Free(MPIDI_Addr_table);
     MPIU_Free(MPIDI_Global.node_map);
 
-    MPIDI_Map_destroy(MPIDI_Global.win_map);
-    MPIDI_Map_destroy(MPIDI_Global.comm_map);
+    MPIDI_OFI_Map_destroy(MPIDI_Global.win_map);
+    MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
     MPIU_CH4U_destroy_buf_pool(MPIDI_Global.buf_pool);
 
     PMI_Finalize();
@@ -378,7 +378,7 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
                                                            int size, const int lpids[])
 {
     int i;
-    MPIDI_VCRT_Create(size, &COMM_OFI(newcomm_ptr).vcrt);
+    MPIDI_OFI_VCRT_Create(size, &COMM_OFI(newcomm_ptr).vcrt);
 
     for (i = 0; i < size; i++)
         COMM_OFI(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];

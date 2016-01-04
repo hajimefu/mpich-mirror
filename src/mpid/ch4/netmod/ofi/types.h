@@ -564,29 +564,15 @@ typedef struct {
 } MPIDI_OFIWin_t;
 #define WIN_OFI(win) ((MPIDI_OFIWin_t*)(win)->dev.pad)
 
-#define MPID_LKEY_START 16384
-
 extern MPIDI_Addr_table_t *MPIDI_Addr_table;
 extern MPIDI_Global_t MPIDI_Global;
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern MPID_Request MPIDI_Request_direct[];
 
-/* Utility functions */
-extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
-extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
-extern void  MPIDI_OFI_Map_create(void **map);
-extern void  MPIDI_OFI_Map_destroy(void *map);
-extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
-extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
-extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
-extern int   MPIDI_OFI_control_dispatch(void *buf);
-extern void  MPIDI_OFI_Index_datatypes();
-extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
-extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
-extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
-extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
-
 extern int   MPIR_Datatype_init_names(void);
+
+#define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
+#define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

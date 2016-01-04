@@ -107,7 +107,21 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     }                                                 \
   })
 
-#define MPIDI_Win_request_alloc_and_init(req,count,extra)       \
+#define MPIDI_AM_Win_request_complete(req)                 \
+    ({							\
+	int count;					\
+	MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)	\
+		    == MPID_REQUEST);			\
+	MPIU_Object_release_ref(req, &count);		\
+	MPIU_Assert(count >= 0);			\
+	if (count == 0)					\
+	{						\
+	    MPIU_Free(req->noncontig);			\
+	    MPIDI_Win_request_tls_free(req);		\
+	}						\
+    })
+
+#define MPIDI_AM_Win_request_alloc_and_init(req,count,extra)       \
   ({                                                            \
     MPIDI_Win_request_tls_alloc(req);                           \
     MPIU_Assert(req != NULL);                                   \
@@ -219,6 +233,27 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
+#define FI_RC_RETRY_AM(FUNC,STR)					\
+	do {								\
+		ssize_t _ret;                                           \
+		do {							\
+			_ret = FUNC;                                    \
+			if(likely(_ret==0)) break;			\
+			MPIR_ERR_##CHKANDJUMP4(_ret != -FI_EAGAIN,	\
+					       mpi_errno,		\
+					       MPI_ERR_OTHER,		\
+					       "**ofi_"#STR,		\
+					       "**ofi_"#STR" %s %d %s %s", \
+					       __SHORT_FILE__,		\
+					       __LINE__,		\
+					       FCNAME,			\
+					       fi_strerror(-_ret));	\
+				mpi_errno = MPIDI_netmod_progress_do_queue(NULL);\
+				if(mpi_errno != MPI_SUCCESS)		\
+					MPIR_ERR_POP(mpi_errno);	\
+		} while (_ret == -FI_EAGAIN);				\
+	} while (0)
+
 #define FI_RC_RETRY2(FUNC1,FUNC2,STR)                       \
     do {                                                    \
     ssize_t _ret;                                           \
@@ -305,6 +340,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define REQ_CREATE(req)                           \
   ({                                              \
     req = MPIDI_Request_alloc_and_init(2);        \
+  })
+
+#define WINREQ_CREATE(req)				\
+  ({						\
+    req = MPIDI_Win_request_alloc_and_init(1);	\
   })
 
 #define SENDREQ_CREATE_LW(req)                     \
@@ -709,5 +749,20 @@ static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
   if(dt->map != &dt->__map)
     MPIU_Free(dt->map);
 }
+
+/* Utility functions */
+extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
+extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
+extern void  MPIDI_OFI_Map_create(void **map);
+extern void  MPIDI_OFI_Map_destroy(void *map);
+extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
+extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
+extern int   MPIDI_OFI_control_dispatch(void *buf);
+extern void  MPIDI_OFI_Index_datatypes();
+extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
 
 #endif

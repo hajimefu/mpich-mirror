@@ -12,7 +12,7 @@
 #define NETMOD_AM_OFI_AM_H_INCLUDED
 
 #include "impl.h"
-#include "request.h"
+#include "am_request.h"
 
 static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
 

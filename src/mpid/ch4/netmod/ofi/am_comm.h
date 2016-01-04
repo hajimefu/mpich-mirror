@@ -69,7 +69,7 @@ static inline void dup_vcrt(struct MPIDI_VCRT *src_vcrt,
      * VCRT */
 
     if (!vcrt_offset)
-        MPIDI_VCRT_Create(vcrt_size, dest_vcrt);
+        MPIDI_OFI_VCRT_Create(vcrt_size, dest_vcrt);
 
     if (mapper->type == MPIR_COMM_MAP_DUP) {
         for (i = 0; i < src_comm_size; i++)
@@ -226,7 +226,7 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
     alloc_tables(comm);
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_Map_set(MPIDI_Global.comm_map, mapid, comm);
+    MPIDI_OFI_Map_set(MPIDI_Global.comm_map, mapid, comm);
     MPIDI_CH4U_init_comm(comm);
 
     /* Do not handle intercomms */
@@ -249,14 +249,14 @@ static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
     MPIDI_CH4U_destroy_comm(comm);
 
     mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_Map_erase(MPIDI_Global.comm_map, mapid);
-    mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm).vcrt);
+    MPIDI_OFI_Map_erase(MPIDI_Global.comm_map, mapid);
+    mpi_errno = MPIDI_OFI_VCRT_Release(COMM_OFI(comm).vcrt);
 
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     if (comm->comm_kind == MPID_INTERCOMM) {
-        mpi_errno = MPIDI_VCRT_Release(COMM_OFI(comm).local_vcrt);
+        mpi_errno = MPIDI_OFI_VCRT_Release(COMM_OFI(comm).local_vcrt);
 
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);

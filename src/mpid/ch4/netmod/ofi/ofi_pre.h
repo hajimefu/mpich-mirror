@@ -76,8 +76,4 @@ typedef struct {
     }util;
 } MPIDI_netmod_ofi_request_t;
 
-typedef struct {
-    int dummy;
-} MPIDI_netmod_ofi_amrequest_t;
-
 #endif

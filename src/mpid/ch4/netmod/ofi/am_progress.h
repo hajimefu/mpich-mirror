@@ -12,7 +12,7 @@
 #define NETMOD_AM_OFI_PROGRESS_H_INCLUDED
 
 #include "impl.h"
-#include "request.h"
+#include "am_request.h"
 
 static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
 
@@ -129,7 +129,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
 {
     int mpi_errno = MPI_SUCCESS;
     size_t done = 0, curr_len, rem = 0;
-    MPIDI_netmod_am_ofi_amrequest_t *am_req;
+    MPIDI_netmod_ofi_amrequest_t *am_req;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_RDMA_READ);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_RDMA_READ);
 
@@ -137,8 +137,8 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
     while (done != data_sz) {
         curr_len = MIN(rem, MPIDI_Global.max_send);
 
-        MPIU_Assert(sizeof(MPIDI_netmod_am_ofi_amrequest_t) <= MPIDI_BUF_POOL_SZ);
-        am_req = (MPIDI_netmod_am_ofi_amrequest_t *)MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        MPIU_Assert(sizeof(MPIDI_netmod_ofi_amrequest_t) <= MPIDI_BUF_POOL_SZ);
+        am_req = (MPIDI_netmod_ofi_amrequest_t *)MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
         MPIU_Assert(am_req);
 
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
@@ -413,13 +413,13 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
-    MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
+    MPIDI_netmod_ofi_amrequest_t *ofi_req;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
 
-    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
+    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_ofi_amrequest_t, context);
     sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
     msg_hdr = &ofi_req->req_hdr->msg_hdr;
     MPIDI_netmod_am_ofi_req_complete(sreq);
@@ -550,12 +550,12 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
 {
     MPID_Request *rreq;
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_netmod_am_ofi_amrequest_t *ofi_req;
+    MPIDI_netmod_ofi_amrequest_t *ofi_req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
 
-    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_am_ofi_amrequest_t, context);
+    ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_ofi_amrequest_t, context);
     ofi_req->req_hdr->lmt_cntr--;
     if (ofi_req->req_hdr->lmt_cntr)
         goto fn_exit;

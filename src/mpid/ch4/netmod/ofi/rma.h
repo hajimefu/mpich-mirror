@@ -204,7 +204,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_put_get(int                 ori
 
     o_size=sizeof(iovec_t);
     t_size=sizeof(rma_iov_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size);
     *winreq = req;
 
     req->noncontig->buf.iov.put_get.originv = (iovec_t*)&req->noncontig->buf.iov_store[0];
@@ -244,7 +244,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_accumulate(int                 
 
     o_size=sizeof(ioc_t);
     t_size=sizeof(rma_ioc_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size);
     *winreq = req;
 
     req->noncontig->buf.iov.accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
@@ -288,7 +288,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_get_accumulate(int             
     o_size=sizeof(ioc_t);
     t_size=sizeof(rma_ioc_t);
     r_size=sizeof(ioc_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size+r_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size+r_size);
     *winreq = req;
 
     req->noncontig->buf.iov.get_accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
