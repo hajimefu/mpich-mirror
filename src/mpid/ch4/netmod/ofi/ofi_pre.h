@@ -25,6 +25,8 @@
 #include "ofi_pre_common.h"
 
 typedef struct fid_ep *fid_base_ep_t;
+typedef struct fid_stx *fid_stx_t;
+typedef struct fid_ep *fid_srx_t;
 typedef struct fid_ep *fid_ep_t;
 typedef struct fid_fabric *fid_fabric_t;
 typedef struct fid_domain *fid_domain_t;

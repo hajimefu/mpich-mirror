@@ -98,7 +98,7 @@ static inline MPID_Request *MPIDI_netmod_request_create(void)
     return req;
 }
 
-static inline void MPIDI_netmod_ofi_req_complete(MPID_Request *req)
+static inline void MPIDI_netmod_request_complete(MPID_Request *req)
 {
     int count;
     MPID_cc_decr(req->cc_ptr, &count);

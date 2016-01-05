@@ -62,10 +62,10 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define G_TXC_RMA(x) MPIDI_Global.ep
 #define G_TXC_MSG(x) MPIDI_Global.ep
 #define G_TXC_CTR(x) MPIDI_Global.ep
-#define G_RXC_TAG(x) MPIDI_Global.ep
-#define G_RXC_RMA(x) MPIDI_Global.ep
-#define G_RXC_MSG(x) MPIDI_Global.ep
-#define G_RXC_CTR(x) MPIDI_Global.ep
+#define G_RXC_TAG(x) MPIDI_Global.ep_srx
+#define G_RXC_RMA(x) MPIDI_Global.ep_srx
+#define G_RXC_MSG(x) MPIDI_Global.ep_srx
+#define G_RXC_CTR(x) MPIDI_Global.ep_srx
 #endif
 #ifdef MPIDI_USE_AV_TABLE
 #define COMM_TO_PHYS(comm,rank)  ((fi_addr_t)(uintptr_t)COMM_TO_INDEX(comm,rank))

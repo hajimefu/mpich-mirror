@@ -277,6 +277,11 @@ typedef struct {
     fid_domain_t domain;
     fid_fabric_t fabric;
     fid_base_ep_t ep;
+    fid_base_ep_t am_ep;
+    fid_stx_t     ep_stx;
+    fid_stx_t     am_ep_stx;
+    fid_srx_t     ep_srx;
+    fid_srx_t     am_ep_srx;
 #ifdef MPIDI_USE_SCALABLE_ENDPOINTS
     MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
 #endif

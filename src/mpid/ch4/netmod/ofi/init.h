@@ -16,13 +16,20 @@
 #include "pmi.h"
 
 static inline int MPIDI_Choose_provider(info_t * prov, info_t ** prov_use);
-static inline int MPIDI_Create_endpoint(info_t        *prov_use,
-                                        fid_domain_t   domain,
-                                        fid_cq_t       p2p_cq,
-                                        fid_cntr_t     rma_ctr,
-                                        fid_av_t       av,
-                                        fid_base_ep_t *ep,
-                                        int            index);
+static inline int MPIDI_Create_endpoint(info_t          *prov_use,
+                                        fid_domain_t     domain,
+                                        fid_cq_t         p2p_cq,
+                                        fid_cq_t         am_cq,
+                                        fid_cntr_t       rma_ctr,
+                                        fid_av_t         av,
+                                        fid_base_ep_t   *ep,
+                                        fid_base_ep_t   *am_ep,
+                                        fid_stx_t       *ep_stx,
+                                        fid_stx_t       *am_ep_stx,
+                                        fid_srx_t       *ep_srx,
+                                        fid_srx_t       *am_ep_srx,
+                                        int              index);
+
 #define CHOOSE_PROVIDER(prov, prov_use,errstr)                          \
     do {                                                                \
     info_t *p = prov;                                                   \
@@ -142,19 +149,21 @@ static inline int MPIDI_netmod_init(int         rank,
     /* FI_COMPLETION:  Selective completions of RMA ops                         */
     /* FI_EP_RDM:  Reliable datagram                                            */
     /* ------------------------------------------------------------------------ */
-    hints->addr_format = FI_FORMAT_UNSPEC;
-    hints->domain_attr->threading = FI_THREAD_DOMAIN;
+    hints->addr_format                   = FI_FORMAT_UNSPEC;
+    hints->domain_attr->threading        = FI_THREAD_DOMAIN;
     hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
-    hints->domain_attr->data_progress = FI_PROGRESS_MANUAL;
-    hints->domain_attr->resource_mgmt = FI_RM_ENABLED;
-    hints->domain_attr->av_type = FI_AV_UNSPEC;
-    hints->domain_attr->mr_mode = FI_MR_SCALABLE;
-    hints->tx_attr->op_flags = FI_DELIVERY_COMPLETE | FI_COMPLETION;
-    hints->tx_attr->msg_order = FI_ORDER_SAS;
-    hints->tx_attr->comp_order = FI_ORDER_NONE;
-    hints->rx_attr->op_flags = FI_COMPLETION;
-    hints->rx_attr->total_buffered_recv = 0; /* FI_RM_ENABLED ensures buffering of unexpected messages */
-    hints->ep_attr->type = FI_EP_RDM;
+    hints->domain_attr->data_progress    = FI_PROGRESS_MANUAL;
+    hints->domain_attr->resource_mgmt    = FI_RM_ENABLED;
+    hints->domain_attr->av_type          = FI_AV_UNSPEC;
+    hints->domain_attr->mr_mode          = FI_MR_SCALABLE;
+    hints->tx_attr->op_flags             = FI_DELIVERY_COMPLETE | FI_COMPLETION;
+    hints->tx_attr->msg_order            = FI_ORDER_SAS;
+    hints->tx_attr->comp_order           = FI_ORDER_NONE;
+    hints->rx_attr->op_flags             = FI_COMPLETION;
+    hints->rx_attr->total_buffered_recv  = 0; /* FI_RM_ENABLED ensures buffering of unexpected messages */
+    hints->ep_attr->type                 = FI_EP_RDM;
+    hints->ep_attr->rx_ctx_cnt           = FI_SHARED_CONTEXT;
+    hints->ep_attr->tx_ctx_cnt           = FI_SHARED_CONTEXT;
 
     /* ------------------------------------------------------------------------ */
     /* fi_getinfo:  returns information about fabric  services for reaching a   */
@@ -237,10 +246,17 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ------------------------------------------------------------------------ */
     memset(&cq_attr, 0, sizeof(cq_attr));
     cq_attr.format = FI_CQ_FORMAT_TAGGED;
-    FI_RC(fi_cq_open(MPIDI_Global.domain,       /* In:  Domain Object                */
-                     &cq_attr,  /* In:  Configuration object         */
-                     &MPIDI_Global.p2p_cq,      /* Out: CQ Object                    */
-                     NULL), opencq);    /* In:  Context for cq events        */
+    FI_RC(fi_cq_open(MPIDI_Global.domain,  /* In:  Domain Object                */
+                     &cq_attr,             /* In:  Configuration object         */
+                     &MPIDI_Global.p2p_cq, /* Out: CQ Object                    */
+                     NULL), opencq);       /* In:  Context for cq events        */
+
+    memset(&cq_attr, 0, sizeof(cq_attr));
+    cq_attr.format = FI_CQ_FORMAT_DATA;
+    FI_RC(fi_cq_open(MPIDI_Global.domain,
+                     &cq_attr,
+                     &MPIDI_Global.am_cq,
+                     NULL), opencq);
 
     /* ------------------------------------------------------------------------ */
     /* Construct:  Counters                                                     */
@@ -284,9 +300,16 @@ static inline int MPIDI_netmod_init(int         rank,
     MPIDI_NM_MPI_RC_POP(MPIDI_Create_endpoint(prov_use,
                                               MPIDI_Global.domain,
                                               MPIDI_Global.p2p_cq,
+                                              MPIDI_Global.am_cq,
                                               MPIDI_Global.rma_ctr,
                                               MPIDI_Global.av,
-                                              &MPIDI_Global.ep, 0));
+                                              &MPIDI_Global.ep,
+                                              &MPIDI_Global.am_ep,
+                                              &MPIDI_Global.ep_stx,
+                                              &MPIDI_Global.am_ep_stx,
+                                              &MPIDI_Global.ep_srx,
+                                              &MPIDI_Global.am_ep_srx,
+                                              0));
 
     /* ---------------------------------- */
     /* Get our endpoint name and publish  */
@@ -381,6 +404,35 @@ static inline int MPIDI_netmod_init(int         rank,
     /* ---------------------------------- */
     MPIDI_NM_MPI_RC_POP(MPIDI_OFI_VCRT_Create(comm_world->remote_size, &COMM_OFI(comm_world).vcrt));
 
+    /* ---------------------------------- */
+    /* Initialize Active Message          */
+    /* ---------------------------------- */
+    MPIDI_Global.buf_pool = MPIU_CH4U_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
+    mpi_errno             = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+    slist_init(&MPIDI_Global.cq_buff_list);
+    MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
+    optlen                    = MPIDI_MIN_MSG_SZ;
+    FI_RC(fi_setopt(&MPIDI_Global.ep->fid,
+                    FI_OPT_ENDPOINT,
+                    FI_OPT_MIN_MULTI_RECV,
+                    &optlen, sizeof(optlen)), setopt);
+
+    for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {
+        MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_AM_BUFF_SZ);
+        MPIU_Assert(MPIDI_Global.am_bufs[i]);
+        MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
+        MPIDI_Global.am_iov[i].iov_len   = MPIDI_AM_BUFF_SZ;
+        MPIDI_Global.am_msg[i].msg_iov   = &MPIDI_Global.am_iov[i];
+        MPIDI_Global.am_msg[i].desc      = NULL;
+        MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
+        MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_msg[i];
+        MPIDI_Global.am_msg[i].iov_count = 1;
+        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i],
+                               FI_MULTI_RECV | FI_COMPLETION), prepost);
+    }
+
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
@@ -448,16 +500,17 @@ static inline int MPIDI_netmod_finalize(void)
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_Comm *comm;
 
+    MPIDI_CH4U_finalize();
+
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
     MPIDI_NM_MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
                                             MPI_SUM, MPIR_Process.comm_world, &errflag));
 
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-
     for (i = 0; i < MPIDI_Global.num_ctrlblock; i++)
-        FI_RC(fi_cancel((fid_t) G_RXC_MSG(0), &MPIDI_Global.control_req[i].context), ctrlcancel);
+        FI_RC(fi_cancel(&((G_RXC_MSG(0))->fid), &MPIDI_Global.control_req[i].context), ctrlcancel);
 
+#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
     FI_RC(fi_close((fid_t) G_TXC_TAG(0)), epclose);
     FI_RC(fi_close((fid_t) G_TXC_RMA(0)), epclose);
     FI_RC(fi_close((fid_t) G_TXC_MSG(0)), epclose);
@@ -467,17 +520,24 @@ static inline int MPIDI_netmod_finalize(void)
     FI_RC(fi_close((fid_t) G_RXC_RMA(0)), epclose);
     FI_RC(fi_close((fid_t) G_RXC_MSG(0)), epclose);
     FI_RC(fi_close((fid_t) G_RXC_CTR(0)), epclose);
-#else /* MPIDI_USE_SCALABLE_ENDPOINTS not defined */
-
-    for (i = 0; i < MPIDI_Global.num_ctrlblock; i++)
-        FI_RC(fi_cancel((fid_t) MPIDI_Global.ep, &MPIDI_Global.control_req[i].context), ctrlcancel);
-
 #endif
-    FI_RC(fi_close((fid_t) MPIDI_Global.ep), epclose);
-    FI_RC(fi_close((fid_t) MPIDI_Global.av), avclose);
-    FI_RC(fi_close((fid_t) MPIDI_Global.p2p_cq), cqclose);
-    FI_RC(fi_close((fid_t) MPIDI_Global.rma_ctr), cqclose);
-    FI_RC(fi_close((fid_t) MPIDI_Global.domain), domainclose);
+
+    FI_RC(fi_close(&MPIDI_Global.ep->fid),        epclose);
+    FI_RC(fi_close(&MPIDI_Global.ep_srx->fid),    epclose);
+    FI_RC(fi_close(&MPIDI_Global.ep_stx->fid),    epclose);
+
+    FI_RC(fi_close(&MPIDI_Global.am_ep->fid),     epclose);
+    FI_RC(fi_close(&MPIDI_Global.am_ep_srx->fid), epclose);
+    FI_RC(fi_close(&MPIDI_Global.am_ep_stx->fid), epclose);
+
+    FI_RC(fi_close(&MPIDI_Global.av->fid),        avclose);
+    FI_RC(fi_close(&MPIDI_Global.p2p_cq->fid),    cqclose);
+    FI_RC(fi_close(&MPIDI_Global.am_cq->fid),     cqclose);
+    FI_RC(fi_close(&MPIDI_Global.rma_ctr->fid),   cqclose);
+    FI_RC(fi_close(&MPIDI_Global.domain->fid),    domainclose);
+
+    for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++)
+        MPIU_Free(MPIDI_Global.am_bufs[i]);
 
     /* --------------------------------------- */
     /* Free comm world VCRT and addr table     */
@@ -502,6 +562,7 @@ static inline int MPIDI_netmod_finalize(void)
 
     MPIDI_OFI_Map_destroy(MPIDI_Global.win_map);
     MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
+    MPIU_CH4U_destroy_buf_pool(MPIDI_Global.buf_pool);
 
     PMI_Finalize();
 
@@ -653,15 +714,23 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 #define FUNCNAME MPIDI_Create_endpoint
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_Create_endpoint(info_t        *prov_use,
-                                        fid_domain_t   domain,
-                                        fid_cq_t       p2p_cq,
-                                        fid_cntr_t     rma_ctr,
-                                        fid_av_t       av,
-                                        fid_base_ep_t *ep,
-                                        int            index)
+static inline int MPIDI_Create_endpoint(info_t          *prov_use,
+                                        fid_domain_t     domain,
+                                        fid_cq_t         p2p_cq,
+                                        fid_cq_t         am_cq,
+                                        fid_cntr_t       rma_ctr,
+                                        fid_av_t         av,
+                                        fid_base_ep_t   *ep,
+                                        fid_base_ep_t   *am_ep,
+                                        fid_stx_t       *ep_stx,
+                                        fid_stx_t       *am_ep_stx,
+                                        fid_srx_t       *ep_srx,
+                                        fid_srx_t       *am_ep_srx,
+                                        int              index)
 {
     int mpi_errno = MPI_SUCCESS;
+    tx_attr_t tx_attr;
+    rx_attr_t rx_attr;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
@@ -670,7 +739,6 @@ static inline int MPIDI_Create_endpoint(info_t        *prov_use,
     FI_RC(fi_scalable_ep(domain, prov_use, ep, NULL), ep);
     FI_RC(fi_scalable_ep_bind(*ep, (fid_t) av, 0), bind);
 
-    tx_attr_t tx_attr;
     tx_attr = *prov_use->tx_attr;
     tx_attr.caps = FI_TAGGED;
     tx_attr.caps |= FI_DELIVERY_COMPLETE;
@@ -700,7 +768,6 @@ static inline int MPIDI_Create_endpoint(info_t        *prov_use,
     FI_RC(fi_tx_context(*ep, index + 3, &tx_attr, &G_TXC_CTR(index), NULL), ep);
     FI_RC(fi_ep_bind(G_TXC_CTR(index), (fid_t) rma_ctr, FI_WRITE | FI_READ), bind);
 
-    rx_attr_t rx_attr;
     rx_attr = *prov_use->rx_attr;
     rx_attr.caps = FI_TAGGED;
     rx_attr.caps |= FI_DELIVERY_COMPLETE;
@@ -741,11 +808,30 @@ static inline int MPIDI_Create_endpoint(info_t        *prov_use,
     /* ---------------------------------------------------------- */
     /* Bind the CQs, counters,  and AV to the endpoint object     */
     /* ---------------------------------------------------------- */
+
+    tx_attr=*prov_use->tx_attr;
+    rx_attr=*prov_use->rx_attr;
+    /* "Normal Endpoint */
+    FI_RC(fi_srx_context(domain,&rx_attr,ep_srx,NULL), ep);
+    FI_RC(fi_stx_context(domain,&tx_attr,ep_stx,NULL), ep);
     FI_RC(fi_endpoint(domain, prov_use, ep, NULL), ep);
-    FI_RC(fi_ep_bind(*ep, (fid_t) p2p_cq, FI_SEND | FI_RECV | FI_SELECTIVE_COMPLETION), bind);
-    FI_RC(fi_ep_bind(*ep, (fid_t) rma_ctr, FI_READ | FI_WRITE), bind);
-    FI_RC(fi_ep_bind(*ep, (fid_t) av, 0), bind);
+    FI_RC(fi_ep_bind(*ep, &((*ep_srx)->fid),  0), bind);
+    FI_RC(fi_ep_bind(*ep, &((*ep_stx)->fid),  0), bind);
+    FI_RC(fi_ep_bind(*ep, &p2p_cq->fid,  FI_SEND | FI_RECV | FI_SELECTIVE_COMPLETION), bind);
+    FI_RC(fi_ep_bind(*ep, &rma_ctr->fid, FI_READ | FI_WRITE), bind);
+    FI_RC(fi_ep_bind(*ep, &av->fid,      0), bind);
     FI_RC(fi_enable(*ep), ep_enable);
+
+    /* "AM" Endpoint */
+    FI_RC(fi_srx_context(domain,&rx_attr,am_ep_srx,NULL), ep);
+    FI_RC(fi_stx_context(domain,&tx_attr,am_ep_stx,NULL), ep);
+    FI_RC(fi_endpoint(domain, prov_use, am_ep, NULL), ep);
+    FI_RC(fi_ep_bind(*am_ep, &((*am_ep_srx)->fid),  0), bind);
+    FI_RC(fi_ep_bind(*am_ep, &((*am_ep_stx)->fid), FI_SEND | FI_RECV | FI_SELECTIVE_COMPLETION), bind);
+    FI_RC(fi_ep_bind(*am_ep, &am_cq->fid, FI_SEND | FI_RECV | FI_SELECTIVE_COMPLETION), bind);
+    FI_RC(fi_ep_bind(*am_ep, &av->fid,      0), bind);
+    FI_RC(fi_enable(*am_ep), ep_enable);
+
 #endif /* MPIDI_USE_SCALABLE_ENDPOINTS */
 
   fn_exit:
