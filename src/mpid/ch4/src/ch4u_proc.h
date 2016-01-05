@@ -20,10 +20,10 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    if (NULL == MPIU_CH4U_COMM(comm,locality)) {
+    if (NULL == MPIDI_CH4R_COMM(comm,locality)) {
         ret = 0;
     } else {
-        ret = MPIU_CH4U_COMM(comm,locality)[rank].is_local;
+        ret = MPIDI_CH4R_COMM(comm,locality)[rank].is_local;
 
         MPIU_DBG_MSG_FMT(CH4, VERBOSE, (MPIU_DBG_FDEST,
                     "Rank %d %s local", rank, ret ? "is" : "is not"));
@@ -44,7 +44,7 @@ static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPID_Comm * comm)
     MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    ret = MPIU_CH4U_COMM(comm,locality)[rank].index;
+    ret = MPIDI_CH4R_COMM(comm,locality)[rank].index;
 #else
     ret = -1;
 #endif
@@ -121,7 +121,7 @@ static inline int MPIDI_CH4U_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id
 {
     int mpi_errno = MPI_SUCCESS;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    *id_p = MPIDI_CH4_Global.node_map[MPIU_CH4U_COMM(comm,locality)[rank].index];
+    *id_p = MPIDI_CH4_Global.node_map[MPIDI_CH4R_COMM(comm,locality)[rank].index];
 #else
     /* If the locality info isn't being built, this function shouldn't be getting called. */
     MPIR_ERR_SET(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_locality");

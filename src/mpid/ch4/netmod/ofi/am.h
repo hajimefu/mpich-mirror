@@ -300,7 +300,7 @@ static inline int MPIDI_netmod_send_amv(int rank,
         am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = (char *)MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *)MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -316,7 +316,7 @@ static inline int MPIDI_netmod_send_amv(int rank,
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
     else
-        MPIU_CH4U_release_buf(am_hdr_buf);
+        MPIDI_CH4R_release_buf(am_hdr_buf);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AMV);
     return mpi_errno;
@@ -349,7 +349,7 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
         am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *) MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -365,7 +365,7 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
     else
-        MPIU_CH4U_release_buf(am_hdr_buf);
+        MPIDI_CH4R_release_buf(am_hdr_buf);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AMV_HDR);
     return mpi_errno;
@@ -433,7 +433,7 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
         am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
-        am_hdr_buf = (char *) MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_hdr_buf = (char *) MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
         is_allocated = 0;
     }
 
@@ -449,7 +449,7 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
     else
-        MPIU_CH4U_release_buf(am_hdr_buf);
+        MPIDI_CH4R_release_buf(am_hdr_buf);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AMV_REPLY);
     return mpi_errno;

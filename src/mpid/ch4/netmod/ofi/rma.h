@@ -343,7 +343,7 @@ static inline int do_put(const void    *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_PUT);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
                                                            target_count,
                                                            target_rank,
                                                            origin_datatype,
@@ -498,7 +498,7 @@ static inline int do_get(void          *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_GET);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
                                                            target_rank,
                                                            origin_datatype,target_datatype,
                                                            &req,&flags,&ep,sigreq));
@@ -806,7 +806,7 @@ static inline int do_accumulate(const void    *origin_addr,
 
     MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
                                                               target_count,
                                                               target_rank,
                                                               origin_datatype,
@@ -960,7 +960,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
 
     MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
                                                                   target_count,
                                                                   result_count,
                                                                   target_rank,

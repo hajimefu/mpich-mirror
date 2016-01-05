@@ -20,38 +20,38 @@ EXTERN_C_BEGIN
 typedef std::map<uint64_t,void *>  uint64_map;
 void MPIDI_CH4I_map_create(void **_map)
 {
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     *_map = (void *)MPIU_Malloc(sizeof(uint64_map));
     new(*_map) uint64_map();
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
 }
 
 void MPIDI_CH4I_map_destroy(void *_map)
 {
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     m->~uint64_map();
     MPIU_Free(_map);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
 }
 
 void MPIDI_CH4I_map_set(void     *_map,
                        uint64_t  id,
                        void     *val)
 {
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     (*m)[id] = val;
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
 }
 
 void MPIDI_CH4I_map_erase(void     *_map,
                          uint64_t  id)
 {
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     m->erase(id);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
 }
 
 void *MPIDI_CH4I_map_lookup(void     *_map,
@@ -60,12 +60,12 @@ void *MPIDI_CH4I_map_lookup(void     *_map,
     uint64_map *m = (uint64_map *)_map;
     void       *rc;
 
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     if(m->find(id) == m->end())
         rc = MPIDI_CH4I_MAP_NOT_FOUND;
     else
         rc = (*m)[id];
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_THREAD_PROGRESS_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     return rc;
 }
 

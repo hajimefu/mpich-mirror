@@ -63,7 +63,7 @@ static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
     if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
         MPIU_Free(req_hdr->am_hdr);
     }
-    MPIU_CH4U_release_buf(req_hdr);
+    MPIDI_CH4R_release_buf(req_hdr);
     AMREQ_OFI(sreq, req_hdr) = NULL;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
     return;
@@ -121,7 +121,7 @@ static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
 
     if (AMREQ_OFI(sreq, req_hdr) == NULL) {
         req_hdr = (MPIDI_am_ofi_req_hdr_t *)
-            MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+            MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
         MPIU_Assert(req_hdr);
         AMREQ_OFI(sreq, req_hdr) = req_hdr;
 

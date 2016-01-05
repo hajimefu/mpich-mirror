@@ -136,7 +136,7 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
         curr_len = MIN(rem, MPIDI_Global.max_send);
 
         MPIU_Assert(sizeof(MPIDI_netmod_ofi_amrequest_t) <= MPIDI_BUF_POOL_SZ);
-        am_req = (MPIDI_netmod_ofi_amrequest_t *)MPIU_CH4U_get_buf(MPIDI_Global.buf_pool);
+        am_req = (MPIDI_netmod_ofi_amrequest_t *)MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
         MPIU_Assert(am_req);
 
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
@@ -598,7 +598,7 @@ static inline int MPIDI_netmod_handle_read_completion(struct fi_cq_data_entry *c
     MPIDI_netmod_request_complete(rreq);
     ofi_req->req_hdr->cmpl_handler_fn(rreq);
   fn_exit:
-    MPIU_CH4U_release_buf((void *)ofi_req);
+    MPIDI_CH4R_release_buf((void *)ofi_req);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     return mpi_errno;
   fn_fail:

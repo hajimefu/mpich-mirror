@@ -228,7 +228,7 @@ typedef struct MPIU_buf_t {
     char data[];
 } MPIU_buf_t;
 
-#define MPIDI_CH4_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
-#define MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
+#define MPIDI_CH4I_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
+#define MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
 
 #endif /* MPIDCH4_TYPES_H_INCLUDED */

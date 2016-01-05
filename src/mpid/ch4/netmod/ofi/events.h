@@ -227,7 +227,7 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
             FI_RC_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
             MPIU_Free(ptr);
             ctrl.type = MPIDI_CTRL_HUGE_CLEANUP;
-            MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl, NULL, 0, REQ_OFI(sreq, util_id), comm, NULL));
+            MPIDI_CH4_NMI_MPI_RC_POP(do_control_send(&ctrl, NULL, 0, REQ_OFI(sreq, util_id), comm, NULL));
         }
 
         if (REQ_OFI(sreq, pack_buffer))
@@ -321,7 +321,7 @@ static inline int get_huge_event(cq_tagged_entry_t *wc,
             hc->wc.len = hc->cur_offset;
             hc->done_fn(&hc->wc, hc->localreq);
             ctrl.type = MPIDI_CTRL_HUGEACK;
-            MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
+            MPIDI_CH4_NMI_MPI_RC_POP(do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
                                                 hc->comm_ptr,hc->remote_info.ackreq));
             MPIU_Free(hc);
             goto fn_exit;

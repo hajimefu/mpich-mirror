@@ -170,10 +170,8 @@ typedef struct {
 } MPIDI_Devreq_t;
 #define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.ch4.netmod)
 #define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.ch4.netmod_am)
-#define MPIU_CH4_REQUEST(req,field)         (((req)->dev).field)
-#define MPIU_CH4U_REQUEST(req,field)        (((req)->dev.ch4.ch4u).field)
-#define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4.ch4u).netmod_am)
-#define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.ch4.netmod)
+#define MPIDI_CH4I_REQUEST(req,field)       (((req)->dev).field)
+#define MPIDI_CH4R_REQUEST(req,field)       (((req)->dev.ch4.ch4u).field)
 
 typedef struct MPIDI_CH4I_win_info_t {
     uint64_t base_addr;
@@ -260,8 +258,8 @@ typedef struct {
     MPIDI_CH4I_win_t ch4u;
     uint64_t pad[192 / 8];
 } MPIDI_Devwin_t;
-#define MPIU_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
-#define MPIU_CH4U_WINFO(win,rank) (MPIDI_CH4I_win_info_t*) &(MPIU_CH4U_WIN(win, info_table)[rank])
+#define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4u).field)
+#define MPIDI_CH4R_WINFO(win,rank) (MPIDI_CH4I_win_info_t*) &(MPIDI_CH4R_WIN(win, info_table)[rank])
 
 typedef struct {
     unsigned is_local : 1;
@@ -292,7 +290,7 @@ typedef struct MPIDI_Devcomm_t {
         }shm;
     }ch4;
 } MPIDI_Devcomm_t;
-#define MPIU_CH4U_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
+#define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
 
 typedef struct {
     uint32_t pad[4 / 4];

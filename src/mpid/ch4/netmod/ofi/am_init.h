@@ -125,20 +125,20 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     MPIU_STR_RC(MPIU_Str_add_binary_arg(&val, &maxlen, "OFI",
                                         (char *) &MPIDI_Global.addrname,
                                         MPIDI_Global.addrnamelen), buscard_len);
-    MPIDI_NM_PMI_RC_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
+    MPIDI_CH4_NMI_PMI_RC_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
 
     val = valS;
     sprintf(keyS, "OFI-%d", rank);
-    MPIDI_NM_PMI_RC_POP(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
-    MPIDI_NM_PMI_RC_POP(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
-    MPIDI_NM_PMI_RC_POP(PMI_Barrier(), pmi);
+    MPIDI_CH4_NMI_PMI_RC_POP(PMI_KVS_Put(MPIDI_Global.kvsname, keyS, val), pmi);
+    MPIDI_CH4_NMI_PMI_RC_POP(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
+    MPIDI_CH4_NMI_PMI_RC_POP(PMI_Barrier(), pmi);
 
     table = (char *) MPIU_Malloc(size * MPIDI_Global.addrnamelen);
     maxlen = MPIDI_KVSAPPSTRLEN;
 
     for (i = 0; i < size; i++) {
         sprintf(keyS, "OFI-%d", i);
-        MPIDI_NM_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+        MPIDI_CH4_NMI_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
         MPIU_STR_RC(MPIU_Str_get_binary_arg(valS, "OFI",
                                             (char *) &table[i * MPIDI_Global.addrnamelen],
                                             MPIDI_Global.addrnamelen, &maxlen), buscard_len);
@@ -167,9 +167,9 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_Global.buf_pool = 
-        MPIU_CH4U_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
+        MPIDI_CH4R_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
 
-    mpi_errno = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
+    mpi_errno = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     slist_init(&MPIDI_Global.cq_buff_list);
@@ -234,7 +234,7 @@ static inline int MPIDI_netmod_finalize(void)
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_Comm *comm;
 
-    MPIDI_CH4U_finalize();
+    MPIDI_CH4R_finalize();
 
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
@@ -263,7 +263,7 @@ static inline int MPIDI_netmod_finalize(void)
 
     MPIDI_OFI_Map_destroy(MPIDI_Global.win_map);
     MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
-    MPIU_CH4U_destroy_buf_pool(MPIDI_Global.buf_pool);
+    MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
 
     PMI_Finalize();
 
@@ -388,12 +388,12 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 
 static inline int MPIDI_netmod_free_mem(void *ptr)
 {
-    return MPIDI_CH4U_free_mem(ptr);
+    return MPIDI_CH4R_free_mem(ptr);
 }
 
 static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
-    return MPIDI_CH4U_alloc_mem(size, info_ptr);
+    return MPIDI_CH4R_alloc_mem(size, info_ptr);
 }
 
 #undef FUNCNAME

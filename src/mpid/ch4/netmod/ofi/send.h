@@ -205,7 +205,7 @@ __ALWAYS_INLINE__ int send_normal(SENDPARAMS,
                            tsend);
         ctrl.type = MPIDI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
-        MPIDI_NM_MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
+        MPIDI_CH4_NMI_MPI_RC_POP(do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
     }
 

@@ -148,7 +148,7 @@ static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num)
     MPID_Request *req;
     for (i = 0; i < num; i++) {
         req = devreq_to_req(wc[i].op_context);
-        MPIDI_NM_MPI_RC_POP(dispatch_function(&wc[i],req));
+        MPIDI_CH4_NMI_MPI_RC_POP(dispatch_function(&wc[i],req));
     }
 fn_exit:
     return mpi_errno;

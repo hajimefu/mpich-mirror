@@ -16,46 +16,46 @@
 #include "ch4u_callbacks.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_init_comm
+#define FUNCNAME MPIDI_CH4R_init_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
-    comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
+    comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
     if (!MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
-        MPIU_CH4U_COMM(comm, posted_list) = NULL;
-        MPIU_CH4U_COMM(comm, unexp_list) = NULL;
+        MPIDI_CH4R_COMM(comm, posted_list) = NULL;
+        MPIDI_CH4R_COMM(comm, unexp_list) = NULL;
         MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = comm;
         if (MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list) {
             MPIDI_CH4U_Dev_rreq_t *curr, *tmp;
             MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, 
                                 curr, tmp) {
                 MPL_DL_DELETE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, curr);
-                MPL_DL_APPEND(MPIU_CH4U_COMM(comm, unexp_list), curr);
+                MPL_DL_APPEND(MPIDI_CH4R_COMM(comm, unexp_list), curr);
             }
             MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list = NULL;
         }
     }
-    MPIU_CH4U_COMM(comm, window_instance) = 0;
+    MPIDI_CH4R_COMM(comm, window_instance) = 0;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_destroy_comm
+#define FUNCNAME MPIDI_CH4R_destroy_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4R_destroy_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
-    comm_idx = MPIDI_CH4I_get_context_index(comm->recvcontext_id);
+    comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
     if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
         MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.posted_list == NULL);
         MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.unexp_list == NULL);
@@ -68,10 +68,10 @@ __CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_init
+#define FUNCNAME MPIDI_CH4R_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
+__CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
                                    int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -183,10 +183,10 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4I_am_acc_data_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPIDI_CH4U_init_comm(comm_world);
+    mpi_errno = MPIDI_CH4R_init_comm(comm_world);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPIDI_CH4U_init_comm(comm_self);
+    mpi_errno = MPIDI_CH4R_init_comm(comm_self);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_CH4I_map_create(&MPIDI_CH4_Global.win_map);
@@ -199,10 +199,10 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_init
+#define FUNCNAME MPIDI_CH4R_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_finalize()
+__CH4_INLINE__ void MPIDI_CH4R_finalize()
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
@@ -211,10 +211,10 @@ __CH4_INLINE__ void MPIDI_CH4U_finalize()
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_alloc_mem
+#define FUNCNAME MPIDI_CH4R_alloc_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPID_Info * info_ptr)
+__CH4_INLINE__ void *MPIDI_CH4R_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
@@ -225,10 +225,10 @@ __CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPID_Info * info_ptr)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_free_mem
+#define FUNCNAME MPIDI_CH4R_free_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
+__CH4_INLINE__ int MPIDI_CH4R_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);

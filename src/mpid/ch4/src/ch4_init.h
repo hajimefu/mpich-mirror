@@ -176,8 +176,8 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                              "**pmi_get_appnum %d", pmi_errno);
     }
 
-    MPID_Thread_mutex_create(&MPIDI_CH4_THREAD_PROGRESS_MUTEX, &thr_err);
-    MPID_Thread_mutex_create(&MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
     MPIDI_CH4_Global.comm_req_lists = (MPIDI_CH4_Comm_req_list_t *)
         MPIU_Calloc(MPIR_CONTEXT_INT_BITS * MPIR_CONTEXT_ID_BITS,
                     sizeof(MPIDI_CH4_Comm_req_list_t *));
@@ -213,12 +213,12 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     int i;
 
     /* Build up locality information if the netmod doesn't want to do it. */
-    MPIU_CH4U_COMM(MPIR_Process.comm_world,locality) =
+    MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality) =
         (MPIDI_CH4U_locality_t *) MPIU_Malloc(size * sizeof(MPIDI_CH4U_locality_t));
     for (i = 0; i < MPIR_Process.comm_world->local_size; i++)
-        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
+        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
 
-    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality) =
+    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality) =
         (MPIDI_CH4U_locality_t *) MPIU_Malloc(sizeof(MPIDI_CH4U_locality_t));
 
     /* This requires a partially built MPI_COMM_WORLD in order to be able to
@@ -234,15 +234,15 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                              &MPIDI_CH4_Global.max_node_id);
 
     for(i=0; i<MPIR_Process.comm_world->local_size; i++) {
-        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local =
+        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local =
             (MPIDI_CH4_Global.node_map[i] == MPIDI_CH4_Global.node_map[MPIR_Process.comm_world->rank])?1:0;
-        MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].index = i;
+        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].index = i;
         MPIU_DBG_MSG_FMT(CH4, VERBOSE, (MPIU_DBG_FDEST, "WORLD RANK %d %s local", i,
-                MPIU_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local ? "is" : "is not"));
+                MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local ? "is" : "is not"));
     }
 
-    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[0].is_local = 1;
-    MPIU_CH4U_COMM(MPIR_Process.comm_self,locality)[0].index = MPIR_Process.comm_self->rank;
+    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality)[0].is_local = 1;
+    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality)[0].index = MPIR_Process.comm_self->rank;
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM
@@ -329,8 +329,8 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
 #endif
 
     MPIU_Free(MPIDI_CH4_Global.comm_req_lists);
-    MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_MUTEX, &thr_err);
-    MPID_Thread_mutex_destroy(&MPIDI_CH4_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
+    MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_FINALIZE);
     return mpi_errno;

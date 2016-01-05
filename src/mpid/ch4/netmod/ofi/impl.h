@@ -181,35 +181,35 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
        MPIDI_NM_PROGRESS();                           \
   })
 
-#define MPIU_CH4_OFI_ERR  MPIR_ERR_CHKANDJUMP4
+#define MPIDI_CH4_NMI_OFI_ERR  MPIR_ERR_CHKANDJUMP4
 #define FI_RC(FUNC,STR)                                     \
     do {                                                    \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
         ssize_t _ret = FUNC;                                \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
-        MPIU_CH4_OFI_ERR(_ret<0,                            \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
     } while (0)
 
 #define FI_RC_NOLOCK(FUNC,STR)                              \
     do {                                                    \
         ssize_t _ret = FUNC;                                \
-        MPIU_CH4_OFI_ERR(_ret<0,                            \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
     } while (0)
 
 #define FI_RC_RETRY(FUNC,STR)                               \
@@ -220,15 +220,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         _ret = FUNC;                                        \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
-        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
         MPIDI_NM_PROGRESS();                                \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
@@ -263,15 +263,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         _ret = FUNC2;                                       \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
-        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
         MPIDI_NM_PROGRESS();                                \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
@@ -285,37 +285,37 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
      do {                                                     \
          _ret = FUNC;                                         \
          if (likely(_ret==0)) break;                          \
-         MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                   \
-                          mpi_errno,                          \
-                          MPI_ERR_OTHER,                      \
-                          "**ofid_"#STR,                      \
-                          "**ofid_"#STR" %s %d %s %s",        \
-                          __SHORT_FILE__,                     \
-                          __LINE__,                           \
-                          FCNAME,                             \
-                          fi_strerror(-_ret));                \
+         MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,              \
+                               mpi_errno,                     \
+                               MPI_ERR_OTHER,                 \
+                               "**ofid_"#STR,                 \
+                               "**ofid_"#STR" %s %d %s %s",   \
+                               __SHORT_FILE__,                \
+                               __LINE__,                      \
+                               FCNAME,                        \
+                               fi_strerror(-_ret));           \
          MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);     \
          MPIDI_NM_PROGRESS();                                 \
          MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);    \
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
-#define MPIDI_NM_PMI_RC_POP(FUNC,STR)               \
-  do                                                \
-    {                                               \
-      pmi_errno  = FUNC;                            \
-      MPIU_CH4_OFI_ERR(pmi_errno!=PMI_SUCCESS,      \
-                       mpi_errno,                   \
-                       MPI_ERR_OTHER,               \
-                       "**ofid_"#STR,               \
-                       "**ofid_"#STR" %s %d %s %s", \
-                       __SHORT_FILE__,              \
-                       __LINE__,                    \
-                       FCNAME,                      \
-                       #STR);                       \
+#define MPIDI_CH4_NMI_PMI_RC_POP(FUNC,STR)                    \
+  do                                                          \
+    {                                                         \
+      pmi_errno  = FUNC;                                      \
+      MPIDI_CH4_NMI_OFI_ERR(pmi_errno!=PMI_SUCCESS,           \
+                            mpi_errno,                        \
+                            MPI_ERR_OTHER,                    \
+                            "**ofid_"#STR,                    \
+                            "**ofid_"#STR" %s %d %s %s",      \
+                            __SHORT_FILE__,                   \
+                            __LINE__,                         \
+                            FCNAME,                           \
+                            #STR);                            \
     } while (0)
 
-#define MPIDI_NM_MPI_RC_POP(FUNC)                                    \
+#define MPIDI_CH4_NMI_MPI_RC_POP(FUNC)                               \
   do                                                                 \
     {                                                                \
       mpi_errno = FUNC;                                              \
@@ -326,15 +326,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   do                                                            \
     {                                                           \
       str_errno = FUNC;                                         \
-      MPIU_CH4_OFI_ERR(str_errno!=MPIU_STR_SUCCESS,             \
-                       mpi_errno,                               \
-                       MPI_ERR_OTHER,                           \
-                       "**"#STR,                                \
-                       "**"#STR" %s %d %s %s",                  \
-                       __SHORT_FILE__,                          \
-                       __LINE__,                                \
-                       FCNAME,                                  \
-                       #STR);                                   \
+      MPIDI_CH4_NMI_OFI_ERR(str_errno!=MPIU_STR_SUCCESS,        \
+                            mpi_errno,                          \
+                            MPI_ERR_OTHER,                      \
+                            "**"#STR,                           \
+                            "**"#STR" %s %d %s %s",             \
+                            __SHORT_FILE__,                     \
+                            __LINE__,                           \
+                            FCNAME,                             \
+                            #STR);                              \
     } while (0)
 
 #define REQ_CREATE(req)                           \
