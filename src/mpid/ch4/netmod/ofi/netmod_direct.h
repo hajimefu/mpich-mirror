@@ -14,6 +14,7 @@
 #include "am.h"
 #include "request.h"
 #include "comm.h"
+#include "unimpl.h"
 
 #ifdef USE_OFI_TAGGED
 #include "init.h"
@@ -24,7 +25,6 @@
 #include "win.h"
 #include "rma.h"
 #include "spawn.h"
-#include "unimpl.h"
 #include "proc.h"
 #else
 #include "am_init.h"
@@ -35,7 +35,6 @@
 #include "am_win.h"
 #include "am_rma.h"
 #include "am_spawn.h"
-#include "unimpl.h"
 #include "am_proc.h"
 #endif /* USE_OFI_TAGGED */
 
