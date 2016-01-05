@@ -37,23 +37,11 @@ typedef struct MPIDI_netmod_funcs {
     MPIDI_netmod_init_t init;
     MPIDI_netmod_finalize_t finalize;
     MPIDI_netmod_progress_t progress;
-    MPIDI_netmod_reg_hdr_handler_t reg_hdr_handler;
     MPIDI_netmod_comm_connect_t comm_connect;
     MPIDI_netmod_comm_disconnect_t comm_disconnect;
     MPIDI_netmod_open_port_t open_port;
     MPIDI_netmod_close_port_t close_port;
     MPIDI_netmod_comm_accept_t comm_accept;
-    MPIDI_netmod_send_am_hdr_t send_am_hdr;
-    MPIDI_netmod_inject_am_hdr_t inject_am_hdr;
-    MPIDI_netmod_send_am_t send_am;
-    MPIDI_netmod_send_amv_t send_amv;
-    MPIDI_netmod_send_amv_hdr_t send_amv_hdr;
-    MPIDI_netmod_send_am_hdr_reply_t send_am_hdr_reply;
-    MPIDI_netmod_inject_am_hdr_reply_t inject_am_hdr_reply;
-    MPIDI_netmod_send_am_reply_t send_am_reply;
-    MPIDI_netmod_send_amv_reply_t send_amv_reply;
-    MPIDI_netmod_am_hdr_max_sz_t am_hdr_max_sz;
-    MPIDI_netmod_am_inject_max_sz_t am_inject_max_sz;
     /* Routines that handle addressing */
     MPIDI_netmod_comm_get_lpid_t comm_get_lpid;
     MPIDI_netmod_gpid_get_t gpid_get;
@@ -67,6 +55,20 @@ typedef struct MPIDI_netmod_funcs {
     /* Request allocation routines */
     MPIDI_netmod_request_create_t request_create;
     MPIDI_netmod_request_release_t request_release;
+    /* Active Message Routines */
+    MPIDI_netmod_reg_hdr_handler_t reg_hdr_handler;
+    MPIDI_netmod_send_am_hdr_t send_am_hdr;
+    MPIDI_netmod_inject_am_hdr_t inject_am_hdr;
+    MPIDI_netmod_send_am_t send_am;
+    MPIDI_netmod_send_amv_t send_amv;
+    MPIDI_netmod_send_amv_hdr_t send_amv_hdr;
+    MPIDI_netmod_send_am_hdr_reply_t send_am_hdr_reply;
+    MPIDI_netmod_inject_am_hdr_reply_t inject_am_hdr_reply;
+    MPIDI_netmod_send_am_reply_t send_am_reply;
+    MPIDI_netmod_send_amv_reply_t send_amv_reply;
+    MPIDI_netmod_am_hdr_max_sz_t am_hdr_max_sz;
+    MPIDI_netmod_am_inject_max_sz_t am_inject_max_sz;
+
 } MPIDI_netmod_funcs_t;
 
 typedef struct MPIDI_netmod_native_funcs {
