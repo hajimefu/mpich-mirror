@@ -750,6 +750,8 @@ static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
     MPIU_Free(dt->map);
 }
 
+static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
+
 /* Utility functions */
 extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
 extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);

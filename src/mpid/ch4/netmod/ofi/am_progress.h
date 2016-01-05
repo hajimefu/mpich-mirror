@@ -14,8 +14,6 @@
 #include "impl.h"
 #include "am_request.h"
 
-static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_handle_short_am
 #undef FCNAME
