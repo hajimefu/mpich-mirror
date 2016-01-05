@@ -534,6 +534,9 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
     req->errflag = MPIR_ERR_NONE;
+#ifdef MPIDI_BUILD_CH4_SHM
+    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
+#endif
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }

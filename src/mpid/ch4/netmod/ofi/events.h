@@ -82,7 +82,7 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 
     if (MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq))
     {
-        int continue_matching = 0;
+        int continue_matching = 1;
 
         MPIDI_CH4U_anysource_matched(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq), MPIDI_CH4U_NETMOD, &continue_matching);
 

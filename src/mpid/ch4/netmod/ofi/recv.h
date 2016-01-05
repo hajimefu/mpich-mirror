@@ -273,11 +273,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
 
     if (ret == 0) {
         while ((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPID_cc_is_complete(&rreq->cc))) {
-#ifndef MPIDI_BUILD_CH4_SHM
-            if ((mpi_errno = MPIDI_Progress_test()) != MPI_SUCCESS)
-#else /* MPIDI_BUILD_CH4_SHM */
             if ((mpi_errno = MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
-#endif /* MPIDI_BUILD_CH4_SHM */
                 goto fn_exit;
         }
 

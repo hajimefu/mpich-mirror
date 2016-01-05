@@ -45,7 +45,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
         /* traverse posted receive queue */
         MPID_Request *req = MPIDI_shm_recvq_posted.head;
         MPID_Request *prev_req = NULL;
-        int continue_matching = 0;
+        int continue_matching = 1;
         char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
         int type = in_cell ? cell->pkt.mpich.type : REQ_SHM(sreq)->type;
         MPID_Request* pending = in_cell ? cell->pending : REQ_SHM(sreq)->pending;
@@ -71,7 +71,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
 
                 /* Request matched */
 
-                continue_matching = 0;
+                continue_matching = 1;
 
                 if (MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req))
                 {
@@ -83,7 +83,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)) = NULL;
                     MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 
-                    if (!continue_matching) break;
+                    if (continue_matching) break;
                 }
 
                 char *recv_buffer = (char *) REQ_SHM(req)->user_buf;

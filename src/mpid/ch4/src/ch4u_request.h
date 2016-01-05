@@ -39,13 +39,13 @@ static inline int MPIDI_CH4U_anysource_matched(MPID_Request *rreq, int caller, i
             rreq->status = MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq)->status;
         }
 #endif
-        *continue_matching = 1;
+        *continue_matching = 0;
     } else if (MPIDI_CH4U_SHM == caller) {
         mpi_errno = MPIDI_netmod_cancel_recv(rreq);
 
         /* If the netmod has already matched this request, shared memory will
          * lose and should stop matching this request */
-        *continue_matching = MPIR_STATUS_GET_CANCEL_BIT(rreq->status);
+        *continue_matching = !MPIR_STATUS_GET_CANCEL_BIT(rreq->status);
     }
 
     MPIDI_FUNC_EXIT(MPIDI_CH4U_ANYSOURCE_MATCHED);
