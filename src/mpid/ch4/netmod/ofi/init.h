@@ -603,7 +603,7 @@ static inline int MPIDI_netmod_finalize_generic(int do_scalable_ep)
 }
 
 static inline int MPIDI_netmod_finalize(void) {
-    return MPIDI_netmod_finalize_generic(MPIDI_USE_SCALABLE_ENDPOINTS);
+    return MPIDI_netmod_finalize_generic(MPIDI_ENABLE_SCALABLE_ENDPOINTS);
 }
 
 static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
