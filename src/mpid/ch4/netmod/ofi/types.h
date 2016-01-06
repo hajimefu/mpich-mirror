@@ -48,11 +48,23 @@ EXTERN_C_BEGIN
 
 
 #ifdef USE_OFI_TAGGED
-#define MPIDI_ENABLE_TAGGED_PROGRESS 1
-#define MPIDI_ENABLE_AM_PROGRESS 1
+#define MPIDI_ENABLE_TAGGED          1
+#define MPIDI_ENABLE_AM              1
+#define MPIDI_ENABLE_RMA             1
 #else
-#define MPIDI_ENABLE_TAGGED_PROGRESS 0
-#define MPIDI_ENABLE_AM_PROGRESS 1
+#define MPIDI_ENABLE_TAGGED          0
+#define MPIDI_ENABLE_AM              1
+#define MPIDI_ENABLE_RMA             1
+#endif
+
+#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
+#define MPIDI_ENABLE_SCALABLE_ENDPOINTS 1
+#endif
+
+#ifdef MPIDI_USE_AV_TABLE
+#define MPIDI_ENABLE_AV_TABLE 1
+#else
+#define MPIDI_ENABLE_AV_TABLE 0
 #endif
 
 /* Macros and inlines */

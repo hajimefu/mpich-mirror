@@ -12,6 +12,7 @@
 #define NETMOD_DIRECT_H_INCLUDED
 
 #include "am.h"
+#include "am_events.h"
 #include "request.h"
 #include "comm.h"
 #include "unimpl.h"

@@ -22,7 +22,7 @@ static inline int am_progress(void *netmod_context,
                               int   blocking);
 
 __attribute__((__always_inline__)) static inline
-int MPIDI_netmod_generic_progress(void *netmod_context,
+int MPIDI_netmod_progress_generic(void *netmod_context,
                                   int   blocking,
                                   int   do_am,
                                   int   do_tagged)
@@ -61,10 +61,10 @@ static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
-    mpi_errno = MPIDI_netmod_generic_progress(netmod_context,
+    mpi_errno = MPIDI_netmod_progress_generic(netmod_context,
                                               blocking,
-                                              MPIDI_ENABLE_AM_PROGRESS,
-                                              MPIDI_ENABLE_TAGGED_PROGRESS);
+                                              MPIDI_ENABLE_AM,
+                                              MPIDI_ENABLE_TAGGED);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
 }
