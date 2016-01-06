@@ -23,7 +23,7 @@ noinst_HEADERS += src/mpid/ch4/src/ch4_comm.h     \
                   src/mpid/ch4/src/ch4u_probe.h   \
                   src/mpid/ch4/src/ch4u_recv.h    \
                   src/mpid/ch4/src/ch4u_rma.h     \
-                  src/mpid/ch4/src/ch4u_win.h     \
+                  src/mpid/ch4/src/ch4r_win.h     \
                   src/mpid/ch4/src/ch4r_init.h    \
                   src/mpid/ch4/src/ch4u_proc.h    \
                   src/mpid/ch4/src/ch4u_recvq.h   \

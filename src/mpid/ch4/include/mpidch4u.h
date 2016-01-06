@@ -18,7 +18,7 @@
 #include "ch4u_recv.h"
 #include "ch4u_rma.h"
 #include "ch4u_send.h"
-#include "ch4u_win.h"
+#include "ch4r_win.h"
 #include "ch4u_proc.h"
 #include "ch4r_buf.h"
 
