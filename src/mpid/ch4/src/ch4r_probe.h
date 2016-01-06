@@ -14,10 +14,10 @@
 #include "ch4_impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_iprobe
+#define FUNCNAME MPIDI_CH4R_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_iprobe(int source,
+__CH4_INLINE__ int MPIDI_CH4R_iprobe(int source,
                                      int tag,
                                      MPID_Comm * comm,
                                      int context_offset, int *flag, MPI_Status * status)
@@ -73,7 +73,7 @@ fn_exit:
 #define FUNCNAME MPIDI_Probe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_probe(int source,
+__CH4_INLINE__ int MPIDI_CH4R_probe(int source,
                                     int tag,
                                     MPID_Comm * comm, int context_offset, MPI_Status * status)
 {
@@ -82,7 +82,7 @@ __CH4_INLINE__ int MPIDI_CH4U_probe(int source,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PROBE);
 
     while (!flag) {
-        mpi_errno = MPIDI_CH4U_iprobe(source, tag, comm, context_offset, &flag, status);
+        mpi_errno = MPIDI_CH4R_iprobe(source, tag, comm, context_offset, &flag, status);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
@@ -94,10 +94,10 @@ __CH4_INLINE__ int MPIDI_CH4U_probe(int source,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_improbe
+#define FUNCNAME MPIDI_CH4R_improbe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_improbe(int source,
+__CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
                                       int tag,
                                       MPID_Comm * comm,
                                       int context_offset,
@@ -158,10 +158,10 @@ fn_exit:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4U_mprobe
+#define FUNCNAME MPIDI_CH4R_mprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_mprobe(int source,
+__CH4_INLINE__ int MPIDI_CH4R_mprobe(int source,
                                      int tag,
                                      MPID_Comm * comm,
                                      int context_offset,
@@ -171,7 +171,7 @@ __CH4_INLINE__ int MPIDI_CH4U_mprobe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MPROBE);
     while (!flag) {
-        MPIDI_CH4U_improbe(source, tag, comm, context_offset, &flag, message, status);
+        MPIDI_CH4R_improbe(source, tag, comm, context_offset, &flag, message, status);
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
     return mpi_errno;
