@@ -13,7 +13,7 @@
 
 #include "ch4_impl.h"
 #include "ch4i_util.h"
-#include "ch4u_callbacks.h"
+#include "ch4i_callbacks.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4R_init_comm
