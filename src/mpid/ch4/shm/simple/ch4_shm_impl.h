@@ -11,10 +11,6 @@
 #ifndef SHM_IMPL_H_INCLUDED
 #define SHM_IMPL_H_INCLUDED
 
-/* for some reason these variables can't be set with configure */
-#define USE_MMAP_SHM 1
-#define MPID_NEM_USE_LOCK_FREE_QUEUES 1
-
 #include <mpidimpl.h>
 #include "mpidch4r.h"
 
