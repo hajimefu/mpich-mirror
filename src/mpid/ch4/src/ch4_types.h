@@ -107,12 +107,12 @@ typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
     uint64_t sreq_ptr;
 } MPIDI_CH4U_Ssend_ack_msg_t;
 
-typedef struct MPIDI_CH4U_win_cntrl_msg_t {
+typedef struct MPIDI_CH4R_win_cntrl_msg_t {
     uint64_t win_id;
     uint32_t origin_rank;
     int16_t lock_type;
     int16_t type;
-} MPIDI_CH4U_win_cntrl_msg_t;
+} MPIDI_CH4R_win_cntrl_msg_t;
 
 typedef struct MPIDI_CH4U_put_msg_t {
     uint64_t win_id;

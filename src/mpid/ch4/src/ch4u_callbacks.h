@@ -1628,7 +1628,7 @@ static inline int MPIDI_CH4I_win_lock_advance(MPID_Win *win)
         ++slock->local.count;
         slock->local.type = lock->type;
 
-        MPIDI_CH4U_win_cntrl_msg_t msg;
+        MPIDI_CH4R_win_cntrl_msg_t msg;
         msg.win_id = MPIDI_CH4R_WIN(win, win_id);
         msg.origin_rank = win->comm_ptr->rank;
 
@@ -1660,7 +1660,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4I_win_lock_req_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t  *info,
+static inline void MPIDI_CH4I_win_lock_req_proc(const MPIDI_CH4R_win_cntrl_msg_t  *info,
                                                 MPID_Win                   *win,
                                                 unsigned                    peer)
 {
@@ -1696,7 +1696,7 @@ static inline void MPIDI_CH4I_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t
 #define FUNCNAME MPIDI_CH4I_win_lock_ack_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                                 MPID_Win                   *win,
                                                 unsigned                    peer)
 {
@@ -1715,7 +1715,7 @@ static inline void MPIDI_CH4I_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t
 #define FUNCNAME MPIDI_CH4I_win_unlock_ack_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                               MPID_Win                   *win,
                                               unsigned                    peer)
 {
@@ -1728,7 +1728,7 @@ static inline void MPIDI_CH4I_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *
     MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.local.count >= 0);
     MPIDI_CH4I_win_lock_advance(win);
 
-    MPIDI_CH4U_win_cntrl_msg_t msg;
+    MPIDI_CH4R_win_cntrl_msg_t msg;
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4U_WIN_UNLOCK_ACK;
@@ -1748,7 +1748,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4I_win_complete_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4I_win_complete_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                                 MPID_Win                   *win,
                                                 unsigned                    peer)
 {
@@ -1764,7 +1764,7 @@ static inline void MPIDI_CH4I_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t
 #define FUNCNAME MPIDI_CH4I_win_post_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4I_win_post_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                             MPID_Win                   *win,
                                             unsigned                    peer)
 {
@@ -1781,7 +1781,7 @@ static inline void MPIDI_CH4I_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *in
 #define FUNCNAME MPIDI_CH4I_win_unlock_done_cb
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                                  MPID_Win                   *win,
                                                  unsigned                    peer)
 {
@@ -1811,7 +1811,7 @@ static inline int MPIDI_CH4I_am_win_ctrl_target_handler(void *am_hdr, size_t am_
                                                         cmpl_handler_fn, MPID_Request ** req)
 {
     int mpi_errno = MPI_SUCCESS, sender_rank;
-    MPIDI_CH4U_win_cntrl_msg_t *msg_hdr = (MPIDI_CH4U_win_cntrl_msg_t *) am_hdr;
+    MPIDI_CH4R_win_cntrl_msg_t *msg_hdr = (MPIDI_CH4R_win_cntrl_msg_t *) am_hdr;
     MPID_Win *win;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_AM_WIN_CTRL_HANDLER);
