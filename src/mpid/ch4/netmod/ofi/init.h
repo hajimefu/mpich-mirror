@@ -63,6 +63,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     char valS[MPIDI_KVSAPPSTRLEN], *val;
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
+    int max_n_avts;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
@@ -270,20 +271,19 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     /* ------------------------------------------------------------------------ */
     /* Construct:  Address Vector                                               */
     /* ------------------------------------------------------------------------ */
+
     memset(&av_attr, 0, sizeof(av_attr));
+
 
     if(do_av_table) {
         av_attr.type           = FI_AV_TABLE;
-        MPIDI_Addr_table       = (MPIDI_OFI_addr_table_t *) MPL_malloc(sizeof(MPIDI_OFI_addr_table_t));
         mapped_table           = NULL;
     } else {
         av_attr.type           = FI_AV_MAP;
-        MPIDI_Addr_table       = (MPIDI_OFI_addr_table_t *) MPL_malloc(size * sizeof(fi_addr_t) + sizeof(MPIDI_OFI_addr_table_t));
-        mapped_table           = (fi_addr_t *) MPIDI_Addr_table->table;
+        mapped_table           = (fi_addr_t *) MPL_malloc(size * sizeof(fi_addr_t));
     }
 
-    av_attr.rx_ctx_bits    = MPIDI_OFI_MAX_ENDPOINTS_BITS;
-    MPIDI_Addr_table->size = size;
+    av_attr.rx_ctx_bits    = MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS;
 
     MPIDI_OFI_CALL(fi_av_open(MPIDI_Global.domain,  /* In:  Domain Object         */
                                       &av_attr,             /* In:  Configuration object  */
@@ -347,22 +347,23 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     /* Table is constructed.  Map it    */
     /* -------------------------------- */
     MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, table, size, mapped_table, 0ULL, NULL), avmap);
+    if (mapped_table != NULL) {
+        /* AV_MAP */
+        for (i = 0; i < size; i++) {
+            MPIDI_OFI_AV(&MPIDIR_get_av(0, i)).dest = mapped_table[i];
+        }
+        MPL_free(mapped_table);
+    } else {
+        /* AV_TABLE logical addressing */
+        for (i = 0; i < size; i++) {
+            MPIDII_OFI_AV(&MPIDIR_get_av(0, i)).dest = i;
+        }
+    }
 
     /* -------------------------------- */
     /* Create the id to object maps     */
     /* -------------------------------- */
     MPIDI_OFI_map_create(&MPIDI_Global.win_map);
-    /* ---------------------------------- */
-    /* Initialize MPI_COMM_SELF and VCRT  */
-    /* ---------------------------------- */
-    MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_vcrt_create(comm_self->remote_size, &MPIDI_OFI_COMM(comm_self).vcrt));
-    MPIDI_OFI_COMM(comm_self).vcrt->vcr_table[0].addr_idx = rank;
-    MPIDI_OFI_COMM(comm_self).vcrt->vcr_table[0].is_local = 1;
-
-    /* ---------------------------------- */
-    /* Initialize MPI_COMM_WORLD and VCRT */
-    /* ---------------------------------- */
-    MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_vcrt_create(comm_world->remote_size, &MPIDI_OFI_COMM(comm_world).vcrt));
 
     /* ---------------------------------- */
     /* Initialize Active Message          */
@@ -411,35 +412,24 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     OPA_store_int(&MPIDI_Global.am_inflight_inject_emus, 0);
     OPA_store_int(&MPIDI_Global.am_inflight_rma_send_mrs, 0);
 
-    /* -------------------------------- */
-    /* Calculate per-node map           */
-    /* -------------------------------- */
-    /* If the user configures with ch4 exclusive shared memory we will still
-     * build this information because it is used by the mapper later when
-     * tranlating gpids to lpids */
-    MPIDI_Global.node_map = (MPID_Node_id_t *)
-                            MPL_malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
-
     /* max_inject_size is temporarily set to 1 inorder to avoid deadlock in
      * shm initialization since PMI_Barrier does not call progress and flush its injects */
     MPIDI_Global.max_buffered_send = 1;
     MPIDI_Global.max_buffered_write = 1;
 
-    MPIDI_CH4U_build_nodemap(comm_world->rank,
-                             comm_world,
-                             comm_world->local_size,
-                             MPIDI_Global.node_map,
-                             &MPIDI_Global.max_node_id);
-
     MPIDI_Global.max_buffered_send  = prov_use->tx_attr->inject_size;
     MPIDI_Global.max_buffered_write = prov_use->tx_attr->inject_size;
 
-    for(i=0; i<comm_world->local_size; i++)
-        MPIDI_OFI_COMM(comm_world).vcrt->vcr_table[i].is_local =
-            (MPIDI_Global.node_map[i] == MPIDI_Global.node_map[comm_world->rank])?1:0;
-
     MPIR_Datatype_init_names();
     MPIDI_OFI_index_datatypes();
+
+#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
+    MPIDI_CH4R_build_nodemap_avtid(comm_world->rank, comm_world,
+                                  comm_world->local_size, 0);
+    for(i=0; i<comm_world->local_size; i++)
+        MPIDI_CH4_NMI_OFI_AV(&MPIDI_CH4R_get_av(0, i)).is_local =
+            (MPIDI_CH4R_get_node_map(0)[i] == MPIDI_CH4R_get_node_map(0)[comm_world->rank])?1:0;
+#endif
 
     /* -------------------------------- */
     /* Initialize Dynamic Tasking       */
@@ -518,6 +508,7 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     int barrier[2] = { 0 };
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPIR_Comm *comm;
+    int max_n_avts;
 
     /* Progress until we drain all inflight RMA send long buffers */
     while(OPA_load_int(&MPIDI_Global.am_inflight_rma_send_mrs) > 0)
@@ -552,8 +543,7 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.domain->fid),    domainclose);
 
     /* --------------------------------------- */
-    /* Free comm world VCRT and addr table     */
-    /* comm_release will also releace the vcrt */
+    /* Free comm world addr table              */
     /* --------------------------------------- */
     comm = MPIR_Process.comm_world;
     MPIR_Comm_release_always(comm);
@@ -562,9 +552,6 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     MPIR_Comm_release_always(comm);
 
     MPIDI_CH4U_finalize();
-
-    MPL_free(MPIDI_Addr_table);
-    MPL_free(MPIDI_Global.node_map);
 
     MPIDI_OFI_map_destroy(MPIDI_Global.win_map);
 
@@ -616,13 +603,16 @@ static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm *comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
+    int avtid = 0, lpid;
     if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-        *lpid_ptr = MPIDI_OFI_COMM_TO_INDEX(comm_ptr, idx);
+        MPIDIR_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
     else if(is_remote)
-        *lpid_ptr = MPIDI_OFI_COMM_TO_INDEX(comm_ptr, idx);
-    else
-        *lpid_ptr = MPIDI_OFI_COMM(comm_ptr).local_vcrt->vcr_table[idx].addr_idx;
+        MPIDIR_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
+    else {
+        MPIDIR_comm_rank_to_pid_local(comm_ptr, idx, &lpid, &avtid);
+    }
 
+    *lpid_ptr = MPIDI_CH4R_LPID_CREATE(avtid, lpid);
     return MPI_SUCCESS;
 }
 
@@ -630,11 +620,10 @@ static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm *comm_ptr, int rank, MPIR_Gpid
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
-    size_t sz = sizeof(MPIDI_OFI_GPID(gpid)->addr);
+    size_t sz = sizeof(MPIDI_OFI_GPID(gpid).addr);
     MPIDI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_OFI_COMM_TO_PHYS(comm_ptr, rank),
-                                        &MPIDI_OFI_GPID(gpid)->addr, &sz), avlookup);
-    MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(gpid)->addr));
-    MPIDI_OFI_GPID(gpid)->node = MPIDI_Global.node_map[MPIDI_OFI_COMM_TO_INDEX(comm_ptr, rank)];
+                                        &MPIDI_OFI_GPID(gpid).addr, &sz), avlookup);
+    MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(gpid).addr));
 fn_exit:
     return mpi_errno;
 fn_fail:
@@ -643,13 +632,13 @@ fn_fail:
 
 static inline int MPIDI_CH4_NM_get_node_id(MPIR_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
-    *id_p = MPIDI_Global.node_map[MPIDI_OFI_COMM_TO_INDEX(comm, rank)];
+    MPIDIU_get_node_id(comm, rank, id_p);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm *comm, MPID_Node_id_t *max_id_p)
 {
-    *max_id_p = MPIDI_Global.max_node_id;
+    MPIDI_CH4U_get_max_node_id(comm, max_id_p);
     return MPI_SUCCESS;
 }
 
@@ -661,55 +650,73 @@ static inline int MPIDI_CH4_NM_getallincomm(MPIR_Comm *comm_ptr,
     for(i = 0; i < comm_ptr->local_size; i++)
         MPIDI_GPID_Get(comm_ptr, i, &local_gpids[i]);
 
-    *singlePG = 0;
     return 0;
 }
 
 static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
                                                         MPIR_Gpid gpid[],
-                                                        int       lpid[],
+                                                        int  lpid[],
                                                         int       use_av_table)
 {
     int i, mpi_errno = MPI_SUCCESS;
+    int *new_avt_procs;
+    int n_new_procs = 0;
+    int max_n_avts;
+    new_avt_procs = (int *) MPL_malloc(size * sizeof(int));
+    max_n_avts = MPIDI_CH4R_get_max_n_avts();
 
     for(i = 0; i < size; i++) {
-        int j;
+        int j, k;
         char tbladdr[FI_NAME_MAX];
         int found = 0;
 
-        for(j = 0; j < MPIDI_Addr_table->size; j++) {
-            size_t sz = sizeof(MPIDI_OFI_GPID(&gpid[i])->addr);
-            MPIDI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_OFI_TO_PHYS(j), &tbladdr, &sz), avlookup);
-            MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(&gpid[i])->addr));
+        for (k = 0; k < max_n_avts; k++) {
+            if (MPIDIR_get_av_table(k) == NULL) { continue; }
+            for(j = 0; j < MPIDIR_get_av_table(k)->size; j++) {
+                size_t sz = sizeof(MPIDI_OFI_GPID(&gpid[i]).addr);
+                MPIDI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_OFI_TO_PHYS(k, j), &tbladdr, &sz), avlookup);
+                MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(&gpid[i]).addr));
 
-            if(!memcmp(tbladdr, MPIDI_OFI_GPID(&gpid[i])->addr, sz)) {
-                lpid[i] = j;
-                found = 1;
-                break;
+                if(!memcmp(tbladdr, MPIDI_OFI_GPID(&gpid[i]).addr, sz)) {
+                    lpid[i] = MPIDIR_LPID_CREATE(k, j);
+                    found = 1;
+                    break;
+                }
             }
         }
 
-        if(!found) {
-            int start = MPIDI_Addr_table->size;
-            fi_addr_t addr;
-            MPIDI_Global.node_map = (MPID_Node_id_t *) MPL_realloc(MPIDI_Global.node_map,
-                                                                    (1 +
-                                                                     start) *
-                                                                    sizeof(MPID_Node_id_t));
-            MPIDI_Global.node_map[start] = MPIDI_OFI_GPID(&gpid[i])->node;
-
-            if(use_av_table)
-                MPIDI_Addr_table = (MPIDI_OFI_addr_table_t *) MPL_realloc(MPIDI_Addr_table,
-                                                                                   (1 + start) * sizeof(fi_addr_t) +
-                                                                                   sizeof(MPIDI_OFI_addr_table_t));
-
-            addr = MPIDI_OFI_TO_PHYS(start);
-            MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_OFI_GPID(&gpid[i])->addr,
-                                                1, &addr, 0ULL, NULL), avmap);
-            MPIDI_Addr_table->size++;
-            lpid[i] = start;
+        if (!found) {
+            new_avt_procs[n_new_procs] = i;
+            n_new_procs++;
         }
     }
+
+    /* create new av_table, insert processes */
+    if (n_new_procs > 0) {
+        int avtid;
+        MPIDIR_new_avt(n_new_procs, &avtid);
+
+        for (i = 0; i < n_new_procs; i++) {
+            if (use_av_table) { /* logical addressing */
+                MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_OFI_GPID(&gpid[new_avt_procs[i]]).addr,
+                                                    1, NULL, 0ULL, NULL), avmap);
+                /* FIXME: get logical address */
+                /* MPIDI_NM_OFI_AV(&MPIDIR_get_av(avtid, i)).dest = i; */
+            } else {
+                MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_OFI_GPID(&gpid[new_avt_procs[i]]).addr,
+                                                    1, (fi_addr_t *)&MPIDI_OFI_AV(&MPIDIR_get_av(avtid, i)).dest, 0ULL, NULL), avmap);
+            }
+            /* highest bit is marked as 1 to indicate this is a new process */
+            lpid[i] = MPIDIR_LPID_CREATE(avtid, i);
+            MPIDIR_LPID_SET_NEW_AVT_MARK(lpid[i]);
+#ifndef MPIDI_BUILD_LOCALITY_INFO
+            if (avtid != 0) {
+                MPIDI_OFI_AV(&MPIDIR_get_av(avtid, i)).is_local = 0;
+            }
+#endif
+        }
+    }
+
 
 fn_exit:
     return mpi_errno;
@@ -725,16 +732,6 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int 
 static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPIR_Comm *newcomm_ptr,
                                                            int size, const int lpids[])
 {
-    int i;
-    MPIDI_OFI_vcrt_create(size, &MPIDI_OFI_COMM(newcomm_ptr).vcrt);
-
-    for(i = 0; i < size; i++) {
-        MPIDI_OFI_COMM(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
-        MPIDI_OFI_COMM(newcomm_ptr).vcrt->vcr_table[i].is_local =
-            (MPIDI_Global.node_map[MPIR_Process.comm_world->rank] ==
-             MPIDI_Global.node_map[lpids[i]]);
-    }
-
     return 0;
 }
 

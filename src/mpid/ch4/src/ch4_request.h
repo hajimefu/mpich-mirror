@@ -83,7 +83,7 @@ __CH4_INLINE__ void MPIDI_Request_release_ref(MPIR_Request * req)
 __CH4_INLINE__ void MPIDI_Request_release(MPIR_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQUEST_RELEASE);
 
     MPIDI_CH4I_request_release(req);
 
@@ -110,7 +110,7 @@ __CH4_INLINE__ MPIR_Request *MPIDI_Request_create(void)
 {
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_CREATE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQUEST_CREATE);
 
     req = MPIDI_CH4I_alloc_and_init_req(1);
 

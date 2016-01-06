@@ -386,6 +386,8 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 extern int MPIDI_num_netmods;
 #if defined(MPL_USE_DBG_LOGGING)
 extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
+extern MPL_dbg_class MPIDI_CH4_DBG_MAP;
+extern MPL_dbg_class MPIDI_CH4_DBG_MEMORY;
 #endif /* MPL_USE_DBG_LOGGING */
 
 

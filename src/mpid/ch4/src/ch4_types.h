@@ -238,6 +238,13 @@ typedef struct MPIU_buf_t {
     char data[];
 } MPIU_buf_t;
 
+typedef struct {
+    int max_n_avts;
+    int n_avts;
+    int next_avtid;
+    int *free_avtid;
+} MPIDI_CH4_avt_manager;
+
 typedef struct MPIDI_CH4_Global_t {
     MPIR_Request *request_test;
     MPIR_Comm *comm_test;
@@ -245,10 +252,10 @@ typedef struct MPIDI_CH4_Global_t {
     int pname_len;
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
+    int allocated_max_n_avts;
+    MPIDI_CH4_avt_manager avt_mgr;
     int is_ch4u_initialized;
-#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPID_Node_id_t *node_map, max_node_id;
-#endif
+    MPID_Node_id_t **node_map, max_node_id;
     MPIDI_CH4U_comm_req_list_t *comm_req_lists;
     OPA_int_t active_progress_hooks;
     MPIR_Commops         MPIR_Comm_fns_store;
@@ -269,6 +276,8 @@ typedef struct MPIDI_CH4_Global_t {
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
 #ifdef MPL_USE_DBG_LOGGING
 extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
+extern MPL_dbg_class MPIDI_CH4_DBG_MAP;
+extern MPL_dbg_class MPIDI_CH4_DBG_MEMORY;
 #endif
 #define MPIDI_CH4I_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]

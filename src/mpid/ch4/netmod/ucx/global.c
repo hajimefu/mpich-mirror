@@ -11,5 +11,3 @@
 #include "ucx_types.h"
 
 MPIDI_UCX_global_t MPIDI_UCX_global = { 0 };
-
-ucp_ep_h *MPIDI_UCX_eps = NULL;

@@ -21,8 +21,9 @@
 
 #define MPIDI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
 #define MPIDI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)
-#define COMM_TO_INDEX(comm,rank) MPIDI_UCX_COMM(comm).vept->vep_table[rank].addr_idx
-#define MPIDI_UCX_COMM_TO_EP(comm,rank)    MPIDI_UCX_eps[COMM_TO_INDEX(comm,rank)]
+#define COMM_TO_INDEX(comm,rank) MPIDIR_comm_rank_to_pid(comm, rank, NULL, NULL)
+#define MPIDI_UCX_COMM_TO_EP(comm,rank) \
+    MPIDI_UCX_AV(&MPIDIR_get_av(avtid, lpid)).dest;
 
 #define MPIDI_UCX_WIN(win) ((win)->dev.netmod.ucx)
 #define MPIDI_UCX_WIN_INFO(win, rank) MPIDI_UCX_WIN(win).info_table[rank]
@@ -179,7 +180,6 @@ static inline int MPIDI_UCX_get_source(uint64_t match_bits)
     (rreq_)->u.nbc.errflag = MPIR_ERR_NONE;\
 }
 
-int MPIDI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr);
 extern int MPIR_Datatype_init_names(void);
 
 #endif /* IMPL_H_INCLUDED */

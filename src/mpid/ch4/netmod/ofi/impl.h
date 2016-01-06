@@ -41,15 +41,16 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __clang__ || __INTEL_COMPILER */
 
 #define MPIDI_OFI_COMM_TO_INDEX(comm,rank) \
-    MPIDI_OFI_COMM(comm).vcrt->vcr_table[rank].addr_idx
+    MPIDIR_comm_rank_to_pid(comm, rank, NULL, NULL)
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank) \
-    ((fi_addr_t)(uintptr_t)MPIDI_OFI_COMM_TO_INDEX(comm,rank))
-#define MPIDI_OFI_TO_PHYS(rank)            ((fi_addr_t)(uintptr_t)rank)
+    ((fi_addr_t)(int)MPIDI_OFI_AV(MPIDIR_comm_rank_to_av(comm, rank)).dest)
+#define MPIDI_OFI_TO_PHYS(rank)            ((fi_addr_t)rank)
 #else
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank)                       \
-    MPIDI_Addr_table->table[MPIDI_OFI_COMM_TO_INDEX(comm,rank)].dest
-#define MPIDI_OFI_TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
+    MPIDI_OFI_AV(MPIDIR_comm_rank_to_av((comm), (rank))).dest
+#define MPIDI_OFI_TO_PHYS(rank)                                 \
+    MPIDI_OFI_AV(&MPIDIR_get_av((avtid), (lpid))).dest
 #endif
 
 #define MPIDI_OFI_WIN(win)     ((win)->dev.netmod.ofi)
@@ -370,9 +371,9 @@ static inline fi_addr_t MPIDI_OFI_to_phys(int rank, int ep_family)
     int ep_num = 0;
     int offset = MPIDI_Global.ctx[ep_num].ctx_offset;
     int rx_idx = offset + ep_family;
-    return fi_rx_addr(MPIDI_OFI_TO_PHYS(rank), rx_idx, MPIDI_OFI_MAX_ENDPOINTS_BITS);
+    return fi_rx_addr(MPIDI_OFI_TO_PHYS(0, rank), rx_idx, MPIDI_OFI_MAX_ENDPOINTS_BITS);
 #else
-    return MPIDI_OFI_TO_PHYS(rank);
+    return MPIDI_OFI_TO_PHYS(0, rank);
 #endif
 }
 
@@ -444,8 +445,6 @@ extern int   MPIDI_OFI_control_handler(void *am_hdr,
                                                void **data,size_t *data_sz,int *is_contig,
                                                MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                                                MPIR_Request **req);
-extern int   MPIDI_OFI_vcrt_create(int size, struct MPIDI_OFI_VCRT **vcrt_ptr);
-extern int   MPIDI_OFI_vcrt_release(struct MPIDI_OFI_VCRT *vcrt);
 extern void  MPIDI_OFI_map_create(void **map);
 extern void  MPIDI_OFI_map_destroy(void *map);
 extern void  MPIDI_OFI_map_set(void *_map, uint64_t id, void *val);

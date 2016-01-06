@@ -213,7 +213,7 @@ static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t 
 }
 
 static inline int MPIDI_CH4_NM_getallincomm(MPIR_Comm * comm_ptr,
-                                            int local_size, MPIR_Gpid local_gpids[], int *singlePG)
+                                            int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

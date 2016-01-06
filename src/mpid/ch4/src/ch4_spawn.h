@@ -86,6 +86,7 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
     PMI_keyval_t **info_keyval_vectors=0, preput_keyval_vector;
     int           *pmi_errcodes = 0, pmi_errno=0;
     int            total_num_processes, should_accept = 1;
+
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
 

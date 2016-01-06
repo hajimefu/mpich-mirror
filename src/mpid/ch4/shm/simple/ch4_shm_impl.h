@@ -46,7 +46,7 @@
 /* ---------------------------------------------------- */
 /* VCR Table Data */
 typedef struct {
-    unsigned int pg_rank;
+    unsigned int avt_rank;
 } MPIDI_CH4_SHMI_SIMPLE_vcr_t;
 
 struct MPIDI_CH4_SHMI_SIMPLE_vcrt_t {

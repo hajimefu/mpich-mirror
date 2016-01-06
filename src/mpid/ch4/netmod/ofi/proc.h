@@ -16,12 +16,24 @@
 static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm *comm)
 {
     int ret;
+
     MPIDI_STATE_DECL(MPIDI_NETMOD_RANK_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_NETMOD_RANK_IS_LOCAL);
 
-    ret = MPIDI_OFI_COMM(comm).vcrt->vcr_table[rank].is_local;
+#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
+    if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
+        ret = 0;
+        goto fn_exit;
+    }
+    ret = MPIDI_OFI_AV(MPIDIR_comm_rank_to_av(comm, rank)).is_local;
+    MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
+            (MPL_DBG_FDEST, " is_local=%d, rank=%d",
+             ret, rank));
+#endif
 
+fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;
 }
+
 #endif /*NETMOD_OFI_PROC_H_INCLUDED */

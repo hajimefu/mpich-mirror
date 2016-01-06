@@ -12,20 +12,9 @@
 #include <mpi.h>
 #include "mpihandlemem.h"
 
-typedef struct MPIDI_VEP {
-    unsigned is_local:1;
-    unsigned addr_idx:31;
-} MPIDI_VEP;
-
-struct MPIDI_VEPT {
-    MPIU_OBJECT_HEADER;
-    unsigned size;                /**< Number of entries in the table */
-    MPIDI_VEP vep_table[0];       /**< Array of virtual connection references */
-};
-typedef struct  MPIDI_VEPT * MPIDI_UCX_VEP_t;
 typedef struct {
-    MPIDI_UCX_VEP_t vept;
-    MPIDI_UCX_VEP_t local_vept;
+    int dummy;
 } MPIDI_UCX_comm_t;
+
 
 #endif /* UCX_PRE_COMMON_H_INCLUDED */

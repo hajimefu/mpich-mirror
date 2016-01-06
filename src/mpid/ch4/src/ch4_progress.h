@@ -40,15 +40,15 @@ __CH4_INLINE__ int MPIDI_Progress_test(void)
     }
     /* todo: progress unexp_list */
     mpi_errno = MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POP(mpi_errno);
+    }
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    if (mpi_errno != MPI_SUCCESS) {
-        MPIR_ERR_POP(mpi_errno);
-    }
     mpi_errno = MPIDI_CH4_SHM_progress(0);
-#endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
+#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROGRESS_TEST);
     return mpi_errno;

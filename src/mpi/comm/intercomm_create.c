@@ -42,7 +42,7 @@ PMPI_LOCAL int MPID_LPID_GetAllInComm( MPIR_Comm *comm_ptr, int local_size,
 #define FUNCNAME MPIR_CheckDisjointLpids
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-PMPI_LOCAL int MPIR_CheckDisjointLpids( int lpids1[], int n1, 
+PMPI_LOCAL int MPIR_CheckDisjointLpids( int lpids1[], int n1,
 					 int lpids2[], int n2 )
 {
     int i, mask_size, idx, bit, maxlpid = -1;

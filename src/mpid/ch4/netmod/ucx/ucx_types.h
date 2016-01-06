@@ -37,12 +37,12 @@ typedef struct {
 } MPIDI_UCX_ucp_request_t;
 
 typedef struct {
+    int avtid;
     ucp_context_h context;
     ucp_worker_h worker;
     char addrname[UCP_PEER_NAME_MAX];
+    char *pmi_addr_table;
     size_t addrname_len;
-    MPID_Node_id_t *node_map;
-    MPID_Node_id_t max_node_id;
     ucp_address_t *if_address;
     char kvsname[MPIDI_UCX_KVSAPPSTRLEN];
     char pname[MPI_MAX_PROCESSOR_NAME];
@@ -53,9 +53,10 @@ typedef struct {
     MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
 } MPIDI_UCX_global_t;
 
-extern MPIDI_UCX_global_t MPIDI_UCX_global;
-extern ucp_ep_h *MPIDI_UCX_eps;
+#define MPIDI_UCX_GPID(gpid) ((gpid)->dev.netmod.ucx)
+#define MPIDI_UCX_AV(av)     ((av)->netmod.ucx)
 
+extern MPIDI_UCX_global_t     MPIDI_UCX_global;
 
 /* UCX TAG Layout */
 

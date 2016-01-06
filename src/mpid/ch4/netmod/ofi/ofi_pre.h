@@ -47,30 +47,7 @@
 struct MPIR_Comm;
 struct MPIR_Request;
 
-#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-typedef struct MPIDI_OFI_VCR {
-    unsigned is_local : 1;
-unsigned ep_idx   :
-    MPIDI_OFI_MAX_ENDPOINTS_BITS;
-unsigned addr_idx :
-    (31 - MPIDI_OFI_MAX_ENDPOINTS_BITS);
-} MPIDI_OFI_VCR;
-#else
-typedef struct MPIDI_OFI_VCR {
-    unsigned is_local : 1;
-    unsigned addr_idx : 31;
-} MPIDI_OFI_VCR;
-#endif
-
-struct MPIDI_OFI_VCRT {
-    MPIU_OBJECT_HEADER;
-    unsigned              size;                /**< Number of entries in the table */
-    MPIDI_OFI_VCR vcr_table[0];       /**< Array of virtual connection references */
-};
-
 typedef struct {
-    struct MPIDI_OFI_VCRT *vcrt;
-    struct MPIDI_OFI_VCRT *local_vcrt;
     void                          *huge_send_counters;
     void                          *huge_recv_counters;
     void                          *win_id_allocator;
@@ -184,5 +161,19 @@ typedef struct {
     struct MPIDI_OFI_win_request   *syncQ;
     uint32_t *disp_units;
 } MPIDI_OFI_win_t;
+
+typedef struct {
+    char           addr[62];
+} MPIDI_OFI_gpid_t;
+
+typedef struct {
+    fi_addr_t dest;
+#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
+    unsigned is_local:1;
+#endif
+#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+    unsigned ep_idx:MPIDI_OFI_MAX_ENDPOINTS_BITS;
+#endif
+} MPIDI_OFI_addr_t;
 
 #endif

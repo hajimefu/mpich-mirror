@@ -38,6 +38,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     char *table = NULL;
     int i;
     ucp_params_t ucp_params;
+    int avtid = 0, max_n_avts;
 
     size_t address_length = 0;
 
@@ -81,7 +82,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
     table = MPL_malloc(size * MPIDI_UCX_global.addrname_len);
-    MPIDI_UCX_eps = MPL_malloc(size * sizeof(ucp_ep_h));
+    MPIDI_UCX_global.pmi_addr_table = table;
 
     maxlen = MPIDI_UCX_KVSAPPSTRLEN;
 
@@ -91,24 +92,12 @@ static inline int MPIDI_CH4_NM_init(int rank,
         MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_commit);
         str_errno = MPL_str_get_binary_arg(valS, "UCX", &table[i * MPIDI_UCX_global.addrname_len],
                                 (int) MPIDI_UCX_global.addrname_len, (int *) &maxlen);
-        MPIDI_CH4_UCX_STR_ERRCHK(str_errno, buscard_len);
+        MPIDI_UCX_STR_ERRCHK(str_errno, buscard_len);
         ucx_status = ucp_ep_create(MPIDI_UCX_global.worker,
                                 (ucp_address_t *) & table[i * MPIDI_UCX_global.addrname_len],
-                                &MPIDI_UCX_eps[i]);
+                                &MPIDI_UCX_AV(&MPIDIR_get_av(0, i)).dest);
         MPIDI_UCX_CHK_STATUS(ucx_status, ep_create);
     }
-
-    mpi_errno = MPIDI_UCX_VEPT_Create(comm_self->remote_size, &MPIDI_UCX_COMM(comm_self).vept);
-    MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
-
-    MPIDI_UCX_COMM(comm_self).vept->vep_table[0].addr_idx = rank;
-    MPIDI_UCX_COMM(comm_self).vept->vep_table[0].is_local = 1;
-
-    /* ---------------------------------- */
-    /* Initialize MPI_COMM_WORLD and VEPT */
-    /* ---------------------------------- */
-    mpi_errno = MPIDI_UCX_VEPT_Create(comm_world->remote_size, &MPIDI_UCX_COMM(comm_world).vept);
-    MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
 
     /* -------------------------------- */
     /* Setup CH4U Active Messages       */
@@ -127,22 +116,6 @@ static inline int MPIDI_CH4_NM_init(int rank,
         MPIDI_CH4_UCX_REQUEST(MPIDI_UCX_global.ucp_am_requests[i], tag_recv_nb);
     }
 
-    /* -------------------------------- */
-    /* Calculate per-node map           */
-    /* -------------------------------- */
-    MPIDI_UCX_global.node_map = MPL_malloc(comm_world->local_size * sizeof(*MPIDI_UCX_global.node_map));
-
-    MPIDI_UCX_global.max_node_id = 1024;
-    mpi_errno = MPIDI_CH4U_build_nodemap(comm_world->rank,
-                             comm_world,
-                             comm_world->local_size,
-                             MPIDI_UCX_global.node_map, &MPIDI_UCX_global.max_node_id);
-
-    MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
-    for (i = 0; i < comm_world->local_size; i++)
-        MPIDI_UCX_COMM(comm_world).vept->vep_table[i].is_local =
-            (MPIDI_UCX_global.node_map[i] == MPIDI_UCX_global.node_map[comm_world->rank]) ? 1 : 0;
-
     mpi_errno = MPIR_Datatype_init_names();
     MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
 
@@ -150,12 +123,6 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_FUNC_EXIT(MPID_STATE_EXIT);
     return mpi_errno;
   fn_fail:
-    if (MPIDI_UCX_eps != NULL) {
-        for (i = 0; i < size; i++) {
-            if (MPIDI_UCX_eps[i] != NULL)
-                ucp_ep_destroy(MPIDI_UCX_eps[i]);
-        }
-    }
     if (MPIDI_UCX_global.worker != NULL)
         ucp_worker_destroy(MPIDI_UCX_global.worker);
 
@@ -169,7 +136,8 @@ static inline int MPIDI_CH4_NM_init(int rank,
 static inline int MPIDI_CH4_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS, thr_err, pmi_errno;
-    int i, size;
+    int i, max_n_avts;
+    max_n_avts = MPIDI_CH4R_get_max_n_avts();
 
     MPIDI_CH4U_finalize();
 
@@ -181,21 +149,13 @@ static inline int MPIDI_CH4_NM_finalize(void)
         MPL_free(MPIDI_UCX_global.am_bufs[i]);
     }
 
-    size = MPIR_Process.comm_world->local_size;
-    if (MPIDI_UCX_eps != NULL) {
-        for (i = 0; i < size; i++) {
-            if (MPIDI_UCX_eps[i] != NULL)
-                ucp_ep_destroy(MPIDI_UCX_eps[i]);
-        }
-    }
-
     if (MPIDI_UCX_global.worker != NULL)
         ucp_worker_destroy(MPIDI_UCX_global.worker);
 
     if (MPIDI_UCX_global.context != NULL)
         ucp_cleanup(MPIDI_UCX_global.context);
 
-    MPL_free(MPIDI_UCX_global.node_map);
+    MPL_free(MPIDI_UCX_global.pmi_addr_table);
 
     PMI_Finalize();
 
@@ -209,12 +169,16 @@ static inline int MPIDI_CH4_NM_finalize(void)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-   if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-        *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
-    else if(is_remote)
-        *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
-    else
-        *lpid_ptr = 0;
+    int avtid = 0, lpid;
+   if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
+        MPIDI_CH4R_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
+    } else if (is_remote) {
+        MPIDI_CH4R_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
+    } else {
+        MPIDI_CH4R_comm_rank_to_pid_local(comm_ptr, idx, &lpid, &avtid);
+    }
+
+    *lpid_ptr = MPIDI_CH4R_LPID_CREATE(avtid, lpid);
     return MPI_SUCCESS;
 
 }
@@ -222,6 +186,15 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
 static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     int mpi_errno = MPI_SUCCESS;
+    int avtid = 0, lpid;
+    size_t sz;
+    MPIDI_CH4R_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
+    MPIU_Assert(rank < comm_ptr->local_size);
+    sz = sizeof(MPIDI_CH4_NMI_UCX_GPID(gpid).addr);
+    memset(MPIDI_CH4_NMI_UCX_GPID(gpid).addr, 0, sz);
+    memcpy(MPIDI_CH4_NMI_UCX_GPID(gpid).addr,
+           &MPIDI_CH4_NMI_UCX_global.pmi_addr_table[lpid * MPIDI_CH4_NMI_UCX_global.addrname_len], sz);
+    MPIU_Assert(sz <= sizeof(MPIDI_CH4_NMI_UCX_GPID(gpid).addr));
   fn_exit:
     return mpi_errno;
   fn_fail:
@@ -230,32 +203,75 @@ static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpi
 
 static inline int MPIDI_CH4_NM_get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
-    *id_p = MPIDI_UCX_global.node_map[COMM_TO_INDEX(comm, rank)];
+    MPIDIU_get_node_id(comm, rank, id_p);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
 {
-    *max_id_p = MPIDI_UCX_global.max_node_id;
+    MPIDIU_get_max_node_id(comm, max_id_p);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_getallincomm(MPIR_Comm * comm_ptr,
-                                            int local_size, MPIR_Gpid local_gpids[], int *singlePG)
+                                            int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
     int i;
 
     for (i = 0; i < comm_ptr->local_size; i++)
         MPIDI_GPID_Get(comm_ptr, i, &local_gpids[i]);
 
-    *singlePG = 0;
+    *singleAVT = 0;
     return 0;
 }
 
 static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
 
-    return MPI_SUCCESS;
+    int i, mpi_errno = MPI_SUCCESS;
+    int *new_avt_procs;
+    int n_new_procs = 0;
+    size_t sz;
+    int max_n_avts;
+    new_avt_procs = (int *) MPL_malloc(size * sizeof(int));
+    max_n_avts = MPIDIR_get_max_n_avts();
+
+    for(i = 0; i < size; i++) {
+        int j, k;
+        char tbladdr[128];
+        int found = 0;
+
+        for (k = 0; k < max_n_avts; k++) {
+            if (MPIDIR_get_av_table(k) == NULL) { continue; }
+            for(j = 0; j < MPIDIR_get_av_table(k)->size; j++) {
+                sz = sizeof(MPIDI_UCX_GPID(&gpid[i]).addr);
+                MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(&gpid[i]).addr));
+
+                if(!memcmp(&MPIDI_UCX_global.pmi_addr_table[j * MPIDI_UCX_global.addrname_len],
+                           MPIDI_UCX_GPID(&gpid[i]).addr, sz)) {
+                    lpid[i] = MPIDIR_LPID_CREATE(k, j);
+                    found = 1;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            new_avt_procs[n_new_procs] = i;
+            n_new_procs++;
+        }
+    }
+
+    /* FIXME: add support for dynamic processes */
+    if (n_new_procs > 0) {
+        mpi_errno = -1;
+        MPIR_ERR_POP(mpi_errno);
+    }
+
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,

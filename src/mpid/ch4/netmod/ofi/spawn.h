@@ -16,8 +16,9 @@
 #define MPIDI_OFI_PORT_NAME_TAG_KEY "tag"
 #define MPIDI_OFI_CONNENTRY_TAG_KEY "connentry"
 
+// FIXME:
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE
-#define MPIDI_OFI_TABLE_INDEX_INCR() MPIDI_Addr_table->size++
+#define MPIDI_OFI_TABLE_INDEX_INCR()
 #else
 #define MPIDI_OFI_TABLE_INDEX_INCR()
 #endif
@@ -107,6 +108,7 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
                                                              char            *api)
 {
     int        start,i,context_id_offset,mpi_errno = MPI_SUCCESS;
+    int max_n_avts;
     MPIR_Comm *tmp_comm_ptr = NULL;
     fi_addr_t *addr = NULL;
 
@@ -123,39 +125,59 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
     tmp_comm_ptr->comm_kind            = MPIR_COMM_KIND__INTERCOMM;
     tmp_comm_ptr->local_comm           = comm_ptr;
     tmp_comm_ptr->is_low_group         = is_low_group;
-    MPIDI_OFI_COMM(tmp_comm_ptr).local_vcrt = MPIDI_OFI_COMM(comm_ptr).vcrt;
-
-    mpi_errno = MPIDI_OFI_vcrt_create(tmp_comm_ptr->remote_size,
-                                              &MPIDI_OFI_COMM(tmp_comm_ptr).vcrt);
-    start = MPIDI_Addr_table->size;
-    MPIDI_Global.node_map = (MPID_Node_id_t *)MPL_realloc(MPIDI_Global.node_map,
-                                                           (entries+start)*sizeof(MPID_Node_id_t));
-
-    for(i=0; i<entries; i++)
-        MPIDI_Global.node_map[start+i] = node_table[i];
-
-#ifndef MPIDI_OFI_CONFIG_USE_AV_TABLE
-    MPIDI_Addr_table = (MPIDI_OFI_addr_table_t *)MPL_realloc(MPIDI_Addr_table,
-                                                                      (entries+start)*sizeof(fi_addr_t)+
-                                                                      sizeof(MPIDI_OFI_addr_table_t));
-    addr=&(MPIDI_OFI_TO_PHYS(start));
-#endif
-
-    MPIDI_Addr_table->size += entries;
-
-    for(i=0; i<entries; i++) {
-        MPIDI_OFI_COMM(tmp_comm_ptr).vcrt->vcr_table[i].addr_idx += start;
+    MPIDII_COMM(tmp_comm_ptr,local_map).mode = MPIDII_COMM(comm_ptr,map).mode;
+    MPIDII_COMM(tmp_comm_ptr,local_map).size = MPIDII_COMM(comm_ptr,map).size;
+    MPIDII_COMM(tmp_comm_ptr,local_map).avtid = MPIDII_COMM(comm_ptr,map).avtid;
+    switch (MPIDII_COMM(comm_ptr,map).mode) {
+        case MPIDII_RANK_MAP_DIRECT:
+            break;
+        case MPIDII_RANK_MAP_OFFSET:
+            MPIDII_COMM(tmp_comm_ptr,local_map).reg.offset = MPIDII_COMM(comm_ptr,map).reg.offset;
+            break;
+        case MPIDII_RANK_MAP_STRIDE:
+        case MPIDII_RANK_MAP_STRIDE_BLOCK:
+            MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.stride = MPIDII_COMM(comm_ptr,map).reg.stride.stride;
+            MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.blocksize = MPIDII_COMM(comm_ptr,map).reg.stride.blocksize;
+            MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.offset = MPIDII_COMM(comm_ptr,map).reg.stride.offset;
+            break;
+        case MPIDII_RANK_MAP_LUT:
+            MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.t = MPIDII_COMM(comm_ptr,map).irreg.lut.t;
+            MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.lpid = MPIDII_COMM(comm_ptr,map).irreg.lut.lpid;
+            MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.lut.t);
+            break;
+        case MPIDII_RANK_MAP_MLUT:
+            MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.t = MPIDII_COMM(comm_ptr,map).irreg.mlut.t;
+            MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.gpid = MPIDII_COMM(comm_ptr,map).irreg.mlut.gpid;
+            MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.mlut.t);
+            break;
     }
 
-    MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av,addr_table,entries,
-                                        addr,0ULL,NULL),avmap);
-    /*    *newcomm = tmp_comm_ptr;  not needed to be intialized */
+    int avtid;
+    avtid = 0;
+    max_n_avts = MPIDIR_get_max_n_avts();
+    MPIDIR_new_avt(entries, &avtid);
+
+    fi_addr_t *mapped_table;
+    mapped_table = (fi_addr_t*) MPL_malloc(entries * sizeof(fi_addr_t));
+
+    MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, addr_table, entries,
+                                        mapped_table, 0ULL, NULL), avmap);
+    for (i = 0; i < entries; i++) {
+        MPIDI_OFI_AV(&MPIDIR_get_av(avtid, i)).dest = mapped_table[i];
+    }
+    MPL_free(mapped_table);
+
+    MPIDIR_update_node_map(avtid, entries, node_table);
+
+    /* set mapping for remote group */
+    MPIDII_COMM(tmp_comm_ptr,map).mode = MPIDII_RANK_MAP_DIRECT;
+    MPIDII_COMM(tmp_comm_ptr,map).size = entries;
+    MPIDII_COMM(tmp_comm_ptr,map).avtid = avtid;
+
     MPIR_Comm_commit(tmp_comm_ptr);
 
     MPIDI_OFI_MPI_CALL_POP(MPIR_Comm_dup_impl(tmp_comm_ptr, newcomm));
 
-    /*    MPIDI_OFI_vcrt_release(MPIDI_OFI_COMM(tmp_comm_ptr).vcrt);
-        MPIU_Handle_obj_free(&MPID_Comm_mem, tmp_comm_ptr);  this is done in comm_release */
     tmp_comm_ptr->local_comm = NULL; /* avoid freeing local comm with comm_release */
     MPIR_Comm_release(tmp_comm_ptr);
 
@@ -309,7 +331,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         }
 
         for(i=0; i<comm_ptr->local_size; i++)
-            my_node_table[i] = MPIDI_Global.node_map[MPIDI_OFI_COMM_TO_INDEX(comm_ptr,i)];
+            MPIDIU_get_node_id(comm_ptr, i, &my_node_table[i]);
 
         /* fi_av_map here is not quite right for some providers */
         /* we need to get this connection from the sockname     */
@@ -375,7 +397,6 @@ static inline int MPIDI_CH4_NM_comm_connect(const char *port_name,
         char      conname[FI_NAME_MAX];
         MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_get_conn_name_from_port(port_name,conname));
         MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av,conname,1,&conn,0ULL,NULL),avmap);
-        MPIDI_OFI_TABLE_INDEX_INCR();
         MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_dynproc_exchange_map(root,1,port_id,&conn,conname,comm_ptr,
                                                                               &parent_table_sz,&parent_root,
                                                                               &parent_addr_table,
@@ -509,7 +530,6 @@ static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
                                                                               &child_addr_table,
                                                                               &child_node_table));
         MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av,conname,1,&conn,0ULL,NULL),avmap);
-        MPIDI_OFI_TABLE_INDEX_INCR();
         MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_dynproc_exchange_map(root,1,port_id,&conn,conname,comm_ptr,
                                                                               &child_table_sz,&child_root,
                                                                               &child_addr_table,

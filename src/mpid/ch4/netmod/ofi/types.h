@@ -135,18 +135,19 @@
 #define MPIDI_OFI_THREAD_SPAWN_MUTEX    MPIDI_Global.mutexes[3].m
 
 /* Field accessor macros */
-#define MPIDI_OFI_GPID(req)                ((MPIDI_OFI_gpid_t*)(req)->dev.pad)
+#define MPIDI_OFI_GPID(gpid)               ((gpid)->dev.netmod.ofi)
 #define MPIDI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_OFI_offset_checker_t,  pad)
 #define MPIDI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
 #define MPIDI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
 #define MPIDI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr)
 #define MPIDI_OFI_REQUEST(req,field)       ((req)->dev.ch4.netmod.ofi.field)
+#define MPIDI_OFI_AV(av)                   ((av)->netmod.ofi)
 
 #define MPIDI_OFI_DATATYPE(dt)   ((dt)->dev.netmod.ofi)
 #define MPIDI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 
 #ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-#define MPIDI_OFI_COMM_TO_EP(comm,rank)  MPIDI_OFI_COMM(comm).vcrt->vcr_table[rank].ep_idx
+#define MPIDI_OFI_COMM_TO_EP(comm,rank)  MPIDI_OFI_AV(MPIDIR_comm_rank_to_av(comm, rank)).ep_idx
 #define MPIDI_OFI_EP_TX_TAG(x) MPIDI_Global.ctx[x].tx_tag
 #define MPIDI_OFI_EP_TX_RMA(x) MPIDI_Global.ctx[x].tx_rma
 #define MPIDI_OFI_EP_TX_MSG(x) MPIDI_Global.ctx[x].tx_msg
@@ -221,15 +222,6 @@ enum {
 };
 
 typedef struct {
-    fi_addr_t dest;
-} MPIDI_OFI_addr_entry_t;
-
-typedef struct {
-    int                            size;
-    MPIDI_OFI_addr_entry_t table[0];/**< Array of physical addresses */
-} MPIDI_OFI_addr_table_t;
-
-typedef struct {
     char              pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context context;          /* fixed field, do not move */
     int               event_id;         /* fixed field, do not move */
@@ -300,6 +292,7 @@ typedef struct  {
 #define MPIDI_KVSAPPSTRLEN 1024
 typedef struct {
     /* OFI objects */
+    int avtid;
     struct fid_domain *domain;
     struct fid_fabric *fabric;
     struct fid_av     *av;
@@ -321,8 +314,6 @@ typedef struct {
     int             context_shift;
     size_t          iov_limit;
     size_t          rma_iov_limit;
-    MPID_Node_id_t *node_map;
-    MPID_Node_id_t  max_node_id;
 
     /* Mutexex and endpoints */
     MPIDI_OFI_cacheline_mutex_t mutexes[4];
@@ -360,11 +351,6 @@ typedef struct {
     char   pname[MPI_MAX_PROCESSOR_NAME];
     int    port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
 } MPIDI_OFI_global_t;
-
-typedef struct {
-    char           addr[62];
-    MPID_Node_id_t node;
-} MPIDI_OFI_gpid_t;
 
 typedef struct {
     uint32_t index;
@@ -509,7 +495,6 @@ typedef struct MPIDI_OFI_huge_counter_t {
 } MPIDI_OFI_huge_counter_t;
 
 /* Externs */
-extern MPIDI_OFI_addr_table_t  *MPIDI_Addr_table;
 extern MPIDI_OFI_global_t       MPIDI_Global;
 extern int                              MPIR_Datatype_init_names(void);
 

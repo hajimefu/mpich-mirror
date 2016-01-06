@@ -144,14 +144,14 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPIR_Request * req)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void MPIDI_CH4U_request_release(MPIR_Request * req)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_REQUEST_RELEASE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_REQEUST_RELEASE);
 
     if (req->kind == MPIR_REQUEST_KIND__PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
         MPIDI_CH4I_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
     }
     MPIDI_CH4I_request_release(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_RELEASE);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_REQUEST_RELEASE);
 }
 
 #undef FUNCNAME
@@ -412,7 +412,7 @@ static inline int MPIDI_CH4I_valid_group_rank(MPIR_Comm  *comm,
 
     MPIDI_CH4_NM_comm_get_lpid(comm, rank, &lpid, FALSE);
 
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
+    for(z = 0; z < size && (int)lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
 
     ret = (z < size);
 

@@ -298,5 +298,16 @@ __CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
     return mpi_errno;
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_update_node_map
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4R_update_node_map(int avtid, int size, MPID_Node_id_t node_map[])
+{
+    int i;
+    for (i = 0; i < size; i++) {
+        MPIDI_CH4_Global.node_map[avtid][i] = node_map[i];
+    }
+}
 
 #endif /* CH4R_INIT_H_INCLUDED */

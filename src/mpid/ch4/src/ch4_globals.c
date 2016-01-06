@@ -16,6 +16,8 @@
 #include "ch4_impl.h"
 
 MPIDI_CH4_Global_t MPIDI_CH4_Global;
+MPIDI_CH4I_av_table_t **MPIDI_CH4I_av_table;
+MPIDI_CH4I_av_table_t *MPIDI_CH4I_av_table0;
 
 MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_func;
 MPIDI_CH4_NM_native_funcs_t *MPIDI_CH4_NM_native_func;
@@ -65,3 +67,10 @@ void MPID_Request_finalize(MPIR_Request *req)
 {
     return;
 }
+
+#if defined(MPL_USE_DBG_LOGGING)
+MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
+MPL_dbg_class MPIDI_CH4_DBG_MAP;
+MPL_dbg_class MPIDI_CH4_DBG_MEMORY;
+#endif
+

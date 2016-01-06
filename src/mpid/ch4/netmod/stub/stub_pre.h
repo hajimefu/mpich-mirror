@@ -32,4 +32,12 @@ typedef struct {
     int dummy;
 } MPIDI_STUB_win_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_CH4_NMI_STUB_gpid_t;
+
+typedef struct {
+    int dummy;
+} MPIDI_CH4_NMI_STUB_addr_t;
+
 #endif

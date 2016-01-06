@@ -29,57 +29,6 @@ int   MPIDI_OFI_handle_cq_error_util(ssize_t ret)
     return mpi_errno;
 }
 
-#undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_vcrt_create
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_OFI_vcrt_create(int size, struct MPIDI_OFI_VCRT **vcrt_ptr)
-{
-    struct MPIDI_OFI_VCRT *vcrt;
-    int i,mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
-
-    vcrt = (struct MPIDI_OFI_VCRT *)MPL_malloc(sizeof(struct MPIDI_OFI_VCRT) +
-                                                        size*sizeof(MPIDI_OFI_VCR));
-
-    if(vcrt != NULL) {
-        MPIU_Object_set_ref(vcrt, 1);
-        vcrt->size = size;
-        *vcrt_ptr = vcrt;
-
-        for(i=0; i<size; i++)
-            vcrt->vcr_table[i].addr_idx = i;
-
-        for(i=0; i<size; i++)
-            vcrt->vcr_table[i].is_local = 0;
-
-        mpi_errno = MPI_SUCCESS;
-    } else
-        mpi_errno = MPIR_ERR_MEMALLOCFAILED;
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
-    return mpi_errno;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_vcrt_release
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_OFI_vcrt_release(struct MPIDI_OFI_VCRT *vcrt)
-{
-    int count;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_RELEASE);
-    MPIU_Object_release_ref(vcrt, &count);
-
-    if(count == 0)
-        MPL_free(vcrt);
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VCRT_RELEASE);
-    return MPI_SUCCESS;
-}
-
 typedef struct {
     uint64_t            key;
     void               *value;
@@ -243,6 +192,10 @@ void MPIDI_OFI_index_allocator_destroy(void *indexmap)
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_UTIL_MUTEX);
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NMI_OFI_Win_lock_advance
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int
 MPIDI_OFI_win_lock_advance(MPIR_Win *win)
 {
@@ -565,6 +518,8 @@ fn_exit:
                               (x) == MPI_C_DOUBLE_COMPLEX)
 
 
+#undef FUNCNAME
+#define FUNCNAME mpi_to_ofi
 #undef FCNAME
 #define FCNAME DECL_FUNC(mpi_to_ofi)
 static inline int mpi_to_ofi(MPI_Datatype       dt,
