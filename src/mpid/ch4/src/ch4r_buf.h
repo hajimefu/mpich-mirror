@@ -13,7 +13,7 @@
 #define MPIDI_CH4R_BUF_H_INCLUDED
 
 #include "ch4_impl.h"
-#include "ch4u_util.h"
+#include "ch4i_util.h"
 #include <pthread.h>
 
 /* 
