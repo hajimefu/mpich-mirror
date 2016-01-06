@@ -12,7 +12,7 @@
 #if !defined(MPICH_MPIDCH4U_H_INCLUDED)
 #define MPICH_MPIDCH4U_H_INCLUDED
 
-#include "ch4u_recvq.h"
+#include "ch4i_recvq.h"
 #include "ch4r_init.h"
 #include "ch4u_probe.h"
 #include "ch4r_recv.h"
