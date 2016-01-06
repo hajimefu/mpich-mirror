@@ -65,6 +65,7 @@ typedef struct {
     uint64_t src_offset;
     uint64_t sreq_ptr;
     uint64_t am_hdr_src;
+    uint64_t rma_key;
 } MPIDI_OFI_lmt_msg_pyld_t;
 
 typedef struct {
@@ -98,6 +99,7 @@ typedef struct {
 typedef struct {
     MPIDI_OFI_lmt_msg_pyld_t lmt_info;
     uint64_t lmt_cntr;
+    struct fid_mr *lmt_mr;
 
     void *pack_buffer;
     void *rreq_ptr;

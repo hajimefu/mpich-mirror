@@ -93,6 +93,7 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     MPIDI_AM_OFI_hdr_t *msg_hdr;
     MPIDI_OFI_lmt_msg_pyld_t *lmt_info;
     struct iovec iov[3];
+    uint64_t index;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
@@ -104,12 +105,27 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     msg_hdr->am_type = MPIDI_AMTYPE_LMT_REQ;
 
     lmt_info = &AMREQ_OFI_HDR(sreq, lmt_info);
-    lmt_info->src_offset = (uint64_t) data;
+    lmt_info->src_offset = (uint64_t) 0; /* TODO: Set to data if MR_BASIC */
     lmt_info->sreq_ptr = (uint64_t) sreq;
+    /* Always allocates RMA ID from COMM_WORLD as the actual associated communicator
+       is not available here */
+    index = MPIDI_OFI_Index_allocator_alloc(COMM_OFI(MPIR_Process.comm_world).rma_id_allocator);
+    MPIU_Assert(index < MPIDI_Global.max_huge_rmas);
+    lmt_info->rma_key = index << MPIDI_Global.huge_rma_shift;
 
     MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
     MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
     MPIU_Assert((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) <= MPIDI_MAX_SHORT_SEND_SZ);
+
+    FI_RC(fi_mr_reg(MPIDI_Global.domain,
+                    data,
+                    data_sz,
+                    FI_REMOTE_READ,
+                    0ULL,
+                    lmt_info->rma_key,
+                    0ULL,
+                    &AMREQ_OFI_HDR(sreq, lmt_mr),
+                    NULL), mr_reg);
 
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);

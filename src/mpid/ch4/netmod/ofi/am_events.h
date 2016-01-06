@@ -140,10 +140,10 @@ static inline int MPIDI_netmod_do_rdma_read(void *dst, uint64_t src, size_t data
         MPIU_Assert(am_req);
 
         am_req->req_hdr = AMREQ_OFI(rreq, req_hdr);
-#warning "Jithin:  Need LKEY"
         FI_RC_RETRY_AM(fi_read(MPIDI_Global.ep, (char *) dst + done,
                             curr_len, NULL, source, src + done,
-                            0ULL, &am_req->context), read);
+                               AMREQ_OFI_HDR(rreq, lmt_info).rma_key,
+                               &am_req->context), read);
         done += curr_len;
         rem -= curr_len;
     }
@@ -353,11 +353,16 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_a
     MPID_Request *sreq;
     MPIDI_OFI_Ack_msg_pyld_t *ack_msg;
     int handler_id;
+    uint64_t index;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LMT_ACK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_LMT_ACK);
 
     ack_msg = (MPIDI_OFI_Ack_msg_pyld_t *) msg_hdr->payload;
     sreq = (MPID_Request *) ack_msg->sreq_ptr;
+
+    index = fi_mr_key(AMREQ_OFI_HDR(sreq, lmt_mr)) >> MPIDI_Global.huge_rma_shift;
+    MPIDI_OFI_Index_allocator_free(COMM_OFI(MPIR_Process.comm_world).rma_id_allocator, index);
+    FI_RC(fi_close(&AMREQ_OFI_HDR(sreq, lmt_mr)->fid), mr_unreg);
 
     if (AMREQ_OFI_HDR(sreq, pack_buffer)) {
         MPIU_Free(AMREQ_OFI_HDR(sreq, pack_buffer));
