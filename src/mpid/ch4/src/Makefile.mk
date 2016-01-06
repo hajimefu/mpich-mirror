@@ -29,7 +29,7 @@ noinst_HEADERS += src/mpid/ch4/src/ch4_comm.h     \
                   src/mpid/ch4/src/ch4u_recvq.h   \
                   src/mpid/ch4/src/ch4i_util.h 	  \
                   src/mpid/ch4/src/ch4i_symheap.h \
-                  src/mpid/ch4/src/ch4u_send.h	  \
+                  src/mpid/ch4/src/ch4r_send.h	  \
                   src/mpid/ch4/src/ch4r_buf.h
 
 mpi_core_sources += src/mpid/ch4/src/ch4_globals.c        \
