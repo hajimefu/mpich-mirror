@@ -12,7 +12,7 @@
 #define MPIDCH4U_WIN_H_INCLUDED
 
 #include "ch4_impl.h"
-#include "ch4u_symheap.h"
+#include "ch4i_symheap.h"
 #include "ch4i_util.h"
 #include <opa_primitives.h>
 #include "mpiinfo.h"
