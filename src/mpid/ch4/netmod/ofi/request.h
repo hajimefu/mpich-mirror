@@ -87,14 +87,13 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
 
         MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
     }
-
     return;
 }
 
 static inline MPID_Request *MPIDI_netmod_request_create(void)
 {
     MPID_Request *req;
-    req = MPIDI_Request_alloc_and_init(1);
+    req = MPIDI_netmod_request_alloc_and_init(1);
     return req;
 }
 
