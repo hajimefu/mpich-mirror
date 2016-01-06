@@ -29,7 +29,7 @@
 #else
 #include "am_init.h"
 #include "am_probe.h"
-#include "am_progress.h"
+#include "progress.h"
 #include "am_recv.h"
 #include "am_send.h"
 #include "am_win.h"

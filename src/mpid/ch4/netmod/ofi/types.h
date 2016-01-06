@@ -46,6 +46,15 @@ EXTERN_C_BEGIN
 #define MPIDI_BUF_POOL_NUM (1024)
 #define MPIDI_NUM_CQ_BUFFERED (1024)
 
+
+#ifdef USE_OFI_TAGGED
+#define MPIDI_ENABLE_TAGGED_PROGRESS 1
+#define MPIDI_ENABLE_AM_PROGRESS 1
+#else
+#define MPIDI_ENABLE_TAGGED_PROGRESS 0
+#define MPIDI_ENABLE_AM_PROGRESS 1
+#endif
+
 /* Macros and inlines */
 /* match/ignore bit manipulation
  *

@@ -18,8 +18,39 @@
 #define NUM_CQ_ENTRIES 8
 static inline int handle_cq_error(ssize_t ret);
 static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num);
-static inline int am_progress(void *netmod_context, int blocking);
+static inline int am_progress(void *netmod_context,
+                              int   blocking);
 
+__attribute__((__always_inline__)) static inline
+int MPIDI_netmod_generic_progress(void *netmod_context,
+                                  int   blocking,
+                                  int   do_am,
+                                  int   do_tagged)
+{
+    int                mpi_errno;
+    if(do_tagged) {
+        cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
+        ssize_t            ret;
+
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
+        ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
+
+        if(likely(ret > 0))
+            mpi_errno = handle_cq_entries(wc,ret);
+        else if (ret == -FI_EAGAIN)
+            mpi_errno = MPI_SUCCESS;
+        else
+            mpi_errno = handle_cq_error(ret);
+
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
+        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    }
+    if(do_am)
+        mpi_errno = am_progress(netmod_context,blocking);
+
+    return mpi_errno;
+}
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_progress
@@ -27,28 +58,13 @@ static inline int am_progress(void *netmod_context, int blocking);
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_progress(void *netmod_context, int blocking)
 {
-    int                mpi_errno;
-    cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
-    ssize_t            ret;
+    int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
-
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-    ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
-
-    if(likely(ret > 0))
-        mpi_errno = handle_cq_entries(wc,ret);
-    else if (ret == -FI_EAGAIN)
-        mpi_errno = MPI_SUCCESS;
-    else
-        mpi_errno = handle_cq_error(ret);
-
-    am_progress(netmod_context,blocking);
-
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-
-    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
-    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    mpi_errno = MPIDI_netmod_generic_progress(netmod_context,
+                                              blocking,
+                                              MPIDI_ENABLE_AM_PROGRESS,
+                                              MPIDI_ENABLE_TAGGED_PROGRESS);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
 }
