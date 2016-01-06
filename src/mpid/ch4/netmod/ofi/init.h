@@ -441,7 +441,7 @@ static inline int MPIDI_netmod_init(int         rank,
      * tranlating gpids to lpids */
     MPIDI_Global.node_map = (MPID_Node_id_t *)
         MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
-    MPIDI_CH4U_build_nodemap(comm_world->rank,
+    MPIDI_CH4R_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
                              MPIDI_Global.node_map,

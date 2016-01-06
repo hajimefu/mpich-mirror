@@ -62,7 +62,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             ENVELOPE_GET(REQ_SHM(req), sender_rank, tag, context_id);
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                              (MPIU_DBG_FDEST, "Posted from grank %d to %d in progress %d,%d,%d\n",
-                              MPIDI_CH4U_rank_to_lpid(sender_rank, req->comm), MPID_nem_mem_region.rank,
+                              MPIDI_CH4R_rank_to_lpid(sender_rank, req->comm), MPID_nem_mem_region.rank,
                               sender_rank, tag, context_id));
             if ((in_cell && ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
                 (sreq && ENVELOPE_MATCH(REQ_SHM(sreq), sender_rank, tag, context_id))) {
@@ -225,7 +225,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
         /*
          * TODO: make request field dest_lpid (or even recvQ[dest_lpid]) instead of dest - no need to do rank_to_lpid each time
          */
-        int grank = MPIDI_CH4U_rank_to_lpid(dest, sreq->comm);
+        int grank = MPIDI_CH4R_rank_to_lpid(dest, sreq->comm);
         cell->pending = NULL;
         if (REQ_SHM(sreq)->type == TYPE_SYNC ) {
             /* increase req cc in order to release req only after ACK, do it once per SYNC request */

@@ -28,7 +28,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm)
      * it will call back up to the CH4U function to get the infomration. */
     ret = MPIDI_netmod_rank_is_local(rank, comm);
 #else
-    ret = MPIDI_CH4U_rank_is_local(rank, comm);
+    ret = MPIDI_CH4R_rank_is_local(rank, comm);
 #endif
 
     MPIDI_FUNC_EXIT(MPIDI_STATE_CH4_RANK_IS_LOCAL);

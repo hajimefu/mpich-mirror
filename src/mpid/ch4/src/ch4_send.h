@@ -12,7 +12,7 @@
 #define MPIDCH4_SEND_H_INCLUDED
 
 #include "ch4_impl.h"
-#include "ch4u_proc.h"
+#include "ch4r_proc.h"
 #undef FUNCNAME
 #define FUNCNAME MPIDI_Send
 #undef FCNAME

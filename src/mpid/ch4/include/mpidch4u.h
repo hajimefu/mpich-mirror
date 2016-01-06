@@ -19,7 +19,7 @@
 #include "ch4r_rma.h"
 #include "ch4r_send.h"
 #include "ch4r_win.h"
-#include "ch4u_proc.h"
+#include "ch4r_proc.h"
 #include "ch4r_buf.h"
 
 #endif /* !defined(MPICH_MPIDCH4U_H_INCLUDED) */

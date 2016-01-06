@@ -12,7 +12,7 @@
 #define MPIDCH4_INIT_H_INCLUDED
 
 #include "ch4_impl.h"
-#include "ch4u_proc.h"
+#include "ch4r_proc.h"
 
 /*
 === BEGIN_MPI_T_CVAR_INFO_BLOCK ===
@@ -227,7 +227,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     MPIDI_CH4_Global.node_map =
         (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(MPID_Node_id_t));
-    MPIDI_CH4U_build_nodemap(MPIR_Process.comm_world->rank,
+    MPIDI_CH4R_build_nodemap(MPIR_Process.comm_world->rank,
                              MPIR_Process.comm_world,
                              MPIR_Process.comm_world->local_size,
                              MPIDI_CH4_Global.node_map,
