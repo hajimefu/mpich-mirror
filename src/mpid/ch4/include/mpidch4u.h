@@ -15,7 +15,7 @@
 #include "ch4u_recvq.h"
 #include "ch4r_init.h"
 #include "ch4u_probe.h"
-#include "ch4u_recv.h"
+#include "ch4r_recv.h"
 #include "ch4r_rma.h"
 #include "ch4r_send.h"
 #include "ch4r_win.h"
