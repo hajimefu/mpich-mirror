@@ -1788,9 +1788,9 @@ static inline void MPIDI_CH4I_win_unlock_done_cb(const MPIDI_CH4R_win_cntrl_msg_
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK_DONE_CB);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK_DONE_CB);
 
-    if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK) {
+    if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK) {
         MPIDI_CH4R_WIN(win, sync).lock.remote.locked--;
-    } else if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_LOCK_ALL) {
+    } else if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK_ALL) {
         MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked > 0);
         MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked -= 1;
     } else {

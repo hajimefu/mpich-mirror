@@ -85,13 +85,13 @@ typedef enum {
 } MPIDI_CH4U_WIN_CTRL_MSG_TYPE;
 
 enum {
-    MPIDI_CH4I_EPOTYPE_NONE = 0,          /**< No epoch in affect */
-    MPIDI_CH4I_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
-    MPIDI_CH4I_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
-    MPIDI_CH4I_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
-    MPIDI_CH4I_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
-    MPIDI_CH4I_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
-    MPIDI_CH4I_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
+    MPIDI_CH4R_EPOTYPE_NONE = 0,          /**< No epoch in affect */
+    MPIDI_CH4R_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
+    MPIDI_CH4R_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
+    MPIDI_CH4R_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
+    MPIDI_CH4R_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
+    MPIDI_CH4R_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
+    MPIDI_CH4R_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
 };
 
 typedef struct MPIDI_CH4U_AM_Hdr_t {
