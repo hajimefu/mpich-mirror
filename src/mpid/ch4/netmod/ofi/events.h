@@ -80,6 +80,7 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
     count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
 
+#ifdef MPIDI_BUILD_CH4_SHM
     if (MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq))
     {
         int continue_matching = 1;
@@ -96,6 +97,7 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 
         if (!continue_matching) goto fn_exit;
     }
+#endif
 
     if (REQ_OFI(rreq, pack_buffer)) {
         last = count;
