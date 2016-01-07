@@ -31,7 +31,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
         MPIDI_CH4R_COMM(comm, unexp_list) = NULL;
         MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = comm;
         if (MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list) {
-            MPIDI_CH4U_Dev_rreq_t *curr, *tmp;
+            MPIDI_CH4R_Dev_rreq_t *curr, *tmp;
             MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, 
                                 curr, tmp) {
                 MPL_DL_DELETE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, curr);
@@ -57,8 +57,8 @@ __CH4_INLINE__ int MPIDI_CH4R_destroy_comm(MPID_Comm * comm)
 
     comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
     if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.posted_list == NULL);
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4u.unexp_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4r.posted_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4r.unexp_list == NULL);
         MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = NULL;
     }
 
@@ -78,7 +78,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT);
 
-#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
+#ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
     MPIDI_CH4_Global.posted_list = NULL;
     MPIDI_CH4_Global.unexp_list = NULL;
 #endif

@@ -303,15 +303,15 @@ if test "$rankbits" != "16" -a "$rankbits" != "32" ; then
 fi
 AC_DEFINE_UNQUOTED(CH4_RANK_BITS,$rankbits,[Define the number of CH4_RANK_BITS])
 
-AC_ARG_ENABLE(ch4u-per-comm-msg-queue,
-    [--enable-ch4u-per-comm-msg-queue=option
+AC_ARG_ENABLE(ch4r-per-comm-msg-queue,
+    [--enable-ch4r-per-comm-msg-queue=option
        Enable use of per-communicator message queues for posted recvs/unexpected messages
          yes       - Use per-communicator message queue. (Default)
          no        - Use global queue for posted recvs/unexpected messages.
-    ],,enable_ch4u_per_comm_msg_queue=yes)
+    ],,enable_ch4r_per_comm_msg_queue=yes)
 
-if test "$enable_ch4u_per_comm_msg_queue" = "yes" ; then
-    AC_DEFINE([MPIDI_CH4U_USE_PER_COMM_QUEUE], [1],
+if test "$enable_ch4r_per_comm_msg_queue" = "yes" ; then
+    AC_DEFINE([MPIDI_CH4R_USE_PER_COMM_QUEUE], [1],
         [Define if CH4U will use per-communicator message queues])
 fi
 

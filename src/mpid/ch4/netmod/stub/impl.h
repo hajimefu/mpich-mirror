@@ -12,6 +12,6 @@
 #define NETMOD_STUB_IMPL_H_INCLUDED
 
 #include <mpidimpl.h>
-#include "mpidch4u.h"
+#include "mpidch4r.h"
 
 #endif /* NETMOD_STUB_IMPL_H_INCLUDED */

@@ -25,13 +25,13 @@
  * |   |                  |                  |
  * +---- protocol
  */
-#define MPIDI_CH4U_PROTOCOL_MASK (0x9000000000000000ULL)
-#define MPIDI_CH4U_CONTEXT_MASK  (0x0FFFF00000000000ULL)
-#define MPIDI_CH4U_SOURCE_MASK   (0x00000FFFF0000000ULL)
-#define MPIDI_CH4U_TAG_MASK      (0x000000000FFFFFFFULL)
-#define MPIDI_CH4U_DYNPROC_SEND  (0x4000000000000000ULL)
-#define MPIDI_CH4U_TAG_SHIFT     (28)
-#define MPIDI_CH4U_SOURCE_SHIFT  (16)
+#define MPIDI_CH4R_PROTOCOL_MASK (0x9000000000000000ULL)
+#define MPIDI_CH4R_CONTEXT_MASK  (0x0FFFF00000000000ULL)
+#define MPIDI_CH4R_SOURCE_MASK   (0x00000FFFF0000000ULL)
+#define MPIDI_CH4R_TAG_MASK      (0x000000000FFFFFFFULL)
+#define MPIDI_CH4R_DYNPROC_SEND  (0x4000000000000000ULL)
+#define MPIDI_CH4R_TAG_SHIFT     (28)
+#define MPIDI_CH4R_SOURCE_SHIFT  (16)
 
 #define MPIDI_CH4I_MAP_NOT_FOUND      ((void*)(-1UL))
 
@@ -72,17 +72,17 @@ typedef enum {
 } MPIDI_CH4R_TYPE;
 
 typedef enum {
-    MPIDI_CH4U_WIN_COMPLETE,
-    MPIDI_CH4U_WIN_POST,
-    MPIDI_CH4U_WIN_LOCK,
-    MPIDI_CH4U_WIN_LOCK_ACK,
-    MPIDI_CH4U_WIN_UNLOCK,
-    MPIDI_CH4U_WIN_UNLOCK_ACK,
-    MPIDI_CH4U_WIN_LOCKALL,
-    MPIDI_CH4U_WIN_LOCKALL_ACK,
-    MPIDI_CH4U_WIN_UNLOCKALL,
-    MPIDI_CH4U_WIN_UNLOCKALL_ACK,
-} MPIDI_CH4U_WIN_CTRL_MSG_TYPE;
+    MPIDI_CH4R_WIN_COMPLETE,
+    MPIDI_CH4R_WIN_POST,
+    MPIDI_CH4R_WIN_LOCK,
+    MPIDI_CH4R_WIN_LOCK_ACK,
+    MPIDI_CH4R_WIN_UNLOCK,
+    MPIDI_CH4R_WIN_UNLOCK_ACK,
+    MPIDI_CH4R_WIN_LOCKALL,
+    MPIDI_CH4R_WIN_LOCKALL_ACK,
+    MPIDI_CH4R_WIN_UNLOCKALL,
+    MPIDI_CH4R_WIN_UNLOCKALL_ACK,
+} MPIDI_CH4R_WIN_CTRL_MSG_TYPE;
 
 enum {
     MPIDI_CH4R_EPOTYPE_NONE = 0,          /**< No epoch in affect */
@@ -98,14 +98,14 @@ typedef struct MPIDI_CH4R_Hdr_t {
     uint64_t msg_tag;
 } MPIDI_CH4R_Hdr_t;
 
-typedef struct MPIDI_CH4U_Ssend_req_msg_t {
+typedef struct MPIDI_CH4R_Ssend_req_msg_t {
     MPIDI_CH4R_Hdr_t hdr;
     uint64_t sreq_ptr;
-} MPIDI_CH4U_Ssend_req_msg_t;
+} MPIDI_CH4R_Ssend_req_msg_t;
 
-typedef struct MPIDI_CH4U_Ssend_ack_msg_t {
+typedef struct MPIDI_CH4R_Ssend_ack_msg_t {
     uint64_t sreq_ptr;
-} MPIDI_CH4U_Ssend_ack_msg_t;
+} MPIDI_CH4R_Ssend_ack_msg_t;
 
 typedef struct MPIDI_CH4R_win_cntrl_msg_t {
     uint64_t win_id;
@@ -114,55 +114,55 @@ typedef struct MPIDI_CH4R_win_cntrl_msg_t {
     int16_t type;
 } MPIDI_CH4R_win_cntrl_msg_t;
 
-typedef struct MPIDI_CH4U_put_msg_t {
+typedef struct MPIDI_CH4R_put_msg_t {
     uint64_t win_id;
     uint64_t preq_ptr;
     uint64_t addr;
     uint64_t count;
     MPI_Datatype datatype;
     int n_iov;
-} MPIDI_CH4U_put_msg_t;
+} MPIDI_CH4R_put_msg_t;
 
-typedef struct MPIDI_CH4U_put_iov_ack_msg_t {
+typedef struct MPIDI_CH4R_put_iov_ack_msg_t {
     uint64_t target_preq_ptr;
     uint64_t origin_preq_ptr;
-} MPIDI_CH4U_put_iov_ack_msg_t;
-typedef MPIDI_CH4U_put_iov_ack_msg_t MPIDI_CH4U_acc_iov_ack_msg_t;
+} MPIDI_CH4R_put_iov_ack_msg_t;
+typedef MPIDI_CH4R_put_iov_ack_msg_t MPIDI_CH4R_acc_iov_ack_msg_t;
 
-typedef struct MPIDI_CH4U_put_dat_msg_t {
+typedef struct MPIDI_CH4R_put_dat_msg_t {
     uint64_t preq_ptr;
-} MPIDI_CH4U_put_dat_msg_t;
-typedef MPIDI_CH4U_put_dat_msg_t MPIDI_CH4U_acc_dat_msg_t;
+} MPIDI_CH4R_put_dat_msg_t;
+typedef MPIDI_CH4R_put_dat_msg_t MPIDI_CH4R_acc_dat_msg_t;
 
-typedef struct MPIDI_CH4U_put_ack_msg_t {
+typedef struct MPIDI_CH4R_put_ack_msg_t {
     uint64_t preq_ptr;
-} MPIDI_CH4U_put_ack_msg_t;
+} MPIDI_CH4R_put_ack_msg_t;
 
-typedef struct MPIDI_CH4U_get_req_msg_t {
+typedef struct MPIDI_CH4R_get_req_msg_t {
     uint64_t win_id;
     uint64_t greq_ptr;
     uint64_t addr;
     uint64_t count;
     MPI_Datatype datatype;
     int n_iov;
-} MPIDI_CH4U_get_req_msg_t;
+} MPIDI_CH4R_get_req_msg_t;
 
-typedef struct MPIDI_CH4U_get_ack_msg_t {
+typedef struct MPIDI_CH4R_get_ack_msg_t {
     uint64_t greq_ptr;
-} MPIDI_CH4U_get_ack_msg_t;
+} MPIDI_CH4R_get_ack_msg_t;
 
-typedef struct MPIDI_CH4U_cswap_req_msg_t {
+typedef struct MPIDI_CH4R_cswap_req_msg_t {
     uint64_t win_id;
     uint64_t req_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
-} MPIDI_CH4U_cswap_req_msg_t;
+} MPIDI_CH4R_cswap_req_msg_t;
 
-typedef struct MPIDI_CH4U_cswap_ack_msg_t {
+typedef struct MPIDI_CH4R_cswap_ack_msg_t {
     uint64_t req_ptr;
-} MPIDI_CH4U_cswap_ack_msg_t;
+} MPIDI_CH4R_cswap_ack_msg_t;
 
-typedef struct MPIDI_CH4U_acc_req_msg_t {
+typedef struct MPIDI_CH4R_acc_req_msg_t {
     uint64_t win_id;
     uint64_t req_ptr;
     int origin_count;
@@ -174,15 +174,15 @@ typedef struct MPIDI_CH4U_acc_req_msg_t {
     uint64_t target_addr;
     uint64_t result_data_sz;
     int n_iov;
-} MPIDI_CH4U_acc_req_msg_t;
+} MPIDI_CH4R_acc_req_msg_t;
 
-typedef struct MPIDI_CH4U_acc_ack_msg_t {
+typedef struct MPIDI_CH4R_acc_ack_msg_t {
     uint64_t req_ptr;
-} MPIDI_CH4U_acc_ack_msg_t;
+} MPIDI_CH4R_acc_ack_msg_t;
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
     MPID_Comm *comm;
-    MPIDI_CH4U_Dev_rreq_t *unexp_list;
+    MPIDI_CH4R_Dev_rreq_t *unexp_list;
 } MPIDI_CH4_Comm_req_list_t;
 
 typedef struct MPIDI_CH4_Global_t {
@@ -202,11 +202,11 @@ typedef struct MPIDI_CH4_Global_t {
     MPID_Thread_mutex_t  m[2];
     void *win_map;
     int jobid;
-#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
-    MPIDI_CH4U_Dev_rreq_t *posted_list;
-    MPIDI_CH4U_Dev_rreq_t *unexp_list;
+#ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
+    MPIDI_CH4R_Dev_rreq_t *posted_list;
+    MPIDI_CH4R_Dev_rreq_t *unexp_list;
 #endif
-    MPIDI_CH4U_Devreq_t *cmpl_list;
+    MPIDI_CH4R_Devreq_t *cmpl_list;
     OPA_int_t exp_seq_no;
     OPA_int_t nxt_seq_no;
     void *netmod_context[8];

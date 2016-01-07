@@ -37,23 +37,23 @@ typedef enum {
     MPIDI_PTYPE_SSEND,
 } MPIDI_ptype;
 
-#define MPIDI_CH4U_REQ_BUSY 		  (0x1)
-#define MPIDI_CH4U_REQ_PEER_SSEND 	  (0x1 << 1)
-#define MPIDI_CH4U_REQ_UNEXPECTED 	  (0x1 << 2)
-#define MPIDI_CH4U_REQ_UNEXP_DQUED 	  (0x1 << 3)
-#define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
-#define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
-#define MPIDI_CH4U_REQ_MATCHED (0x1 << 6)
+#define MPIDI_CH4R_REQ_BUSY 		  (0x1)
+#define MPIDI_CH4R_REQ_PEER_SSEND 	  (0x1 << 1)
+#define MPIDI_CH4R_REQ_UNEXPECTED 	  (0x1 << 2)
+#define MPIDI_CH4R_REQ_UNEXP_DQUED 	  (0x1 << 3)
+#define MPIDI_CH4R_REQ_UNEXP_CLAIMED  (0x1 << 4)
+#define MPIDI_CH4R_REQ_RCV_NON_CONTIG (0x1 << 5)
+#define MPIDI_CH4R_REQ_MATCHED (0x1 << 6)
 
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
 
-typedef struct MPIDI_CH4U_Dev_sreq_t {
+typedef struct MPIDI_CH4R_Dev_sreq_t {
     /* persistent send fields */
     struct MPID_Comm    *util_comm;
-} MPIDI_CH4U_Dev_sreq_t;
+} MPIDI_CH4R_Dev_sreq_t;
 
-typedef struct MPIDI_CH4U_Dev_rreq_t {
+typedef struct MPIDI_CH4R_Dev_rreq_t {
     /* mrecv fields */
     void         *mrcv_buffer;
     uint64_t      mrcv_count;
@@ -64,10 +64,10 @@ typedef struct MPIDI_CH4U_Dev_rreq_t {
     uint64_t      peer_req_ptr;
     uint64_t      match_req;
 
-    struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
-} MPIDI_CH4U_Dev_rreq_t;
+    struct MPIDI_CH4R_Dev_rreq_t *prev, *next;
+} MPIDI_CH4R_Dev_rreq_t;
 
-typedef struct MPIDI_CH4U_Dev_put_req_t {
+typedef struct MPIDI_CH4R_Dev_put_req_t {
     uint64_t win_ptr;
     uint64_t preq_ptr;
     void *reply_token;
@@ -76,9 +76,9 @@ typedef struct MPIDI_CH4U_Dev_put_req_t {
     int origin_count;
     MPI_Datatype origin_datatype;
     int n_iov;
-} MPIDI_CH4U_Dev_put_req_t;
+} MPIDI_CH4R_Dev_put_req_t;
 
-typedef struct MPIDI_CH4U_Dev_get_req_t {
+typedef struct MPIDI_CH4R_Dev_get_req_t {
     uint64_t win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
@@ -87,9 +87,9 @@ typedef struct MPIDI_CH4U_Dev_get_req_t {
     int n_iov;
     void *reply_token;
     void *dt_iov;
-} MPIDI_CH4U_Dev_get_req_t;
+} MPIDI_CH4R_Dev_get_req_t;
 
-typedef struct MPIDI_CH4U_Dev_cswap_req_t {
+typedef struct MPIDI_CH4R_Dev_cswap_req_t {
     uint64_t win_ptr;
     uint64_t creq_ptr;
     void *reply_token;
@@ -97,9 +97,9 @@ typedef struct MPIDI_CH4U_Dev_cswap_req_t {
     MPI_Datatype datatype;
     void *data;
     void *result_addr;
-} MPIDI_CH4U_Dev_cswap_req_t;
+} MPIDI_CH4R_Dev_cswap_req_t;
 
-typedef struct MPIDI_CH4U_Dev_acc_req_t {
+typedef struct MPIDI_CH4R_Dev_acc_req_t {
     uint64_t win_ptr;
     uint64_t req_ptr;
     void *reply_token;
@@ -118,17 +118,17 @@ typedef struct MPIDI_CH4U_Dev_acc_req_t {
     int do_get;
     void *origin_addr;
     MPI_Datatype result_datatype;
-} MPIDI_CH4U_Dev_acc_req_t;
+} MPIDI_CH4R_Dev_acc_req_t;
 
-typedef struct MPIDI_CH4U_Devreq_t {
+typedef struct MPIDI_CH4R_Devreq_t {
 
     union {
-        MPIDI_CH4U_Dev_sreq_t sreq;
-        MPIDI_CH4U_Dev_rreq_t rreq;
-        MPIDI_CH4U_Dev_put_req_t preq;
-        MPIDI_CH4U_Dev_get_req_t greq;
-        MPIDI_CH4U_Dev_cswap_req_t creq;
-        MPIDI_CH4U_Dev_acc_req_t areq;
+        MPIDI_CH4R_Dev_sreq_t sreq;
+        MPIDI_CH4R_Dev_rreq_t rreq;
+        MPIDI_CH4R_Dev_put_req_t preq;
+        MPIDI_CH4R_Dev_get_req_t greq;
+        MPIDI_CH4R_Dev_cswap_req_t creq;
+        MPIDI_CH4R_Dev_acc_req_t areq;
     };
 
     void         *buffer;
@@ -141,14 +141,14 @@ typedef struct MPIDI_CH4U_Devreq_t {
     uint64_t      status;
     MPIDI_ptype   p_type;
 
-    struct MPIDI_CH4U_Devreq_t *next, *prev;
+    struct MPIDI_CH4R_Devreq_t *next, *prev;
     void *cmpl_handler_fn;
     int seq_no;
 
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
     }netmod_am;
-} MPIDI_CH4U_Devreq_t;
+} MPIDI_CH4R_Devreq_t;
 
 typedef struct {
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
@@ -156,7 +156,7 @@ typedef struct {
 #endif
     union {
         /* The first fields are used by the CH4U apis */
-        MPIDI_CH4U_Devreq_t ch4u;
+        MPIDI_CH4R_Devreq_t ch4r;
 
         /* Used by the netmod direct apis */
         union {
@@ -171,7 +171,7 @@ typedef struct {
 #define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.ch4.netmod)
 #define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.ch4.netmod_am)
 #define MPIDI_CH4I_REQUEST(req,field)       (((req)->dev).field)
-#define MPIDI_CH4R_REQUEST(req,field)       (((req)->dev.ch4.ch4u).field)
+#define MPIDI_CH4R_REQUEST(req,field)       (((req)->dev.ch4.ch4r).field)
 
 typedef struct MPIDI_CH4I_win_info_t {
     uint64_t base_addr;
@@ -255,30 +255,30 @@ typedef struct MPIDI_CH4I_win_t {
 } MPIDI_CH4I_win_t;
 
 typedef struct {
-    MPIDI_CH4I_win_t ch4u;
+    MPIDI_CH4I_win_t ch4r;
     uint64_t pad[192 / 8];
 } MPIDI_Devwin_t;
-#define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4u).field)
+#define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4r).field)
 #define MPIDI_CH4R_WINFO(win,rank) (MPIDI_CH4I_win_info_t*) &(MPIDI_CH4R_WIN(win, info_table)[rank])
 
 typedef struct {
     unsigned is_local : 1;
     unsigned index    : 31;
-}MPIDI_CH4U_locality_t;
+}MPIDI_CH4R_locality_t;
 
-typedef struct MPIDI_CH4U_Devcomm_t {
-    MPIDI_CH4U_Dev_rreq_t *posted_list;
-    MPIDI_CH4U_Dev_rreq_t *unexp_list;
+typedef struct MPIDI_CH4R_Devcomm_t {
+    MPIDI_CH4R_Dev_rreq_t *posted_list;
+    MPIDI_CH4R_Dev_rreq_t *unexp_list;
     uint32_t   window_instance;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIDI_CH4U_locality_t *locality;
+    MPIDI_CH4R_locality_t *locality;
 #endif
-} MPIDI_CH4U_Devcomm_t;
+} MPIDI_CH4R_Devcomm_t;
 
 typedef struct MPIDI_Devcomm_t {
     struct {
         /* The first fields are used by the CH4U apis */
-        MPIDI_CH4U_Devcomm_t ch4u;
+        MPIDI_CH4R_Devcomm_t ch4r;
 
         /* Used by the netmod direct apis */
         union {
@@ -290,7 +290,7 @@ typedef struct MPIDI_Devcomm_t {
         }shm;
     }ch4;
 } MPIDI_Devcomm_t;
-#define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
+#define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4r).field
 
 typedef struct {
     uint32_t pad[4 / 4];

@@ -130,7 +130,7 @@ static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
                         "**nomem");
     *win_ptr = win;
 
-    memset(&win->dev.ch4u, 0, sizeof(MPIDI_CH4I_win_t));
+    memset(&win->dev.ch4r, 0, sizeof(MPIDI_CH4I_win_t));
     win->comm_ptr = comm_ptr;
     size          = comm_ptr->local_size;
     rank          = comm_ptr->rank;
@@ -301,7 +301,7 @@ static inline int MPIDI_CH4R_win_complete(MPID_Win *win)
 
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
-    msg.type = MPIDI_CH4U_WIN_COMPLETE;
+    msg.type = MPIDI_CH4R_WIN_COMPLETE;
 
     ranks_in_win_grp = (int *) MPIU_Malloc(sizeof(int) * group->size);
     MPIU_Assert(ranks_in_win_grp);
@@ -357,7 +357,7 @@ static inline int MPIDI_CH4R_win_post(MPID_Group *group, int assert, MPID_Win *w
 
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
-    msg.type = MPIDI_CH4U_WIN_POST;
+    msg.type = MPIDI_CH4R_WIN_POST;
 
     ranks_in_win_grp = (int *) MPIU_Malloc(sizeof(int) * group->size);
     MPIU_Assert(ranks_in_win_grp);
@@ -467,7 +467,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
     MPIDI_CH4R_win_cntrl_msg_t msg;
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
-    msg.type = MPIDI_CH4U_WIN_LOCK;
+    msg.type = MPIDI_CH4R_WIN_LOCK;
     msg.lock_type = lock_type;
 
     locked = slock->remote.locked + 1;
@@ -508,7 +508,7 @@ static inline int MPIDI_CH4R_win_unlock(int rank, MPID_Win *win)
 
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
     msg.origin_rank = win->comm_ptr->rank;
-    msg.type = MPIDI_CH4U_WIN_UNLOCK;
+    msg.type = MPIDI_CH4R_WIN_UNLOCK;
     unlocked = MPIDI_CH4R_WIN(win, sync).lock.remote.locked - 1;
 
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
@@ -1077,7 +1077,7 @@ static inline int MPIDI_CH4R_win_unlock_all(MPID_Win *win)
         MPIDI_CH4R_win_cntrl_msg_t msg;
         msg.win_id = MPIDI_CH4R_WIN(win, win_id);
         msg.origin_rank = win->comm_ptr->rank;
-        msg.type = MPIDI_CH4U_WIN_UNLOCKALL;
+        msg.type = MPIDI_CH4R_WIN_UNLOCKALL;
 
         lockQ[i].done = 0;
         lockQ[i].peer = i;
@@ -1241,7 +1241,7 @@ static inline int MPIDI_CH4R_win_lock_all(int assert, MPID_Win *win)
         MPIDI_CH4R_win_cntrl_msg_t msg;
         msg.win_id = MPIDI_CH4R_WIN(win, win_id);
         msg.origin_rank = win->comm_ptr->rank;
-        msg.type = MPIDI_CH4U_WIN_LOCKALL;
+        msg.type = MPIDI_CH4R_WIN_LOCKALL;
         msg.lock_type = MPI_LOCK_SHARED;
 
         lockQ[i].done      = 0;

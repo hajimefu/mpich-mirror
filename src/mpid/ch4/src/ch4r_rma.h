@@ -28,7 +28,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
 {
     int mpi_errno = MPI_SUCCESS, n_iov, c;
     MPID_Request *sreq = NULL;
-    MPIDI_CH4U_put_msg_t am_hdr;
+    MPIDI_CH4R_put_msg_t am_hdr;
     uint64_t offset;
     MPIDI_CH4I_win_info_t *winfo;
     size_t data_sz;
@@ -156,7 +156,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     int                mpi_errno = MPI_SUCCESS, n_iov, c;
     size_t             offset;
     MPID_Request      *sreq = NULL;
-    MPIDI_CH4U_get_req_msg_t am_hdr;
+    MPIDI_CH4R_get_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
     size_t data_sz;
     MPI_Aint last, num_iov;
@@ -380,7 +380,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
 {
     int                mpi_errno = MPI_SUCCESS, c, n_iov;
     size_t             offset, basic_type_size;
-    MPIDI_CH4U_acc_req_msg_t am_hdr;
+    MPIDI_CH4R_acc_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
     uint64_t data_sz, result_data_sz, target_data_sz;
     MPI_Aint last, num_iov;
@@ -687,7 +687,7 @@ __CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
     int                mpi_errno = MPI_SUCCESS, c;
     size_t             offset;
     MPID_Request      *sreq = NULL;
-    MPIDI_CH4U_cswap_req_msg_t am_hdr;
+    MPIDI_CH4R_cswap_req_msg_t am_hdr;
     MPIDI_CH4I_win_info_t *winfo;
     size_t data_sz;
     void *p_data;

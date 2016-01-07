@@ -116,8 +116,8 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (comm != MPIR_Process.comm_world && comm != MPIR_Process.comm_self) {
         int i, lpid, is_local;
 
-        MPIDI_CH4R_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
-            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4U_locality_t));
+        MPIDI_CH4R_COMM(comm,locality) = (MPIDI_CH4R_locality_t*)
+            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4R_locality_t));
 
         /* For now, we'll only deal with locality for intracommunicators. For
          * intercommunicators, we'll just set all locality to remote. */

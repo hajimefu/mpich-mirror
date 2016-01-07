@@ -13,7 +13,7 @@
 
 #include <mpidimpl.h>
 #include "types.h"
-#include "mpidch4u.h"
+#include "mpidch4r.h"
 #include "ch4_impl.h"
 #include "iovec_util.h"
 EXTERN_C_BEGIN

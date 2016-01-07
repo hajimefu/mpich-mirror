@@ -16,7 +16,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include "ofi_pre.h"
-#include "mpidch4u.h"
+#include "mpidch4r.h"
 #include "ch4_types.h"
 #include "fi_list.h"
 
@@ -599,8 +599,8 @@ extern MPID_Request MPIDI_Request_direct[];
 
 extern int   MPIR_Datatype_init_names(void);
 
-#define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
-#define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
+#define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
+#define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

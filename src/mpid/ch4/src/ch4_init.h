@@ -214,12 +214,12 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     /* Build up locality information if the netmod doesn't want to do it. */
     MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality) =
-        (MPIDI_CH4U_locality_t *) MPIU_Malloc(size * sizeof(MPIDI_CH4U_locality_t));
+        (MPIDI_CH4R_locality_t *) MPIU_Malloc(size * sizeof(MPIDI_CH4R_locality_t));
     for (i = 0; i < MPIR_Process.comm_world->local_size; i++)
         MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
 
     MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality) =
-        (MPIDI_CH4U_locality_t *) MPIU_Malloc(sizeof(MPIDI_CH4U_locality_t));
+        (MPIDI_CH4R_locality_t *) MPIU_Malloc(sizeof(MPIDI_CH4R_locality_t));
 
     /* This requires a partially built MPI_COMM_WORLD in order to be able to
      * communicate to build the nodemap. The communicator is built by the netmod
@@ -253,7 +253,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     }
 #endif
 
-    MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;
+    MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4R_TAG_SHIFT) - 1;
     /* discuss */
 
     if (mpi_errno != MPI_SUCCESS) {

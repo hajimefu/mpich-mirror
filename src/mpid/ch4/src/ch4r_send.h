@@ -32,7 +32,7 @@ static inline int MPIDI_CH4I_do_send(const void *buf,
     MPID_Request *sreq = NULL;
     uint64_t match_bits;
     MPIDI_CH4R_Hdr_t am_hdr;
-    MPIDI_CH4U_Ssend_req_msg_t ssend_req;
+    MPIDI_CH4R_Ssend_req_msg_t ssend_req;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_SEND);

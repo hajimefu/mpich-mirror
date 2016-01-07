@@ -140,7 +140,7 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
         unexp_req->status.MPI_TAG =
             MPIDI_CH4R_get_tag(MPIDI_CH4R_REQUEST(unexp_req, tag));
         MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4R_REQUEST(unexp_req, count));
-        MPIDI_CH4R_REQUEST(unexp_req, status) |= MPIDI_CH4U_REQ_UNEXP_DQUED;
+        MPIDI_CH4R_REQUEST(unexp_req, status) |= MPIDI_CH4R_REQ_UNEXP_DQUED;
 
         status->MPI_TAG = unexp_req->status.MPI_TAG;
         status->MPI_SOURCE = unexp_req->status.MPI_SOURCE;

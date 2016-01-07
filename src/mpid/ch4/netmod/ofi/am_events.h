@@ -423,7 +423,7 @@ static inline int MPIDI_netmod_handle_send_completion(struct fi_cq_data_entry *c
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
 
     ofi_req = container_of(cq_entry->op_context, MPIDI_netmod_ofi_amrequest_t, context);
-    sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4u.netmod_am);
+    sreq = container_of(ofi_req, MPID_Request, dev.ch4.ch4r.netmod_am);
     msg_hdr = &ofi_req->req_hdr->msg_hdr;
     MPIDI_netmod_request_complete(sreq);
 
