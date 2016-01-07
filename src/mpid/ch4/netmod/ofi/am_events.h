@@ -181,7 +181,7 @@ static inline int MPIDI_netmod_handle_long_am_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr, 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_AM_HDR);
 
-    rreq = MPIDI_CH4_NM_AM_request_create();
+    rreq = MPIDI_AM_netmod_request_create();
 
     mpi_errno = MPIDI_netmod_am_ofi_init_req(NULL, 0, rreq);
     if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
@@ -217,7 +217,7 @@ static inline int MPIDI_netmod_handle_long_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr, fi_
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
 
-    rreq = MPIDI_CH4_NM_AM_request_create();
+    rreq = MPIDI_AM_netmod_request_create();
 
     mpi_errno = MPIDI_netmod_am_ofi_init_req(NULL, 0, rreq);
     if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);

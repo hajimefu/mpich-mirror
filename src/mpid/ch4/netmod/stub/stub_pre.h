@@ -14,14 +14,14 @@
 
 typedef struct {
     int dummy;
-} MPIDI_netmod_stub_amrequest_t;
+} MPIDI_CH4_NM_stub_amrequest_t;
 
 typedef struct {
     int dummy;
-} MPIDI_netmod_stub_request_t;
+} MPIDI_CH4_NM_stub_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_netmod_stub_comm_t;
+} MPIDI_CH4_NM_stub_comm_t;
 
 #endif

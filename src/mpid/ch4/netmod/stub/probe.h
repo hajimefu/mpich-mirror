@@ -13,14 +13,14 @@
 
 #include "impl.h"
 
-static inline int MPIDI_netmod_probe(int source,
+static inline int MPIDI_CH4_NM_probe(int source,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPI_Status * status)
 {
     return MPIDI_CH4R_probe(source, tag, comm, context_offset, status);
 }
 
-static inline int MPIDI_netmod_improbe(int source,
+static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
                                        MPID_Comm * comm,
                                        int context_offset,
@@ -29,7 +29,7 @@ static inline int MPIDI_netmod_improbe(int source,
     return MPIDI_CH4R_improbe(source, tag, comm, context_offset, flag, message, status);
 }
 
-static inline int MPIDI_netmod_iprobe(int source,
+static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
                                       MPID_Comm * comm,
                                       int context_offset, int *flag, MPI_Status * status)
