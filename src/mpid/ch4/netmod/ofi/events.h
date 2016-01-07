@@ -12,9 +12,8 @@
 #define NETMOD_OFI_EVENTS_H_INCLUDED
 
 #include "impl.h"
-
+#include "am_events.h"
 static inline int get_huge_event(cq_tagged_entry_t *wc, MPID_Request *req);
-
 
 #undef FUNCNAME
 #define FUNCNAME peek_event
@@ -268,33 +267,16 @@ static inline int control_event(cq_tagged_entry_t *wc,
                                 MPID_Request      *req)
 {
     int mpi_errno = MPI_SUCCESS;
+    int16_t *buf;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
 
-    MPIU_Assert(wc->len == 0 || wc->len == MPID_MIN_CTRL_MSG_SZ);
+    buf              = (int16_t *)wc->buf;
+    MPIU_Assert(buf != NULL);
+    mpi_errno        = MPIDI_OFI_control_dispatch(buf);
 
-    if(wc->len == MPID_MIN_CTRL_MSG_SZ) {
-        int16_t *buf;
-        buf         = (int16_t *)wc->buf;
-        MPIU_Assert(buf != NULL);
-        mpi_errno   = MPIDI_OFI_control_dispatch(buf);
-    }
-
-    if(wc->flags & FI_MULTI_RECV) {
-        FI_RC_RETRY_NOLOCK(fi_recvmsg(G_RXC_MSG(0),
-                                      &MPIDI_Global.msg[MPIDI_Global.cur_ctrlblock],
-                                      FI_MULTI_RECV|FI_COMPLETION),repost);
-        MPIDI_Global.cur_ctrlblock++;
-
-        if(MPIDI_Global.cur_ctrlblock == MPIDI_Global.num_ctrlblock)
-            MPIDI_Global.cur_ctrlblock=0;
-    }
-
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 
@@ -415,6 +397,192 @@ static inline int dynproc_done_event(cq_tagged_entry_t *wc,
   return MPI_SUCCESS;
 }
 
+#undef FUNCNAME
+#define FUNCNAME am_send_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int am_send_event(cq_tagged_entry_t *wc,
+                                MPID_Request      *sreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_AM_OFI_hdr_t           *msg_hdr;
+
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
+
+    msg_hdr  = &AMREQ_OFI_HDR(sreq,msg_hdr);
+    MPIDI_AM_netmod_request_complete(sreq);
+
+    switch (msg_hdr->am_type) {
+    case MPIDI_AMTYPE_LMT_ACK:
+    case MPIDI_AMTYPE_LMT_REQ:
+    case MPIDI_AMTYPE_LMT_HDR_REQ:
+    case MPIDI_AMTYPE_LONG_HDR_REQ:
+    case MPIDI_AMTYPE_LONG_HDR_ACK:
+        goto fn_exit;
+    default:
+        break;
+    }
+
+    if (AMREQ_OFI_HDR(sreq, pack_buffer)) {
+        MPIU_Free(AMREQ_OFI_HDR(sreq, pack_buffer));
+        AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
+    }
+    mpi_errno = MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_SEND_COMPLETION);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME am_recv_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int am_recv_event(cq_tagged_entry_t *wc,
+                                MPID_Request      *rreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_AM_OFI_hdr_t *am_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
+    fi_addr_t source = 0ULL;
+    MPIU_Assert(source != 0ULL);
+    am_hdr = (MPIDI_AM_OFI_hdr_t *) wc->buf;
+    switch (am_hdr->am_type) {
+    case MPIDI_AMTYPE_SHORT_HDR:
+        mpi_errno = MPIDI_netmod_handle_short_am_hdr(am_hdr,
+                                                     am_hdr->payload,
+                                                     source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_SHORT:
+        mpi_errno = MPIDI_netmod_handle_short_am(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_LMT_REQ:
+        mpi_errno = MPIDI_netmod_handle_long_am(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_LMT_HDR_REQ:
+        mpi_errno = MPIDI_netmod_handle_long_am_hdr(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_LMT_ACK:
+        mpi_errno = MPIDI_netmod_handle_lmt_ack(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_LONG_HDR_REQ:
+        mpi_errno = MPIDI_netmod_handle_long_hdr(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    case MPIDI_AMTYPE_LONG_HDR_ACK:
+        mpi_errno = MPIDI_netmod_handle_long_hdr_ack(am_hdr, source);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        break;
+
+    default:
+        MPIU_Assert(0);
+    }
+
+  fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME am_read_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int am_read_event(cq_tagged_entry_t *wc,
+                                MPID_Request      *req)
+{
+    MPID_Request *rreq;
+    void         *netmod_context = NULL;
+    fi_addr_t     source         = 0ULL;
+    int           mpi_errno      = MPI_SUCCESS;
+    MPIU_Assert(source != 0ULL);
+
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
+
+    AMREQ_OFI_HDR(req,lmt_cntr)--;
+    if (AMREQ_OFI_HDR(req,lmt_cntr))
+        goto fn_exit;
+
+    switch (AMREQ_OFI_HDR(req,msg_hdr).am_type) {
+    case MPIDI_AMTYPE_LMT_HDR_REQ:
+        rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
+        AMREQ_OFI_HDR(rreq, msg_hdr).am_type = MPIDI_AMTYPE_LMT_REQ;
+        mpi_errno = MPIDI_netmod_do_handle_long_am(&AMREQ_OFI_HDR(rreq, msg_hdr),
+                                                   &AMREQ_OFI_HDR(rreq, lmt_info),
+                                                   AMREQ_OFI_HDR(rreq, am_hdr),
+                                                   (fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer));
+        if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
+        MPIDI_AM_netmod_request_complete(rreq);
+        goto fn_exit;
+    case MPIDI_AMTYPE_LONG_HDR_REQ:
+        rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
+
+        mpi_errno = MPIDI_netmod_dispatch_ack((fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer),
+                                              AMREQ_OFI_HDR(rreq, lmt_info.sreq_ptr),
+                                              MPIDI_AMTYPE_LONG_HDR_ACK, netmod_context);
+        if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
+
+        mpi_errno = MPIDI_netmod_handle_short_am_hdr(&AMREQ_OFI_HDR(rreq, msg_hdr),
+                                                     AMREQ_OFI_HDR(rreq, am_hdr),
+                                                     (fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer));
+        if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
+        MPIDI_AM_netmod_request_complete(rreq);
+        goto fn_exit;
+
+    default:
+        break;
+    }
+
+    rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
+    mpi_errno = MPIDI_netmod_dispatch_ack(source,
+        AMREQ_OFI_HDR(rreq, lmt_info).sreq_ptr,MPIDI_AMTYPE_LMT_ACK,netmod_context);
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+    MPIDI_AM_netmod_request_complete(rreq);
+    AMREQ_OFI_HDR(req,cmpl_handler_fn)(rreq);
+  fn_exit:
+    MPIDI_CH4R_release_buf((void *)AMREQ_OFI_HDR_PTR(req));
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
+    return mpi_errno;
+  fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME am_repost_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int am_repost_event(cq_tagged_entry_t *wc,
+                                  MPID_Request      *rreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
+
+    mpi_errno = MPIDI_netmod_repost_buffer(wc->op_context);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
+    return mpi_errno;
+}
+
 static inline MPID_Request *devreq_to_req(void *context)
 {
     char *base = (char *) context;
@@ -434,8 +602,20 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
     } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_RMA_DONE)) {
         mpi_errno = rma_done_event(wc,req);
         goto fn_exit;
+    } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_AM_SEND)) {
+        mpi_errno = am_send_event(wc,req);
+        goto fn_exit;
+    } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_AM_RECV)) {
+        mpi_errno = am_recv_event(wc,req);
+        goto fn_exit;
+    } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_AM_READ)) {
+        mpi_errno = am_read_event(wc,req);
+        goto fn_exit;
     } else if (unlikely(1)) {
         switch(REQ_OFI(req,event_id)) {
+        case MPIDI_EVENT_AM_MULTI:
+            mpi_errno = am_repost_event(wc,req);
+            break;
         case MPIDI_EVENT_CONTROL:
             mpi_errno = control_event(wc,req);
             break;

@@ -49,7 +49,7 @@ EXTERN_C_BEGIN
 
 #ifdef USE_OFI_TAGGED
 #define MPIDI_ENABLE_TAGGED          1
-#define MPIDI_ENABLE_AM              1
+#define MPIDI_ENABLE_AM              0
 #define MPIDI_ENABLE_RMA             1
 #else
 #define MPIDI_ENABLE_TAGGED          0
@@ -175,16 +175,20 @@ enum {
 
 enum {
     MPIDI_EVENT_ABORT,
-    MPIDI_EVENT_PEEK,
-    MPIDI_EVENT_RECV,
-    MPIDI_EVENT_RECV_HUGE,
     MPIDI_EVENT_SEND,
+    MPIDI_EVENT_RECV,
+    MPIDI_EVENT_RMA_DONE,
+    MPIDI_EVENT_AM_SEND,
+    MPIDI_EVENT_AM_RECV,
+    MPIDI_EVENT_AM_READ,
+    MPIDI_EVENT_AM_MULTI,
+    MPIDI_EVENT_PEEK,
+    MPIDI_EVENT_RECV_HUGE,
     MPIDI_EVENT_SEND_HUGE,
     MPIDI_EVENT_SSEND_ACK,
     MPIDI_EVENT_GET_HUGE,
     MPIDI_EVENT_CONTROL,
     MPIDI_EVENT_CHUNK_DONE,
-    MPIDI_EVENT_RMA_DONE,
     MPIDI_EVENT_DYNPROC_DONE,
     MPIDI_EVENT_ACCEPT_PROBE
 };
@@ -300,22 +304,11 @@ typedef struct {
     fid_domain_t domain;
     fid_fabric_t fabric;
     fid_base_ep_t ep;
-    fid_base_ep_t am_ep;
-    fid_stx_t     ep_stx;
-    fid_stx_t     am_ep_stx;
-    fid_srx_t     ep_srx;
-    fid_srx_t     am_ep_srx;
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-    MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
-#endif
-    fid_cq_t p2p_cq;
-    fid_cq_t am_cq;
+    fid_cq_t   p2p_cq;
     fid_cntr_t rma_ctr;
     fid_av_t av;
-    iovec_t *iov;
     MPIDI_cacheline_mutex_t mutexes[4];
-    msg_t *msg;
-    MPIDI_Ctrl_req *control_req;
+    MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
     uint64_t cntr;
     uint64_t max_buffered_send;
     uint64_t max_buffered_write;
@@ -329,8 +322,6 @@ typedef struct {
     int      huge_rma_shift;
     int      context_shift;
     size_t iov_limit;
-    int cur_ctrlblock;
-    int num_ctrlblock;
     int control_init;
     control_event_fn control_fn[16];
     MPID_Node_id_t *node_map;
@@ -396,7 +387,6 @@ typedef struct {
     uint64_t win_id;
     int      dummy[8];
 } MPIDI_Win_control_t;
-#define MPID_MIN_CTRL_MSG_SZ (sizeof(MPIDI_Win_control_t))
 
 typedef struct {
     int16_t       type;
@@ -601,6 +591,7 @@ extern int   MPIR_Datatype_init_names(void);
 
 #define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
 #define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
+#define AMREQ_OFI_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

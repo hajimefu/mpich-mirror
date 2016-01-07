@@ -13,6 +13,9 @@
 
 #include "impl.h"
 #include "request.h"
+#include "am_events.h"
+
+static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_reg_hdr_handler

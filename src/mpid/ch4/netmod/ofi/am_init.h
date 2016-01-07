@@ -91,7 +91,7 @@ static inline int MPIDI_CH4_NM_init(int rank, int size, int appnum, int *tag_ub,
 
     memset(&cq_attr, 0, sizeof(cq_attr));
     cq_attr.format = FI_CQ_FORMAT_DATA;
-    FI_RC(fi_cq_open(MPIDI_Global.domain, &cq_attr, &MPIDI_Global.am_cq, NULL), opencq);
+    FI_RC(fi_cq_open(MPIDI_Global.domain, &cq_attr, &MPIDI_Global.p2p_cq, NULL), opencq);
 
     memset(&av_attr, 0, sizeof(av_attr));
 #ifdef MPIDI_USE_AV_TABLE
@@ -109,7 +109,7 @@ static inline int MPIDI_CH4_NM_init(int rank, int size, int appnum, int *tag_ub,
 
     FI_RC(fi_av_open(MPIDI_Global.domain, &av_attr, &MPIDI_Global.av, NULL), avopen);
 
-    mpi_errno = MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.am_cq,
+    mpi_errno = MPIDI_Create_endpoint(prov_use, MPIDI_Global.domain, MPIDI_Global.p2p_cq,
                                       MPIDI_Global.av, &MPIDI_Global.ep);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -245,7 +245,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
 
     FI_RC(fi_close(&MPIDI_Global.ep->fid), epclose);
     FI_RC(fi_close(&MPIDI_Global.av->fid), avclose);
-    FI_RC(fi_close(&MPIDI_Global.am_cq->fid), cqclose);
+    FI_RC(fi_close(&MPIDI_Global.p2p_cq->fid), cqclose);
     FI_RC(fi_close(&MPIDI_Global.domain->fid), domainclose);
 
     for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {

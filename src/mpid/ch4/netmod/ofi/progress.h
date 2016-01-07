@@ -101,11 +101,11 @@ static inline int am_progress(void *netmod_context, int blocking)
             }
             buffered = 1;
         } else {
-            ret = fi_cq_readfrom(MPIDI_Global.am_cq, &cq_entry, 1, &source);
+            ret = fi_cq_readfrom(MPIDI_Global.p2p_cq, &cq_entry, 1, &source);
             if (ret == -FI_EAGAIN)
                 continue;
             if (ret < 0) {
-                fi_cq_readerr(MPIDI_Global.am_cq, &cq_err_entry, 0);
+                fi_cq_readerr(MPIDI_Global.p2p_cq, &cq_err_entry, 0);
                 fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
                 goto fn_fail;
             }
@@ -113,22 +113,22 @@ static inline int am_progress(void *netmod_context, int blocking)
         }
         found = 1;
         if (cq_entry.flags & FI_SEND) {
-            mpi_errno = MPIDI_netmod_handle_send_completion(&cq_entry);
+/*            mpi_errno = MPIDI_netmod_handle_send_completion(&cq_entry);*/
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
         }
         else if (cq_entry.flags & FI_RECV) {
-            mpi_errno = MPIDI_netmod_handle_recv_completion(&cq_entry, source, netmod_context);
+/*            mpi_errno = MPIDI_netmod_handle_recv_completion(&cq_entry, source, netmod_context);*/
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             if ((cq_entry.flags & FI_MULTI_RECV) && !buffered) {
-                mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context);
+/*                mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, netmod_context);*/
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             }
 
         }
         else if (cq_entry.flags & FI_READ) {
-            mpi_errno = MPIDI_netmod_handle_read_completion(&cq_entry, source, netmod_context);
+            /*mpi_errno = MPIDI_netmod_handle_read_completion(&cq_entry, source, netmod_context); */
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         }
         else {

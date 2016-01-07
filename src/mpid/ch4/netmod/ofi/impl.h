@@ -62,10 +62,10 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define G_TXC_RMA(x) MPIDI_Global.ep
 #define G_TXC_MSG(x) MPIDI_Global.ep
 #define G_TXC_CTR(x) MPIDI_Global.ep
-#define G_RXC_TAG(x) MPIDI_Global.ep_srx
-#define G_RXC_RMA(x) MPIDI_Global.ep_srx
-#define G_RXC_MSG(x) MPIDI_Global.ep_srx
-#define G_RXC_CTR(x) MPIDI_Global.ep_srx
+#define G_RXC_TAG(x) MPIDI_Global.ep
+#define G_RXC_RMA(x) MPIDI_Global.ep
+#define G_RXC_MSG(x) MPIDI_Global.ep
+#define G_RXC_CTR(x) MPIDI_Global.ep
 #endif
 #ifdef MPIDI_USE_AV_TABLE
 #define COMM_TO_PHYS(comm,rank)  ((fi_addr_t)(uintptr_t)COMM_TO_INDEX(comm,rank))
@@ -553,6 +553,28 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /* Common Utility functions used by the
  * C and C++ components
  */
+
+static inline MPID_Request *MPIDI_AM_request_alloc_and_init(int count)
+{
+    MPID_Request *req;
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    MPIU_Assert(req != NULL);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPID_cc_set(&req->cc, 1);
+    req->cc_ptr = &req->cc;
+    MPIU_Object_set_ref(req, count);
+    req->greq_fns = NULL;
+    MPIR_STATUS_SET_COUNT(req->status, 0);
+    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
+    req->status.MPI_SOURCE = MPI_UNDEFINED;
+    req->status.MPI_TAG = MPI_UNDEFINED;
+    req->status.MPI_ERROR = MPI_SUCCESS;
+    req->comm = NULL;
+    AMREQ_OFI(req, req_hdr) = NULL;
+    return req;
+}
+
+
 __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 {
     MPID_Request *req;
@@ -688,8 +710,6 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
-    CH4_COMPILE_TIME_ASSERT(MPID_MIN_CTRL_MSG_SZ == sizeof(MPIDI_Send_control_t));
-
     control->win_id = WIN_OFI(win)->win_id;
     control->origin_rank = win->comm_ptr->rank;
 
@@ -743,6 +763,70 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     goto fn_exit;
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
+{
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+
+    req_hdr = AMREQ_OFI(sreq, req_hdr);
+    if (!req_hdr)
+        return;
+
+    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
+        MPIU_Free(req_hdr->am_hdr);
+    }
+    MPIDI_CH4R_release_buf(req_hdr);
+    AMREQ_OFI(sreq, req_hdr) = NULL;
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    return;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_am_ofi_init_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
+                                               size_t am_hdr_sz,
+                                               MPID_Request *sreq)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_am_ofi_req_hdr_t *req_hdr;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+
+    if (AMREQ_OFI(sreq, req_hdr) == NULL) {
+        req_hdr = (MPIDI_am_ofi_req_hdr_t *)
+            MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
+        MPIU_Assert(req_hdr);
+        AMREQ_OFI(sreq, req_hdr) = req_hdr;
+
+        req_hdr->am_hdr = (void *) &req_hdr->am_hdr_buf[0];
+        req_hdr->am_hdr_sz = MPIDI_MAX_AM_HDR_SZ;
+    } else {
+        req_hdr = AMREQ_OFI(sreq, req_hdr);
+    }
+
+    if (am_hdr_sz > req_hdr->am_hdr_sz) {
+        if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0])
+            MPIU_Free(req_hdr->am_hdr);
+        req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
+        MPIU_Assert(req_hdr->am_hdr);
+        req_hdr->am_hdr_sz = am_hdr_sz;
+    }
+
+    if (am_hdr) {
+        MPIU_Memcpy(req_hdr->am_hdr, am_hdr, am_hdr_sz);
+    }
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
+    return mpi_errno;
+}
+
 
 static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
@@ -750,7 +834,21 @@ static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
     MPIU_Free(dt->map);
 }
 
-static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
+
+static inline void MPIDI_AM_netmod_request_complete(MPID_Request *req)
+{
+    int count;
+    MPID_cc_decr(req->cc_ptr, &count);
+    MPIU_Assert(count >= 0);
+    if (count == 0)
+        MPIDI_Request_release(req);
+}
+
+static inline MPID_Request *MPIDI_AM_netmod_request_create(void)
+{
+    return MPIDI_AM_request_alloc_and_init(1);
+}
+
 
 /* Utility functions */
 extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
