@@ -108,7 +108,7 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
         MPIR_ERR_POP(mpi_errno);
 
     /* local procs barrier */
-    mpi_errno = MPID_nem_barrier();
+    mpi_errno = MPIDU_shm_barrier();
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
@@ -151,7 +151,7 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
     MPID_nem_mem_region.my_recvQ = MPID_nem_mem_region.RecvQ[rank];
 
     /* local barrier */
-    mpi_errno = MPID_nem_barrier();
+    mpi_errno = MPIDU_shm_barrier();
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
@@ -202,7 +202,7 @@ static inline int MPIDI_CH4_SHM_finalize(void)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_FINALIZE);
 
     /* local barrier */
-    mpi_errno = MPID_nem_barrier();
+    mpi_errno = MPIDU_shm_barrier();
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
