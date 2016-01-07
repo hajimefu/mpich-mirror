@@ -48,7 +48,7 @@ static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
 
 static inline MPID_Request *MPIDI_CH4R_create_req()
 {
-    MPID_Request *req = MPIDI_netmod_request_create();
+    MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 2);
     MPIDI_CH4R_REQUEST(req, status) = 0;
     return req;
@@ -56,7 +56,7 @@ static inline MPID_Request *MPIDI_CH4R_create_req()
 
 static inline MPID_Request *MPIDI_CH4R_create_win_req()
 {
-    MPID_Request *req = MPIDI_netmod_request_create();
+    MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 1);
     MPIDI_CH4R_REQUEST(req, status) = 0;
     return req;

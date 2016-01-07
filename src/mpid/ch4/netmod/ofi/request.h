@@ -69,7 +69,7 @@ static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
     return;
 }
 
-static inline void MPIDI_netmod_request_release(MPID_Request * req)
+static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
 {
     int count;
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
@@ -90,7 +90,7 @@ static inline void MPIDI_netmod_request_release(MPID_Request * req)
     return;
 }
 
-static inline MPID_Request *MPIDI_netmod_request_create(void)
+static inline MPID_Request *MPIDI_CH4_NM_request_create(void)
 {
     MPID_Request *req;
     req = MPIDI_netmod_request_alloc_and_init(1);

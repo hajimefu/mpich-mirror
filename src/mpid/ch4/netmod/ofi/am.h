@@ -15,12 +15,12 @@
 #include "request.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_reg_hdr_handler
+#define FUNCNAME MPIDI_CH4_NM_reg_hdr_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_reg_hdr_handler(int handler_id,
-                                               MPIDI_netmod_am_origin_handler_fn origin_handler_fn,
-                                               MPIDI_netmod_am_target_handler_fn target_handler_fn)
+static inline int MPIDI_CH4_NM_reg_hdr_handler(int handler_id,
+                                               MPIDI_CH4_NM_am_origin_handler_fn origin_handler_fn,
+                                               MPIDI_CH4_NM_am_target_handler_fn target_handler_fn)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REG_HDR_HANDLER);
@@ -242,10 +242,10 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_am_hdr
+#define FUNCNAME MPIDI_CH4_NM_send_am_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_am_hdr(int rank,
+static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
                                            MPID_Comm * comm,
                                            int handler_id,
                                            const void *am_hdr,
@@ -263,10 +263,10 @@ static inline int MPIDI_netmod_send_am_hdr(int rank,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_am
+#define FUNCNAME MPIDI_CH4_NM_send_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_am(int rank,
+static inline int MPIDI_CH4_NM_send_am(int rank,
                                        MPID_Comm * comm,
                                        int handler_id,
                                        const void *am_hdr,
@@ -288,10 +288,10 @@ static inline int MPIDI_netmod_send_am(int rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_amv
+#define FUNCNAME MPIDI_CH4_NM_send_amv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_amv(int rank,
+static inline int MPIDI_CH4_NM_send_amv(int rank,
                                         MPID_Comm * comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
@@ -327,7 +327,7 @@ static inline int MPIDI_netmod_send_amv(int rank,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    mpi_errno = MPIDI_netmod_send_am(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
                                      data, count, datatype, sreq, netmod_context);
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
@@ -339,10 +339,10 @@ static inline int MPIDI_netmod_send_amv(int rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_amv_hdr
+#define FUNCNAME MPIDI_CH4_NM_send_amv_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_amv_hdr(int rank,
+static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
                                             MPID_Comm * comm,
                                             int handler_id,
                                             struct iovec *am_hdr,
@@ -376,7 +376,7 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    mpi_errno = MPIDI_netmod_send_am_hdr(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_CH4_NM_send_am_hdr(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
                                          sreq, netmod_context);
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
@@ -388,10 +388,10 @@ static inline int MPIDI_netmod_send_amv_hdr(int rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_am_hdr_reply
+#define FUNCNAME MPIDI_CH4_NM_send_am_hdr_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_am_hdr_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_am_hdr_reply(void *reply_token,
                                                  int handler_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPID_Request * sreq)
@@ -407,10 +407,10 @@ static inline int MPIDI_netmod_send_am_hdr_reply(void *reply_token,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_send_am_reply
+#define FUNCNAME MPIDI_CH4_NM_send_am_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_send_am_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_am_reply(void *reply_token,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
@@ -426,7 +426,7 @@ static inline int MPIDI_netmod_send_am_reply(void *reply_token,
     return mpi_errno;
 }
 
-static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_amv_reply(void *reply_token,
                                               int handler_id,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
@@ -460,7 +460,7 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
         MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
         am_hdr_sz += am_hdr[i].iov_len;
     }
-    mpi_errno = MPIDI_netmod_send_am_reply(reply_token, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_CH4_NM_send_am_reply(reply_token, handler_id, am_hdr_buf, am_hdr_sz,
                                            data, count, datatype, sreq);
     if (is_allocated)
         MPIU_Free(am_hdr_buf);
@@ -471,7 +471,7 @@ static inline int MPIDI_netmod_send_amv_reply(void *reply_token,
     return mpi_errno;
 }
 
-static inline size_t MPIDI_netmod_am_hdr_max_sz(void)
+static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 {
     return (MPIDI_MAX_SHORT_SEND_SZ -
             (sizeof(MPIDI_AM_OFI_hdr_t) + sizeof(MPIDI_OFI_lmt_msg_pyld_t)));
@@ -517,7 +517,7 @@ static inline int MPIDI_netmod_do_inject(int64_t rank,
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_inject_am_hdr(int rank,
+static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
                                              MPID_Comm * comm,
                                              int handler_id,
                                              const void *am_hdr,
@@ -539,7 +539,7 @@ static inline int MPIDI_netmod_inject_am_hdr(int rank,
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_inject_am_hdr_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_inject_am_hdr_reply(void *reply_token,
                                                    int handler_id,
                                                    const void *am_hdr, size_t am_hdr_sz)
 {
@@ -559,7 +559,7 @@ static inline int MPIDI_netmod_inject_am_hdr_reply(void *reply_token,
     goto fn_exit;
 }
 
-static inline size_t MPIDI_netmod_am_inject_max_sz(void)
+static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
 {
     return MPIDI_Global.max_buffered_send - sizeof(MPIDI_AM_OFI_hdr_t);
 }

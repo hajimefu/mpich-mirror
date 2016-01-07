@@ -53,27 +53,27 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_nets_func_decl" ; then
-        ch4_nets_func_decl="MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_decl="MPIDI_CH4_NM_${net}_funcs"
     else
-        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_CH4_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_decl" ; then
-        ch4_nets_native_func_decl="MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_decl="MPIDI_CH4_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_CH4_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_func_array" ; then
-        ch4_nets_func_array="&MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_array="&MPIDI_CH4_NM_${net}_funcs"
     else
-        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_CH4_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_array" ; then
-        ch4_nets_native_func_array="&MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_array="&MPIDI_CH4_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_CH4_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_strings" ; then
@@ -90,24 +90,24 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_netmod_amrequest_decl" ; then
-        ch4_netmod_amrequest_decl="MPIDI_netmod_${net}_amrequest_t ${net};"
+        ch4_netmod_amrequest_decl="MPIDI_CH4_NM_${net}_amrequest_t ${net};"
     else
         ch4_netmod_amrequest_decl="${ch4_netmod_amrequest_decl} \\
-MPIDI_netmod_${net}_amrequest_t ${net};"
+MPIDI_CH4_NM_${net}_amrequest_t ${net};"
     fi
 
     if test -z "$ch4_netmod_request_decl" ; then
-        ch4_netmod_request_decl="MPIDI_netmod_${net}_request_t ${net};"
+        ch4_netmod_request_decl="MPIDI_CH4_NM_${net}_request_t ${net};"
     else
         ch4_netmod_request_decl="${ch4_netmod_request_decl} \\
-MPIDI_netmod_${net}_request_t ${net};"
+MPIDI_CH4_NM_${net}_request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_comm_decl" ; then
-        ch4_netmod_comm_decl="MPIDI_netmod_${net}_comm_t ${net};"
+        ch4_netmod_comm_decl="MPIDI_CH4_NM_${net}_comm_t ${net};"
     else
         ch4_netmod_comm_decl="${ch4_netmod_comm_decl} \\
-MPIDI_netmod_${net}_comm_t ${net};"
+MPIDI_CH4_NM_${net}_comm_t ${net};"
     fi
 
 net_index=`expr $net_index + 1`

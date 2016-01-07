@@ -30,8 +30,8 @@ MPIU_Object_alloc_t MPIDI_Request_mem = {
     MPID_REQUEST_PREALLOC
 };
 
-MPIDI_netmod_funcs_t *MPIDI_netmod_func;
-MPIDI_netmod_native_funcs_t *MPIDI_netmod_native_func;
+MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_func;
+MPIDI_CH4_NM_native_funcs_t *MPIDI_CH4_NM_native_func;
 
 #ifdef MPIDI_BUILD_CH4_SHM
 MPIDI_shm_funcs_t        *MPIDI_shm_func;

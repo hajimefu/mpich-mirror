@@ -29,36 +29,36 @@
 
 #ifdef USE_NETMOD_TYPEDEFS
 #define MPIDI_NETMOD_API(rc,fcnname,...)                              \
-  typedef rc (*MPIDI_netmod_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
+  typedef rc (*MPIDI_CH4_NM_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
 #endif
 
 #ifdef USE_NETMOD_PROTOTYPES
 #define MPIDI_NETMOD_API(rc,fcnname,...)                                \
-  __NETMOD_INLINE__ rc MPIDI_netmod_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
+  __NETMOD_INLINE__ rc MPIDI_CH4_NM_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
   __INLINE_ATTRIBUTE__
 #endif
 
 #ifdef USE_NETMOD_INLINES
 #define MPIDI_NETMOD_API(rc,fcnname,...)                                \
-  __NETMOD_INLINE__ rc MPIDI_netmod_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_netmod_func->fcnname(APPLY(STRIP, __VA_ARGS__));       \
+  __NETMOD_INLINE__ rc MPIDI_CH4_NM_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
+    return MPIDI_CH4_NM_func->fcnname(APPLY(STRIP, __VA_ARGS__));       \
   }
 #endif
 
 #ifdef USE_NETMOD_TYPEDEFS
 #define MPIDI_NETMOD_API_NATIVE(rc,fcnname,...)                       \
-  typedef rc (*MPIDI_netmod_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
+  typedef rc (*MPIDI_CH4_NM_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
 #endif
 
 #ifdef USE_NETMOD_PROTOTYPES
 #define MPIDI_NETMOD_API_NATIVE(rc,fcnname,...)                         \
-  __NETMOD_INLINE__ rc MPIDI_netmod_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
+  __NETMOD_INLINE__ rc MPIDI_CH4_NM_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
   __INLINE_ATTRIBUTE__
 #endif
 
 #ifdef USE_NETMOD_INLINES
 #define MPIDI_NETMOD_API_NATIVE(rc,fcnname,...)                         \
-  __NETMOD_INLINE__ rc MPIDI_netmod_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_netmod_native_func->fcnname(APPLY(STRIP, __VA_ARGS__)); \
+  __NETMOD_INLINE__ rc MPIDI_CH4_NM_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
+    return MPIDI_CH4_NM_native_func->fcnname(APPLY(STRIP, __VA_ARGS__)); \
   }
 #endif

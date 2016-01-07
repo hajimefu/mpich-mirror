@@ -76,6 +76,6 @@ typedef struct {
         } persist;
         struct iovec iov;
     }util;
-} MPIDI_netmod_ofi_request_t;
+} MPIDI_CH4_NM_ofi_request_t;
 
 #endif

@@ -46,7 +46,7 @@ typedef struct {
     void      *huge_recv_counters;
     void      *win_id_allocator;
     void      *rma_id_allocator;
-} MPIDI_netmod_ofi_comm_t;
+} MPIDI_CH4_NM_ofi_comm_t;
 
 struct MPID_Comm;
 struct MPID_Request;
@@ -116,8 +116,8 @@ typedef struct {
 typedef struct {
     struct fi_context  context;  /* fixed field, do not move */
     MPIDI_am_ofi_req_hdr_t *req_hdr;
-} MPIDI_netmod_ofi_amrequest_t;
+} MPIDI_CH4_NM_ofi_amrequest_t;
 
-typedef MPIDI_netmod_ofi_comm_t MPIDI_netmod_am_ofi_comm_t;
+typedef MPIDI_CH4_NM_ofi_comm_t MPIDI_netmod_am_ofi_comm_t;
 
 #endif

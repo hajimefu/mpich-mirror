@@ -24,11 +24,11 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4_PROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_PROBE);
     while (!flag) {
-        mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, &flag, status);
+        mpi_errno = MPIDI_CH4_NM_iprobe(source, tag, comm, context_offset, &flag, status);
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
-        MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+        MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROBE);
@@ -51,11 +51,11 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MPROBE);
     while (!flag) {
-        mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, &flag, message, status);
+        mpi_errno = MPIDI_CH4_NM_improbe(source, tag, comm, context_offset, &flag, message, status);
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
-        MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+        MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
     }
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
@@ -77,7 +77,7 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_IMPROBE);
-    mpi_errno = MPIDI_netmod_improbe(source, tag, comm, context_offset, flag, message, status);
+    mpi_errno = MPIDI_CH4_NM_improbe(source, tag, comm, context_offset, flag, message, status);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -101,7 +101,7 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_IPROBE);
-    mpi_errno = MPIDI_netmod_iprobe(source, tag, comm, context_offset, flag, status);
+    mpi_errno = MPIDI_CH4_NM_iprobe(source, tag, comm, context_offset, flag, status);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }

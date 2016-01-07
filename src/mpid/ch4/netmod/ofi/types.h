@@ -342,8 +342,8 @@ typedef struct {
     struct iovec am_iov[MPIDI_NUM_AM_BUFFERS];
     struct fi_msg am_msg[MPIDI_NUM_AM_BUFFERS];
     void *am_bufs[MPIDI_NUM_AM_BUFFERS];
-    MPIDI_netmod_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS];
-    MPIDI_netmod_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS];
+    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS];
+    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS];
     int coll_progress;
     int pname_set;
     int pname_len;

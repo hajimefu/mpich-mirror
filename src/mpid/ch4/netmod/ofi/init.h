@@ -40,17 +40,21 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
     MPIDI_Choose_provider(prov,prov_use);                               \
   } while (0);
 
-static inline int MPIDI_netmod_init_generic(int         rank,
-                                            int         size,
-                                            int         appnum,
-                                            int        *tag_ub,
-                                            MPID_Comm  *comm_world,
-                                            MPID_Comm  *comm_self,
-                                            int         spawned,
-                                            int         num_contexts,
-                                            void      **netmod_contexts,
-                                            int         do_av_table,
-                                            int         do_scalable_ep)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NM_init_generic
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4_NM_init_generic(int         rank,
+                                    int         size,
+                                    int         appnum,
+                                    int        *tag_ub,
+                                    MPID_Comm  *comm_world,
+                                    MPID_Comm  *comm_self,
+                                    int         spawned,
+                                    int         num_contexts,
+                                    void      **netmod_contexts,
+				    int	        do_av_table,
+				    int         do_scalable_ep)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen, iov_len;
@@ -79,7 +83,7 @@ static inline int MPIDI_netmod_init_generic(int         rank,
                             offsetof(MPIDI_Dynproc_req,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_Win_request,context));
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_netmod_ofi_request_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_CH4_NM_ofi_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request)>=sizeof(MPIDI_Win_request));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFIGpid_t));
 
@@ -491,10 +495,10 @@ static inline int MPIDI_netmod_init_generic(int         rank,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_init
+#define FUNCNAME MPIDI_CH4_NM_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_init(int         rank,
+static inline int MPIDI_CH4_NM_init(int         rank,
                                     int         size,
                                     int         appnum,
                                     int        *tag_ub,
@@ -506,7 +510,7 @@ static inline int MPIDI_netmod_init(int         rank,
 
 {
     int mpi_errno;
-    mpi_errno = MPIDI_netmod_init_generic(rank,size,appnum,tag_ub,comm_world,
+    mpi_errno = MPIDI_CH4_NM_init_generic(rank,size,appnum,tag_ub,comm_world,
                                           comm_self,spawned,num_contexts,
                                           netmod_contexts,
                                           MPIDI_ENABLE_AV_TABLE,
@@ -517,7 +521,7 @@ static inline int MPIDI_netmod_init(int         rank,
 
 
 
-static inline int MPIDI_netmod_finalize_generic(int do_scalable_ep)
+static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
 {
     int thr_err=0,mpi_errno = MPI_SUCCESS;
     int i = 0;
@@ -602,11 +606,11 @@ static inline int MPIDI_netmod_finalize_generic(int do_scalable_ep)
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_finalize(void) {
-    return MPIDI_netmod_finalize_generic(MPIDI_ENABLE_SCALABLE_ENDPOINTS);
+static inline int MPIDI_CH4_NM_finalize(void) {
+    return MPIDI_CH4_NM_finalize_generic(MPIDI_ENABLE_SCALABLE_ENDPOINTS);
 }
 
-static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
+static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
 
     void *ap;
@@ -614,7 +618,7 @@ static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
     return ap;
 }
 
-static inline int MPIDI_netmod_free_mem(void *ptr)
+static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Free(ptr);
@@ -622,7 +626,7 @@ static inline int MPIDI_netmod_free_mem(void *ptr)
     return mpi_errno;
 }
 
-static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     if (comm_ptr->comm_kind == MPID_INTRACOMM)
@@ -635,7 +639,7 @@ static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
@@ -650,19 +654,19 @@ static inline int MPIDI_netmod_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpi
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_CH4_NM_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
     *id_p = MPIDI_Global.node_map[COMM_TO_INDEX(comm, rank)];
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
 {
     *max_id_p = MPIDI_Global.max_node_id;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_getallincomm(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm * comm_ptr,
                                             int local_size, MPID_Gpid local_gpids[], int *singlePG)
 {
     int i;
@@ -674,7 +678,7 @@ static inline int MPIDI_netmod_getallincomm(MPID_Comm * comm_ptr,
     return 0;
 }
 
-static inline int MPIDI_netmod_gpid_tolpidarray_generic(int       size,
+static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
                                                         MPID_Gpid gpid[],
                                                         int       lpid[],
                                                         int       use_av_table)
@@ -724,12 +728,12 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
+static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
 {
-    return MPIDI_netmod_gpid_tolpidarray_generic(size,gpid,lpid,MPIDI_ENABLE_AV_TABLE);
+    return MPIDI_CH4_NM_gpid_tolpidarray_generic(size,gpid,lpid,MPIDI_ENABLE_AV_TABLE);
 }
 
-static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
+static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
                                                            int size, const int lpids[])
 {
     int i;

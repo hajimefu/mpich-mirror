@@ -13,7 +13,7 @@
 
 #include "impl.h"
 
-static inline int MPIDI_netmod_recv(void *buf,
+static inline int MPIDI_CH4_NM_recv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -25,7 +25,7 @@ static inline int MPIDI_netmod_recv(void *buf,
     return MPIDI_CH4R_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
 }
 
-static inline int MPIDI_netmod_recv_init(void *buf,
+static inline int MPIDI_CH4_NM_recv_init(void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -36,7 +36,7 @@ static inline int MPIDI_netmod_recv_init(void *buf,
     return MPIDI_CH4R_recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_netmod_imrecv(void *buf,
+static inline int MPIDI_CH4_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       MPID_Request * message, MPID_Request ** rreqp)
@@ -44,7 +44,7 @@ static inline int MPIDI_netmod_imrecv(void *buf,
     return MPIDI_CH4R_imrecv(buf, count, datatype, message, rreqp);
 }
 
-static inline int MPIDI_netmod_irecv(void *buf,
+static inline int MPIDI_CH4_NM_irecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -55,7 +55,7 @@ static inline int MPIDI_netmod_irecv(void *buf,
 
 }
 
-static inline int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
+static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
 {
     return MPIDI_CH4R_cancel_recv(rreq);
 }

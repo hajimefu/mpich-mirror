@@ -33,10 +33,10 @@ static inline int MPIDI_Create_endpoint(struct fi_info *prov_use,
                                         struct fid_ep **ep);
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_init
+#define FUNCNAME MPIDI_CH4_NM_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
+static inline int MPIDI_CH4_NM_init(int rank, int size, int appnum, int *tag_ub,
                                     MPID_Comm * comm_world, MPID_Comm * comm_self,
                                     int spawned,int num_contexts, void **netmod_contexts)
 {
@@ -226,7 +226,7 @@ static inline int MPIDI_netmod_init(int rank, int size, int appnum, int *tag_ub,
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_finalize(void)
+static inline int MPIDI_CH4_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
     int i = 0;
@@ -274,7 +274,7 @@ static inline int MPIDI_netmod_finalize(void)
 }
 
 
-static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     if (comm_ptr->comm_kind == MPID_INTRACOMM)
@@ -287,7 +287,7 @@ static inline int MPIDI_netmod_comm_get_lpid(MPID_Comm * comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
@@ -302,19 +302,19 @@ static inline int MPIDI_netmod_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpi
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_CH4_NM_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
     *id_p = MPIDI_Global.node_map[COMM_TO_INDEX(comm, rank)];
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
 {
     *max_id_p = MPIDI_Global.max_node_id;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_getallincomm(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm * comm_ptr,
                                             int local_size, MPID_Gpid local_gpids[], int *singlePG)
 {
     int i;
@@ -326,7 +326,7 @@ static inline int MPIDI_netmod_getallincomm(MPID_Comm * comm_ptr,
     return 0;
 }
 
-static inline int MPIDI_netmod_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
+static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
 {
     int i, mpi_errno = MPI_SUCCESS;
 
@@ -374,7 +374,7 @@ static inline int MPIDI_netmod_gpid_tolpidarray(int size, MPID_Gpid gpid[], int 
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
+static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
                                                            int size, const int lpids[])
 {
     int i;
@@ -386,12 +386,12 @@ static inline int MPIDI_netmod_create_intercomm_from_lpids(MPID_Comm * newcomm_p
     return 0;
 }
 
-static inline int MPIDI_netmod_free_mem(void *ptr)
+static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 {
     return MPIDI_CH4R_free_mem(ptr);
 }
 
-static inline void *MPIDI_netmod_alloc_mem(size_t size, MPID_Info * info_ptr)
+static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     return MPIDI_CH4R_alloc_mem(size, info_ptr);
 }

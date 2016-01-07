@@ -243,10 +243,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_set_info
+#define FUNCNAME MPIDI_CH4_NM_win_set_info
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_set_info(MPID_Win *win, MPID_Info *info)
+static inline int MPIDI_CH4_NM_win_set_info(MPID_Win *win, MPID_Info *info)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -313,10 +313,10 @@ static inline int MPIDI_netmod_win_set_info(MPID_Win *win, MPID_Info *info)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_start
+#define FUNCNAME MPIDI_CH4_NM_win_start
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_start(MPID_Group *group, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_start(MPID_Group *group, int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -347,10 +347,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_complete
+#define FUNCNAME MPIDI_CH4_NM_win_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_complete(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -389,10 +389,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_post
+#define FUNCNAME MPIDI_CH4_NM_win_post
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_post(MPID_Group *group, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win *win)
 {
     int peer, index, mpi_errno = MPI_SUCCESS;
     MPIDI_Win_control_t msg;
@@ -429,10 +429,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_wait
+#define FUNCNAME MPIDI_CH4_NM_win_wait
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_wait(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_wait(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -461,10 +461,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_test
+#define FUNCNAME MPIDI_CH4_NM_win_test
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_test(MPID_Win *win, int *flag)
+static inline int MPIDI_CH4_NM_win_test(MPID_Win *win, int *flag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -495,10 +495,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_lock
+#define FUNCNAME MPIDI_CH4_NM_win_lock
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_lock(int lock_type, int rank, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -534,10 +534,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_unlock
+#define FUNCNAME MPIDI_CH4_NM_win_unlock
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_unlock(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_unlock(int rank, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
@@ -571,10 +571,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_get_info
+#define FUNCNAME MPIDI_CH4_NM_win_get_info
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
+static inline int MPIDI_CH4_NM_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
@@ -645,10 +645,10 @@ static inline int MPIDI_netmod_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_free
+#define FUNCNAME MPIDI_CH4_NM_win_free
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_free(MPID_Win **win_ptr)
+static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
@@ -700,10 +700,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_fence
+#define FUNCNAME MPIDI_CH4_NM_win_fence
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_fence(int massert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_fence(int massert, MPID_Win *win)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -727,10 +727,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_create
+#define FUNCNAME MPIDI_CH4_NM_win_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_create(void       *base,
+static inline int MPIDI_CH4_NM_win_create(void       *base,
                                           MPI_Aint    length,
                                           int         disp_unit,
                                           MPID_Info  *info,
@@ -773,10 +773,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_attach
+#define FUNCNAME MPIDI_CH4_NM_win_attach
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_attach(MPID_Win *win, void *base, MPI_Aint size)
+static inline int MPIDI_CH4_NM_win_attach(MPID_Win *win, void *base, MPI_Aint size)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
@@ -792,10 +792,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_allocate_shared
+#define FUNCNAME MPIDI_CH4_NM_win_allocate_shared
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_allocate_shared(MPI_Aint    size,
+static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                                    int         disp_unit,
                                                    MPID_Info  *info_ptr,
                                                    MPID_Comm  *comm_ptr,
@@ -957,10 +957,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_detach
+#define FUNCNAME MPIDI_CH4_NM_win_detach
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_detach(MPID_Win *win, const void *base)
+static inline int MPIDI_CH4_NM_win_detach(MPID_Win *win, const void *base)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_DETACH);
@@ -975,10 +975,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_shared_query
+#define FUNCNAME MPIDI_CH4_NM_win_shared_query
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_shared_query(MPID_Win *win,
+static inline int MPIDI_CH4_NM_win_shared_query(MPID_Win *win,
                                                 int       rank,
                                                 MPI_Aint *size,
                                                 int      *disp_unit,
@@ -1003,10 +1003,10 @@ static inline int MPIDI_netmod_win_shared_query(MPID_Win *win,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_allocate
+#define FUNCNAME MPIDI_CH4_NM_win_allocate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_allocate(MPI_Aint     size,
+static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint     size,
                                             int          disp_unit,
                                             MPID_Info   *info,
                                             MPID_Comm   *comm,
@@ -1050,10 +1050,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_flush
+#define FUNCNAME MPIDI_CH4_NM_win_flush
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_flush(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush(int rank, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
@@ -1071,10 +1071,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_flush_local_all
+#define FUNCNAME MPIDI_CH4_NM_win_flush_local_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_flush_local_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_local_all(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
@@ -1091,10 +1091,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_unlock_all
+#define FUNCNAME MPIDI_CH4_NM_win_unlock_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_unlock_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
@@ -1139,10 +1139,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_create_dynamic
+#define FUNCNAME MPIDI_CH4_NM_win_create_dynamic
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_create_dynamic(MPID_Info *info,
+static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info *info,
                                                   MPID_Comm *comm,
                                                   MPID_Win **win_ptr)
 {
@@ -1179,10 +1179,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_flush_local
+#define FUNCNAME MPIDI_CH4_NM_win_flush_local
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_flush_local(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
@@ -1201,10 +1201,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_sync
+#define FUNCNAME MPIDI_CH4_NM_win_sync
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_sync(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_sync(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SYNC);
@@ -1222,10 +1222,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_flush_all
+#define FUNCNAME MPIDI_CH4_NM_win_flush_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_flush_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_all(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
@@ -1242,10 +1242,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_win_lock_all
+#define FUNCNAME MPIDI_CH4_NM_win_lock_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_win_lock_all(int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 

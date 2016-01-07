@@ -28,8 +28,8 @@ MPIDI_NETMOD_API(int,progress,
 /* called by CH4 and netmods to register header types */
 MPIDI_NETMOD_API(int,reg_hdr_handler,
 		 (int) handler_id,
-		 (MPIDI_netmod_am_origin_handler_fn) origin_handler_fn,
-		 (MPIDI_netmod_am_target_handler_fn) target_handler_fn);
+		 (MPIDI_CH4_NM_am_origin_handler_fn) origin_handler_fn,
+		 (MPIDI_CH4_NM_am_target_handler_fn) target_handler_fn);
 
 /* for dynamic processes */
 MPIDI_NETMOD_API(int,comm_connect,

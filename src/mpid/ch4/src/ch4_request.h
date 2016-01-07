@@ -52,7 +52,7 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
-    MPIDI_netmod_request_release(req);
+    MPIDI_CH4_NM_request_release(req);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_RELEASE);
 }
 
@@ -78,7 +78,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_Request_create(void)
     MPID_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_CREATE);
-    req = MPIDI_netmod_request_create();
+    req = MPIDI_CH4_NM_request_create();
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_CREATE);
     return req;
 }

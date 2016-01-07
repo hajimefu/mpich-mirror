@@ -102,7 +102,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CREATE);
-    mpi_errno = MPIDI_netmod_comm_create(comm);
+    mpi_errno = MPIDI_CH4_NM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -157,7 +157,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DESTROY);
-    mpi_errno = MPIDI_netmod_comm_destroy(comm);
+    mpi_errno = MPIDI_CH4_NM_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
