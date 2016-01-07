@@ -312,7 +312,7 @@ static inline int MPIDI_CH4R_win_complete(MPID_Win *win)
     for(index = 0; index < group->size; ++index) {
         peer = ranks_in_win_grp[index];
         mpi_errno = MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
-                                               MPIDI_CH4U_AM_WIN_CTRL,
+                                               MPIDI_CH4R_WIN_CTRL,
                                                &msg, sizeof (msg), NULL);
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -368,7 +368,7 @@ static inline int MPIDI_CH4R_win_post(MPID_Group *group, int assert, MPID_Win *w
     for(index=0; index < group->size; ++index) {
         peer = ranks_in_win_grp[index];
         mpi_errno = MPIDI_netmod_inject_am_hdr(peer, win->comm_ptr,
-                                               MPIDI_CH4U_AM_WIN_CTRL,
+                                               MPIDI_CH4R_WIN_CTRL,
                                                &msg, sizeof (msg), NULL);
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -472,7 +472,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
 
     locked = slock->remote.locked + 1;
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
-                                           MPIDI_CH4U_AM_WIN_CTRL,
+                                           MPIDI_CH4R_WIN_CTRL,
                                            &msg, sizeof (msg), NULL);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -512,7 +512,7 @@ static inline int MPIDI_CH4R_win_unlock(int rank, MPID_Win *win)
     unlocked = MPIDI_CH4R_WIN(win, sync).lock.remote.locked - 1;
 
     mpi_errno = MPIDI_netmod_inject_am_hdr(rank, win->comm_ptr,
-                                           MPIDI_CH4U_AM_WIN_CTRL,
+                                           MPIDI_CH4R_WIN_CTRL,
                                            &msg, sizeof (msg), NULL);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -1084,7 +1084,7 @@ static inline int MPIDI_CH4R_win_unlock_all(MPID_Win *win)
         lockQ[i].win  = win;
 
         mpi_errno = MPIDI_netmod_inject_am_hdr(i, win->comm_ptr,
-                                               MPIDI_CH4U_AM_WIN_CTRL,
+                                               MPIDI_CH4R_WIN_CTRL,
                                                &msg, sizeof(msg), NULL);
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -1250,7 +1250,7 @@ static inline int MPIDI_CH4R_win_lock_all(int assert, MPID_Win *win)
         lockQ[i].lock_type = MPI_LOCK_SHARED;
 
         mpi_errno = MPIDI_netmod_inject_am_hdr(i, win->comm_ptr,
-                                               MPIDI_CH4U_AM_WIN_CTRL,
+                                               MPIDI_CH4R_WIN_CTRL,
                                                &msg, sizeof(msg), NULL);
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,

@@ -31,7 +31,7 @@ static inline int MPIDI_CH4I_do_send(const void *buf,
     int mpi_errno = MPI_SUCCESS, c;
     MPID_Request *sreq = NULL;
     uint64_t match_bits;
-    MPIDI_CH4U_AM_Hdr_t am_hdr;
+    MPIDI_CH4R_Hdr_t am_hdr;
     MPIDI_CH4U_Ssend_req_msg_t ssend_req;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_SEND);
@@ -45,18 +45,18 @@ static inline int MPIDI_CH4I_do_send(const void *buf,
     match_bits = MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, comm->rank, tag);
 
     am_hdr.msg_tag = match_bits;
-    if (type == MPIDI_CH4U_AM_SSEND_REQ) {
+    if (type == MPIDI_CH4R_SSEND_REQ) {
         ssend_req.hdr = am_hdr;
         ssend_req.sreq_ptr = (uint64_t) sreq;
         MPID_cc_incr(sreq->cc_ptr, &c);
 
-        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SSEND_REQ,
+        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4R_SSEND_REQ,
                                          &ssend_req, sizeof(ssend_req),
                                          buf, count, datatype, sreq, NULL);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     else {
-        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4U_AM_SEND,
+        mpi_errno = MPIDI_netmod_send_am(rank, comm, MPIDI_CH4R_SEND,
                                          &am_hdr, sizeof(am_hdr),
                                          buf, count, datatype, sreq, NULL);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -233,7 +233,7 @@ __CH4_INLINE__ int MPIDI_CH4R_ssend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_SSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SSEND);
     mpi_errno = MPIDI_CH4I_send(buf, count, datatype, rank, tag, comm,
-                            context_offset, request, 1, MPIDI_CH4U_AM_SSEND_REQ);
+                            context_offset, request, 1, MPIDI_CH4R_SSEND_REQ);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SSEND);
     return mpi_errno;
 }
@@ -253,7 +253,7 @@ __CH4_INLINE__ int MPIDI_CH4R_issend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ISSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ISSEND);
     mpi_errno = MPIDI_CH4I_send(buf, count, datatype, rank, tag, comm,
-                            context_offset, request, 0, MPIDI_CH4U_AM_SSEND_REQ);
+                            context_offset, request, 0, MPIDI_CH4R_SSEND_REQ);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ISSEND);
     return mpi_errno;
 }
