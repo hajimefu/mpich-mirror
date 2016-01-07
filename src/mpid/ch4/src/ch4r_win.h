@@ -34,7 +34,7 @@ static inline int MPIDI_CH4I_win_allgather(MPID_Win  *win)
                                     0,
                                     MPI_DATATYPE_NULL,
                                     MPIDI_CH4R_WIN(win, info_table),
-                                    sizeof(MPIDI_CH4I_win_info_t),
+                                    sizeof(MPIDI_CH4R_win_info_t),
                                     MPI_BYTE,
                                     comm_ptr,
                                     &errflag);
@@ -130,14 +130,14 @@ static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
                         "**nomem");
     *win_ptr = win;
 
-    memset(&win->dev.ch4r, 0, sizeof(MPIDI_CH4I_win_t));
+    memset(&win->dev.ch4r, 0, sizeof(MPIDI_CH4R_win_t));
     win->comm_ptr = comm_ptr;
     size          = comm_ptr->local_size;
     rank          = comm_ptr->rank;
     MPIR_Comm_add_ref(comm_ptr);
 
-    MPIDI_CH4R_WIN(win, info_table) = (MPIDI_CH4I_win_info_t *)
-        MPIU_Calloc(size, sizeof(MPIDI_CH4I_win_info_t));
+    MPIDI_CH4R_WIN(win, info_table) = (MPIDI_CH4R_win_info_t *)
+        MPIU_Calloc(size, sizeof(MPIDI_CH4R_win_info_t));
     MPIR_ERR_CHKANDSTMT(MPIDI_CH4R_WIN(win, info_table) == NULL,mpi_errno,MPI_ERR_NO_MEM,
                         goto fn_fail,"**nomem");
     win->errhandler          = NULL;
@@ -170,8 +170,8 @@ static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
     MPIDI_CH4R_WIN(win, mmap_sz)                          = 0;
     MPIDI_CH4R_WIN(win, mmap_addr)                        = NULL;
 
-    MPIDI_CH4I_win_info_t *winfo;
-    winfo            = (MPIDI_CH4I_win_info_t *)MPIDI_CH4R_WINFO(win, rank);
+    MPIDI_CH4R_win_info_t *winfo;
+    winfo            = (MPIDI_CH4R_win_info_t *)MPIDI_CH4R_WINFO(win, rank);
     winfo->disp_unit = disp_unit;
 
     /* context id lower bits, window instance upper bits */
@@ -457,7 +457,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_LOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_LOCK);
 
-    MPIDI_CH4I_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
+    MPIDI_CH4R_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
     if (!MPIDI_CH4R_WIN(win, sync).lock.remote.locked) {
@@ -690,7 +690,7 @@ static inline int MPIDI_CH4R_win_create(void *base,
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
     MPID_Win       *win;
     int             rank;
-    MPIDI_CH4I_win_info_t *winfo;
+    MPIDI_CH4R_win_info_t *winfo;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_CREATE);
@@ -708,7 +708,7 @@ static inline int MPIDI_CH4R_win_create(void *base,
     win              = *win_ptr;
     win->base   = base;
     rank             = comm_ptr->rank;
-    winfo            = (MPIDI_CH4I_win_info_t *)MPIDI_CH4R_WINFO(win,rank);
+    winfo            = (MPIDI_CH4R_win_info_t *)MPIDI_CH4R_WINFO(win,rank);
     winfo->base_addr = (uint64_t) base;
     winfo->disp_unit = disp_unit;
 
@@ -759,7 +759,7 @@ static inline int MPIDI_CH4R_win_allocate_shared(MPI_Aint size,
     int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP      = NULL;
-    MPIDI_CH4I_win_info_t *winfo      = NULL;
+    MPIDI_CH4R_win_info_t *winfo      = NULL;
     MPID_Win       *win        = NULL;
     ssize_t         total_size = 0LL;
     MPI_Aint        *sizes, size_out   = 0;
@@ -891,7 +891,7 @@ fn_zero:
     win->base   =  baseP;
     win->size        =  size;
 
-    winfo            = (MPIDI_CH4I_win_info_t *)MPIDI_CH4R_WINFO(win, comm_ptr->rank);
+    winfo            = (MPIDI_CH4R_win_info_t *)MPIDI_CH4R_WINFO(win, comm_ptr->rank);
     winfo->base_addr = (uint64_t) baseP;
     winfo->disp_unit = disp_unit;
     mpi_errno        = MPIDI_CH4I_win_allgather(win);
@@ -932,7 +932,7 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_win_shared_query
+#define FUNCNAME MPIDI_CH4R_win_shared_query
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_win_shared_query(MPID_Win *win,
@@ -940,7 +940,7 @@ static inline int MPIDI_CH4R_win_shared_query(MPID_Win *win,
                                               MPI_Aint *size, int *disp_unit, void *baseptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_CH4I_win_info_t *win_info;
+    MPIDI_CH4R_win_info_t *win_info;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_SHARED_QUERY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_SHARED_QUERY);
@@ -974,7 +974,7 @@ static inline int MPIDI_CH4R_win_allocate(MPI_Aint size,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_ALLOCATE);
 
     void           *baseP;
-    MPIDI_CH4I_win_info_t *winfo;
+    MPIDI_CH4R_win_info_t *winfo;
     MPID_Win       *win;
 
     mpi_errno = MPIDI_CH4I_win_init(size,disp_unit,win_ptr, info, comm,
@@ -988,7 +988,7 @@ static inline int MPIDI_CH4R_win_allocate(MPI_Aint size,
 
     win              = *win_ptr;
     win->base   =  baseP;
-    winfo            = (MPIDI_CH4I_win_info_t *)MPIDI_CH4R_WINFO(win, comm->rank);
+    winfo            = (MPIDI_CH4R_win_info_t *)MPIDI_CH4R_WINFO(win, comm->rank);
     winfo->base_addr =  (uint64_t) baseP;
     winfo->disp_unit =  disp_unit;
 
@@ -1062,7 +1062,7 @@ static inline int MPIDI_CH4R_win_unlock_all(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK_ALL);
     int i;
-    MPIDI_CH4I_winLock_info    *lockQ;
+    MPIDI_CH4R_winLock_info    *lockQ;
 
     MPIDI_CH4R_EPOCH_ORIGIN_CHECK(MPIDI_CH4R_EPOTYPE_LOCK_ALL);
 
@@ -1070,7 +1070,7 @@ static inline int MPIDI_CH4R_win_unlock_all(MPID_Win *win)
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIU_Assert(MPIDI_CH4R_WIN(win, msgQ) != NULL);
-    lockQ = (MPIDI_CH4I_winLock_info *) MPIDI_CH4R_WIN(win, msgQ);
+    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4R_WIN(win, msgQ);
 
     for(i = 0; i < win->comm_ptr->local_size; i++) {
 
@@ -1170,7 +1170,7 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_win_sync
+#define FUNCNAME MPIDI_CH4R_win_sync
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_win_sync(MPID_Win *win)
@@ -1228,13 +1228,13 @@ static inline int MPIDI_CH4R_win_lock_all(int assert, MPID_Win *win)
     size = win->comm_ptr->local_size;
 
     if(!MPIDI_CH4R_WIN(win, msgQ)) {
-        MPIDI_CH4R_WIN(win, msgQ) = (void *) MPIU_Calloc(size, sizeof(MPIDI_CH4I_winLock_info));
+        MPIDI_CH4R_WIN(win, msgQ) = (void *) MPIU_Calloc(size, sizeof(MPIDI_CH4R_winLock_info));
         MPIU_Assert(MPIDI_CH4R_WIN(win, msgQ) != NULL);
         MPIDI_CH4R_WIN(win, count) = 0;
     }
 
-    MPIDI_CH4I_winLock_info *lockQ;
-    lockQ = (MPIDI_CH4I_winLock_info *) MPIDI_CH4R_WIN(win, msgQ);
+    MPIDI_CH4R_winLock_info *lockQ;
+    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4R_WIN(win, msgQ);
     int i;
 
     for(i = 0; i < size; i++) {

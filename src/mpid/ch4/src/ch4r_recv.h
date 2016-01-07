@@ -98,7 +98,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4R_REQUEST(rreq, tag));
 
     if (MPIDI_CH4R_REQUEST(rreq, status) & MPIDI_CH4R_REQ_PEER_SSEND) {
-        mpi_errno = MPIDI_CH4I_reply_ssend(rreq);
+        mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4R_complete_req(rreq);
@@ -136,7 +136,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER() */
-    unexp_req = MPIDI_CH4I_dequeue_unexp(match_bits, mask_bits,
+    unexp_req = MPIDI_CH4R_dequeue_unexp(match_bits, mask_bits,
                                          &MPIDI_CH4R_COMM(root_comm, unexp_list));
     /* MPIDI_CS_EXIT() */
 
@@ -182,7 +182,7 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
 
     if (!unexp_req) {
         /* MPIDI_CS_ENTER(); */
-        MPIDI_CH4I_enqueue_posted(rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
+        MPIDI_CH4R_enqueue_posted(rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     } else {
         MPIDI_CH4R_REQUEST(unexp_req, rreq.match_req) = (uint64_t) rreq;
@@ -292,7 +292,7 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
         MPIDI_CH4R_REQUEST(message, status) |= MPIDI_CH4R_REQ_UNEXP_CLAIMED;
     }
     else {
-        mpi_errno = MPIDI_CH4I_unexp_mrecv_cmpl_handler(message);
+        mpi_errno = MPIDI_CH4R_unexp_mrecv_cmpl_handler(message);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     /* MPIDI_CS_EXIT(); */
@@ -382,7 +382,7 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
 
     /* MPIDI_CS_ENTER(); */
-    found = MPIDI_CH4I_delete_posted(&rreq->dev.ch4.ch4r.rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
+    found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4r.rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
     /* MPIDI_CS_EXIT(); */
 
     if (found) {
