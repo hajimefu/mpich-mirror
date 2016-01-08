@@ -14,6 +14,11 @@
 #include "impl.h"
 
 static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_netmod_repost_buffer
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_repost_buffer(void* buf)
 {
     int mpi_errno = MPI_SUCCESS;
