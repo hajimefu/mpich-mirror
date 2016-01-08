@@ -12,13 +12,12 @@
 #define NETMOD_DIRECT_H_INCLUDED
 
 #include "am.h"
-#include "am_events.h"
 #include "request.h"
 #include "events.h"
 #include "comm.h"
-#include "unimpl.h"
 #include "proc.h"
 #include "progress.h"
+#include "unimpl.h"
 
 #ifdef USE_OFI_TAGGED
 #include "init.h"

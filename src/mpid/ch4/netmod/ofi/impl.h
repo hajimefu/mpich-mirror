@@ -107,32 +107,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     }                                                 \
   })
 
-#define MPIDI_AM_Win_request_complete(req)                 \
-    ({							\
-	int count;					\
-	MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)	\
-		    == MPID_REQUEST);			\
-	MPIU_Object_release_ref(req, &count);		\
-	MPIU_Assert(count >= 0);			\
-	if (count == 0)					\
-	{						\
-	    MPIU_Free(req->noncontig);			\
-	    MPIDI_Win_request_tls_free(req);		\
-	}						\
-    })
-
-#define MPIDI_AM_Win_request_alloc_and_init(req,count,extra)       \
-  ({                                                            \
-    MPIDI_Win_request_tls_alloc(req);                           \
-    MPIU_Assert(req != NULL);                                   \
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                \
-                == MPID_REQUEST);                               \
-    MPIU_Object_set_ref(req, count);                            \
-    memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,                \
-           sizeof(MPIDI_Win_request)-                           \
-           MPIDI_REQUEST_HDR_SIZE);                             \
-    req->noncontig = (MPIDI_Win_noncontig*)MPIU_Calloc(1,(extra)+sizeof(*(req->noncontig))); \
-  })
 
 #define MPIDI_Ssendack_request_tls_alloc(req)                           \
   ({                                                                    \
@@ -232,27 +206,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         MPIDI_NM_PROGRESS();                                \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
-
-#define FI_RC_RETRY_AM(FUNC,STR)					\
-	do {								\
-		ssize_t _ret;                                           \
-		do {							\
-			_ret = FUNC;                                    \
-			if(likely(_ret==0)) break;			\
-			MPIR_ERR_##CHKANDJUMP4(_ret != -FI_EAGAIN,	\
-					       mpi_errno,		\
-					       MPI_ERR_OTHER,		\
-					       "**ofi_"#STR,		\
-					       "**ofi_"#STR" %s %d %s %s", \
-					       __SHORT_FILE__,		\
-					       __LINE__,		\
-					       FCNAME,			\
-					       fi_strerror(-_ret));	\
-				mpi_errno = MPIDI_netmod_progress_do_queue(NULL);\
-				if(mpi_errno != MPI_SUCCESS)		\
-					MPIR_ERR_POP(mpi_errno);	\
-		} while (_ret == -FI_EAGAIN);				\
-	} while (0)
 
 #define FI_RC_RETRY2(FUNC1,FUNC2,STR)                       \
     do {                                                    \
@@ -553,28 +506,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /* Common Utility functions used by the
  * C and C++ components
  */
-
-static inline MPID_Request *MPIDI_AM_request_alloc_and_init(int count)
-{
-    MPID_Request *req;
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
-    MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPID_cc_set(&req->cc, 1);
-    req->cc_ptr = &req->cc;
-    MPIU_Object_set_ref(req, count);
-    req->greq_fns = NULL;
-    MPIR_STATUS_SET_COUNT(req->status, 0);
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->status.MPI_SOURCE = MPI_UNDEFINED;
-    req->status.MPI_TAG = MPI_UNDEFINED;
-    req->status.MPI_ERROR = MPI_SUCCESS;
-    req->comm = NULL;
-    AMREQ_OFI(req, req_hdr) = NULL;
-    return req;
-}
-
-
 __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 {
     MPID_Request *req;
@@ -698,161 +629,17 @@ static inline int get_source(uint64_t match_bits)
     return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
 }
 
-#undef FUNCNAME
-#define FUNCNAME do_control_win
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_win(MPIDI_Win_control_t *control,
-                                 int                  rank,
-                                 MPID_Win            *win,
-                                 int                  use_comm,
-                                 int                  use_lock)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-
-    control->win_id = WIN_OFI(win)->win_id;
-    control->origin_rank = win->comm_ptr->rank;
-
-    MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    if(use_lock)
-        FI_RC_RETRY(fi_inject(G_TXC_MSG(0),
-                              control, sizeof(*control),
-                              use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                              _to_phys(rank, MPIDI_API_MSG)), inject);
-    else
-        FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),
-                                     control, sizeof(*control),
-                                     use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                                     _to_phys(rank, MPIDI_API_MSG)), inject);
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME do_control_send
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_send(MPIDI_Send_control_t *control,
-                                  char                 *send_buf,
-                                  size_t                msgsize,
-                                  int                   rank,
-                                  MPID_Comm            *comm_ptr,
-                                  MPID_Request         *ackreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-
-    control->origin_rank = comm_ptr->rank;
-    control->send_buf = send_buf;
-    control->msgsize = msgsize;
-    control->comm_id = comm_ptr->context_id;
-    control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
-    control->ackreq = ackreq;
-    MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),control, sizeof(*control),
-                                 _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG)),
-                       inject);
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_am_ofi_clear_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
-{
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-
-    req_hdr = AMREQ_OFI(sreq, req_hdr);
-    if (!req_hdr)
-        return;
-
-    if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
-        MPIU_Free(req_hdr->am_hdr);
-    }
-    MPIDI_CH4R_release_buf(req_hdr);
-    AMREQ_OFI(sreq, req_hdr) = NULL;
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
-    return;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_am_ofi_init_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
-                                               size_t am_hdr_sz,
-                                               MPID_Request *sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_am_ofi_req_hdr_t *req_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-
-    if (AMREQ_OFI(sreq, req_hdr) == NULL) {
-        req_hdr = (MPIDI_am_ofi_req_hdr_t *)
-            MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
-        MPIU_Assert(req_hdr);
-        AMREQ_OFI(sreq, req_hdr) = req_hdr;
-
-        req_hdr->am_hdr = (void *) &req_hdr->am_hdr_buf[0];
-        req_hdr->am_hdr_sz = MPIDI_MAX_AM_HDR_SZ;
-    } else {
-        req_hdr = AMREQ_OFI(sreq, req_hdr);
-    }
-
-    if (am_hdr_sz > req_hdr->am_hdr_sz) {
-        if (req_hdr->am_hdr != &req_hdr->am_hdr_buf[0])
-            MPIU_Free(req_hdr->am_hdr);
-        req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
-        MPIU_Assert(req_hdr->am_hdr);
-        req_hdr->am_hdr_sz = am_hdr_sz;
-    }
-
-    if (am_hdr) {
-        MPIU_Memcpy(req_hdr->am_hdr, am_hdr, am_hdr_sz);
-    }
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
-    return mpi_errno;
-}
-
 
 static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
   if(dt->map != &dt->__map)
     MPIU_Free(dt->map);
 }
-
-
-static inline void MPIDI_AM_netmod_request_complete(MPID_Request *req)
-{
-    int count;
-    MPID_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
-    if (count == 0)
-        MPIDI_Request_release(req);
-}
-
-static inline MPID_Request *MPIDI_AM_netmod_request_create(void)
-{
-    return MPIDI_AM_request_alloc_and_init(1);
-}
-
-
 /* Utility functions */
+extern int   MPIDI_OFI_Control_handler(void *am_hdr,size_t am_hdr_sz,void *reply_token,
+                                       void **data,size_t * data_sz,int *is_contig,
+                                       MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                                       MPID_Request ** req);
 extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
 extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
 extern void  MPIDI_OFI_Map_create(void **map);

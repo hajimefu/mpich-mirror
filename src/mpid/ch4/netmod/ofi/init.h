@@ -70,7 +70,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_Huge_chunk_t,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
-                            offsetof(MPIDI_Ctrl_req,context));
+                            offsetof(MPIDI_AM_req,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_Ssendack_request,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
@@ -125,6 +125,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
     hints->caps |= FI_RMA;                   /* RMA(read/write)         */
     hints->caps |= FI_ATOMICS;               /* Atomics capabilities    */
+    hints->caps |= FI_DIRECTED_RECV;         /* Atomics capabilities    */
 
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
@@ -369,17 +370,24 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
 
     for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {
         MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_AM_BUFF_SZ);
+        MPIDI_Global.am_reqs[i].event_id = MPIDI_EVENT_AM_RECV;
         MPIU_Assert(MPIDI_Global.am_bufs[i]);
         MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
         MPIDI_Global.am_iov[i].iov_len   = MPIDI_AM_BUFF_SZ;
         MPIDI_Global.am_msg[i].msg_iov   = &MPIDI_Global.am_iov[i];
         MPIDI_Global.am_msg[i].desc      = NULL;
         MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
-        MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_msg[i];
+        MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
+        fprintf(stderr, "Posting context=%p\n",  &MPIDI_Global.am_reqs[i].context);
         MPIDI_Global.am_msg[i].iov_count = 1;
-        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep, &MPIDI_Global.am_msg[i],
+        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep,
+                               &MPIDI_Global.am_msg[i],
                                FI_MULTI_RECV | FI_COMPLETION), prepost);
     }
+
+    /* Grow the header handlers down */
+    MPIDI_Global.am_handlers[MPIDI_MAX_AM_HANDLERS]        = MPIDI_OFI_Control_handler;
+    MPIDI_Global.send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS] = NULL;
 
     /* -------------------------------- */
     /* Calculate per-node map           */

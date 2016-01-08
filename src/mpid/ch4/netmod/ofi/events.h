@@ -12,7 +12,10 @@
 #define NETMOD_OFI_EVENTS_H_INCLUDED
 
 #include "impl.h"
+#include "am_impl.h"
 #include "am_events.h"
+#include "control.h"
+
 static inline int get_huge_event(cq_tagged_entry_t *wc, MPID_Request *req);
 
 #undef FUNCNAME
@@ -258,27 +261,6 @@ static inline int ssend_ack_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND_ACK_EVENT);
     return mpi_errno;
 }
-
-#undef FUNCNAME
-#define FUNCNAME control_event
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int control_event(cq_tagged_entry_t *wc,
-                                MPID_Request      *req)
-{
-    int mpi_errno = MPI_SUCCESS;
-    int16_t *buf;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
-
-    buf              = (int16_t *)wc->buf;
-    MPIU_Assert(buf != NULL);
-    mpi_errno        = MPIDI_OFI_control_dispatch(buf);
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CONTROL_EVENT);
-    return mpi_errno;
-}
-
 
 #undef FUNCNAME
 #define FUNCNAME get_huge_event
@@ -593,6 +575,13 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
 {
     int mpi_errno;
 
+    fprintf(stderr, "Handling wc->context=%p recv:%d send:%d mr:%d recv:%d, event_id=%d\n",
+            wc->op_context,
+            0==(wc->flags&FI_SEND)?0:1,
+            0==(wc->flags&FI_RECV)?0:1,
+            0==(wc->flags&FI_MULTI_RECV)?0:1,
+            0==(wc->flags&FI_READ)?0:1,
+            REQ_OFI(req,event_id));
     if(likely(REQ_OFI(req,event_id) == MPIDI_EVENT_SEND)) {
         mpi_errno = send_event(wc,req);
         goto fn_exit;
@@ -615,9 +604,6 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
         switch(REQ_OFI(req,event_id)) {
         case MPIDI_EVENT_AM_MULTI:
             mpi_errno = am_repost_event(wc,req);
-            break;
-        case MPIDI_EVENT_CONTROL:
-            mpi_errno = control_event(wc,req);
             break;
         case MPIDI_EVENT_PEEK:
             mpi_errno = peek_event(wc,req);

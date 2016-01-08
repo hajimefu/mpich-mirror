@@ -20,6 +20,7 @@
 #include <mpidimpl.h>
 #include "impl.h"
 #include "events.h"
+#include "control.h"
 EXTERN_C_BEGIN
 
 #undef FUNCNAME
@@ -362,12 +363,24 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     get_huge_event(NULL, (MPID_Request *)hc);
 }
 
-int MPIDI_OFI_control_dispatch(void *buf)
+int MPIDI_OFI_Control_handler(void    *am_hdr,
+                              size_t   am_hdr_sz,
+                              void    *reply_token,
+                              void   **data,
+                              size_t  *data_sz,
+                              int     *is_contig,
+                              MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                              MPID_Request ** req)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int   mpi_errno  = MPI_SUCCESS;
+    void *buf        = am_hdr;
     int senderrank;
-
     MPIDI_Win_control_t *control = (MPIDI_Win_control_t *)buf;
+    *req             = NULL;
+    *cmpl_handler_fn = NULL;
+    *data            = NULL;
+    *data_sz         = 0;
+    *is_contig       = 1;
 
     switch(control->type) {
         case MPIDI_CTRL_HUGEACK: {

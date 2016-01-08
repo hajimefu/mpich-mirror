@@ -39,12 +39,16 @@ EXTERN_C_BEGIN
 #define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
-#define MPIDI_MAX_AM_HANDLERS 		(24)
 #define MPIDI_CACHELINE_SIZE        (64)
 #define MPIDI_IOV_MAX               1
 #define MPIDI_BUF_POOL_SZ  (1024)
 #define MPIDI_BUF_POOL_NUM (1024)
 #define MPIDI_NUM_CQ_BUFFERED (1024)
+#define MPIDI_MAX_AM_HANDLERS_TOTAL 		(24)
+
+#define MPIDI_INTERNAL_HANDLER_CONTROL (MPIDI_MAX_AM_HANDLERS_TOTAL-1)
+#define MPIDI_INTERNAL_HANDLER_NEXT    (MPIDI_MAX_AM_HANDLERS_TOTAL-2)
+#define MPIDI_MAX_AM_HANDLERS          (MPIDI_INTERNAL_HANDLER_NEXT-1)
 
 
 #ifdef USE_OFI_TAGGED
@@ -130,7 +134,6 @@ EXTERN_C_BEGIN
 /* Typedefs */
 typedef struct iovec iovec_t;
 typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
-typedef int (*control_event_fn) (void *buf);
 
 typedef enum {
     MPIDI_ACCU_ORDER_RAR = 1,
@@ -187,7 +190,6 @@ enum {
     MPIDI_EVENT_SEND_HUGE,
     MPIDI_EVENT_SSEND_ACK,
     MPIDI_EVENT_GET_HUGE,
-    MPIDI_EVENT_CONTROL,
     MPIDI_EVENT_CHUNK_DONE,
     MPIDI_EVENT_DYNPROC_DONE,
     MPIDI_EVENT_ACCEPT_PROBE
@@ -216,10 +218,10 @@ typedef struct {
 } MPIDI_Addr_table_t;
 
 typedef struct {
-    char pad[MPIDI_REQUEST_HDR_SIZE];
+    char      pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
     int       event_id;
-} MPIDI_Ctrl_req;
+} MPIDI_AM_req;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
@@ -323,16 +325,16 @@ typedef struct {
     int      context_shift;
     size_t iov_limit;
     int control_init;
-    control_event_fn control_fn[16];
     MPID_Node_id_t *node_map;
     MPID_Node_id_t max_node_id;
     void *win_map;
     void *comm_map;
     atomic_valid_t win_op_table[DT_SIZES][OP_SIZES];
     MPID_CommOps MPID_Comm_fns_store;
-    struct iovec am_iov[MPIDI_NUM_AM_BUFFERS];
-    struct fi_msg am_msg[MPIDI_NUM_AM_BUFFERS];
-    void *am_bufs[MPIDI_NUM_AM_BUFFERS];
+    struct iovec    am_iov[MPIDI_NUM_AM_BUFFERS];
+    struct fi_msg   am_msg[MPIDI_NUM_AM_BUFFERS];
+    void           *am_bufs[MPIDI_NUM_AM_BUFFERS];
+    MPIDI_AM_req    am_reqs[MPIDI_NUM_AM_BUFFERS];
     MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS];
     MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS];
     int coll_progress;

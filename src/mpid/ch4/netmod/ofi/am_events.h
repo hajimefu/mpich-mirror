@@ -11,27 +11,7 @@
 #ifndef NETMOD_AM_OFI_EVENTS_H_INCLUDED
 #define NETMOD_AM_OFI_EVENTS_H_INCLUDED
 
-#include "impl.h"
-
-static inline int MPIDI_netmod_progress_do_queue(void *netmod_context);
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_repost_buffer
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_repost_buffer(void* buf)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
-    FI_RC_RETRY_AM(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf,
-                              FI_MULTI_RECV | FI_COMPLETION), repost);
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
+#include "am_impl.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_netmod_handle_short_am
@@ -123,7 +103,7 @@ static inline int MPIDI_netmod_handle_short_am_hdr(MPIDI_AM_OFI_hdr_t * msg_hdr,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
 
     MPIDI_Global.am_handlers[msg_hdr->handler_id] (am_hdr, msg_hdr->am_hdr_sz,
-                                                   (void *) source, NULL, NULL, NULL, 
+                                                   (void *) source, NULL, NULL, NULL,
                                                    &cmpl_handler_fn, &rreq);
     if (!rreq)
         goto fn_exit;
@@ -457,54 +437,5 @@ static inline int MPIDI_netmod_dispatch_ack(fi_addr_t source,
     goto fn_exit;
 }
 
-#undef FUNCNAME
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
-{
-    int mpi_errno = MPI_SUCCESS, ret;
-    struct fi_cq_data_entry cq_entry;
-    struct fi_cq_err_entry cq_err_entry;
-    fi_addr_t source;
-
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS);
-
-    ret = fi_cq_readfrom(MPIDI_Global.p2p_cq, &cq_entry, 1, &source);
-    if (ret == -FI_EAGAIN)
-        goto fn_exit;
-
-    if (ret < 0) {
-        fi_cq_readerr(MPIDI_Global.p2p_cq, &cq_err_entry, 0);
-        fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
-        goto fn_fail;
-    }
-
-    if (((MPIDI_Global.cq_buff_head + 1) %
-         MPIDI_NUM_CQ_BUFFERED == MPIDI_Global.cq_buff_tail) ||
-        !slist_empty(&MPIDI_Global.cq_buff_list)) {
-        struct cq_list *list_entry = (struct cq_list *) MPIU_Malloc(sizeof(struct cq_list));
-        MPIU_Assert(list_entry);
-        list_entry->cq_entry = cq_entry;
-        list_entry->source = source;
-        slist_insert_tail(&list_entry->entry, &MPIDI_Global.cq_buff_list);
-    } else {
-        MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].cq_entry = cq_entry;
-        MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].source = source;
-        MPIDI_Global.cq_buff_head = (MPIDI_Global.cq_buff_head + 1) % MPIDI_NUM_CQ_BUFFERED;
-    }
-
-    if ((cq_entry.flags & FI_RECV) &&
-        (cq_entry.flags & FI_MULTI_RECV)) {
-        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context);
-        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-    }
-
-fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_PROGRESS);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
 
 #endif /* NETMOD_AM_OFI_EVENTS_H_INCLUDED */
