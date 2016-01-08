@@ -1817,7 +1817,9 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr, size_t am_hdr
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_CTRL_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_CTRL_HANDLER);
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
+    /* TODO: check output win ptr */
     sender_rank = msg_hdr->origin_rank;
 
     switch (msg_hdr->type) {
@@ -1900,7 +1902,8 @@ static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
     MPIDI_CH4R_REQUEST(*req, preq.preq_ptr) = msg_hdr->preq_ptr;
     MPIDI_CH4R_REQUEST(*req, preq.reply_token) = reply_token;
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */
@@ -1991,7 +1994,8 @@ static inline int MPIDI_CH4R_put_iov_target_handler(void *am_hdr,
     MPIDI_CH4R_REQUEST(*req, preq.preq_ptr) = msg_hdr->preq_ptr;
     MPIDI_CH4R_REQUEST(*req, preq.reply_token) = reply_token;
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */
@@ -2222,7 +2226,8 @@ static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
     MPIDI_Datatype_check_contig_size(msg_hdr->datatype, 1, dt_contig, data_sz);
     *is_contig = dt_contig;
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */
@@ -2291,7 +2296,8 @@ static inline int MPIDI_CH4R_handle_acc_request(void *am_hdr,
     *p_data_sz = data_sz;
     *data = p_data;
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */
@@ -2355,7 +2361,8 @@ static inline int MPIDI_CH4R_acc_iov_target_handler(void *am_hdr,
     rreq->kind = MPID_WIN_REQUEST;
     *req = rreq;
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */
@@ -2420,7 +2427,8 @@ static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
     *cmpl_handler_fn = MPIDI_CH4R_get_cmpl_handler;
     MPIDI_CH4R_REQUEST(rreq, seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
-    win = (MPID_Win *)MPIDI_CH4I_map_lookup(MPIDI_CH4_Global.win_map, msg_hdr->win_id);
+    MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    &msg_hdr->win_id, sizeof(uint64_t), win);
     MPIU_Assert(win);
 
     /* MPIDI_CS_ENTER(); */

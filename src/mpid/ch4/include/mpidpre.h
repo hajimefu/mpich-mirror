@@ -21,6 +21,7 @@ typedef size_t MPIDI_msg_sz_t;
 #include "mpid_thread.h"
 #include "mpid_timers_fallback.h"
 #include "netmodpre.h"
+#include "mpl_uthash.h"
 
 #define MPID_PROGRESS_STATE_DECL
 #define HAVE_GPID_ROUTINES
@@ -252,6 +253,7 @@ typedef struct MPIDI_CH4R_win_t {
     MPIDI_CH4R_win_sync_t sync;
     MPIDI_CH4R_win_info_t *info_table;
     MPIDI_CH4R_win_info_args_t info_args;
+    MPL_UT_hash_handle hash_handle;
 } MPIDI_CH4R_win_t;
 
 typedef struct {

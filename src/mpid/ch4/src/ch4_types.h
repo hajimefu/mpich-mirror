@@ -200,7 +200,7 @@ typedef struct MPIDI_CH4_Global_t {
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
     MPID_Thread_mutex_t  m[2];
-    void *win_map;
+    MPID_Win *win_hash;
     int jobid;
 #ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
     MPIDI_CH4R_Dev_rreq_t *posted_list;

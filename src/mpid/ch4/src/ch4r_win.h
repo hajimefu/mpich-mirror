@@ -16,6 +16,7 @@
 #include "ch4i_util.h"
 #include <opa_primitives.h>
 #include "mpiinfo.h"
+#include "mpl_uthash.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_win_allgather
@@ -177,7 +178,8 @@ static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
     /* context id lower bits, window instance upper bits */
     MPIDI_CH4R_WIN(win, win_id) = 1 + (((uint64_t)comm_ptr->context_id) |
                                       ((uint64_t)((MPIDI_CH4R_COMM(comm_ptr, window_instance))++)<<32));
-    MPIDI_CH4I_map_set(MPIDI_CH4_Global.win_map, MPIDI_CH4R_WIN(win, win_id), win);
+    MPL_HASH_ADD(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
+		    dev.ch4r.win_id, sizeof(uint64_t), win);
 
 fn_exit:
     return mpi_errno;

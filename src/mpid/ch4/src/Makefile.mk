@@ -34,5 +34,4 @@ noinst_HEADERS += src/mpid/ch4/src/ch4_comm.h     \
 
 mpi_core_sources += src/mpid/ch4/src/ch4_globals.c        \
                     src/mpid/ch4/src/mpid_ch4_net_array.c \
-                    src/mpid/ch4/src/mpid_ch4_shm_array.c \
-                    src/mpid/ch4/src/ch4i_map.cc
+                    src/mpid/ch4/src/mpid_ch4_shm_array.c

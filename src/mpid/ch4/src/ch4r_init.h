@@ -14,6 +14,7 @@
 #include "ch4_impl.h"
 #include "ch4i_util.h"
 #include "ch4r_callbacks.h"
+#include "mpl_uthash.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4R_init_comm
@@ -189,7 +190,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     mpi_errno = MPIDI_CH4R_init_comm(comm_self);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDI_CH4I_map_create(&MPIDI_CH4_Global.win_map);
+    MPIDI_CH4_Global.win_hash = NULL;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
 
   fn_exit:
@@ -206,7 +207,7 @@ __CH4_INLINE__ void MPIDI_CH4R_finalize()
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
-    MPIDI_CH4I_map_destroy(MPIDI_CH4_Global.win_map);
+    MPL_HASH_CLEAR(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
 }
 
