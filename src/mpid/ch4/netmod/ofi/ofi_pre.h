@@ -116,13 +116,20 @@ typedef struct {
     uint64_t sreq_ptr;
 } MPIDI_OFI_Ack_msg_pyld_t;
 
+
+typedef struct MPIDI_AM_OFI_reply_token_t {
+    uint32_t context_id;
+    uint32_t src_rank;
+}MPIDI_AM_OFI_reply_token_t;
+
 typedef struct MPIDI_AM_OFI_hdr_t {
-    uint16_t handler_id;
-    uint8_t  am_type;
-    uint8_t  pad[5];
-    uint64_t am_hdr_sz;
-    uint64_t data_sz;
-    uint8_t  payload[0];
+    uint64_t handler_id  : 8;
+    uint64_t am_type     : 8;
+    uint64_t am_hdr_sz   : 8;
+    uint64_t data_sz     : 48;
+    uint64_t context_id  : 24;
+    uint64_t src_rank    : 32;
+    uint64_t payload[0];
 } MPIDI_AM_OFI_hdr_t;
 #define MPIDI_AM_OFI_MSG_HDR_SZ (sizeof(MPIDI_AM_OFI_hdr_t))
 

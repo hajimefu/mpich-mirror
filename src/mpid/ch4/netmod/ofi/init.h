@@ -378,7 +378,6 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
         MPIDI_Global.am_msg[i].desc      = NULL;
         MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
         MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
-        fprintf(stderr, "Posting context=%p\n",  &MPIDI_Global.am_reqs[i].context);
         MPIDI_Global.am_msg[i].iov_count = 1;
         FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep,
                                &MPIDI_Global.am_msg[i],
@@ -386,8 +385,8 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     }
 
     /* Grow the header handlers down */
-    MPIDI_Global.am_handlers[MPIDI_MAX_AM_HANDLERS]        = MPIDI_OFI_Control_handler;
-    MPIDI_Global.send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS] = NULL;
+    MPIDI_Global.am_handlers[MPIDI_INTERNAL_HANDLER_CONTROL]        = MPIDI_OFI_Control_handler;
+    MPIDI_Global.send_cmpl_handlers[MPIDI_INTERNAL_HANDLER_CONTROL] = NULL;
 
     /* -------------------------------- */
     /* Calculate per-node map           */

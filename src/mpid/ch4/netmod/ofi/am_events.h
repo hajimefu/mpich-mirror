@@ -414,9 +414,9 @@ static inline int MPIDI_netmod_handle_long_hdr_ack(MPIDI_AM_OFI_hdr_t * msg_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_dispatch_ack(fi_addr_t source,
-                                            uint64_t sreq_ptr,
-                                            int am_type,
-                                            void *netmod_context)
+                                            uint64_t  sreq_ptr,
+                                            int       am_type,
+                                            void     *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_OFI_Ack_msg_t msg;
@@ -425,8 +425,8 @@ static inline int MPIDI_netmod_dispatch_ack(fi_addr_t source,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DISPATCH_ACK);
 
     msg.hdr.am_hdr_sz = sizeof(msg.pyld);
-    msg.hdr.data_sz = 0;
-    msg.hdr.am_type = am_type;
+    msg.hdr.data_sz   = 0;
+    msg.hdr.am_type   = am_type;
     msg.pyld.sreq_ptr = sreq_ptr;
 
     FI_RC_RETRY_AM(fi_inject(MPIDI_Global.ep, &msg, sizeof(msg), source), inject);

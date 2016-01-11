@@ -431,9 +431,11 @@ static inline int am_recv_event(cq_tagged_entry_t *wc,
     MPIDI_AM_OFI_hdr_t *am_hdr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
-    fi_addr_t source = 0ULL;
-    MPIU_Assert(source != 0ULL);
-    am_hdr = (MPIDI_AM_OFI_hdr_t *) wc->buf;
+    am_hdr           = (MPIDI_AM_OFI_hdr_t *) wc->buf;
+    fi_addr_t source = 0xFFFFFFFFFFFFFFFFULL;
+    MPID_Comm *comm  = MPIDI_CH4R_context_id_to_comm(am_hdr->context_id);
+    if(comm) source  = _comm_to_phys(comm, am_hdr->src_rank, MPIDI_API_TAG);
+
     switch (am_hdr->am_type) {
     case MPIDI_AMTYPE_SHORT_HDR:
         mpi_errno = MPIDI_netmod_handle_short_am_hdr(am_hdr,
@@ -490,11 +492,15 @@ static inline int am_recv_event(cq_tagged_entry_t *wc,
 static inline int am_read_event(cq_tagged_entry_t *wc,
                                 MPID_Request      *req)
 {
-    MPID_Request *rreq;
-    void         *netmod_context = NULL;
-    fi_addr_t     source         = 0ULL;
-    int           mpi_errno      = MPI_SUCCESS;
-    MPIU_Assert(source != 0ULL);
+    int                 mpi_errno      = MPI_SUCCESS;
+    void               *netmod_context = NULL;
+    MPIDI_AM_OFI_hdr_t *am_hdr;
+    MPID_Request       *rreq;
+
+    am_hdr           = (MPIDI_AM_OFI_hdr_t *) wc->buf;
+    fi_addr_t source = 0xFFFFFFFFFFFFFFFFULL;
+    MPID_Comm *comm  = MPIDI_CH4R_context_id_to_comm(am_hdr->context_id);
+    if(comm) source  = _comm_to_phys(comm, am_hdr->src_rank, MPIDI_API_TAG);
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
@@ -574,14 +580,6 @@ static inline MPID_Request *devreq_to_req(void *context)
 static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
 {
     int mpi_errno;
-
-    fprintf(stderr, "Handling wc->context=%p recv:%d send:%d mr:%d recv:%d, event_id=%d\n",
-            wc->op_context,
-            0==(wc->flags&FI_SEND)?0:1,
-            0==(wc->flags&FI_RECV)?0:1,
-            0==(wc->flags&FI_MULTI_RECV)?0:1,
-            0==(wc->flags&FI_READ)?0:1,
-            REQ_OFI(req,event_id));
     if(likely(REQ_OFI(req,event_id) == MPIDI_EVENT_SEND)) {
         mpi_errno = send_event(wc,req);
         goto fn_exit;

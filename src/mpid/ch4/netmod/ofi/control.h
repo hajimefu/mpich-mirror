@@ -31,19 +31,28 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
 
     control->win_id      = WIN_OFI(win)->win_id;
     control->origin_rank = win->comm_ptr->rank;
-    fprintf(stderr, "Do control:  uc: %d  ul: %d\n", use_comm, use_lock);
     dest = use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
                       _to_phys(rank, MPIDI_API_MSG);
+    if(use_comm == 0) {
+        MPIU_Assert(0);
+    }
+    MPIDI_AM_OFI_reply_token_t reply_token;
     if(use_lock)
-            mpi_errno = MPIDI_netmod_do_inject(dest,
-                                               MPIDI_INTERNAL_HANDLER_CONTROL,
-                                               (void*)control,
-                                               sizeof(*control),NULL);
+        mpi_errno = MPIDI_netmod_do_inject(rank,
+                                           win->comm_ptr,
+                                           reply_token,
+                                           MPIDI_INTERNAL_HANDLER_CONTROL,
+                                           (void*)control,
+                                           sizeof(*control),NULL,
+                                           FALSE);
     else
-            mpi_errno = MPIDI_netmod_do_inject(dest,
-                                               MPIDI_INTERNAL_HANDLER_CONTROL,
-                                               (void*)control,
-                                               sizeof(*control),NULL);
+        mpi_errno = MPIDI_netmod_do_inject(rank,
+                                           win->comm_ptr,
+                                           reply_token,
+                                           MPIDI_INTERNAL_HANDLER_CONTROL,
+                                           (void*)control,
+                                           sizeof(*control),NULL,
+                                           FALSE);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;
@@ -72,12 +81,13 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    fprintf(stderr, "Do control_send:  uc: %d  ul: %d\n", 1, 1);
     dest      = _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG);
-    mpi_errno = MPIDI_netmod_do_inject(dest,
+    MPIDI_AM_OFI_reply_token_t reply_token;
+    mpi_errno = MPIDI_netmod_do_inject(rank,comm_ptr,
+                                       reply_token,
                                        MPIDI_INTERNAL_HANDLER_CONTROL,
                                        (void*)control,
-                                       sizeof(*control),NULL);
+                                       sizeof(*control),NULL,FALSE);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;

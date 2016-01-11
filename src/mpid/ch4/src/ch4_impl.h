@@ -47,6 +47,12 @@ static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
     return gen_id;
 }
 
+static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
+{
+    int comm_idx = MPIDI_CH4R_get_context_index(context_id);
+    return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
+}
+
 static inline MPID_Request *MPIDI_CH4R_create_req()
 {
     MPID_Request *req = MPIDI_CH4_NM_request_create();

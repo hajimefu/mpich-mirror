@@ -216,14 +216,19 @@ fn_exit:
 #define FUNCNAME MPIDI_netmod_ofi_do_send_am_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank,
-                                                  int     handler_id,
-                                                  const void *am_hdr,
-                                                  size_t am_hdr_sz, MPID_Request * sreq)
+static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         rank,
+                                                  MPID_Comm                  *comm,
+                                                  MPIDI_AM_OFI_reply_token_t  reply_token,
+                                                  int                         handler_id,
+                                                  const void                 *am_hdr,
+                                                  size_t                      am_hdr_sz,
+                                                  MPID_Request               *sreq,
+                                                  int                         is_reply)
 {
     struct iovec iov[2];
     MPIDI_AM_OFI_hdr_t *msg_hdr;
-    int mpi_errno = MPI_SUCCESS, c;
+    int mpi_errno = MPI_SUCCESS, c, use_rank;
+    MPID_Comm *use_comm;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -233,9 +238,22 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank,
 
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
-    msg_hdr->am_hdr_sz = am_hdr_sz;
-    msg_hdr->data_sz = 0;
-    msg_hdr->am_type = MPIDI_AMTYPE_SHORT_HDR;
+    msg_hdr->am_hdr_sz  = am_hdr_sz;
+    msg_hdr->data_sz    = 0;
+    msg_hdr->am_type    = MPIDI_AMTYPE_SHORT_HDR;
+
+    if(is_reply) {
+        use_comm            = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
+        use_rank            = reply_token.src_rank;
+        msg_hdr->context_id = reply_token.context_id;
+        msg_hdr->src_rank   = reply_token.src_rank;
+    }
+    else {
+        use_comm = comm;
+        use_rank = rank;
+        msg_hdr->context_id = use_comm->context_id;
+        msg_hdr->src_rank   = use_rank;
+    }
 
     AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
     MPID_cc_incr(sreq->cc_ptr, &c);
@@ -247,7 +265,9 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank,
     iov[1].iov_base = AMREQ_OFI_HDR(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 2, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 2,
+                            _comm_to_phys(use_comm, use_rank, MPIDI_API_TAG),
+                            &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     return mpi_errno;
@@ -259,25 +279,32 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int64_t rank,
 #define FUNCNAME MPIDI_netmod_ofi_send_am_long
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
-                                                const void *am_hdr, size_t am_hdr_sz,
-                                                const void *data, size_t data_sz,
-                                                MPID_Request * sreq)
+static inline int MPIDI_netmod_ofi_send_am_long(int           rank,
+                                                MPID_Comm    *comm,
+                                                int           handler_id,
+                                                const void   *am_hdr,
+                                                size_t        am_hdr_sz,
+                                                const void   *data,
+                                                size_t        data_sz,
+                                                MPID_Request *sreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
-    MPIDI_AM_OFI_hdr_t *msg_hdr;
+    MPIDI_AM_OFI_hdr_t       *msg_hdr;
     MPIDI_OFI_lmt_msg_pyld_t *lmt_info;
-    struct iovec iov[3];
-    uint64_t index;
+    struct iovec              iov[3];
+    uint64_t                  index;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
 
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
-    msg_hdr->am_hdr_sz = am_hdr_sz;
-    msg_hdr->data_sz = data_sz;
-    msg_hdr->am_type = MPIDI_AMTYPE_LMT_REQ;
+    msg_hdr->am_hdr_sz  = am_hdr_sz;
+    msg_hdr->data_sz    = data_sz;
+    msg_hdr->am_type    = MPIDI_AMTYPE_LMT_REQ;
+    msg_hdr->context_id = comm->context_id;
+    msg_hdr->src_rank   = rank;
+
 
     lmt_info = &AMREQ_OFI_HDR(sreq, lmt_info);
     lmt_info->src_offset = (uint64_t) 0; /* TODO: Set to data if MR_BASIC */
@@ -311,7 +338,9 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
     iov[2].iov_base = lmt_info;
     iov[2].iov_len = sizeof(*lmt_info);
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3,
+                            _comm_to_phys(comm, rank, MPIDI_API_TAG),
+                            &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     return mpi_errno;
@@ -323,10 +352,14 @@ static inline int MPIDI_netmod_ofi_send_am_long(int64_t rank, int handler_id,
 #define FUNCNAME MPIDI_netmod_ofi_send_am_short
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
-                                                 const void *am_hdr, size_t am_hdr_sz,
-                                                 const void *data, MPI_Count count,
-                                                 MPID_Request * sreq)
+static inline int MPIDI_netmod_ofi_send_am_short(int           rank,
+                                                 MPID_Comm    *comm,
+                                                 int           handler_id,
+                                                 const void   *am_hdr,
+                                                 size_t        am_hdr_sz,
+                                                 const void   *data,
+                                                 MPI_Count     count,
+                                                 MPID_Request *sreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_AM_OFI_hdr_t *msg_hdr;
@@ -337,22 +370,26 @@ static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
 
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
-    msg_hdr->am_hdr_sz = am_hdr_sz;
-    msg_hdr->data_sz = count;
-    msg_hdr->am_type = MPIDI_AMTYPE_SHORT;
+    msg_hdr->am_hdr_sz  = am_hdr_sz;
+    msg_hdr->data_sz    = count;
+    msg_hdr->am_type    = MPIDI_AMTYPE_SHORT;
+    msg_hdr->context_id = comm->context_id;
+    msg_hdr->src_rank   = rank;
 
-    iov[0].iov_base = msg_hdr;
-    iov[0].iov_len = sizeof(*msg_hdr);
+    iov[0].iov_base     = msg_hdr;
+    iov[0].iov_len      = sizeof(*msg_hdr);
 
-    iov[1].iov_base = AMREQ_OFI_HDR(sreq, am_hdr);
-    iov[1].iov_len = am_hdr_sz;
+    iov[1].iov_base     = AMREQ_OFI_HDR(sreq, am_hdr);
+    iov[1].iov_len      = am_hdr_sz;
 
-    iov[2].iov_base = (void *) data;
-    iov[2].iov_len = count;
+    iov[2].iov_base     = (void *) data;
+    iov[2].iov_len      = count;
 
     MPID_cc_incr(sreq->cc_ptr, &c);
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3, rank, &AMREQ_OFI(sreq, context)), sendv);
+    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3,
+                            _comm_to_phys(comm, rank, MPIDI_API_TAG),
+                            &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
     return mpi_errno;
@@ -364,17 +401,24 @@ static inline int MPIDI_netmod_ofi_send_am_short(int64_t rank, int handler_id,
 #define FUNCNAME MPIDI_netmod_ofi_do_send_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
-                                              const void *am_hdr, size_t am_hdr_sz,
-                                              const void *buf, size_t count,
-                                              MPI_Datatype datatype, MPID_Request * sreq)
+static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
+                                              MPID_Comm    *comm,
+                                              MPIDI_AM_OFI_reply_token_t  reply_token,
+                                              int           handler_id,
+                                              const void   *am_hdr,
+                                              size_t        am_hdr_sz,
+                                              const void   *buf,
+                                              size_t        count,
+                                              MPI_Datatype  datatype,
+                                              MPID_Request *sreq,
+                                              int           is_reply)
 {
-    char *send_buf;
-    int dt_contig, mpi_errno = MPI_SUCCESS;
-    MPIDI_msg_sz_t data_sz;
-    MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
-    MPI_Aint last;
+    int             dt_contig, mpi_errno = MPI_SUCCESS, use_rank;
+    MPID_Comm      *use_comm;
+    char           *send_buf;
+    MPIDI_msg_sz_t  data_sz;
+    MPI_Aint        dt_true_lb, last;
+    MPID_Datatype  *dt_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
@@ -384,6 +428,15 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     send_buf = (char *) buf + dt_true_lb;
+
+    if(is_reply) {
+        use_comm = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
+        use_rank = reply_token.src_rank;
+    }
+    else {
+        use_comm = comm;
+        use_rank = rank;
+    }
 
     if (!dt_contig) {
         MPIDI_msg_sz_t segment_first;
@@ -406,9 +459,9 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
     }
 
     mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_AM_OFI_hdr_t)) < MPIDI_MAX_SHORT_SEND_SZ) ?
-        MPIDI_netmod_ofi_send_am_short(rank, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
+        MPIDI_netmod_ofi_send_am_short(use_rank, use_comm, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
                                        am_hdr_sz, send_buf, data_sz, sreq) :
-        MPIDI_netmod_ofi_send_am_long(rank, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
+        MPIDI_netmod_ofi_send_am_long(use_rank, use_comm, handler_id, AMREQ_OFI_HDR(sreq, am_hdr),
                                       am_hdr_sz, send_buf, data_sz, sreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DO_SEND_AM);
@@ -417,13 +470,17 @@ static inline int MPIDI_netmod_ofi_do_send_am(int64_t rank, int handler_id,
     goto fn_exit;
 }
 
-static inline int MPIDI_netmod_do_inject(int64_t     rank,
-                                         int         handler_id,
-                                         const void *am_hdr,
-                                         size_t      am_hdr_sz,
-                                         void       *netmod_context)
+static inline int MPIDI_netmod_do_inject(int           rank,
+                                         MPID_Comm    *comm,
+                                         MPIDI_AM_OFI_reply_token_t  reply_token,
+                                         int           handler_id,
+                                         const void   *am_hdr,
+                                         size_t        am_hdr_sz,
+                                         void         *netmod_context,
+                                         int           is_reply)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS, use_rank;
+    MPID_Comm *use_comm;
     MPIDI_AM_OFI_hdr_t msg_hdr;
     struct fi_msg msg;
     struct iovec msg_iov[2];
@@ -438,19 +495,34 @@ static inline int MPIDI_netmod_do_inject(int64_t     rank,
     msg_hdr.data_sz     = 0;
     msg_hdr.am_type     = MPIDI_AMTYPE_SHORT;
 
+    if(is_reply) {
+        use_comm           = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
+        use_rank           = reply_token.src_rank;
+        msg_hdr.context_id = reply_token.context_id;
+        msg_hdr.src_rank   = reply_token.src_rank;
+    }
+    else {
+        use_comm           = comm;
+        use_rank           = rank;
+        msg_hdr.context_id = use_comm->context_id;
+        msg_hdr.src_rank   = use_rank;
+    }
+
     msg_iov[0].iov_base = (void *) &msg_hdr;
     msg_iov[0].iov_len  = sizeof(msg_hdr);
 
     msg_iov[1].iov_base = (void *) am_hdr;
     msg_iov[1].iov_len  = am_hdr_sz;
 
-    msg.msg_iov   = &msg_iov[0];
-    msg.desc      = NULL;
-    msg.iov_count = 2;
-    msg.context   = NULL;
-    msg.addr      = (fi_addr_t)rank;
+    msg.msg_iov         = &msg_iov[0];
+    msg.desc            = NULL;
+    msg.iov_count       = 2;
+    msg.context         = NULL;
+    msg.addr            = _comm_to_phys(use_comm, use_rank, MPIDI_API_TAG);
+
     FI_RC_RETRY_AM(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
-  fn_exit:
+
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_INJECT);
     return mpi_errno;
   fn_fail:

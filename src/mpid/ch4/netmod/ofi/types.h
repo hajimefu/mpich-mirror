@@ -296,7 +296,6 @@ struct cq_buff_entry {
     fi_addr_t source;
 };
 
-
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
 typedef struct {
