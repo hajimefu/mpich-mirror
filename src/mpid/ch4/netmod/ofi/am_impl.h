@@ -477,7 +477,8 @@ static inline int MPIDI_netmod_do_inject(int           rank,
                                          const void   *am_hdr,
                                          size_t        am_hdr_sz,
                                          void         *netmod_context,
-                                         int           is_reply)
+                                         int           is_reply,
+                                         int           use_comm_table)
 {
     int mpi_errno = MPI_SUCCESS, use_rank;
     MPID_Comm *use_comm;
@@ -518,7 +519,12 @@ static inline int MPIDI_netmod_do_inject(int           rank,
     msg.desc            = NULL;
     msg.iov_count       = 2;
     msg.context         = NULL;
-    msg.addr            = _comm_to_phys(use_comm, use_rank, MPIDI_API_TAG);
+    msg.addr            = use_comm_table ?
+        _comm_to_phys(use_comm, use_rank, MPIDI_API_MSG):
+        _to_phys(use_rank, MPIDI_API_MSG);
+
+
+
 
     FI_RC_RETRY_AM(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
 

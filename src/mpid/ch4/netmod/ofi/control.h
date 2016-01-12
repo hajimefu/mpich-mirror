@@ -23,20 +23,14 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
                                  int                  use_comm,
                                  int                  use_lock)
 {
-    int mpi_errno = MPI_SUCCESS;
-    fi_addr_t dest;
-
+    int                        mpi_errno = MPI_SUCCESS;
+    MPIDI_AM_OFI_reply_token_t reply_token;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
     control->win_id      = WIN_OFI(win)->win_id;
     control->origin_rank = win->comm_ptr->rank;
-    dest = use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                      _to_phys(rank, MPIDI_API_MSG);
-    if(use_comm == 0) {
-        MPIU_Assert(0);
-    }
-    MPIDI_AM_OFI_reply_token_t reply_token;
+
     if(use_lock)
         mpi_errno = MPIDI_netmod_do_inject(rank,
                                            win->comm_ptr,
@@ -44,7 +38,8 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
                                            MPIDI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
-                                           FALSE);
+                                           FALSE,
+                                           use_comm);
     else
         mpi_errno = MPIDI_netmod_do_inject(rank,
                                            win->comm_ptr,
@@ -52,7 +47,8 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
                                            MPIDI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
-                                           FALSE);
+                                           FALSE,
+                                           use_comm);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;
@@ -70,7 +66,6 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
                                   MPID_Request         *ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    fi_addr_t dest;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
 
@@ -81,13 +76,13 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    dest      = _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG);
     MPIDI_AM_OFI_reply_token_t reply_token;
     mpi_errno = MPIDI_netmod_do_inject(rank,comm_ptr,
                                        reply_token,
                                        MPIDI_INTERNAL_HANDLER_CONTROL,
                                        (void*)control,
-                                       sizeof(*control),NULL,FALSE);
+                                       sizeof(*control),NULL,
+                                       FALSE,TRUE);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;
