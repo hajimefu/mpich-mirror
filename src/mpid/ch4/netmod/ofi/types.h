@@ -53,7 +53,7 @@ EXTERN_C_BEGIN
 
 #ifdef USE_OFI_TAGGED
 #define MPIDI_ENABLE_TAGGED          1
-#define MPIDI_ENABLE_AM              0
+#define MPIDI_ENABLE_AM              1
 #define MPIDI_ENABLE_RMA             1
 #else
 #define MPIDI_ENABLE_TAGGED          0

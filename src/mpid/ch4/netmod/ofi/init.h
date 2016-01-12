@@ -27,28 +27,30 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
 
 #define CHOOSE_PROVIDER(prov, prov_use,errstr)                          \
     do {                                                                \
-    info_t *p = prov;                                                   \
-    MPIR_ERR_CHKANDJUMP4(p==NULL, mpi_errno,MPI_ERR_OTHER,"**ofid_addrinfo", \
-                         "**ofid_addrinfo %s %d %s %s",__SHORT_FILE__,  \
-                         __LINE__,FCNAME, errstr);                      \
-    MPIDI_Choose_provider(prov,prov_use);                               \
-  } while (0);
+        info_t *p = prov;                                               \
+        MPIR_ERR_CHKANDJUMP4(p==NULL, mpi_errno,MPI_ERR_OTHER,"**ofid_addrinfo", \
+                             "**ofid_addrinfo %s %d %s %s",__SHORT_FILE__, \
+                             __LINE__,FCNAME, errstr);                  \
+        MPIDI_Choose_provider(prov,prov_use);                           \
+    } while (0);
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_init_generic
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_init_generic(int         rank,
-                                    int         size,
-                                    int         appnum,
-                                    int        *tag_ub,
-                                    MPID_Comm  *comm_world,
-                                    MPID_Comm  *comm_self,
-                                    int         spawned,
-                                    int         num_contexts,
-                                    void      **netmod_contexts,
-				    int	        do_av_table,
-				    int         do_scalable_ep)
+                                            int         size,
+                                            int         appnum,
+                                            int        *tag_ub,
+                                            MPID_Comm  *comm_world,
+                                            MPID_Comm  *comm_self,
+                                            int         spawned,
+                                            int         num_contexts,
+                                            void      **netmod_contexts,
+                                            int	        do_av_table,
+                                            int         do_scalable_ep,
+                                            int         do_am,
+                                            int         do_tagged)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen;
@@ -77,9 +79,12 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
                             offsetof(MPIDI_Dynproc_req,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_Win_request,context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.ch4r.netmod_am.ofi.context) ==
+                            offsetof(struct MPID_Request, dev.ch4.netmod.ofi.context));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_CH4_NM_ofi_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request)>=sizeof(MPIDI_Win_request));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFIGpid_t));
+
 
     *tag_ub = (1 << MPID_TAG_SHIFT) - 1;
 
@@ -120,13 +125,19 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     MPIU_Assert(hints != NULL);
 
     hints->mode = FI_CONTEXT|FI_ASYNC_IOV;   /* We can handle contexts  */
-    hints->caps = FI_TAGGED;                 /* Tag matching interface  */
-    hints->caps |= FI_MSG;                   /* Message Queue apis      */
-    hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
+    hints->caps = 0ULL;                      /* Tag matching interface  */
     hints->caps |= FI_RMA;                   /* RMA(read/write)         */
     hints->caps |= FI_ATOMICS;               /* Atomics capabilities    */
-    hints->caps |= FI_DIRECTED_RECV;         /* Atomics capabilities    */
+    hints->caps |= FI_DIRECTED_RECV;         /* directed receive        */
 
+    if(do_tagged) {
+        hints->caps |= FI_TAGGED;                 /* Tag matching interface  */
+    }
+
+    if(do_am) {
+        hints->caps |= FI_MSG;                   /* Message Queue apis      */
+        hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
+    }
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
     /* Specify the version of OFI is coded to, the provider will select struct  */
@@ -273,10 +284,10 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     av_attr.rx_ctx_bits    = MPIDI_MAX_ENDPOINTS_BITS;
     MPIDI_Addr_table->size = size;
 
-    FI_RC(fi_av_open(MPIDI_Global.domain,       /* In:  Domain Object         */
-                     &av_attr,  /* In:  Configuration object  */
-                     &MPIDI_Global.av,  /* Out: AV Object             */
-                     NULL), avopen);    /* Context: AV events         */
+    FI_RC(fi_av_open(MPIDI_Global.domain,  /* In:  Domain Object         */
+                     &av_attr,             /* In:  Configuration object  */
+                     &MPIDI_Global.av,     /* Out: AV Object             */
+                     NULL), avopen);       /* Context: AV events         */
 
     /* ------------------------------------------------------------------------ */
     /* Create a transport level communication endpoint.  To use the endpoint,   */
@@ -356,38 +367,38 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     /* ---------------------------------- */
     /* Initialize Active Message          */
     /* ---------------------------------- */
-    MPIDI_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
-    mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
-    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+    if(do_am) {
+        MPIDI_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_BUF_POOL_NUM, MPIDI_BUF_POOL_SZ);
+        mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    slist_init(&MPIDI_Global.cq_buff_list);
-    MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
-    optlen                    = MPIDI_MIN_MSG_SZ;
-    FI_RC(fi_setopt(&MPIDI_Global.ep->fid,
-                    FI_OPT_ENDPOINT,
-                    FI_OPT_MIN_MULTI_RECV,
-                    &optlen, sizeof(optlen)), setopt);
+        slist_init(&MPIDI_Global.cq_buff_list);
+        MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
+        optlen                    = MPIDI_MIN_MSG_SZ;
+        FI_RC(fi_setopt(&MPIDI_Global.ep->fid,
+                        FI_OPT_ENDPOINT,
+                        FI_OPT_MIN_MULTI_RECV,
+                        &optlen, sizeof(optlen)), setopt);
 
-    for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {
-        MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_AM_BUFF_SZ);
-        MPIDI_Global.am_reqs[i].event_id = MPIDI_EVENT_AM_RECV;
-        MPIU_Assert(MPIDI_Global.am_bufs[i]);
-        MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
-        MPIDI_Global.am_iov[i].iov_len   = MPIDI_AM_BUFF_SZ;
-        MPIDI_Global.am_msg[i].msg_iov   = &MPIDI_Global.am_iov[i];
-        MPIDI_Global.am_msg[i].desc      = NULL;
-        MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
-        MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
-        MPIDI_Global.am_msg[i].iov_count = 1;
-        FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep,
-                               &MPIDI_Global.am_msg[i],
-                               FI_MULTI_RECV | FI_COMPLETION), prepost);
+        for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {
+            MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_AM_BUFF_SZ);
+            MPIDI_Global.am_reqs[i].event_id = MPIDI_EVENT_AM_RECV;
+            MPIU_Assert(MPIDI_Global.am_bufs[i]);
+            MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
+            MPIDI_Global.am_iov[i].iov_len   = MPIDI_AM_BUFF_SZ;
+            MPIDI_Global.am_msg[i].msg_iov   = &MPIDI_Global.am_iov[i];
+            MPIDI_Global.am_msg[i].desc      = NULL;
+            MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
+            MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
+            MPIDI_Global.am_msg[i].iov_count = 1;
+            FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep,
+                                   &MPIDI_Global.am_msg[i],
+                                   FI_MULTI_RECV | FI_COMPLETION), prepost);
+        }
+        /* Grow the header handlers down */
+        MPIDI_Global.am_handlers[MPIDI_INTERNAL_HANDLER_CONTROL]        = MPIDI_OFI_Control_handler;
+        MPIDI_Global.send_cmpl_handlers[MPIDI_INTERNAL_HANDLER_CONTROL] = NULL;
     }
-
-    /* Grow the header handlers down */
-    MPIDI_Global.am_handlers[MPIDI_INTERNAL_HANDLER_CONTROL]        = MPIDI_OFI_Control_handler;
-    MPIDI_Global.send_cmpl_handlers[MPIDI_INTERNAL_HANDLER_CONTROL] = NULL;
-
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
@@ -415,15 +426,15 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     if (spawned) {
         char parent_port[MPIDI_MAX_KVS_VALUE_LEN];
         MPIDI_CH4_NMI_PMI_RC_POP(PMI_KVS_Get(MPIDI_Global.kvsname,
-                                        MPIDI_PARENT_PORT_KVSKEY,
-                                        parent_port,
-                                        MPIDI_MAX_KVS_VALUE_LEN), pmi);
+                                             MPIDI_PARENT_PORT_KVSKEY,
+                                             parent_port,
+                                             MPIDI_MAX_KVS_VALUE_LEN), pmi);
         MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
         MPIU_Assert(MPIR_Process.comm_parent != NULL);
         MPIU_Strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
 
-  fn_exit:
+fn_exit:
 
     /* -------------------------------- */
     /* Free temporary resources         */
@@ -443,7 +454,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INIT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
@@ -469,14 +480,17 @@ static inline int MPIDI_CH4_NM_init(int         rank,
                                           comm_self,spawned,num_contexts,
                                           netmod_contexts,
                                           MPIDI_ENABLE_AV_TABLE,
-                                          MPIDI_ENABLE_SCALABLE_ENDPOINTS);
+                                          MPIDI_ENABLE_SCALABLE_ENDPOINTS,
+                                          MPIDI_ENABLE_AM,
+                                          MPIDI_ENABLE_TAGGED);
     return mpi_errno;
 }
 
 
 
 
-static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
+static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep,
+                                                int do_am)
 {
     int thr_err=0,mpi_errno = MPI_SUCCESS;
     int i = 0;
@@ -487,7 +501,7 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
     MPIDI_CH4_NMI_MPI_RC_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
-                                            MPI_SUM, MPIR_Process.comm_world, &errflag));
+                                                 MPI_SUM, MPIR_Process.comm_world, &errflag));
 
     MPIDI_CH4R_finalize();
 
@@ -509,9 +523,6 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
     FI_RC(fi_close(&MPIDI_Global.rma_ctr->fid),   cqclose);
     FI_RC(fi_close(&MPIDI_Global.domain->fid),    domainclose);
 
-    for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++)
-        MPIU_Free(MPIDI_Global.am_bufs[i]);
-
     /* --------------------------------------- */
     /* Free comm world VCRT and addr table     */
     /* comm_release will also releace the vcrt */
@@ -527,8 +538,12 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
 
     MPIDI_OFI_Map_destroy(MPIDI_Global.win_map);
     MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
-    MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
 
+    if(do_am) {
+        for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++)
+            MPIU_Free(MPIDI_Global.am_bufs[i]);
+        MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
+    }
     PMI_Finalize();
 
     MPID_Thread_mutex_destroy(&MPIDI_THREAD_UTIL_MUTEX, &thr_err);
@@ -536,14 +551,15 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep)
     MPID_Thread_mutex_destroy(&MPIDI_THREAD_FI_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_THREAD_SPAWN_MUTEX, &thr_err);
 
-  fn_exit:
+fn_exit:
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
 static inline int MPIDI_CH4_NM_finalize(void) {
-    return MPIDI_CH4_NM_finalize_generic(MPIDI_ENABLE_SCALABLE_ENDPOINTS);
+    return MPIDI_CH4_NM_finalize_generic(MPIDI_ENABLE_SCALABLE_ENDPOINTS,
+                                         MPIDI_ENABLE_AM);
 }
 
 static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
@@ -584,9 +600,9 @@ static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpi
                        &GPID_OFI(gpid)->addr, &sz), avlookup);
     MPIU_Assert(sz <= sizeof(GPID_OFI(gpid)->addr));
     GPID_OFI(gpid)->node = MPIDI_Global.node_map[COMM_TO_INDEX(comm_ptr, rank)];
-  fn_exit:
+fn_exit:
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 

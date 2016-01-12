@@ -142,18 +142,16 @@ typedef struct MPIDI_CH4R_req_t {
 } MPIDI_CH4R_req_t;
 
 typedef struct MPIDI_CH4R_Devreq_t {
-    MPIDI_CH4R_req_t *req;
-    MPIDI_ptype   p_type;
-    void         *buffer;
-
-    uint64_t      count;
-    uint64_t      tag;
-    MPI_Datatype  datatype;
-    struct MPID_Comm    *util_comm;
-
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
     }netmod_am;
+    MPIDI_CH4R_req_t *req;
+    MPIDI_ptype       p_type;
+    void             *buffer;
+    uint64_t          count;
+    uint64_t          tag;
+    MPI_Datatype      datatype;
+    struct MPID_Comm *util_comm;
 } MPIDI_CH4R_Devreq_t;
 
 typedef struct {

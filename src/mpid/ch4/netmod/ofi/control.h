@@ -66,6 +66,7 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
                                   MPID_Request         *ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPIDI_AM_OFI_reply_token_t reply_token;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
 
@@ -76,7 +77,7 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    MPIDI_AM_OFI_reply_token_t reply_token;
+
     mpi_errno = MPIDI_netmod_do_inject(rank,comm_ptr,
                                        reply_token,
                                        MPIDI_INTERNAL_HANDLER_CONTROL,

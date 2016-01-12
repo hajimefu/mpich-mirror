@@ -28,26 +28,23 @@ int MPIDI_netmod_progress_generic(void *netmod_context,
                                   int   do_tagged)
 {
     int                mpi_errno;
-    if(do_tagged) {
-        cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
-        ssize_t            ret;
+    cq_tagged_entry_t  wc[NUM_CQ_ENTRIES];
+    ssize_t            ret;
 
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-        ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
+    ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
 
-        if(likely(ret > 0))
-            mpi_errno = handle_cq_entries(wc,ret);
-        else if (ret == -FI_EAGAIN)
-            mpi_errno = MPI_SUCCESS;
-        else
-            mpi_errno = handle_cq_error(ret);
+    if(likely(ret > 0))
+        mpi_errno = handle_cq_entries(wc,ret);
+    else if (ret == -FI_EAGAIN)
+        mpi_errno = MPI_SUCCESS;
+    else
+        mpi_errno = handle_cq_error(ret);
 
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
-        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
-        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
-    }
-    if(do_am)
-        mpi_errno = am_progress(netmod_context,blocking);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
+
+    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 
     return mpi_errno;
 }
