@@ -112,7 +112,11 @@ static inline int MPIDI_CH4R_win_set_info(MPID_Win *win, MPID_Info *info)
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_win_init
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4R_win_init(MPI_Aint     length,
                                       int          disp_unit,
                                       MPID_Win   **win_ptr,
                                       MPID_Info   *info,
@@ -699,7 +703,7 @@ static inline int MPIDI_CH4R_win_create(void *base,
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_CREATE);
 
-    mpi_errno        = MPIDI_CH4I_win_init(length,
+    mpi_errno        = MPIDI_CH4R_win_init(length,
                                            disp_unit,
                                            win_ptr,
                                            info,
@@ -772,7 +776,7 @@ static inline int MPIDI_CH4R_win_allocate_shared(MPI_Aint size,
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_ALLOCATE_SHARED);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_ALLOCATE_SHARED);
 
-    mpi_errno = MPIDI_CH4I_win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
+    mpi_errno = MPIDI_CH4R_win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
                                     MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
@@ -981,7 +985,7 @@ static inline int MPIDI_CH4R_win_allocate(MPI_Aint size,
     MPIDI_CH4R_win_info_t *winfo;
     MPID_Win       *win;
 
-    mpi_errno = MPIDI_CH4I_win_init(size,disp_unit,win_ptr, info, comm,
+    mpi_errno = MPIDI_CH4R_win_init(size,disp_unit,win_ptr, info, comm,
                                     MPI_WIN_FLAVOR_ALLOCATE, MPI_WIN_UNIFIED);
 
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
@@ -1127,7 +1131,7 @@ static inline int MPIDI_CH4R_win_create_dynamic(MPID_Info *info,
 
     MPID_Win       *win;
 
-    rc = MPIDI_CH4I_win_init(0,1,win_ptr, info, comm,
+    rc = MPIDI_CH4R_win_init(0,1,win_ptr, info, comm,
                              MPI_WIN_FLAVOR_DYNAMIC,
                              MPI_WIN_UNIFIED);
 
