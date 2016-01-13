@@ -614,6 +614,30 @@ static inline int MPIDI_CH4R_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_win_finalize
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4R_win_finalize(MPID_Win **win_ptr)
+{
+    int            mpi_errno = MPI_SUCCESS;
+    MPID_Win      *win       = *win_ptr;
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_FREE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_FREE);
+
+    MPL_HASH_DELETE(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash, win);
+
+    MPIU_Free(MPIDI_CH4R_WIN(win, info_table));
+    MPIR_Comm_release(win->comm_ptr);
+    MPIU_Handle_obj_free(&MPID_Win_mem, win);
+
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FREE);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4R_win_free
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -645,12 +669,7 @@ static inline int MPIDI_CH4R_win_free(MPID_Win **win_ptr)
     if(MPIDI_CH4R_WIN(win, msgQ))
         MPIU_Free(MPIDI_CH4R_WIN(win, msgQ));
 
-    MPIU_Free(MPIDI_CH4R_WIN(win, info_table));
-    MPIR_Comm_release(win->comm_ptr);
-
-    MPL_HASH_DELETE(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash, win);
-
-    MPIU_Handle_obj_free(&MPID_Win_mem, win);
+    MPIDI_CH4R_win_finalize(win_ptr);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FREE);
     return mpi_errno;
