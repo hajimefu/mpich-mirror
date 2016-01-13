@@ -362,6 +362,7 @@ static inline int MPIDI_CH4R_valid_comm_rank(int rank, MPID_Comm *comm)
            MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_REFENCE) \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
                                 goto fn_fail, "**rmasync");             \
+        MPID_END_ERROR_CHECKS;                                          \
     })
 
 #define MPIDI_CH4R_EPOCH_START_CHECK()                                  \
