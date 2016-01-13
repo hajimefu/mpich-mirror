@@ -240,7 +240,7 @@ do {                                                                            
  */
 #define MPL_HASH_DELETE(hh,head,delptr)                                          \
 do {                                                                             \
-    struct UT_hash_handle *_hd_hh_del;                                           \
+    struct MPL_UT_hash_handle *_hd_hh_del;                                           \
     if ( ((delptr)->hh.prev == NULL) && ((delptr)->hh.next == NULL) )  {         \
         MPL_uthash_free((head)->hh.tbl->buckets,                                 \
                     (head)->hh.tbl->num_buckets*sizeof(struct MPL_UT_hash_bucket) ); \
@@ -249,7 +249,7 @@ do {                                                                            
         head = NULL;                                                             \
     } else {                                                                     \
         unsigned _hd_bkt;                                                        \
-        _hd_hh_del = (UT_hash_handle*)&((delptr)->hh);                           \
+        _hd_hh_del = (MPL_UT_hash_handle*)&((delptr)->hh);                           \
         if ((delptr) == MPL_ELMT_FROM_HH((head)->hh.tbl,(head)->hh.tbl->tail)) { \
             (head)->hh.tbl->tail =                                               \
                 (MPL_UT_hash_handle*)((ptrdiff_t)((delptr)->hh.prev) +           \
