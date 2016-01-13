@@ -835,14 +835,11 @@ static inline int do_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2DOUBLE_COMPLEX:
 #endif
-            MPIR_ERR_SETANDSTMT(mpi_errno,MPI_ERR_TYPE,goto fn_fail,
-                                "**rmatypenotatomic");
-            break;
+            goto am_fallback;
     }
 
-    MPIR_ERR_CHKANDSTMT((acccheck && op != MPI_REPLACE),
-                        mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (acccheck && op != MPI_REPLACE)
+        goto am_fallback;
 
     max_size               = MPIDI_QUERY_ATOMIC_COUNT;
 
@@ -852,8 +849,8 @@ static inline int do_accumulate(const void    *origin_addr,
     req->next              = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ    = req;
     max_size               = max_size*dt_size;
-    MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (max_size == 0)
+        goto am_fallback;
 
     MPIDI_Init_iovec_state(&req->noncontig->iovs,
                            (uintptr_t)origin_addr,
@@ -902,6 +899,13 @@ fn_exit:
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+am_fallback:
+    /* Fall back to active message */
+    MPIDI_Win_request_complete(req);
+    return MPIDI_CH4R_accumulate(origin_addr, origin_count, origin_datatype,
+                                 target_rank, target_disp,
+                                 target_count, target_datatype,
+                                 op, win);
 }
 
 #undef FUNCNAME
@@ -993,14 +997,12 @@ static inline int do_get_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2DOUBLE_COMPLEX:
 #endif
-            MPIR_ERR_SETANDSTMT(mpi_errno,MPI_ERR_TYPE,goto fn_fail,
-                                "**rmatypenotatomic");
+            goto am_fallback;
             break;
     }
 
-    MPIR_ERR_CHKANDSTMT((acccheck && op != MPI_REPLACE && op != MPI_NO_OP),
-                        mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (acccheck && op != MPI_REPLACE && op != MPI_NO_OP)
+        goto am_fallback;
 
     GET_BASIC_TYPE(rt, basic_type_res);
     MPIU_Assert(basic_type_res != MPI_DATATYPE_NULL);
@@ -1011,8 +1013,8 @@ static inline int do_get_accumulate(const void    *origin_addr,
     req->next           = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ = req;
     max_size            = max_size*dt_size;
-    MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (max_size == 0)
+        goto am_fallback;
 
     if(op != MPI_NO_OP)
         MPIDI_Init_iovec_state2(&req->noncontig->iovs,
@@ -1086,6 +1088,12 @@ fn_exit:
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+am_fallback:
+    MPIDI_Win_request_complete(req);
+    return MPIDI_CH4R_get_accumulate(origin_addr, origin_count, origin_datatype,
+                                     result_addr, result_count, result_datatype,
+                                     target_rank, target_disp, target_count,
+                                     target_datatype, op, win);
 }
 
 

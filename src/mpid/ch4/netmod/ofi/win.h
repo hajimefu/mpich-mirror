@@ -127,8 +127,8 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_OFIWin_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_OFIdt_t));
 
-    win = (MPID_Win *)MPIU_Handle_obj_alloc(&MPID_Win_mem);
-    MPIR_ERR_CHKANDSTMT(win == NULL,
+    mpi_errno = MPIDI_CH4R_win_init(length, disp_unit, &win, info, comm_ptr, create_flavor, model);
+    MPIR_ERR_CHKANDSTMT(mpi_errno != MPI_SUCCESS,
                         mpi_errno,
                         MPI_ERR_NO_MEM,
                         goto fn_fail,
@@ -136,20 +136,6 @@ static inline int MPIDI_Win_init(MPI_Aint     length,
     *win_ptr = win;
 
     memset(WIN_OFI(win), 0, sizeof(*WIN_OFI(win)));
-    MPIR_Comm_add_ref(comm_ptr);
-    win->comm_ptr            = comm_ptr;
-    win->errhandler          = NULL;
-    win->base                = NULL;
-    win->size                = length;
-    win->disp_unit           = disp_unit;
-    win->create_flavor       = (MPIR_Win_flavor_t)create_flavor;
-    win->model               = (MPIR_Win_model_t)model;
-    win->copyCreateFlavor    = (MPIR_Win_flavor_t)0;
-    win->copyModel           = (MPIR_Win_model_t)0;
-    win->attributes          = NULL;
-    win->comm_ptr            = comm_ptr;
-    win->copyDispUnit        = 0;
-    win->copySize            = 0;
 
     if((info != NULL) && ((int *)info != (int *) MPI_INFO_NULL)) {
         mpi_errno= MPIDI_Win_set_info(win, info);
@@ -221,6 +207,9 @@ static inline int MPIDI_Progress_win_counter_fence(MPID_Win *win)
             itercount = 0;
         }
     }
+
+    while (OPA_load_int(&MPIDI_CH4R_WIN(win, outstanding_ops)) != 0)
+        MPIDI_NM_PROGRESS();
 
     r = WIN_OFI(win)->syncQ;
 
@@ -683,8 +672,7 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
 
     FI_RC(fi_close(&WIN_OFI(win)->mr->fid), mr_unreg);
 
-    MPIR_Comm_release(win->comm_ptr);
-    MPIU_Handle_obj_free(&MPID_Win_mem, win);
+    MPIDI_CH4R_win_finalize(win_ptr);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FREE);
