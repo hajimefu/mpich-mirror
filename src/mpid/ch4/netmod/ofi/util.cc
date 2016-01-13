@@ -181,8 +181,8 @@ static inline int
 WinLockAdvance(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    struct MPIDI_Win_sync_lock *slock = &WIN_OFI(win)->sync.lock;
-    struct MPIDI_Win_queue     *q     = &slock->local.requested;
+    struct MPIDI_CH4R_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
+    struct MPIDI_CH4R_win_queue     *q     = &slock->local.requested;
 
     if(
         (q->head != NULL) &&
@@ -193,7 +193,7 @@ WinLockAdvance(MPID_Win *win)
          )
         )
     ) {
-        struct MPIDI_Win_lock *lock = q->head;
+        struct MPIDI_CH4R_win_lock *lock = q->head;
         q->head = lock->next;
 
         if(q->head == NULL)
@@ -235,7 +235,8 @@ static inline void WinLockReq_proc(const MPIDI_Win_control_t  *info,
                                    MPID_Win                   *win,
                                    unsigned                    peer)
 {
-    struct MPIDI_Win_lock *lock = (struct MPIDI_Win_lock *)MPIU_Calloc(1, sizeof(struct MPIDI_Win_lock));
+    struct MPIDI_CH4R_win_lock *lock =
+        (struct MPIDI_CH4R_win_lock *)MPIU_Calloc(1, sizeof(struct MPIDI_CH4R_win_lock));
 
     if(info->type == MPIDI_CTRL_LOCKREQ)
         lock->mtype = MPIDI_REQUEST_LOCK;
@@ -244,7 +245,7 @@ static inline void WinLockReq_proc(const MPIDI_Win_control_t  *info,
 
     lock->rank                = info->origin_rank;
     lock->type                = info->lock_type;
-    struct MPIDI_Win_queue *q = &WIN_OFI(win)->sync.lock.local.requested;
+    struct MPIDI_CH4R_win_queue *q = &MPIDI_CH4R_WIN(win, sync).lock.local.requested;
     MPIU_Assert((q->head != NULL) ^ (q->tail == NULL));
 
     if(q->tail == NULL)
@@ -263,9 +264,9 @@ static inline void WinLockAck_proc(const MPIDI_Win_control_t *info,
                                    unsigned                    peer)
 {
     if(info->type == MPIDI_CTRL_LOCKACK)
-        WIN_OFI(win)->sync.lock.remote.locked = 1;
+        MPIDI_CH4R_WIN(win, sync).lock.remote.locked = 1;
     else  if(info->type == MPIDI_CTRL_LOCKALLACK)
-        WIN_OFI(win)->sync.lock.remote.allLocked += 1;
+        MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked += 1;
 }
 
 
@@ -273,8 +274,8 @@ static inline void WinUnlock_proc(const MPIDI_Win_control_t *info,
                                   MPID_Win                   *win,
                                   unsigned                    peer)
 {
-    --WIN_OFI(win)->sync.lock.local.count;
-    MPIU_Assert((int)WIN_OFI(win)->sync.lock.local.count >= 0);
+    --MPIDI_CH4R_WIN(win, sync).lock.local.count;
+    MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.local.count >= 0);
     WinLockAdvance(win);
 
     MPIDI_Win_control_t new_info;
@@ -286,14 +287,14 @@ static inline void WinComplete_proc(const MPIDI_Win_control_t *info,
                                     MPID_Win                   *win,
                                     unsigned                    peer)
 {
-    ++WIN_OFI(win)->sync.sc.count;
+    ++MPIDI_CH4R_WIN(win, sync).sc.count;
 }
 
 static inline void WinPost_proc(const MPIDI_Win_control_t *info,
                                 MPID_Win                   *win,
                                 unsigned                    peer)
 {
-    ++WIN_OFI(win)->sync.pw.count;
+    ++MPIDI_CH4R_WIN(win, sync).pw.count;
 }
 
 
@@ -301,11 +302,11 @@ static inline void WinUnlockDoneCB(const MPIDI_Win_control_t *info,
                                    MPID_Win                   *win,
                                    unsigned                    peer)
 {
-    if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_LOCK)
-        WIN_OFI(win)->sync.lock.remote.locked = 0;
-    else if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_LOCK_ALL) {
-        MPIU_Assert((int)WIN_OFI(win)->sync.lock.remote.allLocked > 0);
-        WIN_OFI(win)->sync.lock.remote.allLocked -= 1;
+    if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK)
+        MPIDI_CH4R_WIN(win, sync).lock.remote.locked = 0;
+    else if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK_ALL) {
+        MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked > 0);
+        MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked -= 1;
     } else
         MPIU_Assert(0);
 

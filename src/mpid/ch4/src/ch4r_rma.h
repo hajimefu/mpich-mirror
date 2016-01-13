@@ -42,7 +42,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     MPIDI_CH4R_EPOCH_CHECK1();
 
     winfo = MPIDI_CH4R_WINFO(win, target_rank);
-    offset = target_disp * winfo->disp_unit;
+    offset = target_disp * MPIDI_CH4R_WINFO_DISP_UNIT(win, target_rank);;
 
     sreq = MPIDI_CH4R_create_win_req();
     MPIU_Assert(sreq);
@@ -69,7 +69,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
                               target_datatype);
     }
 
-    MPIDI_CH4R_EPOCH_START_CHECK();
+    MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPID_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
@@ -200,7 +200,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
                               origin_datatype);
     }
 
-    MPIDI_CH4R_EPOCH_START_CHECK();
+    MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPID_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = winfo->base_addr + offset;
     am_hdr.count = target_count;
@@ -409,7 +409,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
     }
 
     MPIDI_CH4R_REQUEST(sreq, req->areq.win_ptr) = (uint64_t) win;
-    MPIDI_CH4R_EPOCH_START_CHECK();
+    MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPID_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.req_ptr = (uint64_t) sreq;
@@ -721,7 +721,7 @@ __CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
     MPIDI_CH4R_REQUEST(sreq, req->creq.result_addr) = result_addr;
     MPIDI_CH4R_REQUEST(sreq, req->creq.data) = p_data;
 
-    MPIDI_CH4R_EPOCH_START_CHECK();
+    MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPID_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.addr = winfo->base_addr + offset;

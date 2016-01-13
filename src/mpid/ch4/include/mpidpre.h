@@ -179,9 +179,8 @@ typedef struct {
 
 typedef struct MPIDI_CH4R_win_info_t {
     uint64_t base_addr;
-    uint64_t size;
-    uint64_t disp_unit;
-} MPIDI_CH4R_win_info_t;
+    uint32_t disp_unit;
+} __attribute__ ((packed)) MPIDI_CH4R_win_info_t;
 
 #define MPIDI_CH4I_ACCU_ORDER_RAR (1)
 #define MPIDI_CH4I_ACCU_ORDER_RAW (1 << 1)
@@ -265,6 +264,18 @@ typedef struct {
 } MPIDI_Devwin_t;
 #define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4r).field)
 #define MPIDI_CH4R_WINFO(win,rank) (MPIDI_CH4R_win_info_t*) &(MPIDI_CH4R_WIN(win, info_table)[rank])
+#define MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)                              \
+    ({                                                                  \
+        uint32_t _v;                                                    \
+        if(MPIDI_CH4R_WIN(w, info_table)) {                             \
+            _v = ((MPIDI_CH4R_win_info_t *) MPIDI_CH4R_WINFO(w, rank))->disp_unit; \
+        }                                                               \
+        else {                                                          \
+            _v = w->disp_unit;                                          \
+        }                                                               \
+        _v;                                                             \
+    })
+
 
 typedef struct {
     unsigned is_local : 1;

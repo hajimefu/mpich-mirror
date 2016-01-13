@@ -148,16 +148,6 @@ typedef enum {
 } MPIDI_Win_info_accumulate_ops;
 
 enum {
-    MPID_EPOTYPE_NONE = 0,          /**< No epoch in affect */
-    MPID_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
-    MPID_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
-    MPID_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
-    MPID_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
-    MPID_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
-    MPID_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
-};
-
-enum {
     MPIDI_CTRL_ASSERT,    /**< Lock acknowledge      */
     MPIDI_CTRL_LOCKACK,   /**< Lock acknowledge      */
     MPIDI_CTRL_LOCKALLACK,/**< Lock all acknowledge  */
@@ -362,25 +352,6 @@ typedef struct {
 } MPIDI_OFIdt_t;
 #define DT_OFI(comm) ((MPIDI_OFIdt_t*)(comm)->dev.pad)
 
-struct MPIDI_Win_lock {
-    struct MPIDI_Win_lock *next;
-    unsigned rank;
-    uint16_t mtype;
-    uint16_t type;
-};
-
-struct MPIDI_Win_queue {
-    struct MPIDI_Win_lock *head;
-    struct MPIDI_Win_lock *tail;
-};
-
-typedef struct MPIDI_WinLock_info {
-    unsigned peer;
-    int lock_type;
-    struct MPID_Win *win;
-    volatile unsigned done;
-} MPIDI_WinLock_info;
-
 /* These control structures have to be the same size */
 typedef struct {
     int16_t  type;
@@ -539,44 +510,12 @@ typedef struct MPIDI_Win_info_args {
     int alloc_shared_noncontig;
 } MPIDI_Win_info_args;
 
-typedef struct MPIDI_Win_info {
-    void *base_addr;
-    uint32_t disp_unit;
-} __attribute__ ((packed)) MPIDI_Win_info;
-
-typedef struct MPIDI_Win_sync_lock {
-    struct {
-        volatile unsigned locked;
-        volatile unsigned allLocked;
-    } remote;
-    struct {
-        struct MPIDI_Win_queue requested;
-        int type;
-        unsigned count;
-    } local;
-} MPIDI_Win_sync_lock;
-
-typedef struct MPIDI_Win_sync_pscw {
-    struct MPID_Group *group;
-    volatile unsigned count;
-} MPIDI_Win_sync_pscw;
-
-typedef struct MPIDI_Win_sync_t {
-    volatile int origin_epoch_type;
-    volatile int target_epoch_type;
-    MPIDI_Win_sync_pscw sc, pw;
-    MPIDI_Win_sync_lock lock;
-} MPIDI_Win_sync_t;
-
 typedef struct {
-    void                *winfo;
-    MPIDI_Win_sync_t     sync;
     fid_mr_t             mr;
     uint64_t             mr_key;
     uint64_t             win_id;
     void                *mmap_addr;
     int64_t              mmap_sz;
-    MPI_Aint            *sizes;
     MPIDI_Win_request   *syncQ;
     void                *msgQ;
     int                  count;
