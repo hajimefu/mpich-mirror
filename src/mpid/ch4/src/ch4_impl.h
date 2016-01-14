@@ -507,4 +507,27 @@ static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
             MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_NONE; \
 })
 
+/*
+  Calculate base address of the target window at the origin side
+  Return zero to let the target side calculate the actual address
+  (only offset from window base is given to the target in this case)
+*/
+static inline uintptr_t MPIDI_CH4I_win_base_at_origin(const MPID_Win *win, int target_rank)
+{
+    /* TODO: In future we may want to calculate the full virtual address
+       in the target at the origin side. It can be done by looking at
+       MPIDI_CH4R_WINFO(win, target_rank)->base_addr */
+    return 0;
+}
+
+/*
+  Calculate base address of the window at the target side
+  If MPIDI_CH4I_win_base_at_origin calculates the full virtual address
+  this function must return zero
+*/
+static inline uintptr_t MPIDI_CH4I_win_base_at_target(const MPID_Win *win)
+{
+    return (uintptr_t) win->base;
+}
+
 #endif /* MPIDCH4_IMPL_H_INCLUDED */
