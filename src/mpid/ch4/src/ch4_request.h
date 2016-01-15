@@ -53,10 +53,6 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
-    if (MPIDI_CH4R_REQUEST(req, req) && MPID_cc_is_complete(&req->cc)) {
-        MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
-        MPIDI_CH4R_REQUEST(req, req) = NULL;
-    }
     MPIDI_CH4_NM_request_release(req);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_RELEASE);
 }

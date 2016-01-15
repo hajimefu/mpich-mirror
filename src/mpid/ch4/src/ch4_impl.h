@@ -94,8 +94,13 @@ static inline void MPIDI_CH4R_complete_req(MPID_Request *req)
     int count;
     MPID_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
-    if (count == 0)
+    if (count == 0) {
+        if (MPIDI_CH4R_REQUEST(req, req) && MPID_cc_is_complete(&req->cc)) {
+            MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
+            MPIDI_CH4R_REQUEST(req, req) = NULL;
+        }
         MPIDI_Request_release(req);
+    }
 }
 
 #define dtype_add_ref_if_not_builtin(datatype_)                         \

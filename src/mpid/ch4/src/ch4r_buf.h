@@ -162,7 +162,7 @@ static inline void MPIDI_CH4R_destroy_buf_pool(MPIU_buf_pool_t *pool)
 {
     if (pool->next)
         MPIDI_CH4R_destroy_buf_pool(pool->next);
-    
+
     MPIU_Free(pool->memory_region);
     MPIU_Free(pool);
 }
