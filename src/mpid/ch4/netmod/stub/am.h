@@ -71,7 +71,7 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_send_am_hdr_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token,
                                                  int handler_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPID_Request * sreq)
@@ -80,7 +80,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(void *reply_token,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_send_am_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
@@ -92,7 +92,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(void *reply_token,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_send_amv_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t reply_token,
                                               int handler_id,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
@@ -120,7 +120,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_inject_am_hdr_reply(void *reply_token,
+static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
                                                    int handler_id,
                                                    const void *am_hdr, size_t am_hdr_sz)
 {

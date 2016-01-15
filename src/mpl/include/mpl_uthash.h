@@ -249,7 +249,7 @@ do {                                                                            
         head = NULL;                                                             \
     } else {                                                                     \
         unsigned _hd_bkt;                                                        \
-        _hd_hh_del = &((delptr)->hh);                                            \
+        _hd_hh_del = (UT_hash_handle*)&((delptr)->hh);                           \
         if ((delptr) == MPL_ELMT_FROM_HH((head)->hh.tbl,(head)->hh.tbl->tail)) { \
             (head)->hh.tbl->tail =                                               \
                 (MPL_UT_hash_handle*)((ptrdiff_t)((delptr)->hh.prev) +           \
@@ -267,7 +267,7 @@ do {                                                                            
                     _hd_hh_del->prev;                                            \
         }                                                                        \
         MPL_HASH_TO_BKT( _hd_hh_del->hashv, (head)->hh.tbl->num_buckets, _hd_bkt); \
-        MPL_HASH_DEL_IN_BKT(hh,(head)->hh.tbl->buckets[_hd_bkt], _hd_hh_del);    \
+        MPL_HASH_DEL_IN_BKT(hh,(head)->hh.tbl->buckets[_hd_bkt], _hd_hh_del); \
         (head)->hh.tbl->num_items--;                                             \
     }                                                                            \
     MPL_HASH_FSCK(hh,head);                                                      \
@@ -655,14 +655,14 @@ do {                                                                            
 /* remove an item from a given bucket */
 #define MPL_HASH_DEL_IN_BKT(hh,head,hh_del)                                          \
     (head).count--;                                                              \
-    if ((head).hh_head == hh_del) {                                              \
-      (head).hh_head = hh_del->hh_next;                                          \
+    if ((head).hh_head == (MPL_UT_hash_handle*)hh_del) {          \
+        (head).hh_head = (MPL_UT_hash_handle*)hh_del->hh_next;                   \
     }                                                                            \
     if (hh_del->hh_prev) {                                                       \
-        hh_del->hh_prev->hh_next = hh_del->hh_next;                              \
+            hh_del->hh_prev->hh_next = hh_del->hh_next;                          \
     }                                                                            \
     if (hh_del->hh_next) {                                                       \
-        hh_del->hh_next->hh_prev = hh_del->hh_prev;                              \
+            hh_del->hh_next->hh_prev = hh_del->hh_prev;                          \
     }
 
 /* Bucket expansion has the effect of doubling the number of buckets

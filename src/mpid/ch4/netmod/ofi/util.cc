@@ -363,12 +363,12 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     get_huge_event(NULL, (MPID_Request *)hc);
 }
 
-int MPIDI_OFI_Control_handler(void    *am_hdr,
-                              size_t   am_hdr_sz,
-                              void    *reply_token,
-                              void   **data,
-                              size_t  *data_sz,
-                              int     *is_contig,
+int MPIDI_OFI_Control_handler(void      *am_hdr,
+                              size_t     am_hdr_sz,
+                              uint64_t   reply_token,
+                              void     **data,
+                              size_t    *data_sz,
+                              int       *is_contig,
                               MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                               MPID_Request ** req)
 {

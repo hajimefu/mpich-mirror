@@ -113,17 +113,18 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
 #define FUNCNAME MPIDI_CH4I_do_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4I_do_irecv(void *buf,
-                                      int count,
-                                      MPI_Datatype datatype,
-                                      int rank,
-                                      int tag,
-                                      MPID_Comm * comm,
-                                      int context_offset,
-                                      MPID_Request ** request, int alloc_req,
-                                      uint64_t flags)
+static inline int MPIDI_CH4I_do_irecv(void          *buf,
+                                      int            count,
+                                      MPI_Datatype   datatype,
+                                      int            rank,
+                                      int            tag,
+                                      MPID_Comm     *comm,
+                                      int            context_offset,
+                                      MPID_Request **request,
+                                      int            alloc_req,
+                                      uint64_t       flags)
 {
-    int mpi_errno = MPI_SUCCESS, comm_idx;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL, *unexp_req = NULL;
     uint64_t match_bits, mask_bits;
     MPIU_Context_id_t context_id = comm->recvcontext_id + context_offset;
@@ -132,13 +133,9 @@ static inline int MPIDI_CH4I_do_irecv(void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_IRECV);
 
     match_bits = MPIDI_CH4R_init_recvtag(&mask_bits, context_id, rank, tag);
-    comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
-    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
-
-    /* MPIDI_CS_ENTER() */
-    unexp_req = MPIDI_CH4R_dequeue_unexp(match_bits, mask_bits,
-                                         &MPIDI_CH4R_COMM(root_comm, unexp_list));
-    /* MPIDI_CS_EXIT() */
+    root_comm  = MPIDI_CH4R_context_id_to_comm(comm->recvcontext_id);
+    unexp_req  = MPIDI_CH4R_dequeue_unexp(match_bits, mask_bits,
+                                          &MPIDI_CH4R_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
         if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_BUSY) {
@@ -371,16 +368,15 @@ __CH4_INLINE__ int MPIDI_CH4R_irecv(void *buf,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
 {
-    int mpi_errno = MPI_SUCCESS, found, comm_idx;
+    int mpi_errno = MPI_SUCCESS, found;
     MPID_Comm *root_comm;
     uint64_t msg_tag;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CANCEL_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CANCEL_RECV);
 
-    msg_tag = MPIDI_CH4R_REQUEST(rreq, tag);
-    comm_idx = MPIDI_CH4R_get_context_index(MPIDI_CH4R_get_context(msg_tag));
-    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
+    msg_tag   = MPIDI_CH4R_REQUEST(rreq, tag);
+    root_comm = MPIDI_CH4R_context_id_to_comm(MPIDI_CH4R_get_context(MPIDI_CH4R_get_context(msg_tag)));
 
     /* MPIDI_CS_ENTER(); */
     found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4r.req->rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));

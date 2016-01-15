@@ -406,9 +406,9 @@ static inline int am_send_event(cq_tagged_entry_t *wc,
         break;
     }
 
-    if (AMREQ_OFI_HDR(sreq, pack_buffer)) {
-        MPIU_Free(AMREQ_OFI_HDR(sreq, pack_buffer));
-        AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
+    if (AMREQ_OFI_HDR(sreq, clientdata).pack_buffer) {
+        MPIU_Free(AMREQ_OFI_HDR(sreq, clientdata).pack_buffer);
+        AMREQ_OFI_HDR(sreq, clientdata).pack_buffer = NULL;
     }
     mpi_errno = MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id] (sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -428,49 +428,50 @@ static inline int am_recv_event(cq_tagged_entry_t *wc,
                                 MPID_Request      *rreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_AM_OFI_hdr_t *am_hdr;
+    MPIDI_AM_OFI_hdr_t         *am_hdr;
+    MPIDI_AM_OFI_reply_token_t  reply_token;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
-    am_hdr           = (MPIDI_AM_OFI_hdr_t *) wc->buf;
-    fi_addr_t source = 0xFFFFFFFFFFFFFFFFULL;
-    MPID_Comm *comm  = MPIDI_CH4R_context_id_to_comm(am_hdr->context_id);
-    if(comm) source  = _comm_to_phys(comm, am_hdr->src_rank, MPIDI_API_TAG);
+
+    am_hdr                      = (MPIDI_AM_OFI_hdr_t *) wc->buf;
+    reply_token.data.context_id = am_hdr->context_id;
+    reply_token.data.src_rank   = am_hdr->src_rank;
 
     switch (am_hdr->am_type) {
     case MPIDI_AMTYPE_SHORT_HDR:
         mpi_errno = MPIDI_netmod_handle_short_am_hdr(am_hdr,
                                                      am_hdr->payload,
-                                                     source);
+                                                     reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_SHORT:
-        mpi_errno = MPIDI_netmod_handle_short_am(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_short_am(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_LMT_REQ:
-        mpi_errno = MPIDI_netmod_handle_long_am(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_long_am(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_LMT_HDR_REQ:
-        mpi_errno = MPIDI_netmod_handle_long_am_hdr(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_long_am_hdr(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_LMT_ACK:
-        mpi_errno = MPIDI_netmod_handle_lmt_ack(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_lmt_ack(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_LONG_HDR_REQ:
-        mpi_errno = MPIDI_netmod_handle_long_hdr(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_long_hdr(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
     case MPIDI_AMTYPE_LONG_HDR_ACK:
-        mpi_errno = MPIDI_netmod_handle_long_hdr_ack(am_hdr, source);
+        mpi_errno = MPIDI_netmod_handle_long_hdr_ack(am_hdr, reply_token);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         break;
 
@@ -490,47 +491,41 @@ static inline int am_recv_event(cq_tagged_entry_t *wc,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int am_read_event(cq_tagged_entry_t *wc,
-                                MPID_Request      *req)
+                                MPID_Request      *dont_use_me)
 {
-    int                 mpi_errno      = MPI_SUCCESS;
-    void               *netmod_context = NULL;
-    MPIDI_AM_OFI_hdr_t *am_hdr;
-    MPID_Request       *rreq;
-
-    am_hdr           = (MPIDI_AM_OFI_hdr_t *) wc->buf;
-    fi_addr_t source = 0xFFFFFFFFFFFFFFFFULL;
-    MPID_Comm *comm  = MPIDI_CH4R_context_id_to_comm(am_hdr->context_id);
-    if(comm) source  = _comm_to_phys(comm, am_hdr->src_rank, MPIDI_API_TAG);
+    int                           mpi_errno      = MPI_SUCCESS;
+    void                         *netmod_context = NULL;
+    MPID_Request                 *rreq;
+    MPIDI_CH4_NM_ofi_amrequest_t *ofi_req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
 
-    AMREQ_OFI_HDR(req,lmt_cntr)--;
-    if (AMREQ_OFI_HDR(req,lmt_cntr))
+    ofi_req = container_of(wc->op_context, MPIDI_CH4_NM_ofi_amrequest_t, context);
+    ofi_req->req_hdr->lmt_cntr--;
+    if (ofi_req->req_hdr->lmt_cntr)
         goto fn_exit;
-
-    switch (AMREQ_OFI_HDR(req,msg_hdr).am_type) {
+    switch (ofi_req->req_hdr->msg_hdr.am_type) {
     case MPIDI_AMTYPE_LMT_HDR_REQ:
-        rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
+        rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
         AMREQ_OFI_HDR(rreq, msg_hdr).am_type = MPIDI_AMTYPE_LMT_REQ;
         mpi_errno = MPIDI_netmod_do_handle_long_am(&AMREQ_OFI_HDR(rreq, msg_hdr),
                                                    &AMREQ_OFI_HDR(rreq, lmt_info),
                                                    AMREQ_OFI_HDR(rreq, am_hdr),
-                                                   (fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer));
+                                                   AMREQ_OFI_HDR(rreq, clientdata).reply_token);
         if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
         MPIDI_AM_netmod_request_complete(rreq);
         goto fn_exit;
     case MPIDI_AMTYPE_LONG_HDR_REQ:
-        rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
-
-        mpi_errno = MPIDI_netmod_dispatch_ack((fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer),
+        rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
+        mpi_errno = MPIDI_netmod_dispatch_ack(ofi_req->req_hdr->msg_hdr.src_rank,
+                                              ofi_req->req_hdr->msg_hdr.context_id,
                                               AMREQ_OFI_HDR(rreq, lmt_info.sreq_ptr),
                                               MPIDI_AMTYPE_LONG_HDR_ACK, netmod_context);
         if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
-
         mpi_errno = MPIDI_netmod_handle_short_am_hdr(&AMREQ_OFI_HDR(rreq, msg_hdr),
                                                      AMREQ_OFI_HDR(rreq, am_hdr),
-                                                     (fi_addr_t) AMREQ_OFI_HDR(rreq, pack_buffer));
+                                                     AMREQ_OFI_HDR(rreq, clientdata).reply_token);
         if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
         MPIDI_AM_netmod_request_complete(rreq);
         goto fn_exit;
@@ -538,16 +533,17 @@ static inline int am_read_event(cq_tagged_entry_t *wc,
     default:
         break;
     }
-
-    rreq = (MPID_Request *)AMREQ_OFI_HDR(req,rreq_ptr);
-    mpi_errno = MPIDI_netmod_dispatch_ack(source,
-        AMREQ_OFI_HDR(rreq, lmt_info).sreq_ptr,MPIDI_AMTYPE_LMT_ACK,netmod_context);
+    rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
+    mpi_errno = MPIDI_netmod_dispatch_ack(ofi_req->req_hdr->msg_hdr.src_rank,
+                                          ofi_req->req_hdr->msg_hdr.context_id,
+                                          AMREQ_OFI_HDR(rreq, lmt_info).sreq_ptr,
+                                          MPIDI_AMTYPE_LMT_ACK,netmod_context);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_AM_netmod_request_complete(rreq);
-    AMREQ_OFI_HDR(req,cmpl_handler_fn)(rreq);
+    ofi_req->req_hdr->cmpl_handler_fn(rreq);
   fn_exit:
-    MPIDI_CH4R_release_buf((void *)AMREQ_OFI_HDR_PTR(req));
+    MPIDI_CH4R_release_buf((void *)ofi_req);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     return mpi_errno;
   fn_fail:

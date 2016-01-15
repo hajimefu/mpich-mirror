@@ -286,13 +286,13 @@ typedef union MPIDI_cacheline_mutex_t{
 }MPIDI_cacheline_mutex_t __attribute__ ((aligned (MPIDI_CACHELINE_SIZE)));
 
 struct cq_list {
-    struct fi_cq_data_entry cq_entry;
-    fi_addr_t source;
+    cq_tagged_entry_t  cq_entry;
+    fi_addr_t          source;
     struct slist_entry entry;
 };
 
 struct cq_buff_entry {
-    struct fi_cq_data_entry cq_entry;
+    cq_tagged_entry_t cq_entry;
     fi_addr_t source;
 };
 

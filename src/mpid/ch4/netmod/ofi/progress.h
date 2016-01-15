@@ -18,8 +18,8 @@
 #define NUM_CQ_ENTRIES 8
 static inline int handle_cq_error(ssize_t ret);
 static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num);
-static inline int am_progress(void *netmod_context,
-                              int   blocking);
+static inline int get_buffered(cq_tagged_entry_t *wc, ssize_t num);
+
 
 __attribute__((__always_inline__)) static inline
 int MPIDI_netmod_progress_generic(void *netmod_context,
@@ -32,15 +32,17 @@ int MPIDI_netmod_progress_generic(void *netmod_context,
     ssize_t            ret;
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
-    ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
-
-    if(likely(ret > 0))
-        mpi_errno = handle_cq_entries(wc,ret);
-    else if (ret == -FI_EAGAIN)
-        mpi_errno = MPI_SUCCESS;
-    else
-        mpi_errno = handle_cq_error(ret);
-
+    if(unlikely(get_buffered(wc, 1)))
+        mpi_errno = handle_cq_entries(wc,1);
+    else if(likely(1)) {
+        ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
+        if(likely(ret > 0))
+            mpi_errno = handle_cq_entries(wc,ret);
+        else if (ret == -FI_EAGAIN)
+            mpi_errno = MPI_SUCCESS;
+        else
+            mpi_errno = handle_cq_error(ret);
+    }
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);
 
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -67,12 +69,38 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
 }
 
 #undef FUNCNAME
+#define FUNCNAME get_buffered
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int get_buffered(cq_tagged_entry_t *wc, ssize_t num) {
+    int rc;
+    if ((MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) ||
+        !slist_empty(&MPIDI_Global.cq_buff_list)) {
+        if (MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) {
+            wc[0]                     = MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_tail].cq_entry;
+            MPIDI_Global.cq_buff_tail = (MPIDI_Global.cq_buff_tail + 1) % MPIDI_NUM_CQ_BUFFERED;
+        }
+        else {
+            struct cq_list     *cq_list_entry;
+            struct slist_entry *entry = slist_remove_head(&MPIDI_Global.cq_buff_list);
+            cq_list_entry             = container_of(entry, struct cq_list, entry);
+            wc[0]                     = cq_list_entry->cq_entry;
+            MPIU_Free((void *)cq_list_entry);
+        }
+        rc = 1;
+    }
+    rc = 0;
+    return rc;
+}
+
+#if 0
+#undef FUNCNAME
 #define FUNCNAME am_progress
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int am_progress(void *netmod_context, int blocking)
 {
-    int mpi_errno = MPI_SUCCESS, found = 0, ret, buffered;
+    struct fi_cq_data_enint mpi_errno = MPI_SUCCESS, found = 0, ret, buffered;
     struct fi_cq_data_entry cq_entry;
     struct fi_cq_err_entry  cq_err_entry;
     fi_addr_t source;
@@ -138,6 +166,7 @@ static inline int am_progress(void *netmod_context, int blocking)
   fn_fail:
     goto fn_exit;
 }
+#endif
 
 static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num)
 {

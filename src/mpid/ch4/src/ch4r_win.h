@@ -113,12 +113,12 @@ static inline int MPIDI_CH4R_win_set_info(MPID_Win *win, MPID_Info *info)
 }
 
 static inline int MPIDI_CH4I_win_init(MPI_Aint     length,
-                                 int          disp_unit,
-                                 MPID_Win   **win_ptr,
-                                 MPID_Info   *info,
-                                 MPID_Comm   *comm_ptr,
-                                 int          create_flavor,
-                                 int          model)
+                                      int          disp_unit,
+                                      MPID_Win   **win_ptr,
+                                      MPID_Info   *info,
+                                      MPID_Comm   *comm_ptr,
+                                      int          create_flavor,
+                                      int          model)
 {
     int             mpi_errno = MPI_SUCCESS;
     int             rank, size;
@@ -643,8 +643,10 @@ static inline int MPIDI_CH4R_win_free(MPID_Win **win_ptr)
 
     MPIU_Free(MPIDI_CH4R_WIN(win, info_table));
     MPIR_Comm_release(win->comm_ptr);
-    MPIU_Handle_obj_free(&MPID_Win_mem, win);
 
+    MPL_HASH_DELETE(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash, win);
+
+    MPIU_Handle_obj_free(&MPID_Win_mem, win);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FREE);
     return mpi_errno;

@@ -24,7 +24,6 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
                                  int                  use_lock)
 {
     int                        mpi_errno = MPI_SUCCESS;
-    MPIDI_AM_OFI_reply_token_t reply_token;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
@@ -34,7 +33,7 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
     if(use_lock)
         mpi_errno = MPIDI_netmod_do_inject(rank,
                                            win->comm_ptr,
-                                           reply_token,
+                                           -1ULL,
                                            MPIDI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
@@ -43,7 +42,7 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
     else
         mpi_errno = MPIDI_netmod_do_inject(rank,
                                            win->comm_ptr,
-                                           reply_token,
+                                           -1ULL,
                                            MPIDI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
@@ -66,7 +65,6 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
                                   MPID_Request         *ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_AM_OFI_reply_token_t reply_token;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
 
@@ -79,7 +77,7 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
 
     mpi_errno = MPIDI_netmod_do_inject(rank,comm_ptr,
-                                       reply_token,
+                                       -1ULL,
                                        MPIDI_INTERNAL_HANDLER_CONTROL,
                                        (void*)control,
                                        sizeof(*control),NULL,

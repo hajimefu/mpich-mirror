@@ -115,7 +115,7 @@ MPIDI_NETMOD_API(int,send_amv_hdr,
 
 /* active message send am hdr reply */
 MPIDI_NETMOD_API(int,send_am_hdr_reply,
-                 (void *)         reply_token,     /* local pointer to netmod specific information */
+                 (uint64_t)       reply_token,     /* local pointer to netmod specific information */
                  (int)            handler_id,
                  (const void *)   am_hdr,
                  (size_t)         am_hdr_sz,
@@ -123,14 +123,14 @@ MPIDI_NETMOD_API(int,send_am_hdr_reply,
 
 /* active message inject hdr reply */
 MPIDI_NETMOD_API(int,inject_am_hdr_reply,
-                 (void *)         reply_token,     /* local pointer to netmod specific information */
+                 (uint64_t)       reply_token,     /* local pointer to netmod specific information */
                  (int)            handler_id,
                  (const void *)   am_hdr,
                  (size_t)         am_hdr_sz);
 
 /* active message reply */
 MPIDI_NETMOD_API(int,send_am_reply,
-                 (void *)         reply_token, /* local pointer to netmod specific information */
+                 (uint64_t)       reply_token, /* local pointer to netmod specific information */
                  (int)            handler_id,
                  (const void *)   am_hdr,
                  (size_t)         am_hdr_sz,
@@ -141,7 +141,7 @@ MPIDI_NETMOD_API(int,send_am_reply,
 
 /* vector version of reply */
 MPIDI_NETMOD_API(int,send_amv_reply,
-                 (void *)         reply_token,        /* local pointer to netmod specific information */
+                 (uint64_t)       reply_token,        /* local pointer to netmod specific information */
                  (int)            handler_id,
                  (struct iovec *) am_hdr,
                  (size_t)         iov_len,

@@ -13,10 +13,14 @@ typedef int (*MPIDI_CH4_NM_am_origin_handler_fn) (MPID_Request * req);
 /* Callback function setup by handler register function */
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_CH4_NM_am_target_handler_fn)
- (void *am_hdr, size_t am_hdr_sz, void *reply_token,    /* contains information about reply operation */
-  void **data,                  /* data should be set as iovs if *is_contig is true */
-  size_t * data_sz, int *is_contig, MPIDI_CH4_NM_am_completion_handler_fn * cmpl_handler_fn,    /* completion handler */
-  MPID_Request ** req);         /* if allocated, need pointer to completion function */
+ (void                                   *am_hdr,
+  size_t                                  am_hdr_sz,
+  uint64_t                                reply_token,    /* contains information about reply operation */
+  void                                  **data,           /* data should be set as iovs if *is_contig is true */
+  size_t                                 *data_sz,
+  int                                    *is_contig,
+  MPIDI_CH4_NM_am_completion_handler_fn  *cmpl_handler_fn,/* completion handler */
+  MPID_Request                          **req);           /* if allocated, need pointer to completion function */
 
 #ifndef MPIDI_CH4_ARRAY_TYPEDEFS
 #define MPIDI_CH4_ARRAY_TYPEDEFS

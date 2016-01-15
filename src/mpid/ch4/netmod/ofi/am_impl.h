@@ -168,8 +168,8 @@ fn_fail:
 static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret;
-    struct fi_cq_data_entry cq_entry;
-    struct fi_cq_err_entry cq_err_entry;
+    cq_tagged_entry_t cq_entry;
+    cq_err_entry_t    cq_err_entry;
     fi_addr_t source;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS);
@@ -218,7 +218,7 @@ fn_exit:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         rank,
                                                   MPID_Comm                  *comm,
-                                                  MPIDI_AM_OFI_reply_token_t  reply_token,
+                                                  uint64_t                    reply_token,
                                                   int                         handler_id,
                                                   const void                 *am_hdr,
                                                   size_t                      am_hdr_sz,
@@ -229,7 +229,7 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         ra
     MPIDI_AM_OFI_hdr_t *msg_hdr;
     int mpi_errno = MPI_SUCCESS, c, use_rank;
     MPID_Comm *use_comm;
-
+    MPIDI_AM_OFI_reply_token_t use_token;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
 
@@ -243,19 +243,20 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         ra
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT_HDR;
 
     if(is_reply) {
-        use_comm            = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
-        use_rank            = reply_token.src_rank;
-        msg_hdr->context_id = reply_token.context_id;
-        msg_hdr->src_rank   = reply_token.src_rank;
+        use_token.val       = reply_token;
+        use_comm            = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_rank            = use_token.data.src_rank;
+        msg_hdr->context_id = use_token.data.context_id;
+        msg_hdr->src_rank   = use_comm->rank;
     }
     else {
         use_comm = comm;
         use_rank = rank;
         msg_hdr->context_id = use_comm->context_id;
-        msg_hdr->src_rank   = use_rank;
+        msg_hdr->src_rank   = use_comm->rank;
     }
 
-    AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
+    AMREQ_OFI_HDR(sreq, clientdata).pack_buffer = NULL;
     MPID_cc_incr(sreq->cc_ptr, &c);
 
     iov[0].iov_base = msg_hdr;
@@ -297,13 +298,13 @@ static inline int MPIDI_netmod_ofi_send_am_long(int           rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
 
-    msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
+    msg_hdr             = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
     msg_hdr->am_hdr_sz  = am_hdr_sz;
     msg_hdr->data_sz    = data_sz;
     msg_hdr->am_type    = MPIDI_AMTYPE_LMT_REQ;
     msg_hdr->context_id = comm->context_id;
-    msg_hdr->src_rank   = rank;
+    msg_hdr->src_rank   = comm->rank;
 
 
     lmt_info = &AMREQ_OFI_HDR(sreq, lmt_info);
@@ -318,7 +319,6 @@ static inline int MPIDI_netmod_ofi_send_am_long(int           rank,
     MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
     MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
     MPIU_Assert((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) <= MPIDI_MAX_SHORT_SEND_SZ);
-
     FI_RC(fi_mr_reg(MPIDI_Global.domain,
                     data,
                     data_sz,
@@ -374,7 +374,7 @@ static inline int MPIDI_netmod_ofi_send_am_short(int           rank,
     msg_hdr->data_sz    = count;
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT;
     msg_hdr->context_id = comm->context_id;
-    msg_hdr->src_rank   = rank;
+    msg_hdr->src_rank   = comm->rank;
 
     iov[0].iov_base     = msg_hdr;
     iov[0].iov_len      = sizeof(*msg_hdr);
@@ -403,7 +403,7 @@ static inline int MPIDI_netmod_ofi_send_am_short(int           rank,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
                                               MPID_Comm    *comm,
-                                              MPIDI_AM_OFI_reply_token_t  reply_token,
+                                              uint64_t      reply_token,
                                               int           handler_id,
                                               const void   *am_hdr,
                                               size_t        am_hdr_sz,
@@ -419,7 +419,7 @@ static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
     MPIDI_msg_sz_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
-
+    MPIDI_AM_OFI_reply_token_t  use_token;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
 
@@ -430,8 +430,9 @@ static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
     send_buf = (char *) buf + dt_true_lb;
 
     if(is_reply) {
-        use_comm = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
-        use_rank = reply_token.src_rank;
+        use_token.val = reply_token;
+        use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_rank = use_token.data.src_rank;
     }
     else {
         use_comm = comm;
@@ -447,15 +448,15 @@ static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
         MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
         last = data_sz;
-        AMREQ_OFI_HDR(sreq, pack_buffer) = (char *) MPIU_Malloc(data_sz);
-        MPIR_ERR_CHKANDJUMP1(AMREQ_OFI_HDR(sreq, pack_buffer) == NULL, mpi_errno,
+        AMREQ_OFI_HDR(sreq, clientdata).pack_buffer = (char *) MPIU_Malloc(data_sz);
+        MPIR_ERR_CHKANDJUMP1(AMREQ_OFI_HDR(sreq, clientdata).pack_buffer == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
-        MPID_Segment_pack(segment_ptr, segment_first, &last, AMREQ_OFI_HDR(sreq, pack_buffer));
+        MPID_Segment_pack(segment_ptr, segment_first, &last, AMREQ_OFI_HDR(sreq, clientdata).pack_buffer);
         MPID_Segment_free(segment_ptr);
-        send_buf = (char *) AMREQ_OFI_HDR(sreq, pack_buffer);
+        send_buf = (char *) AMREQ_OFI_HDR(sreq, clientdata).pack_buffer;
     }
     else {
-        AMREQ_OFI_HDR(sreq, pack_buffer) = NULL;
+        AMREQ_OFI_HDR(sreq, clientdata).pack_buffer = NULL;
     }
 
     mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_AM_OFI_hdr_t)) < MPIDI_MAX_SHORT_SEND_SZ) ?
@@ -472,7 +473,7 @@ static inline int MPIDI_netmod_ofi_do_send_am(int           rank,
 
 static inline int MPIDI_netmod_do_inject(int           rank,
                                          MPID_Comm    *comm,
-                                         MPIDI_AM_OFI_reply_token_t  reply_token,
+                                         uint64_t      reply_token,
                                          int           handler_id,
                                          const void   *am_hdr,
                                          size_t        am_hdr_sz,
@@ -485,7 +486,7 @@ static inline int MPIDI_netmod_do_inject(int           rank,
     MPIDI_AM_OFI_hdr_t msg_hdr;
     struct fi_msg msg;
     struct iovec msg_iov[2];
-
+    MPIDI_AM_OFI_reply_token_t  use_token;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_INJECT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_INJECT);
 
@@ -497,16 +498,17 @@ static inline int MPIDI_netmod_do_inject(int           rank,
     msg_hdr.am_type     = MPIDI_AMTYPE_SHORT;
 
     if(is_reply) {
-        use_comm           = MPIDI_CH4R_context_id_to_comm(reply_token.context_id);
-        use_rank           = reply_token.src_rank;
-        msg_hdr.context_id = reply_token.context_id;
-        msg_hdr.src_rank   = reply_token.src_rank;
+        use_token.val      = reply_token;
+        use_comm           = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_rank           = use_token.data.src_rank;
+        msg_hdr.context_id = use_token.data.context_id;
+        msg_hdr.src_rank   = use_comm->rank;
     }
     else {
         use_comm           = comm;
         use_rank           = rank;
         msg_hdr.context_id = use_comm->context_id;
-        msg_hdr.src_rank   = use_rank;
+        msg_hdr.src_rank   = use_comm->rank;
     }
 
     msg_iov[0].iov_base = (void *) &msg_hdr;

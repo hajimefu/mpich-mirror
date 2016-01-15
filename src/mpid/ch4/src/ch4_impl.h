@@ -49,8 +49,22 @@ static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
 
 static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
 {
-    int comm_idx = MPIDI_CH4R_get_context_index(context_id);
-    return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
+    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    MPIU_Assert(subcomm_type <= 3);
+    MPIU_Assert(is_localcomm <= 2);
+    return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
+}
+
+static inline MPIDI_CH4R_Dev_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t context_id)
+{
+    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    MPIU_Assert(subcomm_type <= 3);
+    MPIU_Assert(is_localcomm <= 2);
+    return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
 }
 
 static inline MPID_Request *MPIDI_CH4R_create_req()

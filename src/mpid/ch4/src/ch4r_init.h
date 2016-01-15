@@ -23,25 +23,33 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
 {
-    int mpi_errno = MPI_SUCCESS, comm_idx;
+    int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type,is_localcomm;
+    MPIDI_CH4R_Dev_rreq_t **uelist;
+
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
-    comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
-    if (!MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
-        MPIDI_CH4R_COMM(comm, posted_list) = NULL;
-        MPIDI_CH4R_COMM(comm, unexp_list) = NULL;
-        MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = comm;
-        if (MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list) {
-            MPIDI_CH4R_Dev_rreq_t *curr, *tmp;
-            MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, 
-                                curr, tmp) {
-                MPL_DL_DELETE(MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list, curr);
-                MPL_DL_APPEND(MPIDI_CH4R_COMM(comm, unexp_list), curr);
-            }
-            MPIDI_CH4_Global.comm_req_lists[comm_idx].unexp_list = NULL;
+    comm_idx     = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
+    subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
+    is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
+
+    MPIU_Assert(subcomm_type <= 3);
+    MPIU_Assert(is_localcomm <= 1);
+    MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] = comm;
+    MPIDI_CH4R_COMM(comm, posted_list) = NULL;
+    MPIDI_CH4R_COMM(comm, unexp_list)  = NULL;
+
+    uelist = MPIDI_CH4R_context_id_to_uelist(comm->context_id);
+    if (*uelist) {
+        MPIDI_CH4R_Dev_rreq_t *curr, *tmp;
+        MPL_DL_FOREACH_SAFE(*uelist,
+                            curr, tmp) {
+            MPL_DL_DELETE(*uelist, curr);
+            MPL_DL_APPEND(MPIDI_CH4R_COMM(comm, unexp_list), curr);
         }
+        *uelist = NULL;
     }
+
     MPIDI_CH4R_COMM(comm, window_instance) = 0;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
     return mpi_errno;
@@ -53,18 +61,26 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4R_destroy_comm(MPID_Comm * comm)
 {
-    int mpi_errno = MPI_SUCCESS, comm_idx;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
+    int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type, is_localcomm;
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_DESTROY_COMM);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DESTROY_COMM);
 
-    comm_idx = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
-    if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm) {
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4r.posted_list == NULL);
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm->dev.ch4.ch4r.unexp_list == NULL);
-        MPIDI_CH4_Global.comm_req_lists[comm_idx].comm = NULL;
+    comm_idx     = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
+    subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
+    is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
+
+    MPIU_Assert(subcomm_type <=3);
+    MPIU_Assert(is_localcomm <= 1);
+    MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] != NULL);
+
+    if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[subcomm_type]) {
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4r.posted_list == NULL);
+        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4r.unexp_list == NULL);
     }
+    MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DESTROY_COMM);
     return mpi_errno;
 }
 

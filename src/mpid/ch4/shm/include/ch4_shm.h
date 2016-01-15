@@ -13,7 +13,7 @@ typedef int (*MPIDI_shm_am_origin_handler_fn) (MPID_Request * req);
 /* Callback function setup by handler register function */
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_shm_am_target_handler_fn)
- (void *am_hdr, size_t am_hdr_sz, void *reply_token,    /* contains information about reply operation */
+ (void *am_hdr, size_t am_hdr_sz, uint64_t reply_token,    /* contains information about reply operation */
   void **data,                  /* CH4 manages this buffer - shm only fills with data */
   MPI_Datatype * datatype, MPI_Count * count, int *noncontig,   /* if TRUE: data/data_sz are actually iovec/count */
   MPIDI_shm_am_completion_handler_fn * cmpl_handler_fn, /* completion handler */

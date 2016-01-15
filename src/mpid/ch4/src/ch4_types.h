@@ -185,8 +185,8 @@ typedef struct MPIDI_CH4R_acc_ack_msg_t {
 } MPIDI_CH4R_acc_ack_msg_t;
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
-    MPID_Comm *comm;
-    MPIDI_CH4R_Dev_rreq_t *unexp_list;
+    MPID_Comm             *comm[2][4];
+    MPIDI_CH4R_Dev_rreq_t *uelist[2][4];
 } MPIDI_CH4_Comm_req_list_t;
 
 typedef struct MPIU_buf_pool_t {

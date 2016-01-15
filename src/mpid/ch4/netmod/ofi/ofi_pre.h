@@ -116,10 +116,14 @@ typedef struct {
     uint64_t sreq_ptr;
 } MPIDI_OFI_Ack_msg_pyld_t;
 
-
 typedef struct MPIDI_AM_OFI_reply_token_t {
-    uint32_t context_id;
-    uint32_t src_rank;
+    union {
+        uint64_t val;
+        struct {
+            uint32_t context_id;
+            uint32_t src_rank;
+        }data;
+    };
 }MPIDI_AM_OFI_reply_token_t;
 
 typedef struct MPIDI_AM_OFI_hdr_t {
@@ -149,7 +153,10 @@ typedef struct {
     MPIDI_OFI_lmt_msg_pyld_t  lmt_info;
     uint64_t                  lmt_cntr;
     struct fid_mr            *lmt_mr;
-    void                     *pack_buffer;
+    union                    {
+        void                       *pack_buffer;
+        MPIDI_AM_OFI_reply_token_t  reply_token;
+    }clientdata;
     void                     *rreq_ptr;
     void                     *am_hdr;
     cmpl_handler_fn_t         cmpl_handler_fn;

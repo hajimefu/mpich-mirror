@@ -22,7 +22,7 @@ __CH4_INLINE__ int MPIDI_CH4R_iprobe(int source,
                                      MPID_Comm * comm,
                                      int context_offset, int *flag, MPI_Status * status)
 {
-    int mpi_errno=MPI_SUCCESS, comm_idx;
+    int mpi_errno=MPI_SUCCESS;
     MPID_Comm *root_comm;
     MPID_Request *unexp_req;
     uint64_t match_bits, mask_bits;
@@ -35,9 +35,7 @@ __CH4_INLINE__ int MPIDI_CH4R_iprobe(int source,
         goto fn_exit;
     }
 
-    comm_idx = MPIDI_CH4R_get_context_index(comm->context_id);
-    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
-
+    root_comm  = MPIDI_CH4R_context_id_to_comm(comm->context_id);
     match_bits = MPIDI_CH4R_init_recvtag(&mask_bits, root_comm->recvcontext_id +
                                         context_offset, source, tag);
 
@@ -103,7 +101,7 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
                                       int context_offset,
                                       int *flag, MPID_Request ** message, MPI_Status * status)
 {
-    int mpi_errno = MPI_SUCCESS, comm_idx;
+    int mpi_errno = MPI_SUCCESS;
     MPID_Comm *root_comm;
     MPID_Request *unexp_req;
     uint64_t match_bits, mask_bits;
@@ -117,9 +115,7 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
         goto fn_exit;
     }
 
-    comm_idx = MPIDI_CH4R_get_context_index(comm->context_id);
-    root_comm = MPIDI_CH4_Global.comm_req_lists[comm_idx].comm;
-
+    root_comm  = MPIDI_CH4R_context_id_to_comm(comm->context_id);
     match_bits = MPIDI_CH4R_init_recvtag(&mask_bits, root_comm->recvcontext_id +
                                         context_offset, source, tag);
 
