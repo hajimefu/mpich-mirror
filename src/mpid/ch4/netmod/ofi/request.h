@@ -27,33 +27,12 @@ static inline int MPIDI_netmod_request_is_pending_failure(MPID_Request * req)
 
 static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
 {
-    int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
-
-    if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
-
-        if (req->comm)
-            MPIR_Comm_release(req->comm);
-
-        if (req->greq_fns)
-            MPIU_Free(req->greq_fns);
-
-        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
-    }
-    return;
+    MPIDI_CH4_NMI_OFI_request_release(req);
 }
 
 static inline MPID_Request *MPIDI_CH4_NM_request_create(void)
 {
     return MPIDI_AM_netmod_request_create();
-}
-
-static inline void MPIDI_netmod_request_complete(MPID_Request *req)
-{
-    MPIDI_AM_netmod_request_complete(req);
 }
 
 #endif /* NETMOD_OFI_REQUEST_H_INCLUDED */

@@ -153,6 +153,7 @@ static inline int MPIDI_netmod_do_rdma_read(void                       *dst,
         am_req->req_hdr  = AMREQ_OFI(rreq, req_hdr);
         am_req->event_id = MPIDI_EVENT_AM_READ;
         comm             = MPIDI_CH4R_context_id_to_comm(reply_token.data.context_id);
+        MPIU_Assert(comm);
         FI_RC_RETRY_AM(fi_read(MPIDI_Global.ep, (char *) dst + done,
                                curr_len, NULL,
                                _comm_to_phys(comm, reply_token.data.src_rank,MPIDI_API_TAG),
