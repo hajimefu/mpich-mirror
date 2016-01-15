@@ -180,7 +180,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
     MPIDI_CH4_Global.comm_req_lists = (MPIDI_CH4_Comm_req_list_t *)
         MPIU_Calloc(MPIR_CONTEXT_INT_BITS * MPIR_CONTEXT_ID_BITS,
-                    sizeof(MPIDI_CH4_Comm_req_list_t *));
+                    sizeof(MPIDI_CH4_Comm_req_list_t));
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF           */
