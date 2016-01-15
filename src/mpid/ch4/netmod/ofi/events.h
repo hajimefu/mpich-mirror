@@ -561,7 +561,7 @@ static inline int am_repost_event(cq_tagged_entry_t *wc,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
 
-    mpi_errno = MPIDI_netmod_repost_buffer(wc->op_context);
+    mpi_errno = MPIDI_netmod_repost_buffer(wc->op_context, rreq);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
     return mpi_errno;
@@ -573,7 +573,9 @@ static inline MPID_Request *devreq_to_req(void *context)
     return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
 }
 
-static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
+static inline int dispatch_function(cq_tagged_entry_t *wc,
+                                    MPID_Request      *req,
+                                    int                buffered)
 {
     int mpi_errno;
     if(likely(REQ_OFI(req,event_id) == MPIDI_EVENT_SEND)) {
@@ -590,6 +592,8 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
         goto fn_exit;
     } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_AM_RECV)) {
         mpi_errno = am_recv_event(wc,req);
+        if (unlikely((wc->flags & FI_MULTI_RECV) && !buffered))
+            am_repost_event(wc,req);
         goto fn_exit;
     } else if (likely(REQ_OFI(req,event_id) == MPIDI_EVENT_AM_READ)) {
         mpi_errno = am_read_event(wc,req);
@@ -630,6 +634,7 @@ static inline int dispatch_function(cq_tagged_entry_t * wc, MPID_Request *req)
             break;
         }
     }
+
 fn_exit:
     return mpi_errno;
 }

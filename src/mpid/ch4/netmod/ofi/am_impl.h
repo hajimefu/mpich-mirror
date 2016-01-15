@@ -147,12 +147,16 @@ static inline int MPIDI_netmod_am_ofi_init_req(const void *am_hdr,
     return mpi_errno;
 }
 
-static inline int MPIDI_netmod_repost_buffer(void* buf)
+static inline int MPIDI_netmod_repost_buffer(void         *buf,
+                                             MPID_Request *req)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int           mpi_errno = MPI_SUCCESS;
+    MPIDI_AM_req *am = (MPIDI_AM_req *)req;
+
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
-    FI_RC_RETRY_AM(fi_recvmsg(MPIDI_Global.ep, (struct fi_msg *) buf,
+    FI_RC_RETRY_AM(fi_recvmsg(MPIDI_Global.ep,
+                              &MPIDI_Global.am_msg[am->index],
                               FI_MULTI_RECV | FI_COMPLETION), repost);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REPOST_BUFFER);
@@ -175,6 +179,7 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS);
 
+    MPIU_Assert(0);
     ret = fi_cq_readfrom(MPIDI_Global.p2p_cq, &cq_entry, 1, &source);
     if (ret == -FI_EAGAIN)
         goto fn_exit;
@@ -201,7 +206,7 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
 
     if ((cq_entry.flags & FI_RECV) &&
         (cq_entry.flags & FI_MULTI_RECV)) {
-        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context);
+        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, NULL);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 

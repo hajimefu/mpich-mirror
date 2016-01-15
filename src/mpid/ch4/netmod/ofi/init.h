@@ -383,6 +383,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
         for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++) {
             MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_AM_BUFF_SZ);
             MPIDI_Global.am_reqs[i].event_id = MPIDI_EVENT_AM_RECV;
+            MPIDI_Global.am_reqs[i].index    = i;
             MPIU_Assert(MPIDI_Global.am_bufs[i]);
             MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
             MPIDI_Global.am_iov[i].iov_len   = MPIDI_AM_BUFF_SZ;

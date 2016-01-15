@@ -17,7 +17,7 @@
 
 #define NUM_CQ_ENTRIES 8
 static inline int handle_cq_error(ssize_t ret);
-static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num);
+static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num, int buffered);
 static inline int get_buffered(cq_tagged_entry_t *wc, ssize_t num);
 
 
@@ -33,11 +33,11 @@ int MPIDI_netmod_progress_generic(void *netmod_context,
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);
     if(unlikely(get_buffered(wc, 1)))
-        mpi_errno = handle_cq_entries(wc,1);
+        mpi_errno = handle_cq_entries(wc,1, 1);
     else if(likely(1)) {
         ret = fi_cq_read(MPIDI_Global.p2p_cq, (void *) wc, NUM_CQ_ENTRIES);
         if(likely(ret > 0))
-            mpi_errno = handle_cq_entries(wc,ret);
+            mpi_errno = handle_cq_entries(wc,ret,0);
         else if (ret == -FI_EAGAIN)
             mpi_errno = MPI_SUCCESS;
         else
@@ -168,13 +168,15 @@ static inline int am_progress(void *netmod_context, int blocking)
 }
 #endif
 
-static inline int handle_cq_entries(cq_tagged_entry_t * wc,ssize_t num)
+static inline int handle_cq_entries(cq_tagged_entry_t *wc,
+                                    ssize_t            num,
+                                    int                buffered)
 {
     int i, mpi_errno;
     MPID_Request *req;
     for (i = 0; i < num; i++) {
         req = devreq_to_req(wc[i].op_context);
-        MPIDI_CH4_NMI_MPI_RC_POP(dispatch_function(&wc[i],req));
+        MPIDI_CH4_NMI_MPI_RC_POP(dispatch_function(&wc[i],req,buffered));
     }
 fn_exit:
     return mpi_errno;
@@ -201,10 +203,10 @@ static inline int handle_cq_error(ssize_t ret)
             req = devreq_to_req(e.op_context);
             switch(req->kind) {
             case MPID_REQUEST_SEND:
-                mpi_errno = dispatch_function(NULL,req);
+                mpi_errno = dispatch_function(NULL,req,0);
                 break;
             case MPID_REQUEST_RECV:
-                mpi_errno = dispatch_function((cq_tagged_entry_t *) &e, req);
+                mpi_errno = dispatch_function((cq_tagged_entry_t *) &e, req, 0);
                 req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
                 break;
             default:

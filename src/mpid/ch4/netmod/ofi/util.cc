@@ -385,7 +385,7 @@ int MPIDI_OFI_Control_handler(void      *am_hdr,
     switch(control->type) {
         case MPIDI_CTRL_HUGEACK: {
             MPIDI_Send_control_t *ctrlsend = (MPIDI_Send_control_t *)buf;
-            dispatch_function(NULL,ctrlsend->ackreq);
+            dispatch_function(NULL,ctrlsend->ackreq,0);
             goto fn_exit;
         }
         break;

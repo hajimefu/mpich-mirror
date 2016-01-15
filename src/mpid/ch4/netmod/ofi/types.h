@@ -221,6 +221,7 @@ typedef struct {
     char      pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
     int       event_id;
+    int       index;
 } MPIDI_AM_req;
 
 typedef struct {
