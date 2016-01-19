@@ -1990,7 +1990,7 @@ static inline int MPIDI_CH4R_put_iov_target_handler(void *am_hdr,
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *rreq = NULL;
-    struct iovec *iov, *dt_iov;
+    struct iovec *dt_iov;
 
     MPID_Win *win;
     MPIDI_CH4R_put_msg_t *msg_hdr = (MPIDI_CH4R_put_msg_t *) am_hdr;

@@ -630,11 +630,8 @@ static inline int MPIDI_CH4R_win_finalize(MPID_Win **win_ptr)
     MPIR_Comm_release(win->comm_ptr);
     MPIU_Handle_obj_free(&MPID_Win_mem, win);
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FREE);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
