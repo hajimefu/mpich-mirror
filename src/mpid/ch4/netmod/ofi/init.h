@@ -351,7 +351,6 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     /* Create the id to object maps     */
     /* -------------------------------- */
     MPIDI_OFI_Map_create(&MPIDI_Global.win_map);
-    MPIDI_OFI_Map_create(&MPIDI_Global.comm_map);
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
     /* ---------------------------------- */
@@ -538,7 +537,6 @@ static inline int MPIDI_CH4_NM_finalize_generic(int do_scalable_ep,
     MPIU_Free(MPIDI_Global.node_map);
 
     MPIDI_OFI_Map_destroy(MPIDI_Global.win_map);
-    MPIDI_OFI_Map_destroy(MPIDI_Global.comm_map);
 
     if(do_am) {
         for (i = 0; i < MPIDI_NUM_AM_BUFFERS; i++)

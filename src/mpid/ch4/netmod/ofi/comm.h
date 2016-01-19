@@ -227,12 +227,8 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CREATE);
-    uint64_t mapid;
-
     alloc_tables(comm);
 
-    mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_OFI_Map_set(MPIDI_Global.comm_map, mapid, comm);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_recv_counters);
     MPIDI_OFI_Index_allocator_create(&COMM_OFI(comm).win_id_allocator,0);
@@ -256,14 +252,10 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    uint64_t mapid;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
 
     MPIDI_CH4R_destroy_comm(comm);
-
-    mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_OFI_Map_erase(MPIDI_Global.comm_map, mapid);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_recv_counters);
     MPIDI_OFI_Index_allocator_destroy(COMM_OFI(comm).win_id_allocator);

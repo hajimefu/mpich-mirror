@@ -318,9 +318,8 @@ static inline void MPIDI_Gethuge_cleanup(MPIDI_Send_control_t *info)
     MPID_Comm          *comm_ptr;
     uint64_t            mapid;
     /* Look up the communicator */
-    mapid = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
-    comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,mapid);
-
+    mapid    = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
+    comm_ptr = MPIDI_CH4R_context_id_to_comm(mapid);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
@@ -335,12 +334,10 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     MPIDI_Huge_chunk_t *hc;
     MPID_Comm          *comm_ptr;
     /* Look up the communicator */
-    comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,
-                                                              info->comm_id);
+    comm_ptr = MPIDI_CH4R_context_id_to_comm(info->comm_id);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
-
     if(recv == MPIDI_MAP_NOT_FOUND) {
         recv        = (MPIDI_Huge_recv_t *)MPIU_Malloc(sizeof(*recv));
         recv->seqno = 0;
@@ -373,15 +370,15 @@ int MPIDI_OFI_Control_handler(void      *am_hdr,
                               MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                               MPID_Request ** req)
 {
-    int   mpi_errno  = MPI_SUCCESS;
-    void *buf        = am_hdr;
-    int senderrank;
-    MPIDI_Win_control_t *control = (MPIDI_Win_control_t *)buf;
-    *req             = NULL;
-    *cmpl_handler_fn = NULL;
-    *data            = NULL;
-    *data_sz         = 0;
-    *is_contig       = 1;
+    int                  senderrank;
+    int                  mpi_errno  = MPI_SUCCESS;
+    void                *buf        = am_hdr;
+    MPIDI_Win_control_t *control    = (MPIDI_Win_control_t *)buf;
+    *req                            = NULL;
+    *cmpl_handler_fn                = NULL;
+    *data                           = NULL;
+    *data_sz                        = 0;
+    *is_contig                      = 1;
 
     switch(control->type) {
         case MPIDI_CTRL_HUGEACK: {
