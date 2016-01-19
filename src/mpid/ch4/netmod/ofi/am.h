@@ -301,8 +301,13 @@ static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t      reply_token,
 
 static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 {
-    return (MPIDI_MAX_SHORT_SEND_SZ -
-            (sizeof(MPIDI_AM_OFI_hdr_t) + sizeof(MPIDI_OFI_lmt_msg_pyld_t)));
+    /* Maximum size that fits in short send */
+    size_t max_shortsend = MPIDI_MAX_SHORT_SEND_SZ -
+        (sizeof(MPIDI_AM_OFI_hdr_t) + sizeof(MPIDI_OFI_lmt_msg_pyld_t));
+    /* Maximum payload size representable by MPIDI_AM_OFI_hdr_t::am_hdr_sz field */
+    size_t max_representable = (1 << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS) - 1;
+
+    return MPL_MIN(max_shortsend, max_representable);
 }
 
 static inline int MPIDI_CH4_NM_inject_am_hdr(int         rank,
