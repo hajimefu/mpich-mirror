@@ -639,6 +639,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
     MPIDI_Datatype_check_size(origin_datatype,origin_count,origin_bytes);
 
     if(unlikely((origin_bytes == 0) ||(target_rank == MPI_PROC_NULL))) {
+        mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
         MPIDI_Request_complete(rreq);
@@ -1210,6 +1211,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
     MPIDI_Datatype_check_size(origin_datatype,origin_count,origin_bytes);
 
     if(unlikely((origin_bytes == 0) || (target_rank == MPI_PROC_NULL))) {
+        mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
         MPIDI_Request_complete(rreq);
@@ -1261,7 +1263,7 @@ static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
                                               MPI_Datatype target_datatype,
                                               MPI_Op op, MPID_Win *win)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     mpi_errno = do_get_accumulate(origin_addr, origin_count, origin_datatype,
