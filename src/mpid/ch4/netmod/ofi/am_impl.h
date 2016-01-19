@@ -234,6 +234,8 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         ra
     mpi_errno = MPIDI_netmod_am_ofi_init_req(am_hdr, am_hdr_sz, sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
+    MPIU_Assert(handler_id < (1 << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
+    MPIU_Assert(am_hdr_sz  < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
     msg_hdr->am_hdr_sz  = am_hdr_sz;
@@ -244,15 +246,18 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         ra
         use_token.val       = reply_token;
         use_comm            = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
         use_rank            = use_token.data.src_rank;
+        MPIU_Assert(use_token.data.context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr->context_id = use_token.data.context_id;
         msg_hdr->src_rank   = use_comm->rank;
     }
     else {
         use_comm = comm;
         use_rank = rank;
+        MPIU_Assert(use_comm->context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr->context_id = use_comm->context_id;
         msg_hdr->src_rank   = use_comm->rank;
     }
+    MPIU_Assert(use_comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     AMREQ_OFI_HDR(sreq, clientdata).pack_buffer = NULL;
     MPID_cc_incr(sreq->cc_ptr, &c);
@@ -295,6 +300,12 @@ static inline int MPIDI_netmod_ofi_send_am_long(int           rank,
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
+
+    MPIU_Assert(handler_id       < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
+    MPIU_Assert(am_hdr_sz        < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
+    MPIU_Assert(data_sz          < (1ULL << MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS));
+    MPIU_Assert(comm->context_id < (1    << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
+    MPIU_Assert(comm->rank       < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_hdr             = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
@@ -365,6 +376,12 @@ static inline int MPIDI_netmod_ofi_send_am_short(int           rank,
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
+
+    MPIU_Assert(handler_id       < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
+    MPIU_Assert(am_hdr_sz        < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
+    MPIU_Assert(count            < (1ULL << MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS));
+    MPIU_Assert(comm->context_id < (1    << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
+    MPIU_Assert(comm->rank       < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_hdr = &AMREQ_OFI_HDR(sreq, msg_hdr);
     msg_hdr->handler_id = handler_id;
@@ -490,6 +507,9 @@ static inline int MPIDI_netmod_do_inject(int           rank,
 
     MPIU_Assert(am_hdr_sz + sizeof(msg_hdr) < MPIDI_Global.max_buffered_send);
 
+    MPIU_Assert(handler_id       < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
+    MPIU_Assert(am_hdr_sz        < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
+
     msg_hdr.handler_id  = handler_id;
     msg_hdr.am_hdr_sz   = am_hdr_sz;
     msg_hdr.data_sz     = 0;
@@ -499,15 +519,18 @@ static inline int MPIDI_netmod_do_inject(int           rank,
         use_token.val      = reply_token;
         use_comm           = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
         use_rank           = use_token.data.src_rank;
+        MPIU_Assert(use_token.data.context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr.context_id = use_token.data.context_id;
         msg_hdr.src_rank   = use_comm->rank;
     }
     else {
         use_comm           = comm;
         use_rank           = rank;
+        MPIU_Assert(use_comm->context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr.context_id = use_comm->context_id;
         msg_hdr.src_rank   = use_comm->rank;
     }
+    MPIU_Assert(use_comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_iov[0].iov_base = (void *) &msg_hdr;
     msg_iov[0].iov_len  = sizeof(msg_hdr);

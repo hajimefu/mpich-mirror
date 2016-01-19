@@ -126,13 +126,20 @@ typedef struct MPIDI_AM_OFI_reply_token_t {
     };
 }MPIDI_AM_OFI_reply_token_t;
 
+#define MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS 8
+#define MPIDI_CH4_NMI_OFI_AM_TYPE_BITS 8
+#define MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS 8
+#define MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS 48
+#define MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS 24
+#define MPIDI_CH4_NMI_OFI_AM_RANK_BITS 32
+
 typedef struct MPIDI_AM_OFI_hdr_t {
-    uint64_t handler_id  : 8;
-    uint64_t am_type     : 8;
-    uint64_t am_hdr_sz   : 8;
-    uint64_t data_sz     : 48;
-    uint64_t context_id  : 24;
-    uint64_t src_rank    : 32;
+    uint64_t handler_id  : MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
+    uint64_t am_type     : MPIDI_CH4_NMI_OFI_AM_TYPE_BITS;
+    uint64_t am_hdr_sz   : MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS;
+    uint64_t data_sz     : MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
+    uint64_t context_id  : MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS;
+    uint64_t src_rank    : MPIDI_CH4_NMI_OFI_AM_RANK_BITS;
     uint64_t payload[0];
 } MPIDI_AM_OFI_hdr_t;
 #define MPIDI_AM_OFI_MSG_HDR_SZ (sizeof(MPIDI_AM_OFI_hdr_t))
