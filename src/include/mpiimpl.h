@@ -156,27 +156,6 @@ int usleep(useconds_t usec);
 */
 #include "mpidbg.h"
 
-#if defined(MPICH_DBG_OUTPUT)
-#define MPIU_DBG_PRINTF(e)			\
-{						\
-    if (MPIU_dbg_state != MPIU_DBG_STATE_NONE)	\
-    {						\
-	MPIU_dbg_printf e;			\
-    }						\
-}
-/* The first argument is a place holder to allow the selection of a subset
-   of debugging events.  The second is a placeholder to allow a numeric
-   level of debugging within that class.  The third is the debugging text */
-#define MPIU_DBG_PRINTF_CLASS(_c,_l,_e) MPIU_DBG_PRINTF(_e)
-#else
-#define MPIU_DBG_PRINTF(e)
-#define MPIU_DBG_PRINTF_CLASS(_c,_l,_e)
-#endif
-
-/* The follow is temporarily provided for backward compatibility.  Any code
-   using dbg_printf should be updated to use MPIU_DBG_PRINTF. */
-#define dbg_printf MPIU_dbg_printf
-
 /* ------------------------------------------------------------------------- */
 /* end of mpidebug.h */
 /* ------------------------------------------------------------------------- */
@@ -342,12 +321,6 @@ void MPIR_DatatypeAttrFinalize( void );
 /* Should the following be moved into mpihandlemem.h ?*/
 /* ------------------------------------------------------------------------- */
 
-/* Routines to initialize handle allocations */
-/* These are now internal to the handlemem package
-void *MPIU_Handle_direct_init( void *, int, int, int );
-void *MPIU_Handle_indirect_init( void *(**)[], int *, int, int, int, int );
-int MPIU_Handle_free( void *((*)[]), int );
-*/
 /* Convert Handles to objects for MPI types that have predefined objects */
 /* TODO examine generated assembly for this construct, it's probably suboptimal
  * on Blue Gene.  An if/else if/else might help the compiler out.  It also lets

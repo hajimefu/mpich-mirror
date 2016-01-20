@@ -75,12 +75,6 @@ extern "C" {
   D*/
 
 /* Define the string copy and duplication functions */
-/* Safer string routines */
-int MPIU_Strncpy( char *outstr, const char *instr, size_t maxlen );
-
-int MPIU_Strnapp( char *, const char *, size_t );
-char *MPIU_Strdup( const char * );
-
 /* ---------------------------------------------------------------------- */
 /* FIXME - The string routines do not belong in the memory header file  */
 /* FIXME - The string error code such be MPICH-usable error codes */
@@ -127,7 +121,6 @@ int MPIU_Str_add_binary_arg(char **str_ptr, int *maxlen_ptr, const char *key,
 			    const char *buffer, int length);
 int MPIU_Str_add_int_arg(char **str_ptr, int *maxlen_ptr, const char *key, 
 			 int val);
-MPIU_BOOL MPIU_Str_hide_string_arg(char *str, const char *key);
 int MPIU_Str_add_string(char **str_ptr, int *maxlen_ptr, const char *val);
 int MPIU_Str_get_string(char **str_ptr, char *val, int maxlen);
 
@@ -137,14 +130,9 @@ void MPIU_trinit(int);
 void *MPIU_trmalloc(size_t, int, const char []);
 void MPIU_trfree(void *, int, const char []);
 int MPIU_trvalid(const char []);
-void MPIU_trspace(size_t *, size_t *);
-void MPIU_trid(int);
-void MPIU_trlevel(int);
-void MPIU_trDebugLevel(int);
 void *MPIU_trcalloc(size_t, size_t, int, const char []);
 void *MPIU_trrealloc(void *, size_t, int, const char[]);
 void *MPIU_trstrdup(const char *, int, const char[]);
-void MPIU_TrSetMaxMem(size_t);
 void MPIU_trdump(FILE *, int);
 
 #ifdef USE_MEMORY_TRACING
@@ -242,11 +230,6 @@ void MPIU_trdump(FILE *, int);
 #if defined(strdup) || defined(__strdup)
 #undef strdup
 #endif
-    /* We include string.h first, so that if it contains a definition of 
-     strdup, we won't have an obscure failure when a file include string.h
-    later in the compilation process. */
-#include <string.h>
-
     /* The ::: should cause the compiler to choke; the string 
        will give the explanation */
 #undef strdup /* in case strdup is a macro */
@@ -258,16 +241,7 @@ void MPIU_trdump(FILE *, int);
 #define MPIU_Calloc(a,b)  calloc((size_t)(a),(size_t)(b))
 #define MPIU_Free(a)      free((void *)(a))
 #define MPIU_Realloc(a,b)  realloc((void *)(a),(size_t)(b))
-
-#ifdef HAVE_STRDUP
-/* Watch for the case where strdup is defined as a macro by a header include */
-# if defined(NEEDS_STRDUP_DECL) && !defined(strdup)
-extern char *strdup( const char * );
-# endif
-#define MPIU_Strdup(a)    strdup(a)
-#else
-/* Don't define MPIU_Strdup, provide it in safestr.c */
-#endif /* HAVE_STRDUP */
+#define MPIU_Strdup       MPL_strdup
 
 #endif /* USE_MEMORY_TRACING */
 
@@ -435,13 +409,6 @@ if (pointer_) { \
 /* FIXME: Provide a fallback function ? */
 #   error "No function defined for case-insensitive strncmp"
 #endif
-
-/* MPIU_Basename(path, basename)
-   This function finds the basename in a path (ala "man 1 basename").
-   *basename will point to an element in path.
-   More formally: This function sets basename to the character just after the last '/' in path.
-*/
-void MPIU_Basename(char *path, char **basename);
 
 /* Evaluates to a boolean expression, true if the given byte ranges overlap,
  * false otherwise.  That is, true iff [a_,a_+a_len_) overlaps with [b_,b_+b_len_) */

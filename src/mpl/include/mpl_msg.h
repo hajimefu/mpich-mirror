@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#ifndef MPLMSG_H_INCLUDED
-#define MPLMSG_H_INCLUDED
+#if !defined(MPL_MSG_H_INCLUDED)
+#define MPL_MSG_H_INCLUDED
 
 #include "mpl.h"
 
@@ -19,6 +19,12 @@
 #define MPL_DBG_INLINE_KEYWORD inline
 #endif
 
+#if defined(MPL_HAVE_MACRO_VA_ARGS)
+#define MPL_error_printf(...) fprintf(stderr,__VA_ARGS__)
+#else
+#define MPL_error_printf printf
+#endif
+
 /* These routines are used to ensure that messages are sent to the
  * appropriate output and (eventually) are properly
  * internationalized */
@@ -29,4 +35,4 @@ int MPL_internal_sys_error_printf(mpl_const char *, int, mpl_const char *str,
                                   ...) ATTRIBUTE((format(printf, 3, 4)));
 void MPL_exit(int);
 
-#endif /* MPLMSG_H_INCLUDED */
+#endif /* !defined(MPL_MSG_H_INCLUDED) */

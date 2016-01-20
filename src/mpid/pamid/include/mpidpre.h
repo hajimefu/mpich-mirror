@@ -38,7 +38,7 @@
 #include <pami.h>
 
 /* provides "pre" typedefs and such for NBC scheduling mechanism */
-#include "mpid_sched_pre.h"
+#include "mpidu_pre.h"
 
 /** \brief Creates a compile error if the condition is false. */
 #define MPID_assert_static(expr) ({ switch(0){case 0:case expr:;} })
@@ -50,6 +50,21 @@
 #define MPID_assert(x)        assert(x) /**< \brief Tests for likely problems--may not be active in performance code */
 #endif
 
+/* The timer code is allowed to return "NOT_INITIALIZED" before the
+ * device is initialized.  Once the device is initialized, it must
+ * always return SUCCESS, so the upper layers do not need to check for
+ * the return code.  */
+#define MPID_TIMER_SUCCESS              MPL_TIMER_SUCCESS
+#define MPID_TIMER_ERR_NOT_INITIALIZED  MPL_TIMER_ERR_NOT_INITIALIZED
+
+typedef double MPID_Time_t;
+
+int MPID_Wtime(MPID_Time_t *tval);
+int MPID_Wtick(double *wtick);
+int MPID_Wtime_diff(MPID_Time_t *t1, MPID_Time_t *t2, double *diff);
+int MPID_Wtime_todouble(MPID_Time_t *t, double *val);
+int MPID_Wtime_acc(MPID_Time_t *t1, MPID_Time_t *t2, MPID_Time_t *t3);
+int MPID_Wtime_init(void);
 
 #include "mpidi_platform.h"
 

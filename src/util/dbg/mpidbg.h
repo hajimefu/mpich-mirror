@@ -87,64 +87,34 @@ enum MPIU_DBG_LEVEL { MPIU_DBG_TERSE   = 0,
 		      MPIU_DBG_TYPICAL = 50,
 		      MPIU_DBG_VERBOSE = 99 };
 /* Any change in MPIU_DBG_CLASS must be matched by changes in 
-   MPIU_Classnames in src/util/dbg/dbg_printf.c */
+   "classnames" in src/util/dbg/dbg_printf.c */
 enum MPIU_DBG_CLASS { MPIU_DBG_PT2PT         = 0x1,
-		      MPIU_DBG_RMA           = 0x2,
-		      MPIU_DBG_THREAD        = 0x4,
-		      MPIU_DBG_PM            = 0x8,
-		      MPIU_DBG_ROUTINE_ENTER = 0x10,
-		      MPIU_DBG_ROUTINE_EXIT  = 0x20,
-		      MPIU_DBG_SYSCALL       = 0x40,
-		      MPIU_DBG_DATATYPE      = 0x80,
-		      MPIU_DBG_HANDLE        = 0x100,
-		      MPIU_DBG_COMM          = 0x200,
-		      MPIU_DBG_BSEND         = 0x400,
-		      MPIU_DBG_OTHER         = 0x800,
-		      MPIU_DBG_CH3_CONNECT   = 0x1000,
-		      MPIU_DBG_CH3_DISCONNECT= 0x2000,
-		      MPIU_DBG_CH3_PROGRESS  = 0x4000,
-		      MPIU_DBG_CH3_CHANNEL   = 0x8000,
-		      MPIU_DBG_CH3_OTHER     = 0x10000,
-		      MPIU_DBG_CH3_MSG       = 0x20000,
-		      MPIU_DBG_CH3           = 0x3f000, /* alias for all Ch3*/
-                      MPIU_DBG_NEM_SOCK_FUNC = 0x40000,
-                      MPIU_DBG_NEM_SOCK_DET  = 0x80000,
-		      MPIU_DBG_VC            = 0x100000,
-		      MPIU_DBG_REFCOUNT      = 0x200000,
-		      MPIU_DBG_ROMIO         = 0x400000,
-                      MPIU_DBG_ERRHAND       = 0x800000,
-                      MPIU_DBG_CH4           = 0x1000000,
+		      MPIU_DBG_THREAD        = 0x2,
+		      MPIU_DBG_ROUTINE_ENTER = 0x4,
+		      MPIU_DBG_ROUTINE_EXIT  = 0x8,
+		      MPIU_DBG_DATATYPE      = 0x10,
+		      MPIU_DBG_HANDLE        = 0x20,
+		      MPIU_DBG_COMM          = 0x40,
+		      MPIU_DBG_BSEND         = 0x80,
+		      MPIU_DBG_OTHER         = 0x100,
+		      MPIU_DBG_CH3_CONNECT   = 0x200,
+		      MPIU_DBG_CH3_DISCONNECT= 0x400,
+		      MPIU_DBG_CH3_PROGRESS  = 0x800,
+		      MPIU_DBG_CH3_CHANNEL   = 0x1000,
+		      MPIU_DBG_CH3_OTHER     = 0x2000,
+		      MPIU_DBG_CH3_MSG       = 0x4000,
+		      MPIU_DBG_CH3           = 0x7e00, /* alias for all CH3 */
+		      MPIU_DBG_NEM_SOCK_DET  = 0x8000,
+		      MPIU_DBG_VC            = 0x10000,
+		      MPIU_DBG_REFCOUNT      = 0x20000,
+		      MPIU_DBG_ROMIO         = 0x40000,
+		      MPIU_DBG_ERRHAND       = 0x80000,
+              MPIU_DBG_CH4           = 0x1000000,
 		      MPIU_DBG_ALL           = (~0) };   /* alias for all */
 
 extern int MPIU_DBG_ActiveClasses;
 extern int MPIU_DBG_MaxLevel;
-typedef enum MPIU_dbg_state_t
-{
-    MPIU_DBG_STATE_NONE = 0,
-    MPIU_DBG_STATE_UNINIT = 1,
-    MPIU_DBG_STATE_STDOUT = 2,
-    MPIU_DBG_STATE_MEMLOG = 4,
-    MPIU_DBG_STATE_FILE = 8
-}
-MPIU_dbg_state_t;
 
-int MPIU_dbg_init(int rank);
-int MPIU_dbg_printf(const char *str, ...) ATTRIBUTE((format(printf,1,2)));
-int MPIU_dbglog_printf(const char *str, ...) ATTRIBUTE((format(printf,1,2)));
-int MPIU_dbglog_vprintf(const char *str, va_list ap);
-void MPIU_dump_dbg_memlog_to_stdout(void);
-void MPIU_dump_dbg_memlog_to_file(const char *filename);
-void MPIU_dump_dbg_memlog(FILE * fp);
-
-extern MPIU_dbg_state_t MPIU_dbg_state;
-extern FILE * MPIU_dbg_fp;
-#define MPIU_dbglog_flush()				\
-{							\
-    if (MPIU_dbg_state & MPIU_DBG_STATE_STDOUT)	\
-    {							\
-	fflush(stdout);					\
-    }							\
-}
 int MPIU_DBG_Outevent(const char *, int, int, int, const char *, ...) 
                                         ATTRIBUTE((format(printf,5,6)));
 int MPIU_DBG_Init( int *, char ***, int, int, int );

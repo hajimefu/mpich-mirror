@@ -87,7 +87,7 @@
 /* We can't use mpimem.h, because the memory routines are no longer available
    as utility routines, and instead now import properties from the device 
    and other parts of the code */
-/* mpimem.h contains prototypes for MPIU_Strncpy etc. */
+/* mpimem.h contains prototypes for MPL_strncpy etc. */
 /* #include "mpimem.h" */
 
 typedef struct { PMISetup pmiinfo; IOLabelSetup labelinfo; } SetupInfo;
@@ -310,7 +310,7 @@ int mypreamble( void *data, ProcessState *pState )
 	ranks[0] = 0;
 	for (i=0; i<size; i++) {
 	    MPL_snprintf( digits, sizeof(digits), "%d,", i );
-	    MPIU_Strnapp( ranks, digits, sizeof(ranks) );
+	    MPL_strnapp( ranks, digits, sizeof(ranks) );
 	}
 	/* Remove the trailing comma */
 	if (size > 0) 

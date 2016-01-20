@@ -395,7 +395,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     MPIR_Process.comm_world->comm_kind	    = MPID_INTRACOMM;
     /* This initialization of the comm name could be done only when 
        comm_get_name is called */
-    MPIU_Strncpy(MPIR_Process.comm_world->name, "MPI_COMM_WORLD",
+    MPL_strncpy(MPIR_Process.comm_world->name, "MPI_COMM_WORLD",
 		 MPI_MAX_OBJECT_NAME);
 
     MPIR_Process.comm_self		    = MPID_Comm_builtin + 1;
@@ -404,7 +404,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     MPIR_Process.comm_self->context_id	    = 1 << MPID_CONTEXT_PREFIX_SHIFT;
     MPIR_Process.comm_self->recvcontext_id  = 1 << MPID_CONTEXT_PREFIX_SHIFT;
     MPIR_Process.comm_self->comm_kind	    = MPID_INTRACOMM;
-    MPIU_Strncpy(MPIR_Process.comm_self->name, "MPI_COMM_SELF",
+    MPL_strncpy(MPIR_Process.comm_self->name, "MPI_COMM_SELF",
 		 MPI_MAX_OBJECT_NAME);
 
 #ifdef MPID_NEEDS_ICOMM_WORLD
@@ -414,7 +414,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     MPIR_Process.icomm_world->context_id    = 2 << MPID_CONTEXT_PREFIX_SHIFT;
     MPIR_Process.icomm_world->recvcontext_id= 2 << MPID_CONTEXT_PREFIX_SHIFT;
     MPIR_Process.icomm_world->comm_kind	    = MPID_INTRACOMM;
-    MPIU_Strncpy(MPIR_Process.icomm_world->name, "MPI_ICOMM_WORLD",
+    MPL_strncpy(MPIR_Process.icomm_world->name, "MPI_ICOMM_WORLD",
 		 MPI_MAX_OBJECT_NAME);
 
     /* Note that these communicators are not ready for use - MPID_Init 
@@ -493,7 +493,6 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
 #endif /* MPICH_IS_THREADED */
 
     /* FIXME: Define these in the interface.  Does Timer init belong here? */
-    MPIU_dbg_init(MPIR_Process.comm_world->rank);
     MPIU_Timer_init(MPIR_Process.comm_world->rank,
 		    MPIR_Process.comm_world->local_size);
 #ifdef USE_MEMORY_TRACING
@@ -502,9 +501,6 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
        allocated already will have an id of zero; this helps 
        separate memory leaks in the initialization code from 
        leaks in the "active" code */
-    /* Uncomment this code to leave out any of the MPID_Init/etc 
-       memory allocations from the memory leak testing */
-    /* MPIU_trid( 1 ); */
 #endif
 #ifdef USE_DBG_LOGGING
     MPIU_DBG_Init( argc, argv, has_args, has_env, 
