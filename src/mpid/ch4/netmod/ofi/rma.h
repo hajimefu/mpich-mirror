@@ -798,7 +798,7 @@ static inline int do_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
 
         return MPI_SUCCESS;
     }
@@ -959,7 +959,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
 
         goto fn_exit;
     }

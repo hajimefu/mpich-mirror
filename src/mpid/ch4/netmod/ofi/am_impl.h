@@ -79,6 +79,7 @@ static inline MPID_Request *MPIDI_AM_request_alloc_and_init(int count)
     req->status.MPI_TAG = MPI_UNDEFINED;
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_AM;
     AMREQ_OFI(req, req_hdr) = NULL;
     return req;
 }
@@ -103,6 +104,27 @@ static inline void MPIDI_netmod_am_ofi_clear_req(MPID_Request *sreq)
     MPIDI_CH4R_release_buf(req_hdr);
     AMREQ_OFI(sreq, req_hdr) = NULL;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
+    return;
+}
+
+static inline void MPIDI_CH4_NMI_OFI_AM_request_release(MPID_Request * req)
+{
+    int count;
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Object_release_ref(req, &count);
+    MPIU_Assert(count >= 0);
+
+    if (count == 0) {
+        MPIU_Assert(MPID_cc_is_complete(&req->cc));
+        MPIDI_netmod_am_ofi_clear_req(req);
+        if (req->comm)
+            MPIR_Comm_release(req->comm);
+
+        if (req->greq_fns)
+            MPIU_Free(req->greq_fns);
+
+        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+    }
     return;
 }
 
@@ -547,9 +569,6 @@ static inline int MPIDI_netmod_do_inject(int           rank,
         _comm_to_phys(use_comm, use_rank, MPIDI_API_MSG):
         _to_phys(use_rank, MPIDI_API_MSG);
 
-
-
-
     FI_RC_RETRY_AM(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
 
 fn_exit:
@@ -559,13 +578,14 @@ fn_exit:
     goto fn_exit;
 }
 
+
 static inline void MPIDI_AM_netmod_request_complete(MPID_Request *req)
 {
     int count;
     MPID_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
     if (count == 0)
-        MPIDI_Request_release(req);
+        MPIDI_CH4_NMI_OFI_AM_request_release(req);
 }
 
 static inline MPID_Request *MPIDI_AM_netmod_request_create(void)

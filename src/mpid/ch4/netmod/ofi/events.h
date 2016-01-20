@@ -187,7 +187,7 @@ static inline int send_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
             MPIU_Free(REQ_OFI(sreq, pack_buffer));
 
         dtype_release_if_not_builtin(REQ_OFI(sreq, datatype));
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4_NMI_OFI_request_release(sreq);
     }   /* c != 0, ssend */
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_EVENT);
@@ -236,7 +236,7 @@ static inline int send_huge_event(cq_tagged_entry_t * wc, MPID_Request * sreq)
             MPIU_Free(REQ_OFI(sreq, pack_buffer));
 
         dtype_release_if_not_builtin(REQ_OFI(sreq, datatype));
-        MPIDI_Request_release(sreq);
+        MPIDI_CH4_NMI_OFI_request_release(sreq);
     }   /* c != 0, ssend */
 
   fn_exit:
@@ -323,7 +323,7 @@ static inline int chunk_done_event(cq_tagged_entry_t *wc,
   MPIDI_Chunk_request *creq = (MPIDI_Chunk_request *)req;
   MPID_cc_decr(creq->parent->cc_ptr, &c);
   MPIU_Assert(c >= 0);
-  if(c == 0)MPIDI_Request_release(creq->parent);
+  if(c == 0)MPIDI_CH4_NMI_OFI_request_release(creq->parent);
   MPIU_Free(creq);
   MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
   return MPI_SUCCESS;

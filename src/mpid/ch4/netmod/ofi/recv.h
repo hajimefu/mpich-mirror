@@ -211,7 +211,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
     if (message == NULL) {
-        MPIDI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
+        MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
         *rreqp = rreq;
         goto fn_exit;
     }

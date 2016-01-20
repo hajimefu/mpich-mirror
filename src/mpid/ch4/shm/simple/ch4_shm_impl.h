@@ -93,16 +93,14 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
 
 #define MPIDI_Request_create_sreq(sreq_)	\
 {								\
-    (sreq_) = MPIDI_Request_create();                            \
-    MPIU_Object_set_ref((sreq_), 2);				\
+    MPIDI_Request_shm_alloc_and_init(sreq_,2);      \
     (sreq_)->kind = MPID_REQUEST_SEND;				\
     (sreq_)->partner_request   = NULL;                          \
 }
 
 #define MPIDI_Request_create_rreq(rreq_)	\
 {								\
-    (rreq_) = MPIDI_Request_create();                            \
-    MPIU_Object_set_ref((rreq_), 2);				\
+    MPIDI_Request_shm_alloc_and_init(rreq_,2);      \
     (rreq_)->kind = MPID_REQUEST_RECV;				\
     (rreq_)->partner_request   = NULL;                          \
 }
@@ -171,6 +169,7 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
     req->status.MPI_TAG       = MPI_UNDEFINED;          \
     req->status.MPI_ERROR     = MPI_SUCCESS;            \
     req->comm                 = NULL;                   \
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_SHM; \
     MPIR_REQUEST_CLEAR_DBG(req);                        \
   })
 

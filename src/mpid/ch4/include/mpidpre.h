@@ -38,6 +38,13 @@ typedef enum {
     MPIDI_PTYPE_SSEND,
 } MPIDI_ptype;
 
+enum {
+    MPIDI_CH4_DEVTYPE_UNSPECIFIED,
+    MPIDI_CH4_DEVTYPE_AM,
+    MPIDI_CH4_DEVTYPE_DIRECT,
+    MPIDI_CH4_DEVTYPE_SHM
+};
+
 #define MPIDI_CH4R_REQ_BUSY 		  (0x1)
 #define MPIDI_CH4R_REQ_PEER_SSEND 	  (0x1 << 1)
 #define MPIDI_CH4R_REQ_UNEXPECTED 	  (0x1 << 2)
@@ -156,7 +163,10 @@ typedef struct MPIDI_CH4R_Devreq_t {
 
 typedef struct {
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    int is_local;
+    int16_t is_local;
+    int16_t reqtype;
+#else
+    int reqtype;
 #endif
     union {
         /* The first fields are used by the CH4U apis */

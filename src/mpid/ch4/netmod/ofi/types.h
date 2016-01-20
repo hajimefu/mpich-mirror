@@ -210,25 +210,25 @@ typedef struct {
 typedef struct {
     char      pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    int       event_id;
+    int       event_id;         /* fixed field, do not move */
     int       index;
 } MPIDI_AM_req;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    context_t     context;          /* fixed field, do not move */
+    int           event_id;         /* fixed field, do not move */
     MPID_Request *signal_req;
 } MPIDI_Ssendack_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
-    int done;
-    uint32_t tag;
-    uint32_t source;
-    uint64_t msglen;
+    int       event_id;         /* fixed field, do not move */
+    int       done;
+    uint32_t  tag;
+    uint32_t  source;
+    uint64_t  msglen;
 } MPIDI_Dynproc_req;
 
 typedef struct atomic_valid {
@@ -480,7 +480,7 @@ typedef struct {
 typedef struct {
     char                  pad[MPIDI_REQUEST_HDR_SIZE];
     context_t             context;          /* fixed field, do not move */
-    int                   event_id; /* fixed field, do not move */
+    int                   event_id;         /* fixed field, do not move */
     event_event_fn        done_fn;
     MPIDI_Send_control_t  remote_info;
     size_t                cur_offset;

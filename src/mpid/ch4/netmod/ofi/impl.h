@@ -128,11 +128,10 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                 == MPID_SSENDACK_REQUEST);              \
   })
 
-#define MPIDI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_)        \
+#define MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
   do {                                                                  \
-    (rreq_) = MPIDI_Request_create();                                   \
+    (rreq_) = MPIDI_Request_alloc_and_init(1);                          \
     if ((rreq_) != NULL) {                                              \
-      MPIU_Object_set_ref((rreq_), 1);                                  \
       MPID_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPID_REQUEST_RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
@@ -369,6 +368,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
     req->errflag = MPIR_ERR_NONE;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
@@ -390,11 +390,12 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
     req->kind              = MPID_REQUEST_SEND;
     req->comm              = NULL;
     req->errflag           = MPIR_ERR_NONE;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_request_release(MPID_Request * req)
+__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_request_release(MPID_Request * req)
 {
     int count;
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
