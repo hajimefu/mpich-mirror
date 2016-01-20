@@ -766,6 +766,12 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
         rx_attr.caps     |= FI_ATOMICS;
         rx_attr.op_flags  = 0;
         FI_RC(fi_rx_context(*ep, index + 1, &rx_attr, &G_RXC_RMA(index), NULL), ep);
+        /* Note:  This bind should cause the "passive target" rx context to never generate an event
+           We need this bind for manual progress to ensure that progress is made on the
+           rx_ctr or rma operations during completion queue reads */
+        if(prov_use->domain_attr->data_progress == FI_PROGRESS_MANUAL)
+            FI_RC(fi_ep_bind(G_RXC_RMA(index), &p2p_cq->fid,
+                             FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
 
         rx_attr           = *prov_use->rx_attr;
         rx_attr.caps      = FI_MSG;
@@ -779,6 +785,10 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
         rx_attr.caps     |= FI_ATOMICS;
         rx_attr.op_flags  = 0;
         FI_RC(fi_rx_context(*ep, index + 3, &rx_attr, &G_RXC_CTR(index), NULL), ep);
+        /* See note above */
+        if(prov_use->domain_attr->data_progress == FI_PROGRESS_MANUAL)
+            FI_RC(fi_ep_bind(G_RXC_CTR(index), &p2p_cq->fid,
+                             FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
 
         FI_RC(fi_enable(G_TXC_TAG(index)), ep_enable);
         FI_RC(fi_enable(G_TXC_RMA(index)), ep_enable);
