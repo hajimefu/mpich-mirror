@@ -199,7 +199,8 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
 
     if ((cq_entry.flags & FI_RECV) &&
         (cq_entry.flags & FI_MULTI_RECV)) {
-        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context, NULL);
+        mpi_errno = MPIDI_netmod_repost_buffer(cq_entry.op_context,
+                                               devreq_to_req(cq_entry.op_context));
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 

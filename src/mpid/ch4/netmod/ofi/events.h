@@ -657,23 +657,24 @@ static inline int get_buffered(cq_tagged_entry_t *wc, ssize_t num) {
     return rc;
 }
 
-static inline MPID_Request *devreq_to_req(void *context)
-{
-    char *base = (char *) context;
-    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
-}
-
+#undef FUNCNAME
+#define FUNCNAME handle_cq_entries
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int handle_cq_entries(cq_tagged_entry_t *wc,
                                     ssize_t            num,
                                     int                buffered)
 {
     int i, mpi_errno;
     MPID_Request *req;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_CQ_ENTRIES);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_CQ_ENTRIES);
     for (i = 0; i < num; i++) {
         req = devreq_to_req(wc[i].op_context);
         MPIDI_CH4_NMI_MPI_RC_POP(dispatch_function(&wc[i],req,buffered));
     }
 fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_CQ_ENTRIES);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

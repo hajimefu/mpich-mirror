@@ -499,6 +499,12 @@ static inline int get_source(uint64_t match_bits)
     return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
 }
 
+static inline MPID_Request *devreq_to_req(void *context)
+{
+    char *base = (char *) context;
+    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
+}
+
 static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
   if(dt->map != &dt->__map)
