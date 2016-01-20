@@ -723,14 +723,14 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
 
     if(do_scalable_ep) {
         FI_RC(fi_scalable_ep(domain, prov_use, ep, NULL), ep);
-        FI_RC(fi_scalable_ep_bind(*ep, (fid_t) av, 0), bind);
+        FI_RC(fi_scalable_ep_bind(*ep, &av->fid, 0), bind);
 
         tx_attr           = *prov_use->tx_attr;
         tx_attr.caps      = FI_TAGGED;
         tx_attr.caps     |= FI_DELIVERY_COMPLETE;
         tx_attr.op_flags  = FI_DELIVERY_COMPLETE;
         FI_RC(fi_tx_context(*ep, index, &tx_attr, &G_TXC_TAG(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_TXC_TAG(index), (fid_t) p2p_cq, FI_SEND), bind);
+        FI_RC(fi_ep_bind(G_TXC_TAG(index), &p2p_cq->fid, FI_SEND), bind);
 
         tx_attr           = *prov_use->tx_attr;
         tx_attr.caps      = FI_RMA;
@@ -738,13 +738,13 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
         tx_attr.caps     |= FI_DELIVERY_COMPLETE;
         tx_attr.op_flags  = FI_DELIVERY_COMPLETE;
         FI_RC(fi_tx_context(*ep, index + 1, &tx_attr, &G_TXC_RMA(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_TXC_RMA(index), (fid_t) p2p_cq, FI_SEND), bind);
+        FI_RC(fi_ep_bind(G_TXC_RMA(index), &p2p_cq->fid, FI_SEND), bind);
 
         tx_attr          = *prov_use->tx_attr;
         tx_attr.caps     = FI_MSG;
         tx_attr.op_flags = 0;
         FI_RC(fi_tx_context(*ep, index + 2, &tx_attr, &G_TXC_MSG(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_TXC_MSG(index), (fid_t) p2p_cq, FI_SEND), bind);
+        FI_RC(fi_ep_bind(G_TXC_MSG(index), &p2p_cq->fid, FI_SEND), bind);
 
         tx_attr           = *prov_use->tx_attr;
         tx_attr.caps      = FI_RMA;
@@ -752,14 +752,14 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
         tx_attr.caps     |= FI_DELIVERY_COMPLETE;
         tx_attr.op_flags  = FI_DELIVERY_COMPLETE;
         FI_RC(fi_tx_context(*ep, index + 3, &tx_attr, &G_TXC_CTR(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_TXC_CTR(index), (fid_t) rma_ctr, FI_WRITE | FI_READ), bind);
+        FI_RC(fi_ep_bind(G_TXC_CTR(index), &rma_ctr->fid, FI_WRITE | FI_READ), bind);
 
         rx_attr           = *prov_use->rx_attr;
         rx_attr.caps      = FI_TAGGED;
         rx_attr.caps     |= FI_DELIVERY_COMPLETE;
         rx_attr.op_flags  = 0;
         FI_RC(fi_rx_context(*ep, index, &rx_attr, &G_RXC_TAG(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_RXC_TAG(index), (fid_t) p2p_cq, FI_RECV), bind);
+        FI_RC(fi_ep_bind(G_RXC_TAG(index), &p2p_cq->fid, FI_RECV), bind);
 
         rx_attr           = *prov_use->rx_attr;
         rx_attr.caps      = FI_RMA;
@@ -772,7 +772,7 @@ static inline int MPIDI_Create_endpoint(info_t          *prov_use,
         rx_attr.caps     |= FI_MULTI_RECV;
         rx_attr.op_flags  = FI_MULTI_RECV;
         FI_RC(fi_rx_context(*ep, index + 2, &rx_attr, &G_RXC_MSG(index), NULL), ep);
-        FI_RC(fi_ep_bind(G_RXC_MSG(index), (fid_t) p2p_cq, FI_RECV), bind);
+        FI_RC(fi_ep_bind(G_RXC_MSG(index), &p2p_cq->fid, FI_RECV), bind);
 
         rx_attr           = *prov_use->rx_attr;
         rx_attr.caps      = FI_RMA;
