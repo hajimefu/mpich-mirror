@@ -284,7 +284,6 @@ struct cq_list {
 
 struct cq_buff_entry {
     cq_tagged_entry_t cq_entry;
-    fi_addr_t source;
 };
 
 /* Global state data */

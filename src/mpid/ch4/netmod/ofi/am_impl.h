@@ -173,20 +173,15 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret;
     cq_tagged_entry_t cq_entry;
-    cq_err_entry_t    cq_err_entry;
-    fi_addr_t source;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS);
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_PROGRESS_DO_QUEUE);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_PROGRESS_DO_QUEUE);
 
-    MPIU_Assert(0);
-    ret = fi_cq_readfrom(MPIDI_Global.p2p_cq, &cq_entry, 1, &source);
-    if (ret == -FI_EAGAIN)
+    ret = fi_cq_read(MPIDI_Global.p2p_cq, &cq_entry, 1);
+    if (unlikely(ret == -FI_EAGAIN))
         goto fn_exit;
-
     if (ret < 0) {
-        fi_cq_readerr(MPIDI_Global.p2p_cq, &cq_err_entry, 0);
-        fprintf(stderr, "fi_cq_read failed with error: %s\n", fi_strerror(cq_err_entry.err));
+        mpi_errno = MPIDI_CH4_NM_ofi_handle_cq_error(ret);
         goto fn_fail;
     }
 
@@ -196,11 +191,9 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
         struct cq_list *list_entry = (struct cq_list *) MPIU_Malloc(sizeof(struct cq_list));
         MPIU_Assert(list_entry);
         list_entry->cq_entry = cq_entry;
-        list_entry->source = source;
         slist_insert_tail(&list_entry->entry, &MPIDI_Global.cq_buff_list);
     } else {
         MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].cq_entry = cq_entry;
-        MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_head].source = source;
         MPIDI_Global.cq_buff_head = (MPIDI_Global.cq_buff_head + 1) % MPIDI_NUM_CQ_BUFFERED;
     }
 
@@ -211,9 +204,9 @@ static inline int MPIDI_netmod_progress_do_queue(void *netmod_context)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_PROGRESS);
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_PROGRESS_DO_QUEUE);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 

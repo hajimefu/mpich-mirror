@@ -24,6 +24,21 @@
 EXTERN_C_BEGIN
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NM_ofi_handle_cq_error
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+int   MPIDI_CH4_NM_ofi_handle_cq_error(ssize_t ret) {
+    int mpi_errno;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+
+    mpi_errno = handle_cq_error(ret);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    return mpi_errno;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_VCRT_Create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -51,7 +66,7 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
     } else
         mpi_errno = MPIR_ERR_MEMALLOCFAILED;
 
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
     return mpi_errno;
 }
 

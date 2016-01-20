@@ -567,12 +567,6 @@ static inline int am_repost_event(cq_tagged_entry_t *wc,
     return mpi_errno;
 }
 
-static inline MPID_Request *devreq_to_req(void *context)
-{
-    char *base = (char *) context;
-    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
-}
-
 static inline int dispatch_function(cq_tagged_entry_t *wc,
                                     MPID_Request      *req,
                                     int                buffered)
@@ -638,5 +632,106 @@ static inline int dispatch_function(cq_tagged_entry_t *wc,
 fn_exit:
     return mpi_errno;
 }
+
+#undef FUNCNAME
+#define FUNCNAME get_buffered
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int get_buffered(cq_tagged_entry_t *wc, ssize_t num) {
+    int rc = 0;
+    if ((MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) ||
+        !slist_empty(&MPIDI_Global.cq_buff_list)) {
+        if (MPIDI_Global.cq_buff_head != MPIDI_Global.cq_buff_tail) {
+            wc[0]                     = MPIDI_Global.cq_buffered[MPIDI_Global.cq_buff_tail].cq_entry;
+            MPIDI_Global.cq_buff_tail = (MPIDI_Global.cq_buff_tail + 1) % MPIDI_NUM_CQ_BUFFERED;
+        }
+        else {
+            struct cq_list     *cq_list_entry;
+            struct slist_entry *entry = slist_remove_head(&MPIDI_Global.cq_buff_list);
+            cq_list_entry             = container_of(entry, struct cq_list, entry);
+            wc[0]                     = cq_list_entry->cq_entry;
+            MPIU_Free((void *)cq_list_entry);
+        }
+        rc = 1;
+    }
+    return rc;
+}
+
+static inline MPID_Request *devreq_to_req(void *context)
+{
+    char *base = (char *) context;
+    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
+}
+
+static inline int handle_cq_entries(cq_tagged_entry_t *wc,
+                                    ssize_t            num,
+                                    int                buffered)
+{
+    int i, mpi_errno;
+    MPID_Request *req;
+    for (i = 0; i < num; i++) {
+        req = devreq_to_req(wc[i].op_context);
+        MPIDI_CH4_NMI_MPI_RC_POP(dispatch_function(&wc[i],req,buffered));
+    }
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME handle_cq_error
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int handle_cq_error(ssize_t ret)
+{
+    int mpi_errno = MPI_SUCCESS;
+    cq_err_entry_t e;
+    MPID_Request *req;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
+    switch (ret) {
+    case -FI_EAVAIL:
+        fi_cq_readerr(MPIDI_Global.p2p_cq, &e, 0);
+        switch (e.err) {
+        case FI_ETRUNC:
+            req = devreq_to_req(e.op_context);
+            switch(req->kind) {
+            case MPID_REQUEST_SEND:
+                mpi_errno = dispatch_function(NULL,req,0);
+                break;
+            case MPID_REQUEST_RECV:
+                mpi_errno = dispatch_function((cq_tagged_entry_t *) &e, req, 0);
+                req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
+                break;
+            default:
+                MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
+                                          "**ofid_poll %s %d %s %s", __SHORT_FILE__,
+                                          __LINE__, FCNAME, fi_strerror(e.err));
+            }
+            break;
+        case FI_ECANCELED:
+            req = devreq_to_req(e.op_context);
+            MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
+            break;
+        case FI_ENOMSG:
+            req = devreq_to_req(e.op_context);
+            peek_empty_event(NULL, req);
+            break;
+        }
+        break;
+    default:
+        MPIR_ERR_SETFATALANDJUMP4(mpi_errno, MPI_ERR_OTHER, "**ofid_poll",
+                                  "**ofid_poll %s %d %s %s", __SHORT_FILE__, __LINE__,
+                                  FCNAME, fi_strerror(errno));
+        break;
+    }
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_HANDLE_CQ_ERROR);
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
+}
+
 
 #endif /* NETMOD_OFI_EVENTS_H_INCLUDED */

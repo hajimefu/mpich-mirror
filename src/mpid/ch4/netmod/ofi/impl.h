@@ -499,13 +499,14 @@ static inline int get_source(uint64_t match_bits)
     return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
 }
 
-
 static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
   if(dt->map != &dt->__map)
     MPIU_Free(dt->map);
 }
+
 /* Utility functions */
+extern int   MPIDI_CH4_NM_ofi_handle_cq_error(ssize_t ret);
 extern int   MPIDI_OFI_Control_handler(void *am_hdr,size_t am_hdr_sz,uint64_t reply_token,
                                        void **data,size_t * data_sz,int *is_contig,
                                        MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
