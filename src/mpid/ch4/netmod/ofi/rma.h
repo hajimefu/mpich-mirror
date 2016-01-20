@@ -137,26 +137,6 @@ static inline void MPIDI_Win_datatype_basic(int           count,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_valid_group_rank
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_valid_group_rank(int         lpid,
-                                         MPID_Group *grp)
-{
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VALID_GROUP_RANK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VALID_GROUP_RANK);
-
-    int size = grp->size;
-    int z;
-
-    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
-
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VALID_GROUP_RANK);
-    return (z < size);
-}
-
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_Win_datatype_map
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -204,7 +184,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_put_get(int                 ori
 
     o_size=sizeof(iovec_t);
     t_size=sizeof(rma_iov_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size);
     *winreq = req;
 
     req->noncontig->buf.iov.put_get.originv = (iovec_t*)&req->noncontig->buf.iov_store[0];
@@ -244,7 +224,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_accumulate(int                 
 
     o_size=sizeof(ioc_t);
     t_size=sizeof(rma_ioc_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size);
     *winreq = req;
 
     req->noncontig->buf.iov.accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
@@ -288,7 +268,7 @@ __ALWAYS_INLINE__ int MPIDI_Allocate_win_request_get_accumulate(int             
     o_size=sizeof(ioc_t);
     t_size=sizeof(rma_ioc_t);
     r_size=sizeof(ioc_t);
-    MPIDI_Win_request_alloc_and_init(req,1,o_size+t_size+r_size);
+    MPIDI_AM_Win_request_alloc_and_init(req,1,o_size+t_size+r_size);
     *winreq = req;
 
     req->noncontig->buf.iov.get_accumulate.originv = (ioc_t*)&req->noncontig->buf.iov_store[0];
@@ -343,7 +323,7 @@ static inline int do_put(const void    *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_PUT);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,
                                                            target_count,
                                                            target_rank,
                                                            origin_datatype,
@@ -399,10 +379,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_put
+#define FUNCNAME MPIDI_CH4_NM_put
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_put(const void   *origin_addr,
+static inline int MPIDI_CH4_NM_put(const void   *origin_addr,
                                    int           origin_count,
                                    MPI_Datatype  origin_datatype,
                                    int           target_rank,
@@ -418,8 +398,8 @@ static inline int MPIDI_netmod_put(const void   *origin_addr,
     MPI_Aint       origin_true_lb,target_true_lb;
     size_t         offset;
 
-    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
-    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_Datatype_check_contig_size_lb(target_datatype,target_count,
                                         target_contig,target_bytes,
@@ -498,7 +478,7 @@ static inline int do_get(void          *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_GET);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_put_get(origin_count,target_count,
                                                            target_rank,
                                                            origin_datatype,target_datatype,
                                                            &req,&flags,&ep,sigreq));
@@ -550,10 +530,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_get
+#define FUNCNAME MPIDI_CH4_NM_get
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_get(void         *origin_addr,
+static inline int MPIDI_CH4_NM_get(void         *origin_addr,
                                    int           origin_count,
                                    MPI_Datatype  origin_datatype,
                                    int           target_rank,
@@ -573,8 +553,8 @@ static inline int MPIDI_netmod_get(void         *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GET);
 
-    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
-    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_Datatype_check_contig_size(origin_datatype,origin_count,
                                      origin_contig,origin_bytes);
@@ -636,10 +616,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_rput
+#define FUNCNAME MPIDI_CH4_NM_rput
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rput(const void   *origin_addr,
+static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
                                     int           origin_count,
                                     MPI_Datatype  origin_datatype,
                                     int           target_rank,
@@ -659,6 +639,7 @@ static inline int MPIDI_netmod_rput(const void   *origin_addr,
     MPIDI_Datatype_check_size(origin_datatype,origin_count,origin_bytes);
 
     if(unlikely((origin_bytes == 0) ||(target_rank == MPI_PROC_NULL))) {
+        mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
         MPIDI_Request_complete(rreq);
@@ -697,10 +678,10 @@ fn_exit:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_compare_and_swap
+#define FUNCNAME MPIDI_CH4_NM_compare_and_swap
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
+static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
                                                 const void *compare_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
@@ -721,7 +702,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMPARE_AND_SWAP);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMPARE_AND_SWAP);
 
-    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
     offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
@@ -736,7 +717,7 @@ static inline int MPIDI_netmod_compare_and_swap(const void *origin_addr,
     rbuffer = (char *)result_addr + result_dt.true_lb;
     tbuffer = (char *)WINFO_BASE(win,target_rank) + offset;
 
-    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
     max_size=MPIDI_QUERY_COMPARE_ATOMIC_COUNT;
     MPIDI_Query_dt(datatype,&fi_dt,MPI_OP_NULL,&fi_op,&max_size,&dt_size);
@@ -774,7 +755,7 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_do_accumulate
+#define FUNCNAME do_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int do_accumulate(const void    *origin_addr,
@@ -804,9 +785,9 @@ static inline int do_accumulate(const void    *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_ACCUMULATE);
 
-    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_accumulate(origin_count,
                                                               target_count,
                                                               target_rank,
                                                               origin_datatype,
@@ -817,14 +798,14 @@ static inline int do_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
 
         return MPI_SUCCESS;
     }
 
     offset = target_disp * WINFO_DISP_UNIT(win, target_rank);
 
-    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
     GET_BASIC_TYPE(target_datatype, basic_type);
     switch(basic_type) {
@@ -855,14 +836,11 @@ static inline int do_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2DOUBLE_COMPLEX:
 #endif
-            MPIR_ERR_SETANDSTMT(mpi_errno,MPI_ERR_TYPE,goto fn_fail,
-                                "**rmatypenotatomic");
-            break;
+            goto am_fallback;
     }
 
-    MPIR_ERR_CHKANDSTMT((acccheck && op != MPI_REPLACE),
-                        mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (acccheck && op != MPI_REPLACE)
+        goto am_fallback;
 
     max_size               = MPIDI_QUERY_ATOMIC_COUNT;
 
@@ -872,8 +850,8 @@ static inline int do_accumulate(const void    *origin_addr,
     req->next              = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ    = req;
     max_size               = max_size*dt_size;
-    MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (max_size == 0)
+        goto am_fallback;
 
     MPIDI_Init_iovec_state(&req->noncontig->iovs,
                            (uintptr_t)origin_addr,
@@ -922,10 +900,17 @@ fn_exit:
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+am_fallback:
+    /* Fall back to active message */
+    MPIDI_Win_request_complete(req);
+    return MPIDI_CH4R_accumulate(origin_addr, origin_count, origin_datatype,
+                                 target_rank, target_disp,
+                                 target_count, target_datatype,
+                                 op, win);
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_get_accumulate
+#define FUNCNAME MPIDI_CH4_NM_get_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int do_get_accumulate(const void    *origin_addr,
@@ -958,9 +943,9 @@ static inline int do_get_accumulate(const void    *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
 
-    MPIDI_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    MPIDI_NM_MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
+    MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Allocate_win_request_get_accumulate(origin_count,
                                                                   target_count,
                                                                   result_count,
                                                                   target_rank,
@@ -974,14 +959,14 @@ static inline int do_get_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
 
         goto fn_exit;
     }
 
     offset = target_disp * WINFO_DISP_UNIT(win,target_rank);
 
-    MPIDI_EPOCH_CHECK_START(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
     GET_BASIC_TYPE(target_datatype, basic_type);
     rt=result_datatype;
@@ -1013,14 +998,12 @@ static inline int do_get_accumulate(const void    *origin_addr,
 #ifdef MPICH_DEFINE_2COMPLEX
         case MPI_2DOUBLE_COMPLEX:
 #endif
-            MPIR_ERR_SETANDSTMT(mpi_errno,MPI_ERR_TYPE,goto fn_fail,
-                                "**rmatypenotatomic");
+            goto am_fallback;
             break;
     }
 
-    MPIR_ERR_CHKANDSTMT((acccheck && op != MPI_REPLACE && op != MPI_NO_OP),
-                        mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (acccheck && op != MPI_REPLACE && op != MPI_NO_OP)
+        goto am_fallback;
 
     GET_BASIC_TYPE(rt, basic_type_res);
     MPIU_Assert(basic_type_res != MPI_DATATYPE_NULL);
@@ -1031,8 +1014,8 @@ static inline int do_get_accumulate(const void    *origin_addr,
     req->next           = WIN_OFI(win)->syncQ;
     WIN_OFI(win)->syncQ = req;
     max_size            = max_size*dt_size;
-    MPIR_ERR_CHKANDSTMT((max_size == 0), mpi_errno,MPI_ERR_TYPE,
-                        goto fn_fail, "**rmatypenotatomic");
+    if (max_size == 0)
+        goto am_fallback;
 
     if(op != MPI_NO_OP)
         MPIDI_Init_iovec_state2(&req->noncontig->iovs,
@@ -1106,14 +1089,20 @@ fn_exit:
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+am_fallback:
+    MPIDI_Win_request_complete(req);
+    return MPIDI_CH4R_get_accumulate(origin_addr, origin_count, origin_datatype,
+                                     result_addr, result_count, result_datatype,
+                                     target_rank, target_disp, target_count,
+                                     target_datatype, op, win);
 }
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_raccumulate
+#define FUNCNAME MPIDI_CH4_NM_raccumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_raccumulate(const void *origin_addr,
+static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
                                            int origin_count,
                                            MPI_Datatype origin_datatype,
                                            int target_rank,
@@ -1143,10 +1132,10 @@ static inline int MPIDI_netmod_raccumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_rget_accumulate
+#define FUNCNAME MPIDI_CH4_NM_rget_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rget_accumulate(const void *origin_addr,
+static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
                                                int origin_count,
                                                MPI_Datatype origin_datatype,
                                                void *result_addr,
@@ -1174,10 +1163,10 @@ static inline int MPIDI_netmod_rget_accumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_fetch_and_op
+#define FUNCNAME MPIDI_CH4_NM_fetch_and_op
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_fetch_and_op(const void *origin_addr,
+static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
                                             void *result_addr,
                                             MPI_Datatype datatype,
                                             int target_rank,
@@ -1200,10 +1189,10 @@ static inline int MPIDI_netmod_fetch_and_op(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_rget
+#define FUNCNAME MPIDI_CH4_NM_rget
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_rget(void *origin_addr,
+static inline int MPIDI_CH4_NM_rget(void *origin_addr,
                                     int origin_count,
                                     MPI_Datatype origin_datatype,
                                     int target_rank,
@@ -1222,6 +1211,7 @@ static inline int MPIDI_netmod_rget(void *origin_addr,
     MPIDI_Datatype_check_size(origin_datatype,origin_count,origin_bytes);
 
     if(unlikely((origin_bytes == 0) || (target_rank == MPI_PROC_NULL))) {
+        mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
         MPIDI_Request_complete(rreq);
@@ -1258,10 +1248,10 @@ fn_exit:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_get_accumulate
+#define FUNCNAME MPIDI_CH4_NM_get_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_get_accumulate(const void *origin_addr,
+static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
                                               int origin_count,
                                               MPI_Datatype origin_datatype,
                                               void *result_addr,
@@ -1273,7 +1263,7 @@ static inline int MPIDI_netmod_get_accumulate(const void *origin_addr,
                                               MPI_Datatype target_datatype,
                                               MPI_Op op, MPID_Win *win)
 {
-    int mpi_errno = MPI_SUCCESS;
+    int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GET_ACCUMULATE);
     mpi_errno = do_get_accumulate(origin_addr, origin_count, origin_datatype,
@@ -1285,10 +1275,10 @@ static inline int MPIDI_netmod_get_accumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_accumulate
+#define FUNCNAME MPIDI_CH4_NM_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_accumulate(const void *origin_addr,
+static inline int MPIDI_CH4_NM_accumulate(const void *origin_addr,
                                           int origin_count,
                                           MPI_Datatype origin_datatype,
                                           int target_rank,

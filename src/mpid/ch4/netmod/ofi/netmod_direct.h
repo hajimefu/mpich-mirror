@@ -10,17 +10,30 @@
  */
 #ifndef NETMOD_DIRECT_H_INCLUDED
 #define NETMOD_DIRECT_H_INCLUDED
-#include "init.h"
-#include "probe.h"
-#include "progress.h"
-#include "recv.h"
+
+#include "am.h"
 #include "request.h"
+#include "events.h"
+#include "comm.h"
+#include "proc.h"
+#include "progress.h"
+#include "unimpl.h"
+#include "init.h"
+
+#ifdef USE_OFI_TAGGED
+#include "probe.h"
+#include "recv.h"
 #include "send.h"
 #include "win.h"
 #include "rma.h"
-#include "am.h"
 #include "spawn.h"
-#include "comm.h"
-#include "unimpl.h"
-#include "proc.h"
+#else
+#include "am_probe.h"
+#include "am_recv.h"
+#include "am_send.h"
+#include "am_win.h"
+#include "am_rma.h"
+#include "am_spawn.h"
+#endif /* USE_OFI_TAGGED */
+
 #endif /* NETMOD_DIRECT_H_INCLUDED */

@@ -128,10 +128,10 @@ __ALWAYS_INLINE__ int do_irecv(void          *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_recv
+#define FUNCNAME MPIDI_CH4_NM_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_recv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -150,10 +150,10 @@ __ALWAYS_INLINE__ int MPIDI_netmod_recv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_recv_init
+#define FUNCNAME MPIDI_CH4_NM_recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void          *buf,
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
                                              int            count,
                                              MPI_Datatype   datatype,
                                              int            rank,
@@ -197,10 +197,10 @@ __ALWAYS_INLINE__ int MPIDI_netmod_recv_init(void          *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_imrecv
+#define FUNCNAME MPIDI_CH4_NM_imrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_imrecv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       MPID_Request * message, MPID_Request ** rreqp)
@@ -211,7 +211,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_imrecv(void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
     if (message == NULL) {
-        MPIDI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
+        MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
         *rreqp = rreq;
         goto fn_exit;
     }
@@ -233,10 +233,10 @@ __ALWAYS_INLINE__ int MPIDI_netmod_imrecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_irecv
+#define FUNCNAME MPIDI_CH4_NM_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_irecv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -253,10 +253,10 @@ __ALWAYS_INLINE__ int MPIDI_netmod_irecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_cancel_recv
+#define FUNCNAME MPIDI_CH4_NM_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
 {
 
     int mpi_errno = MPI_SUCCESS;
@@ -273,7 +273,7 @@ __ALWAYS_INLINE__ int MPIDI_netmod_cancel_recv(MPID_Request * rreq)
 
     if (ret == 0) {
         while ((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPID_cc_is_complete(&rreq->cc))) {
-            if ((mpi_errno = MPIDI_netmod_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
+            if ((mpi_errno = MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
                 goto fn_exit;
         }
 

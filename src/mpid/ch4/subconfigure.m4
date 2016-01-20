@@ -53,27 +53,27 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_nets_func_decl" ; then
-        ch4_nets_func_decl="MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_decl="MPIDI_CH4_NM_${net}_funcs"
     else
-        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_CH4_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_decl" ; then
-        ch4_nets_native_func_decl="MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_decl="MPIDI_CH4_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_CH4_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_func_array" ; then
-        ch4_nets_func_array="&MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_array="&MPIDI_CH4_NM_${net}_funcs"
     else
-        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_netmod_${net}_funcs"
+        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_CH4_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_array" ; then
-        ch4_nets_native_func_array="&MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_array="&MPIDI_CH4_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_netmod_native_${net}_funcs"
+        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_CH4_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_strings" ; then
@@ -90,24 +90,24 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_netmod_amrequest_decl" ; then
-        ch4_netmod_amrequest_decl="MPIDI_netmod_${net}_amrequest_t ${net};"
+        ch4_netmod_amrequest_decl="MPIDI_CH4_NM_${net}_amrequest_t ${net};"
     else
         ch4_netmod_amrequest_decl="${ch4_netmod_amrequest_decl} \\
-MPIDI_netmod_${net}_amrequest_t ${net};"
+MPIDI_CH4_NM_${net}_amrequest_t ${net};"
     fi
 
     if test -z "$ch4_netmod_request_decl" ; then
-        ch4_netmod_request_decl="MPIDI_netmod_${net}_request_t ${net};"
+        ch4_netmod_request_decl="MPIDI_CH4_NM_${net}_request_t ${net};"
     else
         ch4_netmod_request_decl="${ch4_netmod_request_decl} \\
-MPIDI_netmod_${net}_request_t ${net};"
+MPIDI_CH4_NM_${net}_request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_comm_decl" ; then
-        ch4_netmod_comm_decl="MPIDI_netmod_${net}_comm_t ${net};"
+        ch4_netmod_comm_decl="MPIDI_CH4_NM_${net}_comm_t ${net};"
     else
         ch4_netmod_comm_decl="${ch4_netmod_comm_decl} \\
-MPIDI_netmod_${net}_comm_t ${net};"
+MPIDI_CH4_NM_${net}_comm_t ${net};"
     fi
 
 net_index=`expr $net_index + 1`
@@ -303,15 +303,15 @@ if test "$rankbits" != "16" -a "$rankbits" != "32" ; then
 fi
 AC_DEFINE_UNQUOTED(CH4_RANK_BITS,$rankbits,[Define the number of CH4_RANK_BITS])
 
-AC_ARG_ENABLE(ch4u-per-comm-msg-queue,
-    [--enable-ch4u-per-comm-msg-queue=option
+AC_ARG_ENABLE(ch4r-per-comm-msg-queue,
+    [--enable-ch4r-per-comm-msg-queue=option
        Enable use of per-communicator message queues for posted recvs/unexpected messages
          yes       - Use per-communicator message queue. (Default)
          no        - Use global queue for posted recvs/unexpected messages.
-    ],,enable_ch4u_per_comm_msg_queue=yes)
+    ],,enable_ch4r_per_comm_msg_queue=yes)
 
-if test "$enable_ch4u_per_comm_msg_queue" = "yes" ; then
-    AC_DEFINE([MPIDI_CH4U_USE_PER_COMM_QUEUE], [1],
+if test "$enable_ch4r_per_comm_msg_queue" = "yes" ; then
+    AC_DEFINE([MPIDI_CH4R_USE_PER_COMM_QUEUE], [1],
         [Define if CH4U will use per-communicator message queues])
 fi
 

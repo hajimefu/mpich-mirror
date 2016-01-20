@@ -17,6 +17,7 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
                 av-table           - Use OFI AV table (logical addressing mode).  Default is av-map mode
                 mr-offset          - USE OFI memory region offset mode
                 direct-provider    - USE OFI FI_DIRECT to compile in a single OFI direct provider
+                no-tagged          - Do not use OFI fi_tagged interfaces.
                 static-fabric      - Statically link libfabric
                 ],
                 [ofi_netmod_args=$withval],
@@ -30,6 +31,7 @@ dnl Parse the device arguments
     do_direct_provider=false
     do_av_table=false
     do_static_fabric=false
+    do_tagged=true
     echo "Parsing Arguments for OFI Netmod"
     for arg in $args_array; do
     case ${arg} in
@@ -48,6 +50,10 @@ dnl Parse the device arguments
       static-fabric)
               do_static_fabric=true
               echo " ---> CH4::OFI Static library: $arg"
+              ;;
+      no-tagged)
+              do_tagged=false
+              echo " ---> CH4::OFI Disable fi_tagged interfaces : $arg"
               ;;
     esac
     done
@@ -71,6 +77,11 @@ dnl Parse the device arguments
     if [test "$do_static_fabric" = "true"]; then
        MPID_LIBTOOL_STATIC_FLAG="-static -lfabric"
        AC_MSG_NOTICE([Enabling static link of libfabric])
+    fi
+
+    if [test "$do_tagged" = "true"]; then
+       AC_DEFINE([USE_OFI_TAGGED], [1], [Define to use fi_tagged interfaces])
+       AC_MSG_NOTICE([Enabling fi_tagged interfaces])
     fi
 ])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI],[test "X$build_ch4_netmod_ofi" = "Xyes"])

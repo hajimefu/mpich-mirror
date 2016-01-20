@@ -12,6 +12,7 @@
 #define MPIDCH4_IMPL_H_INCLUDED
 
 #include "ch4_types.h"
+#include "ch4r_buf.h"
 #include <mpidch4.h>
 
 /* Forward declarations used to resolve dependencies in inline builds */
@@ -20,23 +21,23 @@
 int MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char *value, int *flag);
 
 /* Static inlines */
-static inline int MPIDI_CH4I_get_source(uint64_t match_bits)
+static inline int MPIDI_CH4R_get_source(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4U_SOURCE_MASK) >> MPIDI_CH4U_TAG_SHIFT));
+    return ((int) ((match_bits & MPIDI_CH4R_SOURCE_MASK) >> MPIDI_CH4R_TAG_SHIFT));
 }
 
-static inline int MPIDI_CH4I_get_tag(uint64_t match_bits)
+static inline int MPIDI_CH4R_get_tag(uint64_t match_bits)
 {
-    return ((int) (match_bits & MPIDI_CH4U_TAG_MASK));
+    return ((int) (match_bits & MPIDI_CH4R_TAG_MASK));
 }
 
-static inline int MPIDI_CH4I_get_context(uint64_t match_bits)
+static inline int MPIDI_CH4R_get_context(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >>
-                   (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
+    return ((int) ((match_bits & MPIDI_CH4R_CONTEXT_MASK) >>
+                   (MPIDI_CH4R_TAG_SHIFT + MPIDI_CH4R_SOURCE_SHIFT)));
 }
 
-static inline int MPIDI_CH4I_get_context_index(uint64_t context_id)
+static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
     raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX, context_id);
@@ -46,29 +47,60 @@ static inline int MPIDI_CH4I_get_context_index(uint64_t context_id)
     return gen_id;
 }
 
-static inline MPID_Request *MPIDI_CH4I_create_req()
+static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
 {
-    MPID_Request *req = MPIDI_netmod_request_create();
+    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    MPIU_Assert(subcomm_type <= 3);
+    MPIU_Assert(is_localcomm <= 2);
+    return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
+}
+
+static inline MPIDI_CH4R_Dev_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t context_id)
+{
+    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    MPIU_Assert(subcomm_type <= 3);
+    MPIU_Assert(is_localcomm <= 2);
+    return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
+}
+
+static inline MPID_Request *MPIDI_CH4R_create_req()
+{
+    MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 2);
-    MPIU_CH4U_REQUEST(req, status) = 0;
+    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
     return req;
 }
 
-static inline MPID_Request *MPIDI_CH4I_create_win_req()
+static inline MPID_Request *MPIDI_CH4R_create_win_req()
 {
-    MPID_Request *req = MPIDI_netmod_request_create();
+    MPID_Request *req = MPIDI_CH4_NM_request_create();
     MPIU_Object_set_ref(req, 1);
-    MPIU_CH4U_REQUEST(req, status) = 0;
+    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
     return req;
 }
 
-static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
+static inline void MPIDI_CH4R_complete_req(MPID_Request *req)
 {
     int count;
     MPID_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
-    if (count == 0)
+    if (count == 0) {
+        if (MPIDI_CH4R_REQUEST(req, req) && MPID_cc_is_complete(&req->cc)) {
+            MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
+            MPIDI_CH4R_REQUEST(req, req) = NULL;
+        }
         MPIDI_Request_release(req);
+    }
 }
 
 #define dtype_add_ref_if_not_builtin(datatype_)                         \
@@ -253,200 +285,262 @@ static inline void MPIDI_CH4I_complete_req(MPID_Request *req)
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPIDI_CH4I_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4R_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4U_SOURCE_SHIFT);
+    match_bits = (match_bits << MPIDI_CH4R_SOURCE_SHIFT);
     match_bits |= source;
-    match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
-    match_bits |= (MPIDI_CH4U_TAG_MASK & tag);
+    match_bits = (match_bits << MPIDI_CH4R_TAG_SHIFT);
+    match_bits |= (MPIDI_CH4R_TAG_MASK & tag);
     return match_bits;
 }
 
-static inline uint64_t MPIDI_CH4I_init_recvtag(uint64_t * mask_bits,
+static inline uint64_t MPIDI_CH4R_init_recvtag(uint64_t * mask_bits,
                                               MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;
-    *mask_bits = MPIDI_CH4U_PROTOCOL_MASK;
+    *mask_bits = MPIDI_CH4R_PROTOCOL_MASK;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4U_SOURCE_SHIFT);
+    match_bits = (match_bits << MPIDI_CH4R_SOURCE_SHIFT);
 
     if (MPI_ANY_SOURCE == source) {
-        match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
-        *mask_bits |= MPIDI_CH4U_SOURCE_MASK;
+        match_bits = (match_bits << MPIDI_CH4R_TAG_SHIFT);
+        *mask_bits |= MPIDI_CH4R_SOURCE_MASK;
     }
     else {
         match_bits |= source;
-        match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
+        match_bits = (match_bits << MPIDI_CH4R_TAG_SHIFT);
     }
 
     if (MPI_ANY_TAG == tag)
-        *mask_bits |= MPIDI_CH4U_TAG_MASK;
+        *mask_bits |= MPIDI_CH4R_TAG_MASK;
     else
-        match_bits |= (MPIDI_CH4U_TAG_MASK & tag);
+        match_bits |= (MPIDI_CH4R_TAG_MASK & tag);
 
     return match_bits;
 }
 
-static inline int MPIDI_CH4I_valid_comm_rank(int rank, MPID_Comm *comm)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_valid_group_rank
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
+                                              int         rank,
+                                              MPID_Group *grp)
 {
-    return (rank < comm->local_size);
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_VALID_GROUP_RANK);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_VALID_GROUP_RANK);
+
+    int lpid;
+    int size = grp->size;
+    int z;
+
+    MPIDI_CH4_NM_comm_get_lpid(comm, rank, &lpid, FALSE);
+
+    for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_VALID_GROUP_RANK);
+    return (z < size);
 }
 
-#define MPIDI_CH4I_PROGRESS()                                   \
+#define MPIDI_CH4R_PROGRESS()                                   \
     ({								\
 	mpi_errno = MPIDI_Progress_test();			\
 	if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);	\
     })
 
-#define MPIDI_CH4I_PROGRESS_WHILE(cond)         \
+#define MPIDI_CH4R_PROGRESS_WHILE(cond)         \
     ({						\
 	while (cond)				\
-	    MPIDI_CH4I_PROGRESS();              \
+	    MPIDI_CH4R_PROGRESS();              \
     })
 
 #ifdef HAVE_ERROR_CHECKING
-#define MPIDI_CH4I_EPOCH_CHECK1()                                       \
+#define MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, stmt)               \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIU_CH4U_WIN(win, sync).target_epoch_type && \
-           MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_REFENCE) \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_WIN(win, sync).target_epoch_type && \
+           MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_REFENCE) \
         {                                                               \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_FENCE; \
-            MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_FENCE; \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_FENCE; \
+            MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_FENCE; \
         }                                                               \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_NONE || \
-           MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_POST) \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_NONE || \
+           MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_POST) \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                goto fn_fail, "**rmasync");             \
+                                stmt, "**rmasync");                     \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_CHECK2()                                  \
+#define MPIDI_CH4R_EPOCH_CHECK1() MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail)
+
+#define MPIDI_CH4R_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)            \
     ({                                                             \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_NONE && \
-           MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_REFENCE) \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_NONE && \
+           MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_REFENCE) \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                goto fn_fail, "**rmasync");             \
+                                stmt, "**rmasync");                     \
+        MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_START_CHECK()                                  \
+#define MPIDI_CH4R_EPOCH_CHECK2() MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail)
+
+#define MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,stmt)                \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if (MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_START && \
-            !MPIDI_CH4I_valid_comm_rank(target_rank, win->comm_ptr))    \
+        if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_START && \
+            !MPIDI_CH4I_valid_group_rank(win->comm_ptr, target_rank,    \
+                                         MPIDI_CH4R_WIN(win, sync).sc.group)) \
             MPIR_ERR_SETANDSTMT(mpi_errno,                              \
                                 MPI_ERR_RMA_SYNC,                       \
-                                goto fn_fail,                           \
+                                stmt,                                   \
                                 "**rmasync");                           \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_FENCE_CHECK()                                  \
+#define MPIDI_CH4R_EPOCH_START_CHECK2(win,mpi_errno,stmt)               \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIU_CH4U_WIN(win, sync).target_epoch_type) \
-            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                goto fn_fail, "**rmasync");             \
-        if (!(massert & MPI_MODE_NOPRECEDE) &&                          \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_FENCE && \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_REFENCE && \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_NONE) \
-            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                goto fn_fail, "**rmasync");             \
+        if (MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_START) { \
+            MPIR_ERR_SETANDSTMT(mpi_errno,                              \
+                                MPI_ERR_RMA_SYNC,                       \
+                                stmt,                                   \
+                                "**rmasync");                           \
+        }                                                               \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_POST_CHECK()                              \
+#define MPIDI_CH4R_EPOCH_FENCE_CHECK(win,mpi_errno,stmt)                \
+    ({                                                                  \
+        MPID_BEGIN_ERROR_CHECKS;                                        \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_WIN(win, sync).target_epoch_type) \
+            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
+                                stmt, "**rmasync");                     \
+        if (!(massert & MPI_MODE_NOPRECEDE) &&                          \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_FENCE && \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_REFENCE && \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_NONE) \
+            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
+                                stmt, "**rmasync");                     \
+        MPID_END_ERROR_CHECKS;                                          \
+    })
+
+#define MPIDI_CH4R_EPOCH_POST_CHECK(win,mpi_errno,stmt)            \
     ({                                                             \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).target_epoch_type != MPIDI_CH4I_EPOTYPE_NONE && \
-           MPIU_CH4U_WIN(win, sync).target_epoch_type != MPIDI_CH4I_EPOTYPE_REFENCE) \
+        if(MPIDI_CH4R_WIN(win, sync).target_epoch_type != MPIDI_CH4R_EPOTYPE_NONE && \
+           MPIDI_CH4R_WIN(win, sync).target_epoch_type != MPIDI_CH4R_EPOTYPE_REFENCE) \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                goto fn_fail, "**rmasync");             \
+                                stmt, "**rmasync");                     \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_LOCK_CHECK()                                            \
+#define MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,stmt)               \
 ({                                                                    \
     MPID_BEGIN_ERROR_CHECKS;                                      \
-    if((MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_LOCK) && \
-       (MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_LOCK_ALL)) \
+    if((MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_LOCK) && \
+       (MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_LOCK_ALL)) \
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                \
-                            goto fn_fail, "**rmasync");                 \
+                            stmt, "**rmasync");                 \
     MPID_END_ERROR_CHECKS;                                              \
 })
 
-#define MPIDI_CH4I_EPOCH_FREE_CHECK()                                   \
+#define MPIDI_CH4R_EPOCH_FREE_CHECK(win,mpi_errno,stmt)                 \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIU_CH4U_WIN(win, sync).target_epoch_type || \
-           (MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_NONE && \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type != MPIDI_CH4I_EPOTYPE_REFENCE)) \
-            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC, return mpi_errno, "**rmasync"); \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_WIN(win, sync).target_epoch_type || \
+           (MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_NONE && \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type != MPIDI_CH4R_EPOTYPE_REFENCE)) \
+            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC, stmt, "**rmasync"); \
         MPID_END_ERROR_CHECKS;                                          \
 })
 
-#define MPIDI_CH4I_EPOCH_ORIGIN_CHECK(epoch_type)                       \
+#define MPIDI_CH4R_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt) \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type != epoch_type)    \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type != epoch_type)    \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                return mpi_errno, "**rmasync");         \
+                                stmt, "**rmasync");                     \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4I_EPOCH_TARGET_CHECK(epoch_type)                       \
+#define MPIDI_CH4R_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) \
     ({                                                                  \
         MPID_BEGIN_ERROR_CHECKS;                                        \
-        if(MPIU_CH4U_WIN(win, sync).target_epoch_type != epoch_type)    \
+        if(MPIDI_CH4R_WIN(win, sync).target_epoch_type != epoch_type)    \
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,            \
-                                return mpi_errno, "**rmasync");         \
+                                stmt, "**rmasync");         \
         MPID_END_ERROR_CHECKS;                                          \
     })
 
 #else /* HAVE_ERROR_CHECKING */
-#define MPIDI_CH4I_EPOCH_CHECK1()       if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_CHECK2()       if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_START_CHECK()  if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_FENCE_CHECK()  if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_POST_CHECK()   if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_LOCK_CHECK()   if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_FREE_CHECK()   if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_ORIGIN_CHECK(epoch_type) if(0) goto fn_fail;
-#define MPIDI_CH4I_EPOCH_TARGET_CHECK(epoch_type) if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, stmt)               if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, stmt)               if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_CHECK1()                                       if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_CHECK2()                                       if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, stmt)              if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_START_CHECK2(win, mpi_errno, stmt)             if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_FENCE_CHECK(win, mpi_errno, stmt)              if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_POST_CHECK(win, mpi_errno, stmt)               if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_LOCK_CHECK(win, mpi_errno, stmt)               if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_FREE_CHECK(win, mpi_errno, stmt)               if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
+#define MPIDI_CH4R_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
 #endif /* HAVE_ERROR_CHECKING */
 
-#define MPIDI_CH4I_EPOCH_FENCE_EVENT()                             \
+#define MPIDI_CH4R_EPOCH_FENCE_EVENT(win, massert)                 \
     ({                                                             \
         if(massert & MPI_MODE_NOSUCCEED)                           \
         {                                                               \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_NONE; \
-            MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_NONE; \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_NONE; \
+            MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_NONE; \
         }                                                               \
         else                                                            \
         {                                                               \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_REFENCE; \
-            MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_REFENCE; \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_REFENCE; \
+            MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_REFENCE; \
         }                                                               \
     })
 
-#define MPIDI_CH4I_EPOCH_TARGET_EVENT()                                 \
+#define MPIDI_CH4R_EPOCH_TARGET_EVENT(win)                              \
     ({                                                                  \
-        if(MPIU_CH4U_WIN(win, sync).target_epoch_type == MPIDI_CH4I_EPOTYPE_REFENCE) \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_REFENCE; \
+        if(MPIDI_CH4R_WIN(win, sync).target_epoch_type == MPIDI_CH4R_EPOTYPE_REFENCE) \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_REFENCE; \
         else                                                            \
-            MPIU_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4I_EPOTYPE_NONE; \
+            MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_NONE; \
     })
 
-#define MPIDI_CH4I_EPOCH_ORIGIN_EVENT()                                 \
+#define MPIDI_CH4R_EPOCH_ORIGIN_EVENT(Win)                              \
     ({                                                                  \
-        if(MPIU_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4I_EPOTYPE_REFENCE) \
-            MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_REFENCE; \
+        if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_REFENCE) \
+            MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_REFENCE; \
         else                                                            \
-            MPIU_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4I_EPOTYPE_NONE; \
+            MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_NONE; \
 })
+
+/*
+  Calculate base address of the target window at the origin side
+  Return zero to let the target side calculate the actual address
+  (only offset from window base is given to the target in this case)
+*/
+static inline uintptr_t MPIDI_CH4I_win_base_at_origin(const MPID_Win *win, int target_rank)
+{
+    /* TODO: In future we may want to calculate the full virtual address
+       in the target at the origin side. It can be done by looking at
+       MPIDI_CH4R_WINFO(win, target_rank)->base_addr */
+    return 0;
+}
+
+/*
+  Calculate base address of the window at the target side
+  If MPIDI_CH4I_win_base_at_origin calculates the full virtual address
+  this function must return zero
+*/
+static inline uintptr_t MPIDI_CH4I_win_base_at_target(const MPID_Win *win)
+{
+    return (uintptr_t) win->base;
+}
 
 #endif /* MPIDCH4_IMPL_H_INCLUDED */

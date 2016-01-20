@@ -219,25 +219,22 @@ static inline int alloc_tables(MPID_Comm * comm)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_comm_create
+#define FUNCNAME MPIDI_CH4_NM_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CREATE);
-    uint64_t mapid;
-
     alloc_tables(comm);
 
-    mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_OFI_Map_set(MPIDI_Global.comm_map, mapid, comm);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_create(&COMM_OFI(comm).huge_recv_counters);
     MPIDI_OFI_Index_allocator_create(&COMM_OFI(comm).win_id_allocator,0);
     MPIDI_OFI_Index_allocator_create(&COMM_OFI(comm).rma_id_allocator,1);
 
+    MPIDI_CH4R_init_comm(comm);
     /* Do not handle intercomms */
     if (comm->comm_kind == MPID_INTERCOMM)
         goto fn_exit;
@@ -249,27 +246,23 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_comm_destroy
+#define FUNCNAME MPIDI_CH4_NM_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    uint64_t mapid;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
 
-    mapid = (((uint64_t) COMM_TO_EP(comm, comm->rank)) << 32) | comm->context_id;
-    MPIDI_OFI_Map_erase(MPIDI_Global.comm_map, mapid);
+    MPIDI_CH4R_destroy_comm(comm);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_send_counters);
     MPIDI_OFI_Map_destroy(COMM_OFI(comm).huge_recv_counters);
     MPIDI_OFI_Index_allocator_destroy(COMM_OFI(comm).win_id_allocator);
     MPIDI_OFI_Index_allocator_destroy(COMM_OFI(comm).rma_id_allocator);
 
     mpi_errno = MPIDI_OFI_VCRT_Release(COMM_OFI(comm).vcrt);
-
-    if (mpi_errno)
-        MPIR_ERR_POP(mpi_errno);
+    if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if (comm->comm_kind == MPID_INTERCOMM) {
         mpi_errno = MPIDI_OFI_VCRT_Release(COMM_OFI(comm).local_vcrt);

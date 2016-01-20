@@ -178,11 +178,11 @@ static inline int MPIDI_CH4I_get_symmetric_heap(MPI_Aint    size,
 	  baseP = MPIU_Malloc(size);
 	  MPIR_ERR_CHKANDJUMP((baseP == NULL), mpi_errno,
 			      MPI_ERR_BUFFER, "**bufnull");
-	  MPIU_CH4U_WIN(win, mmap_sz)   = -1ULL;
-	  MPIU_CH4U_WIN(win, mmap_addr) = NULL;
+	  MPIDI_CH4R_WIN(win, mmap_sz)   = -1ULL;
+	  MPIDI_CH4R_WIN(win, mmap_addr) = NULL;
   } else {
-	  MPIU_CH4U_WIN(win, mmap_sz)   = mapsize;
-	  MPIU_CH4U_WIN(win, mmap_addr) = baseP;
+	  MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
+	  MPIDI_CH4R_WIN(win, mmap_addr) = baseP;
   }
 
   *base = baseP;

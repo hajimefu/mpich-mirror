@@ -13,10 +13,10 @@
 
 #include <mpidimpl.h>
 #include "types.h"
-#include "mpidch4u.h"
+#include "mpidch4r.h"
 #include "ch4_impl.h"
 #include "iovec_util.h"
-
+EXTERN_C_BEGIN
 /* The purpose of this hacky #ifdef is to tag                */
 /* select MPI util functions with always inline.  A better   */
 /* approach would be to declare them inline in a header file */
@@ -107,18 +107,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     }                                                 \
   })
 
-#define MPIDI_Win_request_alloc_and_init(req,count,extra)       \
-  ({                                                            \
-    MPIDI_Win_request_tls_alloc(req);                           \
-    MPIU_Assert(req != NULL);                                   \
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                \
-                == MPID_REQUEST);                               \
-    MPIU_Object_set_ref(req, count);                            \
-    memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,                \
-           sizeof(MPIDI_Win_request)-                           \
-           MPIDI_REQUEST_HDR_SIZE);                             \
-    req->noncontig = (MPIDI_Win_noncontig*)MPIU_Calloc(1,(extra)+sizeof(*(req->noncontig))); \
-  })
 
 #define MPIDI_Ssendack_request_tls_alloc(req)                           \
   ({                                                                    \
@@ -140,11 +128,10 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                 == MPID_SSENDACK_REQUEST);              \
   })
 
-#define MPIDI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_)        \
+#define MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
   do {                                                                  \
-    (rreq_) = MPIDI_Request_create();                                   \
+    (rreq_) = MPIDI_Request_alloc_and_init(1);                          \
     if ((rreq_) != NULL) {                                              \
-      MPIU_Object_set_ref((rreq_), 1);                                  \
       MPID_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPID_REQUEST_RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
@@ -167,35 +154,35 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
        MPIDI_NM_PROGRESS();                           \
   })
 
-#define MPIU_CH4_OFI_ERR  MPIR_ERR_CHKANDJUMP4
+#define MPIDI_CH4_NMI_OFI_ERR  MPIR_ERR_CHKANDJUMP4
 #define FI_RC(FUNC,STR)                                     \
     do {                                                    \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
         ssize_t _ret = FUNC;                                \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
-        MPIU_CH4_OFI_ERR(_ret<0,                            \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
     } while (0)
 
 #define FI_RC_NOLOCK(FUNC,STR)                              \
     do {                                                    \
         ssize_t _ret = FUNC;                                \
-        MPIU_CH4_OFI_ERR(_ret<0,                            \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
     } while (0)
 
 #define FI_RC_RETRY(FUNC,STR)                               \
@@ -206,15 +193,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         _ret = FUNC;                                        \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
-        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
         MPIDI_NM_PROGRESS();                                \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
@@ -228,15 +215,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
         _ret = FUNC2;                                       \
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
-        MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                  \
-                         mpi_errno,                         \
-                         MPI_ERR_OTHER,                     \
-                         "**ofid_"#STR,                     \
-                         "**ofid_"#STR" %s %d %s %s",       \
-                         __SHORT_FILE__,                    \
-                         __LINE__,                          \
-                         FCNAME,                            \
-                         fi_strerror(-_ret));               \
+        MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
+                              mpi_errno,                    \
+                              MPI_ERR_OTHER,                \
+                              "**ofid_"#STR,                \
+                              "**ofid_"#STR" %s %d %s %s",  \
+                              __SHORT_FILE__,               \
+                              __LINE__,                     \
+                              FCNAME,                       \
+                              fi_strerror(-_ret));          \
         MPIDI_NM_PROGRESS();                                \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
@@ -250,37 +237,37 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
      do {                                                     \
          _ret = FUNC;                                         \
          if (likely(_ret==0)) break;                          \
-         MPIU_CH4_OFI_ERR(_ret!=-FI_EAGAIN,                   \
-                          mpi_errno,                          \
-                          MPI_ERR_OTHER,                      \
-                          "**ofid_"#STR,                      \
-                          "**ofid_"#STR" %s %d %s %s",        \
-                          __SHORT_FILE__,                     \
-                          __LINE__,                           \
-                          FCNAME,                             \
-                          fi_strerror(-_ret));                \
+         MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,              \
+                               mpi_errno,                     \
+                               MPI_ERR_OTHER,                 \
+                               "**ofid_"#STR,                 \
+                               "**ofid_"#STR" %s %d %s %s",   \
+                               __SHORT_FILE__,                \
+                               __LINE__,                      \
+                               FCNAME,                        \
+                               fi_strerror(-_ret));           \
          MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);     \
          MPIDI_NM_PROGRESS();                                 \
          MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);    \
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
-#define MPIDI_NM_PMI_RC_POP(FUNC,STR)               \
-  do                                                \
-    {                                               \
-      pmi_errno  = FUNC;                            \
-      MPIU_CH4_OFI_ERR(pmi_errno!=PMI_SUCCESS,      \
-                       mpi_errno,                   \
-                       MPI_ERR_OTHER,               \
-                       "**ofid_"#STR,               \
-                       "**ofid_"#STR" %s %d %s %s", \
-                       __SHORT_FILE__,              \
-                       __LINE__,                    \
-                       FCNAME,                      \
-                       #STR);                       \
+#define MPIDI_CH4_NMI_PMI_RC_POP(FUNC,STR)                    \
+  do                                                          \
+    {                                                         \
+      pmi_errno  = FUNC;                                      \
+      MPIDI_CH4_NMI_OFI_ERR(pmi_errno!=PMI_SUCCESS,           \
+                            mpi_errno,                        \
+                            MPI_ERR_OTHER,                    \
+                            "**ofid_"#STR,                    \
+                            "**ofid_"#STR" %s %d %s %s",      \
+                            __SHORT_FILE__,                   \
+                            __LINE__,                         \
+                            FCNAME,                           \
+                            #STR);                            \
     } while (0)
 
-#define MPIDI_NM_MPI_RC_POP(FUNC)                                    \
+#define MPIDI_CH4_NMI_MPI_RC_POP(FUNC)                               \
   do                                                                 \
     {                                                                \
       mpi_errno = FUNC;                                              \
@@ -291,20 +278,25 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   do                                                            \
     {                                                           \
       str_errno = FUNC;                                         \
-      MPIU_CH4_OFI_ERR(str_errno!=MPIU_STR_SUCCESS,             \
-                       mpi_errno,                               \
-                       MPI_ERR_OTHER,                           \
-                       "**"#STR,                                \
-                       "**"#STR" %s %d %s %s",                  \
-                       __SHORT_FILE__,                          \
-                       __LINE__,                                \
-                       FCNAME,                                  \
-                       #STR);                                   \
+      MPIDI_CH4_NMI_OFI_ERR(str_errno!=MPIU_STR_SUCCESS,        \
+                            mpi_errno,                          \
+                            MPI_ERR_OTHER,                      \
+                            "**"#STR,                           \
+                            "**"#STR" %s %d %s %s",             \
+                            __SHORT_FILE__,                     \
+                            __LINE__,                           \
+                            FCNAME,                             \
+                            #STR);                              \
     } while (0)
 
 #define REQ_CREATE(req)                           \
   ({                                              \
     req = MPIDI_Request_alloc_and_init(2);        \
+  })
+
+#define WINREQ_CREATE(req)				\
+  ({						\
+    req = MPIDI_Win_request_alloc_and_init(1);	\
   })
 
 #define SENDREQ_CREATE_LW(req)                     \
@@ -317,156 +309,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     MPIDI_Ssendack_request_tls_alloc(req); \
   })
 
-#ifdef HAVE_ERROR_CHECKING
-#define MPIDI_EPOCH_CHECK_SYNC(win, mpi_errno, stmt)                                 \
-({                                                                                   \
-  MPID_BEGIN_ERROR_CHECKS;                                                           \
-  if(WIN_OFI(win)->sync.origin_epoch_type == WIN_OFI(win)->sync.target_epoch_type && \
-     WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_REFENCE)                   \
-    {                                                                                \
-      WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_FENCE;                     \
-      WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_FENCE;                     \
-    }                                                                                \
-  if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_NONE ||                    \
-     WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_POST)                      \
-      MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,stmt,"**rmasync")              \
-  MPID_END_ERROR_CHECKS;                                                             \
-})
-
-#define MPIDI_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)                 \
-({                                                                 \
-  MPID_BEGIN_ERROR_CHECKS;                                         \
-  if(WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE &&  \
-     WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE) \
-      MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,             \
-                          stmt, "**rmasync");                      \
-})
-
-#define MPIDI_EPOCH_CHECK_START(win,mpi_errno,stmt)                                  \
-({                                                                                   \
-  MPID_BEGIN_ERROR_CHECKS;                                                           \
-  if (WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_START &&                  \
-      !MPIDI_valid_group_rank(COMM_TO_INDEX(win->comm_ptr,target_rank),              \
-                              WIN_OFI(win)->sync.sc.group))                          \
-      MPIR_ERR_SETANDSTMT(mpi_errno,                                                 \
-                          MPI_ERR_RMA_SYNC,                                          \
-                          stmt,                                                      \
-                          "**rmasync");                                              \
-  MPID_END_ERROR_CHECKS;                                                             \
-})
-
-#define MPIDI_EPOCH_FENCE_CHECK(win,mpi_errno,stmt)                                \
-({                                                                                 \
-  MPID_BEGIN_ERROR_CHECKS;                                                         \
-  if(WIN_OFI(win)->sync.origin_epoch_type != WIN_OFI(win)->sync.target_epoch_type) \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                               \
-                        stmt, "**rmasync");                                        \
-  if (!(massert & MPI_MODE_NOPRECEDE) &&                                           \
-      WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_FENCE &&                \
-      WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE &&              \
-      WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE)                   \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                               \
-                        stmt, "**rmasync");                                        \
-  MPID_END_ERROR_CHECKS;                                                           \
-})
-
-#define MPIDI_EPOCH_POST_CHECK(win,mpi_errno,stmt)                 \
-({                                                                 \
-  MPID_BEGIN_ERROR_CHECKS;                                         \
-  if(WIN_OFI(win)->sync.target_epoch_type != MPID_EPOTYPE_NONE &&  \
-     WIN_OFI(win)->sync.target_epoch_type != MPID_EPOTYPE_REFENCE) \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,               \
-                        stmt, "**rmasync");                        \
-  MPID_END_ERROR_CHECKS;                                           \
-})
-
-#define MPIDI_EPOCH_LOCK_CHECK(win,mpi_errno,stmt)                    \
-({                                                                    \
-  MPID_BEGIN_ERROR_CHECKS;                                            \
-  if((WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_LOCK) &&   \
-     (WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_LOCK_ALL)) \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                  \
-                        stmt, "**rmasync");                           \
-  MPID_END_ERROR_CHECKS;                                              \
-})
-
-#define MPIDI_EPOCH_FREE_CHECK(win,mpi_errno,stmt)                                   \
-({                                                                                   \
-  MPID_BEGIN_ERROR_CHECKS;                                                           \
-  if(WIN_OFI(win)->sync.origin_epoch_type != WIN_OFI(win)->sync.target_epoch_type || \
-     (WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_NONE &&                   \
-      WIN_OFI(win)->sync.origin_epoch_type != MPID_EPOTYPE_REFENCE))                 \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC, stmt, "**rmasync"); \
-  MPID_END_ERROR_CHECKS;                                                             \
-})
-
-#define MPIDI_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt)  \
-({                                                                  \
-  MPID_BEGIN_ERROR_CHECKS;                                          \
-  if(WIN_OFI(win)->sync.origin_epoch_type != epoch_type)            \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,                \
-                        stmt, "**rmasync");                         \
-  MPID_END_ERROR_CHECKS;                                            \
-})
-
-#define MPIDI_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) \
-({                                                                 \
-  MPID_BEGIN_ERROR_CHECKS;                                         \
-  if(WIN_OFI(win)->sync.target_epoch_type != epoch_type)           \
-    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,               \
-                        stmt, "**rmasync");                        \
-  MPID_END_ERROR_CHECKS;                                           \
-})
-
-#else /* HAVE_ERROR_CHECKING */
-#define MPIDI_EPOCH_CHECK_SYNC(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
-#define MPIDI_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)                 if(0) goto fn_fail;
-#define MPIDI_EPOCH_CHECK_START(win,mpi_errno,stmt)                if(0) goto fn_fail;
-#define MPIDI_EPOCH_FENCE_CHECK(win_ofi, mpi_errno, stmt)          if(0) goto fn_fail;
-#define MPIDI_EPOCH_POST_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
-#define MPIDI_EPOCH_LOCK_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
-#define MPIDI_EPOCH_FREE_CHECK(win_ofi, mpi_errno, stmt)           if(0) goto fn_fail;
-#define MPIDI_EPOCH_ORIGIN_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
-#define MPIDI_EPOCH_TARGET_CHECK(win, epoch_type, mpi_errno, stmt) if(0) goto fn_fail;
-#endif /* HAVE_ERROR_CHECKING */
-
-#define MPIDI_EPOCH_FENCE_EVENT(win,massert)                       \
-({                                                                 \
-  if(massert & MPI_MODE_NOSUCCEED)                                 \
-    {                                                              \
-      WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_NONE;    \
-      WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_NONE;    \
-    }                                                              \
-  else                                                             \
-    {                                                              \
-      WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_REFENCE; \
-      WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_REFENCE; \
-    }                                                              \
-})
-
-#define MPIDI_EPOCH_TARGET_EVENT(win)                              \
-({                                                                 \
-  if(WIN_OFI(win)->sync.target_epoch_type == MPID_EPOTYPE_REFENCE) \
-    WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_REFENCE;   \
-  else                                                             \
-    WIN_OFI(win)->sync.origin_epoch_type = MPID_EPOTYPE_NONE;      \
-})
-
-#define MPIDI_EPOCH_ORIGIN_EVENT(win)                                       \
-({                                                                 \
-  if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_REFENCE) \
-    WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_REFENCE;   \
-  else                                                             \
-    WIN_OFI(win)->sync.target_epoch_type = MPID_EPOTYPE_NONE;      \
-})
-
-
-#define WINFO(w,rank)                                                   \
-({                                                                      \
-  void *_p;                                                             \
-  _p = &(((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]);                  \
-  _p;                                                                   \
-})
+#define WINFO(w,rank) MPIDI_CH4R_WINFO(w,rank)
 
 #define WINFO_BASE(w,rank)                                              \
 ({                                                                      \
@@ -478,21 +321,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define WINFO_BASE_FORCE(w,rank)                                        \
 ({                                                                      \
   void *_p;                                                             \
-  _p = (((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]).base_addr;         \
+  _p = (void *) ((MPIDI_CH4R_win_info_t *) WINFO(w, rank))->base_addr;  \
   _p;                                                                   \
 })
 
-#define WINFO_DISP_UNIT(w,rank)                                         \
-({                                                                      \
-  uint32_t _v;                                                          \
-  if(WIN_OFI(w)->winfo) {                                               \
-      _v = (((MPIDI_Win_info*) WIN_OFI(w)->winfo)[rank]).disp_unit;     \
-  }                                                                     \
-  else {                                                                \
-      _v = w->disp_unit;                                                \
-  }                                                                     \
-  _v;                                                                   \
-})
+#define WINFO_DISP_UNIT(w,rank) MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)
 
 #define WINFO_MR_KEY(w,rank)                                            \
 ({                                                                      \
@@ -523,6 +356,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIDI_CH4R_REQUEST(req, req) = NULL;
     MPID_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
@@ -535,8 +369,9 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     req->comm = NULL;
     req->errflag = MPIR_ERR_NONE;
 #ifdef MPIDI_BUILD_CH4_SHM
-    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
+    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 #endif
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
@@ -549,6 +384,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIDI_CH4R_REQUEST(req, req) = NULL;
     MPID_cc_set(&req->cc, 0);
     req->cc_ptr  = &req->cc;
     MPIU_Object_set_ref(req, count);
@@ -557,8 +393,38 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
     req->kind              = MPID_REQUEST_SEND;
     req->comm              = NULL;
     req->errflag           = MPIR_ERR_NONE;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
+}
+
+__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_request_release(MPID_Request * req)
+{
+    int count;
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Object_release_ref(req, &count);
+    MPIU_Assert(count >= 0);
+
+    if (count == 0) {
+        MPIU_Assert(MPID_cc_is_complete(&req->cc));
+
+        if (req->comm)
+            MPIR_Comm_release(req->comm);
+
+        if (req->greq_fns)
+            MPIU_Free(req->greq_fns);
+
+        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+    }
+    return;
+}
+
+static inline void MPIDI_CH4_NMI_OFI_request_complete(MPID_Request *req)
+{
+    int count;
+    MPID_cc_decr(req->cc_ptr, &count);
+    MPIU_Assert(count >= 0);
+    MPIDI_CH4_NMI_OFI_request_release(req);
 }
 
 static inline fi_addr_t _comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
@@ -637,75 +503,11 @@ static inline int get_source(uint64_t match_bits)
     return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
 }
 
-#undef FUNCNAME
-#define FUNCNAME do_control_win
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_win(MPIDI_Win_control_t *control,
-                                 int                  rank,
-                                 MPID_Win            *win,
-                                 int                  use_comm,
-                                 int                  use_lock)
+static inline MPID_Request *devreq_to_req(void *context)
 {
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-
-    CH4_COMPILE_TIME_ASSERT(MPID_MIN_CTRL_MSG_SZ == sizeof(MPIDI_Send_control_t));
-
-    control->win_id = WIN_OFI(win)->win_id;
-    control->origin_rank = win->comm_ptr->rank;
-
-    MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    if(use_lock)
-        FI_RC_RETRY(fi_inject(G_TXC_MSG(0),
-                              control, sizeof(*control),
-                              use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                              _to_phys(rank, MPIDI_API_MSG)), inject);
-    else
-        FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),
-                                     control, sizeof(*control),
-                                     use_comm ? _comm_to_phys(win->comm_ptr, rank, MPIDI_API_MSG) :
-                                     _to_phys(rank, MPIDI_API_MSG)), inject);
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
+    char *base = (char *) context;
+    return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
 }
-
-#undef FUNCNAME
-#define FUNCNAME do_control_send
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_send(MPIDI_Send_control_t *control,
-                                  char                 *send_buf,
-                                  size_t                msgsize,
-                                  int                   rank,
-                                  MPID_Comm            *comm_ptr,
-                                  MPID_Request         *ackreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-
-    control->origin_rank = comm_ptr->rank;
-    control->send_buf = send_buf;
-    control->msgsize = msgsize;
-    control->comm_id = comm_ptr->context_id;
-    control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
-    control->ackreq = ackreq;
-    MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
-    FI_RC_RETRY_NOLOCK(fi_inject(G_TXC_MSG(0),control, sizeof(*control),
-                                 _comm_to_phys(comm_ptr, rank, MPIDI_API_MSG)),
-                       inject);
-  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
-    return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-}
-
 
 static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
 {
@@ -713,4 +515,25 @@ static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
     MPIU_Free(dt->map);
 }
 
+/* Utility functions */
+extern int   MPIDI_CH4_NM_ofi_handle_cq_error(ssize_t ret);
+extern int   MPIDI_OFI_Control_handler(void *am_hdr,size_t am_hdr_sz,uint64_t reply_token,
+                                       void **data,size_t * data_sz,int *is_contig,
+                                       MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                                       MPID_Request ** req);
+extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
+extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
+extern void  MPIDI_OFI_Map_create(void **map);
+extern void  MPIDI_OFI_Map_destroy(void *map);
+extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
+extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
+extern int   MPIDI_OFI_control_dispatch(void *buf);
+extern void  MPIDI_OFI_Index_datatypes();
+extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
+
+EXTERN_C_END
 #endif

@@ -25,33 +25,44 @@ static inline int MPIDI_netmod_request_is_pending_failure(MPID_Request * req)
     return MPI_SUCCESS;
 }
 
-static inline void MPIDI_netmod_request_release(MPID_Request * req)
+/* Support for active message and direct requests are a bit tricky:
+   MPI layer can call MPID_Request_create/release/complete and operate on
+   a non-specific request, with the device layer implementing all bookkeeping.
+
+   CH4 layer implements the device-level functions by calling the netmod.
+
+   We assume that if CH4 is allocating the request, it must be an AM
+   OR an unpsecified request that won't be used by communication
+   directly.  So we just allocate an AM request and it should
+   suffice for both instances.
+
+   On release (also called by the upper layers), the netmod and ch4
+   do not have any information about the type of this request and how
+   to free the internal structures, so we have to query the type, which
+   is a common offset/field in both am and direct requests.
+
+   These functions should only be called by the upper layers because
+   we can optimize away branches for internal release functions when
+   the type is completely determined by the operation being used.
+*/
+
+static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
 {
-    int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
-
-    if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
-
-        if (req->comm)
-            MPIR_Comm_release(req->comm);
-
-        if (req->greq_fns)
-            MPIU_Free(req->greq_fns);
-
-        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+    switch (MPIDI_CH4I_REQUEST(req,reqtype)) {
+    case MPIDI_CH4_DEVTYPE_DIRECT:
+    case MPIDI_CH4_DEVTYPE_SHM:
+    case MPIDI_CH4_DEVTYPE_UNSPECIFIED:
+        MPIDI_CH4_NMI_OFI_request_release(req);
+        break;
+    case MPIDI_CH4_DEVTYPE_AM:
+        MPIDI_CH4_NMI_OFI_AM_request_release(req);
+        break;
     }
-
-    return;
 }
 
-static inline MPID_Request *MPIDI_netmod_request_create(void)
+static inline MPID_Request *MPIDI_CH4_NM_request_create(void)
 {
-    MPID_Request *req;
-    req = MPIDI_Request_alloc_and_init(1);
-    return req;
+    return MPIDI_AM_netmod_request_create();
 }
 
 #endif /* NETMOD_OFI_REQUEST_H_INCLUDED */

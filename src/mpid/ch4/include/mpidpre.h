@@ -21,6 +21,7 @@ typedef size_t MPIDI_msg_sz_t;
 #include "mpid_thread.h"
 #include "mpid_timers_fallback.h"
 #include "netmodpre.h"
+#include "mpl_uthash.h"
 
 #define MPID_PROGRESS_STATE_DECL
 #define HAVE_GPID_ROUTINES
@@ -37,72 +38,79 @@ typedef enum {
     MPIDI_PTYPE_SSEND,
 } MPIDI_ptype;
 
-#define MPIDI_CH4U_REQ_BUSY 		  (0x1)
-#define MPIDI_CH4U_REQ_PEER_SSEND 	  (0x1 << 1)
-#define MPIDI_CH4U_REQ_UNEXPECTED 	  (0x1 << 2)
-#define MPIDI_CH4U_REQ_UNEXP_DQUED 	  (0x1 << 3)
-#define MPIDI_CH4U_REQ_UNEXP_CLAIMED  (0x1 << 4)
-#define MPIDI_CH4U_REQ_RCV_NON_CONTIG (0x1 << 5)
-#define MPIDI_CH4U_REQ_MATCHED (0x1 << 6)
+enum {
+    MPIDI_CH4_DEVTYPE_UNSPECIFIED,
+    MPIDI_CH4_DEVTYPE_AM,
+    MPIDI_CH4_DEVTYPE_DIRECT,
+    MPIDI_CH4_DEVTYPE_SHM
+};
+
+#define MPIDI_CH4R_REQ_BUSY 		  (0x1)
+#define MPIDI_CH4R_REQ_PEER_SSEND 	  (0x1 << 1)
+#define MPIDI_CH4R_REQ_UNEXPECTED 	  (0x1 << 2)
+#define MPIDI_CH4R_REQ_UNEXP_DQUED 	  (0x1 << 3)
+#define MPIDI_CH4R_REQ_UNEXP_CLAIMED  (0x1 << 4)
+#define MPIDI_CH4R_REQ_RCV_NON_CONTIG (0x1 << 5)
+#define MPIDI_CH4R_REQ_MATCHED (0x1 << 6)
 
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
 
-typedef struct MPIDI_CH4U_Dev_sreq_t {
+typedef struct MPIDI_CH4R_Dev_sreq_t {
     /* persistent send fields */
-    struct MPID_Comm    *util_comm;
-} MPIDI_CH4U_Dev_sreq_t;
+} MPIDI_CH4R_Dev_sreq_t;
 
-typedef struct MPIDI_CH4U_Dev_rreq_t {
+typedef struct MPIDI_CH4R_Dev_rreq_t {
     /* mrecv fields */
     void         *mrcv_buffer;
     uint64_t      mrcv_count;
     MPI_Datatype  mrcv_datatype;
 
     uint64_t      ignore;
-    void         *reply_token;
+    uint64_t      reply_token;
     uint64_t      peer_req_ptr;
     uint64_t      match_req;
+    uint64_t      request;
 
-    struct MPIDI_CH4U_Dev_rreq_t *prev, *next;
-} MPIDI_CH4U_Dev_rreq_t;
+    struct MPIDI_CH4R_Dev_rreq_t *prev, *next;
+} MPIDI_CH4R_Dev_rreq_t;
 
-typedef struct MPIDI_CH4U_Dev_put_req_t {
+typedef struct MPIDI_CH4R_Dev_put_req_t {
     uint64_t win_ptr;
     uint64_t preq_ptr;
-    void *reply_token;
+    uint64_t reply_token;
     void *dt_iov;
     void *origin_addr;
     int origin_count;
     MPI_Datatype origin_datatype;
     int n_iov;
-} MPIDI_CH4U_Dev_put_req_t;
+} MPIDI_CH4R_Dev_put_req_t;
 
-typedef struct MPIDI_CH4U_Dev_get_req_t {
+typedef struct MPIDI_CH4R_Dev_get_req_t {
     uint64_t win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
     int count;
     int n_iov;
-    void *reply_token;
+    uint64_t reply_token;
     void *dt_iov;
-} MPIDI_CH4U_Dev_get_req_t;
+} MPIDI_CH4R_Dev_get_req_t;
 
-typedef struct MPIDI_CH4U_Dev_cswap_req_t {
+typedef struct MPIDI_CH4R_Dev_cswap_req_t {
     uint64_t win_ptr;
     uint64_t creq_ptr;
-    void *reply_token;
+    uint64_t reply_token;
     uint64_t addr;
     MPI_Datatype datatype;
     void *data;
     void *result_addr;
-} MPIDI_CH4U_Dev_cswap_req_t;
+} MPIDI_CH4R_Dev_cswap_req_t;
 
-typedef struct MPIDI_CH4U_Dev_acc_req_t {
+typedef struct MPIDI_CH4R_Dev_acc_req_t {
     uint64_t win_ptr;
     uint64_t req_ptr;
-    void *reply_token;
+    uint64_t reply_token;
     MPI_Datatype origin_datatype;
     MPI_Datatype target_datatype;
     int origin_count;
@@ -118,41 +126,47 @@ typedef struct MPIDI_CH4U_Dev_acc_req_t {
     int do_get;
     void *origin_addr;
     MPI_Datatype result_datatype;
-} MPIDI_CH4U_Dev_acc_req_t;
+} MPIDI_CH4R_Dev_acc_req_t;
 
-typedef struct MPIDI_CH4U_Devreq_t {
-
+typedef struct MPIDI_CH4R_req_t {
     union {
-        MPIDI_CH4U_Dev_sreq_t sreq;
-        MPIDI_CH4U_Dev_rreq_t rreq;
-        MPIDI_CH4U_Dev_put_req_t preq;
-        MPIDI_CH4U_Dev_get_req_t greq;
-        MPIDI_CH4U_Dev_cswap_req_t creq;
-        MPIDI_CH4U_Dev_acc_req_t areq;
+        MPIDI_CH4R_Dev_sreq_t sreq;
+        MPIDI_CH4R_Dev_rreq_t rreq;
+        MPIDI_CH4R_Dev_put_req_t preq;
+        MPIDI_CH4R_Dev_get_req_t greq;
+        MPIDI_CH4R_Dev_cswap_req_t creq;
+        MPIDI_CH4R_Dev_acc_req_t areq;
     };
 
-    void         *buffer;
-    uint64_t      count;
-    uint64_t      tag;
-
-    MPI_Datatype  datatype;
     struct iovec *iov;
 
-    uint64_t      status;
-    MPIDI_ptype   p_type;
-
-    struct MPIDI_CH4U_Devreq_t *next, *prev;
     void *cmpl_handler_fn;
-    int seq_no;
+    uint64_t seq_no;
+    uint64_t request;
+    uint64_t      status;
+    struct MPIDI_CH4R_req_t *next, *prev;
 
+} MPIDI_CH4R_req_t;
+
+typedef struct MPIDI_CH4R_Devreq_t {
     union {
         MPIDI_CH4_NETMOD_REQUEST_AM_DECL
     }netmod_am;
-} MPIDI_CH4U_Devreq_t;
+    MPIDI_CH4R_req_t *req;
+    MPIDI_ptype       p_type;
+    void             *buffer;
+    uint64_t          count;
+    uint64_t          tag;
+    MPI_Datatype      datatype;
+    struct MPID_Comm *util_comm;
+} MPIDI_CH4R_Devreq_t;
 
 typedef struct {
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    int is_local;
+    int16_t is_local;
+    int16_t reqtype;
+#else
+    int reqtype;
 #endif
 
     /* Anysource handling. Netmod and shm specific requests are cross
@@ -164,7 +178,7 @@ typedef struct {
 
     union {
         /* The first fields are used by the CH4U apis */
-        MPIDI_CH4U_Devreq_t ch4u;
+        MPIDI_CH4R_Devreq_t ch4r;
 
         /* Used by the netmod direct apis */
         union {
@@ -178,22 +192,19 @@ typedef struct {
 } MPIDI_Devreq_t;
 #define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.ch4.netmod)
 #define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.ch4.netmod_am)
-#define MPIU_CH4_REQUEST(req,field)         (((req)->dev).field)
-#define MPIU_CH4U_REQUEST(req,field)        (((req)->dev.ch4.ch4u).field)
-#define MPIU_CH4U_REQUEST_AM_NETMOD(req)    (((req)->dev.ch4.ch4u).netmod_am)
-#define MPIU_CH4_NETMOD_DIRECT_REQUEST(req) ((req)->dev.ch4.netmod)
+#define MPIDI_CH4I_REQUEST(req,field)       (((req)->dev).field)
+#define MPIDI_CH4R_REQUEST(req,field)       (((req)->dev.ch4.ch4r).field)
 
 #ifdef MPIDI_BUILD_CH4_SHM
-#define MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)  (((req)->dev).anysource_partner_request)
+#define MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)  (((req)->dev).anysource_partner_request)
 #else
-#define MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(req)  NULL
+#define MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)  NULL
 #endif
 
-typedef struct MPIDI_CH4I_win_info_t {
+typedef struct MPIDI_CH4R_win_info_t {
     uint64_t base_addr;
-    uint64_t size;
-    uint64_t disp_unit;
-} MPIDI_CH4I_win_info_t;
+    uint32_t disp_unit;
+} __attribute__ ((packed)) MPIDI_CH4R_win_info_t;
 
 #define MPIDI_CH4I_ACCU_ORDER_RAR (1)
 #define MPIDI_CH4I_ACCU_ORDER_RAW (1 << 1)
@@ -203,60 +214,60 @@ typedef struct MPIDI_CH4I_win_info_t {
 typedef enum {
     MPIDI_CH4I_ACCU_SAME_OP,
     MPIDI_CH4I_ACCU_SAME_OP_NO_OP
-} MPIDI_CH4I_win_info_accumulate_ops;
+} MPIDI_CH4R_win_info_accumulate_ops;
 
-typedef struct MPIDI_CH4I_win_info_args_t {
+typedef struct MPIDI_CH4R_win_info_args_t {
     int no_locks;
     int same_size;
     int accumulate_ordering;
     int alloc_shared_noncontig;
-    MPIDI_CH4I_win_info_accumulate_ops accumulate_ops;
-} MPIDI_CH4I_win_info_args_t;
+    MPIDI_CH4R_win_info_accumulate_ops accumulate_ops;
+} MPIDI_CH4R_win_info_args_t;
 
-struct MPIDI_CH4I_win_lock {
-    struct MPIDI_CH4I_win_lock *next;
+struct MPIDI_CH4R_win_lock {
+    struct MPIDI_CH4R_win_lock *next;
     unsigned rank;
     uint16_t mtype;
     uint16_t type;
 };
 
-struct MPIDI_CH4I_win_queue {
-    struct MPIDI_CH4I_win_lock *head;
-    struct MPIDI_CH4I_win_lock *tail;
+struct MPIDI_CH4R_win_queue {
+    struct MPIDI_CH4R_win_lock *head;
+    struct MPIDI_CH4R_win_lock *tail;
 };
 
-typedef struct MPIDI_CH4I_winLock_info {
+typedef struct MPIDI_CH4R_winLock_info {
     unsigned peer;
     int lock_type;
     struct MPID_Win *win;
     volatile unsigned done;
-} MPIDI_CH4I_winLock_info;
+} MPIDI_CH4R_winLock_info;
 
-typedef struct MPIDI_CH4I_win_sync_lock {
+typedef struct MPIDI_CH4R_win_sync_lock {
     struct {
         volatile unsigned locked;
         volatile unsigned allLocked;
     } remote;
     struct {
-        struct MPIDI_CH4I_win_queue requested;
+        struct MPIDI_CH4R_win_queue requested;
         int type;
         unsigned count;
     } local;
-} MPIDI_CH4I_win_sync_lock;
+} MPIDI_CH4R_win_sync_lock;
 
-typedef struct MPIDI_CH4I_win_sync_pscw {
+typedef struct MPIDI_CH4R_win_sync_pscw {
     struct MPID_Group *group;
     volatile unsigned count;
-} MPIDI_CH4I_win_sync_pscw;
+} MPIDI_CH4R_win_sync_pscw;
 
-typedef struct MPIDI_CH4I_win_sync_t {
+typedef struct MPIDI_CH4R_win_sync_t {
     volatile int origin_epoch_type;
     volatile int target_epoch_type;
-    MPIDI_CH4I_win_sync_pscw sc, pw;
-    MPIDI_CH4I_win_sync_lock lock;
-} MPIDI_CH4I_win_sync_t;
+    MPIDI_CH4R_win_sync_pscw sc, pw;
+    MPIDI_CH4R_win_sync_lock lock;
+} MPIDI_CH4R_win_sync_t;
 
-typedef struct MPIDI_CH4I_win_t {
+typedef struct MPIDI_CH4R_win_t {
     uint64_t win_id;
     void *mmap_addr;
     int64_t mmap_sz;
@@ -265,36 +276,49 @@ typedef struct MPIDI_CH4I_win_t {
     void *msgQ;
     void *syncQ; /* todo */
     int count;
-    MPIDI_CH4I_win_sync_t sync;
-    MPIDI_CH4I_win_info_t *info_table;
-    MPIDI_CH4I_win_info_args_t info_args;
-} MPIDI_CH4I_win_t;
+    MPIDI_CH4R_win_sync_t sync;
+    MPIDI_CH4R_win_info_t *info_table;
+    MPIDI_CH4R_win_info_args_t info_args;
+    MPL_UT_hash_handle hash_handle;
+} MPIDI_CH4R_win_t;
 
 typedef struct {
-    MPIDI_CH4I_win_t ch4u;
+    MPIDI_CH4R_win_t ch4r;
     uint64_t pad[192 / 8];
 } MPIDI_Devwin_t;
-#define MPIU_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
-#define MPIU_CH4U_WINFO(win,rank) (MPIDI_CH4I_win_info_t*) &(MPIU_CH4U_WIN(win, info_table)[rank])
+#define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4r).field)
+#define MPIDI_CH4R_WINFO(win,rank) (MPIDI_CH4R_win_info_t*) &(MPIDI_CH4R_WIN(win, info_table)[rank])
+#define MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)                              \
+    ({                                                                  \
+        uint32_t _v;                                                    \
+        if(MPIDI_CH4R_WIN(w, info_table)) {                             \
+            _v = ((MPIDI_CH4R_win_info_t *) MPIDI_CH4R_WINFO(w, rank))->disp_unit; \
+        }                                                               \
+        else {                                                          \
+            _v = w->disp_unit;                                          \
+        }                                                               \
+        _v;                                                             \
+    })
+
 
 typedef struct {
     unsigned is_local : 1;
     unsigned index    : 31;
-}MPIDI_CH4U_locality_t;
+}MPIDI_CH4R_locality_t;
 
-typedef struct MPIDI_CH4U_Devcomm_t {
-    MPIDI_CH4U_Dev_rreq_t *posted_list;
-    MPIDI_CH4U_Dev_rreq_t *unexp_list;
+typedef struct MPIDI_CH4R_Devcomm_t {
+    MPIDI_CH4R_Dev_rreq_t *posted_list;
+    MPIDI_CH4R_Dev_rreq_t *unexp_list;
     uint32_t   window_instance;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIDI_CH4U_locality_t *locality;
+    MPIDI_CH4R_locality_t *locality;
 #endif
-} MPIDI_CH4U_Devcomm_t;
+} MPIDI_CH4R_Devcomm_t;
 
 typedef struct MPIDI_Devcomm_t {
     struct {
         /* The first fields are used by the CH4U apis */
-        MPIDI_CH4U_Devcomm_t ch4u;
+        MPIDI_CH4R_Devcomm_t ch4r;
 
         /* Used by the netmod direct apis */
         union {
@@ -306,7 +330,7 @@ typedef struct MPIDI_Devcomm_t {
         }shm;
     }ch4;
 } MPIDI_Devcomm_t;
-#define MPIU_CH4U_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
+#define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4r).field
 
 typedef struct {
     uint32_t pad[4 / 4];

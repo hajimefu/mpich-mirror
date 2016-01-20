@@ -20,7 +20,23 @@
 #include <mpidimpl.h>
 #include "impl.h"
 #include "events.h"
+#include "control.h"
 EXTERN_C_BEGIN
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NM_ofi_handle_cq_error
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+int   MPIDI_CH4_NM_ofi_handle_cq_error(ssize_t ret) {
+    int mpi_errno;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+
+    mpi_errno = handle_cq_error(ret);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    return mpi_errno;
+}
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_VCRT_Create
@@ -50,7 +66,7 @@ int MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr)
     } else
         mpi_errno = MPIR_ERR_MEMALLOCFAILED;
 
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VCRT_EXIT);
     return mpi_errno;
 }
 
@@ -180,8 +196,8 @@ static inline int
 WinLockAdvance(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    struct MPIDI_Win_sync_lock *slock = &WIN_OFI(win)->sync.lock;
-    struct MPIDI_Win_queue     *q     = &slock->local.requested;
+    struct MPIDI_CH4R_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
+    struct MPIDI_CH4R_win_queue     *q     = &slock->local.requested;
 
     if(
         (q->head != NULL) &&
@@ -192,7 +208,7 @@ WinLockAdvance(MPID_Win *win)
          )
         )
     ) {
-        struct MPIDI_Win_lock *lock = q->head;
+        struct MPIDI_CH4R_win_lock *lock = q->head;
         q->head = lock->next;
 
         if(q->head == NULL)
@@ -234,7 +250,8 @@ static inline void WinLockReq_proc(const MPIDI_Win_control_t  *info,
                                    MPID_Win                   *win,
                                    unsigned                    peer)
 {
-    struct MPIDI_Win_lock *lock = (struct MPIDI_Win_lock *)MPIU_Calloc(1, sizeof(struct MPIDI_Win_lock));
+    struct MPIDI_CH4R_win_lock *lock =
+        (struct MPIDI_CH4R_win_lock *)MPIU_Calloc(1, sizeof(struct MPIDI_CH4R_win_lock));
 
     if(info->type == MPIDI_CTRL_LOCKREQ)
         lock->mtype = MPIDI_REQUEST_LOCK;
@@ -243,7 +260,7 @@ static inline void WinLockReq_proc(const MPIDI_Win_control_t  *info,
 
     lock->rank                = info->origin_rank;
     lock->type                = info->lock_type;
-    struct MPIDI_Win_queue *q = &WIN_OFI(win)->sync.lock.local.requested;
+    struct MPIDI_CH4R_win_queue *q = &MPIDI_CH4R_WIN(win, sync).lock.local.requested;
     MPIU_Assert((q->head != NULL) ^ (q->tail == NULL));
 
     if(q->tail == NULL)
@@ -262,9 +279,9 @@ static inline void WinLockAck_proc(const MPIDI_Win_control_t *info,
                                    unsigned                    peer)
 {
     if(info->type == MPIDI_CTRL_LOCKACK)
-        WIN_OFI(win)->sync.lock.remote.locked = 1;
+        MPIDI_CH4R_WIN(win, sync).lock.remote.locked = 1;
     else  if(info->type == MPIDI_CTRL_LOCKALLACK)
-        WIN_OFI(win)->sync.lock.remote.allLocked += 1;
+        MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked += 1;
 }
 
 
@@ -272,8 +289,8 @@ static inline void WinUnlock_proc(const MPIDI_Win_control_t *info,
                                   MPID_Win                   *win,
                                   unsigned                    peer)
 {
-    --WIN_OFI(win)->sync.lock.local.count;
-    MPIU_Assert((int)WIN_OFI(win)->sync.lock.local.count >= 0);
+    --MPIDI_CH4R_WIN(win, sync).lock.local.count;
+    MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.local.count >= 0);
     WinLockAdvance(win);
 
     MPIDI_Win_control_t new_info;
@@ -285,14 +302,14 @@ static inline void WinComplete_proc(const MPIDI_Win_control_t *info,
                                     MPID_Win                   *win,
                                     unsigned                    peer)
 {
-    ++WIN_OFI(win)->sync.sc.count;
+    ++MPIDI_CH4R_WIN(win, sync).sc.count;
 }
 
 static inline void WinPost_proc(const MPIDI_Win_control_t *info,
                                 MPID_Win                   *win,
                                 unsigned                    peer)
 {
-    ++WIN_OFI(win)->sync.pw.count;
+    ++MPIDI_CH4R_WIN(win, sync).pw.count;
 }
 
 
@@ -300,11 +317,11 @@ static inline void WinUnlockDoneCB(const MPIDI_Win_control_t *info,
                                    MPID_Win                   *win,
                                    unsigned                    peer)
 {
-    if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_LOCK)
-        WIN_OFI(win)->sync.lock.remote.locked = 0;
-    else if(WIN_OFI(win)->sync.origin_epoch_type == MPID_EPOTYPE_LOCK_ALL) {
-        MPIU_Assert((int)WIN_OFI(win)->sync.lock.remote.allLocked > 0);
-        WIN_OFI(win)->sync.lock.remote.allLocked -= 1;
+    if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK)
+        MPIDI_CH4R_WIN(win, sync).lock.remote.locked = 0;
+    else if(MPIDI_CH4R_WIN(win, sync).origin_epoch_type == MPIDI_CH4R_EPOTYPE_LOCK_ALL) {
+        MPIU_Assert((int)MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked > 0);
+        MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked -= 1;
     } else
         MPIU_Assert(0);
 
@@ -316,9 +333,8 @@ static inline void MPIDI_Gethuge_cleanup(MPIDI_Send_control_t *info)
     MPID_Comm          *comm_ptr;
     uint64_t            mapid;
     /* Look up the communicator */
-    mapid = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
-    comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,mapid);
-
+    mapid    = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
+    comm_ptr = MPIDI_CH4R_context_id_to_comm(mapid);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
@@ -333,12 +349,10 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     MPIDI_Huge_chunk_t *hc;
     MPID_Comm          *comm_ptr;
     /* Look up the communicator */
-    comm_ptr              = (MPID_Comm *)MPIDI_OFI_Map_lookup(MPIDI_Global.comm_map,
-                                                              info->comm_id);
+    comm_ptr = MPIDI_CH4R_context_id_to_comm(info->comm_id);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_Huge_recv_t *)MPIDI_OFI_Map_lookup(COMM_OFI(comm_ptr).huge_recv_counters,
                                                      info->origin_rank);
-
     if(recv == MPIDI_MAP_NOT_FOUND) {
         recv        = (MPIDI_Huge_recv_t *)MPIU_Malloc(sizeof(*recv));
         recv->seqno = 0;
@@ -362,17 +376,29 @@ static inline void MPIDI_Gethuge(MPIDI_Send_control_t *info)
     get_huge_event(NULL, (MPID_Request *)hc);
 }
 
-int MPIDI_OFI_control_dispatch(void *buf)
+int MPIDI_OFI_Control_handler(void      *am_hdr,
+                              size_t     am_hdr_sz,
+                              uint64_t   reply_token,
+                              void     **data,
+                              size_t    *data_sz,
+                              int       *is_contig,
+                              MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                              MPID_Request ** req)
 {
-    int mpi_errno = MPI_SUCCESS;
-    int senderrank;
-
-    MPIDI_Win_control_t *control = (MPIDI_Win_control_t *)buf;
+    int                  senderrank;
+    int                  mpi_errno  = MPI_SUCCESS;
+    void                *buf        = am_hdr;
+    MPIDI_Win_control_t *control    = (MPIDI_Win_control_t *)buf;
+    *req                            = NULL;
+    *cmpl_handler_fn                = NULL;
+    *data                           = NULL;
+    *data_sz                        = 0;
+    *is_contig                      = 1;
 
     switch(control->type) {
         case MPIDI_CTRL_HUGEACK: {
             MPIDI_Send_control_t *ctrlsend = (MPIDI_Send_control_t *)buf;
-            dispatch_function(NULL,ctrlsend->ackreq);
+            dispatch_function(NULL,ctrlsend->ackreq,0);
             goto fn_exit;
         }
         break;

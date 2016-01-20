@@ -16,8 +16,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include "ofi_pre.h"
-#include "mpidch4u.h"
 #include "ch4_types.h"
+#include "mpidch4r.h"
 #include "fi_list.h"
 
 EXTERN_C_BEGIN
@@ -39,12 +39,39 @@ EXTERN_C_BEGIN
 #define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
 #define MPIDI_NUM_AM_BUFFERS		  (8)
 #define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
-#define MPIDI_MAX_AM_HANDLERS 		(24)
 #define MPIDI_CACHELINE_SIZE        (64)
 #define MPIDI_IOV_MAX               1
 #define MPIDI_BUF_POOL_SZ  (1024)
 #define MPIDI_BUF_POOL_NUM (1024)
 #define MPIDI_NUM_CQ_BUFFERED (1024)
+#define MPIDI_MAX_AM_HANDLERS_TOTAL 		(24)
+
+#define MPIDI_INTERNAL_HANDLER_CONTROL (MPIDI_MAX_AM_HANDLERS_TOTAL-1)
+#define MPIDI_INTERNAL_HANDLER_NEXT    (MPIDI_MAX_AM_HANDLERS_TOTAL-2)
+#define MPIDI_MAX_AM_HANDLERS          (MPIDI_INTERNAL_HANDLER_NEXT-1)
+
+
+#ifdef USE_OFI_TAGGED
+#define MPIDI_ENABLE_TAGGED          1
+#define MPIDI_ENABLE_AM              1
+#define MPIDI_ENABLE_RMA             1
+#else
+#define MPIDI_ENABLE_TAGGED          0
+#define MPIDI_ENABLE_AM              1
+#define MPIDI_ENABLE_RMA             1
+#endif
+
+#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
+#define MPIDI_ENABLE_SCALABLE_ENDPOINTS 1
+#else
+#define MPIDI_ENABLE_SCALABLE_ENDPOINTS 0
+#endif
+
+#ifdef MPIDI_USE_AV_TABLE
+#define MPIDI_ENABLE_AV_TABLE 1
+#else
+#define MPIDI_ENABLE_AV_TABLE 0
+#endif
 
 /* Macros and inlines */
 /* match/ignore bit manipulation
@@ -107,7 +134,6 @@ EXTERN_C_BEGIN
 /* Typedefs */
 typedef struct iovec iovec_t;
 typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
-typedef int (*control_event_fn) (void *buf);
 
 typedef enum {
     MPIDI_ACCU_ORDER_RAR = 1,
@@ -120,16 +146,6 @@ typedef enum {
     MPIDI_ACCU_SAME_OP,
     MPIDI_ACCU_SAME_OP_NO_OP
 } MPIDI_Win_info_accumulate_ops;
-
-enum {
-    MPID_EPOTYPE_NONE = 0,          /**< No epoch in affect */
-    MPID_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
-    MPID_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
-    MPID_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
-    MPID_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
-    MPID_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
-    MPID_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
-};
 
 enum {
     MPIDI_CTRL_ASSERT,    /**< Lock acknowledge      */
@@ -152,16 +168,19 @@ enum {
 
 enum {
     MPIDI_EVENT_ABORT,
-    MPIDI_EVENT_PEEK,
-    MPIDI_EVENT_RECV,
-    MPIDI_EVENT_RECV_HUGE,
     MPIDI_EVENT_SEND,
+    MPIDI_EVENT_RECV,
+    MPIDI_EVENT_RMA_DONE,
+    MPIDI_EVENT_AM_SEND,
+    MPIDI_EVENT_AM_RECV,
+    MPIDI_EVENT_AM_READ,
+    MPIDI_EVENT_AM_MULTI,
+    MPIDI_EVENT_PEEK,
+    MPIDI_EVENT_RECV_HUGE,
     MPIDI_EVENT_SEND_HUGE,
     MPIDI_EVENT_SSEND_ACK,
     MPIDI_EVENT_GET_HUGE,
-    MPIDI_EVENT_CONTROL,
     MPIDI_EVENT_CHUNK_DONE,
-    MPIDI_EVENT_RMA_DONE,
     MPIDI_EVENT_DYNPROC_DONE,
     MPIDI_EVENT_ACCEPT_PROBE
 };
@@ -189,26 +208,27 @@ typedef struct {
 } MPIDI_Addr_table_t;
 
 typedef struct {
-    char pad[MPIDI_REQUEST_HDR_SIZE];
+    char      pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    int       event_id;
-} MPIDI_Ctrl_req;
+    int       event_id;         /* fixed field, do not move */
+    int       index;
+} MPIDI_AM_req;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
+    context_t     context;          /* fixed field, do not move */
+    int           event_id;         /* fixed field, do not move */
     MPID_Request *signal_req;
 } MPIDI_Ssendack_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     context_t context;          /* fixed field, do not move */
-    int event_id; /* fixed field, do not move */
-    int done;
-    uint32_t tag;
-    uint32_t source;
-    uint64_t msglen;
+    int       event_id;         /* fixed field, do not move */
+    int       done;
+    uint32_t  tag;
+    uint32_t  source;
+    uint64_t  msglen;
 } MPIDI_Dynproc_req;
 
 typedef struct atomic_valid {
@@ -257,16 +277,14 @@ typedef union MPIDI_cacheline_mutex_t{
 }MPIDI_cacheline_mutex_t __attribute__ ((aligned (MPIDI_CACHELINE_SIZE)));
 
 struct cq_list {
-    struct fi_cq_data_entry cq_entry;
-    fi_addr_t source;
+    cq_tagged_entry_t  cq_entry;
+    fi_addr_t          source;
     struct slist_entry entry;
 };
 
 struct cq_buff_entry {
-    struct fi_cq_data_entry cq_entry;
-    fi_addr_t source;
+    cq_tagged_entry_t cq_entry;
 };
-
 
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
@@ -277,17 +295,11 @@ typedef struct {
     fid_domain_t domain;
     fid_fabric_t fabric;
     fid_base_ep_t ep;
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-    MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
-#endif
-    fid_cq_t p2p_cq;
-    fid_cq_t am_cq;
+    fid_cq_t   p2p_cq;
     fid_cntr_t rma_ctr;
     fid_av_t av;
-    iovec_t *iov;
     MPIDI_cacheline_mutex_t mutexes[4];
-    msg_t *msg;
-    MPIDI_Ctrl_req *control_req;
+    MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
     uint64_t cntr;
     uint64_t max_buffered_send;
     uint64_t max_buffered_write;
@@ -301,21 +313,18 @@ typedef struct {
     int      huge_rma_shift;
     int      context_shift;
     size_t iov_limit;
-    int cur_ctrlblock;
-    int num_ctrlblock;
     int control_init;
-    control_event_fn control_fn[16];
     MPID_Node_id_t *node_map;
     MPID_Node_id_t max_node_id;
     void *win_map;
-    void *comm_map;
     atomic_valid_t win_op_table[DT_SIZES][OP_SIZES];
     MPID_CommOps MPID_Comm_fns_store;
-    struct iovec am_iov[MPIDI_NUM_AM_BUFFERS];
-    struct fi_msg am_msg[MPIDI_NUM_AM_BUFFERS];
-    void *am_bufs[MPIDI_NUM_AM_BUFFERS];
-    MPIDI_netmod_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS];
-    MPIDI_netmod_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS];
+    struct iovec    am_iov[MPIDI_NUM_AM_BUFFERS];
+    struct fi_msg   am_msg[MPIDI_NUM_AM_BUFFERS];
+    void           *am_bufs[MPIDI_NUM_AM_BUFFERS];
+    MPIDI_AM_req    am_reqs[MPIDI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS_TOTAL];
+    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS_TOTAL];
     int coll_progress;
     int pname_set;
     int pname_len;
@@ -330,7 +339,7 @@ typedef struct {
 } MPIDI_Global_t;
 
 typedef struct {
-    char addr[62];
+    char           addr[62];
     MPID_Node_id_t node;
 } MPIDI_OFIGpid_t;
 #define GPID_OFI(req) ((MPIDI_OFIGpid_t*)(req)->dev.pad)
@@ -341,25 +350,6 @@ typedef struct {
 } MPIDI_OFIdt_t;
 #define DT_OFI(comm) ((MPIDI_OFIdt_t*)(comm)->dev.pad)
 
-struct MPIDI_Win_lock {
-    struct MPIDI_Win_lock *next;
-    unsigned rank;
-    uint16_t mtype;
-    uint16_t type;
-};
-
-struct MPIDI_Win_queue {
-    struct MPIDI_Win_lock *head;
-    struct MPIDI_Win_lock *tail;
-};
-
-typedef struct MPIDI_WinLock_info {
-    unsigned peer;
-    int lock_type;
-    struct MPID_Win *win;
-    volatile unsigned done;
-} MPIDI_WinLock_info;
-
 /* These control structures have to be the same size */
 typedef struct {
     int16_t  type;
@@ -368,7 +358,6 @@ typedef struct {
     uint64_t win_id;
     int      dummy[8];
 } MPIDI_Win_control_t;
-#define MPID_MIN_CTRL_MSG_SZ (sizeof(MPIDI_Win_control_t))
 
 typedef struct {
     int16_t       type;
@@ -491,7 +480,7 @@ typedef struct {
 typedef struct {
     char                  pad[MPIDI_REQUEST_HDR_SIZE];
     context_t             context;          /* fixed field, do not move */
-    int                   event_id; /* fixed field, do not move */
+    int                   event_id;         /* fixed field, do not move */
     event_event_fn        done_fn;
     MPIDI_Send_control_t  remote_info;
     size_t                cur_offset;
@@ -519,44 +508,12 @@ typedef struct MPIDI_Win_info_args {
     int alloc_shared_noncontig;
 } MPIDI_Win_info_args;
 
-typedef struct MPIDI_Win_info {
-    void *base_addr;
-    uint32_t disp_unit;
-} __attribute__ ((packed)) MPIDI_Win_info;
-
-typedef struct MPIDI_Win_sync_lock {
-    struct {
-        volatile unsigned locked;
-        volatile unsigned allLocked;
-    } remote;
-    struct {
-        struct MPIDI_Win_queue requested;
-        int type;
-        unsigned count;
-    } local;
-} MPIDI_Win_sync_lock;
-
-typedef struct MPIDI_Win_sync_pscw {
-    struct MPID_Group *group;
-    volatile unsigned count;
-} MPIDI_Win_sync_pscw;
-
-typedef struct MPIDI_Win_sync_t {
-    volatile int origin_epoch_type;
-    volatile int target_epoch_type;
-    MPIDI_Win_sync_pscw sc, pw;
-    MPIDI_Win_sync_lock lock;
-} MPIDI_Win_sync_t;
-
 typedef struct {
-    void                *winfo;
-    MPIDI_Win_sync_t     sync;
     fid_mr_t             mr;
     uint64_t             mr_key;
     uint64_t             win_id;
     void                *mmap_addr;
     int64_t              mmap_sz;
-    MPI_Aint            *sizes;
     MPIDI_Win_request   *syncQ;
     void                *msgQ;
     int                  count;
@@ -564,29 +521,16 @@ typedef struct {
 } MPIDI_OFIWin_t;
 #define WIN_OFI(win) ((MPIDI_OFIWin_t*)(win)->dev.pad)
 
-#define MPID_LKEY_START 16384
-
 extern MPIDI_Addr_table_t *MPIDI_Addr_table;
 extern MPIDI_Global_t MPIDI_Global;
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern MPID_Request MPIDI_Request_direct[];
 
-/* Utility functions */
-extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
-extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
-extern void  MPIDI_OFI_Map_create(void **map);
-extern void  MPIDI_OFI_Map_destroy(void *map);
-extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
-extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
-extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
-extern int   MPIDI_OFI_control_dispatch(void *buf);
-extern void  MPIDI_OFI_Index_datatypes();
-extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
-extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
-extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
-extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
-
 extern int   MPIR_Datatype_init_names(void);
+
+#define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
+#define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
+#define AMREQ_OFI_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

@@ -26,7 +26,7 @@ typedef union MPIDI_CH4_Ticket_lock {
 }MPIDI_CH4_Ticket_lock __attribute__((aligned(MPIDI_CH4_CACHELINE_SIZE)));
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_acquire(MPIDI_CH4_Ticket_lock *m)
+MPIDI_CH4I_Thread_mutex_acquire(MPIDI_CH4_Ticket_lock *m)
 {
         uint16_t           u = __sync_fetch_and_add(&m->s.clients, 1);
         while(m->s.ticket != u)
@@ -34,14 +34,14 @@ MPIDI_CH4_Thread_mutex_acquire(MPIDI_CH4_Ticket_lock *m)
 }
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_release(MPIDI_CH4_Ticket_lock *m)
+MPIDI_CH4I_Thread_mutex_release(MPIDI_CH4_Ticket_lock *m)
 {
         asm volatile("": : :"memory");
         m->s.ticket++;
 }
 
 __MUTEX_INLINE__ int
-MPIDI_CH4_Thread_mutex_try_acquire(MPIDI_CH4_Ticket_lock *m)
+MPIDI_CH4I_Thread_mutex_try_acquire(MPIDI_CH4_Ticket_lock *m)
 {
         uint16_t           u    = m->s.clients;
         uint16_t           u2   = u + 1;
@@ -55,28 +55,28 @@ MPIDI_CH4_Thread_mutex_try_acquire(MPIDI_CH4_Ticket_lock *m)
 }
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_lock(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
+MPIDI_CH4I_Thread_mutex_lock(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
-        MPIDI_CH4_Thread_mutex_acquire(m);
+        MPIDI_CH4I_Thread_mutex_acquire(m);
         *mpi_error = 0;
 }
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_unlock(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
+MPIDI_CH4I_Thread_mutex_unlock(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
-        MPIDI_CH4_Thread_mutex_release(m);
+        MPIDI_CH4I_Thread_mutex_release(m);
         *mpi_error = 0;
 }
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_create(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
+MPIDI_CH4I_Thread_mutex_create(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
         m->u = 0;
         *mpi_error = 0;
 }
 
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_mutex_destroy(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
+MPIDI_CH4I_Thread_mutex_destroy(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
         m->u = 0;
         *mpi_error = 0;
@@ -88,7 +88,7 @@ MPIDI_CH4_Thread_mutex_destroy(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 /* Currently only async.c is using condition variables, so we should figure out what  */
 /* we really want from the cv implementations                                         */
 __MUTEX_INLINE__ void
-MPIDI_CH4_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m, int *mpi_error)
+MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
         MPIU_Assert(0);
 }
@@ -96,63 +96,63 @@ MPIDI_CH4_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m,
 
 #if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
 
-#define MPIDI_CH4_THREAD_CS_ENTER_POBJ(mutex)
-#define MPIDI_CH4_THREAD_CS_EXIT_POBJ(mutex)
-#define MPIDI_CH4_THREAD_CS_TRY_POBJ(mutex)
-#define MPIDI_CH4_THREAD_CS_YIELD_POBJ(mutex)
+#define MPIDI_CH4I_THREAD_CS_ENTER_POBJ(mutex)
+#define MPIDI_CH4I_THREAD_CS_EXIT_POBJ(mutex)
+#define MPIDI_CH4I_THREAD_CS_TRY_POBJ(mutex)
+#define MPIDI_CH4I_THREAD_CS_YIELD_POBJ(mutex)
 
-#define MPIDI_CH4_THREAD_CS_ENTER_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4_Thread_mutex_acquire(&m); }})
-#define MPIDI_CH4_THREAD_CS_EXIT_GLOBAL(m)  ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4_Thread_mutex_release(&m); }})
-#define MPIDI_CH4_THREAD_CS_TRY_GLOBAL(m)   ({ (0==MPIDI_CH4_Thread_mutex_try_acquire(&m)); })
-#define MPIDI_CH4_THREAD_CS_YIELD_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4_Thread_mutex_release(&m); sched_yield(); MPIDI_CH4_Thread_mutex_acquire(&m); }})
+#define MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_acquire(&m); }})
+#define MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(m)  ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); }})
+#define MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(m)   ({ (0==MPIDI_CH4I_Thread_mutex_try_acquire(&m)); })
+#define MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); sched_yield(); MPIDI_CH4I_Thread_mutex_acquire(&m); }})
 
-#define MPIDI_CH4_THREAD_CS_ENTER_ALLGRAN(mutex) MPIDI_CH4_THREAD_CS_ENTER_GLOBAL(m)
-#define MPIDI_CH4_THREAD_CS_EXIT_ALLGRAN(mutex)  MPIDI_CH4_THREAD_CS_EXIT_GLOBAL(m)
-#define MPIDI_CH4_THREAD_CS_TRY_ALLGRAN(mutex)   MPIDI_CH4_THREAD_CS_TRY_GLOBAL(m)
-#define MPIDI_CH4_THREAD_CS_YIELD_ALLGRAN(mutex) MPIDI_CH4_THREAD_CS_YIELD_GLOBAL(m)
+#define MPIDI_CH4I_THREAD_CS_ENTER_ALLGRAN(mutex) MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(m)
+#define MPIDI_CH4I_THREAD_CS_EXIT_ALLGRAN(mutex)  MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(m)
+#define MPIDI_CH4I_THREAD_CS_TRY_ALLGRAN(mutex)   MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(m)
+#define MPIDI_CH4I_THREAD_CS_YIELD_ALLGRAN(mutex) MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(m)
 
 #elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
 
-#define MPIDI_CH4_THREAD_CS_ENTER_POBJ(m)                   \
+#define MPIDI_CH4I_THREAD_CS_ENTER_POBJ(m)                   \
         do {                                                \
                 if (likely(MPIR_ThreadInfo.isThreaded)) {   \
-                        MPIDI_CH4_Thread_mutex_acquire(&m); \
+                        MPIDI_CH4I_Thread_mutex_acquire(&m); \
                 }                                           \
         } while (0)
 
-#define MPIDI_CH4_THREAD_CS_EXIT_POBJ(m)                    \
+#define MPIDI_CH4I_THREAD_CS_EXIT_POBJ(m)                    \
         do {                                                \
                 if (likely(MPIR_ThreadInfo.isThreaded)) {   \
-                        MPIDI_CH4_Thread_mutex_release(&m); \
+                        MPIDI_CH4I_Thread_mutex_release(&m); \
                 }                                           \
         } while (0)
 
-#define MPIDI_CH4_THREAD_CS_TRY_POBJ(m)                         \
+#define MPIDI_CH4I_THREAD_CS_TRY_POBJ(m)                         \
         do {                                                    \
                 if (likely(MPIR_ThreadInfo.isThreaded)) {       \
-                        MPIDI_CH4_Thread_mutex_try_acquire(&m); \
+                        MPIDI_CH4I_Thread_mutex_try_acquire(&m); \
                 }                                               \
         } while (0)
 
-#define MPIDI_CH4_THREAD_CS_YIELD_POBJ(m)                   \
+#define MPIDI_CH4I_THREAD_CS_YIELD_POBJ(m)                   \
         do {                                                \
                 if (likely(MPIR_ThreadInfo.isThreaded)) {   \
-                        MPIDI_CH4_Thread_mutex_release(&m); \
+                        MPIDI_CH4I_Thread_mutex_release(&m); \
                         sched_yield();                      \
-                        MPIDI_CH4_Thread_mutex_acquire(&m); \
+                        MPIDI_CH4I_Thread_mutex_acquire(&m); \
                 }                                           \
         } while (0)
 
-#define MPIDI_CH4_THREAD_CS_ENTER_ALLGRAN MPIDI_CH4_THREAD_CS_ENTER_POBJ
-#define MPIDI_CH4_THREAD_CS_EXIT_ALLGRAN  MPIDI_CH4_THREAD_CS_EXIT_POBJ
-#define MPIDI_CH4_THREAD_CS_TRY_ALLGRAN   MPIDI_CH4_THREAD_CS_TRY_POBJ
-#define MPIDI_CH4_THREAD_CS_YIELD_ALLGRAN MPIDI_CH4_THREAD_CS_YIELD_POBJ
+#define MPIDI_CH4I_THREAD_CS_ENTER_ALLGRAN MPIDI_CH4I_THREAD_CS_ENTER_POBJ
+#define MPIDI_CH4I_THREAD_CS_EXIT_ALLGRAN  MPIDI_CH4I_THREAD_CS_EXIT_POBJ
+#define MPIDI_CH4I_THREAD_CS_TRY_ALLGRAN   MPIDI_CH4I_THREAD_CS_TRY_POBJ
+#define MPIDI_CH4I_THREAD_CS_YIELD_ALLGRAN MPIDI_CH4I_THREAD_CS_YIELD_POBJ
 
 /* GLOBAL locks are all NO-OPs */
-#define MPIDI_CH4_THREAD_CS_ENTER_GLOBAL(mutex)
-#define MPIDI_CH4_THREAD_CS_EXIT_GLOBAL(mutex)
-#define MPIDI_CH4_THREAD_CS_TRY_GLOBAL(mutex)
-#define MPIDI_CH4_THREAD_CS_YIELD_GLOBAL(mutex)
+#define MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(mutex)
+#define MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(mutex)
+#define MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(mutex)
+#define MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(mutex)
 
 #else
 
@@ -160,9 +160,9 @@ MPIDI_CH4_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m,
 
 #endif /* MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL */
 
-#define MPIDI_CH4_THREAD_CS_ENTER(name, mutex) MPIDI_CH4_THREAD_CS_ENTER_##name(mutex)
-#define MPIDI_CH4_THREAD_CS_EXIT(name, mutex)  MPIDI_CH4_THREAD_CS_EXIT_##name(mutex)
-#define MPIDI_CH4_THREAD_CS_TRY(name, mutex)  MPIDI_CH4_THREAD_CS_TRY_##name(mutex)
-#define MPIDI_CH4_THREAD_CS_YIELD(name, mutex) MPIDI_CH4_THREAD_CS_YIELD_##name(mutex)
+#define MPIDI_CH4I_THREAD_CS_ENTER(name, mutex) MPIDI_CH4I_THREAD_CS_ENTER_##name(mutex)
+#define MPIDI_CH4I_THREAD_CS_EXIT(name, mutex)  MPIDI_CH4I_THREAD_CS_EXIT_##name(mutex)
+#define MPIDI_CH4I_THREAD_CS_TRY(name, mutex)  MPIDI_CH4I_THREAD_CS_TRY_##name(mutex)
+#define MPIDI_CH4I_THREAD_CS_YIELD(name, mutex) MPIDI_CH4I_THREAD_CS_YIELD_##name(mutex)
 
 #endif /* __include_mpid_ticketlock_h__ */

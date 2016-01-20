@@ -9,11 +9,18 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#if !defined(MPICH_MPIDCH4R_H_INCLUDED)
+#define MPICH_MPIDCH4R_H_INCLUDED
 
+#include "ch4r_recvq.h"
+#include "ch4r_init.h"
+#include "ch4r_probe.h"
+#include "ch4r_recv.h"
+#include "ch4r_rma.h"
+#include "ch4r_send.h"
+#include "ch4r_win.h"
+#include "ch4r_proc.h"
+#include "ch4r_buf.h"
+#include "ch4r_request.h"
 
-#ifdef __cplusplus
-}
-#endif
+#endif /* !defined(MPICH_MPIDCH4R_H_INCLUDED) */

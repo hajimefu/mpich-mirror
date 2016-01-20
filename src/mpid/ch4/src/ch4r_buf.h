@@ -9,11 +9,11 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef MPIDCH4U_BUF_H_INCLUDED
-#define MPIDCH4U_BUF_H_INCLUDED
+#ifndef MPIDI_CH4R_BUF_H_INCLUDED
+#define MPIDI_CH4R_BUF_H_INCLUDED
 
 #include "ch4_impl.h"
-#include "ch4u_util.h"
+#include "ch4i_util.h"
 #include <pthread.h>
 
 /* 
@@ -25,8 +25,8 @@
    - use huge pages
 */
 
-static inline MPIU_buf_pool_t *MPIU_CH4I_create_buf_pool(int num, int size,
-                                                         MPIU_buf_pool_t *parent_pool)
+static inline MPIU_buf_pool_t *create_buf_pool(int num, int size,
+                                               MPIU_buf_pool_t *parent_pool)
 {
     int i;
     MPIU_buf_pool_t *buf_pool;
@@ -59,19 +59,19 @@ static inline MPIU_buf_pool_t *MPIU_CH4I_create_buf_pool(int num, int size,
     return buf_pool;
 }
 
-static inline MPIU_buf_pool_t *MPIU_CH4U_create_buf_pool(int num, int size)
+static inline MPIU_buf_pool_t *MPIDI_CH4R_create_buf_pool(int num, int size)
 {
     MPIU_buf_pool_t *buf_pool;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CREATE_BUF_POOL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CREATE_BUF_POOL);
 
-    buf_pool = MPIU_CH4I_create_buf_pool(num, size, NULL);
+    buf_pool = create_buf_pool(num, size, NULL);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CREATE_BUF_POOL);
     return buf_pool;
 }
 
-static inline void *MPIU_CH4I_get_head_buf(MPIU_buf_pool_t *pool)
+static inline void *MPIDI_CH4R_get_head_buf(MPIU_buf_pool_t *pool)
 {
     void *buf;
     MPIU_buf_t *curr;
@@ -86,7 +86,7 @@ static inline void *MPIU_CH4I_get_head_buf(MPIU_buf_pool_t *pool)
     return buf;    
 }
 
-static inline void *MPIU_CH4U_get_buf_safe(MPIU_buf_pool_t *pool)
+static inline void *MPIDI_CH4R_get_buf_safe(MPIU_buf_pool_t *pool)
 {
     void *buf;
     MPIU_buf_pool_t *curr_pool;
@@ -95,7 +95,7 @@ static inline void *MPIU_CH4U_get_buf_safe(MPIU_buf_pool_t *pool)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_BUF_SAFE);
     
     if (pool->head) {
-        buf = MPIU_CH4I_get_head_buf(pool);
+        buf = MPIDI_CH4R_get_head_buf(pool);
         goto fn_exit;
     }
 
@@ -103,10 +103,10 @@ static inline void *MPIU_CH4U_get_buf_safe(MPIU_buf_pool_t *pool)
     while (curr_pool->next)
         curr_pool = curr_pool->next;
     
-    curr_pool->next = MPIU_CH4I_create_buf_pool(pool->num, pool->size, pool);
+    curr_pool->next = create_buf_pool(pool->num, pool->size, pool);
     MPIU_Assert(curr_pool->next);
     pool->head = curr_pool->next->head;
-    buf = MPIU_CH4I_get_head_buf(pool);
+    buf = MPIDI_CH4R_get_head_buf(pool);
 
 fn_exit:    
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_BUF_SAFE);
@@ -114,7 +114,7 @@ fn_exit:
 }
 
 
-static inline void *MPIU_CH4U_get_buf(MPIU_buf_pool_t *pool)
+static inline void *MPIDI_CH4R_get_buf(MPIU_buf_pool_t *pool)
 {
     void *buf;
 
@@ -122,14 +122,14 @@ static inline void *MPIU_CH4U_get_buf(MPIU_buf_pool_t *pool)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_BUF);
 
     pthread_mutex_lock(&pool->lock);
-    buf = MPIU_CH4U_get_buf_safe(pool);
+    buf = MPIDI_CH4R_get_buf_safe(pool);
     pthread_mutex_unlock(&pool->lock);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_BUF);
     return buf;
 }
 
-static inline void MPIU_CH4U_release_buf_safe(void *buf)
+static inline void MPIDI_CH4R_release_buf_safe(void *buf)
 {
     MPIU_buf_t *curr_buf;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_RELEASE_BUF_SAFE);
@@ -142,7 +142,7 @@ static inline void MPIU_CH4U_release_buf_safe(void *buf)
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_RELEASE_BUF_SAFE);
 }
 
-static inline void MPIU_CH4U_release_buf(void *buf)
+static inline void MPIDI_CH4R_release_buf(void *buf)
 {
     MPIU_buf_t *curr_buf;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_RELEASE_BUF);
@@ -158,11 +158,11 @@ static inline void MPIU_CH4U_release_buf(void *buf)
 }
 
 
-static inline void MPIU_CH4U_destroy_buf_pool(MPIU_buf_pool_t *pool)
+static inline void MPIDI_CH4R_destroy_buf_pool(MPIU_buf_pool_t *pool)
 {
     if (pool->next)
-        MPIU_CH4U_destroy_buf_pool(pool->next);
-    
+        MPIDI_CH4R_destroy_buf_pool(pool->next);
+
     MPIU_Free(pool->memory_region);
     MPIU_Free(pool);
 }

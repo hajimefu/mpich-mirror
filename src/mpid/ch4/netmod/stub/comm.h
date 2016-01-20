@@ -14,10 +14,10 @@
 #include "impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_comm_create
+#define FUNCNAME MPIDI_CH4_NM_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -25,10 +25,10 @@ static inline int MPIDI_netmod_comm_create(MPID_Comm * comm)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_comm_destroy
+#define FUNCNAME MPIDI_CH4_NM_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_comm_destroy(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);

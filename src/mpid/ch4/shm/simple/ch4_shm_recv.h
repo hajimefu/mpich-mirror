@@ -57,7 +57,7 @@ static inline int shm_do_irecv(void *buf,
     REQ_SHM(rreq)->datatype = datatype;
     REQ_SHM(rreq)->next = NULL;
     REQ_SHM(rreq)->segment_ptr = NULL;
-    MPIU_CH4_REQUEST_ANYSOURCE_PARTNER(rreq) = NULL;
+    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq) = NULL;
     MPIR_STATUS_SET_COUNT(rreq->status, 0);
     if( !dt_contig ) {
         REQ_SHM(rreq)->segment_ptr = MPID_Segment_alloc( );
@@ -71,7 +71,7 @@ static inline int shm_do_irecv(void *buf,
     REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
     MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
             (MPIU_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
-             MPIDI_CH4U_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
+             MPIDI_CH4R_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
              rank, tag, comm->context_id + context_offset));
     *request = rreq;
 

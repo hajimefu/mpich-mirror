@@ -13,31 +13,31 @@
 
 #include "impl.h"
 
-static inline int MPIDI_netmod_request_is_anysource(MPID_Request * req)
+static inline int MPIDI_CH4_NM_request_is_anysource(MPID_Request * req)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_netmod_request_is_pending_failure(MPID_Request * req)
+static inline int MPIDI_CH4_NM_request_is_pending_failure(MPID_Request * req)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline void MPIDI_netmod_request_set_completed(MPID_Request * req)
+static inline void MPIDI_CH4_NM_request_set_completed(MPID_Request * req)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline void MPIDI_netmod_request_release(MPID_Request * req)
+static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline MPID_Request *MPIDI_netmod_request_create(void)
+static inline MPID_Request *MPIDI_CH4_NM_request_create(void)
 {
     MPIU_Assert(0);
     return ((MPID_Request *) 0);

@@ -102,7 +102,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CREATE);
-    mpi_errno = MPIDI_netmod_comm_create(comm);
+    mpi_errno = MPIDI_CH4_NM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -116,8 +116,8 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (comm != MPIR_Process.comm_world && comm != MPIR_Process.comm_self) {
         int i, lpid, is_local;
 
-        MPIU_CH4U_COMM(comm,locality) = (MPIDI_CH4U_locality_t*)
-            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4U_locality_t));
+        MPIDI_CH4R_COMM(comm,locality) = (MPIDI_CH4R_locality_t*)
+            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4R_locality_t));
 
         /* For now, we'll only deal with locality for intracommunicators. For
          * intercommunicators, we'll just set all locality to remote. */
@@ -126,16 +126,16 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
                 MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
                 is_local = MPIDI_CH4_rank_is_local(lpid, MPIR_Process.comm_world);
 
-                MPIU_CH4U_COMM(comm,locality)[i].is_local = is_local;
-                MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+                MPIDI_CH4R_COMM(comm,locality)[i].is_local = is_local;
+                MPIDI_CH4R_COMM(comm,locality)[i].index    = lpid;
             }
         } else {
             /* TODO - Set up locality information for intercommunicators. */
             for (i = 0; i < comm->remote_size; i++) {
                 MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
 
-                MPIU_CH4U_COMM(comm,locality)[i].is_local = 0;
-                MPIU_CH4U_COMM(comm,locality)[i].index    = lpid;
+                MPIDI_CH4R_COMM(comm,locality)[i].is_local = 0;
+                MPIDI_CH4R_COMM(comm,locality)[i].index    = lpid;
             }
         }
     }
@@ -157,7 +157,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DESTROY);
-    mpi_errno = MPIDI_netmod_comm_destroy(comm);
+    mpi_errno = MPIDI_CH4_NM_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -168,7 +168,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     }
 #endif
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIU_Free(MPIU_CH4U_COMM(comm,locality));
+    MPIU_Free(MPIDI_CH4R_COMM(comm,locality));
 #endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);

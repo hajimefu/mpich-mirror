@@ -92,10 +92,10 @@ static inline int do_iprobe(int source,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_probe
+#define FUNCNAME MPIDI_CH4_NM_probe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_probe(int source,
+static inline int MPIDI_CH4_NM_probe(int source,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPI_Status * status)
 {
@@ -116,10 +116,10 @@ static inline int MPIDI_netmod_probe(int source,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_improbe
+#define FUNCNAME MPIDI_CH4_NM_improbe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_improbe(int source,
+static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
                                        MPID_Comm * comm,
                                        int context_offset,
@@ -141,10 +141,10 @@ static inline int MPIDI_netmod_improbe(int source,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_iprobe
+#define FUNCNAME MPIDI_CH4_NM_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_netmod_iprobe(int source,
+static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
                                       MPID_Comm * comm,
                                       int context_offset, int *flag, MPI_Status * status)
