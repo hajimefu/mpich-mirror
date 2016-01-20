@@ -128,7 +128,6 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
     hints->caps = 0ULL;                      /* Tag matching interface  */
     hints->caps |= FI_RMA;                   /* RMA(read/write)         */
     hints->caps |= FI_ATOMICS;               /* Atomics capabilities    */
-    hints->caps |= FI_DIRECTED_RECV;         /* directed receive        */
 
     if(do_tagged) {
         hints->caps |= FI_TAGGED;                 /* Tag matching interface  */
