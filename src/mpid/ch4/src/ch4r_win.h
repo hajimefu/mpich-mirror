@@ -299,6 +299,8 @@ static inline int MPIDI_CH4R_win_complete(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_COMPLETE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_COMPLETE);
 
+    MPIDI_CH4R_EPOCH_START_CHECK2(win,mpi_errno,goto fn_fail);
+
     mpi_errno = MPIDI_CH4I_progress_win_fence(win);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 

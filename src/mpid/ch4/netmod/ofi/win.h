@@ -343,6 +343,8 @@ static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
 
+    MPIDI_CH4R_EPOCH_START_CHECK2(win,mpi_errno,goto fn_fail);
+
     MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Progress_win_counter_fence(win));
 
     MPID_Group *group;
