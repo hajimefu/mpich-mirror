@@ -373,7 +373,8 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
         slist_init(&MPIDI_Global.cq_buff_list);
         MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
         optlen                    = MPIDI_MIN_MSG_SZ;
-        FI_RC(fi_setopt(&MPIDI_Global.ep->fid,
+
+        FI_RC(fi_setopt(&(G_RXC_MSG(0)->fid),
                         FI_OPT_ENDPOINT,
                         FI_OPT_MIN_MULTI_RECV,
                         &optlen, sizeof(optlen)), setopt);
@@ -390,7 +391,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
             MPIDI_Global.am_msg[i].addr      = FI_ADDR_UNSPEC;
             MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
             MPIDI_Global.am_msg[i].iov_count = 1;
-            FI_RC_RETRY(fi_recvmsg(MPIDI_Global.ep,
+            FI_RC_RETRY(fi_recvmsg(G_RXC_MSG(0),
                                    &MPIDI_Global.am_msg[i],
                                    FI_MULTI_RECV | FI_COMPLETION), prepost);
         }

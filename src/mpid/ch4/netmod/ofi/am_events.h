@@ -154,7 +154,8 @@ static inline int MPIDI_netmod_do_rdma_read(void                       *dst,
         am_req->event_id = MPIDI_EVENT_AM_READ;
         comm             = MPIDI_CH4R_context_id_to_comm(reply_token.data.context_id);
         MPIU_Assert(comm);
-        FI_RC_RETRY_AM(fi_read(MPIDI_Global.ep, (char *) dst + done,
+        FI_RC_RETRY_AM(fi_read(G_TXC_RMA(0),
+                               (char *) dst + done,
                                curr_len, NULL,
                                _comm_to_phys(comm, reply_token.data.src_rank,MPIDI_API_TAG),
                                src + done,
@@ -461,7 +462,7 @@ static inline int MPIDI_netmod_dispatch_ack(int        rank,
     msg.hdr.context_id = comm->context_id;
     msg.hdr.src_rank   = comm->rank;
     msg.pyld.sreq_ptr  = sreq_ptr;
-    FI_RC_RETRY_AM(fi_inject(MPIDI_Global.ep, &msg, sizeof(msg),
+    FI_RC_RETRY_AM(fi_inject(G_TXC_MSG(0), &msg, sizeof(msg),
                              _comm_to_phys(comm, rank, MPIDI_API_TAG)), inject);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DISPATCH_ACK);

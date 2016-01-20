@@ -177,7 +177,7 @@ static inline int MPIDI_netmod_repost_buffer(void         *buf,
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
-    FI_RC_RETRY_AM(fi_recvmsg(MPIDI_Global.ep,
+    FI_RC_RETRY_AM(fi_recvmsg(G_RXC_MSG(0),
                               &MPIDI_Global.am_msg[am->index],
                               FI_MULTI_RECV | FI_COMPLETION), repost);
 fn_exit:
@@ -292,7 +292,7 @@ static inline int MPIDI_netmod_ofi_do_send_am_hdr(int                         ra
     iov[1].iov_base = AMREQ_OFI_HDR(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 2,
+    FI_RC_RETRY_AM(fi_sendv(G_TXC_MSG(0), iov, NULL, 2,
                             _comm_to_phys(use_comm, use_rank, MPIDI_API_TAG),
                             &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
@@ -370,7 +370,7 @@ static inline int MPIDI_netmod_ofi_send_am_long(int           rank,
     iov[2].iov_base = lmt_info;
     iov[2].iov_len = sizeof(*lmt_info);
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3,
+    FI_RC_RETRY_AM(fi_sendv(G_TXC_MSG(0), iov, NULL, 3,
                             _comm_to_phys(comm, rank, MPIDI_API_TAG),
                             &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
@@ -425,7 +425,7 @@ static inline int MPIDI_netmod_ofi_send_am_short(int           rank,
 
     MPID_cc_incr(sreq->cc_ptr, &c);
     AMREQ_OFI(sreq, event_id) = MPIDI_EVENT_AM_SEND;
-    FI_RC_RETRY_AM(fi_sendv(MPIDI_Global.ep, iov, NULL, 3,
+    FI_RC_RETRY_AM(fi_sendv(G_TXC_MSG(0), iov, NULL, 3,
                             _comm_to_phys(comm, rank, MPIDI_API_TAG),
                             &AMREQ_OFI(sreq, context)), sendv);
   fn_exit:
@@ -569,7 +569,7 @@ static inline int MPIDI_netmod_do_inject(int           rank,
         _comm_to_phys(use_comm, use_rank, MPIDI_API_MSG):
         _to_phys(use_rank, MPIDI_API_MSG);
 
-    FI_RC_RETRY_AM(fi_sendmsg(MPIDI_Global.ep, &msg, FI_INJECT), send);
+    FI_RC_RETRY_AM(fi_sendmsg(G_TXC_MSG(0), &msg, FI_INJECT), send);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_INJECT);
