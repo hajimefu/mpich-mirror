@@ -398,7 +398,7 @@ __CH4_INLINE__ int MPIDI_Get_processor_name(char *name, int namelen, int *result
 
     MPIR_ERR_CHKANDJUMP(MPIDI_CH4_Global.pname_len <= 0,
                         mpi_errno, MPI_ERR_OTHER, "**procnamefailed");
-    MPIU_Strncpy(name, MPIDI_CH4_Global.pname, namelen);
+    MPL_strncpy(name, MPIDI_CH4_Global.pname, namelen);
 
     if (resultlen)
         *resultlen = MPIDI_CH4_Global.pname_len;

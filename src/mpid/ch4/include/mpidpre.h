@@ -19,6 +19,7 @@ typedef size_t MPIDI_msg_sz_t;
 
 #include "mpid_dataloop.h"
 #include "mpid_thread.h"
+#include "mpid_sched.h"
 #include "mpid_timers_fallback.h"
 #include "netmodpre.h"
 #include "mpl_uthash.h"
@@ -358,6 +359,6 @@ typedef struct {
 #define MPID_USE_NODE_IDS
 typedef uint16_t MPID_Node_id_t;
 
-#include "mpid_sched_pre.h"
+#include "mpidu_pre.h"
 
 #endif /* MPIDPRE_H_INCLUDED */

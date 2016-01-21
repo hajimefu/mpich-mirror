@@ -431,7 +431,7 @@ static inline int MPIDI_CH4_NM_init_generic(int         rank,
                                              MPIDI_MAX_KVS_VALUE_LEN), pmi);
         MPIDI_CH4_NMI_MPI_RC_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
         MPIU_Assert(MPIR_Process.comm_parent != NULL);
-        MPIU_Strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
+        MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
 
 fn_exit:

@@ -31,7 +31,6 @@ EXTERN_C_BEGIN
 
 #define MPICH_SKIP_MPICXX
 #include "mpiimpl.h"
-#include "mpid_sched.h"
 
 /* *INDENT-OFF* */
 EXTERN_C_END

@@ -13,4 +13,5 @@ noinst_HEADERS += src/mpid/ch4/include/netmodpre.h  \
                   src/mpid/ch4/include/mpidch4r.h   \
                   src/mpid/ch4/include/mpidimpl.h   \
                   src/mpid/ch4/include/mpidpre.h    \
+                  src/mpid/ch4/include/mpid_sched.h \
                   src/mpid/ch4/include/mpid_thread.h
