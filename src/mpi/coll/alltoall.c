@@ -535,7 +535,6 @@ int MPIR_Alltoall_inter(
         }
     }
 
- fn_exit:
     /* check if multiple threads are calling this collective function */
     MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
@@ -544,9 +543,7 @@ int MPIR_Alltoall_inter(
         MPIR_ERR_SET(mpi_errno, *errflag, "**coll_fail");
 
     return mpi_errno;
- fn_fail:
-    goto fn_exit;
-}
+ }
 
 
 #undef FUNCNAME

@@ -305,8 +305,7 @@ int MPIR_Alltoallw_inter(const void *sendbuf, const int sendcounts[], const int 
             MPIR_ERR_ADD(mpi_errno_ret, mpi_errno);
         }
     }
-    
- fn_exit:
+
     /* check if multiple threads are calling this collective function */
     MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
@@ -314,8 +313,6 @@ int MPIR_Alltoallw_inter(const void *sendbuf, const int sendcounts[], const int 
     else if (*errflag != MPIR_ERR_NONE)
         MPIR_ERR_SET(mpi_errno, *errflag, "**coll_fail");
     return mpi_errno;
- fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
