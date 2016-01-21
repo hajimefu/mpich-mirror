@@ -90,7 +90,9 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
                                    MPI_Datatype datatype,
                                    int rank,
                                    int tag,
-                                   MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                   MPID_Comm * comm,
+                                   int context_offset,
+                                   MPID_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RECV_INIT);
@@ -133,8 +135,12 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
         }
     }
 #endif
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
+
 }
 
 

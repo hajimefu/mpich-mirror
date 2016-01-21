@@ -411,13 +411,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPID_Request * requests[]
 
         switch (REQ_OFI(preq, util.persist.type)) {
 #ifdef MPIDI_BUILD_CH4_SHM
-            STARTALL_CASE(MPIDI_PTYPE_RECV, MPIDI_netmod_irecv, preq->comm->recvcontext_id);
+            STARTALL_CASE(MPIDI_PTYPE_RECV, MPIDI_CH4_NM_irecv, preq->comm->recvcontext_id);
 #else
             STARTALL_CASE(MPIDI_PTYPE_RECV, MPIDI_Irecv, preq->comm->recvcontext_id);
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM
-            STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_netmod_send, preq->comm->context_id);
+            STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_CH4_NM_send, preq->comm->context_id);
 #else
             STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_Isend, preq->comm->context_id);
 #endif
