@@ -81,6 +81,7 @@ static inline MPID_Request *MPIDI_AM_request_alloc_and_init(int count)
     req->comm = NULL;
     MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_AM;
     AMREQ_OFI(req, req_hdr) = NULL;
+    MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
 
