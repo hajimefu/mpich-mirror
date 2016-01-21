@@ -27,7 +27,7 @@ static inline void MPIDI_CH4R_progress_cmpl_list(void)
     /* MPIDI_CS_ENTER(); */
 do_check_again:
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.cmpl_list, curr, tmp) {
-        if (curr->seq_no == OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
+        if (curr->seq_no == (uint64_t)OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
             MPL_DL_DELETE(MPIDI_CH4_Global.cmpl_list, curr);
             req = (MPID_Request *) curr->request;
             cmpl_handler_fn = (MPIDI_CH4_NM_am_completion_handler_fn) curr->cmpl_handler_fn;
@@ -49,7 +49,7 @@ static inline int MPIDI_CH4R_check_cmpl_order(MPID_Request *req,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CHECK_CMPL_ORDER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CHECK_CMPL_ORDER);
 
-    if (MPIDI_CH4R_REQUEST(req, req->seq_no) == OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
+    if (MPIDI_CH4R_REQUEST(req, req->seq_no) == (uint64_t)OPA_load_int(&MPIDI_CH4_Global.exp_seq_no)) {
         OPA_incr_int(&MPIDI_CH4_Global.exp_seq_no);
         return 1;
     }

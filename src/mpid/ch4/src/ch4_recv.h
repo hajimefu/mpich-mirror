@@ -100,6 +100,8 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_CH4_NM_recv_init(buf, count, datatype, rank, tag,
                                        comm, context_offset, request);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
+    return mpi_errno;
 #else
     if (unlikely(rank == MPI_ANY_SOURCE))
     {
@@ -134,12 +136,12 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
             MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request) = NULL;
         }
     }
-#endif
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+#endif
 
 }
 
