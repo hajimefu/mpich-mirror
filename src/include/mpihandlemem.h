@@ -125,23 +125,21 @@ const char *MPIU_Handle_get_kind_str(int kind);
    as they are incremented */
 #ifdef MPICH_DEBUG_HANDLES
 #define MPICH_DEBUG_MAX_REFCOUNT 64
-#define MPIU_HANDLE_CHECK_REFCOUNT(objptr_,op_)                                                     \
+#define MPIU_HANDLE_CHECK_REFCOUNT(objptr_,op_, local_ref_count_)                                   \
     do {                                                                                            \
-        int local_ref_count_ = MPIU_Object_get_ref(objptr_);                                        \
         if (local_ref_count_ > MPICH_DEBUG_MAX_REFCOUNT || local_ref_count_ < 0)                    \
         {                                                                                           \
             MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                        \
                                              "Invalid refcount (%d) in %p (0x%08x) %s",             \
                                              local_ref_count_, (objptr_), (objptr_)->handle, op_)); \
         }                                                                                           \
-        MPIU_Assert(local_ref_count_ >= 0);                                                         \
     } while (0)
 #else
-#define MPIU_HANDLE_CHECK_REFCOUNT(objptr_,op_) \
-    MPIU_Assert(MPIU_Object_get_ref(objptr_) >= 0)
+#define MPIU_HANDLE_CHECK_REFCOUNT(objptr_,op_, local_ref_count_)    \
+    MPIU_Assert(local_ref_count_ >= 0)
 #endif
 
-#define MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, action_str_)                                          \
+#define MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, action_str_, local_ref_count_)                        \
     MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                                   \
                                      "%s %p (0x%08x kind=%s) refcount to %d",                          \
                                      (action_str_),                                                    \
@@ -224,24 +222,24 @@ typedef int MPIU_Handle_ref_count;
 #define MPIU_Object_set_ref(objptr_,val)                 \
     do {                                                 \
         (objptr_)->ref_count = val;                      \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "set"); \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "set",val); \
     } while (0)
 
 /* must be used with care, since there is no synchronization for this read */
 #define MPIU_Object_get_ref(objptr_) \
     ((objptr_)->ref_count)
 
-#define MPIU_Object_add_ref_always(objptr_)               \
-    do {                                                  \
-        (objptr_)->ref_count++;                           \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "incr"); \
-        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"incr");       \
+#define MPIU_Object_add_ref_always(objptr_)                                     \
+    do {                                                                        \
+        (objptr_)->ref_count++;                                                 \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "incr", (objptr_)->ref_count); \
+        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"incr", (objptr_)->ref_count);       \
     } while (0)
-#define MPIU_Object_release_ref_always(objptr_,inuse_ptr) \
-    do {                                                  \
-        *(inuse_ptr) = --((objptr_)->ref_count);          \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "decr"); \
-        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"decr");       \
+#define MPIU_Object_release_ref_always(objptr_,inuse_ptr)               \
+    do {                                                                \
+        *(inuse_ptr) = --((objptr_)->ref_count);                        \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "decr",*(inuse_ptr));  \
+        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"decr",*(inuse_ptr));        \
     } while (0)
 
 #elif MPIU_THREAD_REFCOUNT == MPIU_REFCOUNT_LOCKFREE
@@ -250,29 +248,41 @@ typedef int MPIU_Handle_ref_count;
 typedef OPA_int_t MPIU_Handle_ref_count;
 #define MPIU_HANDLE_REF_COUNT_INITIALIZER(val_) OPA_INT_T_INITIALIZER(val_)
 
-#define MPIU_Object_set_ref(objptr_,val)                 \
-    do {                                                 \
-        OPA_store_int(&(objptr_)->ref_count, val);       \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "set"); \
+#define MPIU_Object_set_ref(objptr_,val)                       \
+    do {                                                       \
+        OPA_store_int(&(objptr_)->ref_count, val);             \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "set",val);   \
     } while (0)
 
 /* must be used with care, since there is no synchronization for this read */
 #define MPIU_Object_get_ref(objptr_) \
     (OPA_load_int(&(objptr_)->ref_count))
 
+#ifdef MPICH_DEBUG_HANDLES
+#define MPIU_Object_add_ref_always(objptr_)                             \
+    do {                                                                \
+        int local_ = OPA_fetch_and_incr_int(&((objptr_)->ref_count))+1; \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "incr", local_);       \
+        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"incr", local_);             \
+    } while (0)
+#define MPIU_Object_release_ref_always(objptr_,inuse_ptr)               \
+    do {                                                                \
+        int local_ = OPA_fetch_and_decr_int(&((objptr_)->ref_count))-1; \
+        *(inuse_ptr) = local_ ? 1 : 0;                                  \
+        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "decr",local_);        \
+        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"decr", local_);             \
+    } while (0)
+#else
 #define MPIU_Object_add_ref_always(objptr_)               \
     do {                                                  \
         OPA_incr_int(&((objptr_)->ref_count));            \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "incr"); \
-        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"incr");       \
     } while (0)
 #define MPIU_Object_release_ref_always(objptr_,inuse_ptr)               \
     do {                                                                \
         int got_zero_ = OPA_decr_and_test_int(&((objptr_)->ref_count)); \
         *(inuse_ptr) = got_zero_ ? 0 : 1;                               \
-        MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, "decr");               \
-        MPIU_HANDLE_CHECK_REFCOUNT(objptr_,"decr");                     \
     } while (0)
+#endif
 #else
 #error invalid value for MPIU_THREAD_REFCOUNT
 #endif
