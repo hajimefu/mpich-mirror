@@ -74,14 +74,14 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 #define FUNCNAME MPIDI_CH4_NM_send_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am(int          rank,
-                                       MPID_Comm   *comm,
-                                       int          handler_id,
-                                       const void  *am_hdr,
-                                       size_t       am_hdr_sz,
-                                       const void  *data,
-                                       MPI_Count    count,
-                                       MPI_Datatype datatype,
+static inline int MPIDI_CH4_NM_send_am(int           rank,
+                                       MPID_Comm    *comm,
+                                       int           handler_id,
+                                       const void   *am_hdr,
+                                       size_t        am_hdr_sz,
+                                       const void   *data,
+                                       MPI_Count     count,
+                                       MPI_Datatype  datatype,
                                        MPID_Request *sreq,
                                        void         *netmod_context)
 {
@@ -108,7 +108,8 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
                                         const void *data,
                                         MPI_Count count,
                                         MPI_Datatype datatype,
-                                        MPID_Request * sreq, void *netmod_context)
+                                        MPID_Request * sreq,
+                                        void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, is_allocated;
     size_t am_hdr_sz = 0, i;

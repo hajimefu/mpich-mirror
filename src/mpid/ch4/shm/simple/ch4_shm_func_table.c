@@ -45,8 +45,8 @@ MPIDI_shm_funcs_t MPIDI_shm_simple_funcs = {
     MPIDI_shm_create_intercomm_from_lpids,
     MPIDI_shm_comm_create,
     MPIDI_shm_comm_destroy,
-    MPIDI_shm_request_create,
-    MPIDI_shm_request_release
+    MPIDI_shm_am_request_init,
+    MPIDI_shm_am_request_release
 };
 
 MPIDI_shm_native_funcs_t MPIDI_shm_native_simple_funcs = {
@@ -103,6 +103,7 @@ MPIDI_shm_native_funcs_t MPIDI_shm_native_simple_funcs = {
     MPIDI_shm_win_sync,
     MPIDI_shm_win_flush_all,
     MPIDI_shm_get_accumulate,
-    MPIDI_shm_win_lock_all
+    MPIDI_shm_win_lock_all,
+    MPIDI_shm_native_request_release,
 };
 #endif

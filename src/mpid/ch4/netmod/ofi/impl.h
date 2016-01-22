@@ -371,7 +371,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
 #ifdef MPIDI_BUILD_CH4_SHM
     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 #endif
-    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_NATIVE;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }
@@ -393,7 +393,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
     req->kind              = MPID_REQUEST_SEND;
     req->comm              = NULL;
     req->errflag           = MPIR_ERR_NONE;
-    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_DIRECT;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_NATIVE;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
 }

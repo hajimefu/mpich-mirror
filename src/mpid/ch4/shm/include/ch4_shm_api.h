@@ -221,10 +221,10 @@ MPIDI_SHM_API(int,comm_create,
 MPIDI_SHM_API(int,comm_destroy,
                  (MPID_Comm *) comm);
 
-MPIDI_SHM_API(MPID_Request *,request_create,
-                 (void));
+MPIDI_SHM_API(void,am_request_init,
+                  (MPID_Request *) req);
 
-MPIDI_SHM_API(void,request_release,
+MPIDI_SHM_API(void,am_request_release,
                  (MPID_Request *) req);
 
 MPIDI_SHM_API_NATIVE(int,send,
@@ -604,6 +604,10 @@ MPIDI_SHM_API_NATIVE(int,get_accumulate,
 MPIDI_SHM_API_NATIVE(int,win_lock_all,
                         (int) assert,
                         (MPID_Win *) win);
+
+MPIDI_SHM_API_NATIVE(void,native_request_release,
+                     (MPID_Request *) req);
+
 
 #undef MPIDI_SHM_API
 #undef MPIDI_SHM_API_NATIVE

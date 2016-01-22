@@ -79,7 +79,7 @@ static inline MPID_Request *MPIDI_AM_request_alloc_and_init(int count)
     req->status.MPI_TAG = MPI_UNDEFINED;
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
-    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_AM;
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_AM;
     AMREQ_OFI(req, req_hdr) = NULL;
     MPIR_REQUEST_CLEAR_DBG(req);
     return req;
@@ -587,11 +587,6 @@ static inline void MPIDI_AM_netmod_request_complete(MPID_Request *req)
     MPIU_Assert(count >= 0);
     if (count == 0)
         MPIDI_CH4_NMI_OFI_AM_request_release(req);
-}
-
-static inline MPID_Request *MPIDI_AM_netmod_request_create(void)
-{
-    return MPIDI_AM_request_alloc_and_init(1);
 }
 
 #endif /*NETMOD_OFI_AM_IMPL_H_INCLUDED */

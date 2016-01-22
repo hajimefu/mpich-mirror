@@ -20,13 +20,15 @@
 #define FUNCNAME MPIDI_CH4I_do_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4I_do_send(const void *buf,
-                              int count,
-                              MPI_Datatype datatype,
-                              int rank,
-                              int tag,
-                              MPID_Comm * comm,
-                              int context_offset, MPID_Request ** request, int type)
+static inline int MPIDI_CH4I_do_send(const void    *buf,
+                                     int            count,
+                                     MPI_Datatype   datatype,
+                                     int            rank,
+                                     int            tag,
+                                     MPID_Comm     *comm,
+                                     int            context_offset,
+                                     MPID_Request **request,
+                                     int            type)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPID_Request *sreq = NULL;

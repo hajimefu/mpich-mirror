@@ -13,34 +13,19 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_shm_request_is_anysource(MPID_Request * req)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-static inline int MPIDI_shm_request_is_pending_failure(MPID_Request * req)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-static inline void MPIDI_shm_request_set_completed(MPID_Request * req)
-{
-    MPIU_Assert(0);
-    return;
-}
-
-static inline void MPIDI_shm_request_release(MPID_Request * req)
+static inline void MPIDI_shm_native_request_release(MPID_Request * req)
 {
     MPIDI_CH4_SHMI_SIMPLE_request_release(req);
 }
 
-static inline MPID_Request *MPIDI_shm_request_create(void)
+static inline void MPIDI_shm_am_request_release(MPID_Request * req)
 {
-    MPID_Request *req;
-    MPIDI_Request_shm_alloc_and_init(req, 1);
-    return req;
+    MPIU_Assert(0);
+}
+
+static inline void MPIDI_shm_am_request_init(MPID_Request *req)
+{
+    MPIU_Assert(0);
 }
 
 #endif /* SHM_REQUEST_H_INCLUDED */

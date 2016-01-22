@@ -67,12 +67,41 @@ static inline MPIDI_CH4R_Dev_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t c
     return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
 }
 
+static inline MPID_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
+{
+    MPID_Request *req;
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    MPIU_Assert(req != NULL);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIDI_CH4R_REQUEST(req, req) = NULL;
+    MPID_cc_set(&req->cc, 1);
+    MPIU_Object_set_ref(req, refcount);
+    MPIR_STATUS_SET_COUNT(req->status, 0);
+    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
+    req->cc_ptr            = &req->cc;
+    req->greq_fns          = NULL;
+    req->status.MPI_SOURCE = MPI_UNDEFINED;
+    req->status.MPI_TAG    = MPI_UNDEFINED;
+    req->status.MPI_ERROR  = MPI_SUCCESS;
+    req->comm              = NULL;
+    req->errflag           = MPIR_ERR_NONE;
+    MPIR_REQUEST_CLEAR_DBG(req);
+#ifdef MPIDI_BUILD_CH4_SHM
+    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
+#endif
+    return req;
+}
+
 static inline MPID_Request *MPIDI_CH4R_create_req()
 {
-    MPID_Request *req = MPIDI_CH4_NM_request_create();
-    MPIU_Object_set_ref(req, 2);
-    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
-    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPID_Request *req;
+    req = MPIDI_CH4I_alloc_and_init_req(2);
+    MPIDI_CH4_NM_am_request_init(req);
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4_NM_am_request_init(req);
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_AM;
+    MPIDI_CH4R_REQUEST(req, req)    =
+        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
     MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
     MPIDI_CH4R_REQUEST(req, req->status) = 0;
     return req;
@@ -80,16 +109,108 @@ static inline MPID_Request *MPIDI_CH4R_create_req()
 
 static inline MPID_Request *MPIDI_CH4R_create_win_req()
 {
-    MPID_Request *req = MPIDI_CH4_NM_request_create();
-    MPIU_Object_set_ref(req, 1);
-    MPIU_Assert(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
-    MPIDI_CH4R_REQUEST(req, req) = (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPID_Request *req;
+    req = MPIDI_CH4I_alloc_and_init_req(1);
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4I_REQUEST(req,reqtype)      = MPIDI_CH4_REQTYPE_AM;
+    MPIDI_CH4R_REQUEST(req, req)         =
+        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
     MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
     MPIDI_CH4R_REQUEST(req, req->status) = 0;
+
+    MPIDI_CH4_NM_am_request_init(req);
     return req;
 }
 
-static inline void MPIDI_CH4R_complete_req(MPID_Request *req)
+static inline void MPIDI_CH4I_Request_release_mpi(MPID_Request * req)
+{
+    int count;
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Object_release_ref(req, &count);
+    MPIU_Assert(count >= 0);
+
+    if (count == 0) {
+        MPIU_Assert(MPID_cc_is_complete(&req->cc));
+
+        if (req->comm)
+            MPIR_Comm_release(req->comm);
+
+        if (req->greq_fns)
+            MPIU_Free(req->greq_fns);
+
+        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+    }
+    return;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_request_release_typed
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline void MPIDI_CH4I_Request_release_typed(MPID_Request * req)
+{
+    MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE_TYPED);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE_TYPED);
+
+    switch (MPIDI_CH4I_REQUEST(req,reqtype)) {
+    case MPIDI_CH4_REQTYPE_NATIVE:
+        MPIDI_CH4_NM_native_request_release(req);
+        break;
+    case MPIDI_CH4_REQTYPE_AM:
+        MPIDI_CH4_NM_am_request_release(req);
+        break;
+#ifdef MPIDI_BUILD_CH4_SHM
+    case MPIDI_CH4_REQTYPE_NATIVE_SHM:
+        MPIDI_shm_native_request_release(req);
+        break;
+    case MPIDI_CH4_REQTYPE_AM_SHM:
+        MPIDI_shm_am_request_release(req);
+        break;
+#endif
+    case MPIDI_CH4_REQTYPE_MPI:
+        MPIDI_CH4I_Request_release_mpi(req);
+        break;
+    default:
+        MPIU_Assert(0);
+    }
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_RELEASE_TYPED);
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_Request_release
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ void MPIDI_CH4I_Request_release(MPID_Request * req)
+{
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
+
+    if (req->kind == MPID_PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
+        MPIDI_CH4I_Request_release_typed(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
+    }
+    MPIDI_CH4I_Request_release_typed(req);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_RELEASE);
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_Request_release
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ void MPIDI_CH4R_Request_release(MPID_Request * req)
+{
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_REQUEST_RELEASE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_REQEUST_RELEASE);
+
+    MPIDI_CH4I_Request_release(req);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_REQUEST_RELEASE);
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_complete_req
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ void MPIDI_CH4R_complete_req(MPID_Request *req)
 {
     int count;
     MPID_cc_decr(req->cc_ptr, &count);
@@ -99,7 +220,7 @@ static inline void MPIDI_CH4R_complete_req(MPID_Request *req)
             MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
             MPIDI_CH4R_REQUEST(req, req) = NULL;
         }
-        MPIDI_Request_release(req);
+        MPIDI_CH4R_Request_release(req);
     }
 }
 

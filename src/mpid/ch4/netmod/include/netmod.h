@@ -57,8 +57,8 @@ typedef struct MPIDI_CH4_NM_funcs {
     MPIDI_CH4_NM_comm_create_t comm_create;
     MPIDI_CH4_NM_comm_destroy_t comm_destroy;
     /* Request allocation routines */
-    MPIDI_CH4_NM_request_create_t request_create;
-    MPIDI_CH4_NM_request_release_t request_release;
+    MPIDI_CH4_NM_am_request_init_t am_request_init;
+    MPIDI_CH4_NM_am_request_release_t am_request_release;
     /* Active Message Routines */
     MPIDI_CH4_NM_reg_hdr_handler_t reg_hdr_handler;
     MPIDI_CH4_NM_send_am_hdr_t send_am_hdr;
@@ -131,6 +131,7 @@ typedef struct MPIDI_CH4_NM_native_funcs {
     MPIDI_CH4_NM_get_accumulate_t get_accumulate;
     MPIDI_CH4_NM_win_lock_all_t win_lock_all;
     MPIDI_CH4_NM_rank_is_local_t rank_is_local;
+    MPIDI_CH4_NM_native_request_release_t native_request_release;
 } MPIDI_CH4_NM_native_funcs_t;
 
 extern MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_funcs[];

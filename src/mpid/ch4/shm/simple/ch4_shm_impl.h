@@ -173,7 +173,7 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
     req->status.MPI_TAG       = MPI_UNDEFINED;          \
     req->status.MPI_ERROR     = MPI_SUCCESS;            \
     req->comm                 = NULL;                   \
-    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_DEVTYPE_SHM; \
+    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_NATIVE_SHM; \
     MPIR_REQUEST_CLEAR_DBG(req);                        \
   })
 
