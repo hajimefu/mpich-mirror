@@ -327,7 +327,7 @@ static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
 
             MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
             MPIR_STATUS_SET_COUNT(req->status, 0);
-            MPIDI_Request_complete(req);
+            REQ_SHM_COMPLETE(req);
 
             break;
         }

@@ -132,7 +132,7 @@ static inline int recv_event(cq_tagged_entry_t * wc, MPID_Request * rreq)
 
     }
 
-    MPIDI_Request_complete(rreq);
+    MPIDI_CH4_NMI_OFI_request_complete(rreq);
 
     /* Polling loop will check for truncation */
   fn_exit:

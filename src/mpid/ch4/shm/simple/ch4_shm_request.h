@@ -33,19 +33,7 @@ static inline void MPIDI_shm_request_set_completed(MPID_Request * req)
 
 static inline void MPIDI_shm_request_release(MPID_Request * req)
 {
-    int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
-    if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
-        if (req->comm)
-            MPIR_Comm_release(req->comm);
-        if (req->greq_fns)
-            MPIU_Free(req->greq_fns);
-        MPIDI_Request_tls_free(req);
-    }
-    return;
+    MPIDI_CH4_SHMI_SIMPLE_request_release(req);
 }
 
 static inline MPID_Request *MPIDI_shm_request_create(void)

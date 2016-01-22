@@ -642,7 +642,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4_NMI_OFI_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -656,7 +656,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
                                    (char *)win->base + offset,
                                    target_count,
                                    target_datatype);
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4_NMI_OFI_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -1214,7 +1214,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4_NMI_OFI_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -1228,7 +1228,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
                               origin_addr,
                               origin_count,
                               origin_datatype);
-        MPIDI_Request_complete(rreq);
+        MPIDI_CH4_NMI_OFI_request_complete(rreq);
         goto fn_exit;
     }
     mpi_errno = do_get(origin_addr,

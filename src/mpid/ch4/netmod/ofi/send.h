@@ -235,7 +235,7 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
         if (!noreq) {
             REQ_CREATE((*request));
             (*request)->kind = MPID_REQUEST_SEND;
-            MPIDI_Request_complete((*request));
+            MPIDI_CH4_NMI_OFI_request_complete((*request));
         }
 
         goto fn_exit;
@@ -282,7 +282,7 @@ __ALWAYS_INLINE__ int nm_psend(SENDPARAMS)
     REQ_OFI(sreq, util_comm)          = comm;
     REQ_OFI(sreq, util_id)            = comm->context_id + context_offset;
     sreq->partner_request             = NULL;
-    MPIDI_Request_complete(sreq);
+    MPIDI_CH4_NMI_OFI_request_complete(sreq);
 
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
         MPID_Datatype *dt_ptr;
@@ -449,7 +449,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPID_Request * requests[]
 
             if (REQ_OFI(preq, util.persist.type) == MPIDI_PTYPE_BSEND) {
                 preq->cc_ptr = &preq->cc;
-                MPIDI_Request_set_completed(preq);
+                MPID_cc_set(&preq->cc, 0);
             }
             else
                 preq->cc_ptr = &preq->partner_request->cc;
@@ -458,7 +458,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPID_Request * requests[]
             preq->partner_request = NULL;
             preq->status.MPI_ERROR = rc;
             preq->cc_ptr = &preq->cc;
-            MPIDI_Request_set_completed(preq);
+            MPID_cc_set(&preq->cc, 0);
         }
     }
 

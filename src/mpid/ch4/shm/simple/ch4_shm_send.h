@@ -221,7 +221,7 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
 
             if (REQ_SHM(preq)->type == TYPE_BUFFERED) {
                 preq->cc_ptr = &preq->cc;
-                MPIDI_Request_set_completed(preq);
+                MPID_cc_set(&preq->cc, 0);
             }
             else
                 preq->cc_ptr = &preq->partner_request->cc;
@@ -230,7 +230,7 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
             preq->partner_request = NULL;
             preq->status.MPI_ERROR = mpi_errno;
             preq->cc_ptr = &preq->cc;
-            MPIDI_Request_set_completed(preq);
+            MPID_cc_set(&preq->cc, 0);
         }
     }
 
@@ -410,7 +410,7 @@ static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
         if (req == sreq) {
             MPIR_STATUS_SET_CANCEL_BIT(sreq->status, TRUE);
             MPIR_STATUS_SET_COUNT(sreq->status, 0);
-            MPIDI_Request_complete(sreq);
+            REQ_SHM_COMPLETE(sreq);
             REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_shm_sendq,mpi_errno);
             break;
         }
