@@ -77,7 +77,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 {
                     MPIDI_CH4R_anysource_matched(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req),
                                                  MPIDI_CH4R_SHM, &continue_matching);
-                    MPIDI_Request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
+                    MPIDI_CH4_SHMI_SIMPLE_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
 
                     /* Decouple requests */
                     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) = NULL;
@@ -330,13 +330,19 @@ static inline int MPIDI_shm_progress(int blocking)
 {
     int complete = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
-
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_PROGRESS);
     do {
         /* Receieve progress */
+        MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
         MPIDI_shm_do_progress_recv(blocking, &complete);
+        MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
         /* Send progress */
+        MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
         MPIDI_shm_do_progress_send(blocking, &complete);
+        MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
+
+        MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
+        MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
         if (complete > 0)
             break;
     } while (blocking);

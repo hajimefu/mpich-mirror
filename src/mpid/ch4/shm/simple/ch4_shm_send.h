@@ -102,7 +102,7 @@ static inline int MPIDI_shm_send(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_SEND);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND);
-
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     /* try to send immediately, contig, short message */
@@ -132,6 +132,7 @@ static inline int MPIDI_shm_send(const void *buf,
     mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_STANDARD);
 
   fn_exit:
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SEND);
     return mpi_errno;
 }
@@ -174,8 +175,9 @@ static inline int MPIDI_shm_ssend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISSEND);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_SYNC);
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
     return mpi_errno;
 }
@@ -188,6 +190,7 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_STARTALL);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_STARTALL);
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     for( i = 0; i < count; i++ ) {
         MPID_Request* preq = requests[i];
         if( preq->kind == MPID_PREQUEST_SEND ) {
@@ -234,6 +237,7 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
         }
     }
 
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_STARTALL);
     return mpi_errno;
 }
@@ -376,8 +380,9 @@ static inline int MPIDI_shm_isend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISEND);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_STANDARD);
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
     return mpi_errno;
 }
@@ -393,14 +398,16 @@ static inline int MPIDI_shm_issend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISSEND);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     mpi_errno = shm_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, TYPE_SYNC);
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
     return mpi_errno;
 }
 
 static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
 {
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     MPID_Request *req = MPIDI_shm_sendq.head;
     MPID_Request *prev_req = NULL;
     int mpi_errno = MPI_SUCCESS;
@@ -418,6 +425,7 @@ static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
         prev_req = req;
         req = REQ_SHM(req)->next;
     }
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     return mpi_errno;
 }
 

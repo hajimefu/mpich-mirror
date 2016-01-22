@@ -99,8 +99,9 @@ static inline int MPIDI_shm_recv(void *buf,
     MPIDI_FUNC_ENTER(MPIDI_SHM_RECV);
 
     /* create a request */
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPIDI_SHM_RECV);
     return mpi_errno;
 }
@@ -162,7 +163,7 @@ static inline int MPIDI_shm_imrecv(void *buf,
 
     MPIDI_STATE_DECL(MPIDI_SHM_IMRECV);
     MPIDI_FUNC_ENTER(MPIDI_SHM_IMRECV);
-
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     if (message == NULL)
     {
         MPIDI_Request_create_null_rreq(rreq, mpi_errno, goto fn_fail);
@@ -272,6 +273,7 @@ static inline int MPIDI_shm_imrecv(void *buf,
     *rreqp = rreq;
 
 fn_exit:
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPIDI_SHM_IMRECV);
     return mpi_errno;
 fn_fail:
@@ -291,9 +293,9 @@ static inline int MPIDI_shm_irecv(void *buf,
     MPIDI_STATE_DECL(MPIDI_SHM_IRECV);
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_IRECV);
-
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     mpi_errno = shm_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPIDI_SHM_IRECV);
     return mpi_errno;
 }
@@ -302,6 +304,7 @@ static inline int MPIDI_shm_irecv(void *buf,
 #define FCNAME DECL_FUNC(MPIDI_shm_cancel_recv)
 static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
 {
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     MPID_Request *req = MPIDI_shm_recvq_posted.head;
     MPID_Request *prev_req = NULL;
 
@@ -335,7 +338,7 @@ static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
         prev_req = req;
         req = REQ_SHM(req)->next;
     }
-
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     return MPI_SUCCESS;
 }
 

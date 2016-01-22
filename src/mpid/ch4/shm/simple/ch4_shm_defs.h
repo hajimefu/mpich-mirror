@@ -81,8 +81,8 @@ typedef struct MPID_nem_seg_info {
 #define MPID_NEM_NON_LOCAL -1
 #define MPID_NEM_IS_LOCAL(grank) (MPID_nem_mem_region.local_ranks[grank] != MPID_NEM_NON_LOCAL)
 #define MPID_NEM_LOCAL_RANK(grank) (MPID_nem_mem_region.local_ranks[grank])
-
 #define MPID_NEM_NUM_BARRIER_VARS 16
+#define MPID_NEM_SHM_MUTEX        MPID_shm_mutex
 typedef struct MPID_nem_barrier_vars {
     OPA_int_t context_id;
     OPA_int_t usage_cnt;
@@ -119,3 +119,5 @@ typedef struct MPID_nem_mem_region {
     struct MPID_nem_mem_region *next;
 } MPID_nem_mem_region_t, *MPID_nem_mem_region_ptr_t;
 extern MPID_nem_mem_region_t MPID_nem_mem_region;
+extern MPID_Thread_mutex_t MPID_shm_mutex;
+

@@ -13,9 +13,9 @@
 #include "ch4_shm_impl.h"
 
 MPIDI_shm_queue_t MPIDI_shm_sendq = { NULL, NULL };
-MPID_nem_mem_region_t MPID_nem_mem_region = { {0}
-};
+MPID_nem_mem_region_t MPID_nem_mem_region = {{0}};
 
 char *MPID_nem_asymm_base_addr = 0;
 MPIDI_shm_queue_t MPIDI_shm_recvq_posted = { NULL, NULL };
 MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected = { NULL, NULL };
+MPID_Thread_mutex_t MPID_shm_mutex;

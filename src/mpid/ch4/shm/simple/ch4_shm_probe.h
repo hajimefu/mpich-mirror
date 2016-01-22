@@ -45,6 +45,7 @@ static inline int MPIDI_shm_improbe(int source,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_IMPROBE);
 
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     *message = NULL;
 
     if (unlikely(source == MPI_PROC_NULL)) {
@@ -101,6 +102,7 @@ static inline int MPIDI_shm_improbe(int source,
     }
 
 fn_exit:
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_IMPROBE);
     return mpi_errno;
 }
@@ -113,10 +115,9 @@ static inline int MPIDI_shm_iprobe(int source,
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *req, *matched_req = NULL;
     int count = 0;
-
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_IPROBE);
-
+    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
     if (unlikely(source == MPI_PROC_NULL)) {
         MPIR_Status_set_procnull(status);
         *flag = true;
@@ -145,6 +146,7 @@ static inline int MPIDI_shm_iprobe(int source,
     }
 
 fn_exit:
+    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_IPROBE);
     return mpi_errno;
 }

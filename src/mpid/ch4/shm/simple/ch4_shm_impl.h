@@ -155,20 +155,12 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
  * Helper routines and macros for request completion
  */
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
-#define MPIDI_Request_tls_alloc(req)                                     \
-  ({                                                                     \
-    (req) = (MPID_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);    \
-    if (req == NULL)                                                     \
-      MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
-  })
-
-#define MPIDI_Request_tls_free(req) \
-  MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
 
 #define MPIDI_Request_shm_alloc_and_init(req,count)     \
   ({                                                    \
-    MPIDI_Request_tls_alloc(req);                       \
-    MPIU_Assert(req != NULL);                           \
+    (req) = (MPID_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);      \
+    if (req == NULL)                                                       \
+        MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
                 == MPID_REQUEST);                       \
     MPID_cc_set(&req->cc, 1);                           \
