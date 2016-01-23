@@ -13,19 +13,14 @@
 
 #include "impl.h"
 
-static inline void MPIDI_CH4_NM_native_request_release(MPID_Request * req)
-{
-    MPIDI_CH4_NMI_OFI_request_release(req);
-}
-
-static inline void MPIDI_CH4_NM_am_request_release(MPID_Request * req)
-{
-    MPIDI_CH4_NMI_OFI_AM_request_release(req);
-}
-
 static inline void MPIDI_CH4_NM_am_request_init(MPID_Request *req)
 {
     AMREQ_OFI(req, req_hdr) = NULL;
+}
+
+static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
+{
+    MPIDI_netmod_am_ofi_clear_req(req);
 }
 
 #endif /* NETMOD_OFI_REQUEST_H_INCLUDED */

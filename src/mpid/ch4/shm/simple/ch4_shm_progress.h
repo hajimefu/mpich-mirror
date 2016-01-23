@@ -55,7 +55,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             MPIU_Assert(in_cell);
             MPIU_Assert(pending);
             MPID_cc_decr(pending->cc_ptr, &c);
-            MPIDI_CH4_SHMI_SIMPLE_request_release(pending);
+            MPIDI_CH4R_Request_release(pending);
             goto release_cell_l;
         }
         while (req) {
@@ -77,7 +77,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                 {
                     MPIDI_CH4R_anysource_matched(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req),
                                                  MPIDI_CH4R_SHM, &continue_matching);
-                    MPIDI_CH4_SHMI_SIMPLE_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
+                    MPIDI_CH4R_Request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
 
                     /* Decouple requests */
                     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) = NULL;

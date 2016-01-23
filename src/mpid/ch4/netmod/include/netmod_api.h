@@ -200,7 +200,7 @@ MPIDI_NETMOD_API(int,comm_destroy,
 MPIDI_NETMOD_API(void ,am_request_init,
                  (MPID_Request *) req);
 
-MPIDI_NETMOD_API(void,am_request_release,
+MPIDI_NETMOD_API(void ,am_request_finalize,
                  (MPID_Request *) req);
 
 MPIDI_NETMOD_API_NATIVE(int,send,
@@ -584,10 +584,6 @@ MPIDI_NETMOD_API_NATIVE(int,win_lock_all,
 MPIDI_NETMOD_API_NATIVE(int, rank_is_local,
                         (int) target,
                         (MPID_Comm *) comm);
-
-MPIDI_NETMOD_API_NATIVE(void,native_request_release,
-                        (MPID_Request *) req);
-
 
 #undef MPIDI_NETMOD_API
 #undef MPIDI_NETMOD_API_NATIVE

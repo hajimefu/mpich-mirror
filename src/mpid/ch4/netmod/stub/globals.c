@@ -32,7 +32,6 @@ MPIDI_CH4_NM_funcs_t MPIDI_CH4_NM_stub_funcs = {
     MPIDI_CH4_NM_comm_create,
     MPIDI_CH4_NM_comm_destroy,
     MPIDI_CH4_NM_am_request_init,
-    MPIDI_CH4_NM_am_request_release,
     MPIDI_CH4_NM_reg_hdr_handler,
     MPIDI_CH4_NM_send_am_hdr,
     MPIDI_CH4_NM_inject_am_hdr,
@@ -103,6 +102,5 @@ MPIDI_CH4_NM_native_funcs_t MPIDI_CH4_NM_native_stub_funcs = {
     MPIDI_CH4_NM_get_accumulate,
     MPIDI_CH4_NM_win_lock_all,
     MPIDI_CH4_NM_rank_is_local,
-    MPIDI_CH4_NM_native_request_release,
 };
 #endif

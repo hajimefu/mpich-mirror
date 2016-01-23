@@ -39,7 +39,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_SEND);
 
-    sreq = MPIDI_CH4R_create_req();
+    sreq = MPIDI_CH4I_am_request_create();
     MPIU_Assert(sreq);
     sreq->kind = MPID_REQUEST_SEND;
 
@@ -87,7 +87,7 @@ static inline int MPIDI_CH4I_send(const void *buf, int count, MPI_Datatype datat
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
         if (!noreq) {
-            *request = MPIDI_CH4R_create_req();
+            *request = MPIDI_CH4I_am_request_create();
             (*request)->kind = MPID_REQUEST_SEND;
             MPIDI_Request_complete((*request));
         }
@@ -116,7 +116,7 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_NM_PSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_NM_PSEND);
 
-    sreq = MPIDI_CH4R_create_req();
+    sreq = MPIDI_CH4I_am_request_create();
     *request = sreq;
 
     sreq->kind = MPID_PREQUEST_SEND;

@@ -12,6 +12,75 @@
 #define MPIDCH4R_REQUEST_H_INCLUDED
 
 #include "ch4_types.h"
+#include "ch4r_buf.h"
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_request_create
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline MPID_Request *MPIDI_CH4I_am_request_create()
+{
+    MPID_Request *req;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_CREATE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
+
+    req = MPIDI_CH4I_alloc_and_init_req(2);
+    MPIDI_CH4_NM_am_request_init(req);
+
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req)    =
+        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_CREATE);
+
+    return req;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_win_request_create
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline MPID_Request *MPIDI_CH4I_am_win_request_create()
+{
+    MPID_Request *req;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+
+    req = MPIDI_CH4I_alloc_and_init_req(1);
+    MPIDI_CH4_NM_am_request_init(req);
+
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4R_REQUEST(req, req)         =
+        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
+    MPIDI_CH4R_REQUEST(req, req->status) = 0;
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+    return req;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4I_am_request_complete
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+__CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
+{
+    int count;
+    MPID_cc_decr(req->cc_ptr, &count);
+    MPIU_Assert(count >= 0);
+    if (count == 0) {
+        if (MPIDI_CH4R_REQUEST(req, req) && MPID_cc_is_complete(&req->cc)) {
+            MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
+            MPIDI_CH4R_REQUEST(req, req) = NULL;
+        }
+        MPIDI_CH4_NM_am_request_finalize(req);
+        MPIDI_CH4R_Request_release(req);
+    }
+}
 
 /* This function should be called any time an anysource request is matched so
  * the upper layer will have a chance to arbitrate who wins the race between

@@ -65,7 +65,7 @@ extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
     MPID_cc_decr((req_)->cc_ptr, &incomplete__); \
     dtype_release_if_not_builtin(REQ_SHM(req_)->datatype); \
     if (!incomplete__) \
-        MPIDI_CH4_SHMI_SIMPLE_request_release(req_);    \
+        MPIDI_CH4R_Request_release(req_);    \
 }
 
 #define REQ_SHM_ENQUEUE(req,queue) \
@@ -173,31 +173,8 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
     req->status.MPI_TAG       = MPI_UNDEFINED;          \
     req->status.MPI_ERROR     = MPI_SUCCESS;            \
     req->comm                 = NULL;                   \
-    MPIDI_CH4I_REQUEST(req,reqtype) = MPIDI_CH4_REQTYPE_NATIVE_SHM; \
     MPIR_REQUEST_CLEAR_DBG(req);                        \
   })
-
-static inline void MPIDI_CH4_SHMI_SIMPLE_request_release(MPID_Request * req)
-{
-    int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
-
-    if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
-
-        if (req->comm)
-            MPIR_Comm_release(req->comm);
-
-        if (req->greq_fns)
-            MPIU_Free(req->greq_fns);
-
-        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
-    }
-    return;
-}
-
 
 #define DECL_FUNC(FUNCNAME)  MPL_QUOTE(FUNCNAME)
 

@@ -45,8 +45,7 @@ MPIDI_shm_funcs_t MPIDI_shm_stub_funcs = {
     MPIDI_shm_create_intercomm_from_lpids,
     MPIDI_shm_comm_create,
     MPIDI_shm_comm_destroy,
-    MPIDI_shm_request_create,
-    MPIDI_shm_request_release
+    MPIDI_shm_am_request_init,
 };
 
 MPIDI_shm_native_funcs_t MPIDI_shm_native_stub_funcs = {

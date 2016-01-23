@@ -101,7 +101,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
         mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
-    MPIDI_CH4R_complete_req(rreq);
+    MPIDI_CH4I_am_request_complete(rreq);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_HANDLE_UNEXPECTED);
     return mpi_errno;
@@ -150,7 +150,7 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
     }
 
     if (alloc_req) {
-        rreq = MPIDI_CH4R_create_req();
+        rreq = MPIDI_CH4I_am_request_create();
     }
     else {
         rreq = *request;
@@ -164,7 +164,7 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         rreq->status.MPI_SOURCE = rank;
         rreq->status.MPI_TAG = tag;
-        MPIDI_CH4R_complete_req(rreq);
+        MPIDI_CH4I_am_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -235,7 +235,7 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_RECV_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_RECV_INIT);
 
-    rreq = MPIDI_CH4R_create_req();
+    rreq = MPIDI_CH4I_am_request_create();
 
     *request = rreq;
     rreq->kind = MPID_PREQUEST_RECV;
@@ -249,7 +249,7 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
     MPIDI_CH4R_REQUEST(rreq, tag) =
         MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, rank, tag);
     rreq->partner_request = NULL;
-    MPIDI_CH4R_complete_req(rreq);
+    MPIDI_CH4I_am_request_complete(rreq);
     MPIDI_CH4R_REQUEST(rreq, p_type) = MPIDI_PTYPE_RECV;
     dtype_add_ref_if_not_builtin(datatype);
 
@@ -385,7 +385,7 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     if (found) {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
         MPIR_STATUS_SET_COUNT(rreq->status, 0);
-        MPIDI_CH4R_complete_req(rreq);
+        MPIDI_CH4I_am_request_complete(rreq);
     }
     else {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, FALSE);

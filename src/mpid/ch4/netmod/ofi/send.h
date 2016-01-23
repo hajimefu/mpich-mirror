@@ -235,7 +235,7 @@ __ALWAYS_INLINE__ int nm_send(SENDPARAMS, int noreq, uint64_t syncflag)
         if (!noreq) {
             REQ_CREATE((*request));
             (*request)->kind = MPID_REQUEST_SEND;
-            MPIDI_CH4_NMI_OFI_request_complete((*request));
+            MPIDI_CH4R_request_complete((*request));
         }
 
         goto fn_exit;
@@ -282,7 +282,7 @@ __ALWAYS_INLINE__ int nm_psend(SENDPARAMS)
     REQ_OFI(sreq, util_comm)          = comm;
     REQ_OFI(sreq, util_id)            = comm->context_id + context_offset;
     sreq->partner_request             = NULL;
-    MPIDI_CH4_NMI_OFI_request_complete(sreq);
+    MPIDI_CH4R_request_complete(sreq);
 
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
         MPID_Datatype *dt_ptr;

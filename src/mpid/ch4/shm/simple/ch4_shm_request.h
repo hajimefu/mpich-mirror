@@ -13,17 +13,12 @@
 
 #include "ch4_shm_impl.h"
 
-static inline void MPIDI_shm_native_request_release(MPID_Request * req)
-{
-    MPIDI_CH4_SHMI_SIMPLE_request_release(req);
-}
-
-static inline void MPIDI_shm_am_request_release(MPID_Request * req)
+static inline void MPIDI_shm_am_request_init(MPID_Request *req)
 {
     MPIU_Assert(0);
 }
 
-static inline void MPIDI_shm_am_request_init(MPID_Request *req)
+static inline void MPIDI_shm_am_request_finalize(MPID_Request *req)
 {
     MPIU_Assert(0);
 }

@@ -70,7 +70,7 @@ typedef struct MPIDI_shm_funcs {
     MPIDI_shm_comm_destroy_t comm_destroy;
     /* Request allocation routines */
     MPIDI_shm_am_request_init_t am_request_init;
-    MPIDI_shm_am_request_release_t am_request_release;
+    MPIDI_shm_am_request_finalize_t am_request_finalize;
 } MPIDI_shm_funcs_t;
 
 typedef struct MPIDI_shm_native_funcs {
@@ -128,7 +128,6 @@ typedef struct MPIDI_shm_native_funcs {
     MPIDI_shm_win_flush_all_t win_flush_all;
     MPIDI_shm_get_accumulate_t get_accumulate;
     MPIDI_shm_win_lock_all_t win_lock_all;
-    MPIDI_shm_native_request_release_t native_request_release;
 } MPIDI_shm_native_funcs_t;
 
 extern MPIDI_shm_funcs_t *MPIDI_shm_funcs[];

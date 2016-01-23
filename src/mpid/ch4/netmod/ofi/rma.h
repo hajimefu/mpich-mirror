@@ -642,7 +642,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_CH4_NMI_OFI_request_complete(rreq);
+        MPIDI_CH4R_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -656,7 +656,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
                                    (char *)win->base + offset,
                                    target_count,
                                    target_datatype);
-        MPIDI_CH4_NMI_OFI_request_complete(rreq);
+        MPIDI_CH4R_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -798,7 +798,7 @@ static inline int do_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
+        if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
 
         return MPI_SUCCESS;
     }
@@ -959,7 +959,7 @@ static inline int do_get_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_CH4_NMI_OFI_request_release(*sigreq);
+        if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
 
         goto fn_exit;
     }
@@ -1214,7 +1214,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_CH4_NMI_OFI_request_complete(rreq);
+        MPIDI_CH4R_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -1228,7 +1228,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
                               origin_addr,
                               origin_count,
                               origin_datatype);
-        MPIDI_CH4_NMI_OFI_request_complete(rreq);
+        MPIDI_CH4R_request_complete(rreq);
         goto fn_exit;
     }
     mpi_errno = do_get(origin_addr,

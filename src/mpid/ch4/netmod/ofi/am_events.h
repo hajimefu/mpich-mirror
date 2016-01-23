@@ -276,6 +276,7 @@ static inline int MPIDI_netmod_do_handle_long_am(MPIDI_AM_OFI_hdr_t         *msg
     if (!rreq)
         goto fn_exit;
 
+    AMREQ_OFI(rreq, req_hdr) = NULL;
     mpi_errno = MPIDI_netmod_am_ofi_init_req(NULL, 0, rreq);
     if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
     MPID_cc_incr(rreq->cc_ptr, &c);
@@ -283,7 +284,7 @@ static inline int MPIDI_netmod_do_handle_long_am(MPIDI_AM_OFI_hdr_t         *msg
     AMREQ_OFI_HDR(rreq, cmpl_handler_fn) = cmpl_handler_fn;
     if ((!p_data || !data_sz) && cmpl_handler_fn) {
         cmpl_handler_fn(rreq);
-        MPIDI_AM_netmod_request_complete(rreq);
+        MPIDI_CH4_NMI_am_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -397,7 +398,7 @@ static inline int MPIDI_netmod_handle_lmt_ack(MPIDI_AM_OFI_hdr_t         *msg_hd
     }
 
     handler_id = AMREQ_OFI_HDR(sreq, msg_hdr).handler_id;
-    MPIDI_AM_netmod_request_complete(sreq);
+    MPIDI_CH4_NMI_am_request_complete(sreq);
     mpi_errno = MPIDI_Global.send_cmpl_handlers[handler_id] (sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -426,7 +427,7 @@ static inline int MPIDI_netmod_handle_long_hdr_ack(MPIDI_AM_OFI_hdr_t         *m
     sreq    = (MPID_Request *)             ack_msg->sreq_ptr;
 
     handler_id = AMREQ_OFI_HDR(sreq, msg_hdr).handler_id;
-    MPIDI_AM_netmod_request_complete(sreq);
+    MPIDI_CH4_NMI_am_request_complete(sreq);
     mpi_errno = MPIDI_Global.send_cmpl_handlers[handler_id] (sreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 

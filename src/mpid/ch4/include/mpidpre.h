@@ -39,14 +39,6 @@ typedef enum {
     MPIDI_PTYPE_SSEND,
 } MPIDI_ptype;
 
-enum {
-    MPIDI_CH4_REQTYPE_MPI,
-    MPIDI_CH4_REQTYPE_AM,
-    MPIDI_CH4_REQTYPE_NATIVE,
-    MPIDI_CH4_REQTYPE_AM_SHM,
-    MPIDI_CH4_REQTYPE_NATIVE_SHM
-};
-
 #define MPIDI_CH4R_REQ_BUSY 		  (0x1)
 #define MPIDI_CH4R_REQ_PEER_SSEND 	  (0x1 << 1)
 #define MPIDI_CH4R_REQ_UNEXPECTED 	  (0x1 << 2)
@@ -164,12 +156,8 @@ typedef struct MPIDI_CH4R_Devreq_t {
 
 typedef struct {
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    int16_t is_local;
-    int16_t reqtype;
-#else
-    int reqtype;
+    int is_local;
 #endif
-
     /* Anysource handling. Netmod and shm specific requests are cross
      * referenced. This must be present all of the time to avoid lots of extra
      * ifdefs in the code. */
