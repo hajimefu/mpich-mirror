@@ -113,7 +113,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_Request_create(void)
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_CREATE);
 
-    req = MPIDI_CH4I_alloc_and_init_req(2);
+    req = MPIDI_CH4I_alloc_and_init_req(1);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_CREATE);
     return req;
