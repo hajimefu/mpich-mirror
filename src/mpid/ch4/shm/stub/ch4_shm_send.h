@@ -13,7 +13,7 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_shm_send(const void *buf,
+static inline int MPIDI_CH4_SHM_send(const void *buf,
                                  int count,
                                  MPI_Datatype datatype,
                                  int rank,
@@ -25,7 +25,7 @@ static inline int MPIDI_shm_send(const void *buf,
     return err;
 }
 
-static inline int MPIDI_shm_rsend(const void *buf,
+static inline int MPIDI_CH4_SHM_rsend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -39,7 +39,7 @@ static inline int MPIDI_shm_rsend(const void *buf,
 
 
 
-static inline int MPIDI_shm_irsend(const void *buf,
+static inline int MPIDI_CH4_SHM_irsend(const void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -50,7 +50,7 @@ static inline int MPIDI_shm_irsend(const void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_ssend(const void *buf,
+static inline int MPIDI_CH4_SHM_ssend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -63,13 +63,13 @@ static inline int MPIDI_shm_ssend(const void *buf,
     return err;
 }
 
-static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
+static inline int MPIDI_CH4_SHM_startall(int count, MPID_Request * requests[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_send_init(const void *buf,
+static inline int MPIDI_CH4_SHM_send_init(const void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -80,7 +80,7 @@ static inline int MPIDI_shm_send_init(const void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_ssend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_ssend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -92,7 +92,7 @@ static inline int MPIDI_shm_ssend_init(const void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_bsend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_bsend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -104,7 +104,7 @@ static inline int MPIDI_shm_bsend_init(const void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_rsend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_rsend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -117,8 +117,8 @@ static inline int MPIDI_shm_rsend_init(const void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_isend)
-static inline int MPIDI_shm_isend(const void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_isend)
+static inline int MPIDI_CH4_SHM_isend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -130,7 +130,7 @@ static inline int MPIDI_shm_isend(const void *buf,
     return err;
 }
 
-static inline int MPIDI_shm_issend(const void *buf,
+static inline int MPIDI_CH4_SHM_issend(const void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -142,7 +142,7 @@ static inline int MPIDI_shm_issend(const void *buf,
     return err;
 }
 
-static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
+static inline int MPIDI_CH4_SHM_cancel_send(MPID_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

@@ -33,10 +33,10 @@ typedef struct {
     struct MPID_Segment *segment_ptr;
     MPIDI_msg_sz_t segment_first;
     MPIDI_msg_sz_t segment_size;
-} MPIDI_shm_simple_request_t;
+} MPIDI_CH4_SHM_SIMPLE_Request_t;
 
-typedef struct MPIDI_shm_simple_comm_t {
+typedef struct MPIDI_CH4_SHM_SIMPLE_Comm_t {
     int dummy;
-} MPIDI_shm_simple_comm_t;
+} MPIDI_CH4_SHM_SIMPLE_Comm_t;
 
 #endif

@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 
-static inline size_t get_mapsize(size_t size,
+static inline size_t MPIDI_CH4_NMI_OFI_Get_mapsize(size_t size,
                           size_t *psz)
 {
   long    page_sz = sysconf(_SC_PAGESIZE);
@@ -29,12 +29,12 @@ static inline size_t get_mapsize(size_t size,
   return mapsize;
 }
 
-static inline int check_maprange_ok(void   *start,
+static inline int MPIDI_CH4_NMI_OFI_Check_maprange(void   *start,
                              size_t  size)
 {
   int     rc          = 0;
   size_t  page_sz;
-  size_t  mapsize     = get_mapsize(size,&page_sz);
+  size_t  mapsize     = MPIDI_CH4_NMI_OFI_Get_mapsize(size,&page_sz);
   size_t  i,num_pages = mapsize/page_sz;
   char   *ptr         = (char *)start;
 
@@ -51,17 +51,17 @@ static inline int check_maprange_ok(void   *start,
   return 1;
 }
 
-static inline void *generate_random_addr(size_t size)
+static inline void *MPIDI_CH4_NMI_OFI_Generate_random_addr(size_t size)
 {
   /* starting position for pointer to map
    * This is not generic, probably only works properly on Linux
    * but it's not fatal since we bail after a fixed number of iterations
    */
-#define MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
+#define MPIDI_CH4_NMI_OFI_MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
   char            random_state[256];
   size_t          page_sz;
   uint64_t        random_unsigned;
-  size_t          mapsize     = get_mapsize(size,&page_sz);
+  size_t          mapsize     = MPIDI_CH4_NMI_OFI_Get_mapsize(size,&page_sz);
   uintptr_t       map_pointer;
   struct timeval  ts;
   int             iter = 100;
@@ -77,12 +77,12 @@ static inline void *generate_random_addr(size_t size)
   initstate_r(ts.tv_usec,random_state,sizeof(random_state),&rbuf);
   random_r(&rbuf, &rh); random_r(&rbuf, &rl);
   random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
-  map_pointer = MAP_POINTER;
+  map_pointer = MPIDI_CH4_NMI_OFI_MAP_POINTER;
 
-  while(check_maprange_ok((void *)map_pointer,mapsize) == 0) {
+  while(MPIDI_CH4_NMI_OFI_Check_maprange((void *)map_pointer,mapsize) == 0) {
     random_r(&rbuf, &rh); random_r(&rbuf, &rl);
     random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
-    map_pointer = MAP_POINTER;
+    map_pointer = MPIDI_CH4_NMI_OFI_MAP_POINTER;
     iter--;
 
     if(iter == 0)
@@ -92,7 +92,7 @@ static inline void *generate_random_addr(size_t size)
   return (void *)map_pointer;
 }
 
-static inline int get_symmetric_heap(MPI_Aint    size,
+static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
                               MPID_Comm  *comm,
                               void      **base,
                               MPID_Win   *win)
@@ -105,7 +105,7 @@ static inline int get_symmetric_heap(MPI_Aint    size,
   size_t    page_sz;
   size_t    mapsize;
 
-  mapsize = get_mapsize(size, &page_sz);
+  mapsize = MPIDI_CH4_NMI_OFI_Get_mapsize(size, &page_sz);
 
   struct {
     uint64_t sz;
@@ -133,7 +133,7 @@ static inline int get_symmetric_heap(MPI_Aint    size,
       baseP                  = (void *)-1ULL;
 
       if(comm->rank == maxloc_result.loc) {
-        map_pointer = (uintptr_t)generate_random_addr(mapsize);
+        map_pointer = (uintptr_t)MPIDI_CH4_NMI_OFI_Generate_random_addr(mapsize);
         baseP       = mmap((void *)map_pointer,
                            mapsize,
                            PROT_READ|PROT_WRITE,
@@ -150,7 +150,7 @@ static inline int get_symmetric_heap(MPI_Aint    size,
       if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
       if(comm->rank != maxloc_result.loc) {
-        int rc = check_maprange_ok((void *)map_pointer,mapsize);
+        int rc = MPIDI_CH4_NMI_OFI_Check_maprange((void *)map_pointer,mapsize);
 
         if(rc) {
           baseP = mmap((void *)map_pointer,
@@ -186,11 +186,11 @@ static inline int get_symmetric_heap(MPI_Aint    size,
     baseP = MPIU_Malloc(size);
     MPIR_ERR_CHKANDJUMP((baseP == NULL), mpi_errno,
                         MPI_ERR_BUFFER, "**bufnull");
-    WIN_OFI(win)->mmap_sz   = -1ULL;
-    WIN_OFI(win)->mmap_addr = NULL;
+    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = -1ULL;
+    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = NULL;
   } else {
-    WIN_OFI(win)->mmap_sz   = mapsize;
-    WIN_OFI(win)->mmap_addr = baseP;
+    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = mapsize;
+    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = baseP;
   }
 
   *base = baseP;

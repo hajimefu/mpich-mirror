@@ -14,10 +14,10 @@
 #include "am_impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME do_control_win
+#define FUNCNAME MPIDI_CH4_NMI_OFI_Do_control_win
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_win(MPIDI_Win_control_t *control,
+static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control_t *control,
                                  int                  rank,
                                  MPID_Win            *win,
                                  int                  use_comm,
@@ -27,23 +27,23 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
-    control->win_id      = WIN_OFI(win)->win_id;
+    control->win_id      = MPIDI_CH4_NMI_OFI_WIN(win)->win_id;
     control->origin_rank = win->comm_ptr->rank;
 
     if(use_lock)
-        mpi_errno = MPIDI_netmod_do_inject(rank,
+        mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
                                            win->comm_ptr,
                                            -1ULL,
-                                           MPIDI_INTERNAL_HANDLER_CONTROL,
+                                           MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
                                            FALSE,
                                            use_comm);
     else
-        mpi_errno = MPIDI_netmod_do_inject(rank,
+        mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
                                            win->comm_ptr,
                                            -1ULL,
-                                           MPIDI_INTERNAL_HANDLER_CONTROL,
+                                           MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                            (void*)control,
                                            sizeof(*control),NULL,
                                            FALSE,
@@ -54,10 +54,10 @@ static inline int do_control_win(MPIDI_Win_control_t *control,
 }
 
 #undef FUNCNAME
-#define FUNCNAME do_control_send
+#define FUNCNAME MPIDI_CH4_NMI_OFI_Do_control_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int do_control_send(MPIDI_Send_control_t *control,
+static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_control_t *control,
                                   char                 *send_buf,
                                   size_t                msgsize,
                                   int                   rank,
@@ -72,13 +72,13 @@ static inline int do_control_send(MPIDI_Send_control_t *control,
     control->send_buf    = send_buf;
     control->msgsize     = msgsize;
     control->comm_id     = comm_ptr->context_id;
-    control->endpoint_id = COMM_TO_EP(comm_ptr, comm_ptr->rank);
+    control->endpoint_id = MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
 
-    mpi_errno = MPIDI_netmod_do_inject(rank,comm_ptr,
+    mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,comm_ptr,
                                        -1ULL,
-                                       MPIDI_INTERNAL_HANDLER_CONTROL,
+                                       MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                        (void*)control,
                                        sizeof(*control),NULL,
                                        FALSE,TRUE);

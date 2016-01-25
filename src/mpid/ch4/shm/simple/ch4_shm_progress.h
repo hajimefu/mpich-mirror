@@ -14,11 +14,11 @@
 #include "ch4_shm_impl.h"
 
 /* ----------------------------------------------------- */
-/* MPIDI_shm_do_progress_recv                     */
+/* MPIDI_CH4_SHM_do_progress_recv                     */
 /* ----------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_do_progress_recv)
-static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_do_progress_recv)
+static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_count)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_msg_sz_t data_sz;
@@ -27,7 +27,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     /* try to match with unexpected */
-    MPID_Request *sreq = MPIDI_shm_recvq_unexpected.head;
+    MPID_Request *sreq = MPIDI_CH4_SHM_recvq_unexpected.head;
     MPID_Request *prev_sreq = NULL;
   unexpected_l:
     if (sreq != NULL) {
@@ -43,7 +43,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
   match_l:
     {
         /* traverse posted receive queue */
-        MPID_Request *req = MPIDI_shm_recvq_posted.head;
+        MPID_Request *req = MPIDI_CH4_SHM_recvq_posted.head;
         MPID_Request *prev_req = NULL;
         int continue_matching = 1;
         char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
@@ -108,7 +108,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     REQ_SHM(req_ack)->segment_ptr = NULL;
                     REQ_SHM(req_ack)->pending = pending;
                     /* enqueue req_ack */
-                    REQ_SHM_ENQUEUE(req_ack, MPIDI_shm_sendq);
+                    REQ_SHM_ENQUEUE(req_ack, MPIDI_CH4_SHM_sendq);
                 }
                 /*
                  * TODO: check for not overflowing recv buffer
@@ -140,7 +140,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
                     count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
                     MPIR_STATUS_SET_COUNT(req->status,count);
                     /* dequeue rreq */
-                    REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_shm_recvq_posted,
+                    REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_CH4_SHM_recvq_posted,
                                                   mpi_errno);
                 }
                 else if (type == TYPE_LMT) {
@@ -193,7 +193,7 @@ static inline int MPIDI_shm_do_progress_recv(int blocking, int *completion_count
             REQ_SHM(rreq)->next = NULL;
             REQ_SHM(rreq)->pending = cell->pending;
             /* enqueue rreq */
-            REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_unexpected);
+            REQ_SHM_ENQUEUE(rreq, MPIDI_CH4_SHM_recvq_unexpected);
             MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
                     (MPIU_DBG_FDEST, "Unexpected from grank %d to %d in progress %d,%d,%d\n",
                      cell->my_rank, MPID_nem_mem_region.rank,
@@ -221,7 +221,7 @@ release_cell_l:
         /* destroy unexpected req */
         REQ_SHM(sreq)->pending = NULL;
         MPIU_Free(REQ_SHM(sreq)->user_buf);
-        REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_recvq_unexpected, mpi_errno);
+        REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHM_recvq_unexpected, mpi_errno);
     }
     (*completion_count)++;
 fn_exit:
@@ -230,16 +230,16 @@ fn_exit:
 }
 
 /* ----------------------------------------------------- */
-/* MPIDI_shm_do_progress_send                     */
+/* MPIDI_CH4_SHM_do_progress_send                     */
 /* ----------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_do_progress_send)
-static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_do_progress_send)
+static inline int MPIDI_CH4_SHM_do_progress_send(int blocking, int *completion_count)
 {
     int mpi_errno = MPI_SUCCESS;
     int dest;
     MPID_nem_cell_ptr_t cell = NULL;
-    MPID_Request *sreq = MPIDI_shm_sendq.head;
+    MPID_Request *sreq = MPIDI_CH4_SHM_sendq.head;
     MPID_Request *prev_sreq = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
@@ -294,7 +294,7 @@ static inline int MPIDI_shm_do_progress_send(int blocking, int *completion_count
                 MPIR_STATUS_SET_COUNT(sreq->status, data_sz);
             }
             /* dequeue sreq */
-            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_shm_sendq, mpi_errno);
+            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHM_sendq, mpi_errno);
         }
         else {
             /* long message */
@@ -325,8 +325,8 @@ fn_exit:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_progress)
-static inline int MPIDI_shm_progress(int blocking)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_progress)
+static inline int MPIDI_CH4_SHM_progress(int blocking)
 {
     int complete = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
@@ -334,11 +334,11 @@ static inline int MPIDI_shm_progress(int blocking)
     do {
         /* Receieve progress */
         MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-        MPIDI_shm_do_progress_recv(blocking, &complete);
+        MPIDI_CH4_SHM_do_progress_recv(blocking, &complete);
         MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
         /* Send progress */
         MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-        MPIDI_shm_do_progress_send(blocking, &complete);
+        MPIDI_CH4_SHM_do_progress_send(blocking, &complete);
         MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
 
         MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -351,55 +351,55 @@ static inline int MPIDI_shm_progress(int blocking)
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_test(void)
+static inline int MPIDI_CH4_SHM_progress_test(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_poke(void)
+static inline int MPIDI_CH4_SHM_progress_poke(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline void MPIDI_shm_progress_start(MPID_Progress_state * state)
+static inline void MPIDI_CH4_SHM_progress_start(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline void MPIDI_shm_progress_end(MPID_Progress_state * state)
+static inline void MPIDI_CH4_SHM_progress_end(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline int MPIDI_shm_progress_wait(MPID_Progress_state * state)
+static inline int MPIDI_CH4_SHM_progress_wait(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_register(int (*progress_fn) (int *))
+static inline int MPIDI_CH4_SHM_progress_register(int (*progress_fn) (int *))
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_deregister(int id)
+static inline int MPIDI_CH4_SHM_progress_deregister(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_activate(int id)
+static inline int MPIDI_CH4_SHM_progress_activate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_progress_deactivate(int id)
+static inline int MPIDI_CH4_SHM_progress_deactivate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

@@ -13,7 +13,7 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_shm_comm_connect(const char *port_name,
+static inline int MPIDI_CH4_SHM_comm_connect(const char *port_name,
                                          MPID_Info * info,
                                          int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
 {
@@ -21,25 +21,25 @@ static inline int MPIDI_shm_comm_connect(const char *port_name,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_comm_disconnect(MPID_Comm * comm_ptr)
+static inline int MPIDI_CH4_SHM_comm_disconnect(MPID_Comm * comm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_open_port(MPID_Info * info_ptr, char *port_name)
+static inline int MPIDI_CH4_SHM_open_port(MPID_Info * info_ptr, char *port_name)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_close_port(const char *port_name)
+static inline int MPIDI_CH4_SHM_close_port(const char *port_name)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_comm_accept(const char *port_name,
+static inline int MPIDI_CH4_SHM_comm_accept(const char *port_name,
                                         MPID_Info * info,
                                         int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
 {

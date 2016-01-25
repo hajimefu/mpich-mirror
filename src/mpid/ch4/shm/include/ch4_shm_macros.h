@@ -28,36 +28,36 @@
 
 #ifdef USE_SHM_TYPEDEFS
 #define MPIDI_SHM_API(rc,fcnname,...)                              \
-  typedef rc (*MPIDI_shm_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
+  typedef rc (*MPIDI_CH4_SHM_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
 #endif
 
 #ifdef USE_SHM_PROTOTYPES
 #define MPIDI_SHM_API(rc,fcnname,...)                                \
-  __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
+  __SHM_INLINE__ rc MPIDI_CH4_SHM_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
   __INLINE_ATTRIBUTE__
 #endif
 
 #ifdef USE_SHM_INLINES
 #define MPIDI_SHM_API(rc,fcnname,...)                                \
-  __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_shm_func->fcnname(APPLY(STRIP, __VA_ARGS__));       \
+  __SHM_INLINE__ rc MPIDI_CH4_SHM_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
+    return MPIDI_CH4_SHM_func->fcnname(APPLY(STRIP, __VA_ARGS__));       \
   }
 #endif
 
 #ifdef USE_SHM_TYPEDEFS
 #define MPIDI_SHM_API_NATIVE(rc,fcnname,...)                       \
-  typedef rc (*MPIDI_shm_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
+  typedef rc (*MPIDI_CH4_SHM_##fcnname##_t)(APPLY(PAIR,__VA_ARGS__))
 #endif
 
 #ifdef USE_SHM_PROTOTYPES
 #define MPIDI_SHM_API_NATIVE(rc,fcnname,...)                         \
-  __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
+  __SHM_INLINE__ rc MPIDI_CH4_SHM_##fcnname(APPLY(PAIR,__VA_ARGS__))  \
   __INLINE_ATTRIBUTE__
 #endif
 
 #ifdef USE_SHM_INLINES
 #define MPIDI_SHM_API_NATIVE(rc,fcnname,...)                         \
-  __SHM_INLINE__ rc MPIDI_shm_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
-    return MPIDI_shm_native_func->fcnname(APPLY(STRIP, __VA_ARGS__)); \
+  __SHM_INLINE__ rc MPIDI_CH4_SHM_##fcnname(APPLY(PAIR,__VA_ARGS__)) { \
+    return MPIDI_CH4_SHM_native_func->fcnname(APPLY(STRIP, __VA_ARGS__)); \
   }
 #endif

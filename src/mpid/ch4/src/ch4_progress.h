@@ -44,7 +44,7 @@ __CH4_INLINE__ int MPIDI_Progress_test(void)
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-    mpi_errno = MPIDI_shm_progress(0);
+    mpi_errno = MPIDI_CH4_SHM_progress(0);
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);

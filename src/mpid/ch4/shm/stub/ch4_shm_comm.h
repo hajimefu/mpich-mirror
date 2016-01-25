@@ -11,13 +11,13 @@
 #define CH4_SHM_STUB_COMM_H_INCLUDED
 
 #include "ch4_shm_impl.h"
-static inline int MPIDI_shm_comm_create(MPID_Comm * comm)
+static inline int MPIDI_CH4_SHM_comm_create(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
     return mpi_errno;
 }
-static inline int MPIDI_shm_comm_destroy(MPID_Comm * comm)
+static inline int MPIDI_CH4_SHM_comm_destroy(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);

@@ -40,57 +40,63 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
 
+#define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 
-#define COMM_TO_INDEX(comm,rank) COMM_OFI(comm).vcrt->vcr_table[rank].addr_idx
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-#define COMM_TO_EP(comm,rank)  COMM_OFI(comm).vcrt->vcr_table[rank].ep_idx
-#define MPIDI_MAX_ENDPOINTS 256
-#define MPIDI_MAX_ENDPOINTS_BITS 8
-#define G_TXC_TAG(x) MPIDI_Global.ctx[x].tx_tag
-#define G_TXC_RMA(x) MPIDI_Global.ctx[x].tx_rma
-#define G_TXC_MSG(x) MPIDI_Global.ctx[x].tx_msg
-#define G_TXC_CTR(x) MPIDI_Global.ctx[x].tx_ctr
-#define G_RXC_TAG(x) MPIDI_Global.ctx[x].rx_tag
-#define G_RXC_RMA(x) MPIDI_Global.ctx[x].rx_rma
-#define G_RXC_MSG(x) MPIDI_Global.ctx[x].rx_msg
-#define G_RXC_CTR(x) MPIDI_Global.ctx[x].rx_ctr
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank)  MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].ep_idx
+#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS 256
+#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS 8
+#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ctx[x].tx_tag
+#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ctx[x].tx_rma
+#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ctx[x].tx_msg
+#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ctx[x].tx_ctr
+#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ctx[x].rx_tag
+#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ctx[x].rx_rma
+#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ctx[x].rx_msg
+#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ctx[x].rx_ctr
 #else
-#define COMM_TO_EP(comm,rank) 0
-#define MPIDI_MAX_ENDPOINTS 0
-#define MPIDI_MAX_ENDPOINTS_BITS 0
-#define G_TXC_TAG(x) MPIDI_Global.ep
-#define G_TXC_RMA(x) MPIDI_Global.ep
-#define G_TXC_MSG(x) MPIDI_Global.ep
-#define G_TXC_CTR(x) MPIDI_Global.ep
-#define G_RXC_TAG(x) MPIDI_Global.ep
-#define G_RXC_RMA(x) MPIDI_Global.ep
-#define G_RXC_MSG(x) MPIDI_Global.ep
-#define G_RXC_CTR(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank) 0
+#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS 0
+#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS 0
+#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ep
 #endif
-#ifdef MPIDI_USE_AV_TABLE
-#define COMM_TO_PHYS(comm,rank)  ((fi_addr_t)(uintptr_t)COMM_TO_INDEX(comm,rank))
-#define TO_PHYS(rank)            ((fi_addr_t)(uintptr_t)rank)
+
+#define MPIDI_CH4_NMI_OFI_NUM_CQ_ENTRIES 8
+
+#define MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank) \
+    MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].addr_idx
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE
+#define MPIDI_CH4_NMI_OFI_COMM_TO_PHYS(comm,rank) \
+    ((fi_addr_t)(uintptr_t)MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank))
+#define MPIDI_CH4_NMI_OFI_TO_PHYS(rank)            ((fi_addr_t)(uintptr_t)rank)
 #else
-#define COMM_TO_PHYS(comm,rank)  MPIDI_Addr_table->table[COMM_TO_INDEX(comm,rank)].dest
-#define TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
+#define MPIDI_CH4_NMI_OFI_COMM_TO_PHYS(comm,rank) \
+    MPIDI_Addr_table->table[MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank)].dest
+#define MPIDI_CH4_NMI_OFI_TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
 #endif
-#define REQ_OFI(req,field) ((req)->dev.ch4.netmod.ofi.field)
-#define COMM_OFI(comm)     ((comm)->dev.ch4.netmod.ofi)
+#define MPIDI_CH4_NMI_OFI_REQUEST(req,field)       ((req)->dev.ch4.netmod.ofi.field)
 
 /*
  * Helper routines and macros for request completion
  */
-#define MPIDI_Win_request_tls_alloc(req)                                \
+#define MPIDI_CH4_NMI_OFI_Win_request_t_tls_alloc(req)                                \
   ({                                                                           \
-  (req) = (MPIDI_Win_request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem); \
+  (req) = (MPIDI_CH4_NMI_OFI_Win_request_t*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem); \
   if (req == NULL)                                                           \
     MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Win Request");   \
   })
 
-#define MPIDI_Win_request_tls_free(req) \
+#define MPIDI_CH4_NMI_OFI_Win_request_t_tls_free(req) \
   MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
 
-#define MPIDI_Win_request_complete(req)                 \
+#define MPIDI_CH4_NMI_OFI_Win_request_t_complete(req)                 \
   ({                                                    \
   int count;                                          \
   MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
@@ -99,30 +105,30 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   MPIU_Assert(count >= 0);                            \
   if (count == 0)                                     \
     {                                                 \
-      MPIDI_Win_datatype_unmap(&req->noncontig->target_dt); \
-      MPIDI_Win_datatype_unmap(&req->noncontig->origin_dt); \
-      MPIDI_Win_datatype_unmap(&req->noncontig->result_dt); \
+      MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->target_dt); \
+      MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->origin_dt); \
+      MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->result_dt); \
       MPIU_Free(req->noncontig);                      \
-      MPIDI_Win_request_tls_free(req);                \
+      MPIDI_CH4_NMI_OFI_Win_request_t_tls_free(req);                \
     }                                                 \
   })
 
 
-#define MPIDI_Ssendack_request_tls_alloc(req)                           \
+#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req)                           \
   ({                                                                    \
-  (req) = (MPIDI_Ssendack_request*)                                     \
+  (req) = (MPIDI_CH4_NMI_OFI_Ssendack_request_t*)                                     \
     MPIU_Handle_obj_alloc(&MPIDI_Request_mem);                          \
   if (req == NULL)                                                      \
     MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1,                              \
                "Cannot allocate Ssendack Request");                     \
   })
 
-#define MPIDI_Ssendack_request_tls_free(req) \
+#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_free(req) \
   MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
 
-#define MPIDI_Ssendack_request_alloc_and_init(req)      \
+#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_alloc_and_init(req)      \
   ({                                                    \
-    MPIDI_Ssendack_request_tls_alloc(req);              \
+    MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);              \
     MPIU_Assert(req != NULL);                           \
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
                 == MPID_SSENDACK_REQUEST);              \
@@ -130,7 +136,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 
 #define MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
   do {                                                                  \
-    (rreq_) = MPIDI_Request_alloc_and_init(1);                          \
+    (rreq_) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);                          \
     if ((rreq_) != NULL) {                                              \
       MPID_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPID_REQUEST_RECV;                                \
@@ -142,24 +148,24 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   } while (0)
 
 
-#define MPIDI_NM_PROGRESS()                              \
+#define MPIDI_CH4_NMI_OFI_PROGRESS()                              \
   ({                                                     \
     mpi_errno = MPIDI_Progress_test();                   \
     if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno); \
   })
 
-#define MPIDI_NM_PROGRESS_WHILE(cond)                 \
+#define MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(cond)                 \
   ({                                                  \
   while (cond)                                        \
-       MPIDI_NM_PROGRESS();                           \
+       MPIDI_CH4_NMI_OFI_PROGRESS();                           \
   })
 
 #define MPIDI_CH4_NMI_OFI_ERR  MPIR_ERR_CHKANDJUMP4
-#define FI_RC(FUNC,STR)                                     \
+#define MPIDI_CH4_NMI_OFI_CALL(FUNC,STR)                                     \
     do {                                                    \
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);   \
         ssize_t _ret = FUNC;                                \
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);    \
         MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
                               mpi_errno,                    \
                               MPI_ERR_OTHER,                \
@@ -171,7 +177,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               fi_strerror(-_ret));          \
     } while (0)
 
-#define FI_RC_NOLOCK(FUNC,STR)                              \
+#define MPIDI_CH4_NMI_OFI_CALL_NOLOCK(FUNC,STR)                              \
     do {                                                    \
         ssize_t _ret = FUNC;                                \
         MPIDI_CH4_NMI_OFI_ERR(_ret<0,                       \
@@ -185,13 +191,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               fi_strerror(-_ret));          \
     } while (0)
 
-#define FI_RC_RETRY(FUNC,STR)                               \
+#define MPIDI_CH4_NMI_OFI_CALL_RETRY(FUNC,STR)                               \
     do {                                                    \
     ssize_t _ret;                                           \
     do {                                                    \
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);   \
         _ret = FUNC;                                        \
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
         MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
                               mpi_errno,                    \
@@ -202,18 +208,18 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               __LINE__,                     \
                               FCNAME,                       \
                               fi_strerror(-_ret));          \
-        MPIDI_NM_PROGRESS();                                \
+        MPIDI_CH4_NMI_OFI_PROGRESS();                                \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
-#define FI_RC_RETRY2(FUNC1,FUNC2,STR)                       \
+#define MPIDI_CH4_NMI_OFI_CALL_RETRY2(FUNC1,FUNC2,STR)                       \
     do {                                                    \
     ssize_t _ret;                                           \
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);       \
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);       \
     FUNC1;                                                  \
     do {                                                    \
         _ret = FUNC2;                                       \
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
         MPIDI_CH4_NMI_OFI_ERR(_ret!=-FI_EAGAIN,             \
                               mpi_errno,                    \
@@ -224,13 +230,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               __LINE__,                     \
                               FCNAME,                       \
                               fi_strerror(-_ret));          \
-        MPIDI_NM_PROGRESS();                                \
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);   \
+        MPIDI_CH4_NMI_OFI_PROGRESS();                                \
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
 
-#define FI_RC_RETRY_NOLOCK(FUNC,STR)                          \
+#define MPIDI_CH4_NMI_OFI_CALL_RETRY_NOLOCK(FUNC,STR)                          \
   do                                                          \
     {                                                         \
      ssize_t _ret;                                            \
@@ -246,13 +252,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                                __LINE__,                      \
                                FCNAME,                        \
                                fi_strerror(-_ret));           \
-         MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_FI_MUTEX);     \
-         MPIDI_NM_PROGRESS();                                 \
-         MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_FI_MUTEX);    \
+         MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);     \
+         MPIDI_CH4_NMI_OFI_PROGRESS();                                 \
+         MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);    \
      } while (_ret == -FI_EAGAIN);                            \
     } while (0)
 
-#define MPIDI_CH4_NMI_PMI_RC_POP(FUNC,STR)                    \
+#define MPIDI_CH4_NMI_OFI_PMI_CALL_POP(FUNC,STR)                    \
   do                                                          \
     {                                                         \
       pmi_errno  = FUNC;                                      \
@@ -267,14 +273,14 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                             #STR);                            \
     } while (0)
 
-#define MPIDI_CH4_NMI_MPI_RC_POP(FUNC)                               \
+#define MPIDI_CH4_NMI_OFI_MPI_CALL_POP(FUNC)                               \
   do                                                                 \
     {                                                                \
       mpi_errno = FUNC;                                              \
       if (unlikely(mpi_errno!=MPI_SUCCESS)) MPIR_ERR_POP(mpi_errno); \
     } while (0)
 
-#define MPIU_STR_RC(FUNC,STR)                                   \
+#define MPIDI_CH4_NMI_OFI_STR_CALL(FUNC,STR)                                   \
   do                                                            \
     {                                                           \
       str_errno = FUNC;                                         \
@@ -289,55 +295,43 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                             #STR);                              \
     } while (0)
 
-#define REQ_CREATE(req)                           \
+#define MPIDI_CH4_NMI_OFI_REQUEST_CREATE(req)                           \
   ({                                              \
-    req = MPIDI_Request_alloc_and_init(2);        \
+    req = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);        \
   })
 
-#define WINREQ_CREATE(req)				\
-  ({						\
-    req = MPIDI_Win_request_alloc_and_init(1);	\
-  })
-
-#define SENDREQ_CREATE_LW(req)                     \
+#define MPIDI_CH4_NMI_OFI_SEND_REQUEST_CREATE_LW(req)                     \
   ({                                               \
-    req = MPIDI_Request_alloc_and_init_send_lw(1); \
+    req = MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(1); \
   })
 
-#define SSENDACKREQ_CREATE(req)            \
+#define MPIDI_CH4_NMI_OFI_SSEND_ACKREQUEST_CREATE(req)            \
   ({                                       \
-    MPIDI_Ssendack_request_tls_alloc(req); \
+    MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req); \
   })
 
 #define WINFO(w,rank) MPIDI_CH4R_WINFO(w,rank)
 
-#define WINFO_BASE(w,rank)                                              \
+#define MPIDI_CH4_NMI_OFI_WINFO_BASE(w,rank)                                              \
 ({                                                                      \
   void *_p;                                                             \
   _p = NULL;                                                            \
   _p;                                                                   \
 })
 
-#define WINFO_BASE_FORCE(w,rank)                                        \
+#define MPIDI_CH4_NMI_OFI_WINFO_BASE_FORCE(w,rank)                                        \
 ({                                                                      \
   void *_p;                                                             \
   _p = (void *) ((MPIDI_CH4R_win_info_t *) WINFO(w, rank))->base_addr;  \
   _p;                                                                   \
 })
 
-#define WINFO_DISP_UNIT(w,rank) MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)
+#define MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)
 
-#define WINFO_MR_KEY(w,rank)                                            \
+#define MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(w,rank)                          \
 ({                                                                      \
   uint64_t _v;                                                          \
-  _v = WIN_OFI(w)->mr_key;                                              \
-  _v;                                                                   \
-})
-
-#define WINFO_MR(w,target)                                              \
-({                                                                      \
-  void* _v;                                                             \
-  _v = fi_mr_desc(WIN_OFI(w)->mr);                                      \
+  _v = MPIDI_CH4_NMI_OFI_WIN(w)->mr_key;                                              \
   _v;                                                                   \
 })
 
@@ -346,7 +340,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /* Common Utility functions used by the
  * C and C++ components
  */
-__ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
+__ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int count)
 {
     MPID_Request *req;
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
@@ -375,7 +369,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init(int count)
     return req;
 }
 
-__ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
+__ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(int count)
 {
     MPID_Request *req;
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
@@ -396,113 +390,118 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_Request_alloc_and_init_send_lw(int count)
     return req;
 }
 
-static inline fi_addr_t _comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
+static inline fi_addr_t MPIDI_CH4_NMI_OFI_Comm_to_phys(MPID_Comm * comm, int rank, int ep_family)
 {
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-    int ep_num = COMM_TO_EP(comm, rank);
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+    int ep_num = MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm, rank);
     int offset = MPIDI_Global.ctx[ep_num].ctx_offset;
     int rx_idx = offset + ep_family;
-    return fi_rx_addr(COMM_TO_PHYS(comm, rank), rx_idx, MPIDI_MAX_ENDPOINTS_BITS);
+    return fi_rx_addr(MPIDI_CH4_NMI_OFI_COMM_TO_PHYS(comm, rank), rx_idx, MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS);
 #else
-    return COMM_TO_PHYS(comm, rank);
+    return MPIDI_CH4_NMI_OFI_COMM_TO_PHYS(comm, rank);
 #endif
 }
 
-static inline fi_addr_t _to_phys(int rank, int ep_family)
+static inline fi_addr_t MPIDI_CH4_NMI_OFI_To_phys(int rank, int ep_family)
 {
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
     int ep_num = 0;
     int offset = MPIDI_Global.ctx[ep_num].ctx_offset;
     int rx_idx = offset + ep_family;
-    return fi_rx_addr(TO_PHYS(rank), rx_idx, MPIDI_MAX_ENDPOINTS_BITS);
+    return fi_rx_addr(MPIDI_CH4_NMI_OFI_TO_PHYS(rank), rx_idx, MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS);
 #else
-    return TO_PHYS(rank);
+    return MPIDI_CH4_NMI_OFI_TO_PHYS(rank);
 #endif
 }
 
-static inline bool is_tag_sync(uint64_t match_bits)
+static inline bool MPIDI_CH4_NMI_OFI_Is_tag_sync(uint64_t match_bits)
 {
-    return (0 != (MPID_SYNC_SEND & match_bits));
+    return (0 != (MPIDI_CH4_NMI_OFI_SYNC_SEND & match_bits));
 }
 
-static inline uint64_t init_sendtag(MPIU_Context_id_t contextid, int source, int tag, uint64_t type)
+static inline uint64_t MPIDI_CH4_NMI_OFI_Init_sendtag(MPIU_Context_id_t contextid,
+                                                      int               source,
+                                                      int               tag,
+                                                      uint64_t          type)
 {
     uint64_t match_bits;
     match_bits = contextid;
-    match_bits = (match_bits << MPID_SOURCE_SHIFT);
+    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_SOURCE_SHIFT);
     match_bits |= source;
-    match_bits = (match_bits << MPID_TAG_SHIFT);
-    match_bits |= (MPID_TAG_MASK & tag) | type;
+    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
+    match_bits |= (MPIDI_CH4_NMI_OFI_TAG_MASK & tag) | type;
     return match_bits;
 }
 
 /* receive posting */
-static inline uint64_t init_recvtag(uint64_t * mask_bits,
-                                    MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4_NMI_OFI_Init_recvtag(uint64_t          *mask_bits,
+                                                      MPIU_Context_id_t  contextid,
+                                                      int                source,
+                                                      int                tag)
 {
     uint64_t match_bits = 0;
-    *mask_bits = MPID_PROTOCOL_MASK;
+    *mask_bits = MPIDI_CH4_NMI_OFI_PROTOCOL_MASK;
     match_bits = contextid;
-    match_bits = (match_bits << MPID_SOURCE_SHIFT);
+    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_SOURCE_SHIFT);
 
     if (MPI_ANY_SOURCE == source) {
-        match_bits = (match_bits << MPID_TAG_SHIFT);
-        *mask_bits |= MPID_SOURCE_MASK;
+        match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
+        *mask_bits |= MPIDI_CH4_NMI_OFI_SOURCE_MASK;
     }
     else {
         match_bits |= source;
-        match_bits = (match_bits << MPID_TAG_SHIFT);
+        match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
     }
 
     if (MPI_ANY_TAG == tag)
-        *mask_bits |= MPID_TAG_MASK;
+        *mask_bits |= MPIDI_CH4_NMI_OFI_TAG_MASK;
     else
-        match_bits |= (MPID_TAG_MASK & tag);
+        match_bits |= (MPIDI_CH4_NMI_OFI_TAG_MASK & tag);
 
     return match_bits;
 }
 
-static inline int get_tag(uint64_t match_bits)
+static inline int MPIDI_CH4_NMI_OFI_Init_get_tag(uint64_t match_bits)
 {
-    return ((int) (match_bits & MPID_TAG_MASK));
+    return ((int) (match_bits & MPIDI_CH4_NMI_OFI_TAG_MASK));
 }
 
-static inline int get_source(uint64_t match_bits)
+static inline int MPIDI_CH4_NMI_OFI_Init_get_source(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPID_SOURCE_MASK) >> MPID_TAG_SHIFT));
+    return ((int) ((match_bits & MPIDI_CH4_NMI_OFI_SOURCE_MASK) >> MPIDI_CH4_NMI_OFI_TAG_SHIFT));
 }
 
-static inline MPID_Request *devreq_to_req(void *context)
+static inline MPID_Request *MPIDI_CH4_NMI_OFI_Context_to_request(void *context)
 {
     char *base = (char *) context;
     return (MPID_Request *) container_of(base, MPID_Request, dev.ch4.netmod);
 }
 
-static inline void MPIDI_Win_datatype_unmap(MPIDI_Win_dt *dt)
+static inline void MPIDI_CH4_NMI_OFI_Win_datatype_unmap(MPIDI_CH4_NMI_OFI_Win_datatype_t *dt)
 {
   if(dt->map != &dt->__map)
     MPIU_Free(dt->map);
 }
 
 /* Utility functions */
-extern int   MPIDI_CH4_NM_ofi_handle_cq_error(ssize_t ret);
-extern int   MPIDI_OFI_Control_handler(void *am_hdr,size_t am_hdr_sz,uint64_t reply_token,
+extern int   MPIDI_CH4_NMI_OFI_Handle_cq_error_util(ssize_t ret);
+extern int   MPIDI_CH4_NMI_OFI_Control_handler(void *am_hdr,size_t am_hdr_sz,uint64_t reply_token,
                                        void **data,size_t * data_sz,int *is_contig,
                                        MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                                        MPID_Request ** req);
-extern int   MPIDI_OFI_VCRT_Create(int size, struct MPIDI_VCRT **vcrt_ptr);
-extern int   MPIDI_OFI_VCRT_Release(struct MPIDI_VCRT *vcrt);
-extern void  MPIDI_OFI_Map_create(void **map);
-extern void  MPIDI_OFI_Map_destroy(void *map);
-extern void  MPIDI_OFI_Map_set(void *_map, uint64_t id, void *val);
-extern void  MPIDI_OFI_Map_erase(void *_map, uint64_t id);
-extern void *MPIDI_OFI_Map_lookup(void *_map, uint64_t id);
-extern int   MPIDI_OFI_control_dispatch(void *buf);
-extern void  MPIDI_OFI_Index_datatypes();
-extern void  MPIDI_OFI_Index_allocator_create(void **_indexmap, int start);
-extern int   MPIDI_OFI_Index_allocator_alloc(void *_indexmap);
-extern void  MPIDI_OFI_Index_allocator_free(void *_indexmap, int index);
-extern void  MPIDI_OFI_Index_allocator_destroy(void *_indexmap);
+extern int   MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr);
+extern int   MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt);
+extern void  MPIDI_CH4_NMI_OFI_Map_create(void **map);
+extern void  MPIDI_CH4_NMI_OFI_Map_destroy(void *map);
+extern void  MPIDI_CH4_NMI_OFI_Map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_CH4_NMI_OFI_Map_erase(void *_map, uint64_t id);
+extern void *MPIDI_CH4_NMI_OFI_Map_lookup(void *_map, uint64_t id);
+extern int   MPIDI_CH4_NMI_OFI_Control_dispatch(void *buf);
+extern void  MPIDI_CH4_NMI_OFI_Index_datatypes();
+extern void  MPIDI_CH4_NMI_OFI_Index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_CH4_NMI_OFI_Index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *_indexmap);
 
 EXTERN_C_END
 #endif

@@ -32,6 +32,7 @@ MPIDI_CH4_NM_funcs_t MPIDI_CH4_NM_stub_funcs = {
     MPIDI_CH4_NM_comm_create,
     MPIDI_CH4_NM_comm_destroy,
     MPIDI_CH4_NM_am_request_init,
+    MPIDI_CH4_NM_am_request_finalize,
     MPIDI_CH4_NM_reg_hdr_handler,
     MPIDI_CH4_NM_send_am_hdr,
     MPIDI_CH4_NM_inject_am_hdr,

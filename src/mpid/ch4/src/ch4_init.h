@@ -96,16 +96,16 @@ static inline int MPIDI_choose_shm(void)
 
     if (strcmp(MPIR_CVAR_SHM, "") == 0) {
         /* shm not specified, using the default */
-        MPIDI_shm_func = MPIDI_shm_funcs[0];
-        MPIDI_shm_native_func = MPIDI_shm_native_funcs[0];
+        MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[0];
+        MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[0];
         goto fn_exit;
     }
 
     for (i = 0; i < MPIDI_num_shms; ++i) {
         if (!MPIU_Strncasecmp
-            (MPIR_CVAR_SHM, MPIDI_shm_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
-            MPIDI_shm_func = MPIDI_shm_funcs[i];
-            MPIDI_shm_native_func = MPIDI_shm_native_funcs[i];
+            (MPIR_CVAR_SHM, MPIDI_CH4_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
+            MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[i];
+            MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[i];
             goto fn_exit;
         }
     }
@@ -245,7 +245,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM
-    mpi_errno = MPIDI_shm_init(rank, size);
+    mpi_errno = MPIDI_CH4_SHM_init(rank, size);
 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
@@ -319,7 +319,7 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     mpi_errno = MPIDI_CH4_NM_finalize();
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #ifdef MPIDI_BUILD_CH4_SHM
-    mpi_errno = MPIDI_shm_finalize();
+    mpi_errno = MPIDI_CH4_SHM_finalize();
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #endif
 

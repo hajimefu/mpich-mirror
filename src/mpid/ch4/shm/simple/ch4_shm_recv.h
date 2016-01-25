@@ -17,8 +17,8 @@
 /* ---------------------------------------------------- */
 /* general queues                                       */
 /* ---------------------------------------------------- */
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_posted;
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_posted;
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_unexpected;
 
 /* ---------------------------------------------------- */
 /* shm_do_irecv                                             */
@@ -68,7 +68,7 @@ static inline int shm_do_irecv(void *buf,
     }
     dtype_add_ref_if_not_builtin(datatype);
     /* enqueue rreq */
-    REQ_SHM_ENQUEUE(rreq, MPIDI_shm_recvq_posted);
+    REQ_SHM_ENQUEUE(rreq, MPIDI_CH4_SHM_recvq_posted);
     MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
             (MPIU_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
              MPIDI_CH4R_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
@@ -83,8 +83,8 @@ fn_fail:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_recv)
-static inline int MPIDI_shm_recv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
+static inline int MPIDI_CH4_SHM_recv(void *buf,
                                  int count,
                                  MPI_Datatype datatype,
                                  int rank,
@@ -107,8 +107,8 @@ static inline int MPIDI_shm_recv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_recv)
-static inline int MPIDI_shm_recv_init(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
+static inline int MPIDI_CH4_SHM_recv_init(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -138,7 +138,7 @@ static inline int MPIDI_shm_recv_init(void *buf,
 }
 
 
-static inline int MPIDI_shm_mrecv(void *buf,
+static inline int MPIDI_CH4_SHM_mrecv(void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   MPID_Request * message, MPI_Status * status)
@@ -148,7 +148,7 @@ static inline int MPIDI_shm_mrecv(void *buf,
 }
 
 
-static inline int MPIDI_shm_imrecv(void *buf,
+static inline int MPIDI_CH4_SHM_imrecv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    MPID_Request * message, MPID_Request ** rreqp)
@@ -216,7 +216,7 @@ static inline int MPIDI_shm_imrecv(void *buf,
         REQ_SHM(req_ack)->segment_ptr = NULL;
         REQ_SHM(req_ack)->pending = REQ_SHM(message)->pending;
         /* enqueue req_ack */
-        REQ_SHM_ENQUEUE(req_ack, MPIDI_shm_sendq);
+        REQ_SHM_ENQUEUE(req_ack, MPIDI_CH4_SHM_sendq);
     }
 
     for (sreq = message; sreq; ) {
@@ -281,8 +281,8 @@ fn_fail:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_irecv)
-static inline int MPIDI_shm_irecv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_irecv)
+static inline int MPIDI_CH4_SHM_irecv(void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -301,11 +301,11 @@ static inline int MPIDI_shm_irecv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_cancel_recv)
-static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_cancel_recv)
+static inline int MPIDI_CH4_SHM_cancel_recv(MPID_Request * rreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-    MPID_Request *req = MPIDI_shm_recvq_posted.head;
+    MPID_Request *req = MPIDI_CH4_SHM_recvq_posted.head;
     MPID_Request *prev_req = NULL;
 
     while (req) {
@@ -320,12 +320,12 @@ static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
             }
             else
             {
-                MPIDI_shm_recvq_posted.head = REQ_SHM(req)->next;
+                MPIDI_CH4_SHM_recvq_posted.head = REQ_SHM(req)->next;
             }
 
-            if (req == MPIDI_shm_recvq_posted.tail)
+            if (req == MPIDI_CH4_SHM_recvq_posted.tail)
             {
-                MPIDI_shm_recvq_posted.tail = prev_req;
+                MPIDI_CH4_SHM_recvq_posted.tail = prev_req;
             }
 
             MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);

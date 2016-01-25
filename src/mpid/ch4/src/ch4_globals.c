@@ -34,8 +34,8 @@ MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_func;
 MPIDI_CH4_NM_native_funcs_t *MPIDI_CH4_NM_native_func;
 
 #ifdef MPIDI_BUILD_CH4_SHM
-MPIDI_shm_funcs_t        *MPIDI_shm_func;
-MPIDI_shm_native_funcs_t *MPIDI_shm_native_func;
+MPIDI_CH4_SHM_funcs_t        *MPIDI_CH4_SHM_func;
+MPIDI_CH4_SHM_native_funcs_t *MPIDI_CH4_SHM_native_func;
 #endif
 
 #ifdef MPID_DEVICE_DEFINES_THREAD_CS

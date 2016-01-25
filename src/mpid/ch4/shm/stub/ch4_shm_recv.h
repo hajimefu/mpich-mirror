@@ -14,8 +14,8 @@
 #include "ch4_shm_impl.h"
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_recv)
-static inline int MPIDI_shm_recv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
+static inline int MPIDI_CH4_SHM_recv(void *buf,
                                  int count,
                                  MPI_Datatype datatype,
                                  int rank,
@@ -27,7 +27,7 @@ static inline int MPIDI_shm_recv(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_recv_init(void *buf,
+static inline int MPIDI_CH4_SHM_recv_init(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -39,7 +39,7 @@ static inline int MPIDI_shm_recv_init(void *buf,
 }
 
 
-static inline int MPIDI_shm_mrecv(void *buf,
+static inline int MPIDI_CH4_SHM_mrecv(void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   MPID_Request * message, MPI_Status * status)
@@ -49,7 +49,7 @@ static inline int MPIDI_shm_mrecv(void *buf,
 }
 
 
-static inline int MPIDI_shm_imrecv(void *buf,
+static inline int MPIDI_CH4_SHM_imrecv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    MPID_Request * message, MPID_Request ** rreqp)
@@ -59,8 +59,8 @@ static inline int MPIDI_shm_imrecv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_irecv)
-static inline int MPIDI_shm_irecv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_irecv)
+static inline int MPIDI_CH4_SHM_irecv(void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -71,7 +71,7 @@ static inline int MPIDI_shm_irecv(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_cancel_recv(MPID_Request * rreq)
+static inline int MPIDI_CH4_SHM_cancel_recv(MPID_Request * rreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

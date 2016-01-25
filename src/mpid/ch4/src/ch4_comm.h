@@ -107,7 +107,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
         MPIR_ERR_POP(mpi_errno);
     }
 #if defined(MPIDI_BUILD_CH4_SHM)
-    mpi_errno = MPIDI_shm_comm_create(comm);
+    mpi_errno = MPIDI_CH4_SHM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -162,7 +162,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
         MPIR_ERR_POP(mpi_errno);
     }
 #if defined(MPIDI_BUILD_CH4_SHM)
-    mpi_errno = MPIDI_shm_comm_destroy(comm);
+    mpi_errno = MPIDI_CH4_SHM_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }

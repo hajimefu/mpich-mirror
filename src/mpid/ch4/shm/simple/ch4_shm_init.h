@@ -21,8 +21,8 @@ extern MPID_nem_mem_region_t MPID_nem_mem_region;
 extern char *MPID_nem_asymm_base_addr;
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_init)
-static inline int MPIDI_shm_init(int rank, int size)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_init)
+static inline int MPIDI_CH4_SHM_init(int rank, int size)
 {
     int mpi_errno = MPI_SUCCESS;
     int num_local = 0;
@@ -194,8 +194,8 @@ static inline int MPIDI_shm_init(int rank, int size)
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_finalize)
-static inline int MPIDI_shm_finalize(void)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_finalize)
+static inline int MPIDI_CH4_SHM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_FINALIZE);
@@ -226,57 +226,57 @@ static inline int MPIDI_shm_finalize(void)
     goto fn_exit;
 }
 
-static inline void *MPIDI_shm_alloc_mem(size_t size, MPID_Info * info_ptr)
+static inline void *MPIDI_CH4_SHM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     MPIU_Assert(0);
     return NULL;
 }
 
-static inline int MPIDI_shm_free_mem(void *ptr)
+static inline int MPIDI_CH4_SHM_free_mem(void *ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_comm_get_lpid(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_SHM_comm_get_lpid(MPID_Comm * comm_ptr,
                                           int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_SHM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_CH4_SHM_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
     *id_p = (MPID_Node_id_t) 0;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_CH4_SHM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
 {
     *max_id_p = (MPID_Node_id_t) 1;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_getallincomm(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_SHM_getallincomm(MPID_Comm * comm_ptr,
                                          int local_size, MPID_Gpid local_gpids[], int *singlePG)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
+static inline int MPIDI_CH4_SHM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
+static inline int MPIDI_CH4_SHM_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
                                                         int size, const int lpids[])
 {
     MPIU_Assert(0);

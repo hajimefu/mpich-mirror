@@ -54,10 +54,10 @@ typedef struct MPIDI_SHM_VCRT *MPID_SHM_VCRT;
 typedef struct {
     MPID_Request *head;
     MPID_Request *tail;
-} MPIDI_shm_queue_t;
-extern MPIDI_shm_queue_t MPIDI_shm_sendq;       /* defined in send.h */
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_posted;        /* defined in recv.h */
-extern MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected;    /* defined in recv.h */
+} MPIDI_CH4_SHM_queue_t;
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_sendq;       /* defined in send.h */
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_posted;        /* defined in recv.h */
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_unexpected;    /* defined in recv.h */
 
 #define REQ_SHM_COMPLETE(req_) \
 { \

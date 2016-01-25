@@ -89,25 +89,26 @@ for net in $ch4_netmods ; do
         #include \"${net}_pre.h\""
     fi
 
+    net_upper=`echo ${net} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
     if test -z "$ch4_netmod_amrequest_decl" ; then
-        ch4_netmod_amrequest_decl="MPIDI_CH4_NM_${net}_amrequest_t ${net};"
+        ch4_netmod_amrequest_decl="MPIDI_CH4_NMI_${net_upper}_Am_request_t ${net};"
     else
         ch4_netmod_amrequest_decl="${ch4_netmod_amrequest_decl} \\
-MPIDI_CH4_NM_${net}_amrequest_t ${net};"
+MPIDI_CH4_NMI_${net_upper}_Am_request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_request_decl" ; then
-        ch4_netmod_request_decl="MPIDI_CH4_NM_${net}_request_t ${net};"
+        ch4_netmod_request_decl="MPIDI_CH4_NMI_${net_upper}_Request_t ${net};"
     else
         ch4_netmod_request_decl="${ch4_netmod_request_decl} \\
-MPIDI_CH4_NM_${net}_request_t ${net};"
+MPIDI_CH4_NMI_${net_upper}_Request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_comm_decl" ; then
-        ch4_netmod_comm_decl="MPIDI_CH4_NM_${net}_comm_t ${net};"
+        ch4_netmod_comm_decl="MPIDI_CH4_NMI_${net_upper}_Comm_t ${net};"
     else
         ch4_netmod_comm_decl="${ch4_netmod_comm_decl} \\
-MPIDI_CH4_NM_${net}_comm_t ${net};"
+MPIDI_CH4_NMI_${net_upper}_Comm_t ${net};"
     fi
 
 net_index=`expr $net_index + 1`
@@ -214,27 +215,27 @@ for shm in $ch4_shm ; do
     fi
 
     if test -z "$ch4_shm_func_decl" ; then
-        ch4_shm_func_decl="MPIDI_shm_${shm}_funcs"
+        ch4_shm_func_decl="MPIDI_CH4_SHM_${shm}_funcs"
     else
-        ch4_shm_func_decl="${ch4_shm_func_decl}, MPIDI_shm_${shm}_funcs"
+        ch4_shm_func_decl="${ch4_shm_func_decl}, MPIDI_CH4_SHM_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_native_func_decl" ; then
-        ch4_shm_native_func_decl="MPIDI_shm_native_${shm}_funcs"
+        ch4_shm_native_func_decl="MPIDI_CH4_SHM_native_${shm}_funcs"
     else
-        ch4_shm_native_func_decl="${ch4_shm_native_func_decl}, MPIDI_shm_native_${shm}_funcs"
+        ch4_shm_native_func_decl="${ch4_shm_native_func_decl}, MPIDI_CH4_SHM_native_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_func_array" ; then
-        ch4_shm_func_array="&MPIDI_shm_${shm}_funcs"
+        ch4_shm_func_array="&MPIDI_CH4_SHM_${shm}_funcs"
     else
-        ch4_shm_func_array="${ch4_shm_func_array}, &MPIDI_shm_${shm}_funcs"
+        ch4_shm_func_array="${ch4_shm_func_array}, &MPIDI_CH4_SHM_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_native_func_array" ; then
-        ch4_shm_native_func_array="&MPIDI_shm_native_${shm}_funcs"
+        ch4_shm_native_func_array="&MPIDI_CH4_SHM_native_${shm}_funcs"
     else
-        ch4_shm_native_func_array="${ch4_shm_native_func_array}, &MPIDI_shm_native_${shm}_funcs"
+        ch4_shm_native_func_array="${ch4_shm_native_func_array}, &MPIDI_CH4_SHM_native_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_strings" ; then
@@ -247,21 +248,22 @@ for shm in $ch4_shm ; do
         ch4_shm_pre_include="#include \"shm_${shm}_pre.h\""
     else
         ch4_shm_pre_include="${ch4_shm_pre_include}
-        #include \"shm_${shm}_pre.h\""
+#include \"shm_${shm}_pre.h\""
     fi
 
+    shm_upper=`echo ${shm} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
     if test -z "$ch4_shm_request_decl" ; then
-        ch4_shm_request_decl="MPIDI_shm_${shm}_request_t ${shm};"
+        ch4_shm_request_decl="MPIDI_CH4_SHM_${shm_upper}_Request_t ${shm};"
     else
         ch4_shm_request_decl="${ch4_shm_request_decl} \\
-MPIDI_shm_${shm}_request_t ${shm};"
+MPIDI_CH4_SHM_${shm_upper}_Request_t ${shm};"
     fi
 
     if test -z "$ch4_shm_comm_decl" ; then
-        ch4_shm_comm_decl="MPIDI_shm_${shm}_comm_t ${shm};"
+        ch4_shm_comm_decl="MPIDI_CH4_SHM_${shm_upper}_Comm_t ${shm};"
     else
         ch4_shm_comm_decl="${ch4_shm_comm_decl} \\
-MPIDI_shm_${shm}_comm_t ${shm};"
+MPIDI_CH4_SHM_${shm_upper}_Comm_t ${shm};"
     fi
 
 

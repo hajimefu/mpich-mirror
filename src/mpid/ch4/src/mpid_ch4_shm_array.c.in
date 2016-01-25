@@ -9,19 +9,19 @@
 #ifdef MPIDI_BUILD_CH4_SHM
 
 /* forward declaration of funcs structs defined in network modules */
-extern MPIDI_shm_funcs_t @ch4_shm_func_decl@;
-extern MPIDI_shm_native_funcs_t @ch4_shm_native_func_decl@;
+extern MPIDI_CH4_SHM_funcs_t @ch4_shm_func_decl@;
+extern MPIDI_CH4_SHM_native_funcs_t @ch4_shm_native_func_decl@;
 
 #ifndef SHM_DIRECT
-MPIDI_shm_funcs_t *MPIDI_shm_funcs[@ch4_shm_array_sz@] = { @ch4_shm_func_array@ };
-MPIDI_shm_native_funcs_t *MPIDI_shm_native_funcs[@ch4_shm_array_sz@] =
+MPIDI_CH4_SHM_funcs_t *MPIDI_CH4_SHM_funcs[@ch4_shm_array_sz@] = { @ch4_shm_func_array@ };
+MPIDI_CH4_SHM_native_funcs_t *MPIDI_CH4_SHM_native_funcs[@ch4_shm_array_sz@] =
     { @ch4_shm_native_func_array@ };
 #else
-MPIDI_shm_funcs_t *MPIDI_shm_funcs[@ch4_shm_array_sz@] = { 0 };
-MPIDI_shm_native_funcs_t *MPIDI_shm_native_funcs[@ch4_shm_array_sz@] = { 0 };
+MPIDI_CH4_SHM_funcs_t *MPIDI_CH4_SHM_funcs[@ch4_shm_array_sz@] = { 0 };
+MPIDI_CH4_SHM_native_funcs_t *MPIDI_CH4_SHM_native_funcs[@ch4_shm_array_sz@] = { 0 };
 #endif
 int MPIDI_num_shms = @ch4_shm_array_sz@;
-char MPIDI_shm_strings[@ch4_shm_array_sz@][MPIDI_MAX_SHM_STRING_LEN] =
+char MPIDI_CH4_SHM_strings[@ch4_shm_array_sz@][MPIDI_MAX_SHM_STRING_LEN] =
     { @ch4_shm_strings@ };
 
 #endif

@@ -12,10 +12,10 @@
 #include <mpidimpl.h>
 #include "ch4_shm_impl.h"
 
-MPIDI_shm_queue_t MPIDI_shm_sendq = { NULL, NULL };
+MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_sendq = { NULL, NULL };
 MPID_nem_mem_region_t MPID_nem_mem_region = {{0}};
 
 char *MPID_nem_asymm_base_addr = 0;
-MPIDI_shm_queue_t MPIDI_shm_recvq_posted = { NULL, NULL };
-MPIDI_shm_queue_t MPIDI_shm_recvq_unexpected = { NULL, NULL };
+MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_posted = { NULL, NULL };
+MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_unexpected = { NULL, NULL };
 MPID_Thread_mutex_t MPID_shm_mutex;

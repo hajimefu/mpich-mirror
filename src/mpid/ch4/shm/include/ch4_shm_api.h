@@ -19,8 +19,8 @@ MPIDI_SHM_API(int,progress,
 /* called by CH4 and shms to register header types */
 MPIDI_SHM_API(int,reg_hdr_handler,
                  (int) handler_id,
-                 (MPIDI_shm_am_origin_handler_fn) origin_handler_fn,
-                 (MPIDI_shm_am_target_handler_fn) target_handler_fn);
+                 (MPIDI_CH4_SHM_am_origin_handler_fn) origin_handler_fn,
+                 (MPIDI_CH4_SHM_am_target_handler_fn) target_handler_fn);
 
 /* for dynamic processes */
 MPIDI_SHM_API(int,comm_connect,

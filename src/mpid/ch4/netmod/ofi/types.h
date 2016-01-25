@@ -22,58 +22,49 @@
 
 EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
-  (strrchr(__FILE__,'/')                        \
-   ? strrchr(__FILE__,'/')+1                    \
-   : __FILE__                                   \
-)
-#ifndef MIN
-#define MIN(x,y) (((x)<(y))?(x):(y))
-#endif
-#ifndef MAX
-#define MAX(x,y) ((x)>(y))?(x):(y))
-#endif
-#define MPIDI_MAP_NOT_FOUND      ((void*)(-1UL))
-#define MPIDI_FI_MAJOR_VERSION 1
-#define MPIDI_FI_MINOR_VERSION 0
-#define MPIDI_MAX_SHORT_SEND_SZ		(16 * 1024)
-#define MPIDI_MIN_MSG_SZ		      MPIDI_MAX_SHORT_SEND_SZ
-#define MPIDI_NUM_AM_BUFFERS		  (8)
-#define MPIDI_AM_BUFF_SZ		      (1 * 1024 * 1024)
-#define MPIDI_CACHELINE_SIZE        (64)
-#define MPIDI_IOV_MAX               1
-#define MPIDI_BUF_POOL_SZ  (1024)
-#define MPIDI_BUF_POOL_NUM (1024)
-#define MPIDI_NUM_CQ_BUFFERED (1024)
-#define MPIDI_MAX_AM_HANDLERS_TOTAL 		(24)
-
-#define MPIDI_INTERNAL_HANDLER_CONTROL (MPIDI_MAX_AM_HANDLERS_TOTAL-1)
-#define MPIDI_INTERNAL_HANDLER_NEXT    (MPIDI_MAX_AM_HANDLERS_TOTAL-2)
-#define MPIDI_MAX_AM_HANDLERS          (MPIDI_INTERNAL_HANDLER_NEXT-1)
-
+    (strrchr(__FILE__,'/')                      \
+     ? strrchr(__FILE__,'/')+1                  \
+     : __FILE__                                 \
+        )
+#define MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND            ((void*)(-1UL))
+#define MPIDI_CH4_NMI_OFI_MAJOR_VERSION            1
+#define MPIDI_CH4_NMI_OFI_MINOR_VERSION            0
+#define MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE      (16 * 1024)
+#define MPIDI_CH4_NMI_OFI_MIN_MSG_SZ               MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE
+#define MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS           (8)
+#define MPIDI_CH4_NMI_OFI_AM_BUFF_SZ               (1 * 1024 * 1024)
+#define MPIDI_CH4_NMI_OFI_CACHELINE_SIZE           (64)
+#define MPIDI_CH4_NMI_OFI_IOV_MAX                  1
+#define MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE            (1024)
+#define MPIDI_CH4_NMI_OFI_BUF_POOL_NUM             (1024)
+#define MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED          (1024)
+#define MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL    (24)
+#define MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL (MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL-1)
+#define MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_NEXT    (MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL-2)
+#define MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS          (MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_NEXT-1)
 
 #ifdef USE_OFI_TAGGED
-#define MPIDI_ENABLE_TAGGED          1
-#define MPIDI_ENABLE_AM              1
-#define MPIDI_ENABLE_RMA             1
+#define MPIDI_CH4_NMI_OFI_ENABLE_TAGGED          1
+#define MPIDI_CH4_NMI_OFI_ENABLE_AM              1
+#define MPIDI_CH4_NMI_OFI_ENABLE_RMA             1
 #else
-#define MPIDI_ENABLE_TAGGED          0
-#define MPIDI_ENABLE_AM              1
-#define MPIDI_ENABLE_RMA             1
+#define MPIDI_CH4_NMI_OFI_ENABLE_TAGGED          0
+#define MPIDI_CH4_NMI_OFI_ENABLE_AM              1
+#define MPIDI_CH4_NMI_OFI_ENABLE_RMA             1
 #endif
 
-#ifdef MPIDI_USE_SCALABLE_ENDPOINTS
-#define MPIDI_ENABLE_SCALABLE_ENDPOINTS 1
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+#define MPIDI_CH4_NMI_OFI_ENABLE_SCALABLE_ENDPOINTS 1
 #else
-#define MPIDI_ENABLE_SCALABLE_ENDPOINTS 0
+#define MPIDI_CH4_NMI_OFI_ENABLE_SCALABLE_ENDPOINTS 0
 #endif
 
-#ifdef MPIDI_USE_AV_TABLE
-#define MPIDI_ENABLE_AV_TABLE 1
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE
+#define MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE 1
 #else
-#define MPIDI_ENABLE_AV_TABLE 0
+#define MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE 0
 #endif
 
-/* Macros and inlines */
 /* match/ignore bit manipulation
  *
  * 0123 4567 01234567 0123 4567 01234567 0123 4567 01234567 01234567 01234567
@@ -82,15 +73,15 @@ EXTERN_C_BEGIN
  * |   |                  |                  |
  * +---- protocol
  */
-#define MPID_PROTOCOL_MASK (0x9000000000000000ULL)
-#define MPID_CONTEXT_MASK  (0x0FFFF00000000000ULL)
-#define MPID_SOURCE_MASK   (0x00000FFFF0000000ULL)
-#define MPID_TAG_MASK      (0x000000000FFFFFFFULL)
-#define MPID_SYNC_SEND     (0x1000000000000000ULL)
-#define MPID_SYNC_SEND_ACK (0x2000000000000000ULL)
-#define MPID_DYNPROC_SEND  (0x4000000000000000ULL)
-#define MPID_TAG_SHIFT     (28)
-#define MPID_SOURCE_SHIFT  (16)
+#define MPIDI_CH4_NMI_OFI_PROTOCOL_MASK (0x9000000000000000ULL)
+#define MPIDI_CH4_NMI_OFI_CONTEXT_MASK  (0x0FFFF00000000000ULL)
+#define MPIDI_CH4_NMI_OFI_SOURCE_MASK   (0x00000FFFF0000000ULL)
+#define MPIDI_CH4_NMI_OFI_TAG_MASK      (0x000000000FFFFFFFULL)
+#define MPIDI_CH4_NMI_OFI_SYNC_SEND     (0x1000000000000000ULL)
+#define MPIDI_CH4_NMI_OFI_SYNC_SEND_ACK (0x2000000000000000ULL)
+#define MPIDI_CH4_NMI_OFI_DYNPROC_SEND  (0x4000000000000000ULL)
+#define MPIDI_CH4_NMI_OFI_TAG_SHIFT     (28)
+#define MPIDI_CH4_NMI_OFI_SOURCE_SHIFT  (16)
 
 /* RMA Key Space division
  *    |                  |                  |                    |
@@ -101,139 +92,155 @@ EXTERN_C_BEGIN
 /* 2M  window instances per comm           */
 /* 2M  outstanding huge RMAS per comm      */
 /* 4M  communicators                       */
-#define MPIDI_MAX_WINDOWS_BITS_64  (21)
-#define MPIDI_MAX_HUGE_RMA_BITS_64 (21)
-#define MPIDI_MAX_HUGE_RMAS_64     (1<<(MPIDI_MAX_HUGE_RMA_BITS_64))
-#define MPIDI_MAX_WINDOWS_64       (1<<(MPIDI_MAX_WINDOWS_BITS_64))
-#define MPIDI_HUGE_RMA_SHIFT_64    (MPIDI_MAX_WINDOWS_BITS_64)
-#define MPIDI_CONTEXT_SHIFT_64     (MPIDI_MAX_WINDOWS_BITS_64+MPIDI_MAX_HUGE_RMA_BITS_64)
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_64  (21)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_64 (21)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_64     (1<<(MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_64))
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_64       (1<<(MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_64))
+#define MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_64    (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_64)
+#define MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_64     (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_64+MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_64)
 
 /* 32-bit key space                         */
 /* 4096 window instances per comm           */
 /* 256  outstanding huge RMAS per comm      */
 /* 4096 communicators                       */
-#define MPIDI_MAX_WINDOWS_BITS_32  (12)
-#define MPIDI_MAX_HUGE_RMA_BITS_32 (8)
-#define MPIDI_MAX_HUGE_RMAS_32     (1<<(MPIDI_MAX_HUGE_RMA_BITS_32))
-#define MPIDI_MAX_WINDOWS_32       (1<<(MPIDI_MAX_WINDOWS_BITS_32))
-#define MPIDI_HUGE_RMA_SHIFT_32    (MPIDI_MAX_WINDOWS_BITS_32)
-#define MPIDI_CONTEXT_SHIFT_32     (MPIDI_MAX_WINDOWS_BITS_32+MPIDI_MAX_HUGE_RMA_BITS_32)
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_32  (12)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_32 (8)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_32     (1<<(MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_32))
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_32       (1<<(MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_32))
+#define MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_32    (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_32)
+#define MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_32     (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_32+MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_32)
 
 /* 16-bit key space                         */
 /* 64 window instances per comm             */
 /* 16 outstanding huge RMAS per comm        */
 /* 64 communicators                          */
-#define MPIDI_MAX_WINDOWS_BITS_16  (6)
-#define MPIDI_MAX_HUGE_RMA_BITS_16 (4)
-#define MPIDI_MAX_HUGE_RMAS_16     (1<<(MPIDI_MAX_HUGE_RMA_BITS_16))
-#define MPIDI_MAX_WINDOWS_16       (1<<(MPIDI_MAX_WINDOWS_BITS_16))
-#define MPIDI_HUGE_RMA_SHIFT_16    (MPIDI_MAX_WINDOWS_BITS_16)
-#define MPIDI_CONTEXT_SHIFT_16     (MPIDI_MAX_WINDOWS_BITS_16+MPIDI_MAX_HUGE_RMA_BITS_16)
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_16  (6)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_16 (4)
+#define MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_16     (1<<(MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_16))
+#define MPIDI_CH4_NMI_OFI_MAX_WINDOWS_16       (1<<(MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_16))
+#define MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_16    (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_16)
+#define MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_16     (MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_16+MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_16)
 
+#define MPIDI_CH4_NMI_OFI_DT_SIZES 62
+#define MPIDI_CH4_NMI_OFI_OP_SIZES 15
+
+#define MPIDI_CH4_NMI_OFI_API_TAG 0
+#define MPIDI_CH4_NMI_OFI_API_RMA 1
+#define MPIDI_CH4_NMI_OFI_API_MSG 2
+#define MPIDI_CH4_NMI_OFI_API_CTR 3
+
+#define MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX     MPIDI_Global.mutexes[0].m
+#define MPIDI_CH4_NMI_OFI_THREAD_PROGRESS_MUTEX MPIDI_Global.mutexes[1].m
+#define MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX       MPIDI_Global.mutexes[2].m
+#define MPIDI_CH4_NMI_OFI_THREAD_SPAWN_MUTEX    MPIDI_Global.mutexes[3].m
+
+/* Field accessor macros */
+#define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_Gpid_t*)(req)->dev.pad)
+#define MPIDI_CH4_NMI_OFI_DATATYPE(comm)           ((MPIDI_CH4_NMI_OFI_Datatype_t*)(comm)->dev.pad)
+#define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_Offset_checker_t,  pad)
+#define MPIDI_CH4_NMI_OFI_WIN(win)                 ((MPIDI_CH4_NMI_OFI_Win_t*)(win)->dev.pad)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 
 /* Typedefs */
-typedef struct iovec iovec_t;
-typedef int (*event_event_fn) (cq_tagged_entry_t * wc, MPID_Request *);
+typedef enum {
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR = 1,
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW = 2,
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR = 4,
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW = 8
+} MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t;
 
 typedef enum {
-    MPIDI_ACCU_ORDER_RAR = 1,
-    MPIDI_ACCU_ORDER_RAW = 2,
-    MPIDI_ACCU_ORDER_WAR = 4,
-    MPIDI_ACCU_ORDER_WAW = 8
-} MPIDI_Win_info_accumulate_ordering;
-
-typedef enum {
-    MPIDI_ACCU_SAME_OP,
-    MPIDI_ACCU_SAME_OP_NO_OP
-} MPIDI_Win_info_accumulate_ops;
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP,
+    MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP_NO_OP
+} MPIDI_CH4_NMI_OFI_Win_info_accumulate_ops_t;
 
 enum {
-    MPIDI_CTRL_ASSERT,    /**< Lock acknowledge      */
-    MPIDI_CTRL_LOCKACK,   /**< Lock acknowledge      */
-    MPIDI_CTRL_LOCKALLACK,/**< Lock all acknowledge  */
-    MPIDI_CTRL_LOCKREQ,   /**< Lock window           */
-    MPIDI_CTRL_LOCKALLREQ,/**< Lock all window       */
-    MPIDI_CTRL_UNLOCK,    /**< Unlock window         */
-    MPIDI_CTRL_UNLOCKACK, /**< Unlock window         */
-    MPIDI_CTRL_UNLOCKALL, /**< Unlock window         */
-    MPIDI_CTRL_UNLOCKALLACK,
+    MPIDI_CH4_NMI_OFI_CTRL_ASSERT,    /**< Lock acknowledge      */
+    MPIDI_CH4_NMI_OFI_CTRL_LOCKACK,   /**< Lock acknowledge      */
+    MPIDI_CH4_NMI_OFI_CTRL_LOCKALLACK,/**< Lock all acknowledge  */
+    MPIDI_CH4_NMI_OFI_CTRL_LOCKREQ,   /**< Lock window           */
+    MPIDI_CH4_NMI_OFI_CTRL_LOCKALLREQ,/**< Lock all window       */
+    MPIDI_CH4_NMI_OFI_CTRL_UNLOCK,    /**< Unlock window         */
+    MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK, /**< Unlock window         */
+    MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALL, /**< Unlock window         */
+    MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALLACK,
     /**< Unlock window         */
-    MPIDI_CTRL_COMPLETE,  /**< End a START epoch     */
-    MPIDI_CTRL_POST,      /**< Begin POST epoch      */
-    MPIDI_CTRL_HUGE,      /**< Huge message          */
-    MPIDI_CTRL_HUGEACK,   /**< Huge message ack      */
-    MPIDI_CTRL_HUGE_CLEANUP,
+    MPIDI_CH4_NMI_OFI_CTRL_COMPLETE,  /**< End a START epoch     */
+    MPIDI_CH4_NMI_OFI_CTRL_POST,      /**< Begin POST epoch      */
+    MPIDI_CH4_NMI_OFI_CTRL_HUGE,      /**< Huge message          */
+    MPIDI_CH4_NMI_OFI_CTRL_HUGEACK,   /**< Huge message ack      */
+    MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP,
     /**< Huge message cleanup  */
 };
 
 enum {
-    MPIDI_EVENT_ABORT,
-    MPIDI_EVENT_SEND,
-    MPIDI_EVENT_RECV,
-    MPIDI_EVENT_RMA_DONE,
-    MPIDI_EVENT_AM_SEND,
-    MPIDI_EVENT_AM_RECV,
-    MPIDI_EVENT_AM_READ,
-    MPIDI_EVENT_AM_MULTI,
-    MPIDI_EVENT_PEEK,
-    MPIDI_EVENT_RECV_HUGE,
-    MPIDI_EVENT_SEND_HUGE,
-    MPIDI_EVENT_SSEND_ACK,
-    MPIDI_EVENT_GET_HUGE,
-    MPIDI_EVENT_CHUNK_DONE,
-    MPIDI_EVENT_DYNPROC_DONE,
-    MPIDI_EVENT_ACCEPT_PROBE
+    MPIDI_CH4_NMI_OFI_EVENT_ABORT,
+    MPIDI_CH4_NMI_OFI_EVENT_SEND,
+    MPIDI_CH4_NMI_OFI_EVENT_RECV,
+    MPIDI_CH4_NMI_OFI_EVENT_RMA_DONE,
+    MPIDI_CH4_NMI_OFI_EVENT_AM_SEND,
+    MPIDI_CH4_NMI_OFI_EVENT_AM_RECV,
+    MPIDI_CH4_NMI_OFI_EVENT_AM_READ,
+    MPIDI_CH4_NMI_OFI_EVENT_AM_MULTI,
+    MPIDI_CH4_NMI_OFI_EVENT_PEEK,
+    MPIDI_CH4_NMI_OFI_EVENT_RECV_HUGE,
+    MPIDI_CH4_NMI_OFI_EVENT_SEND_HUGE,
+    MPIDI_CH4_NMI_OFI_EVENT_SSEND_ACK,
+    MPIDI_CH4_NMI_OFI_EVENT_GET_HUGE,
+    MPIDI_CH4_NMI_OFI_EVENT_CHUNK_DONE,
+    MPIDI_CH4_NMI_OFI_EVENT_DYNPROC_DONE,
+    MPIDI_CH4_NMI_OFI_EVENT_ACCEPT_PROBE
 };
 
 enum {
-    MPIDI_REQUEST_LOCK,
-    MPIDI_REQUEST_LOCKALL,
+    MPIDI_CH4_NMI_OFI_REQUEST_LOCK,
+    MPIDI_CH4_NMI_OFI_REQUEST_LOCKALL,
 };
 
 enum {
-    MPIDI_PEEK_START,
-    MPIDI_PEEK_NOT_FOUND,
-    MPIDI_PEEK_FOUND
+    MPIDI_CH4_NMI_OFI_PEEK_START,
+    MPIDI_CH4_NMI_OFI_PEEK_NOT_FOUND,
+    MPIDI_CH4_NMI_OFI_PEEK_FOUND
 };
 
-
-/* Physical address table data */
 typedef struct {
     fi_addr_t dest;
-    /**< A single physical address */
-} MPID_Addr_entry_t;
-typedef struct {
-    int size;
-    MPID_Addr_entry_t table[0];/**< Array of physical addresses */
-} MPIDI_Addr_table_t;
+} MPIDI_CH4_NMI_OFI_Addr_entry_t;
 
 typedef struct {
-    char      pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int       event_id;         /* fixed field, do not move */
-    int       index;
-} MPIDI_AM_req;
+    int                            size;
+    MPIDI_CH4_NMI_OFI_Addr_entry_t table[0];/**< Array of physical addresses */
+} MPIDI_CH4_NMI_OFI_Addr_table_t;
+
+typedef struct {
+    char              pad[MPIDI_REQUEST_HDR_SIZE];
+    struct fi_context context;          /* fixed field, do not move */
+    int               event_id;         /* fixed field, do not move */
+    int               index;
+} MPIDI_CH4_NMI_OFI_Am_repost_request_t;
+
+typedef struct {
+    char               pad[MPIDI_REQUEST_HDR_SIZE];
+    struct fi_context  context;          /* fixed field, do not move */
+    int                event_id;         /* fixed field, do not move */
+    MPID_Request      *signal_req;
+} MPIDI_CH4_NMI_OFI_Ssendack_request_t;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t     context;          /* fixed field, do not move */
-    int           event_id;         /* fixed field, do not move */
-    MPID_Request *signal_req;
-} MPIDI_Ssendack_request;
+    struct fi_context context;          /* fixed field, do not move */
+    int               event_id;         /* fixed field, do not move */
+    int               done;
+    uint32_t          tag;
+    uint32_t          source;
+    uint64_t          msglen;
+} MPIDI_CH4_NMI_OFI_Dynamic_process_request_t;
 
 typedef struct {
-    char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t context;          /* fixed field, do not move */
-    int       event_id;         /* fixed field, do not move */
-    int       done;
-    uint32_t  tag;
-    uint32_t  source;
-    uint64_t  msglen;
-} MPIDI_Dynproc_req;
-
-typedef struct atomic_valid {
-    uint8_t op;
-    uint8_t dt;
+    uint8_t  op;
+    uint8_t  dt;
     unsigned atomic_valid:2;
     unsigned fetch_atomic_valid:2;
     unsigned compare_atomic_valid:2;
@@ -241,65 +248,53 @@ typedef struct atomic_valid {
     uint64_t max_atomic_count;
     uint64_t max_compare_atomic_count;
     uint64_t max_fetch_atomic_count;
-} atomic_valid_t;
-#define DT_SIZES 62
-#define OP_SIZES 15
-
-#define MPIDI_API_TAG 0
-#define MPIDI_API_RMA 1
-#define MPIDI_API_MSG 2
-#define MPIDI_API_CTR 3
-
-#define MPIDI_THREAD_UTIL_MUTEX     MPIDI_Global.mutexes[0].m
-#define MPIDI_THREAD_PROGRESS_MUTEX MPIDI_Global.mutexes[1].m
-#define MPIDI_THREAD_FI_MUTEX       MPIDI_Global.mutexes[2].m
-#define MPIDI_THREAD_SPAWN_MUTEX    MPIDI_Global.mutexes[3].m
+} MPIDI_CH4_NMI_OFI_Atomic_valid_t;
 
 typedef struct {
-    fid_ep_t tx_tag;
-    fid_ep_t rx_tag;
+    struct fid_ep *tx_tag;
+    struct fid_ep *rx_tag;
 
-    fid_ep_t tx_rma;
-    fid_ep_t rx_rma;
+    struct fid_ep *tx_rma;
+    struct fid_ep *rx_rma;
 
-    fid_ep_t tx_msg;
-    fid_ep_t rx_msg;
+    struct fid_ep *tx_msg;
+    struct fid_ep *rx_msg;
 
-    fid_ep_t tx_ctr;
-    fid_ep_t rx_ctr;
+    struct fid_ep *tx_ctr;
+    struct fid_ep *rx_ctr;
 
     int ctx_offset;
-} MPIDI_Context_t;
+} MPIDI_CH4_NMI_OFI_Context_t;
 
-typedef union MPIDI_cacheline_mutex_t{
+typedef union {
     MPID_Thread_mutex_t m;
-    char cacheline[MPIDI_CACHELINE_SIZE];
-}MPIDI_cacheline_mutex_t __attribute__ ((aligned (MPIDI_CACHELINE_SIZE)));
+    char                cacheline[MPIDI_CH4_NMI_OFI_CACHELINE_SIZE];
+}MPIDI_CH4_NMI_OFI_Cacheline_mutex_t __attribute__ ((aligned (MPIDI_CH4_NMI_OFI_CACHELINE_SIZE)));
 
-struct cq_list {
-    cq_tagged_entry_t  cq_entry;
-    fi_addr_t          source;
-    struct slist_entry entry;
-};
+typedef struct {
+    struct fi_cq_tagged_entry  cq_entry;
+    fi_addr_t                  source;
+    struct slist_entry         entry;
+} MPIDI_CH4_NMI_OFI_Cq_list_t;
 
-struct cq_buff_entry {
-    cq_tagged_entry_t cq_entry;
-};
+typedef struct  {
+    struct fi_cq_tagged_entry cq_entry;
+} MPIDI_CH4_NMI_OFI_Cq_buff_entry_t;
 
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
 typedef struct {
-    int jobid;
-    char addrname[FI_NAME_MAX];
+    int    jobid;
+    char   addrname[FI_NAME_MAX];
     size_t addrnamelen;
-    fid_domain_t domain;
-    fid_fabric_t fabric;
-    fid_base_ep_t ep;
-    fid_cq_t   p2p_cq;
-    fid_cntr_t rma_ctr;
-    fid_av_t av;
-    MPIDI_cacheline_mutex_t mutexes[4];
-    MPIDI_Context_t ctx[MPIDI_MAX_ENDPOINTS];
+    struct fid_domain *domain;
+    struct fid_fabric *fabric;
+    struct fid_ep     *ep;
+    struct fid_cq     *p2p_cq;
+    struct fid_cntr   *rma_ctr;
+    struct fid_av     *av;
+    MPIDI_CH4_NMI_OFI_Cacheline_mutex_t mutexes[4];
+    MPIDI_CH4_NMI_OFI_Context_t         ctx[MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS];
     uint64_t cntr;
     uint64_t max_buffered_send;
     uint64_t max_buffered_write;
@@ -317,14 +312,14 @@ typedef struct {
     MPID_Node_id_t *node_map;
     MPID_Node_id_t max_node_id;
     void *win_map;
-    atomic_valid_t win_op_table[DT_SIZES][OP_SIZES];
+    MPIDI_CH4_NMI_OFI_Atomic_valid_t win_op_table[MPIDI_CH4_NMI_OFI_DT_SIZES][MPIDI_CH4_NMI_OFI_OP_SIZES];
     MPID_CommOps MPID_Comm_fns_store;
-    struct iovec    am_iov[MPIDI_NUM_AM_BUFFERS];
-    struct fi_msg   am_msg[MPIDI_NUM_AM_BUFFERS];
-    void           *am_bufs[MPIDI_NUM_AM_BUFFERS];
-    MPIDI_AM_req    am_reqs[MPIDI_NUM_AM_BUFFERS];
-    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_MAX_AM_HANDLERS_TOTAL];
-    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_MAX_AM_HANDLERS_TOTAL];
+    struct iovec    am_iov[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    struct fi_msg   am_msg[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    void           *am_bufs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NMI_OFI_Am_repost_request_t    am_reqs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
+    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     int coll_progress;
     int pname_set;
     int pname_len;
@@ -332,24 +327,20 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
     MPIU_buf_pool_t *buf_pool;
-    struct cq_buff_entry cq_buffered[MPIDI_NUM_CQ_BUFFERED];
+    MPIDI_CH4_NMI_OFI_Cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];
     int cq_buff_head;
     int cq_buff_tail;
     struct slist cq_buff_list;
-} MPIDI_Global_t;
+} MPIDI_CH4_NMI_OFI_Global_t;
 
 typedef struct {
     char           addr[62];
     MPID_Node_id_t node;
-} MPIDI_OFIGpid_t;
-#define GPID_OFI(req) ((MPIDI_OFIGpid_t*)(req)->dev.pad)
-
+} MPIDI_CH4_NMI_OFI_Gpid_t;
 
 typedef struct {
     uint32_t index;
-} MPIDI_OFIdt_t;
-#define DT_OFI(comm) ((MPIDI_OFIdt_t*)(comm)->dev.pad)
-
+} MPIDI_CH4_NMI_OFI_Datatype_t;
 /* These control structures have to be the same size */
 typedef struct {
     int16_t  type;
@@ -357,7 +348,7 @@ typedef struct {
     int      origin_rank;
     uint64_t win_id;
     int      dummy[8];
-} MPIDI_Win_control_t;
+} MPIDI_CH4_NMI_OFI_Win_control_t;
 
 typedef struct {
     int16_t       type;
@@ -369,7 +360,7 @@ typedef struct {
     int           comm_id;
     int           endpoint_id;
     int           rma_key;
-} MPIDI_Send_control_t;
+} MPIDI_CH4_NMI_OFI_Send_control_t;
 
 typedef struct {
     void *addr;
@@ -380,24 +371,23 @@ typedef struct {
     MPI_Op op;
     int    origin_endpoint;
     size_t len;
-} MPIDI_Win_MsgInfo;
+} MPIDI_CH4_NMI_OFI_Msg_info_t;
 
-typedef struct MPIDI_dummy {
+typedef struct {
     MPIU_OBJECT_HEADER;
     void *pad;
-} MPIDI_dummy_t;
-#define MPIDI_OBJECT_HEADER_SZ offsetof(struct MPIDI_dummy,  pad)
+} MPIDI_CH4_NMI_OFI_Offset_checker_t;
 
-typedef struct MPIDI_Iovec_state {
+typedef struct {
     uintptr_t  target_base_addr;
     uintptr_t  origin_base_addr;
     uintptr_t  result_base_addr;
     size_t     target_count;
     size_t     origin_count;
     size_t     result_count;
-    iovec_t   *target_iov;
-    iovec_t   *origin_iov;
-    iovec_t   *result_iov;
+    struct iovec   *target_iov;
+    struct iovec   *origin_iov;
+    struct iovec   *result_iov;
     size_t     target_idx;
     uintptr_t  target_addr;
     uintptr_t  target_size;
@@ -408,7 +398,7 @@ typedef struct MPIDI_Iovec_state {
     uintptr_t  result_addr;
     uintptr_t  result_size;
     size_t     buf_limit;
-} MPIDI_Iovec_state_t;
+} MPIDI_CH4_NMI_OFI_Iovec_state_t;
 
 typedef struct {
     MPID_Datatype  *pointer;
@@ -420,117 +410,112 @@ typedef struct {
     int             num_contig;
     DLOOP_VECTOR   *map;
     DLOOP_VECTOR    __map;
-} MPIDI_Win_dt;
+} MPIDI_CH4_NMI_OFI_Win_datatype_t;
 
-typedef struct MPIDI_Iovec_array {
+typedef struct {
     char                      pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t                 context;   /* fixed field, do not move */
+    struct fi_context         context;   /* fixed field, do not move */
     int                       event_id;  /* fixed field, do not move */
     struct MPIDI_Iovec_array *next;
     union {
         struct {
-            iovec_t   *originv;
-            rma_iov_t *targetv;
+            struct iovec      *originv;
+            struct fi_rma_iov *targetv;
         }put_get;
         struct {
-            ioc_t     *originv;
-            rma_ioc_t *targetv;
-            ioc_t     *resultv;
-            ioc_t     *comparev;
+            struct fi_ioc     *originv;
+            struct fi_rma_ioc *targetv;
+            struct fi_ioc     *resultv;
+            struct fi_ioc     *comparev;
         }cas;
         struct {
-            ioc_t     *originv;
-            rma_ioc_t *targetv;
+            struct fi_ioc     *originv;
+            struct fi_rma_ioc *targetv;
         }accumulate;
         struct {
-            ioc_t     *originv;
-            rma_ioc_t *targetv;
-            ioc_t     *resultv;
+            struct fi_ioc     *originv;
+            struct fi_rma_ioc *targetv;
+            struct fi_ioc     *resultv;
         }get_accumulate;
     }iov;
     char iov_store[0]; /* Flexible array, do not move */
-} MPIDI_Iovec_array_t;
+} MPIDI_CH4_NMI_OFI_Iovec_array_t;
 
+typedef struct {
+    MPIDI_CH4_NMI_OFI_Iovec_state_t  iovs;
+    MPIDI_CH4_NMI_OFI_Win_datatype_t origin_dt;
+    MPIDI_CH4_NMI_OFI_Win_datatype_t target_dt;
+    MPIDI_CH4_NMI_OFI_Win_datatype_t result_dt;
+    MPIDI_CH4_NMI_OFI_Iovec_array_t  buf; /* Do not move me, flexible array */
+} MPIDI_CH4_NMI_OFI_Win_noncontig_t;
 
-typedef struct MPIDI_Win_noncontig {
-    MPIDI_Iovec_state_t iovs;
-    MPIDI_Win_dt        origin_dt;
-    MPIDI_Win_dt        target_dt;
-    MPIDI_Win_dt        result_dt;
-    MPIDI_Iovec_array_t buf; /* Do not move me, flexible array */
-} MPIDI_Win_noncontig;
-
-typedef struct MPIDI_Win_request {
+typedef struct MPIDI_CH4_NMI_OFI_Win_request {
     MPIU_OBJECT_HEADER;
-    char                      pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OBJECT_HEADER_SZ];
-    context_t                 context;          /* fixed field, do not move */
-    int                       event_id;         /* fixed field, do not move */
-    struct MPIDI_Win_request *next;
-    int                       target_rank;
-    MPIDI_Win_noncontig      *noncontig;
-} MPIDI_Win_request;
+    char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE];
+    struct fi_context                     context;          /* fixed field, do not move */
+    int                                   event_id;         /* fixed field, do not move */
+    struct MPIDI_CH4_NMI_OFI_Win_request *next;
+    int                                   target_rank;
+    MPIDI_CH4_NMI_OFI_Win_noncontig_t    *noncontig;
+} MPIDI_CH4_NMI_OFI_Win_request_t;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t     context;          /* fixed field, do not move */
-    int           event_id;         /* fixed field, do not move */
-    MPID_Request *parent;           /* Parent request           */
-} MPIDI_Chunk_request;
+    struct fi_context  context;          /* fixed field, do not move */
+    int                event_id;         /* fixed field, do not move */
+    MPID_Request      *parent;           /* Parent request           */
+} MPIDI_CH4_NMI_OFI_Chunk_request;
 
 typedef struct {
-    char                  pad[MPIDI_REQUEST_HDR_SIZE];
-    context_t             context;          /* fixed field, do not move */
-    int                   event_id;         /* fixed field, do not move */
-    event_event_fn        done_fn;
-    MPIDI_Send_control_t  remote_info;
-    size_t                cur_offset;
-    MPID_Comm            *comm_ptr;
-    MPID_Request         *localreq;
-    cq_tagged_entry_t     wc;
-} MPIDI_Huge_chunk_t;
+    char pad[MPIDI_REQUEST_HDR_SIZE];
+    struct fi_context                 context;          /* fixed field, do not move */
+    int                               event_id;         /* fixed field, do not move */
+    int                               (*done_fn) (struct fi_cq_tagged_entry *wc,
+                                                  MPID_Request              *req);
+    MPIDI_CH4_NMI_OFI_Send_control_t  remote_info;
+    size_t                            cur_offset;
+    MPID_Comm                        *comm_ptr;
+    MPID_Request                     *localreq;
+    struct fi_cq_tagged_entry         wc;
+} MPIDI_CH4_NMI_OFI_Huge_chunk_t;
 
 typedef struct {
-    uint16_t seqno;
-    void *chunk_q;
-} MPIDI_Huge_recv_t;
+    uint16_t  seqno;
+    void     *chunk_q;
+} MPIDI_CH4_NMI_OFI_Huge_recv_t;
 
-typedef struct MPIDI_Hugecntr {
-    uint16_t counter;
-    uint16_t outstanding;
-    fid_mr_t mr;
-} MPIDI_Hugecntr;
+typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
+    uint16_t       counter;
+    uint16_t       outstanding;
+    struct fid_mr *mr;
+} MPIDI_CH4_NMI_OFI_Huge_counter_t;
 
-typedef struct MPIDI_Win_info_args {
-    int no_locks;
-    MPIDI_Win_info_accumulate_ordering accumulate_ordering;
-    MPIDI_Win_info_accumulate_ops accumulate_ops;
-    int same_size;
-    int alloc_shared_noncontig;
-} MPIDI_Win_info_args;
+typedef struct MPIDI_CH4_NMI_OFI_Win_info_args_t {
+    int                                              no_locks;
+    MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t accumulate_ordering;
+    MPIDI_CH4_NMI_OFI_Win_info_accumulate_ops_t      accumulate_ops;
+    int                                              same_size;
+    int                                              alloc_shared_noncontig;
+} MPIDI_CH4_NMI_OFI_Win_info_args_t;
 
 typedef struct {
-    fid_mr_t             mr;
-    uint64_t             mr_key;
-    uint64_t             win_id;
-    void                *mmap_addr;
-    int64_t              mmap_sz;
-    MPIDI_Win_request   *syncQ;
-    void                *msgQ;
-    int                  count;
-    MPIDI_Win_info_args  info_args;
-} MPIDI_OFIWin_t;
-#define WIN_OFI(win) ((MPIDI_OFIWin_t*)(win)->dev.pad)
+    struct fid_mr                     *mr;
+    uint64_t                           mr_key;
+    uint64_t                           win_id;
+    void                              *mmap_addr;
+    int64_t                            mmap_sz;
+    MPIDI_CH4_NMI_OFI_Win_request_t   *syncQ;
+    void                              *msgQ;
+    int                                count;
+    MPIDI_CH4_NMI_OFI_Win_info_args_t  info_args;
+} MPIDI_CH4_NMI_OFI_Win_t;
 
-extern MPIDI_Addr_table_t *MPIDI_Addr_table;
-extern MPIDI_Global_t MPIDI_Global;
-extern MPIU_Object_alloc_t MPIDI_Request_mem;
-extern MPID_Request MPIDI_Request_direct[];
-
-extern int   MPIR_Datatype_init_names(void);
-
-#define AMREQ_OFI(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
-#define AMREQ_OFI_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
-#define AMREQ_OFI_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
+/* Externs */
+extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;
+extern MPIDI_CH4_NMI_OFI_Global_t       MPIDI_Global;
+extern MPIU_Object_alloc_t              MPIDI_Request_mem;
+extern MPID_Request                     MPIDI_Request_direct[];
+extern int                              MPIR_Datatype_init_names(void);
 
 EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

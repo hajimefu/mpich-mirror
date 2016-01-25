@@ -13,7 +13,7 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_shm_probe(int source,
+static inline int MPIDI_CH4_SHM_probe(int source,
                                   int tag,
                                   MPID_Comm * comm, int context_offset, MPI_Status * status)
 {
@@ -23,7 +23,7 @@ static inline int MPIDI_shm_probe(int source,
 }
 
 
-static inline int MPIDI_shm_mprobe(int source,
+static inline int MPIDI_CH4_SHM_mprobe(int source,
                                    int tag,
                                    MPID_Comm * comm,
                                    int context_offset, MPID_Request ** message, MPI_Status * status)
@@ -32,7 +32,7 @@ static inline int MPIDI_shm_mprobe(int source,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_shm_improbe(int source,
+static inline int MPIDI_CH4_SHM_improbe(int source,
                                     int tag,
                                     MPID_Comm * comm,
                                     int context_offset,
@@ -54,7 +54,7 @@ static inline int MPIDI_shm_improbe(int source,
         goto fn_exit;
     }
 
-    for (req = MPIDI_shm_recvq_unexpected.head; req; req=REQ_SHM(req)->next) {
+    for (req = MPIDI_CH4_SHM_recvq_unexpected.head; req; req=REQ_SHM(req)->next) {
         if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
         {
             if (!matched_req)
@@ -68,9 +68,9 @@ static inline int MPIDI_shm_improbe(int source,
 
     if (*message)
     {
-        MPIDI_shm_queue_t mqueue = {NULL,NULL};
+        MPIDI_CH4_SHM_queue_t mqueue = {NULL,NULL};
         MPID_Request *prev_req = NULL, *next_req = NULL;
-        req = MPIDI_shm_recvq_unexpected.head;
+        req = MPIDI_CH4_SHM_recvq_unexpected.head;
         while (req) {
             next_req = REQ_SHM(req)->next;
             if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
@@ -78,7 +78,7 @@ static inline int MPIDI_shm_improbe(int source,
                 if (mqueue.head == NULL)
                     MPIU_Assert(req == matched_req);
                 count += MPIR_STATUS_GET_COUNT(req->status);
-                REQ_SHM_DEQUEUE(&req, prev_req, MPIDI_shm_recvq_unexpected);
+                REQ_SHM_DEQUEUE(&req, prev_req, MPIDI_CH4_SHM_recvq_unexpected);
                 REQ_SHM_ENQUEUE(req, mqueue);
                 if (req && REQ_SHM(req)->type == TYPE_EAGER)
                     break;
@@ -107,7 +107,7 @@ fn_exit:
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_iprobe(int source,
+static inline int MPIDI_CH4_SHM_iprobe(int source,
                                    int tag,
                                    MPID_Comm * comm,
                                    int context_offset, int *flag, MPI_Status * status)
@@ -124,7 +124,7 @@ static inline int MPIDI_shm_iprobe(int source,
         goto fn_exit;
     }
 
-    for (req = MPIDI_shm_recvq_unexpected.head; req; req = REQ_SHM(req)->next) {
+    for (req = MPIDI_CH4_SHM_recvq_unexpected.head; req; req = REQ_SHM(req)->next) {
         if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset)) {
             count += MPIR_STATUS_GET_COUNT(req->status);
             if (REQ_SHM(req)->type == TYPE_EAGER) {

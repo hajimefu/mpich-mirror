@@ -18,7 +18,7 @@
 /* ---------------------------------------------------- */
 /* general queues                                       */
 /* ---------------------------------------------------- */
-extern MPIDI_shm_queue_t MPIDI_shm_sendq;
+extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_sendq;
 
 /* ---------------------------------------------------- */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_impl.h */
@@ -72,7 +72,7 @@ static inline int shm_do_isend(const void *buf,
     }
     dtype_add_ref_if_not_builtin(datatype);
     /* enqueue sreq */
-    REQ_SHM_ENQUEUE(sreq, MPIDI_shm_sendq);
+    REQ_SHM_ENQUEUE(sreq, MPIDI_CH4_SHM_sendq);
     *request = sreq;
     MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
             (MPIU_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
@@ -88,7 +88,7 @@ fn_fail:
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_SHM_SEND)
-static inline int MPIDI_shm_send(const void *buf,
+static inline int MPIDI_CH4_SHM_send(const void *buf,
                                  int count,
                                  MPI_Datatype datatype,
                                  int rank,
@@ -137,7 +137,7 @@ static inline int MPIDI_shm_send(const void *buf,
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_rsend(const void *buf,
+static inline int MPIDI_CH4_SHM_rsend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -151,7 +151,7 @@ static inline int MPIDI_shm_rsend(const void *buf,
 
 
 
-static inline int MPIDI_shm_irsend(const void *buf,
+static inline int MPIDI_CH4_SHM_irsend(const void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -164,7 +164,7 @@ static inline int MPIDI_shm_irsend(const void *buf,
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_SHM_SSEND)
-static inline int MPIDI_shm_ssend(const void *buf,
+static inline int MPIDI_CH4_SHM_ssend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -184,7 +184,7 @@ static inline int MPIDI_shm_ssend(const void *buf,
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_SHM_STARTALL)
-static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
+static inline int MPIDI_CH4_SHM_startall(int count, MPID_Request * requests[])
 {
     int i, mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_STARTALL);
@@ -244,7 +244,7 @@ static inline int MPIDI_shm_startall(int count, MPID_Request * requests[])
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_SHM_SEND_INIT)
-static inline int MPIDI_shm_send_init(const void *buf,
+static inline int MPIDI_CH4_SHM_send_init(const void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -276,7 +276,7 @@ static inline int MPIDI_shm_send_init(const void *buf,
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_SHM_SSEND_INIT)
-static inline int MPIDI_shm_ssend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_ssend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -306,7 +306,7 @@ static inline int MPIDI_shm_ssend_init(const void *buf,
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_bsend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_bsend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -336,7 +336,7 @@ static inline int MPIDI_shm_bsend_init(const void *buf,
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_rsend_init(const void *buf,
+static inline int MPIDI_CH4_SHM_rsend_init(const void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        int rank,
@@ -368,8 +368,8 @@ static inline int MPIDI_shm_rsend_init(const void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_shm_isend)
-static inline int MPIDI_shm_isend(const void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_isend)
+static inline int MPIDI_CH4_SHM_isend(const void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -387,7 +387,7 @@ static inline int MPIDI_shm_isend(const void *buf,
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_issend(const void *buf,
+static inline int MPIDI_CH4_SHM_issend(const void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -405,10 +405,10 @@ static inline int MPIDI_shm_issend(const void *buf,
     return mpi_errno;
 }
 
-static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
+static inline int MPIDI_CH4_SHM_cancel_send(MPID_Request * sreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-    MPID_Request *req = MPIDI_shm_sendq.head;
+    MPID_Request *req = MPIDI_CH4_SHM_sendq.head;
     MPID_Request *prev_req = NULL;
     int mpi_errno = MPI_SUCCESS;
 
@@ -418,7 +418,7 @@ static inline int MPIDI_shm_cancel_send(MPID_Request * sreq)
             MPIR_STATUS_SET_CANCEL_BIT(sreq->status, TRUE);
             MPIR_STATUS_SET_COUNT(sreq->status, 0);
             REQ_SHM_COMPLETE(sreq);
-            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_shm_sendq,mpi_errno);
+            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_CH4_SHM_sendq,mpi_errno);
             break;
         }
 
