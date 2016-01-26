@@ -980,7 +980,7 @@ static inline int MPIDI_CH4R_win_shared_query(MPID_Win *win,
     win_info = MPIDI_CH4R_WINFO(win, offset);
 
     *(void **)baseptr = (void *)win_info->base_addr;
-    *disp_unit        = MPIDI_CH4R_WINFO_DISP_UNIT(win, rank);
+    *disp_unit        = MPIDI_CH4R_WINFO_DISP_UNIT(win, offset);
     *size             = MPIDI_CH4R_WIN(win, sizes)[offset];
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_SHARED_QUERY);
