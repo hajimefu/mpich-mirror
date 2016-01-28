@@ -29,7 +29,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
     int found;
     int mpi_errno = MPI_SUCCESS;
 	
-    MPIU_DBG_MSG(CH3_OTHER,VERBOSE,"sending message to self");
+    MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"sending message to self");
 	
     MPIDI_Request_create_sreq(sreq, mpi_errno, goto fn_exit);
     MPIDI_Request_set_type(sreq, type);
@@ -61,7 +61,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
     /* If the completion counter is 0, that means that the communicator to
      * which this message is being sent has been revoked and we shouldn't
      * bother finishing this. */
-    if (!found && MPID_cc_get(rreq->cc) == 0) {
+    if (!found && MPIR_cc_get(rreq->cc) == 0) {
         /* We release the send request twice, once to release the
          * progress engine reference and the second to release the
          * user reference since the user will never have a chance to
@@ -87,7 +87,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
         /* we found a posted req, which we now own, so we can release the CS */
         MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_MSGQ_MUTEX);
 
-	MPIU_DBG_MSG(CH3_OTHER,VERBOSE,
+	MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,
 		     "found posted receive request; copying data");
 	    
 	MPIDI_CH3U_Buffer_copy(buf, count, datatype, &sreq->status.MPI_ERROR,
@@ -111,7 +111,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
 	
 	    /* FIXME: Insert code here to buffer small sends in a temporary buffer? */
 
-	    MPIU_DBG_MSG(CH3_OTHER,VERBOSE,
+	    MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,
           "added receive request to unexpected queue; attaching send request");
 	    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	    {
@@ -126,7 +126,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
 	else
 	{
 	    /* --BEGIN ERROR HANDLING-- */
-	    MPIU_DBG_MSG(CH3_OTHER,TYPICAL,
+	    MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,TYPICAL,
 			 "ready send unable to find matching recv req");
 	    sreq->status.MPI_ERROR = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE, FCNAME, __LINE__, MPI_ERR_OTHER,
 							  "**rsendnomatch", "**rsendnomatch %d %d", rank, tag);

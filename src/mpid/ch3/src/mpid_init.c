@@ -43,6 +43,16 @@ MPIDI_CH3U_Win_fns_t MPIDI_CH3U_Win_fns = { NULL };
 MPIDI_CH3U_Win_hooks_t MPIDI_CH3U_Win_hooks = { NULL };
 MPIDI_CH3U_Win_pkt_ordering_t MPIDI_CH3U_Win_pkt_orderings = { 0 };
 
+#if defined(MPL_USE_DBG_LOGGING)
+MPL_DBG_Class MPIDI_CH3_DBG_CONNECT;
+MPL_DBG_Class MPIDI_CH3_DBG_DISCONNECT;
+MPL_DBG_Class MPIDI_CH3_DBG_PROGRESS;
+MPL_DBG_Class MPIDI_CH3_DBG_CHANNEL;
+MPL_DBG_Class MPIDI_CH3_DBG_OTHER;
+MPL_DBG_Class MPIDI_CH3_DBG_MSG;
+MPL_DBG_Class MPIDI_CH3_DBG_VC;
+MPL_DBG_Class MPIDI_CH3_DBG_REFCOUNT;
+#endif /* MPL_USE_DBG_LOGGING */
 
 #undef FUNCNAME
 #define FUNCNAME finalize_failed_procs_group
@@ -130,10 +140,10 @@ int MPID_Init(int *argc, char ***argv, int requested, int *provided,
     /* Create the string that will cache the last group of failed processes
      * we received from PMI */
 #ifdef USE_PMI2_API
-    MPIDI_failed_procs_string = MPIU_Malloc(sizeof(char) * PMI2_MAX_VALLEN);
+    MPIDI_failed_procs_string = MPL_malloc(sizeof(char) * PMI2_MAX_VALLEN);
 #else
     PMI_KVS_Get_value_length_max(&val);
-    MPIDI_failed_procs_string = MPIU_Malloc(sizeof(char) * (val+1));
+    MPIDI_failed_procs_string = MPL_malloc(sizeof(char) * (val+1));
 #endif
 
     /*
@@ -178,6 +188,17 @@ int MPID_Init(int *argc, char ***argv, int requested, int *provided,
     MPIDI_Win_fns_init(&MPIDI_CH3U_Win_fns);
     MPIDI_CH3_Win_fns_init(&MPIDI_CH3U_Win_fns);
     MPIDI_CH3_Win_hooks_init(&MPIDI_CH3U_Win_hooks);
+
+#ifdef MPL_USE_DBG_LOGGING
+    MPIDI_CH3_DBG_CONNECT = MPL_DBG_Class_alloc("CH3_CONNECT", "ch3_connect");;
+    MPIDI_CH3_DBG_DISCONNECT = MPL_DBG_Class_alloc("CH3_DISCONNECT", "ch3_disconnect");
+    MPIDI_CH3_DBG_PROGRESS = MPL_DBG_Class_alloc("CH3_PROGRESS", "ch3_progress");
+    MPIDI_CH3_DBG_CHANNEL = MPL_DBG_Class_alloc("CH3_CHANNEL", "ch3_channel");
+    MPIDI_CH3_DBG_OTHER = MPL_DBG_Class_alloc("CH3_OTHER", "ch3_other");
+    MPIDI_CH3_DBG_MSG = MPL_DBG_Class_alloc("CH3_MSG", "ch3_msg");
+    MPIDI_CH3_DBG_VC = MPL_DBG_Class_alloc("VC", "vc");
+    MPIDI_CH3_DBG_REFCOUNT = MPL_DBG_Class_alloc("REFCOUNT", "refcount");
+#endif /* MPL_USE_DBG_LOGGING */
 
     /*
      * Let the channel perform any necessary initialization
@@ -294,7 +315,7 @@ int MPID_Init(int *argc, char ***argv, int requested, int *provided,
 	    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER, 
 				"**ch3|get_parent_port");
 	}
-	MPIU_DBG_MSG_S(CH3_CONNECT,VERBOSE,"Parent port is %s", parent_port);
+	MPL_DBG_MSG_S(MPIDI_CH3_DBG_CONNECT,VERBOSE,"Parent port is %s", parent_port);
 	    
 	mpi_errno = MPID_Comm_connect(parent_port, NULL, 0, 
 				      MPIR_Process.comm_world, &comm);
@@ -435,7 +456,7 @@ static int init_pg( int *argc, char ***argv,
 #ifdef USE_PMI2_API
         
         /* This memory will be freed by the PG_Destroy if there is an error */
-	pg_id = MPIU_Malloc(MAX_JOBID_LEN);
+	pg_id = MPL_malloc(MAX_JOBID_LEN);
 	if (pg_id == NULL) {
 	    MPIR_ERR_SETANDJUMP1(mpi_errno,MPI_ERR_OTHER,"**nomem","**nomem %d",
 				 MAX_JOBID_LEN);
@@ -458,7 +479,7 @@ static int init_pg( int *argc, char ***argv,
 	}
 
 	/* This memory will be freed by the PG_Destroy if there is an error */
-	pg_id = MPIU_Malloc(pg_id_sz + 1);
+	pg_id = MPL_malloc(pg_id_sz + 1);
 	if (pg_id == NULL) {
 	    MPIR_ERR_SETANDJUMP1(mpi_errno,MPI_ERR_OTHER,"**nomem","**nomem %d",
 				 pg_id_sz+1);
@@ -476,7 +497,7 @@ static int init_pg( int *argc, char ***argv,
     }
     else {
 	/* Create a default pg id */
-	pg_id = MPIU_Malloc(2);
+	pg_id = MPL_malloc(2);
 	if (pg_id == NULL) {
 	    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER, "**nomem");
 	}
@@ -557,7 +578,7 @@ int MPIDI_CH3I_BCInit( char **bc_val_p, int *val_max_sz_p )
     }
 #endif
     /* This memroy is returned by this routine */
-    *bc_val_p = MPIU_Malloc(*val_max_sz_p);
+    *bc_val_p = MPL_malloc(*val_max_sz_p);
     if (*bc_val_p == NULL) {
 	MPIR_ERR_SETANDJUMP1(mpi_errno,MPI_ERR_OTHER, "**nomem","**nomem %d",
 			     *val_max_sz_p);
@@ -579,7 +600,7 @@ int MPIDI_CH3I_BCFree( char *bc_val )
 {
     /* */
     if (bc_val) {
-	MPIU_Free( bc_val );
+	MPL_free( bc_val );
     }
     
     return 0;
@@ -597,7 +618,7 @@ static int pg_destroy(MPIDI_PG_t * pg)
 {
     if (pg->id != NULL)
     { 
-	MPIU_Free(pg->id);
+	MPL_free(pg->id);
     }
     
     return MPI_SUCCESS;

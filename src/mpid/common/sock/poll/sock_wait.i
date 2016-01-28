@@ -117,7 +117,7 @@ int MPIDU_Sock_wait(struct MPIDU_Sock_set * sock_set, int millisecond_timeout,
 		 then test for that and if we are *not* multithreaded, 
 		 just use the same code as above.  Otherwise, use 
 		 multithreaded code (and we don't then need the 
-		 MPIU_THREAD_CHECK_BEGIN/END macros) */
+		 MPIR_THREAD_CHECK_BEGIN/END macros) */
 		if (!MPIR_ThreadInfo.isThreaded) {
 		    MPIDI_FUNC_ENTER(MPID_STATE_POLL);
 		    n_fds = poll(sock_set->pollfds, sock_set->poll_array_elems, 
@@ -155,7 +155,7 @@ int MPIDU_Sock_wait(struct MPIDU_Sock_set * sock_set, int millisecond_timeout,
 		    /* Release the lock so that other threads may make 
 		       progress while this thread waits for something to 
 		       do */
-		    MPIU_DBG_MSG(THREAD,TYPICAL,"Exit global critical section (sock_wait)");
+		    MPL_DBG_MSG(MPIR_DBG_OTHER,TYPICAL,"Exit global critical section (sock_wait)");
 		    /* 		    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 				    MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX); */
 		    MPID_Thread_mutex_unlock(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
@@ -167,7 +167,7 @@ int MPIDU_Sock_wait(struct MPIDU_Sock_set * sock_set, int millisecond_timeout,
 		    
 		    /* Reaquire the lock before processing any of the 
 		       information returned from poll */
-		    MPIU_DBG_MSG(THREAD,TYPICAL,"Enter global critical section (sock_wait)");
+		    MPL_DBG_MSG(MPIR_DBG_OTHER,TYPICAL,"Enter global critical section (sock_wait)");
 		    /* 		    MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
 				    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX); */
 		    MPID_Thread_mutex_lock(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);

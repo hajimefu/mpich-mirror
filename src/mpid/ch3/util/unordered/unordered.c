@@ -18,8 +18,8 @@ int MPIDI_CH3U_Handle_unordered_recv_pkt(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt)
 
 #if defined(MPIDI_CH3_MSGS_UNORDERED)
 
-#define MPIDI_CH3U_Pkt_send_container_alloc() (MPIU_Malloc(sizeof(MPIDI_CH3_Pkt_send_container_t)))
-#define MPIDI_CH3U_Pkt_send_container_free(pc_) MPIU_Free(pc_)
+#define MPIDI_CH3U_Pkt_send_container_alloc() (MPL_malloc(sizeof(MPIDI_CH3_Pkt_send_container_t)))
+#define MPIDI_CH3U_Pkt_send_container_free(pc_) MPL_free(pc_)
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH3U_Handle_unordered_recv_pkt
@@ -47,13 +47,13 @@ int MPIDI_CH3U_Handle_unordered_recv_pkt(MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t * pkt,
 	    MPIDI_CH3_Pkt_send_container_t * pc_cur;
 	    MPIDI_CH3_Pkt_send_container_t * pc_last;
 	    
-	    MPIU_DBG_MSG(CH3_OTHER,VERBOSE,
+	    MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,
 			 "received (potentially) out-of-order send pkt");
-	    MPIU_DBG_MSG_FMT(CH3_OTHER,VERBOSE,(MPIU_DBG_FDEST,
+	    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER,VERBOSE,(MPL_DBG_FDEST,
 	          "rank=%d, tag=%d, context=%d seqnum=%d",
 		  send_pkt->match.rank, send_pkt->match.tag, 
 		  send_pkt->match.context_id, send_pkt->seqnum));
-	    MPIU_DBG_MSG_FMAT(CH3_OTHER,VERBOSE,(MPIU_DBG_FDEST,
+	    MPL_DBG_MSG_FMAT(MPIDI_CH3_DBG_OTHER,VERBOSE,(MPL_DBG_FDEST,
               "vc - seqnum_send=%d seqnum_recv=%d reorder_msg_queue=0x%08lx",
 	      vc->seqnum_send, vc->seqnum_recv, 
 	      (unsigned long) vc->msg_reorder_queue));

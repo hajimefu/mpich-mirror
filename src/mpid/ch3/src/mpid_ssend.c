@@ -33,7 +33,7 @@ int MPID_Ssend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_SSEND);
 
-    MPIU_DBG_MSG_FMT(CH3_OTHER,VERBOSE,(MPIU_DBG_FDEST,
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER,VERBOSE,(MPL_DBG_FDEST,
               "rank=%d, tag=%d, context=%d", 
               rank, tag, comm->context_id + context_offset));
 
@@ -55,7 +55,7 @@ int MPID_Ssend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank
 #       ifndef MPICH_IS_THREADED
 	{
 	    /* --BEGIN ERROR HANDLING-- */
-	    if (sreq != NULL && MPID_cc_get(sreq->cc) != 0)
+	    if (sreq != NULL && MPIR_cc_get(sreq->cc) != 0)
 	    {
 		mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE, FCNAME, __LINE__, MPI_ERR_OTHER,
 						 "**dev|selfsenddeadlock", 0);
@@ -120,8 +120,8 @@ int MPID_Ssend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank
   fn_exit:
     *request = sreq;
     
-    MPIU_DBG_STMT(CH3_OTHER,VERBOSE,{if (sreq!=NULL) {
-            MPIU_DBG_MSG_P(CH3_OTHER,VERBOSE,
+    MPL_DBG_STMT(MPIDI_CH3_DBG_OTHER,VERBOSE,{if (sreq!=NULL) {
+            MPL_DBG_MSG_P(MPIDI_CH3_DBG_OTHER,VERBOSE,
 			   "request allocated, handle=0x%08x", sreq->handle);}});
     
     MPIDI_FUNC_EXIT(MPID_STATE_MPID_SSEND);

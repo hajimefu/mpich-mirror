@@ -153,7 +153,7 @@ MPIDI_Request_create_basic()
   MPIDI_Request_tls_alloc(req);
   MPID_assert(req != NULL);
   MPID_assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-  MPID_cc_set(&req->cc, 1);
+  MPIR_cc_set(&req->cc, 1);
   req->cc_ptr = &req->cc;
 
 #if 0
@@ -278,15 +278,15 @@ MPID_Request_release_inline(MPID_Request *req)
 
   if (count == 0)
   {
-    MPID_assert(MPID_cc_is_complete(&req->cc));
+    MPID_assert(MPIR_cc_is_complete(&req->cc));
 
     if (req->comm)              MPIR_Comm_release(req->comm, 0);
-    if (req->greq_fns)          MPIU_Free(req->greq_fns);
+    if (req->greq_fns)          MPL_free(req->greq_fns);
     if (req->mpid.datatype_ptr) MPID_Datatype_release(req->mpid.datatype_ptr);
     if (req->mpid.uebuf_malloc== mpiuMalloc) {
-        MPIU_Free(req->mpid.uebuf);
+        MPL_free(req->mpid.uebuf);
     }
-    if(req->mpid.win_req)       MPIU_Free(req->mpid.win_req);
+    if(req->mpid.win_req)       MPL_free(req->mpid.win_req);
 #if TOKEN_FLOW_CONTROL
     else if (req->mpid.uebuf_malloc == mpidiBufMM) {
         MPIU_THREAD_CS_ENTER(MSGQUEUE,0);
@@ -304,7 +304,7 @@ static inline void
 MPID_Request_discard_inline(MPID_Request *req)
 {
     if (req->mpid.uebuf_malloc == mpiuMalloc) {
-        MPIU_Free(req->mpid.uebuf);
+        MPL_free(req->mpid.uebuf);
     }
 #if TOKEN_FLOW_CONTROL
     else if (req->mpid.uebuf_malloc == mpidiBufMM) {
@@ -323,7 +323,7 @@ static inline void
 MPIDI_Request_complete_inline(MPID_Request *req)
 {
     int count;
-    MPID_cc_decr(req->cc_ptr, &count);
+    MPIR_cc_decr(req->cc_ptr, &count);
     MPID_assert(count >= 0);
 
     MPID_Request_release(req);
@@ -338,7 +338,7 @@ static inline void
 MPIDI_Request_complete_norelease_inline(MPID_Request *req)
 {
     int count;
-    MPID_cc_decr(req->cc_ptr, &count);
+    MPIR_cc_decr(req->cc_ptr, &count);
     MPID_assert(count >= 0);
 
     if (count == 0) /* decrement completion count; if 0, signal progress engine */

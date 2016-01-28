@@ -178,8 +178,8 @@ int MPIR_Setup_intercomm_localcomm(MPID_Comm * intercomm_ptr)
         MPID_CONTEXT_SET_FIELD(IS_LOCALCOMM, intercomm_ptr->recvcontext_id, 1);
     localcomm_ptr->context_id = localcomm_ptr->recvcontext_id;
 
-    MPIU_DBG_MSG_FMT(COMM, TYPICAL,
-                     (MPIU_DBG_FDEST,
+    MPL_DBG_MSG_FMT(MPIR_DBG_COMM, TYPICAL,
+                     (MPL_DBG_FDEST,
                       "setup_intercomm_localcomm ic=%p ic->context_id=%d ic->recvcontext_id=%d lc->recvcontext_id=%d",
                       intercomm_ptr, intercomm_ptr->context_id, intercomm_ptr->recvcontext_id,
                       localcomm_ptr->recvcontext_id));
@@ -231,14 +231,14 @@ static int cleanup_default_collops(void *unused)
         if (default_collops[i]) {
             MPIU_Assert(default_collops[i]->ref_count >= 1);
             if (--default_collops[i]->ref_count == 0)
-                MPIU_Free(default_collops[i]);
+                MPL_free(default_collops[i]);
             default_collops[i] = NULL;
         }
     }
     if (ic_default_collops) {
         MPIU_Assert(ic_default_collops->ref_count >= 1);
         if (--ic_default_collops->ref_count == 0)
-            MPIU_Free(ic_default_collops);
+            MPL_free(ic_default_collops);
     }
     return MPI_SUCCESS;
 }
@@ -502,8 +502,8 @@ int MPIR_Comm_map_free(MPID_Comm * comm)
     for (mapper = comm->mapper_head; mapper;) {
         tmp = mapper->next;
         if (mapper->type == MPIR_COMM_MAP_IRREGULAR && mapper->free_mapping)
-            MPIU_Free(mapper->src_mapping);
-        MPIU_Free(mapper);
+            MPL_free(mapper->src_mapping);
+        MPL_free(mapper);
         mapper = tmp;
     }
     comm->mapper_head = NULL;
@@ -561,12 +561,12 @@ int MPIR_Comm_commit(MPID_Comm * comm)
 
             /* Non-fatal errors simply mean that this communicator will not have
              * any node awareness.  Node-aware collectives are an optimization. */
-            MPIU_DBG_MSG_P(COMM, VERBOSE, "MPIU_Find_local_and_external failed for comm_ptr=%p",
+            MPL_DBG_MSG_P(MPIR_DBG_COMM, VERBOSE, "MPIU_Find_local_and_external failed for comm_ptr=%p",
                            comm);
             if (comm->intranode_table)
-                MPIU_Free(comm->intranode_table);
+                MPL_free(comm->intranode_table);
             if (comm->internode_table)
-                MPIU_Free(comm->internode_table);
+                MPL_free(comm->internode_table);
 
             mpi_errno = MPI_SUCCESS;
             goto fn_exit;
@@ -597,7 +597,7 @@ int MPIR_Comm_commit(MPID_Comm * comm)
             comm->node_comm->comm_kind = MPID_INTRACOMM;
             comm->node_comm->hierarchy_kind = MPID_HIERARCHY_NODE;
             comm->node_comm->local_comm = NULL;
-            MPIU_DBG_MSG_D(CH3_OTHER, VERBOSE, "Create node_comm=%p\n", comm->node_comm);
+            MPL_DBG_MSG_D(MPIR_DBG_COMM, VERBOSE, "Create node_comm=%p\n", comm->node_comm);
 
             comm->node_comm->local_size = num_local;
             comm->node_comm->remote_size = num_local;
@@ -656,9 +656,9 @@ int MPIR_Comm_commit(MPID_Comm * comm)
 
   fn_exit:
     if (external_procs != NULL)
-        MPIU_Free(external_procs);
+        MPL_free(external_procs);
     if (local_procs != NULL)
-        MPIU_Free(local_procs);
+        MPL_free(local_procs);
 
     MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_COMMIT);
     return mpi_errno;
@@ -964,7 +964,7 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
          * destroy_hook to allow the device to manage these vtables in a custom
          * fashion */
         if (comm_ptr->coll_fns && --comm_ptr->coll_fns->ref_count == 0) {
-            MPIU_Free(comm_ptr->coll_fns);
+            MPL_free(comm_ptr->coll_fns);
             comm_ptr->coll_fns = NULL;
         }
 
@@ -983,9 +983,9 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
         if (comm_ptr->node_roots_comm)
             MPIR_Comm_release(comm_ptr->node_roots_comm);
         if (comm_ptr->intranode_table != NULL)
-            MPIU_Free(comm_ptr->intranode_table);
+            MPL_free(comm_ptr->intranode_table);
         if (comm_ptr->internode_table != NULL)
-            MPIU_Free(comm_ptr->internode_table);
+            MPL_free(comm_ptr->internode_table);
 
         /* Free the context value.  This should come after freeing the
          * intra/inter-node communicators since those free calls won't
@@ -1121,7 +1121,7 @@ static int free_hint_handles(void *ignore)
     if (MPID_hint_fns) {
         HASH_ITER(hh, MPID_hint_fns, curr_hint, tmp) {
             HASH_DEL(MPID_hint_fns, curr_hint);
-            MPIU_Free(curr_hint);
+            MPL_free(curr_hint);
         }
     }
 
@@ -1147,7 +1147,7 @@ int MPIR_Comm_register_hint(const char *hint_key, MPIR_Comm_hint_fn_t fn, void *
         MPIR_Add_finalize(free_hint_handles, NULL, MPIR_FINALIZE_CALLBACK_PRIO - 1);
     }
 
-    hint_elt = MPIU_Malloc(sizeof(struct MPIR_Comm_hint_fn_elt));
+    hint_elt = MPL_malloc(sizeof(struct MPIR_Comm_hint_fn_elt));
     strncpy(hint_elt->name, hint_key, MPI_MAX_INFO_KEY);
     hint_elt->state = state;
     hint_elt->fn = fn;

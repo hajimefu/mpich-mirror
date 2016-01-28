@@ -46,7 +46,7 @@ int MPIR_Group_release(MPID_Group *group_ptr)
     MPIR_Group_release_ref(group_ptr, &inuse);
     if (!inuse) {
         /* Only if refcount is 0 do we actually free. */
-        MPIU_Free(group_ptr->lrank_to_lpid);
+        MPL_free(group_ptr->lrank_to_lpid);
         MPIU_Handle_obj_free( &MPID_Group_mem, group_ptr );
     }
     return mpi_errno;
@@ -71,7 +71,7 @@ int MPIR_Group_create( int nproc, MPID_Group **new_group_ptr )
     /* --END ERROR HANDLING-- */
     MPIU_Object_set_ref( *new_group_ptr, 1 );
     (*new_group_ptr)->lrank_to_lpid = 
-	(MPID_Group_pmap_t *)MPIU_Malloc( nproc * sizeof(MPID_Group_pmap_t) );
+	(MPID_Group_pmap_t *)MPL_malloc( nproc * sizeof(MPID_Group_pmap_t) );
     /* --BEGIN ERROR HANDLING-- */
     if (!(*new_group_ptr)->lrank_to_lpid) {
 	MPIU_Handle_obj_free( &MPID_Group_mem, *new_group_ptr );
@@ -396,12 +396,12 @@ int MPIR_Group_check_subset( MPID_Group *group_ptr, MPID_Comm *comm_ptr )
     MPIR_Group_setup_lpid_list( group_ptr );
     g1_idx = group_ptr->idx_of_first_lpid;
     g2_idx = mergesort_lpidarray( vmap, vsize );
-    MPIU_DBG_MSG_FMT(COMM,VERBOSE,(MPIU_DBG_FDEST,
+    MPL_DBG_MSG_FMT(MPIR_DBG_COMM,VERBOSE,(MPL_DBG_FDEST,
 			   "initial indices: %d %d\n", g1_idx, g2_idx ));
     while (g1_idx >= 0 && g2_idx >= 0) {
 	l1_pid = group_ptr->lrank_to_lpid[g1_idx].lpid;
 	l2_pid = vmap[g2_idx].lpid;
-	MPIU_DBG_MSG_FMT(COMM,VERBOSE,(MPIU_DBG_FDEST,
+	MPL_DBG_MSG_FMT(MPIR_DBG_COMM,VERBOSE,(MPL_DBG_FDEST,
 				       "Lpids are %d, %d\n", l1_pid, l2_pid ));
 	if (l1_pid < l2_pid) {
 	    /* If we have to advance g1, we didn't find a match, so
@@ -416,7 +416,7 @@ int MPIR_Group_check_subset( MPID_Group *group_ptr, MPID_Comm *comm_ptr )
 	    g1_idx = group_ptr->lrank_to_lpid[g1_idx].next_lpid;
 	    g2_idx = vmap[g2_idx].next_lpid;
 	}
-	MPIU_DBG_MSG_FMT(COMM,VERBOSE,(MPIU_DBG_FDEST,
+	MPL_DBG_MSG_FMT(MPIR_DBG_COMM,VERBOSE,(MPL_DBG_FDEST,
 				       "g1 = %d, g2 = %d\n", g1_idx, g2_idx ));
     }
 

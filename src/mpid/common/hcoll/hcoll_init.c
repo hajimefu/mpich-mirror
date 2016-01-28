@@ -22,6 +22,10 @@ int hcoll_enable_iallreduce = 1;
 int hcoll_comm_attr_keyval = MPI_KEYVAL_INVALID;
 int world_comm_destroying = 0;
 
+#if defined(MPL_USE_DBG_LOGGING)
+MPL_DBG_Class MPIR_DBG_HCOLL;
+#endif /* MPL_USE_DBG_LOGGING */
+
 #undef FUNCNAME
 #define FUNCNAME hcoll_destroy
 #undef FCNAME
@@ -53,7 +57,7 @@ static int hcoll_comm_attr_del_fn(MPI_Comm comm, int keyval, void *attr_val, voi
         envar = getenv("HCOLL_ENABLE_" #nameEnv); \
         if (NULL != envar) { \
             hcoll_enable_##name = atoi(envar); \
-            MPIU_DBG_MSG_D(CH3_OTHER, VERBOSE, "HCOLL_ENABLE_" #nameEnv " = %d\n", hcoll_enable_##name); \
+            MPL_DBG_MSG_D(MPIR_DBG_HCOLL, VERBOSE, "HCOLL_ENABLE_" #nameEnv " = %d\n", hcoll_enable_##name); \
         } \
     } while (0)
 
@@ -73,6 +77,11 @@ int hcoll_initialize(void)
     if (0 == hcoll_enable) {
         goto fn_exit;
     }
+
+#if defined(MPL_USE_DBG_LOGGING)
+    MPIR_DBG_HCOLL = MPL_DBG_Class_alloc("HCOLL", "hcoll");
+#endif /* MPL_USE_DBG_LOGGING */
+
     hcoll_rte_fns_setup();
     /*set INT_MAX/2 as tag_base here by the moment.
      * Need to think more about it.
@@ -123,7 +132,7 @@ int hcoll_initialize(void)
 #define INSTALL_COLL_WRAPPER(check_name, name) \
     if (hcoll_enable_##check_name && (NULL != hcoll_collectives.coll_##check_name)) { \
         comm_ptr->coll_fns->name      = hcoll_##name; \
-        MPIU_DBG_MSG(CH3_OTHER,VERBOSE, #name " wrapper installed"); \
+        MPL_DBG_MSG(MPIR_DBG_HCOLL,VERBOSE, #name " wrapper installed"); \
     }
 
 #undef FUNCNAME
@@ -158,7 +167,7 @@ int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
     }
     comm_ptr->hcoll_priv.hcoll_context = hcoll_create_context((rte_grp_handle_t) comm_ptr);
     if (NULL == comm_ptr->hcoll_priv.hcoll_context) {
-        MPIU_DBG_MSG(CH3_OTHER, VERBOSE, "Couldn't create hcoll context.");
+        MPL_DBG_MSG(MPIR_DBG_HCOLL, VERBOSE, "Couldn't create hcoll context.");
         goto fn_fail;
     }
     mpi_errno =
@@ -172,7 +181,7 @@ int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
         MPIR_ERR_POP(mpi_errno);
     }
     comm_ptr->hcoll_priv.hcoll_origin_coll_fns = comm_ptr->coll_fns;
-    comm_ptr->coll_fns = (MPID_Collops *) MPIU_Malloc(sizeof(MPID_Collops));
+    comm_ptr->coll_fns = (MPID_Collops *) MPL_malloc(sizeof(MPID_Collops));
     memset(comm_ptr->coll_fns, 0, sizeof(MPID_Collops));
     if (comm_ptr->hcoll_priv.hcoll_origin_coll_fns != 0) {
         memcpy(comm_ptr->coll_fns, comm_ptr->hcoll_priv.hcoll_origin_coll_fns,
@@ -217,7 +226,7 @@ int hcoll_comm_destroy(MPID_Comm * comm_ptr, void *param)
     context_destroyed = 0;
     if ((NULL != comm_ptr) && (0 != comm_ptr->hcoll_priv.is_hcoll_init)) {
         if (NULL != comm_ptr->coll_fns) {
-            MPIU_Free(comm_ptr->coll_fns);
+            MPL_free(comm_ptr->coll_fns);
         }
         comm_ptr->coll_fns = comm_ptr->hcoll_priv.hcoll_origin_coll_fns;
         hcoll_destroy_context(comm_ptr->hcoll_priv.hcoll_context,

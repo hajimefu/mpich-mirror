@@ -68,6 +68,7 @@ int usleep(useconds_t usec);
 #include "mpi.h"
 #include "mpiutil.h"
 #include "mpidpre.h"
+#include "mpir_refcount.h"
 
 #if defined(HAVE_LONG_LONG_INT)
 /* tt#1776: some platforms have "long long" but not a LLONG_MAX/ULLONG_MAX,
@@ -122,6 +123,9 @@ int usleep(useconds_t usec);
 
 #include "mpir_type_defs.h"
 
+/* Routines for memory management */
+#include "mpimem.h"
+
 /* Overriding memcpy:
      This is a utility function for memory copy.  The device might use
      this directly or override it with a different device-specific
@@ -135,33 +139,6 @@ int usleep(useconds_t usec);
         memcpy((dst), (src), (len));              \
     } while (0)
 #endif
-
-/* ------------------------------------------------------------------------- */
-/* mpidebug.h */
-/* ------------------------------------------------------------------------- */
-/* Debugging and printf control */
-/* Use these *only* for debugging output intended for the implementors
-   and maintainers of MPICH.  Do *not* use these for any output that
-   general users may normally see.  Use either the error code creation
-   routines for error messages or MPIU_msg_printf etc. for general messages 
-   (MPIU_msg_printf will go through gettext).  
-
-   FIXME: Document all of these macros
-
-   NOTE: These macros and values are deprecated.  See 
-   www.mcs.anl.gov/mpi/mpich/developer/design/debugmsg.htm for 
-   the new design (only partially implemented at this time).
-   
-   The implementation is in mpidbg.h
-*/
-#include "mpidbg.h"
-
-/* ------------------------------------------------------------------------- */
-/* end of mpidebug.h */
-/* ------------------------------------------------------------------------- */
-
-/* Routines for memory management */
-#include "mpimem.h"
 
 #if defined HAVE_LIBHCOLL
 #include "../mpid/common/hcoll/hcollpre.h"
@@ -195,6 +172,56 @@ int usleep(useconds_t usec);
 #else
 #define MPIU_SYSCALL(a_,b_,c_) a_ = b_ c_
 #endif
+
+
+typedef struct {
+    int thread_provided;        /* Provided level of thread support */
+
+    /* This is a special case for is_thread_main, which must be
+     * implemented even if MPICH itself is single threaded.  */
+#if MPICH_THREAD_LEVEL >= MPI_THREAD_SERIALIZED
+    MPID_Thread_id_t master_thread;     /* Thread that started MPI */
+#endif
+
+#if defined MPICH_IS_THREADED
+    int isThreaded;             /* Set to true if user requested
+                                 * THREAD_MULTIPLE */
+#endif                          /* MPICH_IS_THREADED */
+} MPIR_Thread_info_t;
+extern MPIR_Thread_info_t MPIR_ThreadInfo;
+
+
+/* ------------------------------------------------------------------------- */
+/* thread-local storage macros */
+/* arbitrary, just needed to avoid cleaning up heap allocated memory at thread
+ * destruction time */
+#define MPIR_STRERROR_BUF_SIZE (1024)
+
+/* This structure contains all thread-local variables and will be zeroed at
+ * allocation time.
+ *
+ * Note that any pointers to dynamically allocated memory stored in this
+ * structure must be externally cleaned up.
+ * */
+typedef struct {
+    int op_errno;               /* For errors in predefined MPI_Ops */
+
+    /* error string storage for MPIU_Strerror */
+    char strerrbuf[MPIR_STRERROR_BUF_SIZE];
+
+#if (MPICH_THREAD_LEVEL == MPI_THREAD_MULTIPLE)
+    int lock_depth;
+#endif
+} MPIR_Per_thread_t;
+
+#if defined(MPICH_IS_THREADED) && defined(MPL_TLS_SPECIFIER)
+extern MPL_TLS_SPECIFIER MPIR_Per_thread_t MPIR_Per_thread;
+#else
+extern MPIR_Per_thread_t MPIR_Per_thread;
+#endif
+
+extern MPID_Thread_tls_t MPIR_Per_thread_key;
+
 
 /*TDSOverview.tex
   
@@ -551,6 +578,31 @@ extern MPIU_Object_alloc_t MPID_Info_mem;
 extern MPID_Info MPID_Info_builtin[MPID_INFO_N_BUILTIN];
 extern MPID_Info MPID_Info_direct[];
 /* ------------------------------------------------------------------------- */
+
+#if defined(MPICH_IS_THREADED)
+#define MPIR_THREAD_CHECK_BEGIN if (MPIR_ThreadInfo.isThreaded) {
+#define MPIR_THREAD_CHECK_END   }
+#else
+#define MPIR_THREAD_CHECK_BEGIN
+#define MPIR_THREAD_CHECK_END
+#endif /* MPICH_IS_THREADED */
+
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL || \
+    MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+extern MPID_Thread_mutex_t MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX;
+#endif
+
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_HANDLE_MUTEX;
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_MSGQ_MUTEX;
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_COMPLETION_MUTEX;
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_CTX_MUTEX;
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_PMI_MUTEX;
+
+#define MPIR_THREAD_POBJ_COMM_MUTEX(_comm_ptr) _comm_ptr->mutex
+#define MPIR_THREAD_POBJ_WIN_MUTEX(_win_ptr)   _win_ptr->mutex
+#endif
+
 
 /* ------------------------------------------------------------------------- */
 /* Error Handlers */
@@ -1428,7 +1480,7 @@ struct MPID_Grequest_fns {
                                                        the generalize req */
 };
 
-#define MPID_Request_is_complete(req_) (MPID_cc_is_complete((req_)->cc_ptr))
+#define MPID_Request_is_complete(req_) (MPIR_cc_is_complete((req_)->cc_ptr))
 
 /*S
   MPID_Request - Description of the Request data structure
@@ -1451,13 +1503,13 @@ typedef struct MPID_Request {
     /* pointer to the completion counter */
     /* This is necessary for the case when an operation is described by a 
        list of requests */
-    MPID_cc_t *cc_ptr;
+    MPIR_cc_t *cc_ptr;
     /* A comm is needed to find the proper error handler */
     MPID_Comm *comm;
     /* completion counter.  Ensure cc and status are in the same cache
        line, assuming the cache line size is a multiple of 32 bytes
        and 32-bit integers */
-    MPID_cc_t cc;
+    MPIR_cc_t cc;
     /* Status is needed for wait/test/recv */
     MPI_Status status;
     /* Persistent requests have their own "real" requests.  Receive requests
@@ -2154,6 +2206,19 @@ typedef struct {
 } MPIR_Thread_info_t;
 extern MPIR_Thread_info_t MPIR_ThreadInfo;
 
+#if defined (MPL_USE_DBG_LOGGING)
+extern MPL_DBG_Class MPIR_DBG_INIT;
+extern MPL_DBG_Class MPIR_DBG_PT2PT;
+extern MPL_DBG_Class MPIR_DBG_THREAD;
+extern MPL_DBG_Class MPIR_DBG_DATATYPE;
+extern MPL_DBG_Class MPIR_DBG_COMM;
+extern MPL_DBG_Class MPIR_DBG_BSEND;
+extern MPL_DBG_Class MPIR_DBG_ERRHAND;
+extern MPL_DBG_Class MPIR_DBG_OTHER;
+
+extern MPL_DBG_Class MPIR_DBG_ASSERT;
+#endif /* MPL_USE_DBG_LOGGING */
+
 /* ------------------------------------------------------------------------- */
 /* In MPICH, each function has an "enter" and "exit" macro.  These can be 
  * used to add various features to each function at compile time, or they
@@ -2164,7 +2229,7 @@ extern MPIR_Thread_info_t MPIR_ThreadInfo;
  *    These collect data on when each function began and finished; the
  *    resulting data can be displayed using special programs
  * 2. Debug logging (selected with --enable-g=log)
- *    Invokes MPIU_DBG_MSG at the entry and exit for each routine            
+ *    Invokes MPL_DBG_MSG at the entry and exit for each routine
  * 3. Additional memory validation of the memory arena (--enable-g=memarena)
  */
 /* ------------------------------------------------------------------------- */

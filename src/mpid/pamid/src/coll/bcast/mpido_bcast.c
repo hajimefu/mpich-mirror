@@ -112,7 +112,7 @@ int MPIDO_Bcast(void *buffer,
 
    if(!data_contig)
    {
-      noncontig_buff = MPIU_Malloc(data_size);
+      noncontig_buff = MPL_malloc(data_size);
       data_buffer = noncontig_buff;
       if(noncontig_buff == NULL)
       {
@@ -241,8 +241,8 @@ int MPIDO_Bcast(void *buffer,
    if(unlikely(verbose))
    {
       unsigned long long int threadID;
-      MPIU_Thread_id_t tid;
-      MPIU_Thread_self(&tid);
+      MPL_thread_id_t tid;
+      MPL_thread_self(&tid);
       threadID = (unsigned long long int)tid;
       fprintf(stderr,"<%llx> Using protocol %s for bcast on %u\n", 
               threadID,
@@ -260,7 +260,7 @@ int MPIDO_Bcast(void *buffer,
       if(rank != root)
          MPIR_Localcopy(noncontig_buff, data_size, MPI_CHAR,
                         buffer,         count,     datatype);
-      MPIU_Free(noncontig_buff);
+      MPL_free(noncontig_buff);
    }
 
    TRACE_ERR("leaving bcast\n");
@@ -325,7 +325,7 @@ int MPIDO_Bcast_simple(void *buffer,
 
    if(!data_contig)
    {
-      noncontig_buff = MPIU_Malloc(data_size);
+      noncontig_buff = MPL_malloc(data_size);
       data_buffer = noncontig_buff;
       if(noncontig_buff == NULL)
       {
@@ -363,7 +363,7 @@ int MPIDO_Bcast_simple(void *buffer,
       if(rank != root)
          MPIR_Localcopy(noncontig_buff, data_size, MPI_CHAR,
                         buffer,         count,     datatype);
-      MPIU_Free(noncontig_buff);
+      MPL_free(noncontig_buff);
    }
 
    TRACE_ERR("Exiting MPIDO_Bcast_optimized\n");

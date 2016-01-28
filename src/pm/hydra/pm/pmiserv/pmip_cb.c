@@ -10,7 +10,6 @@
 #include "ckpoint.h"
 #include "demux.h"
 #include "topo.h"
-#include "hydt_ftb.h"
 
 struct HYD_pmcd_pmip_pmi_handle *HYD_pmcd_pmip_pmi_handle = { 0 };
 
@@ -205,11 +204,10 @@ static HYD_status check_pmi_cmd(char **buf, int *pmi_version, int *repeat)
 
 static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
 {
-    char *buf = NULL, *pmi_cmd = NULL, *args[MAX_PMI_ARGS] = { 0 };
+    char *buf = NULL, *pmi_cmd = NULL, **args = NULL;
     int closed, repeat, sent, i = -1, linelen, pid = -1;
     struct HYD_pmcd_hdr hdr;
     struct HYD_pmcd_pmip_pmi_handle *h;
-    char ftb_event_payload[HYDT_FTB_MAX_PAYLOAD_DATA];
     HYD_status status = HYD_SUCCESS;
 
     HYDU_FUNC_ENTER();
@@ -245,12 +243,6 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
          * active" (which means that this is an MPI application).
          */
         if (pid != -1 && HYD_pmcd_pmip.downstream.pmi_fd_active[pid]) {
-            MPL_snprintf(ftb_event_payload, HYDT_FTB_MAX_PAYLOAD_DATA,
-                         "pgid:%d rank:%d",
-                         HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.downstream.pmi_rank[pid]);
-            status = HYDT_ftb_publish("FTB_MPI_PROCS_DEAD", ftb_event_payload);
-            HYDU_ERR_POP(status, "FTB publish failed\n");
-
             /* If this is not a forced cleanup, store a temporary
              * erroneous exit status. In case the application does not
              * return a non-zero exit status, we will use this. */
@@ -309,6 +301,10 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
         else
             HYD_pmcd_pmip_pmi_handle = HYD_pmcd_pmip_pmi_v2;
 
+        HYDU_MALLOC(args, char **, MAX_PMI_ARGS * sizeof(char *), status);
+        for(i = 0;i < MAX_PMI_ARGS; i++)
+            args[i]= NULL;
+
         status = HYD_pmcd_pmi_parse_pmi_cmd(buf, hdr.pmi_version, &pmi_cmd, args);
         HYDU_ERR_POP(status, "unable to parse PMI command\n");
 
@@ -353,7 +349,10 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
   fn_exit:
     if (pmi_cmd)
         HYDU_FREE(pmi_cmd);
-    HYDU_free_strlist(args);
+    if (args) {
+        HYDU_free_strlist(args);
+        HYDU_free(args);
+    }
     if (buf)
         HYDU_FREE(buf);
     HYDU_FUNC_EXIT();
@@ -365,8 +364,8 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
 
 static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
 {
-    int count, closed, sent;
-    char *buf = NULL, *pmi_cmd = NULL, *args[MAX_PMI_INTERNAL_ARGS] = { 0 };
+    int count, closed, sent, i;
+    char *buf = NULL, *pmi_cmd = NULL, **args = NULL;
     struct HYD_pmcd_pmip_pmi_handle *h;
     HYD_status status = HYD_SUCCESS;
 
@@ -379,6 +378,10 @@ static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
     HYDU_ASSERT(!closed, status);
 
     buf[hdr.buflen] = 0;
+
+    HYDU_MALLOC(args, char **, MAX_PMI_INTERNAL_ARGS * sizeof(char *), status);
+    for (i = 0; i < MAX_PMI_INTERNAL_ARGS; i++)
+        args[i] = NULL;
 
     status = HYD_pmcd_pmi_parse_pmi_cmd(buf, hdr.pmi_version, &pmi_cmd, args);
     HYDU_ERR_POP(status, "unable to parse PMI command\n");
@@ -410,7 +413,10 @@ static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
   fn_exit:
     if (pmi_cmd)
         HYDU_FREE(pmi_cmd);
-    HYDU_free_strlist(args);
+    if (args) {
+        HYDU_free_strlist(args);
+        HYDU_free(args);
+    }
     if (buf)
         HYDU_FREE(buf);
     HYDU_FUNC_EXIT();
@@ -469,7 +475,6 @@ static HYD_status launch_procs(void)
     struct HYD_exec *exec;
     struct HYD_pmcd_hdr hdr;
     int sent, closed, pmi_fds[2] = { HYD_FD_UNSET, HYD_FD_UNSET };
-    char ftb_event_payload[HYDT_FTB_MAX_PAYLOAD_DATA];
     HYD_status status = HYD_SUCCESS;
 
     HYDU_FUNC_ENTER();
@@ -530,10 +535,6 @@ static HYD_status launch_procs(void)
         HYDU_ERR_POP(status, "unable to create env\n");
 
         /* Restart the proxy -- we use the first prefix in the list */
-        MPL_snprintf(ftb_event_payload, HYDT_FTB_MAX_PAYLOAD_DATA, "pgid:%d ranks:%d-%d",
-                     HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.downstream.pmi_rank[0],
-                     HYD_pmcd_pmip.downstream.pmi_rank
-                     [HYD_pmcd_pmip.local.proxy_process_count - 1]);
         status = HYDT_ckpoint_restart(HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.local.id,
                                       env, HYD_pmcd_pmip.local.proxy_process_count,
                                       HYD_pmcd_pmip.downstream.pmi_rank,
@@ -543,11 +544,6 @@ static HYD_status launch_procs(void)
                                       HYD_pmcd_pmip.downstream.err,
                                       HYD_pmcd_pmip.downstream.pid,
                                       HYD_pmcd_pmip.local.ckpoint_prefix_list[0]);
-        if (status)
-            status = HYDT_ftb_publish("FTB_MPI_PROCS_RESTART_FAIL", ftb_event_payload);
-        else
-            status = HYDT_ftb_publish("FTB_MPI_PROCS_RESTARTED", ftb_event_payload);
-        HYDU_ERR_POP(status, "checkpoint restart FTB publishing failure\n");
         goto fn_spawn_complete;
     }
 
@@ -881,7 +877,6 @@ HYD_status HYD_pmcd_pmip_control_cmd_cb(int fd, HYD_event_t events, void *userp)
 {
     int cmd_len, closed;
     struct HYD_pmcd_hdr hdr;
-    char ftb_event_payload[HYDT_FTB_MAX_PAYLOAD_DATA];
     char *buf;
     HYD_status status = HYD_SUCCESS;
 
@@ -902,10 +897,6 @@ HYD_status HYD_pmcd_pmip_control_cmd_cb(int fd, HYD_event_t events, void *userp)
     else if (hdr.cmd == CKPOINT) {
         HYDU_dump(stdout, "requesting checkpoint\n");
 
-        MPL_snprintf(ftb_event_payload, HYDT_FTB_MAX_PAYLOAD_DATA, "pgid:%d ranks:%d-%d",
-                     HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.downstream.pmi_rank[0],
-                     HYD_pmcd_pmip.downstream.pmi_rank
-                     [HYD_pmcd_pmip.local.proxy_process_count - 1]);
         status = HYDT_ckpoint_checkpoint(HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.local.id,
                                          HYD_pmcd_pmip.local.ckpoint_prefix_list[0]);
 

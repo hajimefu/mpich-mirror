@@ -87,8 +87,8 @@ int MPIR_Comm_create_calculate_mapping(MPID_Group  *group_ptr,
             int g_lpid = group_ptr->lrank_to_lpid[i].lpid;
 
             /* This mapping is relative to comm world */
-            MPIU_DBG_MSG_FMT(COMM,VERBOSE,
-                             (MPIU_DBG_FDEST,
+            MPL_DBG_MSG_FMT(MPIR_DBG_COMM,VERBOSE,
+                             (MPL_DBG_FDEST,
                               "comm-create - mapping into world[%d] = %d",
                               i, g_lpid ));
             if (g_lpid < wsize) {
@@ -100,7 +100,7 @@ int MPIR_Comm_create_calculate_mapping(MPID_Group  *group_ptr,
             }
         }
     }
-    MPIU_DBG_MSG_D(COMM,VERBOSE, "subsetOfWorld=%d", subsetOfWorld );
+    MPL_DBG_MSG_D(MPIR_DBG_COMM,VERBOSE, "subsetOfWorld=%d", subsetOfWorld );
     if (subsetOfWorld) {
 #           ifdef HAVE_ERROR_CHECKING
         {
@@ -256,7 +256,7 @@ int MPIR_Comm_create_intra(MPID_Comm *comm_ptr, MPID_Group *group_ptr,
 
 fn_exit:
     if (mapping)
-        MPIU_Free(mapping);
+        MPL_free(mapping);
 
     MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_CREATE_INTRA);
     return mpi_errno;
@@ -442,7 +442,7 @@ PMPI_LOCAL int MPIR_Comm_create_inter(MPID_Comm *comm_ptr, MPID_Group *group_ptr
 fn_exit:
     MPIU_CHKLMEM_FREEALL();
     if (mapping)
-        MPIU_Free(mapping);
+        MPL_free(mapping);
 
     MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_CREATE_INTER);
     return mpi_errno;
@@ -542,7 +542,7 @@ int MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm)
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     if (newcomm_ptr)
-        MPID_OBJ_PUBLISH_HANDLE(*newcomm, newcomm_ptr->handle);
+        MPIR_OBJ_PUBLISH_HANDLE(*newcomm, newcomm_ptr->handle);
     else
         *newcomm = MPI_COMM_NULL;
     /* ... end of body of routine ... */

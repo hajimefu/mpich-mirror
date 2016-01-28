@@ -34,7 +34,7 @@ int MPID_Irsend(const void * buf, int count, MPI_Datatype datatype, int rank, in
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_IRSEND);
 
-    MPIU_DBG_MSG_FMT(CH3_OTHER,VERBOSE,(MPIU_DBG_FDEST,
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER,VERBOSE,(MPL_DBG_FDEST,
                 "rank=%d, tag=%d, context=%d", 
                 rank, tag, comm->context_id + context_offset));
 
@@ -71,7 +71,7 @@ int MPID_Irsend(const void * buf, int count, MPI_Datatype datatype, int rank, in
     if (rank == MPI_PROC_NULL)
     {
 	MPIU_Object_set_ref(sreq, 1);
-        MPID_cc_set(&sreq->cc, 0);
+        MPIR_cc_set(&sreq->cc, 0);
 	goto fn_exit;
     }
     
@@ -86,7 +86,7 @@ int MPID_Irsend(const void * buf, int count, MPI_Datatype datatype, int rank, in
 
     if (data_sz == 0)
     {
-	MPIU_DBG_MSG(CH3_OTHER,VERBOSE,"sending zero length message");
+	MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"sending zero length message");
 
 	sreq->dev.OnDataAvail = 0;
 	
@@ -147,10 +147,10 @@ int MPID_Irsend(const void * buf, int count, MPI_Datatype datatype, int rank, in
   fn_exit:
     *request = sreq;
 
-    MPIU_DBG_STMT(CH3_OTHER,VERBOSE,{
+    MPL_DBG_STMT(MPIDI_CH3_DBG_OTHER,VERBOSE,{
 	if (sreq != NULL)
 	{
-	    MPIU_DBG_MSG_P(CH3_OTHER,VERBOSE,"request allocated, handle=0x%08x", sreq->handle);
+	    MPL_DBG_MSG_P(MPIDI_CH3_DBG_OTHER,VERBOSE,"request allocated, handle=0x%08x", sreq->handle);
 	}
     }
 		  );

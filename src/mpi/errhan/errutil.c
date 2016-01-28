@@ -253,7 +253,7 @@ int MPIR_Err_return_comm( MPID_Comm  *comm_ptr, const char fcname[],
     }
     /* --END ERROR HANDLING-- */
 
-    MPIU_DBG_MSG_FMT(ERRHAND, TERSE, (MPIU_DBG_FDEST, "MPIR_Err_return_comm(comm_ptr=%p, fcname=%s, errcode=%d)", comm_ptr, fcname, errcode));
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TERSE, (MPL_DBG_FDEST, "MPIR_Err_return_comm(comm_ptr=%p, fcname=%s, errcode=%d)", comm_ptr, fcname, errcode));
 
     if (comm_ptr) {
         MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_POBJ_COMM_MUTEX(comm_ptr));
@@ -357,7 +357,7 @@ int MPIR_Err_return_win( MPID_Win  *win_ptr, const char fcname[], int errcode )
 
     checkValidErrcode( error_class, fcname, &errcode );
 
-    MPIU_DBG_MSG_FMT(ERRHAND, TERSE, (MPIU_DBG_FDEST, "MPIR_Err_return_win(win_ptr=%p, fcname=%s, errcode=%d)", win_ptr, fcname, errcode));
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TERSE, (MPL_DBG_FDEST, "MPIR_Err_return_win(win_ptr=%p, fcname=%s, errcode=%d)", win_ptr, fcname, errcode));
 
     /* --BEGIN ERROR HANDLING-- */
     if (MPIR_Err_is_fatal(errcode) ||
@@ -656,7 +656,7 @@ int MPIR_Err_create_code( int lastcode, int fatal, const char fcname[],
 			  int line, int error_class, const char generic_msg[],
 			  const char specific_msg[], ... )
 {
-    MPIU_DBG_MSG_FMT(ERRHAND, TYPICAL, (MPIU_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TYPICAL, (MPL_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
                                         fatal ? "Fatal " : "", lastcode, error_class, fcname, line, generic_msg));
     return (lastcode == MPI_SUCCESS) ? error_class : lastcode;
 }
@@ -686,7 +686,7 @@ int MPIR_Err_create_code( int lastcode, int fatal, const char fcname[],
 			  int line, int error_class, const char generic_msg[],
 			  const char specific_msg[], ... )
 {
-    MPIU_DBG_MSG_FMT(ERRHAND, TYPICAL, (MPIU_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TYPICAL, (MPL_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
                                         fatal ? "Fatal " : "", lastcode, error_class, fcname, line, generic_msg));
     return (lastcode == MPI_SUCCESS) ? error_class : lastcode;
 }
@@ -727,7 +727,7 @@ int MPIR_Err_create_code( int lastcode, int fatal, const char fcname[],
     int rc;
     va_list Argp;
     va_start(Argp, specific_msg);
-    MPIU_DBG_MSG_FMT(ERRHAND, TYPICAL, (MPIU_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TYPICAL, (MPL_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
                                         fatal ? "Fatal " : "", lastcode, error_class, fcname, line, generic_msg));
     rc = MPIR_Err_create_code_valist( lastcode, fatal, fcname, line,
 				      error_class, generic_msg, specific_msg,
@@ -840,18 +840,18 @@ static MPID_Thread_mutex_t error_ring_mutex;
     do {                                                 \
         int err;                                         \
         if (did_err_init) {                              \
-            MPID_THREAD_CHECK_BEGIN                      \
+            MPIR_THREAD_CHECK_BEGIN;                        \
             MPID_Thread_mutex_lock(&error_ring_mutex,&err); \
-            MPID_THREAD_CHECK_END                        \
+            MPIR_THREAD_CHECK_END;                          \
         }                                                \
     } while (0)
 #define error_ring_mutex_unlock()                        \
     do {                                                 \
         int err;                                         \
         if (did_err_init) {                              \
-            MPID_THREAD_CHECK_BEGIN                      \
+            MPIR_THREAD_CHECK_BEGIN;                          \
             MPID_Thread_mutex_unlock(&error_ring_mutex,&err); \
-            MPID_THREAD_CHECK_END                        \
+            MPIR_THREAD_CHECK_END;                            \
         }                                                \
     } while (0)
 #else
@@ -869,7 +869,7 @@ int MPIR_Err_create_code( int lastcode, int fatal, const char fcname[],
     int rc;
     va_list Argp;
     va_start(Argp, specific_msg);
-    MPIU_DBG_MSG_FMT(ERRHAND, TYPICAL, (MPIU_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, TYPICAL, (MPL_DBG_FDEST, "%sError created: last=%#010x class=%#010x %s(%d) %s",
                                         fatal ? "Fatal " : "", lastcode, error_class, fcname, line, generic_msg));
     rc = MPIR_Err_create_code_valist( lastcode, fatal, fcname, line,
 				      error_class, generic_msg, specific_msg,
@@ -1084,10 +1084,10 @@ int MPIR_Err_create_code_valist( int lastcode, int fatal, const char fcname[],
 		ErrorRing[ring_idx].location[0] = '\0';
 	    }
             {
-                MPIU_DBG_MSG_FMT(ERRHAND,VERBOSE,(MPIU_DBG_FDEST, "New ErrorRing[%d]", ring_idx));
-                MPIU_DBG_MSG_FMT(ERRHAND,VERBOSE,(MPIU_DBG_FDEST, "    id         = %#010x", ErrorRing[ring_idx].id));
-                MPIU_DBG_MSG_FMT(ERRHAND,VERBOSE,(MPIU_DBG_FDEST, "    prev_error = %#010x", ErrorRing[ring_idx].prev_error));
-                MPIU_DBG_MSG_FMT(ERRHAND,VERBOSE,(MPIU_DBG_FDEST, "    user=%d", ErrorRing[ring_idx].use_user_error_code));
+                MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND,VERBOSE,(MPL_DBG_FDEST, "New ErrorRing[%d]", ring_idx));
+                MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND,VERBOSE,(MPL_DBG_FDEST, "    id         = %#010x", ErrorRing[ring_idx].id));
+                MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND,VERBOSE,(MPL_DBG_FDEST, "    prev_error = %#010x", ErrorRing[ring_idx].prev_error));
+                MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND,VERBOSE,(MPL_DBG_FDEST, "    user=%d", ErrorRing[ring_idx].use_user_error_code));
             }
 	}
 	error_ring_mutex_unlock();
@@ -1564,7 +1564,7 @@ static int vsnprintf_mpi(char *str, size_t maxlen, const char *fmt_orig,
     MPI_Count c;
     void *p;
 
-    fmt = MPIU_Strdup(fmt_orig);
+    fmt = MPL_strdup(fmt_orig);
     if (fmt == NULL)
     {
 	if (maxlen > 0 && str != NULL)
@@ -1791,7 +1791,7 @@ static int vsnprintf_mpi(char *str, size_t maxlen, const char *fmt_orig,
 	MPL_strncpy(str, begin, maxlen);
     }
     /* Free the dup'ed format string */
-    MPIU_Free( fmt );
+    MPL_free( fmt );
 
     return mpi_errno;
 }
@@ -1885,7 +1885,7 @@ static int checkErrcodeIsValid( int errcode )
     if (errcode <= MPIR_MAX_ERROR_CLASS_INDEX && errcode >= 0) return 0;
 
     convertErrcodeToIndexes( errcode, &ring_idx, &ring_id, &generic_idx );
-    MPIU_DBG_MSG_FMT(ERRHAND, VERBOSE, (MPIU_DBG_FDEST, "code=%#010x ring_idx=%d ring_id=%#010x generic_idx=%d",
+    MPL_DBG_MSG_FMT(MPIR_DBG_ERRHAND, VERBOSE, (MPL_DBG_FDEST, "code=%#010x ring_idx=%d ring_id=%#010x generic_idx=%d",
                                         errcode, ring_idx, ring_id, generic_idx));
 
     if (ring_idx < 0 || ring_idx >= MAX_ERROR_RING ||

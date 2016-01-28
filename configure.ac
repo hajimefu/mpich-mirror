@@ -54,10 +54,6 @@ dnl    MPID_LIBTOOL_STATIC_FLAG - The static compilation flag to use
 dnl                               for the example executables within
 dnl                               mpich.  If not set, -static will be
 dnl                               used.
-dnl    PMI_REQUIRES_READABLE_TOKENS - if yes, define the C-preprocessor
-dnl                            value USE_HUMAN_READABLE_TOKENS, which is
-dnl                            used in src/include/mpimem.h to define token
-dnl                            separators used in src/util/mem/argstr.c
 dnl    PM_REQUIRES_PMI       - if set, provides the name of the PMI 
 dnl                            interface implementation.  If not set,
 dnl                            the "simple" PMI implementation is used.
@@ -368,7 +364,6 @@ AC_ARG_ENABLE(g,
                    compiler flags, i.e. MPICHLIB_CFLAGS, MPICHLIB_CXXFLAGS,
                    MPICHLIB_FFLAGS, and MPICHLIB_FCFLAGS.
         debug    - Synonym for dbg
-        log      - Enable debug event logging
         mem      - Memory usage tracing
         meminit  - Preinitialize memory associated structures and unions to
                    eliminate access warnings from programs like valgrind
@@ -1449,9 +1444,6 @@ for option in $enable_g ; do
 	mem)
 	perform_memtracing=yes
 	;;
-	log)
-	perform_dbglog=yes
-	;;
 	mutex)
 	perform_dbgmutex=yes
 	;;
@@ -1460,7 +1452,6 @@ for option in $enable_g ; do
 	;;
         most|yes)
         perform_memtracing=yes
-        perform_dbglog=yes
         enable_append_g=yes
         perform_meminit=yes
         perform_dbgmutex=yes
@@ -1471,7 +1462,6 @@ for option in $enable_g ; do
 	all)
         perform_memarena=yes
 	perform_memtracing=yes
-	perform_dbglog=yes
 	enable_append_g=yes
 	perform_meminit=yes
 	perform_dbgmutex=yes
@@ -1514,17 +1504,6 @@ if test -n "$perform_memtracing" ; then
         AC_DEFINE(MPICH_DEBUG_MEMARENA,1,[Define if each function exit should confirm memory arena correctness])
     fi
 fi
-USE_DBG_LOGGING=0
-if test -n "$perform_dbglog" ; then
-   if test "$with_logging" != "none" ; then
-       AC_MSG_WARN([--with-logging overrides --enable-g=log])
-   else
-       AC_DEFINE(USE_DBG_LOGGING,1,[Define to enable logging macros])
-       USE_DBG_LOGGING=1
-   fi
-fi
-# allow @USE_DBG_LOGGING@ substitution in glue_romio.h
-AC_SUBST([USE_DBG_LOGGING])
 
 if test -n "$perform_dbgmutex" ; then 
    AC_DEFINE(MPICH_DEBUG_MUTEX,1,[Define to enable mutex debugging])
@@ -1696,11 +1675,6 @@ fi
 # pm_name is the *primary* pm
 pm_name=$first_pm_name
 AC_SUBST(pm_name)
-
-# Some versions of PM and PMI require a special definition
-if test "$PMI_REQUIRES_READABLE_TOKENS" = "yes" ; then
-    AC_DEFINE(USE_HUMAN_READABLE_TOKENS,1,[Define to use ='s and spaces in the string utilities.])
-fi
 
 # Step 2:
 # Once we've selected the process manager (or managers), we can
@@ -4673,11 +4647,6 @@ AC_HAVE_FUNCS(mkstemp)
 if test "$ac_cv_func_mkstemp" = "yes" ; then
     PAC_FUNC_NEEDS_DECL([#include <stdlib.h>],mkstemp)
 fi
-# fdopen() converts from an fd to a FILE*
-AC_HAVE_FUNCS(fdopen)
-if test "$ac_cv_func_fdopen" = "yes" ; then
-    PAC_FUNC_NEEDS_DECL([#include <stdlib.h>],fdopen)
-fi
 # putenv() sets environment variable
 AC_HAVE_FUNCS(putenv)
 if test "$ac_cv_func_putenv" = "yes" ; then
@@ -4877,203 +4846,6 @@ dnl uses to handle the subdir configure.  However, later versions of
 dnl autoconf did this in a way that caused problems, paritcularly with 
 dnl errors reported as inconsistent cache files.  Instead, we simply
 dnl invoke the configure scripts (if present) directly.
-
-#
-# -----------------------------------------------------------------------------
-# Configure threads first.  This is necessary to obtain all required
-# definitions, flags, and libraries that the other subsystems will need
-#
-# 
-# -----------------------------------------------------------------------------
-AC_ARG_WITH([thread-package],
-[  --with-thread-package=package     Thread package to use. Supported thread packages include:
-        posix or pthreads - POSIX threads (default, if required)
-        solaris - Solaris threads (Solaris OS only)
-        win - windows threads
-        none - no threads
-],,with_thread_package=posix)
-
-if test "${thread_pkg_required}" = "no" -o "${with_thread_package}" = "no" ; then
-   with_thread_package=none
-fi
-
-if test "${with_thread_package}" = "yes" ; then
-   with_thread_package=posix
-fi
-
-if test "${thread_pkg_required}" = "yes" -a "${with_thread_package}" = "none" ; then
-   AC_ERROR([if no thread package is available, use --enable-threads=single or funneled])
-fi
-
-MPICH_THREAD_PACKAGE_NAME=MPICH_THREAD_PACKAGE_INVALID
-case $with_thread_package in 
-    posix|pthreads)
-	with_thread_package=posix
-	AC_CHECK_HEADERS(pthread.h)
-
-        # If pthreads library is found, just include it on the link line. We don't try
-        # to test if the C compiler needs it or not, since the C++ or Fortran
-        # compilers might need it even if the C compiler doesn't
-        # (nvcc with gfortran, for example).
-        #
-        # OSF1 has __pthread_create but not pthread_create (because of
-        # inconsistencies in the pthread spec).  Thus, we look for pthread_key_create
-        AC_CHECK_LIB([pthread],[pthread_key_create],have_pthreads=yes)
-	if test "$have_pthreads" = "yes" ; then
-	   PAC_PREPEND_FLAG([-lpthread],[LIBS])
-	fi
-
-        AC_CHECK_FUNCS(pthread_yield)
-
-        # this check should come after the AC_CHECK_LIB for -lpthread
-        AC_CHECK_FUNC([pthread_key_create],[],[AC_MSG_ERROR([unable to find pthreads library])])
-
-	# Check for a routine that specify a routine to call on 
-	# thread exit.  We can use this to release memory that may
-	# be allocated by the MPICH library in the thread.  
-	# A complication: pthread_cleanup_push may be a macro; in that
-	# case, check_funcs will fail to find it.
-	# Under OSX, pthread_cleanup_push and pop are macros that must
-	# appear together in the same lexical scope, and hence are
-	# really useless in libraries that may allocate data within 
-	# a user-managed thread.
-	AC_CHECK_FUNCS(pthread_cleanup_push)
-	if test "$ac_cv_func_pthread_cleanup_push" = "no" ; then
-            AC_CACHE_CHECK([whether pthread_cleanup_push is available (may be a macro in pthread.h)],pac_cv_func_pthread_cleanup_push,[
-	    AC_TRY_LINK([
-#include <pthread.h>
-void f1(void *a) { return; }],
-[pthread_cleanup_push( f1, (void *)0 );],
-            pac_cv_func_pthread_cleanup_push=yes,
-            pac_cv_func_pthread_cleanup_push=no)])
-            if test "$pac_cv_func_pthread_cleanup_push" = yes ; then
-	        AC_DEFINE(HAVE_PTHREAD_CLEANUP_PUSH_MACRO,1,[Define if pthread_cleanup_push is available, even as a macro])
-            fi
-    
-        fi
-
-        # Check for PTHREAD_MUTEX_ERRORCHECK_NP and PTHREAD_MUTEX_ERRORCHECK
-        AC_CACHE_CHECK([whether pthread.h defines PTHREAD_MUTEX_ERRORCHECK_NP],
-        pac_cv_has_pthread_mutex_errorcheck_np,[
-        AC_TRY_COMPILE([#include <pthread.h>],
-                       [int a=PTHREAD_MUTEX_ERRORCHECK_NP;],
-                       pac_cv_has_pthread_mutex_errorcheck_np=yes,
-                       pac_cv_has_pthread_mutex_errorcheck_np=no)])
-        AC_CACHE_CHECK([whether pthread.h defines PTHREAD_MUTEX_ERRORCHECK],
-        pac_cv_has_pthread_mutex_errorcheck,[
-        AC_TRY_COMPILE([#include <pthread.h>],
-                       [int a=PTHREAD_MUTEX_ERRORCHECK;],
-                       pac_cv_has_pthread_mutex_errorcheck=yes,
-                       pac_cv_has_pthread_mutex_errorcheck=no)])
-
-        if test "$pac_cv_has_pthread_mutex_errorcheck" = yes ; then
-            AC_DEFINE(MPICH_PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK,
-                      [Define to an expression that will result in an error checking mutex type.])
-        elif test "$pac_cv_has_pthread_mutex_errorcheck_np" = yes ; then
-            AC_DEFINE(MPICH_PTHREAD_MUTEX_ERRORCHECK_VALUE,PTHREAD_MUTEX_ERRORCHECK_NP,
-                      [Define to an expression that will result in an error checking mutex type.])
-        fi
-
-	PAC_FUNC_NEEDS_DECL([#include <pthread.h>],pthread_mutexattr_settype)
-
-        MPICH_THREAD_PACKAGE_NAME=MPICH_THREAD_PACKAGE_POSIX
-	;;
-    solaris)
-	AC_CHECK_HEADERS(thread.h)
-	AC_CHECK_FUNCS(thr_yield)
-	AC_SEARCH_LIBS(thr_create,thread,found=yes,found=no)
-	if test "$found" != "yes" ; then
-	   AC_MSG_ERROR([unable to find Solaris threads library])
-	fi
-	# FIXME: need to add -mt if using solaris compilers
-        MPICH_THREAD_PACKAGE_NAME=MPICH_THREAD_PACKAGE_SOLARIS
-	;;
-    win|windows)
-        with_thread_package=win
-        MPICH_THREAD_PACKAGE_NAME=MPICH_THREAD_PACKAGE_WIN
-        AC_MSG_ERROR([The 'win' thread package is not supported via autoconf builds at this time.])
-        ;;
-    no|none)
-	with_thread_package=none
-        MPICH_THREAD_PACKAGE_NAME=MPICH_THREAD_PACKAGE_NONE
-	;;
-    *)
-	AC_MSG_ERROR([The specified thread package, $with_thread_package, is not supported.]) 
-	;;
-esac
-
-# Define and export the selected thread library so that other packages
-# know what's used in MPICH
-AC_DEFINE_UNQUOTED([MPICH_THREAD_PACKAGE_NAME],[$MPICH_THREAD_PACKAGE_NAME],[set to the name of the thread package])
-
-# check for compiler-support for thread-local storage (MPICH_TLS_SPECIFIER)
-AX_TLS
-
-AC_CHECK_FUNCS(getpid)
-
-# Choose a method to yield the procesor.
-
-# If the user specified a method to use, we check if it's available.
-# If a method was not specified, we make a guess based on the OS.  The
-# default is to use sched_yield() or yield() if one is available,
-# otherwise, default to nothing.  After that we define the appropriate
-# macro.
-
-AC_CHECK_HEADERS(sched.h)
-AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(sys/select.h)
-AC_CHECK_FUNCS(sched_yield yield usleep sleep select)
-
-if test "$ac_cv_func_usleep" = "yes" ; then
-    PAC_FUNC_NEEDS_DECL([#include <unistd.h>],usleep)
-fi
-
-AC_ARG_ENABLE([yield], 
-    [AS_HELP_STRING([--enable-yield], [choose a method to yield the processor in busy loops.  Available methods are: sched_yield, yield, select, usleep, sleep, nothing])], 
-    [AS_CASE([$enableval],
-        [sched_yield], [AS_IF([test "x$ac_cv_func_sched_yield" != "xyes"], [enable_yield=unavail])],
-        [yield],       [AS_IF([test "x$ac_cv_func_yield"       != "xyes"], [enable_yield=unavail])],
-        [select],      [AS_IF([test "x$ac_cv_func_select"      != "xyes"], [enable_yield=unavail])],
-        [usleep],      [AS_IF([test "x$ac_cv_func_usleep"      != "xyes"], [enable_yield=unavail])],
-        [sleep],       [AS_IF([test "x$ac_cv_func_sleep"       != "xyes"], [enable_yield=unavail])],
-        [nothing|no|none], [],
-        [AC_MSG_ERROR([Invalid option $enableval for --enable-yield])])
-
-     AS_IF([test "x$enable_yield" = "xunavail"], 
-              [AC_MSG_ERROR([Yield method $enableval is not available on this platform.])])
-    ],
-    [# none specified by user; make a guess based on os
-     AS_CASE([$host],
-        [*-*-darwin*], 
-            [# In Lion, sched_yield worked but none of the other options had any effect
-             AS_IF([test "x$ac_cv_func_sched_yield" = "xyes"], [enable_yield=sched_yield],
-                   [enable_yield=nothing])],
-        [*-*-linux*], 
-            [# sched_yield() has been broken in linux since 2.6.23, and no good alternative exists.
-             enable_yield=nothing],
-        [# default: just use sched_yield() or yield()
-         AS_IF([test "x$ac_cv_func_sched_yield" = "xyes"], [enable_yield=sched_yield],
-               [test "x$ac_cv_func_yield" = "xyes"], [enable_yield=yield],
-               [enable_yield=nothing])])
-    ]
-)
-
-# set the appropriate macro
-AS_CASE([$enable_yield],
-    [sched_yield], 
-        [AC_DEFINE(USE_SCHED_YIELD_FOR_YIELD,1,[Define to use sched_yield to yield processor])],
-    [yield],
-        [AC_DEFINE(USE_YIELD_FOR_YIELD,1,[Define to use yield to yield processor])],
-    [select],
-        [AC_DEFINE(USE_SELECT_FOR_YIELD,1,[Define to use select to yield processor])],
-    [usleep],
-        [AC_DEFINE(USE_USLEEP_FOR_YIELD,1,[Define to use usleep to yield processor])],
-    [sleep],
-        [AC_DEFINE(USE_SLEEP_FOR_YIELD,1,[Define to use sleep to yield processor])],
-    [nothing|no|none],
-        [AC_DEFINE(USE_NOTHING_FOR_YIELD,1,[Define to use nothing to yield processor])],
-    [AC_MSG_ERROR([Invalid value $enable_yield for enable_yield.])]
-)
 
 # Check for the Linux functions for controlling processor affinity.
 # LINUX: sched_setaffinity
@@ -5584,8 +5356,6 @@ dnl a build aborts due to an error (this is intended to help developers)
 AC_OUTPUT_COMMANDS([if [ ! -d lib ] ; then mkdir lib ; fi 
 date > lib/newconfig])
 
-AC_OUTPUT_COMMANDS([chmod a+x src/util/dbg/getfuncstack])
-
 AC_OUTPUT_COMMANDS([chmod a+x test/commands/cmdtests])
 
 
@@ -5859,7 +5629,6 @@ AC_OUTPUT(Makefile \
 	  src/env/mpifort.sh \
 	  src/env/mpifort.bash \
           src/env/parkill \
-	  src/util/dbg/getfuncstack \
           src/include/mpi.h \
           doc/design/Makefile \
           doc/installguide/Makefile \

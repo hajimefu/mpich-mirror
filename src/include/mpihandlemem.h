@@ -6,6 +6,8 @@
 #ifndef MPIHANDLE_H_INCLUDED
 #define MPIHANDLE_H_INCLUDED
 
+#include "mpichconf.h"
+
 /*TOpaqOverview.tex
   MPI Opaque Objects:
 
@@ -116,6 +118,10 @@ const char *MPIU_Handle_get_kind_str(int kind);
 #define HANDLE_MASK 0x03FFFFFF
 #define HANDLE_INDEX(a) ((a)& HANDLE_MASK)
 
+#if defined (MPL_USE_DBG_LOGGING)
+extern MPL_DBG_Class MPIR_DBG_HANDLE;
+#endif /* MPL_USE_DBG_LOGGING */
+
 /* ------------------------------------------------------------------------- */
 /* reference counting macros */
 
@@ -129,7 +135,7 @@ const char *MPIU_Handle_get_kind_str(int kind);
     do {                                                                                            \
         if (local_ref_count_ > MPICH_DEBUG_MAX_REFCOUNT || local_ref_count_ < 0)                    \
         {                                                                                           \
-            MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                        \
+            MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE,TYPICAL,(MPL_DBG_FDEST,                                        \
                                              "Invalid refcount (%d) in %p (0x%08x) %s",             \
                                              local_ref_count_, (objptr_), (objptr_)->handle, op_)); \
         }                                                                                           \
@@ -140,7 +146,7 @@ const char *MPIU_Handle_get_kind_str(int kind);
 #endif
 
 #define MPIU_HANDLE_LOG_REFCOUNT_CHANGE(objptr_, action_str_, local_ref_count_)                        \
-    MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                                   \
+    MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE,TYPICAL,(MPL_DBG_FDEST,                                                   \
                                      "%s %p (0x%08x kind=%s) refcount to %d",                          \
                                      (action_str_),                                                    \
                                      (objptr_),                                                        \
@@ -309,7 +315,7 @@ typedef OPA_int_t MPIU_Handle_ref_count;
             MPIU_Object_add_ref_always((objptr_));             \
         }                                                      \
         else {                                                                                                 \
-            MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                                   \
+            MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE,TYPICAL,(MPL_DBG_FDEST,                                                   \
                                              "skipping add_ref on %p (0x%08x kind=%s) refcount=%d",            \
                                              (objptr_),                                                        \
                                              (objptr_)->handle,                                                \
@@ -325,7 +331,7 @@ typedef OPA_int_t MPIU_Handle_ref_count;
         }                                                            \
         else {                                                       \
             *(inuse_ptr_) = 1;                                       \
-            MPIU_DBG_MSG_FMT(HANDLE,TYPICAL,(MPIU_DBG_FDEST,                                                   \
+            MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE,TYPICAL,(MPL_DBG_FDEST,                                                   \
                                              "skipping release_ref on %p (0x%08x kind=%s) refcount=%d",        \
                                              (objptr_),                                                        \
                                              (objptr_)->handle,                                                \

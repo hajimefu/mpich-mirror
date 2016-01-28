@@ -291,7 +291,7 @@ int MPIDI_PG_Destroy(MPIDI_PG_t * pg)
             else
                 pg_prev->next = pg->next;
 
-            MPIU_DBG_MSG_FMT(CH3_DISCONNECT, VERBOSE, (MPIU_DBG_FDEST, "destroying pg=%p pg->id=%s", pg, (char *)pg->id));
+            MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_DISCONNECT, VERBOSE, (MPL_DBG_FDEST, "destroying pg=%p pg->id=%s", pg, (char *)pg->id));
 
             for (i = 0; i < pg->size; ++i) {
                 /* FIXME it would be good if we could make this assertion.
@@ -306,7 +306,7 @@ int MPIDI_PG_Destroy(MPIDI_PG_t * pg)
                       just haven't hit it in the tests yet.  */
                 /*MPIU_Assert(MPIU_Object_get_ref(pg->vct[i]) == 0);*/
 
-                MPIU_DBG_MSG_FMT(CH3_DISCONNECT, VERBOSE, (MPIU_DBG_FDEST, "about to free pg->vct=%p which contains vc=%p", pg->vct, &pg->vct[i]));
+                MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_DISCONNECT, VERBOSE, (MPL_DBG_FDEST, "about to free pg->vct=%p which contains vc=%p", pg->vct, &pg->vct[i]));
 
                 /* This used to be handled in MPIDI_VCRT_Release, but that was
                    not the right place to do this.  The VC should only be freed
@@ -323,17 +323,17 @@ int MPIDI_PG_Destroy(MPIDI_PG_t * pg)
             }
 
 	    MPIDI_PG_Destroy_fn(pg);
-	    MPIU_Free(pg->vct);
+	    MPL_free(pg->vct);
 	    if (pg->connData) {
 		if (pg->freeConnInfo) {
 		    (*pg->freeConnInfo)( pg );
 		}
 		else {
-		    MPIU_Free(pg->connData);
+		    MPL_free(pg->connData);
 		}
 	    }
 	    mpi_errno = MPIDI_CH3_PG_Destroy(pg);
-	    MPIU_Free(pg);
+	    MPL_free(pg);
 
 	    goto fn_exit;
 	}
@@ -515,7 +515,7 @@ int MPIDI_PG_Create_from_string(const char * str, MPIDI_PG_t ** pg_pptr,
     }
     
     pg_ptr = *pg_pptr;
-    pg_ptr->id = MPIU_Strdup( str );
+    pg_ptr->id = MPL_strdup( str );
     
     /* Set up the functions to use strings to manage connection information */
     MPIDI_PG_InitConnString( pg_ptr );
@@ -739,7 +739,7 @@ static int connToStringKVS( char **buf_p, int *slen, MPIDI_PG_t *pg )
        needed space */
     len = 0;
     curSlen = 10 + pg->size * 128;
-    string = (char *)MPIU_Malloc( curSlen );
+    string = (char *)MPL_malloc( curSlen );
 
     /* Start with the id of the pg */
     while (*pg_idStr && len < curSlen) 
@@ -783,7 +783,7 @@ static int connToStringKVS( char **buf_p, int *slen, MPIDI_PG_t *pg )
 	if (len + vallen + 1 >= curSlen) {
 	    char *nstring = 0;
             curSlen += (pg->size - i) * (vallen + 1 );
-	    nstring = MPIU_Realloc( string, curSlen );
+	    nstring = MPL_realloc( string, curSlen );
 	    if (!nstring) {
 		MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**nomem");
 	    }
@@ -802,7 +802,7 @@ static int connToStringKVS( char **buf_p, int *slen, MPIDI_PG_t *pg )
  fn_exit:
     return mpi_errno;
  fn_fail:
-    if (string) MPIU_Free(string);
+    if (string) MPL_free(string);
     goto fn_exit;
 }
 static int connFromStringKVS( const char *buf ATTRIBUTE((unused)), 
@@ -814,7 +814,7 @@ static int connFromStringKVS( const char *buf ATTRIBUTE((unused)),
 static int connFreeKVS( MPIDI_PG_t *pg )
 {
     if (pg->connData) {
-	MPIU_Free( pg->connData );
+	MPL_free( pg->connData );
     }
     return MPI_SUCCESS;
 }
@@ -829,7 +829,7 @@ int MPIDI_PG_InitConnKVS( MPIDI_PG_t *pg )
 #ifdef USE_PMI2_API
     int mpi_errno = MPI_SUCCESS;
     
-    pg->connData = (char *)MPIU_Malloc(MAX_JOBID_LEN);
+    pg->connData = (char *)MPL_malloc(MAX_JOBID_LEN);
     if (pg->connData == NULL) {
 	MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER, "**nomem");
     }
@@ -847,7 +847,7 @@ int MPIDI_PG_InitConnKVS( MPIDI_PG_t *pg )
 			     "**pmi_kvs_get_name_length_max %d", pmi_errno);
     }
     
-    pg->connData = (char *)MPIU_Malloc(kvs_name_sz + 1);
+    pg->connData = (char *)MPL_malloc(kvs_name_sz + 1);
     if (pg->connData == NULL) {
 	MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER, "**nomem");
     }
@@ -867,7 +867,7 @@ int MPIDI_PG_InitConnKVS( MPIDI_PG_t *pg )
  fn_exit:
     return mpi_errno;
  fn_fail:
-    if (pg->connData) { MPIU_Free(pg->connData); }
+    if (pg->connData) { MPL_free(pg->connData); }
     goto fn_exit;
 }
 
@@ -989,13 +989,13 @@ static int connFromString( const char *buf, MPIDI_PG_t *pg )
     pg->size = atoi( buf );
     while (*buf) buf++; buf++;
 
-    conninfo = (MPIDI_ConnInfo *)MPIU_Malloc( sizeof(MPIDI_ConnInfo) );
-    conninfo->connStrings = (char **)MPIU_Malloc( pg->size * sizeof(char *));
+    conninfo = (MPIDI_ConnInfo *)MPL_malloc( sizeof(MPIDI_ConnInfo) );
+    conninfo->connStrings = (char **)MPL_malloc( pg->size * sizeof(char *));
 
     /* For now, make a copy of each item */
     for (i=0; i<pg->size; i++) {
 	/* printf( "Adding conn[%d] = %s\n", i, buf );fflush(stdout); */
-	conninfo->connStrings[i] = MPIU_Strdup( buf );
+	conninfo->connStrings[i] = MPL_strdup( buf );
 	while (*buf) buf++;
 	buf++;
     }
@@ -1013,15 +1013,15 @@ static int connFree( MPIDI_PG_t *pg )
     int i;
 
     for (i=0; i<pg->size; i++) {
-	MPIU_Free( conninfo->connStrings[i] );
+	MPL_free( conninfo->connStrings[i] );
     }
-    MPIU_Free( conninfo->connStrings );
-    MPIU_Free( conninfo );
+    MPL_free( conninfo->connStrings );
+    MPL_free( conninfo );
 
     return MPI_SUCCESS;
 }
 
-#ifdef USE_DBG_LOGGING
+#ifdef MPL_USE_DBG_LOGGING
 /* This is a temporary routine that is used to print out the pg string.
    A better approach may be to convert it into a single (long) string
    with no nulls. */
@@ -1030,8 +1030,8 @@ int MPIDI_PrintConnStr( const char *file, int line,
 {
     int pg_size, i;
 
-    MPIU_DBG_Outevent( file, line, MPIU_DBG_CH3_CONNECT, 0, "%s", label );
-    MPIU_DBG_Outevent( file, line, MPIU_DBG_CH3_CONNECT, 0, "%s", str );
+    MPL_DBG_Outevent( file, line, MPIDI_CH3_DBG_CONNECT, 0, "%s", label );
+    MPL_DBG_Outevent( file, line, MPIDI_CH3_DBG_CONNECT, 0, "%s", str );
     
     /* Skip the pg id */
     while (*str) str++; str++;
@@ -1041,7 +1041,7 @@ int MPIDI_PrintConnStr( const char *file, int line,
     while (*str) str++; str++;
 
     for (i=0; i<pg_size; i++) {
-	MPIU_DBG_Outevent( file, line, MPIU_DBG_CH3_CONNECT, 0, "%s", str );
+	MPL_DBG_Outevent( file, line, MPIDI_CH3_DBG_CONNECT, 0, "%s", str );
 	while (*str) str++;
 	str++;
     }
@@ -1171,7 +1171,7 @@ int MPIDI_PG_Close_VCs( void )
     while (pg) {
 	int i, inuse, n, i_start;
 
-	MPIU_DBG_MSG_S(CH3_DISCONNECT,VERBOSE,"Closing vcs for pg %s",
+	MPL_DBG_MSG_S(MPIDI_CH3_DBG_DISCONNECT,VERBOSE,"Closing vcs for pg %s",
 		       (char *)pg->id );
 
         /* We want to reduce the chance of having all processes send
@@ -1212,7 +1212,7 @@ int MPIDI_PG_Close_VCs( void )
                 if (vc->state == MPIDI_VC_STATE_INACTIVE)
                     MPIDI_CHANGE_VC_STATE(vc, INACTIVE_CLOSED);
             } else {
-		MPIU_DBG_MSG_FMT(CH3_DISCONNECT,VERBOSE,(MPIU_DBG_FDEST,
+		MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_DISCONNECT,VERBOSE,(MPL_DBG_FDEST,
 		     "vc=%p: not sending a close to %d, vc in state %s", vc,i,
 		     MPIDI_VC_GetStateString(vc->state)));
 	    }

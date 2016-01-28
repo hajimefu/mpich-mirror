@@ -30,16 +30,13 @@ static void big_meappend(void *buf, ptl_size_t left_to_send, MPIDI_VC_t *vc, ptl
     me.min_free = 0;
 
     /* allocate enough handles to cover all get operations */
-    REQ_PTL(sreq)->get_me_p = MPIU_Malloc(sizeof(ptl_handle_me_t) *
+    REQ_PTL(sreq)->get_me_p = MPL_malloc(sizeof(ptl_handle_me_t) *
                                         ((left_to_send / MPIDI_nem_ptl_ni_limits.max_msg_size) + 1));
 
     /* queue up as many entries as necessary to describe the entire message */
     for (i = 0; left_to_send > 0; i++) {
         /* send up to the maximum allowed by the portals interface */
-        if (left_to_send > MPIDI_nem_ptl_ni_limits.max_msg_size)
-            me.length = MPIDI_nem_ptl_ni_limits.max_msg_size;
-        else
-            me.length = left_to_send;
+        me.length = MPL_MIN(MPIDI_nem_ptl_ni_limits.max_msg_size, left_to_send);
 
         ret = PtlMEAppend(MPIDI_nem_ptl_ni, MPIDI_nem_ptl_get_pt, &me, PTL_PRIORITY_LIST, sreq,
                           &REQ_PTL(sreq)->get_me_p[i]);
@@ -73,7 +70,7 @@ static int handler_send(const ptl_event_t *e)
     MPIU_Assert(e->type == PTL_EVENT_SEND || e->type == PTL_EVENT_GET);
 
     /* if we are done, release all netmod resources */
-    if (MPID_cc_get(sreq->cc) == 1) {
+    if (MPIR_cc_get(sreq->cc) == 1) {
         if (REQ_PTL(sreq)->md != PTL_INVALID_HANDLE) {
             ret = PtlMDRelease(REQ_PTL(sreq)->md);
             MPIR_ERR_CHKANDJUMP1(ret, mpi_errno, MPI_ERR_OTHER, "**ptlmdrelease", "**ptlmdrelease %s", MPID_nem_ptl_strerror(ret));
@@ -81,10 +78,10 @@ static int handler_send(const ptl_event_t *e)
 
         for (i = 0; i < MPID_NEM_PTL_NUM_CHUNK_BUFFERS; ++i)
             if (REQ_PTL(sreq)->chunk_buffer[i])
-                MPIU_Free(REQ_PTL(sreq)->chunk_buffer[i]);
+                MPL_free(REQ_PTL(sreq)->chunk_buffer[i]);
 
         if (REQ_PTL(sreq)->get_me_p)
-            MPIU_Free(REQ_PTL(sreq)->get_me_p);
+            MPL_free(REQ_PTL(sreq)->get_me_p);
     }
     mpi_errno = MPID_Request_complete(sreq);
     if (mpi_errno != MPI_SUCCESS) {
@@ -135,15 +132,15 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
     }
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
-    MPIU_DBG_MSG_FMT(CH3_CHANNEL, VERBOSE, (MPIU_DBG_FDEST, "count="MPI_AINT_FMT_DEC_SPEC" datatype=%#x contig=%d data_sz=%lu", count, datatype, dt_contig, data_sz));
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_CHANNEL, VERBOSE, (MPL_DBG_FDEST, "count="MPI_AINT_FMT_DEC_SPEC" datatype=%#x contig=%d data_sz=%lu", count, datatype, dt_contig, data_sz));
 
     if (data_sz <= PTL_LARGE_THRESHOLD) {
         /* Small message.  Send all data eagerly */
         if (dt_contig) {
             void *start = (char *)buf + dt_true_lb;
-            MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "Small contig message");
+            MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Small contig message");
             REQ_PTL(sreq)->event_handler = handler_send;
-            MPIU_DBG_MSG_P(CH3_CHANNEL, VERBOSE, "&REQ_PTL(sreq)->event_handler = %p", &(REQ_PTL(sreq)->event_handler));
+            MPL_DBG_MSG_P(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "&REQ_PTL(sreq)->event_handler = %p", &(REQ_PTL(sreq)->event_handler));
             if (start == NULL)
                 ret = MPID_nem_ptl_rptl_put(MPIDI_nem_ptl_global_md, (ptl_size_t)&dummy, data_sz, PTL_NO_ACK_REQ, vc_ptl->id, vc_ptl->pt,
                                             NPTL_MATCH(tag, comm->context_id + context_offset, comm->rank), 0, sreq,
@@ -154,16 +151,16 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
                                             NPTL_HEADER(ssend_flag, data_sz));
             MPIR_ERR_CHKANDJUMP1(ret, mpi_errno, MPI_ERR_OTHER, "**ptlput", "**ptlput %s", MPID_nem_ptl_strerror(ret));
             DBG_MSG_PUT("global", data_sz, vc->pg_rank, NPTL_MATCH(tag, comm->context_id + context_offset, comm->rank), NPTL_HEADER(ssend_flag, data_sz));
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "id.nid = %#x", vc_ptl->id.phys.nid);
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "id.pid = %#x", vc_ptl->id.phys.pid);
-            MPIU_DBG_MSG_P(CH3_CHANNEL, VERBOSE, "sreq = %p", sreq);
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "vc_ptl->pt = %d", vc_ptl->pt);
-            MPIU_DBG_MSG_P(CH3_CHANNEL, VERBOSE, "REQ_PTL(sreq)->event_handler = %p", REQ_PTL(sreq)->event_handler);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "id.nid = %#x", vc_ptl->id.phys.nid);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "id.pid = %#x", vc_ptl->id.phys.pid);
+            MPL_DBG_MSG_P(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "sreq = %p", sreq);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "vc_ptl->pt = %d", vc_ptl->pt);
+            MPL_DBG_MSG_P(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "REQ_PTL(sreq)->event_handler = %p", REQ_PTL(sreq)->event_handler);
            goto fn_exit;
         }
         
         /* noncontig data */
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "Small noncontig message");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Small noncontig message");
         sreq->dev.segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(sreq->dev.segment_ptr == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment_alloc");
         MPID_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
@@ -176,7 +173,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
 
         if (last == sreq->dev.segment_size) {
             /* IOV is able to describe entire message */
-            MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "    entire message fits in IOV");
+            MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "    entire message fits in IOV");
             md.start = sreq->dev.iov;
             md.length = sreq->dev.iov_count;
             md.options = PTL_IOVEC;
@@ -195,7 +192,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
         }
         
         /* IOV is not long enough to describe entire message */
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "    IOV too long: using bounce buffer");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "    IOV too long: using bounce buffer");
         MPIU_CHKPMEM_MALLOC(REQ_PTL(sreq)->chunk_buffer[0], void *, data_sz, mpi_errno, "chunk_buffer");
         MPID_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
         sreq->dev.segment_first = 0;
@@ -214,7 +211,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
     /* Large message.  Send first chunk of data and let receiver get the rest */
     if (dt_contig) {
         /* create ME for buffer so receiver can issue a GET for the data */
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "Large contig message");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Large contig message");
         big_meappend((char *)buf + dt_true_lb + PTL_LARGE_THRESHOLD, data_sz - PTL_LARGE_THRESHOLD, vc,
                      NPTL_MATCH(tag, comm->context_id + context_offset, comm->rank), sreq);
 
@@ -228,7 +225,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
     }
     
     /* Large noncontig data */
-    MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "Large noncontig message");
+    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Large noncontig message");
     sreq->dev.segment_ptr = MPID_Segment_alloc();
     MPIR_ERR_CHKANDJUMP1(sreq->dev.segment_ptr == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment_alloc");
     MPID_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
@@ -244,7 +241,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
 
     if (last == PTL_LARGE_THRESHOLD) {
         /* first chunk of message fits into IOV */
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "    first chunk fits in IOV");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "    first chunk fits in IOV");
         if (initial_iov_count < MPL_IOV_LIMIT) {
             /* There may be space for the rest of the message in this IOV */
             sreq->dev.iov_count = MPL_IOV_LIMIT - sreq->dev.iov_count;
@@ -258,7 +255,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
                 /* Entire message fit in one IOV */
                 int was_incomplete;
 
-                MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "    rest of message fits in one IOV");
+                MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "    rest of message fits in one IOV");
                 /* Create ME for remaining data */
                 me.start = &sreq->dev.iov[initial_iov_count];
                 me.length = remaining_iov_count;

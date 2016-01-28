@@ -30,14 +30,14 @@ extern struct MPID_Request *MPIDI_CH3I_shm_active_send;
 #define MPIDI_CH3I_Sendq_enqueue(qp, ep) do {                                           \
         /* add refcount so req doesn't get freed before it's dequeued */                \
         MPIR_Request_add_ref(ep);                                                       \
-        MPIU_DBG_MSG_FMT(CH3_CHANNEL, VERBOSE, (MPIU_DBG_FDEST,                         \
+        MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_CHANNEL, VERBOSE, (MPL_DBG_FDEST,                         \
                           "MPIDI_CH3I_Sendq_enqueue req=%p (handle=%#x), queue=%p",     \
                           ep, (ep)->handle, qp));                                       \
         GENERIC_Q_ENQUEUE (qp, ep, dev.next);                                           \
     } while (0)
 #define MPIDI_CH3I_Sendq_dequeue(qp, ep)  do {                                          \
         GENERIC_Q_DEQUEUE (qp, ep, dev.next);                                           \
-        MPIU_DBG_MSG_FMT(CH3_CHANNEL, VERBOSE, (MPIU_DBG_FDEST,                         \
+        MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_CHANNEL, VERBOSE, (MPL_DBG_FDEST,                         \
                           "MPIDI_CH3I_Sendq_dequeuereq=%p (handle=%#x), queue=%p",      \
                           *(ep), *(ep) ? (*(ep))->handle : -1, qp));                    \
         MPID_Request_release(*(ep));                                                    \
@@ -135,7 +135,7 @@ int MPIDI_CH3_SHM_Win_free(MPID_Win **win_ptr);
 #define HANDLE_WIN_MUTEX_ERROR()                                                        \
     do {                                                                                \
         HLOCAL str;                                                                     \
-        char error_msg[MPIU_STRERROR_BUF_SIZE];                                         \
+        char error_msg[MPIR_STRERROR_BUF_SIZE];                                         \
         DWORD error = GetLastError();                                                   \
         int num_bytes = FormatMessage(                                                  \
         FORMAT_MESSAGE_FROM_SYSTEM |                                                    \
@@ -149,7 +149,7 @@ int MPIDI_CH3_SHM_Win_free(MPID_Win **win_ptr);
         if (num_bytes != 0) {                                                           \
             int pt_err = 1;                                                             \
             int mpi_errno = MPI_ERR_OTHER;                                              \
-            MPL_strncpy(error_msg, str, MPIU_STRERROR_BUF_SIZE);                       \
+            MPL_strncpy(error_msg, str, MPIR_STRERROR_BUF_SIZE);                       \
             LocalFree(str);                                                             \
             strtok(error_msg, "\r\n");                                                  \
             MPIR_ERR_CHKANDJUMP1(pt_err, mpi_errno, MPI_ERR_OTHER, "**windows_mutex",   \
@@ -250,7 +250,7 @@ static inline void MPIDI_CH3I_SHM_Wins_unlink(MPIDI_SHM_Wins_list_t * list, MPID
     if (elem != NULL) {
         tmp_elem = elem;
         MPL_DL_DELETE(*list, elem);
-        MPIU_Free(tmp_elem);
+        MPL_free(tmp_elem);
     }
 }
 

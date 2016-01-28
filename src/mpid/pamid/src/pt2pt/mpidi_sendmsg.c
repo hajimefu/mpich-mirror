@@ -355,7 +355,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPID_Request      * sreq,
       {
         MPI_Aint dt_extent;
         MPID_Datatype_get_extent_macro(sreq->mpid.datatype, dt_extent);
-        buf =  MPIU_Malloc(dt_extent * sreq->mpid.userbufcount);
+        buf =  MPL_malloc(dt_extent * sreq->mpid.userbufcount);
 
         cudaError_t cudaerr = CudaMemcpy(buf, sreq->mpid.userbuf, dt_extent * sreq->mpid.userbufcount, cudaMemcpyDeviceToHost);
         if (cudaSuccess != cudaerr) {
@@ -368,7 +368,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPID_Request      * sreq,
       MPID_Segment segment;
 
       if(data_sz != 0) {
-        sreq->mpid.uebuf = sndbuf = MPIU_Malloc(data_sz);
+        sreq->mpid.uebuf = sndbuf = MPL_malloc(data_sz);
         if (unlikely(sndbuf == NULL))
           {
             sreq->status.MPI_ERROR = MPI_ERR_NO_SPACE;
@@ -396,7 +396,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPID_Request      * sreq,
         MPID_assert(last == data_sz);
 #if CUDA_AWARE_SUPPORT
         if(MPIDI_Process.cuda_aware_support_on && on_device)
-          MPIU_Free(buf);
+          MPL_free(buf);
 #endif
       } else {
 	sndbuf = NULL;
@@ -498,7 +498,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
                           sndbuf,
                           data_sz);
 #ifdef MPIDI_STATISTICS
-      if (!isLocal && MPID_cc_is_complete(&sreq->cc))
+      if (!isLocal && MPIR_cc_is_complete(&sreq->cc))
         {
           MPID_NSTAT(mpid_statp->sendsComplete);
         }
@@ -529,7 +529,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
         }
 
 #ifdef MPIDI_STATISTICS
-      if (!isLocal && MPID_cc_is_complete(&sreq->cc))
+      if (!isLocal && MPIR_cc_is_complete(&sreq->cc))
         {
           MPID_NSTAT(mpid_statp->sendsComplete);
         }
@@ -598,7 +598,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
                                  sndbuf,
                                  data_sz);
 #ifdef MPIDI_STATISTICS
-                    if (MPID_cc_is_complete(&sreq->cc)) {
+                    if (MPIR_cc_is_complete(&sreq->cc)) {
                         MPID_NSTAT(mpid_statp->sendsComplete);
                     }
 #endif
@@ -616,7 +616,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
                                   sndbuf,
                                   data_sz);
 #ifdef MPIDI_STATISTICS
-                       if (MPID_cc_is_complete(&sreq->cc))
+                       if (MPIR_cc_is_complete(&sreq->cc))
                        {
                           MPID_NSTAT(mpid_statp->sendsComplete);
                        }
@@ -646,7 +646,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
               MPIDI_SendMsg_rzv_zerobyte(context, sreq, dest);
             }
 #ifdef MPIDI_STATISTICS
-               if (MPID_cc_is_complete(&sreq->cc))
+               if (MPIR_cc_is_complete(&sreq->cc))
                 {
                    MPID_NSTAT(mpid_statp->sendsComplete);
                 }

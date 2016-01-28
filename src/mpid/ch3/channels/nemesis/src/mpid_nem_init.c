@@ -80,7 +80,7 @@ static int MPID_nem_init_stats(int n_local_ranks)
     int mpi_errno = MPI_SUCCESS;
 
     if (ENABLE_PVAR_NEM) {
-        MPID_nem_fbox_fall_back_to_queue_count = MPIU_Calloc(n_local_ranks, sizeof(unsigned long long));
+        MPID_nem_fbox_fall_back_to_queue_count = MPL_calloc(n_local_ranks, sizeof(unsigned long long));
     }
 
     MPIR_T_PVAR_COUNTER_REGISTER_DYNAMIC(
@@ -391,7 +391,7 @@ MPID_nem_init(int pg_rank, MPIDI_PG_t *pg_p, int has_parent ATTRIBUTE((unused)))
     /* publish business card */
     mpi_errno = MPIDI_PG_SetConnInfo(pg_rank, (const char *)publish_bc_orig);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-    MPIU_Free(publish_bc_orig);
+    MPL_free(publish_bc_orig);
 
 
     mpi_errno = MPID_nem_barrier();
@@ -549,7 +549,7 @@ MPID_nem_vc_init (MPIDI_VC_t *vc)
         else
             vc->ready_eager_max_msg_sz = MPIR_CVAR_NEMESIS_SHM_READY_EAGER_MAX_SZ;
 
-        MPIU_DBG_MSG(VC, VERBOSE, "vc using shared memory");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_VC, VERBOSE, "vc using shared memory");
     }
     else
     {
@@ -569,7 +569,7 @@ MPID_nem_vc_init (MPIDI_VC_t *vc)
         vc_ch->iStartContigMsg = NULL;
         vc_ch->iSendContig     = NULL;
 
-        MPIU_DBG_MSG_FMT(VC, VERBOSE, (MPIU_DBG_FDEST, "vc using %s netmod for rank %d pg %s",
+        MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_VC, VERBOSE, (MPL_DBG_FDEST, "vc using %s netmod for rank %d pg %s",
                                        MPID_nem_netmod_strings[MPID_nem_netmod_id], vc->pg_rank,
                                        ((vc->pg == MPIDI_Process.my_pg) 
                                         ? "my_pg" 
@@ -620,7 +620,7 @@ MPID_nem_vc_destroy(MPIDI_VC_t *vc)
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_VC_DESTROY);
 
-    MPIU_Free(vc_ch->pending_pkt);
+    MPL_free(vc_ch->pending_pkt);
 
     mpi_errno = MPID_nem_netmod_func->vc_destroy(vc);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);

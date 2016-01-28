@@ -25,13 +25,13 @@
     (sreq_) = MPID_Request_create();				\
     if ((sreq_) == NULL)						\
     {									\
-	MPIU_DBG_MSG(CH3_OTHER,VERBOSE,"send request allocation failed");\
+	MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"send request allocation failed");\
 	(mpi_errno_) = MPIR_ERR_MEMALLOCFAILED;				\
 	FAIL_;								\
     }									\
 									\
     MPIU_Object_set_ref((sreq_), 1);					\
-    MPID_cc_set(&(sreq_)->cc, 0);                                       \
+    MPIR_cc_set(&(sreq_)->cc, 0);                                       \
     (sreq_)->kind = MPID_PREQUEST_SEND;					\
     (sreq_)->comm = comm;						\
     MPIR_Comm_add_ref(comm);						\
@@ -142,7 +142,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	    preq->partner_request = NULL;
 	    preq->status.MPI_ERROR = rc;
 	    preq->cc_ptr = &preq->cc;
-            MPID_cc_set(&preq->cc, 0);
+            MPIR_cc_set(&preq->cc, 0);
 	}
 	/* --END ERROR HANDLING-- */
     }
@@ -311,7 +311,7 @@ int MPID_Recv_init(void * buf, int count, MPI_Datatype datatype, int rank, int t
     MPIU_Object_set_ref(rreq, 1);
     rreq->kind = MPID_PREQUEST_RECV;
     rreq->comm = comm;
-    MPID_cc_set(&rreq->cc, 0);
+    MPIR_cc_set(&rreq->cc, 0);
     MPIR_Comm_add_ref(comm);
     rreq->dev.match.parts.rank = rank;
     rreq->dev.match.parts.tag = tag;

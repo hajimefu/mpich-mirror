@@ -130,8 +130,8 @@ static inline int MPIDI_CH3I_Send_lock_ack_pkt(MPIDI_VC_t * vc, MPID_Win * win_p
     lock_ack_pkt->target_rank = win_ptr->comm_ptr->rank;
     lock_ack_pkt->flags = flags;
 
-    MPIU_DBG_MSG_FMT(CH3_OTHER, VERBOSE,
-                     (MPIU_DBG_FDEST, "sending lock ack pkt on vc=%p, source_win_handle=%#08x",
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER, VERBOSE,
+                     (MPL_DBG_FDEST, "sending lock ack pkt on vc=%p, source_win_handle=%#08x",
                       vc, lock_ack_pkt->source_win_handle));
 
     MPID_THREAD_CS_ENTER(POBJ, vc->pobj_mutex);
@@ -177,8 +177,8 @@ static inline int MPIDI_CH3I_Send_lock_op_ack_pkt(MPIDI_VC_t * vc, MPID_Win * wi
     lock_op_ack_pkt->target_rank = win_ptr->comm_ptr->rank;
     lock_op_ack_pkt->flags = flags;
 
-    MPIU_DBG_MSG_FMT(CH3_OTHER, VERBOSE,
-                     (MPIU_DBG_FDEST, "sending lock op ack pkt on vc=%p, source_win_handle=%#08x",
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER, VERBOSE,
+                     (MPL_DBG_FDEST, "sending lock op ack pkt on vc=%p, source_win_handle=%#08x",
                       vc, lock_op_ack_pkt->source_win_handle));
 
     MPID_THREAD_CS_ENTER(POBJ, vc->pobj_mutex);
@@ -411,13 +411,13 @@ static inline int enqueue_lock_origin(MPID_Win * win_ptr, MPIDI_VC_t * vc,
         if (new_ptr != NULL) {
             if (win_ptr->current_target_lock_data_bytes + buf_size <
                 MPIR_CVAR_CH3_RMA_TARGET_LOCK_DATA_BYTES) {
-                new_ptr->data = MPIU_Malloc(buf_size);
+                new_ptr->data = MPL_malloc(buf_size);
             }
 
             if (new_ptr->data == NULL) {
                 /* Note that there are two possible reasons to make new_ptr->data to be NULL:
                  * (1) win_ptr->current_target_lock_data_bytes + buf_size >= MPIR_CVAR_CH3_RMA_TARGET_LOCK_DATA_BYTES;
-                 * (2) MPIU_Malloc(buf_size) failed.
+                 * (2) MPL_malloc(buf_size) failed.
                  * In such cases, we cannot allocate memory for lock data, so we give up
                  * buffering lock data, however, we still buffer lock request.
                  */
@@ -673,7 +673,7 @@ static inline int check_and_set_req_completion(MPID_Win * win_ptr, MPIDI_RMA_Tar
             incomplete_req_cnt++;
 
             if (rma_op->ureq != NULL) {
-                MPID_cc_set(&(rma_op->ureq->cc), incomplete_req_cnt);
+                MPIR_cc_set(&(rma_op->ureq->cc), incomplete_req_cnt);
                 (*req)->dev.request_handle = rma_op->ureq->handle;
             }
 
@@ -777,7 +777,7 @@ static inline int handle_lock_ack_with_op(MPID_Win * win_ptr,
             MPIU_Assert(op->multi_reqs != NULL && op->multi_reqs[0] != NULL);
             MPID_Request_release(op->multi_reqs[0]);
             /* free req array in this op */
-            MPIU_Free(op->multi_reqs);
+            MPL_free(op->multi_reqs);
             op->multi_reqs = NULL;
             op->reqs_size = 0;
         }
@@ -968,7 +968,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         vec_len = dtp->max_contig_blocks * target_count + 1;
         /* +1 needed because Rob says so */
         dloop_vec = (DLOOP_VECTOR *)
-            MPIU_Malloc(vec_len * sizeof(DLOOP_VECTOR));
+            MPL_malloc(vec_len * sizeof(DLOOP_VECTOR));
         /* --BEGIN ERROR HANDLING-- */
         if (!dloop_vec) {
             mpi_errno =
@@ -1021,7 +1021,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         }
 
         MPID_Segment_free(segp);
-        MPIU_Free(dloop_vec);
+        MPL_free(dloop_vec);
     }
 
   fn_exit:

@@ -46,7 +46,7 @@ PMPI_LOCAL int MPIR_Ibsend_free( void *extra )
 {
     ibsend_req_info *ibsend_info = (ibsend_req_info *)extra;
 
-    MPIU_Free( ibsend_info );
+    MPL_free( ibsend_info );
 
     return MPI_SUCCESS;
 }
@@ -108,7 +108,7 @@ int MPIR_Ibsend_impl(const void *buf, int count, MPI_Datatype datatype, int dest
     MPIR_SENDQ_REMEMBER(request_ptr, dest, tag, comm_ptr->context_id);
 
     /* FIXME: use the memory management macros */
-    ibinfo = (ibsend_req_info *)MPIU_Malloc( sizeof(ibsend_req_info) );
+    ibinfo = (ibsend_req_info *)MPL_malloc( sizeof(ibsend_req_info) );
     ibinfo->req       = request_ptr;
     ibinfo->cancelled = 0;
     mpi_errno = MPIR_Grequest_start_impl( MPIR_Ibsend_query, MPIR_Ibsend_free,
@@ -117,7 +117,7 @@ int MPIR_Ibsend_impl(const void *buf, int count, MPI_Datatype datatype, int dest
     /* The request is immediately complete because the MPIR_Bsend_isend has
        already moved the data out of the user's buffer */
     MPIR_Grequest_complete_impl(new_request_ptr);
-    MPID_OBJ_PUBLISH_HANDLE(*request, new_request_ptr->handle);
+    MPIR_OBJ_PUBLISH_HANDLE(*request, new_request_ptr->handle);
   
  fn_exit:
     return mpi_errno;

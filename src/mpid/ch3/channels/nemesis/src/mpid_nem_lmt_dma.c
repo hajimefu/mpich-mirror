@@ -430,7 +430,7 @@ int MPID_nem_lmt_dma_start_recv(MPIDI_VC_t *vc, MPID_Request *rreq, MPL_IOV s_co
         if (complete) {
             /* request was completed by the OnDataAvail fn */
             MPID_nem_lmt_send_DONE(vc, rreq); /* tell the other side to complete its request */
-            MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete");
+            MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete");
 
         }
         else {
@@ -443,7 +443,7 @@ int MPID_nem_lmt_dma_start_recv(MPIDI_VC_t *vc, MPID_Request *rreq, MPL_IOV s_co
 
     /* XXX DJG FIXME this looks like it always pushes! */
     /* push request if not complete for progress checks later */
-    node = MPIU_Malloc(sizeof(struct lmt_dma_node));
+    node = MPL_malloc(sizeof(struct lmt_dma_node));
     node->vc = vc;
     node->req = rreq;
     node->status_p = status;
@@ -472,7 +472,7 @@ int MPID_nem_lmt_dma_done_send(MPIDI_VC_t *vc, MPID_Request *sreq)
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_LMT_DMA_DONE_SEND);
 
     /* free cookie from RTS packet */
-    MPIU_Free(sreq->ch.s_cookie);
+    MPL_free(sreq->ch.s_cookie);
 
     /* We shouldn't ever need to handle the more IOVs case here.  The DONE
        message should only be sent when all of the data is truly transferred.
@@ -485,7 +485,7 @@ int MPID_nem_lmt_dma_done_send(MPIDI_VC_t *vc, MPID_Request *sreq)
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete");
         goto fn_exit;
     }
 
@@ -495,7 +495,7 @@ int MPID_nem_lmt_dma_done_send(MPIDI_VC_t *vc, MPID_Request *sreq)
         
     if (complete) {
         /* request was completed by the OnDataAvail fn */
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete");
         goto fn_exit;
     }
     else {
@@ -584,7 +584,7 @@ int MPID_nem_lmt_dma_progress(void)
                     if (complete) {
                         /* request was completed by the OnDataAvail fn */
                         MPID_nem_lmt_send_DONE(cur->vc, cur->req); /* tell the other side to complete its request */
-                        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete");
+                        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete");
 
                     }
                     else {
@@ -607,7 +607,7 @@ int MPID_nem_lmt_dma_progress(void)
                         free_me = cur;
                         cur = cur->next;
                     }
-                    if (free_me) MPIU_Free(free_me);
+                    if (free_me) MPL_free(free_me);
                     --MPID_nem_local_lmt_pending;
                     continue;
                 }
@@ -634,7 +634,7 @@ int MPID_nem_lmt_dma_progress(void)
                     cur = cur->next;
                 }
 
-                if (free_me) MPIU_Free(free_me);
+                if (free_me) MPL_free(free_me);
                 --MPID_nem_local_lmt_pending;
                 continue;
                 

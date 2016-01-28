@@ -61,7 +61,7 @@ static void MPID_nem_llc_send_handler(void *cba, uint64_t * p_reqid)
 
     /* MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_LLC_SEND_HANDLER); */
 
-    MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "llc_send_handler");
+    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "llc_send_handler");
 
     MPIU_Assert(sreq != NULL);
 
@@ -76,8 +76,8 @@ static void MPID_nem_llc_send_handler(void *cba, uint64_t * p_reqid)
         MPID_nem_llc_send_queued(vc, &vc_llc->send_queue);
 
         p_reqid[0] = !MPIDI_CH3I_Sendq_empty(vc_llc->send_queue);
-        MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "llc_send_handler");
-        MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "send queue %d", (unsigned int) p_reqid[0]);
+        MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "llc_send_handler");
+        MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "send queue %d", (unsigned int) p_reqid[0]);
 
         goto fn_exit;
     }
@@ -110,13 +110,13 @@ static void MPID_nem_llc_send_handler(void *cba, uint64_t * p_reqid)
                 MPID_Datatype_is_contig(sreq->dev.datatype, &is_contig);
                 if (!is_contig && REQ_FIELD(sreq, pack_buf)) {
                     dprintf("llc_send_handler,non-contiguous,free pack_buf\n");
-                    MPIU_Free(REQ_FIELD(sreq, pack_buf));
+                    MPL_free(REQ_FIELD(sreq, pack_buf));
                 }
             }
 
             if ((REQ_FIELD(sreq, rma_buf) != NULL && sreq->dev.datatype_ptr &&
                  sreq->dev.segment_size > 0)) {
-                MPIU_Free(REQ_FIELD(sreq, rma_buf));    // allocated in MPID_nem_llc_SendNoncontig
+                MPL_free(REQ_FIELD(sreq, rma_buf));    // allocated in MPID_nem_llc_SendNoncontig
                 REQ_FIELD(sreq, rma_buf) = NULL;
             }
 
@@ -138,7 +138,7 @@ static void MPID_nem_llc_send_handler(void *cba, uint64_t * p_reqid)
                     if (r_mpi_errno != MPI_SUCCESS) {
                         MPIR_ERR_POP(r_mpi_errno);
                     }
-                    MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete");
+                    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete");
                 }
                 else {
                     complete = 0;
@@ -148,7 +148,7 @@ static void MPID_nem_llc_send_handler(void *cba, uint64_t * p_reqid)
                     if (complete == 0) {
                         MPIU_Assert(complete == TRUE);
                     }
-                    MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, ".... complete2");
+                    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, ".... complete2");
                 }
 
                 /* push queued messages */
@@ -185,7 +185,7 @@ static void MPID_nem_llc_recv_handler(void *vp_vc, uint64_t raddr, void *buf, si
 
     /* MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_LLC_RECV_HANDLER); */
 
-    MPIU_DBG_MSG(CH3_CHANNEL, VERBOSE, "llc_recv_handler");
+    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "llc_recv_handler");
 
     {
         int pg_rank = (int) raddr;
@@ -201,13 +201,13 @@ static void MPID_nem_llc_recv_handler(void *vp_vc, uint64_t raddr, void *buf, si
             MPIDI_PG_Get_vc_set_active(pg, pg_rank, &vc_from_pg);
         }
         else {
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "bad vc %p or", pg);
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "bad pg_rank %d", pg_rank);
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "bad pg_rank < %d", MPIDI_PG_Get_size(pg));
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "bad vc %p or", pg);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "bad pg_rank %d", pg_rank);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "bad pg_rank < %d", MPIDI_PG_Get_size(pg));
             vc_from_pg = vc;    /* XXX */
         }
         if (vc != vc_from_pg) {
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "bad vc for pg_rank %d", pg_rank);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "bad vc for pg_rank %d", pg_rank);
         }
         if (vc == 0) {
             vc = vc_from_pg;
@@ -216,7 +216,7 @@ static void MPID_nem_llc_recv_handler(void *vp_vc, uint64_t raddr, void *buf, si
     if (vc != 0) {
         mpi_errno = MPID_nem_handle_pkt(vc, buf, bsz);
         if (mpi_errno != 0) {
-            MPIU_DBG_MSG_D(CH3_CHANNEL, VERBOSE, "MPID_nem_handle_pkt() = %d", mpi_errno);
+            MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "MPID_nem_handle_pkt() = %d", mpi_errno);
         }
     }
 
@@ -264,7 +264,7 @@ int MPID_nem_llc_recv_posted(struct MPIDI_VC *vc, struct MPID_Request *req)
         write_to_buf = (void *) ((char *) req->dev.user_buf + dt_true_lb);
     }
     else {
-        REQ_FIELD(req, pack_buf) = MPIU_Malloc(data_sz);
+        REQ_FIELD(req, pack_buf) = MPL_malloc(data_sz);
         MPIR_ERR_CHKANDJUMP(!REQ_FIELD(req, pack_buf), mpi_errno, MPI_ERR_OTHER, "**outofmemory");
         write_to_buf = REQ_FIELD(req, pack_buf);
     }

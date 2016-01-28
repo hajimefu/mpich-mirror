@@ -86,6 +86,14 @@ MPICH_PerProcess_t MPIR_Process = { OPA_INT_T_INITIALIZER(MPICH_PRE_INIT) };
      /* all other fields in MPIR_Process are irrelevant */
 MPIR_Thread_info_t MPIR_ThreadInfo = { 0 };
 
+#if defined(MPICH_IS_THREADED) && defined(MPL_TLS_SPECIFIER)
+MPL_TLS_SPECIFIER MPIR_Per_thread_t MPIR_Per_thread = { 0 };
+#else
+MPIR_Per_thread_t MPIR_Per_thread = { 0 };
+#endif
+
+MPID_Thread_tls_t MPIR_Per_thread_key;
+
 /* These are initialized as null (avoids making these into common symbols).
    If the Fortran binding is supported, these can be initialized to 
    their Fortran values (MPI only requires that they be valid between
@@ -158,6 +166,19 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 
 #if defined(MPICH_IS_THREADED)
 
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL || \
+    MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+MPID_Thread_mutex_t MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX;
+#endif
+
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_HANDLE_MUTEX;
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_MSGQ_MUTEX;
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_COMPLETION_MUTEX;
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_CTX_MUTEX;
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_PMI_MUTEX;
+#endif
+
 /* These routine handle any thread initialization that my be required */
 #undef FUNCNAME
 #define FUNCNAME thread_cs_init
@@ -166,13 +187,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 static int thread_cs_init( void )
 {
     int err;
-    MPID_THREADPRIV_DECL;
 
 #if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
 /* There is a single, global lock, held for the duration of an MPI call */
     MPID_Thread_mutex_create(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
-    MPIU_Assert(err == 0);
-    MPID_Thread_mutex_create(&MPIR_THREAD_ALLGRAN_MEMALLOC_MUTEX, &err);
     MPIU_Assert(err == 0);
 
 #elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
@@ -189,8 +207,6 @@ static int thread_cs_init( void )
     MPIU_Assert(err == 0);
     MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_PMI_MUTEX, &err);
     MPIU_Assert(err == 0);
-    MPID_Thread_mutex_create(&MPIR_THREAD_ALLGRAN_MEMALLOC_MUTEX, &err);
-    MPIU_Assert(err == 0);
 
 #elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_LOCK_FREE
 /* Updates to shared data and access to shared services is handled without 
@@ -204,10 +220,9 @@ static int thread_cs_init( void )
 #error Unrecognized thread granularity
 #endif
 
-    MPID_THREADPRIV_INITKEY;
-    MPID_THREADPRIV_INIT;
+    MPID_THREADPRIV_KEY_CREATE;
 
-    MPIU_DBG_MSG(THREAD,TYPICAL,"Created global mutex and private storage");
+    MPL_DBG_MSG(MPIR_DBG_INIT,TYPICAL,"Created global mutex and private storage");
     return MPI_SUCCESS;
 }
 
@@ -219,7 +234,7 @@ int MPIR_Thread_CS_Finalize( void )
 {
     int err;
 
-    MPIU_DBG_MSG(THREAD,TYPICAL,"Freeing global mutex and private storage");
+    MPL_DBG_MSG(MPIR_DBG_INIT,TYPICAL,"Freeing global mutex and private storage");
 #if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
 /* There is a single, global lock, held for the duration of an MPI call */
     MPID_Thread_mutex_destroy(&MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX, &err);
@@ -254,7 +269,7 @@ int MPIR_Thread_CS_Finalize( void )
 #error Unrecognized thread granularity
 #endif
 
-    MPID_THREADPRIV_FINALIZE;
+    MPID_THREADPRIV_KEY_DESTROY;
 
     return MPI_SUCCESS;
 }
@@ -278,6 +293,22 @@ int MPIR_F08_MPI_BOTTOM;
 MPI_F08_Status *MPI_F08_STATUS_IGNORE = &MPIR_F08_MPI_STATUS_IGNORE_OBJ;
 MPI_F08_Status *MPI_F08_STATUSES_IGNORE = &MPIR_F08_MPI_STATUSES_IGNORE_OBJ[0];
 #endif
+
+#if defined (MPL_USE_DBG_LOGGING)
+MPL_DBG_Class MPIR_DBG_INIT;
+MPL_DBG_Class MPIR_DBG_PT2PT;
+MPL_DBG_Class MPIR_DBG_THREAD;
+MPL_DBG_Class MPIR_DBG_DATATYPE;
+MPL_DBG_Class MPIR_DBG_HANDLE;
+MPL_DBG_Class MPIR_DBG_COMM;
+MPL_DBG_Class MPIR_DBG_BSEND;
+MPL_DBG_Class MPIR_DBG_ERRHAND;
+MPL_DBG_Class MPIR_DBG_OTHER;
+
+/* these classes might need to move out later */
+MPL_DBG_Class MPIR_DBG_ASSERT;
+MPL_DBG_Class MPIR_DBG_STRING;
+#endif /* MPL_USE_DBG_LOGGING */
 
 #undef FUNCNAME
 #define FUNCNAME MPIR_Init_thread
@@ -496,15 +527,32 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     MPIU_Timer_init(MPIR_Process.comm_world->rank,
 		    MPIR_Process.comm_world->local_size);
 #ifdef USE_MEMORY_TRACING
-    MPIU_trinit( MPIR_Process.comm_world->rank );
+    MPL_trinit( MPIR_Process.comm_world->rank, MPIR_ThreadInfo.isThreaded );
     /* Indicate that we are near the end of the init step; memory 
        allocated already will have an id of zero; this helps 
        separate memory leaks in the initialization code from 
        leaks in the "active" code */
 #endif
-#ifdef USE_DBG_LOGGING
-    MPIU_DBG_Init( argc, argv, has_args, has_env, 
-		   MPIR_Process.comm_world->rank );
+#ifdef MPL_USE_DBG_LOGGING
+    /* FIXME: This is a hack to handle the common case of two worlds.
+     * If the parent comm is not NULL, we always give the world number
+     * as "1" (false). */
+    MPL_DBG_Init( argc, argv, has_args, has_env,
+		   MPIR_Process.comm_parent != NULL, MPIR_Process.comm_world->rank,
+                   MPIR_ThreadInfo.isThreaded );
+
+    MPIR_DBG_INIT = MPL_DBG_Class_alloc("INIT", "init");
+    MPIR_DBG_PT2PT = MPL_DBG_Class_alloc("PT2PT", "pt2pt");
+    MPIR_DBG_THREAD = MPL_DBG_Class_alloc("THREAD", "thread");
+    MPIR_DBG_DATATYPE = MPL_DBG_Class_alloc("DATATYPE", "datatype");
+    MPIR_DBG_HANDLE = MPL_DBG_Class_alloc("HANDLE", "handle");
+    MPIR_DBG_COMM = MPL_DBG_Class_alloc("COMM", "comm");
+    MPIR_DBG_BSEND = MPL_DBG_Class_alloc("BSEND", "bsend");
+    MPIR_DBG_ERRHAND = MPL_DBG_Class_alloc("ERRHAND", "errhand");
+    MPIR_DBG_OTHER = MPL_DBG_Class_alloc("OTHER", "other");
+
+    MPIR_DBG_ASSERT = MPL_DBG_Class_alloc("ASSERT", "assert");
+    MPIR_DBG_STRING = MPL_DBG_Class_alloc("STRING", "string");
 #endif
 
     /* Initialize the C versions of the Fortran link-time constants.
@@ -602,8 +650,8 @@ int MPI_Init_thread( int *argc, char ***argv, int required, int *provided )
     MPID_MPI_INIT_STATE_DECL(MPID_STATE_MPI_INIT_THREAD);
 
     rc = MPID_Wtime_init();
-#ifdef USE_DBG_LOGGING
-    MPIU_DBG_PreInit( argc, argv, rc );
+#ifdef MPL_USE_DBG_LOGGING
+    MPL_DBG_PreInit( argc, argv, rc );
 #endif
 
     MPID_MPI_INIT_FUNC_ENTER(MPID_STATE_MPI_INIT_THREAD);

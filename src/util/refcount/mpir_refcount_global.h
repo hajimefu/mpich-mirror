@@ -4,39 +4,23 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#if !defined(MPIU_THREAD_GLOBAL_H_INCLUDED)
-#define MPIU_THREAD_GLOBAL_H_INCLUDED
-
-/* GLOBAL locks are all real recursive ops */
-#define MPIUI_THREAD_CS_ENTER_GLOBAL(mutex) MPIUI_THREAD_CS_ENTER_RECURSIVE("GLOBAL", mutex)
-#define MPIUI_THREAD_CS_EXIT_GLOBAL(mutex) MPIUI_THREAD_CS_EXIT_RECURSIVE("GLOBAL", mutex)
-#define MPIUI_THREAD_CS_YIELD_GLOBAL(mutex) MPIUI_THREAD_CS_YIELD_RECURSIVE("GLOBAL", mutex)
-
-/* ALLGRAN locks are all real nonrecursive ops */
-#define MPIUI_THREAD_CS_ENTER_ALLGRAN(mutex) MPIUI_THREAD_CS_ENTER_NONRECURSIVE("ALLGRAN", mutex)
-#define MPIUI_THREAD_CS_EXIT_ALLGRAN(mutex) MPIUI_THREAD_CS_EXIT_NONRECURSIVE("ALLGRAN", mutex)
-#define MPIUI_THREAD_CS_YIELD_ALLGRAN(mutex) MPIUI_THREAD_CS_YIELD_NONRECURSIVE("ALLGRAN", mutex)
-
-/* POBJ locks are all NO-OPs */
-#define MPIUI_THREAD_CS_ENTER_POBJ(mutex)
-#define MPIUI_THREAD_CS_EXIT_POBJ(mutex)
-#define MPIUI_THREAD_CS_YIELD_POBJ(mutex)
-
+#if !defined(MPIR_REFCOUNT_GLOBAL_H_INCLUDED)
+#define MPIR_REFCOUNT_GLOBAL_H_INCLUDED
 
 /* define a type for the completion counter */
 /* memory barriers aren't needed in this impl, because all access to completion
  * counters is done while holding the GLOBAL critical section */
-typedef volatile int MPIU_cc_t;
-#define MPIU_cc_get(cc_) (cc_)
-#define MPIU_cc_set(cc_ptr_, val_) (*(cc_ptr_)) = (val_)
-#define MPIU_cc_is_complete(cc_ptr_) (0 == *(cc_ptr_))
+typedef volatile int MPIR_cc_t;
+#define MPIR_cc_get(cc_) (cc_)
+#define MPIR_cc_set(cc_ptr_, val_) (*(cc_ptr_)) = (val_)
+#define MPIR_cc_is_complete(cc_ptr_) (0 == *(cc_ptr_))
 
-#define MPIU_cc_incr(cc_ptr_, was_incomplete_)  \
+#define MPIR_cc_incr(cc_ptr_, was_incomplete_)  \
     do {                                        \
         *(was_incomplete_) = (*(cc_ptr_))++;    \
     } while (0)
 
-#define MPIU_cc_decr(cc_ptr_, incomplete_)      \
+#define MPIR_cc_decr(cc_ptr_, incomplete_)      \
     do {                                        \
         *(incomplete_) = --(*(cc_ptr_));        \
     } while (0)
@@ -56,9 +40,9 @@ typedef volatile int MPIU_cc_t;
 /* Ideally _GLOBAL would use this too, but we don't want to count on OPA
  * availability in _GLOBAL mode.  Instead the GLOBAL critical section should be
  * used. */
-#define MPIU_OBJ_PUBLISH_HANDLE(hnd_lval_, handle_)     \
+#define MPIR_OBJ_PUBLISH_HANDLE(hnd_lval_, handle_)     \
     do {                                                \
         (hnd_lval_) = (handle_);                        \
     } while (0)
 
-#endif /* !defined(MPIU_THREAD_MULTIPLE_H_INCLUDED) */
+#endif /* !defined(MPIR_REFCOUNT_MULTIPLE_H_INCLUDED) */

@@ -316,7 +316,7 @@ int MPID_nem_ptl_pkt_cancel_send_req_handler(MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pk
     ptl_me_t me;
     MPID_nem_ptl_vc_area *const vc_ptl = VC_PTL(vc);
 
-    MPIU_DBG_MSG_FMT(CH3_OTHER,VERBOSE,(MPIU_DBG_FDEST,
+    MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_OTHER,VERBOSE,(MPL_DBG_FDEST,
       "received cancel send req pkt, sreq=0x%08x, rank=%d, tag=%d, context=%d",
                       req_pkt->sender_req_id, req_pkt->match.parts.rank,
                       req_pkt->match.parts.tag, req_pkt->match.parts.context_id));
@@ -366,7 +366,7 @@ int MPID_nem_ptl_pkt_cancel_send_req_handler(MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pk
 
     /* if the message was found, free the temporary buffer used to copy the data */
     if (REQ_PTL(search_req)->found)
-        MPIU_Free(search_req->dev.tmpbuf);
+        MPL_free(search_req->dev.tmpbuf);
 
     MPID_Request_release(search_req);
     if (resp_req != NULL)
@@ -405,12 +405,12 @@ int MPID_nem_ptl_pkt_cancel_send_resp_handler(MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *p
             }
         }
         if (REQ_PTL(sreq)->get_me_p)
-            MPIU_Free(REQ_PTL(sreq)->get_me_p);
+            MPL_free(REQ_PTL(sreq)->get_me_p);
 
-        MPIU_DBG_MSG(CH3_OTHER,TYPICAL,"message cancelled");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,TYPICAL,"message cancelled");
     } else {
         MPIR_STATUS_SET_CANCEL_BIT(sreq->status, FALSE);
-        MPIU_DBG_MSG(CH3_OTHER,TYPICAL,"unable to cancel message");
+        MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,TYPICAL,"unable to cancel message");
     }
 
     mpi_errno = MPID_Request_complete(sreq);

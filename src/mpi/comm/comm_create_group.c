@@ -103,7 +103,7 @@ int MPIR_Comm_create_group(MPID_Comm * comm_ptr, MPID_Group * group_ptr, int tag
 
 fn_exit:
     if (mapping)
-        MPIU_Free(mapping);
+        MPL_free(mapping);
 
     MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_CREATE_GROUP);
     return mpi_errno;
@@ -209,7 +209,7 @@ int MPI_Comm_create_group(MPI_Comm comm, MPI_Group group, int tag, MPI_Comm * ne
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if (newcomm_ptr)
-        MPID_OBJ_PUBLISH_HANDLE(*newcomm, newcomm_ptr->handle);
+        MPIR_OBJ_PUBLISH_HANDLE(*newcomm, newcomm_ptr->handle);
     else
         *newcomm = MPI_COMM_NULL;
     /* ... end of body of routine ... */

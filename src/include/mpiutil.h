@@ -7,9 +7,7 @@
 #define MPIUTIL_H_INCLUDED
 
 #include "mpiu_strerror.h"
-#include "mpiu_thread.h"
 #include "mpiu_type_defs.h"
-#include "mpidbg.h"
 #include "mpiassert.h"
 #include "mpiu_pointer.h"
 
