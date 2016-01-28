@@ -21,9 +21,9 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
-                                      void            *base,
-                                      int              disp_unit,
-                                      int              do_optimize)
+                                                  void            *base,
+                                                  int              disp_unit,
+                                                  int              do_optimize)
 {
     int             i,same_disp,mpi_errno = MPI_SUCCESS;
     uint32_t        first;
@@ -50,8 +50,8 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
     uint64_t  max_instances_allowed;
 
     bits_for_context_id   = total_bits_avail -
-        MPIDI_Global.max_windows_bits -
-        MPIDI_Global.max_huge_rma_bits;
+                            MPIDI_Global.max_windows_bits -
+                            MPIDI_Global.max_huge_rma_bits;
     max_contexts_allowed  = 1<<(bits_for_context_id);
     max_instances_allowed = 1<<(bits_for_instance_id);
     MPIR_ERR_CHKANDSTMT(gen_id >= max_contexts_allowed,mpi_errno,MPI_ERR_OTHER,
@@ -62,14 +62,14 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
     /* Context id in lower bits, instance in upper bits */
     MPIDI_CH4_NMI_OFI_WIN(win)->mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
     MPIDI_CH4_NMI_OFI_CALL(fi_mr_reg(MPIDI_Global.domain,                /* In:  Domain Object       */
-                    base,                               /* In:  Lower memory address*/
-                    win->size,                          /* In:  Length              */
-                    FI_REMOTE_READ | FI_REMOTE_WRITE,   /* In:  Expose MR for read  */
-                    0ULL,                               /* In:  offset(not used)    */
-                    MPIDI_CH4_NMI_OFI_WIN(win)->mr_key,               /* In:  requested key       */
-                    0ULL,                               /* In:  flags               */
-                    &MPIDI_CH4_NMI_OFI_WIN(win)->mr,                  /* Out: memregion object    */
-                    NULL), mr_reg);                     /* In:  context             */
+                                     base,                               /* In:  Lower memory address*/
+                                     win->size,                          /* In:  Length              */
+                                     FI_REMOTE_READ | FI_REMOTE_WRITE,   /* In:  Expose MR for read  */
+                                     0ULL,                               /* In:  offset(not used)    */
+                                     MPIDI_CH4_NMI_OFI_WIN(win)->mr_key,               /* In:  requested key       */
+                                     0ULL,                               /* In:  flags               */
+                                     &MPIDI_CH4_NMI_OFI_WIN(win)->mr,                  /* Out: memregion object    */
+                                     NULL), mr_reg);                     /* In:  context             */
 
     my_winfo = (MPIDI_CH4R_win_info_t *)WINFO(win,0);
     my_winfo->base_addr = (uint64_t) base;
@@ -86,19 +86,24 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
                                            MPI_BYTE,
                                            comm_ptr,
                                            &errflag);
+
     if(do_optimize) {
         first     = MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,0);
         same_disp = 1;
-        for(i=1;i<comm_ptr->local_size;i++) {
+
+        for(i=1; i<comm_ptr->local_size; i++) {
             if(MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,i) != first)
                 same_disp=0;
-                break;
+
+            break;
         }
+
         if(same_disp) {
             MPIU_Free(MPIDI_CH4R_WIN(win, info_table));
             MPIDI_CH4R_WIN(win, info_table) = NULL;
         }
     }
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_ALLGATHER);
     return mpi_errno;
@@ -111,12 +116,12 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
-                                 int          disp_unit,
-                                 MPID_Win   **win_ptr,
-                                 MPID_Info   *info,
-                                 MPID_Comm   *comm_ptr,
-                                 int          create_flavor,
-                                 int          model)
+                                             int          disp_unit,
+                                             MPID_Win   **win_ptr,
+                                             MPID_Info   *info,
+                                             MPID_Comm   *comm_ptr,
+                                             int          create_flavor,
+                                             int          model)
 {
     int       mpi_errno = MPI_SUCCESS;
     uint64_t  window_instance;
@@ -145,10 +150,10 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
     /* Initialize the info (hint) flags per window */
     MPIDI_CH4_NMI_OFI_WIN(win)->info_args.no_locks               = 0;
     MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering    = (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                                                     (MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR |
-                                                      MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW |
-                                                      MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR |
-                                                      MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW);
+                                                                   (MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR |
+                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW |
+                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR |
+                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW);
     MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ops         = MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP_NO_OP;
     MPIDI_CH4_NMI_OFI_WIN(win)->info_args.same_size              = 0;
     MPIDI_CH4_NMI_OFI_WIN(win)->info_args.alloc_shared_noncontig = 0;
@@ -193,6 +198,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
         donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
         itercount++;
+
         if(itercount == 1000) {
             ret=fi_cntr_wait(MPIDI_Global.rma_ctr,tcount,0);
             MPIDI_CH4_NMI_OFI_ERR(ret < 0 && ret != -FI_ETIMEDOUT,
@@ -208,7 +214,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
         }
     }
 
-    while (OPA_load_int(&MPIDI_CH4R_WIN(win, outstanding_ops)) != 0)
+    while(OPA_load_int(&MPIDI_CH4R_WIN(win, outstanding_ops)) != 0)
         MPIDI_CH4_NMI_OFI_PROGRESS();
 
     r = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
@@ -399,6 +405,7 @@ static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win 
     MPIU_Assert(group != NULL);
 
     msg.type = MPIDI_CH4_NMI_OFI_CTRL_POST;
+
     for(index=0; index < group->size; ++index) {
         peer      = group->lrank_to_lpid[index].lpid;
         mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&msg, peer, win, 0, 1);
@@ -407,6 +414,7 @@ static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win 
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
     }
+
     MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_POST;
 
 fn_exit:
@@ -670,7 +678,7 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
 
     window_instance       = (uint32_t)(MPIDI_CH4_NMI_OFI_WIN(win)->win_id>>32);
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
-                                   window_instance);
+                                           window_instance);
 
     MPIDI_CH4_NMI_OFI_CALL(fi_close(&MPIDI_CH4_NMI_OFI_WIN(win)->mr->fid), mr_unreg);
 
@@ -729,12 +737,12 @@ static inline int MPIDI_CH4_NM_win_create(void       *base,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE);
 
     mpi_errno        = MPIDI_CH4_NMI_OFI_Win_init(length,
-                                      disp_unit,
-                                      win_ptr,
-                                      info,
-                                      comm_ptr,
-                                      MPI_WIN_FLAVOR_CREATE,
-                                      MPI_WIN_UNIFIED);
+                                                  disp_unit,
+                                                  win_ptr,
+                                                  info,
+                                                  comm_ptr,
+                                                  MPI_WIN_FLAVOR_CREATE,
+                                                  MPI_WIN_UNIFIED);
 
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
@@ -798,7 +806,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
 
     mpi_errno = MPIDI_CH4_NMI_OFI_Win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
-                               MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
+                                           MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
     MPIDI_CH4R_WIN(win, sizes) = (MPI_Aint *)MPIU_Malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
@@ -1006,7 +1014,7 @@ static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint     size,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
 
     mpi_errno = MPIDI_CH4_NMI_OFI_Win_init(size,disp_unit,win_ptr, info, comm,
-                               MPI_WIN_FLAVOR_ALLOCATE, MPI_WIN_UNIFIED);
+                                           MPI_WIN_FLAVOR_ALLOCATE, MPI_WIN_UNIFIED);
 
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
@@ -1138,9 +1146,9 @@ static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info *info,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
 
     rc = MPIDI_CH4_NMI_OFI_Win_init(UINTPTR_MAX-(uintptr_t)MPI_BOTTOM,
-                        1,win_ptr, info, comm,
-                        MPI_WIN_FLAVOR_DYNAMIC,
-                        MPI_WIN_UNIFIED);
+                                    1,win_ptr, info, comm,
+                                    MPI_WIN_FLAVOR_DYNAMIC,
+                                    MPI_WIN_UNIFIED);
 
     if(rc != MPI_SUCCESS)
         goto fn_fail;

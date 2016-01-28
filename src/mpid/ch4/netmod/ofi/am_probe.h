@@ -15,24 +15,24 @@
 
 static inline int MPIDI_CH4_NM_probe(int source,
                                      int tag,
-                                     MPID_Comm * comm, int context_offset, MPI_Status * status)
+                                     MPID_Comm *comm, int context_offset, MPI_Status *status)
 {
     return MPIDI_CH4R_probe(source, tag, comm, context_offset, status);
 }
 
 static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
-                                       MPID_Comm * comm,
+                                       MPID_Comm *comm,
                                        int context_offset,
-                                       int *flag, MPID_Request ** message, MPI_Status * status)
+                                       int *flag, MPID_Request **message, MPI_Status *status)
 {
     return MPIDI_CH4R_improbe(source, tag, comm, context_offset, flag, message, status);
 }
 
 static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
-                                      MPID_Comm * comm,
-                                      int context_offset, int *flag, MPI_Status * status)
+                                      MPID_Comm *comm,
+                                      int context_offset, int *flag, MPI_Status *status)
 {
     return MPIDI_CH4R_iprobe(source, tag, comm, context_offset, flag, status);
 }

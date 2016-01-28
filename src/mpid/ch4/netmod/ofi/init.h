@@ -15,15 +15,15 @@
 #include "mpich_cvars.h"
 #include "pmi.h"
 
-static inline int MPIDI_CH4_NMI_OFI_Choose_provider(struct fi_info * prov, struct fi_info ** prov_use);
+static inline int MPIDI_CH4_NMI_OFI_Choose_provider(struct fi_info *prov, struct fi_info **prov_use);
 static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *prov_use,
-                                        struct fid_domain *     domain,
-                                        struct fid_cq *         p2p_cq,
-                                        struct fid_cntr *       rma_ctr,
-                                        struct fid_av *         av,
-                                        struct fid_ep *   *ep,
-                                        int              index,
-                                        int              do_scalable_ep);
+                                                    struct fid_domain      *domain,
+                                                    struct fid_cq          *p2p_cq,
+                                                    struct fid_cntr        *rma_ctr,
+                                                    struct fid_av          *av,
+                                                    struct fid_ep **ep,
+                                                    int              index,
+                                                    int              do_scalable_ep);
 
 #define MPIDI_CH4_NMI_OFI_CHOOSE_PROVIDER(prov, prov_use,errstr)                          \
     do {                                                                \
@@ -39,18 +39,18 @@ static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *pro
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
-                                            int         size,
-                                            int         appnum,
-                                            int        *tag_ub,
-                                            MPID_Comm  *comm_world,
-                                            MPID_Comm  *comm_self,
-                                            int         spawned,
-                                            int         num_contexts,
-                                            void      **netmod_contexts,
-                                            int	        do_av_table,
-                                            int         do_scalable_ep,
-                                            int         do_am,
-                                            int         do_tagged)
+                                                 int         size,
+                                                 int         appnum,
+                                                 int        *tag_ub,
+                                                 MPID_Comm  *comm_world,
+                                                 MPID_Comm  *comm_self,
+                                                 int         spawned,
+                                                 int         num_contexts,
+                                                 void      **netmod_contexts,
+                                                 int	        do_av_table,
+                                                 int         do_scalable_ep,
+                                                 int         do_am,
+                                                 int         do_tagged)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen;
@@ -137,6 +137,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
         hints->caps |= FI_MSG;                   /* Message Queue apis      */
         hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
     }
+
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
     /* Specify the version of OFI is coded to, the provider will select struct  */
@@ -197,22 +198,19 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
         MPIDI_Global.max_huge_rmas      = MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_64;
         MPIDI_Global.huge_rma_shift     = MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_64;
         MPIDI_Global.context_shift      = MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_64;
-    }
-    else if(MPIDI_Global.max_mr_key_size >= 4) {
+    } else if(MPIDI_Global.max_mr_key_size >= 4) {
         MPIDI_Global.max_windows_bits   = MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_32;
         MPIDI_Global.max_huge_rma_bits  = MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_32;
         MPIDI_Global.max_huge_rmas      = MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_32;
         MPIDI_Global.huge_rma_shift     = MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_32;
         MPIDI_Global.context_shift      = MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_32;
-    }
-    else if(MPIDI_Global.max_mr_key_size >= 2) {
+    } else if(MPIDI_Global.max_mr_key_size >= 2) {
         MPIDI_Global.max_windows_bits   = MPIDI_CH4_NMI_OFI_MAX_WINDOWS_BITS_16;
         MPIDI_Global.max_huge_rma_bits  = MPIDI_CH4_NMI_OFI_MAX_HUGE_RMA_BITS_16;
         MPIDI_Global.max_huge_rmas      = MPIDI_CH4_NMI_OFI_MAX_HUGE_RMAS_16;
         MPIDI_Global.huge_rma_shift     = MPIDI_CH4_NMI_OFI_HUGE_RMA_SHIFT_16;
         MPIDI_Global.context_shift      = MPIDI_CH4_NMI_OFI_CONTEXT_SHIFT_16;
-    }
-    else {
+    } else {
         MPIR_ERR_SETFATALANDJUMP4(mpi_errno,
                                   MPI_ERR_OTHER,
                                   "**ofid_rma_init",
@@ -222,6 +220,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
                                   FCNAME,
                                   "Key space too small");
     }
+
     /* ------------------------------------------------------------------------ */
     /* Open fabric                                                              */
     /* The getinfo struct returns a fabric attribute struct that can be used to */
@@ -253,9 +252,9 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     memset(&cq_attr, 0, sizeof(cq_attr));
     cq_attr.format = FI_CQ_FORMAT_TAGGED;
     MPIDI_CH4_NMI_OFI_CALL(fi_cq_open(MPIDI_Global.domain,  /* In:  Domain Object                */
-                     &cq_attr,             /* In:  Configuration object         */
-                     &MPIDI_Global.p2p_cq, /* Out: CQ Object                    */
-                     NULL), opencq);       /* In:  Context for cq events        */
+                                      &cq_attr,             /* In:  Configuration object         */
+                                      &MPIDI_Global.p2p_cq, /* Out: CQ Object                    */
+                                      NULL), opencq);       /* In:  Context for cq events        */
 
     /* ------------------------------------------------------------------------ */
     /* Construct:  Counters                                                     */
@@ -263,30 +262,32 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     memset(&cntr_attr, 0, sizeof(cntr_attr));
     cntr_attr.events = FI_CNTR_EVENTS_COMP;
     MPIDI_CH4_NMI_OFI_CALL(fi_cntr_open(MPIDI_Global.domain,     /* In:  Domain Object        */
-                       &cntr_attr,      /* In:  Configuration object */
-                       &MPIDI_Global.rma_ctr,   /* Out: Counter Object       */
-                       NULL), openct);  /* Context: counter events   */
+                                        &cntr_attr,      /* In:  Configuration object */
+                                        &MPIDI_Global.rma_ctr,   /* Out: Counter Object       */
+                                        NULL), openct);  /* Context: counter events   */
 
     /* ------------------------------------------------------------------------ */
     /* Construct:  Address Vector                                               */
     /* ------------------------------------------------------------------------ */
     memset(&av_attr, 0, sizeof(av_attr));
+
     if(do_av_table) {
         av_attr.type           = FI_AV_TABLE;
         MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Malloc(sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
         mapped_table           = NULL;
-    }else {
+    } else {
         av_attr.type           = FI_AV_MAP;
         MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Malloc(size * sizeof(fi_addr_t) + sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
         mapped_table           = (fi_addr_t *) MPIDI_Addr_table->table;
     }
+
     av_attr.rx_ctx_bits    = MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS;
     MPIDI_Addr_table->size = size;
 
     MPIDI_CH4_NMI_OFI_CALL(fi_av_open(MPIDI_Global.domain,  /* In:  Domain Object         */
-                     &av_attr,             /* In:  Configuration object  */
-                     &MPIDI_Global.av,     /* Out: AV Object             */
-                     NULL), avopen);       /* Context: AV events         */
+                                      &av_attr,             /* In:  Configuration object  */
+                                      &MPIDI_Global.av,     /* Out: AV Object             */
+                                      NULL), avopen);       /* Context: AV events         */
 
     /* ------------------------------------------------------------------------ */
     /* Create a transport level communication endpoint.  To use the endpoint,   */
@@ -295,13 +296,13 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* completion queues, etc.                                                  */
     /* ------------------------------------------------------------------------ */
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Create_endpoint(prov_use,
-                                                   MPIDI_Global.domain,
-                                                   MPIDI_Global.p2p_cq,
-                                                   MPIDI_Global.rma_ctr,
-                                                   MPIDI_Global.av,
-                                                   &MPIDI_Global.ep,
-                                                   0,
-                                                   do_scalable_ep));
+                                                                     MPIDI_Global.domain,
+                                                                     MPIDI_Global.p2p_cq,
+                                                                     MPIDI_Global.rma_ctr,
+                                                                     MPIDI_Global.av,
+                                                                     &MPIDI_Global.ep,
+                                                                     0,
+                                                                     do_scalable_ep));
 
     /* ---------------------------------- */
     /* Get our endpoint name and publish  */
@@ -309,7 +310,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* ---------------------------------- */
     MPIDI_Global.addrnamelen = FI_NAME_MAX;
     MPIDI_CH4_NMI_OFI_CALL(fi_getname((fid_t) MPIDI_Global.ep, MPIDI_Global.addrname,
-                     &MPIDI_Global.addrnamelen), getname);
+                                      &MPIDI_Global.addrnamelen), getname);
     MPIU_Assert(MPIDI_Global.addrnamelen <= FI_NAME_MAX);
 
     val = valS;
@@ -317,7 +318,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     maxlen = MPIDI_KVSAPPSTRLEN;
     memset(val, 0, maxlen);
     MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_add_binary_arg(&val, &maxlen, "OFI", (char *) &MPIDI_Global.addrname,
-                                        MPIDI_Global.addrnamelen), buscard_len);
+                                                       MPIDI_Global.addrnamelen), buscard_len);
     MPIDI_CH4_NMI_OFI_PMI_CALL_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
 
     val = valS;
@@ -333,12 +334,12 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     table = (char *) MPIU_Malloc(size * MPIDI_Global.addrnamelen);
     maxlen = MPIDI_KVSAPPSTRLEN;
 
-    for (i = 0; i < size; i++) {
+    for(i = 0; i < size; i++) {
         sprintf(keyS, "OFI-%d", i);
         MPIDI_CH4_NMI_OFI_PMI_CALL_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
         MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_get_binary_arg
-                    (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
-                     MPIDI_Global.addrnamelen, &maxlen), buscard_len);
+                                   (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
+                                    MPIDI_Global.addrnamelen, &maxlen), buscard_len);
     }
 
     /* -------------------------------- */
@@ -368,18 +369,19 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     if(do_am) {
         MPIDI_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
         mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
-        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+        if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
         slist_init(&MPIDI_Global.cq_buff_list);
         MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
         optlen                    = MPIDI_CH4_NMI_OFI_MIN_MSG_SZ;
 
         MPIDI_CH4_NMI_OFI_CALL(fi_setopt(&(MPIDI_CH4_NMI_OFI_EP_RX_MSG(0)->fid),
-                        FI_OPT_ENDPOINT,
-                        FI_OPT_MIN_MULTI_RECV,
-                        &optlen, sizeof(optlen)), setopt);
+                                         FI_OPT_ENDPOINT,
+                                         FI_OPT_MIN_MULTI_RECV,
+                                         &optlen, sizeof(optlen)), setopt);
 
-        for (i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++) {
+        for(i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++) {
             MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_CH4_NMI_OFI_AM_BUFF_SZ);
             MPIDI_Global.am_reqs[i].event_id = MPIDI_CH4_NMI_OFI_EVENT_AM_RECV;
             MPIDI_Global.am_reqs[i].index    = i;
@@ -392,13 +394,15 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
             MPIDI_Global.am_msg[i].context   = &MPIDI_Global.am_reqs[i].context;
             MPIDI_Global.am_msg[i].iov_count = 1;
             MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_recvmsg(MPIDI_CH4_NMI_OFI_EP_RX_MSG(0),
-                                   &MPIDI_Global.am_msg[i],
-                                   FI_MULTI_RECV | FI_COMPLETION), prepost);
+                                                    &MPIDI_Global.am_msg[i],
+                                                    FI_MULTI_RECV | FI_COMPLETION), prepost);
         }
+
         /* Grow the header handlers down */
         MPIDI_Global.am_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL]        = MPIDI_CH4_NMI_OFI_Control_handler;
         MPIDI_Global.send_cmpl_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL] = NULL;
     }
+
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
@@ -406,7 +410,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
      * build this information because it is used by the mapper later when
      * tranlating gpids to lpids */
     MPIDI_Global.node_map = (MPID_Node_id_t *)
-        MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+                            MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
     MPIDI_CH4R_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
@@ -423,12 +427,12 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* -------------------------------- */
     /* Initialize Dynamic Tasking       */
     /* -------------------------------- */
-    if (spawned) {
+    if(spawned) {
         char parent_port[MPIDI_MAX_KVS_VALUE_LEN];
         MPIDI_CH4_NMI_OFI_PMI_CALL_POP(PMI_KVS_Get(MPIDI_Global.kvsname,
-                                             MPIDI_PARENT_PORT_KVSKEY,
-                                             parent_port,
-                                             MPIDI_MAX_KVS_VALUE_LEN), pmi);
+                                                   MPIDI_PARENT_PORT_KVSKEY,
+                                                   parent_port,
+                                                   MPIDI_MAX_KVS_VALUE_LEN), pmi);
         MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
         MPIU_Assert(MPIR_Process.comm_parent != NULL);
         MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
@@ -439,17 +443,17 @@ fn_exit:
     /* -------------------------------- */
     /* Free temporary resources         */
     /* -------------------------------- */
-    if (provname) {
+    if(provname) {
         MPIU_Free(provname);
         hints->fabric_attr->prov_name = NULL;
     }
 
-    if (prov)
+    if(prov)
         fi_freeinfo(prov);
 
     fi_freeinfo(hints);
 
-    if (table)
+    if(table)
         MPIU_Free(table);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INIT);
@@ -477,12 +481,12 @@ static inline int MPIDI_CH4_NM_init(int         rank,
 {
     int mpi_errno;
     mpi_errno = MPIDI_CH4_NMI_OFI_Init_generic(rank,size,appnum,tag_ub,comm_world,
-                                          comm_self,spawned,num_contexts,
-                                          netmod_contexts,
-                                          MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE,
-                                          MPIDI_CH4_NMI_OFI_ENABLE_SCALABLE_ENDPOINTS,
-                                          MPIDI_CH4_NMI_OFI_ENABLE_AM,
-                                          MPIDI_CH4_NMI_OFI_ENABLE_TAGGED);
+                                               comm_self,spawned,num_contexts,
+                                               netmod_contexts,
+                                               MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE,
+                                               MPIDI_CH4_NMI_OFI_ENABLE_SCALABLE_ENDPOINTS,
+                                               MPIDI_CH4_NMI_OFI_ENABLE_AM,
+                                               MPIDI_CH4_NMI_OFI_ENABLE_TAGGED);
     return mpi_errno;
 }
 
@@ -490,7 +494,7 @@ static inline int MPIDI_CH4_NM_init(int         rank,
 
 
 static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
-                                                int do_am)
+                                                     int do_am)
 {
     int thr_err=0,mpi_errno = MPI_SUCCESS;
     int i = 0;
@@ -501,11 +505,11 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
     /* Barrier over allreduce, but force non-immediate send */
     MPIDI_Global.max_buffered_send = 0;
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
-                                                 MPI_SUM, MPIR_Process.comm_world, &errflag));
+                                                       MPI_SUM, MPIR_Process.comm_world, &errflag));
 
     MPIDI_CH4R_finalize();
 
-    if (do_scalable_ep) {
+    if(do_scalable_ep) {
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_TAG(0)), epclose);
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_RMA(0)), epclose);
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_MSG(0)), epclose);
@@ -539,10 +543,12 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
     MPIDI_CH4_NMI_OFI_Map_destroy(MPIDI_Global.win_map);
 
     if(do_am) {
-        for (i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++)
+        for(i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++)
             MPIU_Free(MPIDI_Global.am_bufs[i]);
+
         MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
     }
+
     PMI_Finalize();
 
     MPID_Thread_mutex_destroy(&MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX, &thr_err);
@@ -556,12 +562,13 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_finalize(void) {
+static inline int MPIDI_CH4_NM_finalize(void)
+{
     return MPIDI_CH4_NMI_OFI_Finalize_generic(MPIDI_CH4_NMI_OFI_ENABLE_SCALABLE_ENDPOINTS,
-                                         MPIDI_CH4_NMI_OFI_ENABLE_AM);
+                                              MPIDI_CH4_NMI_OFI_ENABLE_AM);
 }
 
-static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
+static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info *info_ptr)
 {
 
     void *ap;
@@ -577,12 +584,12 @@ static inline int MPIDI_CH4_NM_free_mem(void *ptr)
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm *comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-    if (comm_ptr->comm_kind == MPID_INTRACOMM)
+    if(comm_ptr->comm_kind == MPID_INTRACOMM)
         *lpid_ptr = MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm_ptr, idx);
-    else if (is_remote)
+    else if(is_remote)
         *lpid_ptr = MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm_ptr, idx);
     else
         *lpid_ptr = MPIDI_CH4_NMI_OFI_COMM(comm_ptr).local_vcrt->vcr_table[idx].addr_idx;
@@ -590,13 +597,13 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm * comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm *comm_ptr, int rank, MPID_Gpid *gpid)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
     size_t sz = sizeof(MPIDI_CH4_NMI_OFI_GPID(gpid)->addr);
     MPIDI_CH4_NMI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_CH4_NMI_OFI_COMM_TO_PHYS(comm_ptr, rank),
-                       &MPIDI_CH4_NMI_OFI_GPID(gpid)->addr, &sz), avlookup);
+                                        &MPIDI_CH4_NMI_OFI_GPID(gpid)->addr, &sz), avlookup);
     MPIU_Assert(sz <= sizeof(MPIDI_CH4_NMI_OFI_GPID(gpid)->addr));
     MPIDI_CH4_NMI_OFI_GPID(gpid)->node = MPIDI_Global.node_map[MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm_ptr, rank)];
 fn_exit:
@@ -605,24 +612,24 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_CH4_NM_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     *id_p = MPIDI_Global.node_map[MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm, rank)];
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
 {
     *max_id_p = MPIDI_Global.max_node_id;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm * comm_ptr,
+static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm *comm_ptr,
                                             int local_size, MPID_Gpid local_gpids[], int *singlePG)
 {
     int i;
 
-    for (i = 0; i < comm_ptr->local_size; i++)
+    for(i = 0; i < comm_ptr->local_size; i++)
         MPIDI_GPID_Get(comm_ptr, i, &local_gpids[i]);
 
     *singlePG = 0;
@@ -636,24 +643,24 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
 {
     int i, mpi_errno = MPI_SUCCESS;
 
-    for (i = 0; i < size; i++) {
+    for(i = 0; i < size; i++) {
         int j;
         char tbladdr[FI_NAME_MAX];
         int found = 0;
 
-        for (j = 0; j < MPIDI_Addr_table->size; j++) {
+        for(j = 0; j < MPIDI_Addr_table->size; j++) {
             size_t sz = sizeof(MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->addr);
             MPIDI_CH4_NMI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_CH4_NMI_OFI_TO_PHYS(j), &tbladdr, &sz), avlookup);
             MPIU_Assert(sz <= sizeof(MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->addr));
 
-            if (!memcmp(tbladdr, MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->addr, sz)) {
+            if(!memcmp(tbladdr, MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->addr, sz)) {
                 lpid[i] = j;
                 found = 1;
                 break;
             }
         }
 
-        if (!found) {
+        if(!found) {
             int start = MPIDI_Addr_table->size;
             fi_addr_t addr;
             MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Realloc(MPIDI_Global.node_map,
@@ -661,13 +668,15 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
                                                                      start) *
                                                                     sizeof(MPID_Node_id_t));
             MPIDI_Global.node_map[start] = MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->node;
+
             if(use_av_table)
                 MPIDI_Addr_table = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Realloc(MPIDI_Addr_table,
-                                                                       (1 + start) * sizeof(fi_addr_t) +
-                                                                       sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
+                                                                                   (1 + start) * sizeof(fi_addr_t) +
+                                                                                   sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
+
             addr = MPIDI_CH4_NMI_OFI_TO_PHYS(start);
             MPIDI_CH4_NMI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->addr,
-                               1, &addr, 0ULL, NULL), avmap);
+                                                1, &addr, 0ULL, NULL), avmap);
             MPIDI_Addr_table->size++;
             lpid[i] = start;
         }
@@ -684,19 +693,19 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int 
     return MPIDI_CH4_NM_gpid_tolpidarray_generic(size,gpid,lpid,MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE);
 }
 
-static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
+static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm *newcomm_ptr,
                                                            int size, const int lpids[])
 {
     int i;
     MPIDI_CH4_NMI_OFI_VCRT_Create(size, &MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt);
 
-    for (i = 0; i < size; i++)
-    {
+    for(i = 0; i < size; i++) {
         MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];
         MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt->vcr_table[i].is_local =
             (MPIDI_Global.node_map[MPIR_Process.comm_world->rank] ==
              MPIDI_Global.node_map[lpids[i]]);
     }
+
     return 0;
 }
 
@@ -706,13 +715,13 @@ static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *prov_use,
-                                        struct fid_domain *     domain,
-                                        struct fid_cq *         p2p_cq,
-                                        struct fid_cntr *       rma_ctr,
-                                        struct fid_av *         av,
-                                        struct fid_ep *   *ep,
-                                        int              index,
-                                        int              do_scalable_ep)
+                                                    struct fid_domain      *domain,
+                                                    struct fid_cq          *p2p_cq,
+                                                    struct fid_cntr        *rma_ctr,
+                                                    struct fid_av          *av,
+                                                    struct fid_ep **ep,
+                                                    int              index,
+                                                    int              do_scalable_ep)
 {
     int mpi_errno = MPI_SUCCESS;
     struct fi_tx_attr tx_attr;
@@ -766,12 +775,13 @@ static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *pro
         rx_attr.caps     |= FI_ATOMICS;
         rx_attr.op_flags  = 0;
         MPIDI_CH4_NMI_OFI_CALL(fi_rx_context(*ep, index + 1, &rx_attr, &MPIDI_CH4_NMI_OFI_EP_RX_RMA(index), NULL), ep);
+
         /* Note:  This bind should cause the "passive target" rx context to never generate an event
            We need this bind for manual progress to ensure that progress is made on the
            rx_ctr or rma operations during completion queue reads */
         if(prov_use->domain_attr->data_progress == FI_PROGRESS_MANUAL)
             MPIDI_CH4_NMI_OFI_CALL(fi_ep_bind(MPIDI_CH4_NMI_OFI_EP_RX_RMA(index), &p2p_cq->fid,
-                             FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
+                                              FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
 
         rx_attr           = *prov_use->rx_attr;
         rx_attr.caps      = FI_MSG;
@@ -785,10 +795,11 @@ static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *pro
         rx_attr.caps     |= FI_ATOMICS;
         rx_attr.op_flags  = 0;
         MPIDI_CH4_NMI_OFI_CALL(fi_rx_context(*ep, index + 3, &rx_attr, &MPIDI_CH4_NMI_OFI_EP_RX_CTR(index), NULL), ep);
+
         /* See note above */
         if(prov_use->domain_attr->data_progress == FI_PROGRESS_MANUAL)
             MPIDI_CH4_NMI_OFI_CALL(fi_ep_bind(MPIDI_CH4_NMI_OFI_EP_RX_CTR(index), &p2p_cq->fid,
-                             FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
+                                              FI_SEND|FI_RECV|FI_SELECTIVE_COMPLETION), bind);
 
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(MPIDI_CH4_NMI_OFI_EP_TX_TAG(index)), ep_enable);
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(MPIDI_CH4_NMI_OFI_EP_TX_RMA(index)), ep_enable);
@@ -799,8 +810,7 @@ static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *pro
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(MPIDI_CH4_NMI_OFI_EP_RX_RMA(index)), ep_enable);
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(MPIDI_CH4_NMI_OFI_EP_RX_MSG(index)), ep_enable);
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(MPIDI_CH4_NMI_OFI_EP_RX_CTR(index)), ep_enable);
-    }
-    else {
+    } else {
         /* ---------------------------------------------------------- */
         /* Bind the CQs, counters,  and AV to the endpoint object     */
         /* ---------------------------------------------------------- */
@@ -811,6 +821,7 @@ static inline int MPIDI_CH4_NMI_OFI_Create_endpoint(struct fi_info          *pro
         MPIDI_CH4_NMI_OFI_CALL(fi_ep_bind(*ep, &av->fid,      0), bind);
         MPIDI_CH4_NMI_OFI_CALL(fi_enable(*ep), ep_enable);
     }
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
     return mpi_errno;
@@ -818,16 +829,16 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Choose_provider(struct fi_info * prov, struct fi_info ** prov_use)
+static inline int MPIDI_CH4_NMI_OFI_Choose_provider(struct fi_info *prov, struct fi_info **prov_use)
 {
     struct fi_info *p = prov;
     int i = 0;
     *prov_use = prov;
 
-    if (MPIR_CVAR_OFI_DUMP_PROVIDERS) {
+    if(MPIR_CVAR_OFI_DUMP_PROVIDERS) {
         fprintf(stdout, "Dumping Providers(first=%p):\n", prov);
 
-        while (p) {
+        while(p) {
             fprintf(stdout, "%s", fi_tostr(p, FI_TYPE_INFO));
             p = p->next;
         }

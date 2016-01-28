@@ -269,7 +269,7 @@ typedef struct {
 typedef union {
     MPID_Thread_mutex_t m;
     char                cacheline[MPIDI_CH4_NMI_OFI_CACHELINE_SIZE];
-}MPIDI_CH4_NMI_OFI_Cacheline_mutex_t __attribute__ ((aligned (MPIDI_CH4_NMI_OFI_CACHELINE_SIZE)));
+} MPIDI_CH4_NMI_OFI_Cacheline_mutex_t __attribute__((aligned(MPIDI_CH4_NMI_OFI_CACHELINE_SIZE)));
 
 typedef struct {
     struct fi_cq_tagged_entry  cq_entry;
@@ -421,23 +421,23 @@ typedef struct {
         struct {
             struct iovec      *originv;
             struct fi_rma_iov *targetv;
-        }put_get;
+        } put_get;
         struct {
             struct fi_ioc     *originv;
             struct fi_rma_ioc *targetv;
             struct fi_ioc     *resultv;
             struct fi_ioc     *comparev;
-        }cas;
+        } cas;
         struct {
             struct fi_ioc     *originv;
             struct fi_rma_ioc *targetv;
-        }accumulate;
+        } accumulate;
         struct {
             struct fi_ioc     *originv;
             struct fi_rma_ioc *targetv;
             struct fi_ioc     *resultv;
-        }get_accumulate;
-    }iov;
+        } get_accumulate;
+    } iov;
     char iov_store[0]; /* Flexible array, do not move */
 } MPIDI_CH4_NMI_OFI_Iovec_array_t;
 
@@ -470,8 +470,8 @@ typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context                 context;          /* fixed field, do not move */
     int                               event_id;         /* fixed field, do not move */
-    int                               (*done_fn) (struct fi_cq_tagged_entry *wc,
-                                                  MPID_Request              *req);
+    int (*done_fn)(struct fi_cq_tagged_entry *wc,
+                   MPID_Request              *req);
     MPIDI_CH4_NMI_OFI_Send_control_t  remote_info;
     size_t                            cur_offset;
     MPID_Comm                        *comm_ptr;

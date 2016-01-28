@@ -18,7 +18,7 @@ static inline int MPIDI_CH4_NM_put(const void *origin_addr,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                                   int target_count, MPI_Datatype target_datatype, MPID_Win *win)
 {
     return MPIDI_CH4R_put(origin_addr, origin_count, origin_datatype,
                           target_rank, target_disp, target_count, target_datatype, win);
@@ -29,7 +29,7 @@ static inline int MPIDI_CH4_NM_get(void *origin_addr,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                                   int target_count, MPI_Datatype target_datatype, MPID_Win *win)
 {
     return MPIDI_CH4R_get(origin_addr, origin_count, origin_datatype,
                           target_rank, target_disp, target_count, target_datatype, win);
@@ -42,7 +42,7 @@ static inline int MPIDI_CH4_NM_rput(const void *origin_addr,
                                     MPI_Aint target_disp,
                                     int target_count,
                                     MPI_Datatype target_datatype,
-                                    MPID_Win * win, MPID_Request ** request)
+                                    MPID_Win *win, MPID_Request **request)
 {
     return MPIDI_CH4R_rput(origin_addr, origin_count, origin_datatype,
                            target_rank, target_disp, target_count, target_datatype, win, request);
@@ -54,7 +54,7 @@ static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
                                                 int target_rank,
-                                                MPI_Aint target_disp, MPID_Win * win)
+                                                MPI_Aint target_disp, MPID_Win *win)
 {
     return MPIDI_CH4R_compare_and_swap(origin_addr, compare_addr, result_addr,
                                        datatype, target_rank, target_disp, win);
@@ -67,7 +67,7 @@ static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
                                            MPI_Aint target_disp,
                                            int target_count,
                                            MPI_Datatype target_datatype,
-                                           MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                           MPI_Op op, MPID_Win *win, MPID_Request **request)
 {
     return MPIDI_CH4R_raccumulate(origin_addr, origin_count, origin_datatype,
                                   target_rank, target_disp, target_count,
@@ -84,7 +84,7 @@ static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
                                                MPI_Aint target_disp,
                                                int target_count,
                                                MPI_Datatype target_datatype,
-                                               MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                               MPI_Op op, MPID_Win *win, MPID_Request **request)
 {
     return MPIDI_CH4R_rget_accumulate(origin_addr, origin_count, origin_datatype,
                                       result_addr, result_count, result_datatype,
@@ -96,7 +96,7 @@ static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
                                             void *result_addr,
                                             MPI_Datatype datatype,
                                             int target_rank,
-                                            MPI_Aint target_disp, MPI_Op op, MPID_Win * win)
+                                            MPI_Aint target_disp, MPI_Op op, MPID_Win *win)
 {
     return MPIDI_CH4R_fetch_and_op(origin_addr, result_addr, datatype,
                                    target_rank, target_disp, op, win);
@@ -110,7 +110,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
                                     MPI_Aint target_disp,
                                     int target_count,
                                     MPI_Datatype target_datatype,
-                                    MPID_Win * win, MPID_Request ** request)
+                                    MPID_Win *win, MPID_Request **request)
 {
     return MPIDI_CH4R_rget(origin_addr, origin_count, origin_datatype,
                            target_rank, target_disp, target_count, target_datatype, win, request);
@@ -127,7 +127,7 @@ static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
                                               MPI_Aint target_disp,
                                               int target_count,
                                               MPI_Datatype target_datatype,
-                                              MPI_Op op, MPID_Win * win)
+                                              MPI_Op op, MPID_Win *win)
 {
     return MPIDI_CH4R_get_accumulate(origin_addr, origin_count, origin_datatype,
                                      result_addr, result_count, result_datatype,
@@ -141,7 +141,7 @@ static inline int MPIDI_CH4_NM_accumulate(const void *origin_addr,
                                           int target_rank,
                                           MPI_Aint target_disp,
                                           int target_count,
-                                          MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
+                                          MPI_Datatype target_datatype, MPI_Op op, MPID_Win *win)
 {
     return MPIDI_CH4R_accumulate(origin_addr, origin_count, origin_datatype,
                                  target_rank, target_disp, target_count, target_datatype, op, win);

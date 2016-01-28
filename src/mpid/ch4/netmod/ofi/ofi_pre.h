@@ -50,8 +50,10 @@ struct MPID_Request;
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
 typedef struct MPIDI_CH4_NMI_OFI_VCR {
     unsigned is_local : 1;
-    unsigned ep_idx   : MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS;
-    unsigned addr_idx : (31 - MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS);
+unsigned ep_idx   :
+    MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS;
+unsigned addr_idx :
+    (31 - MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS);
 } MPIDI_CH4_NMI_OFI_VCR;
 #else
 typedef struct MPIDI_CH4_NMI_OFI_VCR {
@@ -101,17 +103,23 @@ typedef struct MPIDI_CH4_NMI_OFI_Am_reply_token_t {
         struct {
             uint32_t context_id;
             uint32_t src_rank;
-        }data;
+        } data;
     };
-}MPIDI_CH4_NMI_OFI_Am_reply_token_t;
+} MPIDI_CH4_NMI_OFI_Am_reply_token_t;
 
 typedef struct MPIDI_CH4_NMI_OFI_Am_header_t {
-    uint64_t handler_id  : MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
-    uint64_t am_type     : MPIDI_CH4_NMI_OFI_AM_TYPE_BITS;
-    uint64_t am_hdr_sz   : MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS;
-    uint64_t data_sz     : MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
-    uint64_t context_id  : MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS;
-    uint64_t src_rank    : MPIDI_CH4_NMI_OFI_AM_RANK_BITS;
+uint64_t handler_id  :
+    MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
+uint64_t am_type     :
+    MPIDI_CH4_NMI_OFI_AM_TYPE_BITS;
+uint64_t am_hdr_sz   :
+    MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS;
+uint64_t data_sz     :
+    MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
+uint64_t context_id  :
+    MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS;
+uint64_t src_rank    :
+    MPIDI_CH4_NMI_OFI_AM_RANK_BITS;
     uint64_t payload[0];
 } MPIDI_CH4_NMI_OFI_Am_header_t;
 
@@ -132,10 +140,10 @@ typedef struct {
     union  {
         void                               *pack_buffer;
         MPIDI_CH4_NMI_OFI_Am_reply_token_t  reply_token;
-    }clientdata;
+    } clientdata;
     void                          *rreq_ptr;
     void                          *am_hdr;
-    int                           (*cmpl_handler_fn)(struct MPID_Request * req);
+    int (*cmpl_handler_fn)(struct MPID_Request *req);
     uint16_t                      am_hdr_sz;
     uint8_t                       pad[6];
     MPIDI_CH4_NMI_OFI_Am_header_t msg_hdr;
@@ -166,7 +174,7 @@ typedef struct {
             void *buf;
         } persist;
         struct iovec iov;
-    }util;
+    } util;
 } MPIDI_CH4_NMI_OFI_Request_t;
 
 #endif

@@ -14,20 +14,20 @@
 #include "impl.h"
 
 static inline int MPIDI_CH4_NM_comm_connect(const char *port_name,
-                                            MPID_Info * info,
-                                            int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                            MPID_Info *info,
+                                            int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_comm_disconnect(MPID_Comm * comm_ptr)
+static inline int MPIDI_CH4_NM_comm_disconnect(MPID_Comm *comm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_open_port(MPID_Info * info_ptr, char *port_name)
+static inline int MPIDI_CH4_NM_open_port(MPID_Info *info_ptr, char *port_name)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -40,8 +40,8 @@ static inline int MPIDI_CH4_NM_close_port(const char *port_name)
 }
 
 static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
-                                           MPID_Info * info,
-                                           int root, MPID_Comm * comm, MPID_Comm ** newcomm_ptr)
+                                           MPID_Info *info,
+                                           int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

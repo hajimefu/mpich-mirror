@@ -18,10 +18,10 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control_t *control,
-                                 int                  rank,
-                                 MPID_Win            *win,
-                                 int                  use_comm,
-                                 int                  use_lock)
+                                                   int                  rank,
+                                                   MPID_Win            *win,
+                                                   int                  use_comm,
+                                                   int                  use_lock)
 {
     int                        mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
@@ -32,22 +32,22 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control
 
     if(use_lock)
         mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
-                                           win->comm_ptr,
-                                           -1ULL,
-                                           MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
-                                           (void*)control,
-                                           sizeof(*control),NULL,
-                                           FALSE,
-                                           use_comm);
+                                            win->comm_ptr,
+                                            -1ULL,
+                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+                                            (void *)control,
+                                            sizeof(*control),NULL,
+                                            FALSE,
+                                            use_comm);
     else
         mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
-                                           win->comm_ptr,
-                                           -1ULL,
-                                           MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
-                                           (void*)control,
-                                           sizeof(*control),NULL,
-                                           FALSE,
-                                           use_comm);
+                                            win->comm_ptr,
+                                            -1ULL,
+                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+                                            (void *)control,
+                                            sizeof(*control),NULL,
+                                            FALSE,
+                                            use_comm);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;
@@ -58,11 +58,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_control_t *control,
-                                  char                 *send_buf,
-                                  size_t                msgsize,
-                                  int                   rank,
-                                  MPID_Comm            *comm_ptr,
-                                  MPID_Request         *ackreq)
+                                                    char                 *send_buf,
+                                                    size_t                msgsize,
+                                                    int                   rank,
+                                                    MPID_Comm            *comm_ptr,
+                                                    MPID_Request         *ackreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
@@ -77,11 +77,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
     MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
 
     mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,comm_ptr,
-                                       -1ULL,
-                                       MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
-                                       (void*)control,
-                                       sizeof(*control),NULL,
-                                       FALSE,TRUE);
+                                        -1ULL,
+                                        MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+                                        (void *)control,
+                                        sizeof(*control),NULL,
+                                        FALSE,TRUE);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;
