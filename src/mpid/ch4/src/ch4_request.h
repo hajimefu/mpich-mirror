@@ -96,9 +96,8 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Request_complete(MPID_Request * req)
 {
-    int count;
-    MPIR_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
+    int incomplete;
+    MPIR_cc_decr(req->cc_ptr, &incomplete);
     MPIDI_CH4I_request_release(req);
     return MPI_SUCCESS;
 }

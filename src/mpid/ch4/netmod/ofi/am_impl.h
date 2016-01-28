@@ -573,11 +573,10 @@ fn_fail:
 
 static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPID_Request *req)
 {
-    int count;
-    MPIR_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
+    int incomplete;
+    MPIR_cc_decr(req->cc_ptr, &incomplete);
 
-    if(count == 0) {
+    if(!incomplete) {
         MPIDI_CH4R_Request_release(req);
     }
 }

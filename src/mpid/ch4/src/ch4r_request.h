@@ -69,10 +69,9 @@ static inline MPID_Request *MPIDI_CH4I_am_win_request_create()
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
 {
-    int count;
-    MPIR_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
-    if (count == 0) {
+    int incomplete;
+    MPIR_cc_decr(req->cc_ptr, &incomplete);
+    if (!incomplete) {
         if (MPIDI_CH4R_REQUEST(req, req) && MPIR_cc_is_complete(&req->cc)) {
             MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
             MPIDI_CH4R_REQUEST(req, req) = NULL;

@@ -203,7 +203,6 @@ static inline int MPIDI_CH4_NMI_OFI_Send_event(struct fi_cq_tagged_entry *wc, MP
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_EVENT);
 
     MPIR_cc_decr(sreq->cc_ptr, &c);
-    MPIU_Assert(c >= 0);
 
     if(c == 0) {
         if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer))
@@ -229,7 +228,6 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_EVENT_HUGE);
 
     MPIR_cc_decr(sreq->cc_ptr, &c);
-    MPIU_Assert(c >= 0);
 
     if(c == 0) {
         MPID_Comm *comm;
@@ -346,7 +344,6 @@ static inline int MPIDI_CH4_NMI_OFI_Chunk_done_event(struct fi_cq_tagged_entry *
 
     MPIDI_CH4_NMI_OFI_Chunk_request *creq = (MPIDI_CH4_NMI_OFI_Chunk_request *)req;
     MPIR_cc_decr(creq->parent->cc_ptr, &c);
-    MPIU_Assert(c >= 0);
 
     if(c == 0)MPIDI_CH4R_Request_release(creq->parent);
 

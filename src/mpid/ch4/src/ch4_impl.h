@@ -151,10 +151,9 @@ __CH4_INLINE__ void MPIDI_CH4R_Request_release(MPID_Request * req)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 {
-    int count;
-    MPIR_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
-    if (count == 0)
+    int incomplete;
+    MPIR_cc_decr(req->cc_ptr, &incomplete);
+    if (!incomplete)
         MPIDI_CH4R_Request_release(req);
 }
 
