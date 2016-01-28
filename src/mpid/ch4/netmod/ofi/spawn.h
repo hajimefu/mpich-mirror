@@ -67,12 +67,12 @@ static inline int MPIDI_CH4_NMI_OFI_Get_tag_from_port(const char *port_name,
                                                       int        *port_name_tag)
 {
     int mpi_errno = MPI_SUCCESS;
-    int str_errno = MPIU_STR_SUCCESS;
+    int str_errno = MPL_STR_SUCCESS;
 
     if(strlen(port_name) == 0)
         goto fn_exit;
 
-    str_errno = MPIU_Str_get_int_arg(port_name,
+    str_errno = MPL_str_get_int_arg(port_name,
                                      MPIDI_CH4_NMI_OFI_PORT_NAME_TAG_KEY,
                                      port_name_tag);
     MPIR_ERR_CHKANDJUMP(str_errno, mpi_errno, MPI_ERR_OTHER,
@@ -89,7 +89,7 @@ static inline int MPIDI_CH4_NMI_OFI_Get_conn_name_from_port(const char *port_nam
 {
     int mpi_errno = MPI_SUCCESS;
     int maxlen    = MPIDI_KVSAPPSTRLEN;
-    MPIU_Str_get_binary_arg(port_name,
+    MPL_str_get_binary_arg(port_name,
                             MPIDI_CH4_NMI_OFI_CONNENTRY_TAG_KEY,
                             connname,
                             MPIDI_Global.addrnamelen,
@@ -128,14 +128,14 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_create_intercomm(const char      *po
     mpi_errno = MPIDI_CH4_NMI_OFI_VCRT_Create(tmp_comm_ptr->remote_size,
                                               &MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).vcrt);
     start = MPIDI_Addr_table->size;
-    MPIDI_Global.node_map = (MPID_Node_id_t *)MPIU_Realloc(MPIDI_Global.node_map,
+    MPIDI_Global.node_map = (MPID_Node_id_t *)MPL_realloc(MPIDI_Global.node_map,
                                                            (entries+start)*sizeof(MPID_Node_id_t));
 
     for(i=0; i<entries; i++)
         MPIDI_Global.node_map[start+i] = node_table[i];
 
 #ifndef MPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE
-    MPIDI_Addr_table = (MPIDI_CH4_NMI_OFI_Addr_table_t *)MPIU_Realloc(MPIDI_Addr_table,
+    MPIDI_Addr_table = (MPIDI_CH4_NMI_OFI_Addr_table_t *)MPL_realloc(MPIDI_Addr_table,
                                                                       (entries+start)*sizeof(fi_addr_t)+
                                                                       sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
     addr=&(MPIDI_CH4_NMI_OFI_TO_PHYS(start));
@@ -159,8 +159,8 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_create_intercomm(const char      *po
     tmp_comm_ptr->local_comm = NULL; /* avoid freeing local comm with comm_release */
     MPIR_Comm_release(tmp_comm_ptr);
 
-    MPIU_Free(addr_table);
-    MPIU_Free(node_table);
+    MPL_free(addr_table);
+    MPL_free(node_table);
 
 fn_exit:
     return mpi_errno;
@@ -184,7 +184,7 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_bcast(int              root,
                                                     root, comm_ptr, &errflag));
 
     if(*out_addr_table == NULL)
-        *out_addr_table  = (char *)MPIU_Malloc(*out_table_size);
+        *out_addr_table  = (char *)MPL_malloc(*out_table_size);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Bcast_intra(*out_addr_table, *out_table_size,
                                                     MPI_CHAR,root, comm_ptr, &errflag));
@@ -192,7 +192,7 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_bcast(int              root,
     entries     = *out_table_size/MPIDI_Global.addrnamelen;
 
     if(*out_node_table == NULL)
-        *out_node_table  = (MPID_Node_id_t *)MPIU_Malloc(MPIDI_Global.addrnamelen*entries);
+        *out_node_table  = (MPID_Node_id_t *)MPL_malloc(MPIDI_Global.addrnamelen*entries);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Bcast_intra(*out_node_table, entries*sizeof(MPID_Node_id_t),
                                                     MPI_CHAR,root, comm_ptr, &errflag));
@@ -252,10 +252,10 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_exchange_map(int              root,
 
         *out_table_size    = req[0].msglen;
         *out_root          = req[0].tag;
-        *out_addr_table    = (char *)MPIU_Malloc(*out_table_size);
+        *out_addr_table    = (char *)MPL_malloc(*out_table_size);
 
         int entries        = req[0].msglen/MPIDI_Global.addrnamelen;
-        *out_node_table    = (MPID_Node_id_t *)MPIU_Malloc(entries*sizeof(MPID_Node_id_t));
+        *out_node_table    = (MPID_Node_id_t *)MPL_malloc(entries*sizeof(MPID_Node_id_t));
 
         req[0].done     = 0;
         req[0].event_id = MPIDI_CH4_NMI_OFI_EVENT_DYNPROC_DONE;
@@ -289,11 +289,11 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_exchange_map(int              root,
         char   *my_addr_table;
         int     tag   = root;
         int     tblsz = MPIDI_Global.addrnamelen*comm_ptr->local_size;
-        my_addr_table       = (char *)MPIU_Malloc(tblsz);
+        my_addr_table       = (char *)MPL_malloc(tblsz);
 
         MPID_Node_id_t *my_node_table;
         MPID_Node_id_t  nodetblsz = sizeof(*my_node_table)*comm_ptr->local_size;
-        my_node_table             = (MPID_Node_id_t *)MPIU_Malloc(nodetblsz);
+        my_node_table             = (MPID_Node_id_t *)MPL_malloc(nodetblsz);
 
         match_bits                = MPIDI_CH4_NMI_OFI_Init_sendtag(port_id,
                                                                    comm_ptr->rank,
@@ -334,8 +334,8 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_exchange_map(int              root,
 
         MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(!req[0].done || !req[1].done);
 
-        MPIU_Free(my_addr_table);
-        MPIU_Free(my_node_table);
+        MPL_free(my_addr_table);
+        MPL_free(my_node_table);
     }
 
 fn_exit:
@@ -440,16 +440,16 @@ fn_fail:
 static inline int MPIDI_CH4_NM_open_port(MPID_Info *info_ptr, char *port_name)
 {
     int mpi_errno     = MPI_SUCCESS;
-    int str_errno     = MPIU_STR_SUCCESS;
+    int str_errno     = MPL_STR_SUCCESS;
     int port_name_tag = 0;
     int len           = MPI_MAX_PORT_NAME;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Get_port_name_tag(&port_name_tag));
-    MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_add_int_arg(&port_name,&len,MPIDI_CH4_NMI_OFI_PORT_NAME_TAG_KEY,
+    MPIDI_CH4_NMI_OFI_STR_CALL(MPL_str_add_int_arg(&port_name,&len,MPIDI_CH4_NMI_OFI_PORT_NAME_TAG_KEY,
                                                     port_name_tag),port_str);
-    MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_add_binary_arg(&port_name,&len,MPIDI_CH4_NMI_OFI_CONNENTRY_TAG_KEY,
+    MPIDI_CH4_NMI_OFI_STR_CALL(MPL_str_add_binary_arg(&port_name,&len,MPIDI_CH4_NMI_OFI_CONNENTRY_TAG_KEY,
                                                        MPIDI_Global.addrname,
                                                        MPIDI_Global.addrnamelen),port_str);
 fn_exit:

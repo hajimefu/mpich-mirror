@@ -2171,41 +2171,6 @@ typedef struct MPICH_PerProcess_t {
 } MPICH_PerProcess_t;
 extern MPICH_PerProcess_t MPIR_Process;
 
-typedef struct {
-    int thread_provided;        /* Provided level of thread support */
-
-#if defined(MPICH_IS_THREADED) && !defined(MPICH_TLS_SPECIFIER)
-    MPIU_Thread_tls_t thread_storage;   /* Id for perthread data */
-#endif
-
-    /* This is a special case for is_thread_main, which must be
-     * implemented even if MPICH itself is single threaded.  */
-#if MPICH_THREAD_LEVEL >= MPI_THREAD_SERIALIZED
-    MPIU_Thread_id_t master_thread;     /* Thread that started MPI */
-#endif
-
-#if defined MPICH_IS_THREADED
-    int isThreaded;             /* Set to true if user requested
-                                 * THREAD_MULTIPLE */
-#endif                          /* MPICH_IS_THREADED */
-
-    /* Define the mutex values used for each kind of implementation */
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL || \
-    MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
-    MPID_Thread_mutex_t global_mutex;
-    MPID_Thread_mutex_t memalloc_mutex; /* for MPIU_{Malloc,Free,Calloc} */
-#endif
-
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
-    MPID_Thread_mutex_t handle_mutex;
-    MPID_Thread_mutex_t msgq_mutex;
-    MPID_Thread_mutex_t completion_mutex;
-    MPID_Thread_mutex_t ctx_mutex;
-    MPID_Thread_mutex_t pmi_mutex;
-#endif
-} MPIR_Thread_info_t;
-extern MPIR_Thread_info_t MPIR_ThreadInfo;
-
 #if defined (MPL_USE_DBG_LOGGING)
 extern MPL_DBG_Class MPIR_DBG_INIT;
 extern MPL_DBG_Class MPIR_DBG_PT2PT;

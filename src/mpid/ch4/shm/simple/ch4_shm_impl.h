@@ -21,8 +21,6 @@
 #include "mpihandlemem.h"
 #include "mpiu_os_wrappers_pre.h"
 #include "mpiu_shm_wrappers.h"
-#include "mpiu_process_wrappers.h"
-#include "mpidbg.h"
 #include "pmi.h"
 
 /* ---------------------------------------------------- */
@@ -62,7 +60,7 @@ extern MPIDI_CH4_SHM_queue_t MPIDI_CH4_SHM_recvq_unexpected;    /* defined in re
 #define REQ_SHM_COMPLETE(req_) \
 { \
     int incomplete__; \
-    MPID_cc_decr((req_)->cc_ptr, &incomplete__); \
+    MPIR_cc_decr((req_)->cc_ptr, &incomplete__); \
     dtype_release_if_not_builtin(REQ_SHM(req_)->datatype); \
     if (!incomplete__) \
         MPIDI_CH4R_Request_release(req_);    \
@@ -163,7 +161,7 @@ extern MPIU_Object_alloc_t MPIDI_Request_mem;
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
                 == MPID_REQUEST);                       \
-    MPID_cc_set(&req->cc, 1);                           \
+    MPIR_cc_set(&req->cc, 1);                           \
     req->cc_ptr = &req->cc;                             \
     MPIU_Object_set_ref(req, count);                    \
     req->greq_fns          = NULL;                      \

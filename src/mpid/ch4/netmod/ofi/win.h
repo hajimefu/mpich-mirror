@@ -99,7 +99,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
         }
 
         if(same_disp) {
-            MPIU_Free(MPIDI_CH4R_WIN(win, info_table));
+            MPL_free(MPIDI_CH4R_WIN(win, info_table));
             MPIDI_CH4R_WIN(win, info_table) = NULL;
         }
     }
@@ -663,18 +663,18 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
         if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz > 0)
             munmap(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr, MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz);
         else if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz == -1)
-            MPIU_Free(win->base);
+            MPL_free(win->base);
     }
 
     if(win->create_flavor == MPI_WIN_FLAVOR_SHARED) {
         if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr)
             munmap(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr, MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz);
 
-        MPIU_Free(MPIDI_CH4R_WIN(win, sizes));
+        MPL_free(MPIDI_CH4R_WIN(win, sizes));
     }
 
     if(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ)
-        MPIU_Free(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ);
+        MPL_free(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ);
 
     window_instance       = (uint32_t)(MPIDI_CH4_NMI_OFI_WIN(win)->win_id>>32);
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
@@ -809,7 +809,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                            MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
-    MPIDI_CH4R_WIN(win, sizes) = (MPI_Aint *)MPIU_Malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
+    MPIDI_CH4R_WIN(win, sizes) = (MPI_Aint *)MPL_malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
     sizes                 = MPIDI_CH4R_WIN(win, sizes);
     sizes[comm_ptr->rank] = size;
     mpi_errno             = MPIR_Allgather_impl(MPI_IN_PLACE,
@@ -1250,7 +1250,7 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
     size = win->comm_ptr->local_size;
 
     if(!MPIDI_CH4_NMI_OFI_WIN(win)->msgQ) {
-        MPIDI_CH4_NMI_OFI_WIN(win)->msgQ = (void *) MPIU_Calloc(size, sizeof(MPIDI_CH4R_winLock_info));
+        MPIDI_CH4_NMI_OFI_WIN(win)->msgQ = (void *) MPL_calloc(size, sizeof(MPIDI_CH4R_winLock_info));
         MPIU_Assert(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ != NULL);
         MPIDI_CH4_NMI_OFI_WIN(win)->count=0;
     }

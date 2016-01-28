@@ -35,14 +35,14 @@ static inline MPIU_buf_pool_t *create_buf_pool(int num, int size,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CREATE_BUF_POOL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CREATE_BUF_POOL);
 
-    buf_pool = (MPIU_buf_pool_t *) MPIU_Malloc(sizeof(*buf_pool));
+    buf_pool = (MPIU_buf_pool_t *) MPL_malloc(sizeof(*buf_pool));
     MPIU_Assert(buf_pool);
     pthread_mutex_init(&buf_pool->lock, NULL);
 
     buf_pool->size = size;
     buf_pool->num = num;
     buf_pool->next = NULL;
-    buf_pool->memory_region = MPIU_Malloc(num * (sizeof(MPIU_buf_t) + size));
+    buf_pool->memory_region = MPL_malloc(num * (sizeof(MPIU_buf_t) + size));
     MPIU_Assert(buf_pool->memory_region);
 
     curr = (MPIU_buf_t *)buf_pool->memory_region;
@@ -163,8 +163,8 @@ static inline void MPIDI_CH4R_destroy_buf_pool(MPIU_buf_pool_t *pool)
     if (pool->next)
         MPIDI_CH4R_destroy_buf_pool(pool->next);
 
-    MPIU_Free(pool->memory_region);
-    MPIU_Free(pool);
+    MPL_free(pool->memory_region);
+    MPL_free(pool);
 }
 
 #endif /* MPIDCH4_BUF_H_INCLUDED */

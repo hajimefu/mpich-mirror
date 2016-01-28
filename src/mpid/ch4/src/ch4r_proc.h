@@ -25,7 +25,7 @@ static inline int MPIDI_CH4R_rank_is_local(int rank, MPID_Comm * comm)
     } else {
         ret = MPIDI_CH4R_COMM(comm,locality)[rank].is_local;
 
-        MPIU_DBG_MSG_FMT(CH4, VERBOSE, (MPIU_DBG_FDEST,
+        MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_GENERAL, VERBOSE, (MPL_DBG_FDEST,
                     "Rank %d %s local", rank, ret ? "is" : "is not"));
     }
 #else

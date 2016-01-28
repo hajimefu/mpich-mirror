@@ -69,8 +69,8 @@ static inline int shm_do_irecv(void *buf,
     dtype_add_ref_if_not_builtin(datatype);
     /* enqueue rreq */
     REQ_SHM_ENQUEUE(rreq, MPIDI_CH4_SHM_recvq_posted);
-    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-            (MPIU_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
+    MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
+            (MPL_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
              MPIDI_CH4R_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
              rank, tag, comm->context_id + context_offset));
     *request = rreq;
@@ -123,7 +123,7 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
 
     MPIDI_Request_create_rreq(rreq);
     MPIU_Object_set_ref(rreq, 1);
-    MPID_cc_set(&rreq->cc, 0);
+    MPIR_cc_set(&rreq->cc, 0);
     rreq->kind = MPID_PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
@@ -176,7 +176,7 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_Request_create_rreq(rreq);
     MPIU_Object_set_ref(rreq, 1);
-    MPID_cc_set(&rreq->cc, 0);
+    MPIR_cc_set(&rreq->cc, 0);
     ENVELOPE_GET(REQ_SHM(message), rank, tag, context_id);
     ENVELOPE_SET(REQ_SHM(rreq), rank, tag, context_id);
     rreq->comm = message->comm;
@@ -265,7 +265,7 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
         }
         /* destroy unexpected req */
         REQ_SHM(sreq)->pending = NULL;
-        MPIU_Free(REQ_SHM(sreq)->user_buf);
+        MPL_free(REQ_SHM(sreq)->user_buf);
         next_req = REQ_SHM(sreq)->next;
         REQ_SHM_COMPLETE(sreq);
         sreq = next_req;

@@ -50,7 +50,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
     if (type == MPIDI_CH4R_SSEND_REQ) {
         ssend_req.hdr = am_hdr;
         ssend_req.sreq_ptr = (uint64_t) sreq;
-        MPID_cc_incr(sreq->cc_ptr, &c);
+        MPIR_cc_incr(sreq->cc_ptr, &c);
 
         mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, MPIDI_CH4R_SSEND_REQ,
                                          &ssend_req, sizeof(ssend_req),

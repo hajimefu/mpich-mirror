@@ -134,7 +134,7 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
     }
 
     if(am_hdr_sz > MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE) {
-        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
         am_hdr_buf = (char *)MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
@@ -153,7 +153,7 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
                                      data, count, datatype, sreq, netmod_context);
 
     if(is_allocated)
-        MPIU_Free(am_hdr_buf);
+        MPL_free(am_hdr_buf);
     else
         MPIDI_CH4R_release_buf(am_hdr_buf);
 
@@ -185,7 +185,7 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
 
     /* TODO: avoid the malloc here, use the am_hdr directly */
     if(am_hdr_sz > MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE) {
-        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
         am_hdr_buf = (char *) MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
@@ -204,7 +204,7 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
                                          sreq, netmod_context);
 
     if(is_allocated)
-        MPIU_Free(am_hdr_buf);
+        MPL_free(am_hdr_buf);
     else
         MPIDI_CH4R_release_buf(am_hdr_buf);
 
@@ -290,7 +290,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t      reply_token,
 
     /* TODO: avoid the malloc here, use the am_hdr directly */
     if(am_hdr_sz > MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE) {
-        am_hdr_buf = (char *) MPIU_Malloc(am_hdr_sz);
+        am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
         is_allocated = 1;
     } else {
         am_hdr_buf = (char *) MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
@@ -309,7 +309,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t      reply_token,
                                            data, count, datatype, sreq);
 
     if(is_allocated)
-        MPIU_Free(am_hdr_buf);
+        MPL_free(am_hdr_buf);
     else
         MPIDI_CH4R_release_buf(am_hdr_buf);
 

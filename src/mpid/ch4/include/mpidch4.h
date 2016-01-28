@@ -301,6 +301,10 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 extern MPID_Request MPIDI_Request_direct[];
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern int MPIDI_num_netmods;
+#if defined(MPL_USE_DBG_LOGGING)
+extern MPL_DBG_Class MPIDI_CH4_DBG_GENERAL;
+#endif /* MPL_USE_DBG_LOGGING */
+
 
 
 

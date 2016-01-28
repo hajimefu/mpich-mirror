@@ -60,7 +60,8 @@ static inline int MPIDI_choose_netmod(void)
     }
 
     for (i = 0; i < MPIDI_num_netmods; ++i) {
-        if (!MPIU_Strncasecmp
+        /* use MPL variant of strncasecmp if we get one */
+        if (!strncasecmp
             (MPIR_CVAR_NETMOD, MPIDI_CH4_NM_strings[i], MPIDI_MAX_NETMOD_STRING_LEN)) {
             MPIDI_CH4_NM_func = MPIDI_CH4_NM_funcs[i];
             MPIDI_CH4_NM_native_func = MPIDI_CH4_NM_native_funcs[i];
@@ -102,7 +103,8 @@ static inline int MPIDI_choose_shm(void)
     }
 
     for (i = 0; i < MPIDI_num_shms; ++i) {
-        if (!MPIU_Strncasecmp
+        /* use MPL variant of strncasecmp if we get one */
+        if (!strncasecmp
             (MPIR_CVAR_SHM, MPIDI_CH4_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
             MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[i];
             MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[i];
@@ -179,7 +181,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
     MPIDI_CH4_Global.comm_req_lists = (MPIDI_CH4_Comm_req_list_t *)
-        MPIU_Calloc(MPIR_MAX_CONTEXT_MASK*MPIR_CONTEXT_INT_BITS,sizeof(MPIDI_CH4_Comm_req_list_t));
+        MPL_calloc(MPIR_MAX_CONTEXT_MASK*MPIR_CONTEXT_INT_BITS,sizeof(MPIDI_CH4_Comm_req_list_t));
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF           */
@@ -213,19 +215,19 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     /* Build up locality information if the netmod doesn't want to do it. */
     MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality) =
-        (MPIDI_CH4R_locality_t *) MPIU_Malloc(size * sizeof(MPIDI_CH4R_locality_t));
+        (MPIDI_CH4R_locality_t *) MPL_malloc(size * sizeof(MPIDI_CH4R_locality_t));
     for (i = 0; i < MPIR_Process.comm_world->local_size; i++)
         MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
 
     MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality) =
-        (MPIDI_CH4R_locality_t *) MPIU_Malloc(sizeof(MPIDI_CH4R_locality_t));
+        (MPIDI_CH4R_locality_t *) MPL_malloc(sizeof(MPIDI_CH4R_locality_t));
 
     /* This requires a partially built MPI_COMM_WORLD in order to be able to
      * communicate to build the nodemap. The communicator is built by the netmod
      * above. */
 
     MPIDI_CH4_Global.node_map =
-        (MPID_Node_id_t *) MPIU_Malloc(MPIR_Process.comm_world->local_size * sizeof(MPID_Node_id_t));
+        (MPID_Node_id_t *) MPL_malloc(MPIR_Process.comm_world->local_size * sizeof(MPID_Node_id_t));
     MPIDI_CH4R_build_nodemap(MPIR_Process.comm_world->rank,
                              MPIR_Process.comm_world,
                              MPIR_Process.comm_world->local_size,
@@ -236,7 +238,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
         MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local =
             (MPIDI_CH4_Global.node_map[i] == MPIDI_CH4_Global.node_map[MPIR_Process.comm_world->rank])?1:0;
         MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].index = i;
-        MPIU_DBG_MSG_FMT(CH4, VERBOSE, (MPIU_DBG_FDEST, "WORLD RANK %d %s local", i,
+        MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_GENERAL, VERBOSE, (MPL_DBG_FDEST, "WORLD RANK %d %s local", i,
                 MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local ? "is" : "is not"));
     }
 
@@ -324,10 +326,10 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
 #endif
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIU_Free(MPIDI_CH4_Global.node_map);
+    MPL_free(MPIDI_CH4_Global.node_map);
 #endif
 
-    MPIU_Free(MPIDI_CH4_Global.comm_req_lists);
+    MPL_free(MPIDI_CH4_Global.comm_req_lists);
     MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
   fn_exit:

@@ -108,7 +108,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
     if(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer)) {
         last = count;
         MPID_Segment_unpack(MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr), 0, &last, MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer));
-        MPIU_Free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer));
+        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer));
         MPID_Segment_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr));
 
         if(last != (MPI_Aint)count) {
@@ -165,7 +165,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_huge_event(struct fi_cq_tagged_entry *w
                                                                           MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag));
 
     if(recv == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *) MPIU_Malloc(sizeof(*recv));
+        recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *) MPL_malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_CH4_NMI_OFI_Map_create(&recv->chunk_q);
         MPIDI_CH4_NMI_OFI_Map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters, MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag), recv);
@@ -175,7 +175,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_huge_event(struct fi_cq_tagged_entry *w
     hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *) MPIDI_CH4_NMI_OFI_Map_lookup(recv->chunk_q, recv->seqno);
 
     if(hc == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *) MPIU_Malloc(sizeof(*hc));
+        hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *) MPL_malloc(sizeof(*hc));
         memset(hc, 0, sizeof(*hc));
         hc->event_id = MPIDI_CH4_NMI_OFI_EVENT_GET_HUGE;
         MPIDI_CH4_NMI_OFI_Map_set(recv->chunk_q, recv->seqno, hc);
@@ -202,12 +202,12 @@ static inline int MPIDI_CH4_NMI_OFI_Send_event(struct fi_cq_tagged_entry *wc, MP
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_EVENT);
 
-    MPID_cc_decr(sreq->cc_ptr, &c);
+    MPIR_cc_decr(sreq->cc_ptr, &c);
     MPIU_Assert(c >= 0);
 
     if(c == 0) {
         if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer))
-            MPIU_Free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
+            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
         MPIDI_CH4R_Request_release(sreq);
@@ -228,7 +228,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_EVENT_HUGE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_EVENT_HUGE);
 
-    MPID_cc_decr(sreq->cc_ptr, &c);
+    MPIR_cc_decr(sreq->cc_ptr, &c);
     MPIU_Assert(c >= 0);
 
     if(c == 0) {
@@ -250,13 +250,13 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
             key_back     = (key >> MPIDI_Global.huge_rma_shift);
             MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator,key_back);
             MPIDI_CH4_NMI_OFI_CALL_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
-            MPIU_Free(ptr);
+            MPL_free(ptr);
             ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP;
             MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL));
         }
 
         if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer))
-            MPIU_Free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
+            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
         MPIDI_CH4R_Request_release(sreq);
@@ -310,7 +310,7 @@ static inline int MPIDI_CH4_NMI_OFI_Get_huge_event(struct fi_cq_tagged_entry *wc
             ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGEACK;
             MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
                                                                              hc->comm_ptr,hc->remote_info.ackreq));
-            MPIU_Free(hc);
+            MPL_free(hc);
             goto fn_exit;
         }
 
@@ -345,12 +345,12 @@ static inline int MPIDI_CH4_NMI_OFI_Chunk_done_event(struct fi_cq_tagged_entry *
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
 
     MPIDI_CH4_NMI_OFI_Chunk_request *creq = (MPIDI_CH4_NMI_OFI_Chunk_request *)req;
-    MPID_cc_decr(creq->parent->cc_ptr, &c);
+    MPIR_cc_decr(creq->parent->cc_ptr, &c);
     MPIU_Assert(c >= 0);
 
     if(c == 0)MPIDI_CH4R_Request_release(creq->parent);
 
-    MPIU_Free(creq);
+    MPL_free(creq);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
     return MPI_SUCCESS;
 }
@@ -434,7 +434,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_send_event(struct fi_cq_tagged_entry *wc,
     }
 
     if(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer) {
-        MPIU_Free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
+        MPL_free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
     }
 
@@ -717,7 +717,7 @@ static inline int MPIDI_CH4_NMI_OFI_Get_buffered(struct fi_cq_tagged_entry *wc, 
             struct slist_entry *entry = slist_remove_head(&MPIDI_Global.cq_buff_list);
             MPIDI_CH4_NMI_OFI_Cq_list_entry             = container_of(entry, MPIDI_CH4_NMI_OFI_Cq_list_t, entry);
             wc[0]                     = MPIDI_CH4_NMI_OFI_Cq_list_entry->cq_entry;
-            MPIU_Free((void *)MPIDI_CH4_NMI_OFI_Cq_list_entry);
+            MPL_free((void *)MPIDI_CH4_NMI_OFI_Cq_list_entry);
         }
 
         rc = 1;

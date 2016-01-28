@@ -200,7 +200,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_long_am_hdr(MPIDI_CH4_NMI_OFI_Am_head
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, msg_hdr)     = *msg_hdr;
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, clientdata).reply_token = reply_token;
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, rreq_ptr)    = (void *) rreq;
-    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr)      = MPIU_Malloc(msg_hdr->am_hdr_sz);
+    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr)      = MPL_malloc(msg_hdr->am_hdr_sz);
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_cntr)    = ((msg_hdr->am_hdr_sz - 1) / MPIDI_Global.max_send) + 1;
     MPIDI_CH4_NMI_OFI_Do_rdma_read(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr),
                                    lmt_msg->am_hdr_src,
@@ -241,7 +241,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_long_hdr(MPIDI_CH4_NMI_OFI_Am_header_
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, clientdata).reply_token = reply_token;
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, rreq_ptr)    = (void *) rreq;
 
-    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr)      = MPIU_Malloc(msg_hdr->am_hdr_sz);
+    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr)      = MPL_malloc(msg_hdr->am_hdr_sz);
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_cntr)    = ((msg_hdr->am_hdr_sz - 1) / MPIDI_Global.max_send) + 1;
 
     MPIDI_CH4_NMI_OFI_Do_rdma_read(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr), lmt_msg->am_hdr_src,
@@ -288,7 +288,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_handle_long_am(MPIDI_CH4_NMI_OFI_Am_heade
 
     if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
-    MPID_cc_incr(rreq->cc_ptr, &c);
+    MPIR_cc_incr(rreq->cc_ptr, &c);
 
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, cmpl_handler_fn) = cmpl_handler_fn;
 
@@ -407,7 +407,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_lmt_ack(MPIDI_CH4_NMI_OFI_Am_header_t
     MPIDI_CH4_NMI_OFI_CALL(fi_close(&MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr)->fid), mr_unreg);
 
     if(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer) {
-        MPIU_Free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
+        MPL_free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
     }
 
     handler_id = MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, msg_hdr).handler_id;

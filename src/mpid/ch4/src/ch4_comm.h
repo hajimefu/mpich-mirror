@@ -117,7 +117,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
         int i, lpid, is_local;
 
         MPIDI_CH4R_COMM(comm,locality) = (MPIDI_CH4R_locality_t*)
-            MPIU_Malloc(comm->remote_size * sizeof(MPIDI_CH4R_locality_t));
+            MPL_malloc(comm->remote_size * sizeof(MPIDI_CH4R_locality_t));
 
         /* For now, we'll only deal with locality for intracommunicators. For
          * intercommunicators, we'll just set all locality to remote. */
@@ -168,7 +168,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     }
 #endif
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIU_Free(MPIDI_CH4R_COMM(comm,locality));
+    MPL_free(MPIDI_CH4R_COMM(comm,locality));
 #endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);

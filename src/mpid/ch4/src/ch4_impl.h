@@ -82,7 +82,7 @@ static inline MPID_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
     MPIDI_CH4R_REQUEST(req, req) = NULL;
-    MPID_cc_set(&req->cc, 1);
+    MPIR_cc_set(&req->cc, 1);
     MPIU_Object_set_ref(req, refcount);
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
@@ -115,13 +115,13 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPID_Request * req)
     MPIU_Assert(count >= 0);
 
     if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
+        MPIU_Assert(MPIR_cc_is_complete(&req->cc));
 
         if (req->comm)
             MPIR_Comm_release(req->comm);
 
         if (req->greq_fns)
-            MPIU_Free(req->greq_fns);
+            MPL_free(req->greq_fns);
 
         MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
     }
@@ -152,7 +152,7 @@ __CH4_INLINE__ void MPIDI_CH4R_Request_release(MPID_Request * req)
 __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 {
     int count;
-    MPID_cc_decr(req->cc_ptr, &count);
+    MPIR_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
     if (count == 0)
         MPIDI_CH4R_Request_release(req);
@@ -323,7 +323,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
     (rreq_) = MPIDI_Request_create();                                   \
     if ((rreq_) != NULL) {                                              \
       MPIU_Object_set_ref((rreq_), 1);                                  \
-      MPID_cc_set(&(rreq_)->cc, 0);                                     \
+      MPIR_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPID_REQUEST_RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
     }                                                                   \

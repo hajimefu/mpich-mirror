@@ -24,7 +24,7 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
 	MPIU_Assert(count >= 0);			\
 	if (count == 0)					\
 	{						\
-	    MPIU_Free(req->noncontig);			\
+	    MPL_free(req->noncontig);			\
 	    MPIDI_CH4_NMI_OFI_Win_request_t_tls_free(req);		\
 	}						\
     })
@@ -39,7 +39,7 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
     memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,                \
            sizeof(MPIDI_CH4_NMI_OFI_Win_request_t)-                           \
            MPIDI_REQUEST_HDR_SIZE);                             \
-    req->noncontig = (MPIDI_CH4_NMI_OFI_Win_noncontig_t*)MPIU_Calloc(1,(extra)+sizeof(*(req->noncontig))); \
+    req->noncontig = (MPIDI_CH4_NMI_OFI_Win_noncontig_t*)MPL_calloc(1,(extra)+sizeof(*(req->noncontig))); \
   })
 
 #define MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(FUNC,STR)					\
@@ -70,7 +70,7 @@ static inline MPID_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int coun
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPID_cc_set(&req->cc, 1);
+    MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
     req->greq_fns = NULL;
@@ -101,7 +101,7 @@ static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPID_Request *sreq)
         return;
 
     if(req_hdr->am_hdr != &req_hdr->am_hdr_buf[0]) {
-        MPIU_Free(req_hdr->am_hdr);
+        MPL_free(req_hdr->am_hdr);
     }
 
     MPIDI_CH4R_release_buf(req_hdr);
@@ -137,9 +137,9 @@ static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
 
     if(am_hdr_sz > req_hdr->am_hdr_sz) {
         if(req_hdr->am_hdr != &req_hdr->am_hdr_buf[0])
-            MPIU_Free(req_hdr->am_hdr);
+            MPL_free(req_hdr->am_hdr);
 
-        req_hdr->am_hdr = MPIU_Malloc(am_hdr_sz);
+        req_hdr->am_hdr = MPL_malloc(am_hdr_sz);
         MPIU_Assert(req_hdr->am_hdr);
         req_hdr->am_hdr_sz = am_hdr_sz;
     }
@@ -199,7 +199,7 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context)
     if(((MPIDI_Global.cq_buff_head + 1) %
         MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED == MPIDI_Global.cq_buff_tail) ||
        !slist_empty(&MPIDI_Global.cq_buff_list)) {
-        MPIDI_CH4_NMI_OFI_Cq_list_t *list_entry = (MPIDI_CH4_NMI_OFI_Cq_list_t *) MPIU_Malloc(sizeof(MPIDI_CH4_NMI_OFI_Cq_list_t));
+        MPIDI_CH4_NMI_OFI_Cq_list_t *list_entry = (MPIDI_CH4_NMI_OFI_Cq_list_t *) MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Cq_list_t));
         MPIU_Assert(list_entry);
         list_entry->cq_entry = cq_entry;
         slist_insert_tail(&list_entry->entry, &MPIDI_Global.cq_buff_list);
@@ -275,7 +275,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     MPIU_Assert((uint64_t)use_comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
 
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);
@@ -340,8 +340,8 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
     MPIU_Assert((int)index < MPIDI_Global.max_huge_rmas);
     lmt_info->rma_key = index << MPIDI_Global.huge_rma_shift;
 
-    MPID_cc_incr(sreq->cc_ptr, &c); /* send completion */
-    MPID_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
+    MPIR_cc_incr(sreq->cc_ptr, &c); /* send completion */
+    MPIR_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
     MPIU_Assert((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) <= MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE);
     MPIDI_CH4_NMI_OFI_CALL(fi_mr_reg(MPIDI_Global.domain,
                                      data,
@@ -415,7 +415,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
     iov[2].iov_base     = (void *) data;
     iov[2].iov_len      = count;
 
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendv(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), iov, NULL, 3,
                                              MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
@@ -479,7 +479,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
         MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
         last = data_sz;
-        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = (char *) MPIU_Malloc(data_sz);
+        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = (char *) MPL_malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
         MPID_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
@@ -574,7 +574,7 @@ fn_fail:
 static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPID_Request *req)
 {
     int count;
-    MPID_cc_decr(req->cc_ptr, &count);
+    MPIR_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
 
     if(count == 0) {

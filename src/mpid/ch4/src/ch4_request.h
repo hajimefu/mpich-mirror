@@ -28,7 +28,7 @@ __CH4_INLINE__ int MPIDI_Request_is_pending_failure(MPID_Request * req)
 
 __CH4_INLINE__ void MPIDI_Request_set_completed(MPID_Request * req)
 {
-    MPID_cc_set(&req->cc, 0);
+    MPIR_cc_set(&req->cc, 0);
     return;
 }
 
@@ -97,7 +97,7 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 __CH4_INLINE__ int MPIDI_Request_complete(MPID_Request * req)
 {
     int count;
-    MPID_cc_decr(req->cc_ptr, &count);
+    MPIR_cc_decr(req->cc_ptr, &count);
     MPIU_Assert(count >= 0);
     MPIDI_CH4I_request_release(req);
     return MPI_SUCCESS;

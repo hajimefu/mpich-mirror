@@ -75,7 +75,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
         MPID_Segment_init(buf, count, datatype, MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr), 0);
 
-        MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) = (char *) MPIU_Malloc(data_sz);
+        MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) = (char *) MPL_malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv Pack Buffer alloc");
         recv_buf = MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer);
@@ -270,7 +270,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPID_Request *rreq)
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
 
     if(ret == 0) {
-        while((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPID_cc_is_complete(&rreq->cc))) {
+        while((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPIR_cc_is_complete(&rreq->cc))) {
             if((mpi_errno = MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
                 goto fn_exit;
         }

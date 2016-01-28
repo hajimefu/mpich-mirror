@@ -74,8 +74,8 @@ static inline int shm_do_isend(const void *buf,
     /* enqueue sreq */
     REQ_SHM_ENQUEUE(sreq, MPIDI_CH4_SHM_sendq);
     *request = sreq;
-    MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-            (MPIU_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
+    MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
+            (MPL_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
              MPIDI_CH4R_rank_to_lpid(rank, comm), MPID_nem_mem_region.rank, comm->comm_kind,
              comm->rank, tag, comm->context_id + context_offset));
 
@@ -121,8 +121,8 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
             cell->pending = NULL;
             MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
             *request = NULL;
-            MPIU_DBG_MSG_FMT(HANDLE, TYPICAL,
-                    (MPIU_DBG_FDEST, "Sent to grank %d from %d in send %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
+            MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
+                    (MPL_DBG_FDEST, "Sent to grank %d from %d in send %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
                      cell->context_id));
             goto fn_exit;
         }
@@ -224,7 +224,7 @@ static inline int MPIDI_CH4_SHM_startall(int count, MPID_Request * requests[])
 
             if (REQ_SHM(preq)->type == TYPE_BUFFERED) {
                 preq->cc_ptr = &preq->cc;
-                MPID_cc_set(&preq->cc, 0);
+                MPIR_cc_set(&preq->cc, 0);
             }
             else
                 preq->cc_ptr = &preq->partner_request->cc;
@@ -233,7 +233,7 @@ static inline int MPIDI_CH4_SHM_startall(int count, MPID_Request * requests[])
             preq->partner_request = NULL;
             preq->status.MPI_ERROR = mpi_errno;
             preq->cc_ptr = &preq->cc;
-            MPID_cc_set(&preq->cc, 0);
+            MPIR_cc_set(&preq->cc, 0);
         }
     }
 
@@ -258,7 +258,7 @@ static inline int MPIDI_CH4_SHM_send_init(const void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SEND_INIT);
     MPIDI_Request_create_sreq(sreq);
     MPIU_Object_set_ref(sreq, 1);
-    MPID_cc_set(&(sreq)->cc, 0);
+    MPIR_cc_set(&(sreq)->cc, 0);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
     MPIR_Comm_add_ref(comm);
@@ -351,7 +351,7 @@ static inline int MPIDI_CH4_SHM_rsend_init(const void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_RSEND_INIT);
     MPIDI_Request_create_sreq(sreq);
     MPIU_Object_set_ref(sreq, 1);
-    MPID_cc_set(&(sreq)->cc, 0);
+    MPIR_cc_set(&(sreq)->cc, 0);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
     MPIR_Comm_add_ref(comm);

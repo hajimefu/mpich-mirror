@@ -96,10 +96,10 @@ typedef unsigned char uint8_t;
 #define MPL_uthash_fatal(msg) exit(-1)        /* fatal error (out of memory,etc) */
 #endif
 #ifndef MPL_uthash_malloc
-#define MPL_uthash_malloc(sz) MPIU_Malloc(sz)      /* malloc fcn                      */
+#define MPL_uthash_malloc(sz) MPL_malloc(sz)      /* malloc fcn                      */
 #endif
 #ifndef MPL_uthash_free
-#define MPL_uthash_free(ptr,sz) MPIU_Free(ptr)     /* free fcn                        */
+#define MPL_uthash_free(ptr,sz) MPL_free(ptr)     /* free fcn                        */
 #endif
 
 #ifndef MPL_uthash_noexpand_fyi

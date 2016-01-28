@@ -177,7 +177,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* remote node or service.  this does not necessarily allocate resources.   */
     /* Pass NULL for name/service because we want a list of providers supported */
     /* ------------------------------------------------------------------------ */
-    provname = MPIR_CVAR_OFI_USE_PROVIDER ? (char *) MPIU_Strdup(MPIR_CVAR_OFI_USE_PROVIDER) : NULL;
+    provname = MPIR_CVAR_OFI_USE_PROVIDER ? (char *) MPL_strdup(MPIR_CVAR_OFI_USE_PROVIDER) : NULL;
     hints->fabric_attr->prov_name = provname;
     MPIDI_CH4_NMI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, hints, &prov), addrinfo);
     MPIDI_CH4_NMI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
@@ -273,11 +273,11 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
 
     if(do_av_table) {
         av_attr.type           = FI_AV_TABLE;
-        MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Malloc(sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
+        MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
         mapped_table           = NULL;
     } else {
         av_attr.type           = FI_AV_MAP;
-        MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Malloc(size * sizeof(fi_addr_t) + sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
+        MPIDI_Addr_table       = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPL_malloc(size * sizeof(fi_addr_t) + sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
         mapped_table           = (fi_addr_t *) MPIDI_Addr_table->table;
     }
 
@@ -314,10 +314,10 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     MPIU_Assert(MPIDI_Global.addrnamelen <= FI_NAME_MAX);
 
     val = valS;
-    str_errno = MPIU_STR_SUCCESS;
+    str_errno = MPL_STR_SUCCESS;
     maxlen = MPIDI_KVSAPPSTRLEN;
     memset(val, 0, maxlen);
-    MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_add_binary_arg(&val, &maxlen, "OFI", (char *) &MPIDI_Global.addrname,
+    MPIDI_CH4_NMI_OFI_STR_CALL(MPL_str_add_binary_arg(&val, &maxlen, "OFI", (char *) &MPIDI_Global.addrname,
                                                        MPIDI_Global.addrnamelen), buscard_len);
     MPIDI_CH4_NMI_OFI_PMI_CALL_POP(PMI_KVS_Get_my_name(MPIDI_Global.kvsname, MPIDI_KVSAPPSTRLEN), pmi);
 
@@ -331,13 +331,13 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* Create our address table from    */
     /* encoded KVS values               */
     /* -------------------------------- */
-    table = (char *) MPIU_Malloc(size * MPIDI_Global.addrnamelen);
+    table = (char *) MPL_malloc(size * MPIDI_Global.addrnamelen);
     maxlen = MPIDI_KVSAPPSTRLEN;
 
     for(i = 0; i < size; i++) {
         sprintf(keyS, "OFI-%d", i);
         MPIDI_CH4_NMI_OFI_PMI_CALL_POP(PMI_KVS_Get(MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
-        MPIDI_CH4_NMI_OFI_STR_CALL(MPIU_Str_get_binary_arg
+        MPIDI_CH4_NMI_OFI_STR_CALL(MPL_str_get_binary_arg
                                    (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
                                     MPIDI_Global.addrnamelen, &maxlen), buscard_len);
     }
@@ -382,7 +382,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
                                          &optlen, sizeof(optlen)), setopt);
 
         for(i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++) {
-            MPIDI_Global.am_bufs[i]          = MPIU_Malloc(MPIDI_CH4_NMI_OFI_AM_BUFF_SZ);
+            MPIDI_Global.am_bufs[i]          = MPL_malloc(MPIDI_CH4_NMI_OFI_AM_BUFF_SZ);
             MPIDI_Global.am_reqs[i].event_id = MPIDI_CH4_NMI_OFI_EVENT_AM_RECV;
             MPIDI_Global.am_reqs[i].index    = i;
             MPIU_Assert(MPIDI_Global.am_bufs[i]);
@@ -410,7 +410,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
      * build this information because it is used by the mapper later when
      * tranlating gpids to lpids */
     MPIDI_Global.node_map = (MPID_Node_id_t *)
-                            MPIU_Malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+                            MPL_malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
     MPIDI_CH4R_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
@@ -444,7 +444,7 @@ fn_exit:
     /* Free temporary resources         */
     /* -------------------------------- */
     if(provname) {
-        MPIU_Free(provname);
+        MPL_free(provname);
         hints->fabric_attr->prov_name = NULL;
     }
 
@@ -454,7 +454,7 @@ fn_exit:
     fi_freeinfo(hints);
 
     if(table)
-        MPIU_Free(table);
+        MPL_free(table);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INIT);
     return mpi_errno;
@@ -537,14 +537,14 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
     comm = MPIR_Process.comm_self;
     MPIR_Comm_release_always(comm);
 
-    MPIU_Free(MPIDI_Addr_table);
-    MPIU_Free(MPIDI_Global.node_map);
+    MPL_free(MPIDI_Addr_table);
+    MPL_free(MPIDI_Global.node_map);
 
     MPIDI_CH4_NMI_OFI_Map_destroy(MPIDI_Global.win_map);
 
     if(do_am) {
         for(i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++)
-            MPIU_Free(MPIDI_Global.am_bufs[i]);
+            MPL_free(MPIDI_Global.am_bufs[i]);
 
         MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
     }
@@ -572,14 +572,14 @@ static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info *info_ptr)
 {
 
     void *ap;
-    ap = MPIU_Malloc(size);
+    ap = MPL_malloc(size);
     return ap;
 }
 
 static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Free(ptr);
+    MPL_free(ptr);
 
     return mpi_errno;
 }
@@ -663,14 +663,14 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
         if(!found) {
             int start = MPIDI_Addr_table->size;
             fi_addr_t addr;
-            MPIDI_Global.node_map = (MPID_Node_id_t *) MPIU_Realloc(MPIDI_Global.node_map,
+            MPIDI_Global.node_map = (MPID_Node_id_t *) MPL_realloc(MPIDI_Global.node_map,
                                                                     (1 +
                                                                      start) *
                                                                     sizeof(MPID_Node_id_t));
             MPIDI_Global.node_map[start] = MPIDI_CH4_NMI_OFI_GPID(&gpid[i])->node;
 
             if(use_av_table)
-                MPIDI_Addr_table = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPIU_Realloc(MPIDI_Addr_table,
+                MPIDI_Addr_table = (MPIDI_CH4_NMI_OFI_Addr_table_t *) MPL_realloc(MPIDI_Addr_table,
                                                                                    (1 + start) * sizeof(fi_addr_t) +
                                                                                    sizeof(MPIDI_CH4_NMI_OFI_Addr_table_t));
 

@@ -50,7 +50,7 @@ int MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_VCRT_CREATE);
 
-    vcrt = (struct MPIDI_CH4_NMI_OFI_VCRT *)MPIU_Malloc(sizeof(struct MPIDI_CH4_NMI_OFI_VCRT) +
+    vcrt = (struct MPIDI_CH4_NMI_OFI_VCRT *)MPL_malloc(sizeof(struct MPIDI_CH4_NMI_OFI_VCRT) +
                                                         size*sizeof(MPIDI_CH4_NMI_OFI_VCR));
 
     if(vcrt != NULL) {
@@ -84,7 +84,7 @@ int MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt)
     MPIU_Object_release_ref(vcrt, &count);
 
     if(count == 0)
-        MPIU_Free(vcrt);
+        MPL_free(vcrt);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_VCRT_RELEASE);
     return MPI_SUCCESS;
@@ -94,7 +94,7 @@ typedef std::map<uint64_t,void *>  uint64_map;
 void MPIDI_CH4_NMI_OFI_Map_create(void **_map)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    *_map = (void *)MPIU_Malloc(sizeof(uint64_map));
+    *_map = (void *)MPL_malloc(sizeof(uint64_map));
     new(*_map) uint64_map();
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
@@ -104,7 +104,7 @@ void MPIDI_CH4_NMI_OFI_Map_destroy(void *_map)
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     uint64_map *m = (uint64_map *)_map;
     m->~uint64_map();
-    MPIU_Free(_map);
+    MPL_free(_map);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
@@ -154,7 +154,7 @@ void MPIDI_CH4_NMI_OFI_Index_allocator_create(void **_indexmap, int start)
 {
     MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    *_indexmap  = (void *)MPIU_Malloc(sizeof(MPIDI_CH4_NMI_OFI_Index_allocator_t));
+    *_indexmap  = (void *)MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Index_allocator_t));
     alloc       = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)(*_indexmap);
     alloc->high = start;
     new(&alloc->free_pool)std::vector<int>();
@@ -194,7 +194,7 @@ void MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *_indexmap)
     MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)_indexmap;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     alloc->free_pool.~vector();
-    MPIU_Free(_indexmap);
+    MPL_free(_indexmap);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
@@ -239,7 +239,7 @@ MPIDI_CH4_NMI_OFI_Win_lock_advance(MPID_Win *win)
         } else
             MPIU_Assert(0);
 
-        MPIU_Free(lock);
+        MPL_free(lock);
         mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
 
         if(mpi_errno != MPI_SUCCESS)
@@ -258,7 +258,7 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_O
                                                            unsigned                    peer)
 {
     struct MPIDI_CH4R_win_lock *lock =
-        (struct MPIDI_CH4R_win_lock *)MPIU_Calloc(1, sizeof(struct MPIDI_CH4R_win_lock));
+        (struct MPIDI_CH4R_win_lock *)MPL_calloc(1, sizeof(struct MPIDI_CH4R_win_lock));
 
     if(info->type == MPIDI_CH4_NMI_OFI_CTRL_LOCKREQ)
         lock->mtype = MPIDI_CH4_NMI_OFI_REQUEST_LOCK;
@@ -347,7 +347,7 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge_cleanup(MPIDI_CH4_NMI_OFI_Send_con
                                                                          info->origin_rank);
     MPIDI_CH4_NMI_OFI_Map_destroy(recv->chunk_q);
     MPIDI_CH4_NMI_OFI_Map_erase(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,info->origin_rank);
-    MPIU_Free(recv);
+    MPL_free(recv);
 }
 
 static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *info)
@@ -362,7 +362,7 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *
                                                                          info->origin_rank);
 
     if(recv == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        recv        = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPIU_Malloc(sizeof(*recv));
+        recv        = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPL_malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_CH4_NMI_OFI_Map_create(&recv->chunk_q);
         MPIDI_CH4_NMI_OFI_Map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
@@ -372,7 +372,7 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *
     hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *)MPIDI_CH4_NMI_OFI_Map_lookup(recv->chunk_q,info->seqno);
 
     if(hc == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *)MPIU_Malloc(sizeof(*hc));
+        hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *)MPL_malloc(sizeof(*hc));
         memset(hc,0, sizeof(*hc));
         hc->event_id = MPIDI_CH4_NMI_OFI_EVENT_GET_HUGE;
         MPIDI_CH4_NMI_OFI_Map_set(recv->chunk_q,info->seqno,hc);

@@ -68,7 +68,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     }
 
     MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = MPIDI_CH4I_win_base_at_origin(win, target_rank) + offset;
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
@@ -99,13 +99,13 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     n_iov = (int) num_iov;
     MPIU_Assert(n_iov > 0);
     am_hdr.n_iov = n_iov;
-    dt_iov = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
+    dt_iov = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
     MPIU_Assert(dt_iov);
 
     last = data_sz;
     MPID_Segment_pack_vector(segment_ptr, 0, &last, dt_iov, &n_iov);
     MPIU_Assert(last == (MPI_Aint)data_sz);
-    MPIU_Free(segment_ptr);
+    MPL_free(segment_ptr);
 
     am_iov[0].iov_base = &am_hdr;
     am_iov[0].iov_len = sizeof(am_hdr);
@@ -197,7 +197,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     }
 
     MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
     am_hdr.addr = MPIDI_CH4I_win_base_at_origin(win, target_rank) + offset;
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
@@ -228,13 +228,13 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     n_iov = (int) num_iov;
     MPIU_Assert(n_iov > 0);
     am_hdr.n_iov = n_iov;
-    dt_iov = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
+    dt_iov = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
     MPIU_Assert(dt_iov);
 
     last = data_sz;
     MPID_Segment_pack_vector(segment_ptr, 0, &last, dt_iov, &n_iov);
     MPIU_Assert(last == (MPI_Aint)data_sz);
-    MPIU_Free(segment_ptr);
+    MPL_free(segment_ptr);
 
     MPIDI_CH4R_REQUEST(sreq, req->greq.dt_iov) = dt_iov;
     mpi_errno = MPIDI_CH4_NM_send_am(target_rank, win->comm_ptr, MPIDI_CH4R_GET_REQ,
@@ -404,7 +404,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
 
     MPIDI_CH4R_REQUEST(sreq, req->areq.win_ptr) = (uint64_t) win;
     MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.req_ptr = (uint64_t) sreq;
     am_hdr.origin_count = origin_count;
@@ -461,13 +461,13 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
     n_iov = (int) num_iov;
     MPIU_Assert(n_iov > 0);
     am_hdr.n_iov = n_iov;
-    dt_iov = (struct iovec *) MPIU_Malloc(n_iov * sizeof(struct iovec));
+    dt_iov = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
     MPIU_Assert(dt_iov);
 
     last = data_sz;
     MPID_Segment_pack_vector(segment_ptr, 0, &last, dt_iov, &n_iov);
     MPIU_Assert(last == (MPI_Aint)data_sz);
-    MPIU_Free(segment_ptr);
+    MPL_free(segment_ptr);
 
     am_iov[0].iov_base = &am_hdr;
     am_iov[0].iov_len = sizeof(am_hdr);
@@ -702,7 +702,7 @@ __CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
         goto fn_exit;
     }
 
-    p_data = MPIU_Malloc(data_sz * 2);
+    p_data = MPL_malloc(data_sz * 2);
     MPIU_Assert(p_data);
     MPIU_Memcpy(p_data, (char *)origin_addr, data_sz);
     MPIU_Memcpy((char *)p_data + data_sz, (char *)compare_addr, data_sz);
@@ -714,7 +714,7 @@ __CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
     MPIDI_CH4R_REQUEST(sreq, req->creq.data) = p_data;
 
     MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
-    MPID_cc_incr(sreq->cc_ptr, &c);
+    MPIR_cc_incr(sreq->cc_ptr, &c);
 
     am_hdr.addr = MPIDI_CH4I_win_base_at_origin(win, target_rank) + offset;
     am_hdr.datatype = datatype;

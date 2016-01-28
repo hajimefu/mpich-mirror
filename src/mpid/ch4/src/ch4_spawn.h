@@ -28,14 +28,14 @@ static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
 
     if(nkeys == 0) goto fn_exit;
 
-    kv = (PMI_keyval_t *)MPIU_Malloc(nkeys * sizeof(PMI_keyval_t));
+    kv = (PMI_keyval_t *)MPL_malloc(nkeys * sizeof(PMI_keyval_t));
 
     for(i=0; i<nkeys; i++) {
         mpi_errno = MPIR_Info_get_nthkey_impl(info_ptr,i,key);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         MPIR_Info_get_valuelen_impl(info_ptr,key,&vallen,&flag);
-        kv[i].key = (const char *)MPIU_Strdup(key);
-        kv[i].val = (char *)MPIU_Malloc(vallen + 1);
+        kv[i].key = (const char *)MPL_strdup(key);
+        kv[i].val = (char *)MPL_malloc(vallen + 1);
         MPIR_Info_get_impl(info_ptr, key, vallen+1, kv[i].val, &flag);
     }
 
@@ -55,14 +55,14 @@ static inline void MPIDI_free_pmi_keyvals(PMI_keyval_t **kv,
     for(i=0; i<size; i++) {
         for(j=0; j<counts[i]; j++) {
             if(kv[i][j].key != NULL)
-                MPIU_Free((char *)kv[i][j].key);
+                MPL_free((char *)kv[i][j].key);
 
             if(kv[i][j].val != NULL)
-                MPIU_Free(kv[i][j].val);
+                MPL_free(kv[i][j].val);
         }
 
         if(kv[i] != NULL)
-            MPIU_Free(kv[i]);
+            MPL_free(kv[i]);
     }
 
 }
@@ -97,7 +97,7 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
         for(i=0; i<count; i++)
             total_num_processes += maxprocs[i];
 
-        pmi_errcodes = (int *)MPIU_Malloc(sizeof(int) * total_num_processes);
+        pmi_errcodes = (int *)MPL_malloc(sizeof(int) * total_num_processes);
         MPIR_ERR_CHKANDJUMP(!pmi_errcodes, mpi_errno, MPI_ERR_OTHER, "**nomem");
 
         for(i=0; i<total_num_processes; i++)
@@ -106,9 +106,9 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
         mpi_errno = MPIDI_Open_port(NULL, port_name);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-        info_keyval_sizes   = (int *)          MPIU_Malloc(count*sizeof(int));
+        info_keyval_sizes   = (int *)          MPL_malloc(count*sizeof(int));
         MPIR_ERR_CHKANDJUMP(!info_keyval_sizes, mpi_errno, MPI_ERR_OTHER, "**nomem");
-        info_keyval_vectors = (PMI_keyval_t **) MPIU_Malloc(count*sizeof(PMI_keyval_t *));
+        info_keyval_vectors = (PMI_keyval_t **) MPL_malloc(count*sizeof(PMI_keyval_t *));
         MPIR_ERR_CHKANDJUMP(!info_keyval_vectors, mpi_errno, MPI_ERR_OTHER, "**nomem");
 
         if(!info_ptrs)
@@ -190,14 +190,14 @@ fn_exit:
 
     if(info_keyval_vectors) {
         MPIDI_free_pmi_keyvals(info_keyval_vectors, count, info_keyval_sizes);
-        MPIU_Free(info_keyval_vectors);
+        MPL_free(info_keyval_vectors);
     }
 
     if(info_keyval_sizes)
-        MPIU_Free(info_keyval_sizes);
+        MPL_free(info_keyval_sizes);
 
     if(pmi_errcodes)
-        MPIU_Free(pmi_errcodes);
+        MPL_free(pmi_errcodes);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     return mpi_errno;

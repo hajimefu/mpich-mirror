@@ -242,7 +242,7 @@ __CH4_INLINE__ void *MPIDI_CH4R_alloc_mem(size_t size, MPID_Info * info_ptr)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
     void *p;
-    p = MPIU_Malloc(size);
+    p = MPL_malloc(size);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ALLOC_MEM);
     return p;
 }
@@ -256,7 +256,7 @@ __CH4_INLINE__ int MPIDI_CH4R_free_mem(void *ptr)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FREE_MEM);
-    MPIU_Free(ptr);
+    MPL_free(ptr);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FREE_MEM);
     return mpi_errno;
 }

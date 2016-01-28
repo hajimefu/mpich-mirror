@@ -31,8 +31,8 @@
         {                                                               \
             int tmp;                                                    \
             MPIDI_CH4_NMI_OFI_Chunk_request *creq;                      \
-            MPID_cc_incr((*sigreq)->cc_ptr, &tmp);                      \
-            creq=(MPIDI_CH4_NMI_OFI_Chunk_request*)MPIU_Malloc(sizeof(*creq)); \
+            MPIR_cc_incr((*sigreq)->cc_ptr, &tmp);                      \
+            creq=(MPIDI_CH4_NMI_OFI_Chunk_request*)MPL_malloc(sizeof(*creq)); \
             creq->event_id = MPIDI_CH4_NMI_OFI_EVENT_CHUNK_DONE;        \
             creq->parent   = *sigreq;                                   \
             msg.context    = &creq->context;                            \
@@ -47,7 +47,7 @@
         {                                                               \
             MPIDI_CH4_NMI_OFI_REQUEST_CREATE((*(sigreq)));              \
             (*sigreq)->kind             = MPID_WIN_REQUEST;             \
-            MPID_cc_set((*(sigreq))->cc_ptr, 0);                        \
+            MPIR_cc_set((*(sigreq))->cc_ptr, 0);                        \
             *(flags)                    = FI_COMPLETION;                \
             *(ep)                       = MPIDI_CH4_NMI_OFI_EP_TX_RMA(0); \
         }                                                               \
@@ -153,7 +153,7 @@ static inline void MPIDI_CH4_NMI_OFI_Win_datatype_map(MPIDI_CH4_NMI_OFI_Win_data
     } else {
         unsigned map_size = dt->pointer->max_contig_blocks*dt->count + 1;
         dt->num_contig    = map_size;
-        dt->map           = (DLOOP_VECTOR *)MPIU_Malloc(map_size * sizeof(DLOOP_VECTOR));
+        dt->map           = (DLOOP_VECTOR *)MPL_malloc(map_size * sizeof(DLOOP_VECTOR));
         MPIU_Assert(dt->map != NULL);
 
         MPID_Segment seg;

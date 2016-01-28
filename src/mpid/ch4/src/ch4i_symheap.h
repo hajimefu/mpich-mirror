@@ -175,7 +175,7 @@ static inline int MPIDI_CH4I_get_symmetric_heap(MPI_Aint    size,
 
   if(iter == 0) {
 	  fprintf(stderr, "WARNING: Win_allocate:  Unable to allocate symmetric heap\n");
-	  baseP = MPIU_Malloc(size);
+	  baseP = MPL_malloc(size);
 	  MPIR_ERR_CHKANDJUMP((baseP == NULL), mpi_errno,
 			      MPI_ERR_BUFFER, "**bufnull");
 	  MPIDI_CH4R_WIN(win, mmap_sz)   = -1ULL;

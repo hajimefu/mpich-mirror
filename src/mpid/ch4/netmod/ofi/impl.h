@@ -108,7 +108,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
       MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->target_dt); \
       MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->origin_dt); \
       MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->result_dt); \
-      MPIU_Free(req->noncontig);                      \
+      MPL_free(req->noncontig);                      \
       MPIDI_CH4_NMI_OFI_Win_request_t_tls_free(req);                \
     }                                                 \
   })
@@ -138,7 +138,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   do {                                                                  \
     (rreq_) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);                          \
     if ((rreq_) != NULL) {                                              \
-      MPID_cc_set(&(rreq_)->cc, 0);                                     \
+      MPIR_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPID_REQUEST_RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
     }                                                                   \
@@ -284,7 +284,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   do                                                            \
     {                                                           \
       str_errno = FUNC;                                         \
-      MPIDI_CH4_NMI_OFI_ERR(str_errno!=MPIU_STR_SUCCESS,        \
+      MPIDI_CH4_NMI_OFI_ERR(str_errno!=MPL_STR_SUCCESS,        \
                             mpi_errno,                          \
                             MPI_ERR_OTHER,                      \
                             "**"#STR,                           \
@@ -351,7 +351,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int cou
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
     MPIDI_CH4R_REQUEST(req, req) = NULL;
-    MPID_cc_set(&req->cc, 1);
+    MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
     req->greq_fns = NULL;
@@ -380,7 +380,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
     MPIDI_CH4R_REQUEST(req, req) = NULL;
-    MPID_cc_set(&req->cc, 0);
+    MPIR_cc_set(&req->cc, 0);
     req->cc_ptr  = &req->cc;
     MPIU_Object_set_ref(req, count);
     req->greq_fns          = NULL;
@@ -481,7 +481,7 @@ static inline MPID_Request *MPIDI_CH4_NMI_OFI_Context_to_request(void *context)
 static inline void MPIDI_CH4_NMI_OFI_Win_datatype_unmap(MPIDI_CH4_NMI_OFI_Win_datatype_t *dt)
 {
     if(dt->map != &dt->__map)
-        MPIU_Free(dt->map);
+        MPL_free(dt->map);
 }
 
 /* Utility functions */

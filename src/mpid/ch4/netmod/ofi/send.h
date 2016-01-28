@@ -113,7 +113,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
         MPIDI_CH4_NMI_OFI_SSEND_ACKREQUEST_CREATE(ackreq);
         ackreq->event_id = MPIDI_CH4_NMI_OFI_EVENT_SSEND_ACK;
         ackreq->signal_req = sreq;
-        MPID_cc_incr(sreq->cc_ptr, &c);
+        MPIR_cc_incr(sreq->cc_ptr, &c);
         ssend_match = MPIDI_CH4_NMI_OFI_Init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
         ssend_match |= MPIDI_CH4_NMI_OFI_SYNC_SEND_ACK;
         MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_trecv(MPIDI_CH4_NMI_OFI_EP_RX_TAG(0),      /* endpoint    */
@@ -137,7 +137,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
         MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
         last = data_sz;
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer) = (char *) MPIU_Malloc(data_sz);
+        MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer) = (char *) MPL_malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
         MPID_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
@@ -163,13 +163,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
         void *ptr;
         c = 1;
         MPIDI_CH4_NMI_OFI_REQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_SEND_HUGE;
-        MPID_cc_incr(sreq->cc_ptr, &c);
+        MPIR_cc_incr(sreq->cc_ptr, &c);
         ptr = MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters, rank);
 
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
 
         if(ptr == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-            ptr = MPIU_Malloc(sizeof(MPIDI_CH4_NMI_OFI_Huge_counter_t));
+            ptr = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Huge_counter_t));
             cntr = (MPIDI_CH4_NMI_OFI_Huge_counter_t *) ptr;
             cntr->outstanding = 0;
             cntr->counter = 0;
@@ -454,14 +454,14 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPID_Request *requests[])
 
             if(MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.type) == MPIDI_PTYPE_BSEND) {
                 preq->cc_ptr = &preq->cc;
-                MPID_cc_set(&preq->cc, 0);
+                MPIR_cc_set(&preq->cc, 0);
             } else
                 preq->cc_ptr = &preq->partner_request->cc;
         } else {
             preq->partner_request = NULL;
             preq->status.MPI_ERROR = rc;
             preq->cc_ptr = &preq->cc;
-            MPID_cc_set(&preq->cc, 0);
+            MPIR_cc_set(&preq->cc, 0);
         }
     }
 

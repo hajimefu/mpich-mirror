@@ -207,13 +207,13 @@ static inline int MPIDI_CH4_SHM_finalize(void)
         MPIR_ERR_POP(mpi_errno);
 
     /* from MPID_nem_init */
-    MPIU_Free(MPID_nem_mem_region.FreeQ);
-    MPIU_Free(MPID_nem_mem_region.RecvQ);
-    MPIU_Free(MPID_nem_mem_region.local_ranks);
-    MPIU_Free(MPID_nem_mem_region.seg);
-    MPIU_Free(MPID_nem_mem_region.mailboxes.out);
-    MPIU_Free(MPID_nem_mem_region.mailboxes.in);
-    MPIU_Free(MPID_nem_mem_region.local_procs);
+    MPL_free(MPID_nem_mem_region.FreeQ);
+    MPL_free(MPID_nem_mem_region.RecvQ);
+    MPL_free(MPID_nem_mem_region.local_ranks);
+    MPL_free(MPID_nem_mem_region.seg);
+    MPL_free(MPID_nem_mem_region.mailboxes.out);
+    MPL_free(MPID_nem_mem_region.mailboxes.in);
+    MPL_free(MPID_nem_mem_region.local_procs);
 
     MPIDI_CH3I_Seg_destroy();
     if (mpi_errno)
