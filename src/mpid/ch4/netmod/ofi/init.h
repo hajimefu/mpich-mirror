@@ -163,7 +163,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
     hints->domain_attr->data_progress    = FI_PROGRESS_MANUAL;
     hints->domain_attr->resource_mgmt    = FI_RM_ENABLED;
-    hints->domain_attr->av_type          = FI_AV_UNSPEC;
+    hints->domain_attr->av_type          = do_av_table?FI_AV_TABLE:FI_AV_MAP;
     hints->domain_attr->mr_mode          = FI_MR_SCALABLE;
     hints->tx_attr->op_flags             = FI_DELIVERY_COMPLETE | FI_COMPLETION;
     hints->tx_attr->msg_order            = FI_ORDER_SAS;
