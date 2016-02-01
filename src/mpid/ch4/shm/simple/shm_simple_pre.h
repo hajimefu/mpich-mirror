@@ -19,24 +19,22 @@ struct MPID_Request;
 typedef struct {
     struct MPID_Request *next;
     struct MPID_Request *pending;
-    int dest;
-    int rank;
-    int tag;
-    int context_id;
-    char *user_buf;
-    MPIDI_msg_sz_t data_sz;
-    int type;
-    int user_count;
-    MPI_Datatype datatype;
-    /* segment, segment_first, and segment_size are used when processing
-       non-contiguous datatypes */
+    int                  dest;
+    int                  rank;
+    int                  tag;
+    int                  context_id;
+    char                *user_buf;
+    size_t               data_sz;
+    int                  type;
+    int                  user_count;
+    MPI_Datatype         datatype;
     struct MPID_Segment *segment_ptr;
-    MPIDI_msg_sz_t segment_first;
-    MPIDI_msg_sz_t segment_size;
-} MPIDI_CH4_SHM_SIMPLE_Request_t;
+    size_t               segment_first;
+    size_t               segment_size;
+} MPIDI_CH4_SHMI_SIMPLE_Request_t;
 
-typedef struct MPIDI_CH4_SHM_SIMPLE_Comm_t {
+typedef struct {
     int dummy;
-} MPIDI_CH4_SHM_SIMPLE_Comm_t;
+} MPIDI_CH4_SHMI_SIMPLE_Comm_t;
 
 #endif

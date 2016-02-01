@@ -36,7 +36,7 @@ dnl Parse the shmmod arguments
             AC_MSG_NOTICE([Disabling simple shared memory lock free queues])
         else
             AC_MSG_NOTICE([Enabling simple shared memory lock free queues])
-            PAC_APPEND_FLAG([-DMPID_NEM_USE_LOCK_FREE_QUEUES],[CPPFLAGS])
+            PAC_APPEND_FLAG([-DMPIDI_CH4_SHMI_SIMPLE_USE_LOCK_FREE_QUEUES],[CPPFLAGS])
         fi
         # the simple device channel depends on the common shm code
         build_mpid_common_shm=yes

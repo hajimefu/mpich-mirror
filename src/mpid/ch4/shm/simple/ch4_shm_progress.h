@@ -14,28 +14,28 @@
 #include "ch4_shm_impl.h"
 
 /* ----------------------------------------------------- */
-/* MPIDI_CH4_SHM_do_progress_recv                     */
+/* MPIDI_CH4_SHMI_SIMPLE_Progress_recv                     */
 /* ----------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_do_progress_recv)
-static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_count)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_Progress_recv)
+static inline int MPIDI_CH4_SHMI_SIMPLE_Progress_recv(int blocking, int *completion_count)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_msg_sz_t data_sz;
+    size_t data_sz;
     int in_cell = 0;
-    MPID_nem_cell_ptr_t cell = NULL;
+    MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t cell = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     /* try to match with unexpected */
-    MPID_Request *sreq = MPIDI_CH4_SHM_recvq_unexpected.head;
+    MPID_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
     MPID_Request *prev_sreq = NULL;
   unexpected_l:
     if (sreq != NULL) {
         goto match_l;
     }
     /* try to receive from recvq */
-    if (MPID_nem_mem_region.my_recvQ && !MPID_nem_queue_empty(MPID_nem_mem_region.my_recvQ)) {
-        MPID_nem_queue_dequeue(MPID_nem_mem_region.my_recvQ, &cell);
+    if (MPIDI_CH4_SHMI_SIMPLE_mem_region.my_recvQ && !MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_recvQ)) {
+        MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_recvQ, &cell);
         in_cell = 1;
         goto match_l;
     }
@@ -43,13 +43,13 @@ static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_c
   match_l:
     {
         /* traverse posted receive queue */
-        MPID_Request *req = MPIDI_CH4_SHM_recvq_posted.head;
+        MPID_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
         MPID_Request *prev_req = NULL;
         int continue_matching = 1;
-        char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) REQ_SHM(sreq)->user_buf;
-        int type = in_cell ? cell->pkt.mpich.type : REQ_SHM(sreq)->type;
-        MPID_Request* pending = in_cell ? cell->pending : REQ_SHM(sreq)->pending;
-        if (type == TYPE_ACK) {
+        char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf;
+        int type = in_cell ? cell->pkt.mpich.type : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type;
+        MPID_Request* pending = in_cell ? cell->pending : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->pending;
+        if (type == MPIDI_CH4_SHMI_SIMPLE_TYPEACK) {
             /* ACK message doesn't have a matching receive! */
             int c;
             MPIU_Assert(in_cell);
@@ -61,13 +61,13 @@ static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_c
         while (req) {
             int sender_rank, tag, context_id;
             MPI_Count count;
-            ENVELOPE_GET(REQ_SHM(req), sender_rank, tag, context_id);
+            MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_GET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), sender_rank, tag, context_id);
             MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                              (MPL_DBG_FDEST, "Posted from grank %d to %d in progress %d,%d,%d\n",
-                              MPIDI_CH4R_rank_to_lpid(sender_rank, req->comm), MPID_nem_mem_region.rank,
+                              MPIDI_CH4R_rank_to_lpid(sender_rank, req->comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank,
                               sender_rank, tag, context_id));
-            if ((in_cell && ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
-                (sreq && ENVELOPE_MATCH(REQ_SHM(sreq), sender_rank, tag, context_id))) {
+            if ((in_cell && MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
+                (sreq && MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq), sender_rank, tag, context_id))) {
 
                 /* Request matched */
 
@@ -86,47 +86,47 @@ static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_c
                     if (continue_matching) break;
                 }
 
-                char *recv_buffer = (char *) REQ_SHM(req)->user_buf;
+                char *recv_buffer = (char *) MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->user_buf;
 
                 if (pending) {
                     /* we must send ACK */
                     int srank = in_cell ? cell->rank : sreq->status.MPI_SOURCE;
                     MPID_Request* req_ack = NULL;
-                    MPIDI_Request_create_sreq(req_ack);
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_SREQ(req_ack);
                     MPIU_Object_set_ref(req_ack, 1);
                     req_ack->comm = req->comm;
                     MPIR_Comm_add_ref(req->comm);
 
-                    ENVELOPE_SET(REQ_SHM(req_ack), req->comm->rank, tag, context_id);
-                    REQ_SHM(req_ack)->user_buf = NULL;
-                    REQ_SHM(req_ack)->user_count = 0;
-                    REQ_SHM(req_ack)->datatype = MPI_BYTE;
-                    REQ_SHM(req_ack)->data_sz = 0;
-                    REQ_SHM(req_ack)->type = TYPE_ACK;
-                    REQ_SHM(req_ack)->dest = srank;
-                    REQ_SHM(req_ack)->next = NULL;
-                    REQ_SHM(req_ack)->segment_ptr = NULL;
-                    REQ_SHM(req_ack)->pending = pending;
+                    MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_SET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack), req->comm->rank, tag, context_id);
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->user_buf = NULL;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->user_count = 0;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->datatype = MPI_BYTE;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->data_sz = 0;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->type = MPIDI_CH4_SHMI_SIMPLE_TYPEACK;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->dest = srank;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->next = NULL;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->segment_ptr = NULL;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->pending = pending;
                     /* enqueue req_ack */
-                    REQ_SHM_ENQUEUE(req_ack, MPIDI_CH4_SHM_sendq);
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req_ack, MPIDI_CH4_SHMI_SIMPLE_Sendq);
                 }
                 /*
                  * TODO: check for not overflowing recv buffer
                  */
-                if (type == TYPE_EAGER) {
+                if (type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
                     /* eager message */
-                    data_sz = in_cell ? cell->pkt.mpich.datalen : REQ_SHM(sreq)->data_sz;
-                    if( REQ_SHM(req)->segment_ptr ) {
+                    data_sz = in_cell ? cell->pkt.mpich.datalen : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->data_sz;
+                    if( MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr ) {
                         /* non-contig */
-                        MPIDI_msg_sz_t last = REQ_SHM(req)->segment_first + data_sz;
-                        MPID_Segment_unpack(REQ_SHM(req)->segment_ptr, REQ_SHM(req)->segment_first, (MPI_Aint*)&last, send_buffer );
-                        MPID_Segment_free(REQ_SHM(req)->segment_ptr);
+                        size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + data_sz;
+                        MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint*)&last, send_buffer );
+                        MPID_Segment_free(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr);
                     }
                     else {
                         /* contig */
                         if( send_buffer ) MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
                     }
-                    REQ_SHM(req)->data_sz = data_sz;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz = data_sz;
                     /* set status */
 
                     if (in_cell) {
@@ -140,24 +140,24 @@ static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_c
                     count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
                     MPIR_STATUS_SET_COUNT(req->status,count);
                     /* dequeue rreq */
-                    REQ_SHM_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_CH4_SHM_recvq_posted,
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_Recvq_posted,
                                                   mpi_errno);
                 }
-                else if (type == TYPE_LMT) {
+                else if (type == MPIDI_CH4_SHMI_SIMPLE_TYPELMT) {
                     /* long message */
-                    if( REQ_SHM(req)->segment_ptr ) {
+                    if( MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr ) {
                         /* non-contig */
-                        MPIDI_msg_sz_t last = REQ_SHM(req)->segment_first + EAGER_THRESHOLD;
-                        MPID_Segment_unpack(REQ_SHM(req)->segment_ptr, REQ_SHM(req)->segment_first, (MPI_Aint*)&last, send_buffer );
-                        REQ_SHM(req)->segment_first = last;
+                        size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+                        MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint*)&last, send_buffer );
+                        MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first = last;
                     }
                     else {
                         /* contig */
-                        if( send_buffer ) MPIU_Memcpy(recv_buffer, (void *) send_buffer, EAGER_THRESHOLD);
+                        if( send_buffer ) MPIU_Memcpy(recv_buffer, (void *) send_buffer, MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD);
                     }
-                    REQ_SHM(req)->data_sz -= EAGER_THRESHOLD;
-                    REQ_SHM(req)->user_buf += EAGER_THRESHOLD;
-                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)EAGER_THRESHOLD;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz -= MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->user_buf += MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
                     MPIR_STATUS_SET_COUNT(req->status,count);
                 }
                 else {
@@ -166,43 +166,43 @@ static inline int MPIDI_CH4_SHM_do_progress_recv(int blocking, int *completion_c
                 goto release_cell_l;
             }              /* if matched  */
             prev_req = req;
-            req = REQ_SHM(req)->next;
+            req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
         }
         /* unexpected message, no posted matching req */
         if (in_cell) {
             /* free the cell, move to unexpected queue */
             MPID_Request *rreq;
-            MPIDI_Request_create_rreq(rreq);
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_RREQ(rreq);
             MPIU_Object_set_ref(rreq, 1);
             /* set status */
             rreq->status.MPI_SOURCE = cell->rank;
             rreq->status.MPI_TAG = cell->tag;
             MPIR_STATUS_SET_COUNT(rreq->status, cell->pkt.mpich.datalen);
-            ENVELOPE_SET(REQ_SHM(rreq), cell->rank, cell->tag, cell->context_id);
+            MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_SET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq), cell->rank, cell->tag, cell->context_id);
             data_sz = cell->pkt.mpich.datalen;
-            REQ_SHM(rreq)->data_sz = data_sz;
-            REQ_SHM(rreq)->type = cell->pkt.mpich.type;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->data_sz = data_sz;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->type = cell->pkt.mpich.type;
             if( data_sz > 0 ) {
-                REQ_SHM(rreq)->user_buf = (char*)MPL_malloc(data_sz);
-                MPIU_Memcpy(REQ_SHM(rreq)->user_buf, (void *) cell->pkt.mpich.p.payload, data_sz);
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_buf = (char*)MPL_malloc(data_sz);
+                MPIU_Memcpy(MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_buf, (void *) cell->pkt.mpich.p.payload, data_sz);
             }
             else {
-                REQ_SHM(rreq)->user_buf = NULL;
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_buf = NULL;
             }
-            REQ_SHM(rreq)->datatype = MPI_BYTE;
-            REQ_SHM(rreq)->next = NULL;
-            REQ_SHM(rreq)->pending = cell->pending;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->datatype = MPI_BYTE;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->next = NULL;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->pending = cell->pending;
             /* enqueue rreq */
-            REQ_SHM_ENQUEUE(rreq, MPIDI_CH4_SHM_recvq_unexpected);
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(rreq, MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected);
             MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                     (MPL_DBG_FDEST, "Unexpected from grank %d to %d in progress %d,%d,%d\n",
-                     cell->my_rank, MPID_nem_mem_region.rank,
+                     cell->my_rank, MPIDI_CH4_SHMI_SIMPLE_mem_region.rank,
                      cell->rank, cell->tag, cell->context_id));
         }
         else {
             /* examine another message in unexpected queue */
             prev_sreq = sreq;
-            sreq = REQ_SHM(sreq)->next;
+            sreq = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->next;
             goto unexpected_l;
         }
     }
@@ -211,17 +211,17 @@ release_cell_l:
         /* release cell */
         MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                          (MPL_DBG_FDEST, "Received from grank %d to %d in progress %d,%d,%d\n", cell->my_rank,
-                          MPID_nem_mem_region.rank, cell->rank, cell->tag, cell->context_id));
+                          MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, cell->rank, cell->tag, cell->context_id));
         cell->pending = NULL;
         {
-            MPID_nem_queue_enqueue(MPID_nem_mem_region.FreeQ[cell->my_rank], cell);
+            MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_mem_region.FreeQ[cell->my_rank], cell);
         }
     }
     else {
         /* destroy unexpected req */
-        REQ_SHM(sreq)->pending = NULL;
-        MPL_free(REQ_SHM(sreq)->user_buf);
-        REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHM_recvq_unexpected, mpi_errno);
+        MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->pending = NULL;
+        MPL_free(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf);
+        MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected, mpi_errno);
     }
     (*completion_count)++;
 fn_exit:
@@ -230,60 +230,60 @@ fn_exit:
 }
 
 /* ----------------------------------------------------- */
-/* MPIDI_CH4_SHM_do_progress_send                     */
+/* MPIDI_CH4_SHMI_SIMPLE_Progress_send                     */
 /* ----------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_do_progress_send)
-static inline int MPIDI_CH4_SHM_do_progress_send(int blocking, int *completion_count)
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_Progress_send)
+static inline int MPIDI_CH4_SHMI_SIMPLE_Progress_send(int blocking, int *completion_count)
 {
     int mpi_errno = MPI_SUCCESS;
     int dest;
-    MPID_nem_cell_ptr_t cell = NULL;
-    MPID_Request *sreq = MPIDI_CH4_SHM_sendq.head;
+    MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t cell = NULL;
+    MPID_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Sendq.head;
     MPID_Request *prev_sreq = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
     if (sreq == NULL)
         goto fn_exit;
     /* try to send via freeq */
-    if (!MPID_nem_queue_empty(MPID_nem_mem_region.my_freeQ)) {
-        MPID_nem_queue_dequeue(MPID_nem_mem_region.my_freeQ, &cell);
-        ENVELOPE_GET(REQ_SHM(sreq), cell->rank, cell->tag, cell->context_id);
-        dest = REQ_SHM(sreq)->dest;
+    if (!MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ)) {
+        MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ, &cell);
+        MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_GET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq), cell->rank, cell->tag, cell->context_id);
+        dest = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->dest;
         char *recv_buffer = (char *) cell->pkt.mpich.p.payload;
-        MPIDI_msg_sz_t data_sz = REQ_SHM(sreq)->data_sz;
+        size_t data_sz = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->data_sz;
         /*
          * TODO: make request field dest_lpid (or even recvQ[dest_lpid]) instead of dest - no need to do rank_to_lpid each time
          */
         int grank = MPIDI_CH4R_rank_to_lpid(dest, sreq->comm);
         cell->pending = NULL;
-        if (REQ_SHM(sreq)->type == TYPE_SYNC ) {
+        if (MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type == MPIDI_CH4_SHMI_SIMPLE_TYPESYNC ) {
             /* increase req cc in order to release req only after ACK, do it once per SYNC request */
             /* non-NULL pending req signal receiver about sending ACK back */
             /* the pending req should be sent back for sender to decrease cc, for it is dequeued already */
             int c;
             cell->pending = sreq;
             MPIR_cc_incr(sreq->cc_ptr, &c);
-            REQ_SHM(sreq)->type = TYPE_STANDARD;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type = MPIDI_CH4_SHMI_SIMPLE_TYPESTANDARD;
         }
-        if (data_sz <= EAGER_THRESHOLD) {
+        if (data_sz <= MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD) {
             cell->pkt.mpich.datalen = data_sz;
-            if( REQ_SHM(sreq)->type == TYPE_ACK ) {
-                cell->pkt.mpich.type = TYPE_ACK;
-                cell->pending = REQ_SHM(sreq)->pending;
+            if( MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type == MPIDI_CH4_SHMI_SIMPLE_TYPEACK ) {
+                cell->pkt.mpich.type = MPIDI_CH4_SHMI_SIMPLE_TYPEACK;
+                cell->pending = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->pending;
             }
             else {
                 /* eager message */
-                if( REQ_SHM(sreq)->segment_ptr ) {
+                if( MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_ptr ) {
                     /* non-contig */
-                    MPID_Segment_pack(REQ_SHM(sreq)->segment_ptr, REQ_SHM(sreq)->segment_first, (MPI_Aint*)&REQ_SHM(sreq)->segment_size, recv_buffer );
-                    MPID_Segment_free(REQ_SHM(sreq)->segment_ptr);
+                    MPID_Segment_pack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_first, (MPI_Aint*)&MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_size, recv_buffer );
+                    MPID_Segment_free(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_ptr);
                 }
                 else {
                     /* contig */
-                    MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, data_sz);
+                    MPIU_Memcpy((void *) recv_buffer, MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf, data_sz);
                 }
-                cell->pkt.mpich.type = TYPE_EAGER;
+                cell->pkt.mpich.type = MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER;
                 /* set status */
                 /*
                  * TODO: incorrect count for LMT - set to a last chunk of data
@@ -294,29 +294,29 @@ static inline int MPIDI_CH4_SHM_do_progress_send(int blocking, int *completion_c
                 MPIR_STATUS_SET_COUNT(sreq->status, data_sz);
             }
             /* dequeue sreq */
-            REQ_SHM_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHM_sendq, mpi_errno);
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&sreq, prev_sreq, MPIDI_CH4_SHMI_SIMPLE_Sendq, mpi_errno);
         }
         else {
             /* long message */
-            if( REQ_SHM(sreq)->segment_ptr ) {
+            if( MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_ptr ) {
                 /* non-contig */
-                MPIDI_msg_sz_t last = REQ_SHM(sreq)->segment_first + EAGER_THRESHOLD;
-                MPID_Segment_pack(REQ_SHM(sreq)->segment_ptr, REQ_SHM(sreq)->segment_first, (MPI_Aint*)&last, recv_buffer );
-                REQ_SHM(sreq)->segment_first = last;
+                size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_first + MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+                MPID_Segment_pack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_first, (MPI_Aint*)&last, recv_buffer );
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->segment_first = last;
             }
             else {
                 /* contig */
-                MPIU_Memcpy((void *) recv_buffer, REQ_SHM(sreq)->user_buf, EAGER_THRESHOLD);
-                REQ_SHM(sreq)->user_buf += EAGER_THRESHOLD;
+                MPIU_Memcpy((void *) recv_buffer, MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf, MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD);
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf += MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
             }
-            cell->pkt.mpich.datalen = EAGER_THRESHOLD;
-            REQ_SHM(sreq)->data_sz -= EAGER_THRESHOLD;
-            cell->pkt.mpich.type = TYPE_LMT;
+            cell->pkt.mpich.datalen = MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->data_sz -= MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+            cell->pkt.mpich.type = MPIDI_CH4_SHMI_SIMPLE_TYPELMT;
         }
         MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                 (MPL_DBG_FDEST, "Sent to grank %d from %d in progress %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
                  cell->context_id));
-        MPID_nem_queue_enqueue(MPID_nem_mem_region.RecvQ[grank], cell);
+        MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_mem_region.RecvQ[grank], cell);
         (*completion_count)++;
     }
 fn_exit:
@@ -333,13 +333,13 @@ static inline int MPIDI_CH4_SHM_progress(int blocking)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_PROGRESS);
     do {
         /* Receieve progress */
-        MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-        MPIDI_CH4_SHM_do_progress_recv(blocking, &complete);
-        MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
+        MPIDI_CH4_SHMI_SIMPLE_Progress_recv(blocking, &complete);
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
         /* Send progress */
-        MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
-        MPIDI_CH4_SHM_do_progress_send(blocking, &complete);
-        MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
+        MPIDI_CH4_SHMI_SIMPLE_Progress_send(blocking, &complete);
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
 
         MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
         MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);

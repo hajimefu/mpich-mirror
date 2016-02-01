@@ -45,7 +45,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_IMPROBE);
 
-    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     *message = NULL;
 
     if (unlikely(source == MPI_PROC_NULL)) {
@@ -54,12 +54,12 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
         goto fn_exit;
     }
 
-    for (req = MPIDI_CH4_SHM_recvq_unexpected.head; req; req=REQ_SHM(req)->next) {
-        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
+    for (req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head; req; req=MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
+        if (MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), source, tag, comm->recvcontext_id + context_offset))
         {
             if (!matched_req)
                 matched_req = req;
-            if (req && REQ_SHM(req)->type == TYPE_EAGER) {
+            if (req && MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
                 *message = matched_req;
                 break;
             }
@@ -68,19 +68,19 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
 
     if (*message)
     {
-        MPIDI_CH4_SHM_queue_t mqueue = {NULL,NULL};
+        MPIDI_CH4_SHMI_SIMPLE_Request_queue_t mqueue = {NULL,NULL};
         MPID_Request *prev_req = NULL, *next_req = NULL;
-        req = MPIDI_CH4_SHM_recvq_unexpected.head;
+        req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
         while (req) {
-            next_req = REQ_SHM(req)->next;
-            if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset))
+            next_req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
+            if (MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), source, tag, comm->recvcontext_id + context_offset))
             {
                 if (mqueue.head == NULL)
                     MPIU_Assert(req == matched_req);
                 count += MPIR_STATUS_GET_COUNT(req->status);
-                REQ_SHM_DEQUEUE(&req, prev_req, MPIDI_CH4_SHM_recvq_unexpected);
-                REQ_SHM_ENQUEUE(req, mqueue);
-                if (req && REQ_SHM(req)->type == TYPE_EAGER)
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected);
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req, mqueue);
+                if (req && MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER)
                     break;
             }
             else
@@ -102,7 +102,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
     }
 
 fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_IMPROBE);
     return mpi_errno;
 }
@@ -117,17 +117,17 @@ static inline int MPIDI_CH4_SHM_iprobe(int source,
     int count = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_IPROBE);
-    MPID_THREAD_CS_ENTER(POBJ,MPID_NEM_SHM_MUTEX);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     if (unlikely(source == MPI_PROC_NULL)) {
         MPIR_Status_set_procnull(status);
         *flag = true;
         goto fn_exit;
     }
 
-    for (req = MPIDI_CH4_SHM_recvq_unexpected.head; req; req = REQ_SHM(req)->next) {
-        if (ENVELOPE_MATCH(REQ_SHM(req), source, tag, comm->recvcontext_id + context_offset)) {
+    for (req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head; req; req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
+        if (MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), source, tag, comm->recvcontext_id + context_offset)) {
             count += MPIR_STATUS_GET_COUNT(req->status);
-            if (REQ_SHM(req)->type == TYPE_EAGER) {
+            if (MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
                 matched_req = req;
                 break;
             }
@@ -146,7 +146,7 @@ static inline int MPIDI_CH4_SHM_iprobe(int source,
     }
 
 fn_exit:
-    MPID_THREAD_CS_EXIT(POBJ,MPID_NEM_SHM_MUTEX);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_IPROBE);
     return mpi_errno;
 }
