@@ -19,6 +19,8 @@
 #include "mpiu_shm_wrappers.h"
 #include "pmi.h"
 
+#include "mpidu_shm.h"
+
 /* ---------------------------------------------------- */
 /* temp headers                                         */
 /* ---------------------------------------------------- */
@@ -192,12 +194,6 @@ fn_fail:                      \
    : __FILE__                                   \
 )
 
-
-int MPIDU_Seg_alloc(size_t len, void **ptr_p);
-int MPIDU_Seg_commit(MPID_nem_seg_ptr_t memory, int num_local, int local_rank);
 int MPID_nem_barrier_vars_init(MPID_nem_barrier_vars_t * barrier_region);
-int MPIDU_shm_barrier_init(MPID_nem_barrier_t * barrier_region, int init_values);
-int MPIDU_shm_barrier(void);
-int MPIDU_Seg_destroy(void);
 
 #endif /* NETMOD_SHM_IMPL_H_INCLUDED */
