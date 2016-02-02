@@ -1,4 +1,11 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
+/*
+ *  (C) 2016 by Argonne National Laboratory.
+ *      See COPYRIGHT in top-level directory.
+ */
+#ifndef CH4_SHM_DEFS_H
+#define CH4_SHM_DEFS_H
+
 /* ************************************************************************** */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_defs.h                     */
 /* ************************************************************************** */
@@ -100,3 +107,4 @@ typedef struct MPID_nem_mem_region {
 extern MPID_nem_mem_region_t MPID_nem_mem_region;
 extern MPID_Thread_mutex_t MPID_shm_mutex;
 
+#endif /* ifndef CH4_SHM_DEFS_H */

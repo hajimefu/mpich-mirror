@@ -1,4 +1,11 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
+/*
+ *  (C) 2016 by Argonne National Laboratory.
+ *      See COPYRIGHT in top-level directory.
+ */
+#ifndef CH4_SHM_DATATYPES_H
+#define CH4_SHM_DATATYPES_H
+
 /* ************************************************************************** */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_datatypes.h                */
 /* ************************************************************************** */
@@ -168,3 +175,5 @@ typedef struct MPID_nem_fbox_arrays {
     MPID_nem_fastbox_t **in;
     MPID_nem_fastbox_t **out;
 } MPID_nem_fbox_arrays_t;
+
+#endif /* ifndef CH4_SHM_DATATYPES_H */

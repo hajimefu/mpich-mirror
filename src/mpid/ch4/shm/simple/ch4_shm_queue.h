@@ -1,4 +1,11 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
+/*
+ *  (C) 2016 by Argonne National Laboratory.
+ *      See COPYRIGHT in top-level directory.
+ */
+#ifndef CH4_SHM_QUEUE_H
+#define CH4_SHM_QUEUE_H
+
 /* ------------------------------------------------------- */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_debug.h */
 /* ------------------------------------------------------- */
@@ -313,3 +320,5 @@ static inline void MPID_nem_queue_dequeue(MPID_nem_queue_ptr_t qhead, MPID_nem_c
 }
 
 #endif /* !defined(MPID_NEM_USE_LOCK_FREE_QUEUES) */
+
+#endif /* ifndef CH4_SHM_QUEUE_H */
