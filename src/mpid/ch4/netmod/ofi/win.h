@@ -1266,7 +1266,6 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
     if(!MPIDI_CH4_NMI_OFI_WIN(win)->msgQ) {
         MPIDI_CH4_NMI_OFI_WIN(win)->msgQ = (void *) MPL_calloc(size, sizeof(MPIDI_CH4R_winLock_info));
         MPIU_Assert(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ != NULL);
-        MPIDI_CH4_NMI_OFI_WIN(win)->count=0;
     }
 
     MPIDI_CH4R_winLock_info *lockQ;

@@ -535,7 +535,6 @@ typedef struct {
     int64_t                            mmap_sz;
     MPIDI_CH4_NMI_OFI_Win_request_t   *syncQ;
     void                              *msgQ;
-    int                                count;
     MPIDI_CH4_NMI_OFI_Win_info_args_t  info_args;
 } MPIDI_CH4_NMI_OFI_Win_t;
 
