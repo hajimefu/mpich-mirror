@@ -272,7 +272,6 @@ typedef struct MPIDI_CH4R_win_t {
     MPI_Aint *sizes;
     void *msgQ;
     void *syncQ; /* todo */
-    int count;
     MPIDI_CH4R_win_sync_t sync;
     MPIDI_CH4R_win_info_t *info_table;
     MPIDI_CH4R_win_info_args_t info_args;
