@@ -7,7 +7,38 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
         for shm in $ch4_shm ; do
             AS_CASE([$shm],[simple],[build_ch4_shm_simple=yes])
         done
-# the nemesis channel depends on the common shm code
+
+        AC_ARG_WITH(ch4-shmmod-simple-args,
+        [  --with-ch4-shmmod-simple-args=arg1:arg2:arg3
+        CH4 simple shmmod arguments:
+                disable-lock-free-queues - Disable atomics and lock-free queues
+                ],
+                [simple_shmmod_args=$withval],
+                [simple_shmmod_args=])
+
+dnl Parse the shmmod arguments
+        SAVE_IFS=$IFS
+        IFS=':'
+        args_array=$simple_shmmod_args
+        do_disable_lock_free_queues=false
+        echo "Parsing Arguments for Simple shmmod"
+        for arg in $args_array; do
+        case ${arg} in
+            disable-lock-free-queues)
+                do_disable_lock_free_queues=true
+                echo " ---> CH4::SHM::SIMPLE : $arg"
+                ;;
+            esac
+        done
+        IFS=$SAVE_IFS
+
+        if [test "$do_disable_lock_free_queues" = "true"]; then
+            AC_MSG_NOTICE([Disabling simple shared memory lock free queues])
+        else
+            AC_MSG_NOTICE([Enabling simple shared memory lock free queues])
+            PAC_APPEND_FLAG([-DMPID_NEM_USE_LOCK_FREE_QUEUES],[CPPFLAGS])
+        fi
+        # the simple device channel depends on the common shm code
         build_mpid_common_shm=yes
     ])
     AM_CONDITIONAL([BUILD_CH4_SHM_SIMPLE],[test "X$build_ch4_shm_simple" = "Xyes"])
@@ -18,14 +49,5 @@ AM_COND_IF([BUILD_CH4_SHM_SIMPLE],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch4:shm:simple])
 ])dnl end AM_COND_IF(BUILD_CH4_SHM_SIMPLE,...)
 ])dnl end _BODY
-
-PAC_ARG_SHARED_MEMORY
-
-AC_ARG_ENABLE(nemesis-lock-free-queues,
-              [--enable-nemesis-lock-free-queues - Use atomic instructions and lock-free queues for shared memory communication.  Lock-based queues will be used otherwise.  The default is enabled (lock-free).],
-              , [enable_nemesis_lock_free_queues=yes])
-if test "$enable_nemesis_lock_free_queues" = "yes" ; then
-    AC_DEFINE(MPID_NEM_USE_LOCK_FREE_QUEUES, 1, [Define to enable lock-free communication queues])
-fi
 
 [#] end of __file__
