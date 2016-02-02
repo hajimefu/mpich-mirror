@@ -132,6 +132,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_CH4_NMI_OFI_Win_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_CH4_NMI_OFI_Datatype_t));
 
+    /* Note: MPIDI_CH4R_win_init will interpret the info object */
     mpi_errno = MPIDI_CH4R_win_init(length, disp_unit, &win, info, comm_ptr, create_flavor, model);
     MPIR_ERR_CHKANDSTMT(mpi_errno != MPI_SUCCESS,
                         mpi_errno,
@@ -142,21 +143,6 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
 
     memset(MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(*MPIDI_CH4_NMI_OFI_WIN(win)));
 
-    if((info != NULL) && ((int *)info != (int *) MPI_INFO_NULL)) {
-        mpi_errno= MPIDI_Win_set_info(win, info);
-        MPIU_Assert(mpi_errno == 0);
-    }
-
-    /* Initialize the info (hint) flags per window */
-    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.no_locks               = 0;
-    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering    = (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                                                                   (MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR |
-                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW |
-                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR |
-                                                                    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW);
-    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ops         = MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP_NO_OP;
-    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.same_size              = 0;
-    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.alloc_shared_noncontig = 0;
     MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz                          = 0;
     MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr                        = NULL;
     /* context id lower bits, window instance upper bits */
@@ -240,65 +226,13 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_win_set_info(MPID_Win *win, MPID_Info *info)
 {
-    int            mpi_errno = MPI_SUCCESS;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
+    int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
 
-    MPID_Info *curr_ptr;
-    char      *value, *token, *savePtr;
-    uint       save_ordering;
-
-    curr_ptr = info->next;
-
-    while(curr_ptr) {
-        if(!strcmp(curr_ptr->key,"no_locks")) {
-            if(!strcmp(curr_ptr->value,"true"))
-                MPIDI_CH4_NMI_OFI_WIN(win)->info_args.no_locks=1;
-            else
-                MPIDI_CH4_NMI_OFI_WIN(win)->info_args.no_locks=0;
-        } else if(!strcmp(curr_ptr->key,"accumulate_ordering")) {
-            save_ordering=(uint) MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering;
-            MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering=(MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)0;
-            value = curr_ptr->value;
-            token = (char *) strtok_r(value,"," , &savePtr);
-
-            while(token) {
-                if(!memcmp(token,"rar",3))
-                    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering =
-                        (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                        (MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering | MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR);
-                else if(!memcmp(token,"raw",3))
-                    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering =
-                        (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                        (MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering | MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW);
-                else if(!memcmp(token,"war",3))
-                    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering =
-                        (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                        (MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering | MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR);
-                else if(!memcmp(token,"waw",3))
-                    MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering =
-                        (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
-                        (MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering | MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW);
-                else
-                    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**rmasync");
-
-                token = (char *) strtok_r(NULL,"," , &savePtr);
-            }
-
-            if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering == 0)
-                MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering=
-                    (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t) save_ordering;
-        } else if(!strcmp(curr_ptr->key,"accumulate_ops")) {
-            /* the default setting is MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP_NO_OP */
-            if(!strcmp(curr_ptr->value,"same_op"))
-                MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ops = MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP;
-        }
-
-        curr_ptr = curr_ptr->next;
-    }
-
-    mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
+    mpi_errno = MPIDI_CH4R_win_set_info(win, info);
+    if (mpi_errno)
+        MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
@@ -579,67 +513,15 @@ static inline int MPIDI_CH4_NM_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
 
-    mpi_errno = MPIU_Info_alloc(info_p_p);
-    MPIU_Assert(mpi_errno == MPI_SUCCESS);
+    mpi_errno = MPIDI_CH4R_win_get_info(win, info_p_p);
+    if (mpi_errno)
+        MPIR_ERR_POP(mpi_errno);
 
-    if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.no_locks)
-        mpi_errno = MPIR_Info_set_impl(*info_p_p, "no_locks", "true");
-    else
-        mpi_errno = MPIR_Info_set_impl(*info_p_p, "no_locks", "false");
-
-    MPIU_Assert(mpi_errno == MPI_SUCCESS);
-
-    {
-#define BUFSIZE 32
-        char buf[BUFSIZE];
-        int c = 0;
-
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering & MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR)
-            c += snprintf(buf+c, BUFSIZE-c, "%srar", (c > 0) ? "," : "");
-
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering & MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW)
-            c += snprintf(buf+c, BUFSIZE-c, "%sraw", (c > 0) ? "," : "");
-
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering & MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR)
-            c += snprintf(buf+c, BUFSIZE-c, "%swar", (c > 0) ? "," : "");
-
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering & MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW)
-            c += snprintf(buf+c, BUFSIZE-c, "%swaw", (c > 0) ? "," : "");
-
-        if(c == 0) {
-            memcpy(&buf[0],"not set   ",10);
-        }
-
-        MPIR_Info_set_impl(*info_p_p, "accumulate_ordering", buf);
-        MPIU_Assert(mpi_errno == MPI_SUCCESS);
-#undef BUFSIZE
-    }
-
-    if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ops == MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP)
-        mpi_errno = MPIR_Info_set_impl(*info_p_p, "accumulate_ops", "same_op");
-    else
-        mpi_errno = MPIR_Info_set_impl(*info_p_p, "accumulate_ops", "same_op_no_op");
-
-    MPIU_Assert(mpi_errno == MPI_SUCCESS);
-
-    if(win->create_flavor == MPI_WIN_FLAVOR_SHARED) {
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.alloc_shared_noncontig)
-            mpi_errno = MPIR_Info_set_impl(*info_p_p, "alloc_shared_noncontig", "true");
-        else
-            mpi_errno = MPIR_Info_set_impl(*info_p_p, "alloc_shared_noncontig", "false");
-
-        MPIU_Assert(mpi_errno == MPI_SUCCESS);
-    } else if(win->create_flavor == MPI_WIN_FLAVOR_ALLOCATE) {
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->info_args.same_size)
-            mpi_errno = MPIR_Info_set_impl(*info_p_p, "same_size", "true");
-        else
-            mpi_errno = MPIR_Info_set_impl(*info_p_p, "same_size", "false");
-
-        MPIU_Assert(mpi_errno == MPI_SUCCESS);
-    }
-
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 

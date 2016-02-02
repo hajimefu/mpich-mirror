@@ -142,7 +142,6 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 #define MPIDI_CH4_NMI_OFI_REQUEST(req,field)       ((req)->dev.ch4.netmod.ofi.field)
 
-
 #define MPIDI_CH4_NMI_OFI_DATATYPE(dt)   ((dt)->dev.netmod.ofi)
 #define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 
@@ -171,18 +170,6 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_NUM_CQ_ENTRIES 8
 
 /* Typedefs */
-typedef enum {
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR = 1,
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAW = 2,
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAR = 4,
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW = 8
-} MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t;
-
-typedef enum {
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP,
-    MPIDI_CH4_NMI_OFI_ACCUMULATE_SAME_OP_NO_OP
-} MPIDI_CH4_NMI_OFI_Win_info_accumulate_ops_t;
-
 enum {
     MPIDI_CH4_NMI_OFI_CTRL_ASSERT,    /**< Lock acknowledge      */
     MPIDI_CH4_NMI_OFI_CTRL_LOCKACK,   /**< Lock acknowledge      */
@@ -519,14 +506,6 @@ typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
     struct fid_mr *mr;
 } MPIDI_CH4_NMI_OFI_Huge_counter_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Win_info_args_t {
-    int                                              no_locks;
-    MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t accumulate_ordering;
-    MPIDI_CH4_NMI_OFI_Win_info_accumulate_ops_t      accumulate_ops;
-    int                                              same_size;
-    int                                              alloc_shared_noncontig;
-} MPIDI_CH4_NMI_OFI_Win_info_args_t;
-
 typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
@@ -535,7 +514,6 @@ typedef struct {
     int64_t                            mmap_sz;
     MPIDI_CH4_NMI_OFI_Win_request_t   *syncQ;
     void                              *msgQ;
-    MPIDI_CH4_NMI_OFI_Win_info_args_t  info_args;
 } MPIDI_CH4_NMI_OFI_Win_t;
 
 /* Externs */
