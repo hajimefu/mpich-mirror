@@ -402,17 +402,6 @@ typedef struct {
 } MPIDI_CH4_NMI_OFI_Send_control_t;
 
 typedef struct {
-    void *addr;
-    void *result_addr;
-    void *req;
-    MPID_Win *win;
-    MPI_Datatype type;
-    MPI_Op op;
-    int    origin_endpoint;
-    size_t len;
-} MPIDI_CH4_NMI_OFI_Msg_info_t;
-
-typedef struct {
     MPIU_OBJECT_HEADER;
     void *pad;
 } MPIDI_CH4_NMI_OFI_Offset_checker_t;
