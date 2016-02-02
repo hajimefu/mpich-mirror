@@ -625,8 +625,8 @@ static inline int MPIDI_CH4R_win_finalize(MPID_Win **win_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPID_Win      *win       = *win_ptr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_FREE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_FREE);
+    MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_FINALIZE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_FINALIZE);
 
     MPL_HASH_DELETE(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash, win);
 
@@ -634,7 +634,7 @@ static inline int MPIDI_CH4R_win_finalize(MPID_Win **win_ptr)
     MPIR_Comm_release(win->comm_ptr);
     MPIU_Handle_obj_free(&MPID_Win_mem, win);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FREE);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_FINALIZE);
     return mpi_errno;
 }
 
