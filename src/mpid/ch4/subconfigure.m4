@@ -324,11 +324,10 @@ src/mpid/ch4/src/mpid_ch4_net_array.c
 src/mpid/ch4/src/mpid_ch4_shm_array.c
 src/mpid/ch4/include/netmodpre.h
 ])
-
+PAC_ARG_SHARED_MEMORY
 ])dnl end AM_COND_IF(BUILD_CH4,...)
 
 AM_CONDITIONAL([BUILD_CH4_SHM],[test "$ch4_shm_level" = "yes" -o "$ch4_shm_level" = "exclusive"])
-
 
 ])dnl end _BODY
 
