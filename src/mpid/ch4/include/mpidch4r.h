@@ -11,6 +11,7 @@
 #ifndef MPIDCH4R_H_INCLUDED
 #define MPIDCH4R_H_INCLUDED
 
+#include "ch4r_symheap.h"
 #include "ch4r_recvq.h"
 #include "ch4r_init.h"
 #include "ch4r_probe.h"

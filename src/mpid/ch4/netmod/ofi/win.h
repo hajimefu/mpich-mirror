@@ -12,7 +12,6 @@
 #define NETMOD_OFI_WIN_H_INCLUDED
 
 #include "impl.h"
-#include "symheap.h"
 #include <opa_primitives.h>
 
 
@@ -731,7 +730,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
     /* Make the addresses symmetric by using MAP_FIXED */
     size_t page_sz, mapsize;
 
-    mapsize = MPIDI_CH4_NMI_OFI_Get_mapsize(total_size, &page_sz);
+    mapsize = MPIDI_CH4R_get_mapsize(total_size, &page_sz);
     fd      = rc;
     rc      = ftruncate(fd, mapsize);
 
@@ -745,7 +744,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
     }
 
     if(comm_ptr->rank == 0) {
-        map_ptr = MPIDI_CH4_NMI_OFI_Generate_random_addr(mapsize);
+        map_ptr = MPIDI_CH4R_generate_random_addr(mapsize);
         map_ptr = mmap(map_ptr, mapsize,
                        PROT_READ|PROT_WRITE,
                        MAP_SHARED|MAP_FIXED,
@@ -773,7 +772,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
 
         if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
-        rc = MPIDI_CH4_NMI_OFI_Check_maprange(map_ptr,mapsize);
+        rc = MPIDI_CH4R_check_maprange_ok(map_ptr,mapsize);
         /* If we hit this assert, we need to iterate
          * trying more addresses
          */
@@ -895,7 +894,7 @@ static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint     size,
 
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Get_symmetric_heap(size,comm,&baseP,*win_ptr);
+    mpi_errno = MPIDI_CH4R_get_symmetric_heap(size,comm,&baseP,*win_ptr);
 
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 

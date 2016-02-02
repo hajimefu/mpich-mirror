@@ -8,10 +8,9 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_OFI_SYMHEAP_H_INCLUDED
-#define NETMOD_OFI_SYMHEAP_H_INCLUDED
+#ifndef CH4R_SYMHEAP_H_INCLUDED
+#define CH4R_SYMHEAP_H_INCLUDED
 
-#include "impl.h"
 #include <opa_primitives.h>
 #include <sys/mman.h>
 #include <sys/time.h>
@@ -20,23 +19,40 @@
 #include <fcntl.h>
 #include <stdint.h>
 
-static inline size_t MPIDI_CH4_NMI_OFI_Get_mapsize(size_t size,
-                                                   size_t *psz)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_get_mapsize
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline size_t MPIDI_CH4R_get_mapsize(size_t size,
+					    size_t *psz)
 {
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_MAPSIZE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_MAPSIZE);
+
     long    page_sz = sysconf(_SC_PAGESIZE);
     size_t  mapsize = (size + (page_sz-1))&(~(page_sz-1));
     *psz            = page_sz;
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_MAPSIZE);
     return mapsize;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Check_maprange(void   *start,
-                                                   size_t  size)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_check_maprange_ok
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4R_check_maprange_ok(void   *start,
+					       size_t  size)
 {
     int     rc          = 0;
+    int     ret         = 0;
     size_t  page_sz;
-    size_t  mapsize     = MPIDI_CH4_NMI_OFI_Get_mapsize(size,&page_sz);
+    size_t  mapsize     = MPIDI_CH4R_get_mapsize(size,&page_sz);
     size_t  i,num_pages = mapsize/page_sz;
     char   *ptr         = (char *)start;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
 
     for(i=0; i<num_pages; i++) {
         rc = msync(ptr,page_sz,0);
@@ -45,28 +61,38 @@ static inline int MPIDI_CH4_NMI_OFI_Check_maprange(void   *start,
             MPIU_Assert(errno == ENOMEM);
             ptr+=page_sz;
         } else
-            return 0;
+            goto fn_exit;
     }
 
-    return 1;
+    ret = 1;
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
+    return ret;
 }
 
-static inline void *MPIDI_CH4_NMI_OFI_Generate_random_addr(size_t size)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_generate_random_addr
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline void *MPIDI_CH4R_generate_random_addr(size_t size)
 {
     /* starting position for pointer to map
      * This is not generic, probably only works properly on Linux
      * but it's not fatal since we bail after a fixed number of iterations
      */
-#define MPIDI_CH4_NMI_OFI_MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
+#define MPIDI_CH4I_MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
     char            random_state[256];
     size_t          page_sz;
     uint64_t        random_unsigned;
-    size_t          mapsize     = MPIDI_CH4_NMI_OFI_Get_mapsize(size,&page_sz);
+    size_t          mapsize     = MPIDI_CH4R_get_mapsize(size, &page_sz);
     uintptr_t       map_pointer;
     struct timeval  ts;
     int             iter = 100;
     int32_t         rh, rl;
     struct random_data rbuf;
+
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
 
     /* rbuf must be zero-cleared otherwise it results in SIGSEGV in glibc
        (http://stackoverflow.com/questions/4167034/c-initstate-r-crashing) */
@@ -78,26 +104,34 @@ static inline void *MPIDI_CH4_NMI_OFI_Generate_random_addr(size_t size)
     random_r(&rbuf, &rh);
     random_r(&rbuf, &rl);
     random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
-    map_pointer = MPIDI_CH4_NMI_OFI_MAP_POINTER;
+    map_pointer = MPIDI_CH4I_MAP_POINTER;
 
-    while(MPIDI_CH4_NMI_OFI_Check_maprange((void *)map_pointer,mapsize) == 0) {
+    while(MPIDI_CH4R_check_maprange_ok((void *)map_pointer,mapsize) == 0) {
         random_r(&rbuf, &rh);
         random_r(&rbuf, &rl);
         random_unsigned  = ((uint64_t)rh)<<32|(uint64_t)rl;
-        map_pointer = MPIDI_CH4_NMI_OFI_MAP_POINTER;
+        map_pointer = MPIDI_CH4I_MAP_POINTER;
         iter--;
 
-        if(iter == 0)
-            return (void *)-1ULL;
+        if(iter == 0) {
+            map_pointer = -1ULL;
+            goto fn_exit;
+        }
     }
 
+fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
     return (void *)map_pointer;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
-                                                       MPID_Comm  *comm,
-                                                       void      **base,
-                                                       MPID_Win   *win)
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4R_get_symmetric_heap
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
+                                                MPID_Comm  *comm,
+                                                void      **base,
+                                                MPID_Win   *win)
 {
     int mpi_errno = MPI_SUCCESS;
     unsigned  test, result;
@@ -107,7 +141,10 @@ static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
     size_t    page_sz;
     size_t    mapsize;
 
-    mapsize = MPIDI_CH4_NMI_OFI_Get_mapsize(size, &page_sz);
+    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+
+    mapsize = MPIDI_CH4R_get_mapsize(size, &page_sz);
 
     struct {
         uint64_t sz;
@@ -135,7 +172,7 @@ static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
             baseP                  = (void *)-1ULL;
 
             if(comm->rank == maxloc_result.loc) {
-                map_pointer = (uintptr_t)MPIDI_CH4_NMI_OFI_Generate_random_addr(mapsize);
+                map_pointer = (uintptr_t)MPIDI_CH4R_generate_random_addr(mapsize);
                 baseP       = mmap((void *)map_pointer,
                                    mapsize,
                                    PROT_READ|PROT_WRITE,
@@ -152,7 +189,7 @@ static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
             if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
             if(comm->rank != maxloc_result.loc) {
-                int rc = MPIDI_CH4_NMI_OFI_Check_maprange((void *)map_pointer,mapsize);
+                int rc = MPIDI_CH4R_check_maprange_ok((void *)map_pointer,mapsize);
 
                 if(rc) {
                     baseP = mmap((void *)map_pointer,
@@ -198,9 +235,10 @@ static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
     *base = baseP;
 
 fn_exit:
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
-#endif
+#endif /* CH4R_SYMHEAP_H_INCLUDED */
