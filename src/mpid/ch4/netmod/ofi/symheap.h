@@ -188,11 +188,11 @@ static inline int MPIDI_CH4_NMI_OFI_Get_symmetric_heap(MPI_Aint    size,
         baseP = MPL_malloc(size);
         MPIR_ERR_CHKANDJUMP((baseP == NULL), mpi_errno,
                             MPI_ERR_BUFFER, "**bufnull");
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = -1ULL;
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = NULL;
+        MPIDI_CH4R_WIN(win, mmap_sz)   = -1ULL;
+        MPIDI_CH4R_WIN(win, mmap_addr) = NULL;
     } else {
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = mapsize;
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = baseP;
+        MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
+        MPIDI_CH4R_WIN(win, mmap_addr) = baseP;
     }
 
     *base = baseP;

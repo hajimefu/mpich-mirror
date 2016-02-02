@@ -510,10 +510,7 @@ typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
     uint64_t                           win_id;
-    void                              *mmap_addr;
-    int64_t                            mmap_sz;
     MPIDI_CH4_NMI_OFI_Win_request_t   *syncQ;
-    void                              *msgQ;
 } MPIDI_CH4_NMI_OFI_Win_t;
 
 /* Externs */

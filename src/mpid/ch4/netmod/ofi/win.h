@@ -143,8 +143,6 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
 
     memset(MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(*MPIDI_CH4_NMI_OFI_WIN(win)));
 
-    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz                          = 0;
-    MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr                        = NULL;
     /* context id lower bits, window instance upper bits */
     window_instance = MPIDI_CH4_NMI_OFI_Index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator);
     MPIDI_CH4_NMI_OFI_WIN(win)->win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
@@ -544,23 +542,6 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
 
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-    if(win->create_flavor == MPI_WIN_FLAVOR_ALLOCATE  && win->base) {
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz > 0)
-            munmap(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr, MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz);
-        else if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz == -1)
-            MPL_free(win->base);
-    }
-
-    if(win->create_flavor == MPI_WIN_FLAVOR_SHARED) {
-        if(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr)
-            munmap(MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr, MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz);
-
-        MPL_free(MPIDI_CH4R_WIN(win, sizes));
-    }
-
-    if(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ)
-        MPL_free(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ);
-
     window_instance       = (uint32_t)(MPIDI_CH4_NMI_OFI_WIN(win)->win_id>>32);
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
                                            window_instance);
@@ -784,8 +765,8 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
 
         if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = map_ptr;
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = mapsize;
+        MPIDI_CH4R_WIN(win, mmap_addr) = map_ptr;
+        MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
     } else {
         mpi_errno = MPIR_Bcast_impl(&map_ptr,1,MPI_UNSIGNED_LONG,
                                     0,comm_ptr,&errflag);
@@ -801,8 +782,8 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                        PROT_READ|PROT_WRITE,
                        MAP_SHARED|MAP_FIXED,
                        fd, 0);
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_addr = map_ptr;
-        MPIDI_CH4_NMI_OFI_WIN(win)->mmap_sz   = mapsize;
+        MPIDI_CH4R_WIN(win, mmap_addr) = map_ptr;
+        MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
 
         if(map_ptr == NULL || map_ptr == MAP_FAILED) {
             close(fd);
@@ -994,9 +975,9 @@ static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win *win)
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
-    MPIU_Assert(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ != NULL);
+    MPIU_Assert(MPIDI_CH4R_WIN(win, lockQ) != NULL);
 
-    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4_NMI_OFI_WIN(win)->msgQ;
+    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4R_WIN(win, lockQ);
 
     for(i = 0; i < win->comm_ptr->local_size; i++) {
         MPIDI_CH4_NMI_OFI_Win_control_t msg;
@@ -1136,6 +1117,7 @@ fn_fail:
 static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4R_winLock_info *lockQ;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
@@ -1145,13 +1127,12 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
     int size;
     size = win->comm_ptr->local_size;
 
-    if(!MPIDI_CH4_NMI_OFI_WIN(win)->msgQ) {
-        MPIDI_CH4_NMI_OFI_WIN(win)->msgQ = (void *) MPL_calloc(size, sizeof(MPIDI_CH4R_winLock_info));
-        MPIU_Assert(MPIDI_CH4_NMI_OFI_WIN(win)->msgQ != NULL);
+    if(!MPIDI_CH4R_WIN(win, lockQ)) {
+        MPIDI_CH4R_WIN(win, lockQ) = (MPIDI_CH4R_winLock_info *) MPL_calloc(size, sizeof(MPIDI_CH4R_winLock_info));
+        MPIU_Assert(MPIDI_CH4R_WIN(win, lockQ) != NULL);
     }
 
-    MPIDI_CH4R_winLock_info *lockQ;
-    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4_NMI_OFI_WIN(win)->msgQ;
+    lockQ = MPIDI_CH4R_WIN(win, lockQ);
     int i;
 
     for(i = 0; i < size; i++) {
