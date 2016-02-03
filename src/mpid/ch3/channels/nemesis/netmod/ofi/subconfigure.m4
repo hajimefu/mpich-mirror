@@ -17,8 +17,23 @@ AM_COND_IF([BUILD_NEMESIS_NETMOD_OFI],[
     PAC_SET_HEADER_LIB_PATH(ofi)
     PAC_PUSH_FLAG(LIBS)
     PAC_CHECK_HEADER_LIB_FATAL(ofi, rdma/fabric.h, fabric, fi_getinfo)
-    PAC_APPEND_FLAG([-lfabric],[WRAPPER_LIBS])
     PAC_POP_FLAG(LIBS)
+
+    if [test "$enable_sharedlibs" = "osx-gcc" ]; then
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib], [LDFLAGS])
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib], [LDFLAGS])
+    else
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+    fi
+
+    if [test "$do_static_fabric" = "true"]; then
+       PAC_APPEND_FLAG([-L${with_ofi}/lib],[WRAPPER_STATIC_LDFLAGS])
+       PAC_APPEND_FLAG([-lfabric],[WRAPPER_STATIC_LIBS])
+    else
+       PAC_APPEND_FLAG([-L${with_ofi}/lib -lfabric],[LIBS])
+    fi
+    PAC_APPEND_FLAG([-lstdc++ -ldl -lpthread],[LIBS])
 
     AC_DEFINE([ENABLE_COMM_OVERRIDES], 1, [define to add per-vc function pointers to override send and recv functions])
 ])dnl end AM_COND_IF(BUILD_NEMESIS_NETMOD_OFI,...)
