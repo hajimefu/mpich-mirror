@@ -102,6 +102,7 @@ int MPID_nem_ofi_init(MPIDI_PG_t * pg_p, int pg_rank, char **bc_val_p, int *val_
     hints->domain_attr->threading        = FI_THREAD_DOMAIN;
     hints->domain_attr->control_progress = FI_PROGRESS_MANUAL;
     hints->domain_attr->data_progress    = FI_PROGRESS_MANUAL;
+    hints->domain_attr->av_type          = FI_AV_MAP;
     char *provname;
     provname                             = MPIR_CVAR_OFI_USE_PROVIDER?
       MPL_strdup(MPIR_CVAR_OFI_USE_PROVIDER):NULL;
