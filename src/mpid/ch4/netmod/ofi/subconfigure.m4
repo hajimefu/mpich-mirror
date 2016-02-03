@@ -18,7 +18,6 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
                 mr-offset          - USE OFI memory region offset mode
                 direct-provider    - USE OFI FI_DIRECT to compile in a single OFI direct provider
                 no-tagged          - Do not use OFI fi_tagged interfaces.
-                static-fabric      - Statically link libfabric
                 ],
                 [ofi_netmod_args=$withval],
                 [ofi_netmod_args=])
@@ -30,7 +29,6 @@ dnl Parse the device arguments
     do_scalable_endpoints=false
     do_direct_provider=false
     do_av_table=false
-    do_static_fabric=false
     do_tagged=true
     echo "Parsing Arguments for OFI Netmod"
     for arg in $args_array; do
@@ -46,10 +44,6 @@ dnl Parse the device arguments
       direct-provider)
               do_direct_provider=true
               echo " ---> CH4::OFI Direct OFI Provider requested : $arg"
-              ;;
-      static-fabric)
-              do_static_fabric=true
-              echo " ---> CH4::OFI Static library: $arg"
               ;;
       no-tagged)
               do_tagged=false
@@ -72,11 +66,6 @@ dnl Parse the device arguments
     if [test "$do_direct_provider" = "true"]; then
        AC_MSG_NOTICE([Enabling OFI netmod direct provider])
        PAC_APPEND_FLAG([-DFABRIC_DIRECT],[CPPFLAGS])
-    fi
-
-    if [test "$do_static_fabric" = "true"]; then
-       MPID_LIBTOOL_STATIC_FLAG="-static -lfabric"
-       AC_MSG_NOTICE([Enabling static link of libfabric])
     fi
 
     if [test "$do_tagged" = "true"]; then
@@ -102,14 +91,7 @@ AM_COND_IF([BUILD_CH4_NETMOD_OFI],[
         PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
         PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib -Wl,--enable-new-dtags], [LDFLAGS])
     fi
-
-    if [test "$do_static_fabric" = "true"]; then
-       PAC_APPEND_FLAG([-L${with_ofi}/lib],[WRAPPER_STATIC_LDFLAGS])
-       PAC_APPEND_FLAG([-lfabric],[WRAPPER_STATIC_LIBS])
-    else
-       PAC_APPEND_FLAG([-L${with_ofi}/lib -lfabric],[LIBS])
-    fi
-    PAC_APPEND_FLAG([-lstdc++ -ldl -lpthread],[LIBS])
+    PAC_APPEND_FLAG([-lfabric -lstdc++ -ldl -lrt],[WRAPPER_LIBS])
 
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_OFI,...)
 ])dnl end _BODY

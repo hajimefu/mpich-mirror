@@ -85,7 +85,7 @@ fi
 #
 # Look through the arguments for arguments that indicate compile only.
 # If these are *not* found, add the library options
-static_linking=no
+
 linking=yes
 allargs=""
 interlib_deps=yes
@@ -105,7 +105,6 @@ for arg in "$@" ; do
 	# -f77=* -config=*
     -static)
     interlib_deps=no
-    static_linking=yes
     ;;
     -echo)
     addarg=no
@@ -292,17 +291,9 @@ fi
 final_fflags="@MPICH_MPIF77_FFLAGS@ @WRAPPER_FFLAGS@"
 final_ldflags="@MPICH_MPIF77_LDFLAGS@ @WRAPPER_LDFLAGS@"
 final_libs="@MPICH_MPIF77_LIBS@"
-final_static_libs="@WRAPPER_STATIC_LDFLAGS@ @WRAPPER_STATIC_LIBS@"
 if test "@INTERLIB_DEPS@" = "no" -o "${interlib_deps}" = "no" ; then
     final_ldflags="${final_ldflags} @LDFLAGS@"
-    final_libs="${final_libs}  @WRAPPER_LIBS@"
-fi
-if [ "$final_static_libs" != " " ] ; then
-   if [ "$static_linking" = yes ] ; then
-       final_libs="${final_libs} ${final_static_libs}  @WRAPPER_LIBS@"
-   else
-       final_libs="${final_libs} ${wl}-Bstatic ${final_static_libs} ${wl}-Bdynamic  @WRAPPER_LIBS@"
-   fi
+    final_libs="${final_libs} @LIBS@ @WRAPPER_LIBS@"
 fi
 
 # A temporary statement to invoke the compiler
