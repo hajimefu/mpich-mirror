@@ -317,6 +317,8 @@ if test "$enable_ch4r_per_comm_msg_queue" = "yes" ; then
         [Define if CH4U will use per-communicator message queues])
 fi
 
+PAC_ARG_SHARED_MEMORY
+
 AC_CONFIG_FILES([
 src/mpid/ch4/src/mpid_ch4_net_array.c
 src/mpid/ch4/src/mpid_ch4_shm_array.c
