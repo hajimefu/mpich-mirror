@@ -14,12 +14,19 @@ AC_DEFUN([PAC_SUBCFG_BODY_]PAC_SUBCFG_AUTO_SUFFIX,[
 AM_COND_IF([BUILD_NEMESIS_NETMOD_OFI],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch3:nemesis:ofi])
 
-    PAC_SET_HEADER_LIB_PATH(ofi)
-    PAC_PUSH_FLAG(LIBS)
-    PAC_CHECK_HEADER_LIB_FATAL(ofi, rdma/fabric.h, fabric, fi_getinfo)
-    PAC_POP_FLAG(LIBS)
-    PAC_APPEND_FLAG([-lfabric -ldl -lrt],[WRAPPER_LIBS])
-    AC_DEFINE([ENABLE_COMM_OVERRIDES], 1, [define to add per-vc function pointers to override send and recv functions])
+    if [test "${with_libfabric}" != "embedded"]; then
+        AC_MSG_NOTICE([CH3 OFI Netmod:  Using an external libfabric])
+        PAC_SET_HEADER_LIB_PATH(ofi)
+        PAC_PUSH_FLAG(LIBS)
+        PAC_CHECK_HEADER_LIB_FATAL(libfabric, rdma/fabric.h, fabric, fi_getinfo)
+        PAC_POP_FLAG(LIBS)
+        PAC_APPEND_FLAG([-lfabric],[WRAPPER_LIBS])
+    else
+        AC_MSG_NOTICE([CH3 OFI Netmod:  Using an embedded libfabric])
+    fi
+    PAC_APPEND_FLAG([-ldl -lrt],[WRAPPER_LIBS])
+
+AC_DEFINE([ENABLE_COMM_OVERRIDES], 1, [define to add per-vc function pointers to override send and recv functions])
 ])dnl end AM_COND_IF(BUILD_NEMESIS_NETMOD_OFI,...)
 ])dnl end _BODY
 

@@ -80,18 +80,24 @@ AC_DEFUN([PAC_SUBCFG_BODY_]PAC_SUBCFG_AUTO_SUFFIX,[
 AM_COND_IF([BUILD_CH4_NETMOD_OFI],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch4:ofi])
 
-    PAC_SET_HEADER_LIB_PATH(ofi)
-    PAC_PUSH_FLAG(LIBS)
-    PAC_CHECK_HEADER_LIB_FATAL(ofi, rdma/fabric.h, fabric, fi_getinfo)
-    PAC_POP_FLAG(LIBS)
-    if [test "$enable_sharedlibs" = "osx-gcc" ]; then
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib], [LDFLAGS])
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib], [LDFLAGS])
+    if [test "${with_libfabric}" != "embedded"]; then
+        AC_MSG_NOTICE([CH4 OFI Netmod:  Using an external libfabric])
+        PAC_SET_HEADER_LIB_PATH(ofi)
+        PAC_PUSH_FLAG(LIBS)
+        PAC_CHECK_HEADER_LIB_FATAL(libfabric, rdma/fabric.h, fabric, fi_getinfo)
+        PAC_POP_FLAG(LIBS)
+        if [test "$enable_sharedlibs" = "osx-gcc" ]; then
+            PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib], [LDFLAGS])
+            PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_libfabric}/lib], [LDFLAGS])
+        else
+            PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+            PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_libfabric}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+        fi
+        PAC_APPEND_FLAG([-lfabric],[WRAPPER_LIBS])
     else
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ofi}/lib -Wl,--enable-new-dtags], [LDFLAGS])
+        AC_MSG_NOTICE([CH4 OFI Netmod:  Using an embedded libfabric])
     fi
-    PAC_APPEND_FLAG([-lfabric -lstdc++ -ldl -lrt],[WRAPPER_LIBS])
+    PAC_APPEND_FLAG([-lstdc++ -ldl -lrt],[WRAPPER_LIBS])
 
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_OFI,...)
 ])dnl end _BODY

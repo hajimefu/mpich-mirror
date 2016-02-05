@@ -794,6 +794,7 @@ export PMPILIBNAME
 export RANLIB
 export OPALIBNAME
 export MPLLIBNAME
+export LIBFABRICLIBNAME
 # ----------------------------------------------------------------------------
 # with-device
 if test "$with_device" = "default" ; then
@@ -1262,6 +1263,76 @@ else
         opalibdir="-L${with_openpa_prefix}/lib"
     fi
     PAC_APPEND_FLAG([-L${with_openpa_prefix}/lib],[WRAPPER_LDFLAGS])
+fi
+
+# Libfabric
+AC_ARG_VAR([LIBFABRICLIBNAME],[can be used to override the name of the Libfabric library (default: "libfabric")])
+LIBFABRICLIBNAME=${LIBFABRICLIBNAME:-"fabric"}
+export LIBFABRICLIBNAME
+AC_SUBST(LIBFABRICLIBNAME)
+AC_ARG_WITH([libfabric],
+            [AS_HELP_STRING([[--with-libfabric[=DIR]]],
+                            [use an external libfabric,rather than the one included
+                             in src/libfabric.  Pass "embedded" to force usage of
+                             a libfabric in src/libfabric])],
+            [
+             PAC_APPEND_FLAG([-L$withval/lib],[LIBS])
+            ],
+            [# see if LIBFABRIC is already installed on the system
+             PAC_PUSH_FLAG([LIBS])
+             PAC_PREPEND_FLAG([-l${LIBFABRICLIBNAME}],[LIBS])
+             AC_LINK_IFELSE([AC_LANG_PROGRAM([dnl
+#include "rdma/fabric.h"
+],[
+struct fi_info *hints;
+hints = fi_allocinfo();
+])dnl
+                             ],
+                            [with_libfabric=system],[with_libfabric=embedded])
+             PAC_POP_FLAG([LIBS])
+             ])
+
+libfabricsrcdir=""
+AC_SUBST([libfabricsrcdir])
+libfabriclibdir=""
+AC_SUBST([libfabriclibdir])
+libfabriclib=""
+AC_SUBST([libfabriclib])
+
+if test "$with_libfabric" = "embedded" ; then
+    if test -e "${use_top_srcdir}/src/libfabric" ; then
+        libfabricsrcdir="${master_top_builddir}/src/libfabric"
+        libfabriclib="${master_top_builddir}/src/libfabric/src/lib${LIBFABRICLIBNAME}.la"
+        PAC_APPEND_FLAG([-I${use_top_srcdir}/src/libfabric/include],[CPPFLAGS])
+        PAC_APPEND_FLAG([-I${master_top_builddir}/src/libfabric/include/],[CPPFLAGS])
+        PAC_APPEND_FLAG([-DHAVE_SYMVER=0],[CPPFLAGS])
+        PAC_APPEND_FLAG([-DHAVE_SYMVER_GNU_ASM=0],[CPPFLAGS])
+        PAC_APPEND_FLAG([-DHAVE_SYMVER_GNU_ASM_LABEL=0],[CPPFLAGS])
+        libfabric_subdir_args="--disable-versioning"
+        PAC_CONFIG_SUBDIR_ARGS([src/libfabric],[$libfabric_subdir_args],[],[AC_MSG_ERROR([Libfabric configure failed])])
+    else
+        AC_MSG_WARN([Attempted to use the embedded Libfabric source tree in "src/libfabric", but it is missing.  Configuration or compilation may fail later.])
+    fi
+elif test "$with_libfabric" = "system" ; then
+    PAC_PREPEND_FLAG([-l${LIBFABRICLIBNAME}],[WRAPPER_LIBS])
+elif test "$with_libfabric" = "no" ; then
+    # The user doesn't want to use LIBFABRIC.  This may or may not cause MPICH to
+    # fail to configure/build, depending on many other factors.
+    :
+else
+    # The user specified an already-installed LIBFABRIC; just sanity check, don't
+    # subconfigure it
+    AS_IF([test -s "${with_libfabric}/include/rdma/fabric.h"],
+          [:],[AC_MSG_ERROR([the Libfabric installation in "${with_libfabric}" appears broken])])
+    PAC_APPEND_FLAG([-I${with_libfabric}/include],[CPPFLAGS])
+    PAC_PREPEND_FLAG([-l${LIBFABRICLIBNAME}],[WRAPPER_LIBS])
+    if test -d ${with_libfabric}/lib64 ; then
+        PAC_APPEND_FLAG([-L${with_libfabric}/lib64],[WRAPPER_LDFLAGS])
+        libfabriclibdir="-L${with_libfabric}/lib64"
+    else
+        libfabriclibdir="-L${with_libfabric}/lib"
+    fi
+    PAC_APPEND_FLAG([-L${with_libfabric}/lib],[WRAPPER_LDFLAGS])
 fi
 
 # ----------------------------------------------------------------------------

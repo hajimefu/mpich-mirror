@@ -47,11 +47,11 @@ pkgconfigdir = @pkgconfigdir@
 # to build src/mpi/errhan/defmsg.h
 errnames_txt_files = 
 
-external_subdirs = @mplsrcdir@ @opasrcdir@
-external_ldflags = @mpllibdir@ @opalibdir@
+external_subdirs = @mplsrcdir@ @opasrcdir@ @libfabricsrcdir@
+external_ldflags = @mpllibdir@ @opalibdir@ @libfabriclibdir@
 external_libs = @WRAPPER_LIBS@
 mpi_convenience_libs =
-pmpi_convenience_libs = @opalib@ @mpllib@
+pmpi_convenience_libs = @opalib@ @mpllib@ @libfabriclib@
 
 # NOTE on our semi-unconventional usage of DIST_SUBDIRS:
 # The automake manual recommends thinking of DIST_SUBDIRS as the list of all
@@ -292,7 +292,7 @@ uninstall-local:
 	for x in @MPICPP_NAME@ @MPIF90_NAME@ @MPIF77_NAME@ ; do \
 		rm -f ${DESTDIR}${bindir}/$$x ; \
 	done ; \
-	for x in mpl opa mpich fmpich mpichf90 mpichcxx ; do \
+	for x in mpl opa libfabric mpich fmpich mpichf90 mpichcxx ; do \
 		rm -f ${DESTDIR}${libdir}/lib$$x@SHLIB_EXT@ ; \
 	done
 

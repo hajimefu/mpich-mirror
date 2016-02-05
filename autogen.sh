@@ -94,6 +94,10 @@ confdb_dirs="${confdb_dirs} src/pm/hydra/confdb"
 confdb_dirs="${confdb_dirs} src/pm/hydra/mpl/confdb"
 confdb_dirs="${confdb_dirs} test/mpi/confdb"
 
+if [ -e src/libfabric ]; then
+    confdb_dirs="${confdb_dirs} src/libfabric/confdb"
+fi
+
 # hydra's copy of mpl
 sync_external src/mpl src/pm/hydra/mpl
 
@@ -164,6 +168,10 @@ MAKE=${MAKE-make}
 
 # external packages that require autogen.sh to be run for each of them
 externals="src/pm/hydra src/mpi/romio src/openpa"
+if [ -e src/libfabric ]; then
+    externals="${externals} src/libfabric"
+fi
+
 # amdirs are the directories that make use of autoreconf
 amdirs=". src/mpl src/util/logging/rlog"
 
