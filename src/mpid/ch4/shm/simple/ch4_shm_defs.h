@@ -44,8 +44,8 @@ extern char *MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr;
 
 static inline MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t MPIDI_CH4_SHMI_SIMPLE_REL_TO_ABS(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t r)
 {
-    return (MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t) ((char *) OPA_load_ptr(&r.p) +
-                                  (MPIDI_CH4_SHMI_SIMPLE_addr_t) MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr);
+    return (MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t)((char *) OPA_load_ptr(&r.p) +
+                                              (MPIDI_CH4_SHMI_SIMPLE_addr_t) MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr);
 }
 
 static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_ABS_TO_REL(MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t a)

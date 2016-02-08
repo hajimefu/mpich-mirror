@@ -47,18 +47,19 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
                         "mem_region segments");
     MPIU_CHKPMEM_MALLOC(local_procs, int *, size * sizeof(int), mpi_errno, "local process index array");
     MPIU_CHKPMEM_MALLOC(local_ranks, int *, size * sizeof(int), mpi_errno, "mem_region local ranks");
-    for( i = 0; i < size; i++ )
-    {
-        if( MPIDI_CH4_rank_is_local(i, MPIR_Process.comm_world) )
-        {
-            if( i == rank ) {
+
+    for(i = 0; i < size; i++) {
+        if(MPIDI_CH4_rank_is_local(i, MPIR_Process.comm_world)) {
+            if(i == rank) {
                 local_rank = num_local;
             }
+
             local_procs[num_local] = i;
             local_ranks[i] = num_local;
             num_local++;
         }
     }
+
     MPIDI_CH4_SHMI_SIMPLE_mem_region.rank = rank;
     MPIDI_CH4_SHMI_SIMPLE_mem_region.num_local = num_local;
     MPIDI_CH4_SHMI_SIMPLE_mem_region.num_procs = size;
@@ -70,43 +71,49 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
     /* Request fastboxes region */
     mpi_errno =
         MPIDU_shm_seg_alloc(MAX
-                             ((num_local * ((num_local - 1) * sizeof(MPIDI_CH4_SHMI_SIMPLE_Fastbox_t))),
-                              MPIDI_CH4_SHMI_SIMPLE_ASYMM_NULL_VAL), (void **) &fastboxes_p);
-    if (mpi_errno)
+                            ((num_local * ((num_local - 1) * sizeof(MPIDI_CH4_SHMI_SIMPLE_Fastbox_t))),
+                             MPIDI_CH4_SHMI_SIMPLE_ASYMM_NULL_VAL), (void **) &fastboxes_p);
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Request data cells region */
     mpi_errno =
         MPIDU_shm_seg_alloc(num_local * MPIDI_CH4_SHMI_SIMPLE_NUM_CELLS * sizeof(MPIDI_CH4_SHMI_SIMPLE_Cell_t),
-                             (void **) &cells_p);
-    if (mpi_errno)
+                            (void **) &cells_p);
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Request free q region */
     mpi_errno = MPIDU_shm_seg_alloc(num_local * sizeof(MPIDI_CH4_SHMI_SIMPLE_Queue_t), (void **) &free_queues_p);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Request recv q region */
     mpi_errno = MPIDU_shm_seg_alloc(num_local * sizeof(MPIDI_CH4_SHMI_SIMPLE_Queue_t), (void **) &recv_queues_p);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Request shared collectives barrier vars region */
     mpi_errno = MPIDU_shm_seg_alloc(MPIDI_CH4_SHMI_SIMPLE_NUM_BARRIER_VARS * sizeof(MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_t),
-                                     (void **) &MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier_vars);
-    if (mpi_errno)
+                                    (void **) &MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier_vars);
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Actually allocate the segment and assign regions to the pointers */
     mpi_errno = MPIDU_shm_seg_commit(&MPIDI_CH4_SHMI_SIMPLE_mem_region.memory, &MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier,
-                                 num_local, local_rank, MPIDI_CH4_SHMI_SIMPLE_mem_region.local_procs[0],
-                                 MPIDI_CH4_SHMI_SIMPLE_mem_region.rank);
-    if (mpi_errno)
+                                     num_local, local_rank, MPIDI_CH4_SHMI_SIMPLE_mem_region.local_procs[0],
+                                     MPIDI_CH4_SHMI_SIMPLE_mem_region.rank);
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* post check_alloc steps */
-    if (MPIDI_CH4_SHMI_SIMPLE_mem_region.memory.symmetrical == 1) {
+    if(MPIDI_CH4_SHMI_SIMPLE_mem_region.memory.symmetrical == 1) {
         MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr = NULL;
     } else {
         MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr = MPIDI_CH4_SHMI_SIMPLE_mem_region.memory.base_addr;
@@ -117,12 +124,14 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
 
     /* init shared collectives barrier region */
     mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier_vars);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* local procs barrier */
     mpi_errno = MPIDU_shm_barrier(MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier, num_local);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* find our cell region */
@@ -143,14 +152,14 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
     MPIDI_CH4_SHMI_SIMPLE_Queue_init(MPIDI_CH4_SHMI_SIMPLE_mem_region.FreeQ[rank]);
 
     /* Init and enqueue our free cells */
-    for (i = 0; i < MPIDI_CH4_SHMI_SIMPLE_NUM_CELLS; ++i) {
+    for(i = 0; i < MPIDI_CH4_SHMI_SIMPLE_NUM_CELLS; ++i) {
         MPIDI_CH4_SHMI_SIMPLE_Cell_init(&(MPIDI_CH4_SHMI_SIMPLE_mem_region.Elements[i]),rank);
         MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_mem_region.FreeQ[rank],
-                               &(MPIDI_CH4_SHMI_SIMPLE_mem_region.Elements[i]));
+                                            &(MPIDI_CH4_SHMI_SIMPLE_mem_region.Elements[i]));
     }
 
     /* set route for local procs through shmem */
-    for (i = 0; i < num_local; i++) {
+    for(i = 0; i < num_local; i++) {
         grank = local_procs[i];
         MPIDI_CH4_SHMI_SIMPLE_mem_region.FreeQ[grank] = &free_queues_p[i];
         MPIDI_CH4_SHMI_SIMPLE_mem_region.RecvQ[grank] = &recv_queues_p[i];
@@ -165,7 +174,8 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
 
     /* local barrier */
     mpi_errno = MPIDU_shm_barrier(MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier, num_local);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* Allocate table of pointers to fastboxes */
@@ -180,26 +190,26 @@ static inline int MPIDI_CH4_SHM_init(int rank, int size)
                                           (((sender) < (receiver)) ? ((num_local-1) * (sender) + ((receiver)-1)) : 0))
 
     /* fill in tables */
-    for (i = 0; i < num_local; ++i) {
-        if (i == local_rank) {
+    for(i = 0; i < num_local; ++i) {
+        if(i == local_rank) {
             /* No fastboxs to myself */
             MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.in[i] = NULL;
             MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.out[i] = NULL;
-        }
-        else {
+        } else {
             MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.in[i] = &fastboxes_p[MPIDI_CH4_SHMI_SIMPLE_MAILBOX_INDEX(i, local_rank)];
             MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.out[i] = &fastboxes_p[MPIDI_CH4_SHMI_SIMPLE_MAILBOX_INDEX(local_rank, i)];
             OPA_store_int(&MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.in[i]->common.flag.value, 0);
             OPA_store_int(&MPIDI_CH4_SHMI_SIMPLE_mem_region.mailboxes.out[i]->common.flag.value, 0);
         }
     }
+
 #undef MPIDI_CH4_SHMI_SIMPLE_MAILBOX_INDEX
 
     MPIU_CHKPMEM_COMMIT();
-  fn_exit:
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_INIT);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     /* --BEGIN ERROR HANDLING-- */
     MPIU_CHKPMEM_REAP();
     goto fn_exit;
@@ -216,7 +226,8 @@ static inline int MPIDI_CH4_SHM_finalize(void)
 
     /* local barrier */
     mpi_errno = MPIDU_shm_barrier(MPIDI_CH4_SHMI_SIMPLE_mem_region.barrier, MPIDI_CH4_SHMI_SIMPLE_mem_region.num_local);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
     /* from MPIDI_CH4_SHMI_SIMPLE_init */
@@ -229,17 +240,18 @@ static inline int MPIDI_CH4_SHM_finalize(void)
     MPL_free(MPIDI_CH4_SHMI_SIMPLE_mem_region.local_procs);
 
     mpi_errno = MPIDU_shm_seg_destroy(&MPIDI_CH4_SHMI_SIMPLE_mem_region.memory, MPIDI_CH4_SHMI_SIMPLE_mem_region.num_local);
-    if (mpi_errno)
+
+    if(mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
-  fn_exit:
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_FINALIZE);
     return mpi_errno;
-  fn_fail:
+fn_fail:
     goto fn_exit;
 }
 
-static inline void *MPIDI_CH4_SHM_alloc_mem(size_t size, MPID_Info * info_ptr)
+static inline void *MPIDI_CH4_SHM_alloc_mem(size_t size, MPID_Info *info_ptr)
 {
     MPIU_Assert(0);
     return NULL;
@@ -251,33 +263,33 @@ static inline int MPIDI_CH4_SHM_free_mem(void *ptr)
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_comm_get_lpid(MPID_Comm * comm_ptr,
-                                          int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+static inline int MPIDI_CH4_SHM_comm_get_lpid(MPID_Comm *comm_ptr,
+                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_SHM_gpid_get(MPID_Comm *comm_ptr, int rank, MPID_Gpid *gpid)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_CH4_SHM_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     *id_p = (MPID_Node_id_t) 0;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_CH4_SHM_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
 {
     *max_id_p = (MPID_Node_id_t) 1;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_getallincomm(MPID_Comm * comm_ptr,
-                                         int local_size, MPID_Gpid local_gpids[], int *singlePG)
+static inline int MPIDI_CH4_SHM_getallincomm(MPID_Comm *comm_ptr,
+                                             int local_size, MPID_Gpid local_gpids[], int *singlePG)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -289,8 +301,8 @@ static inline int MPIDI_CH4_SHM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
-                                                        int size, const int lpids[])
+static inline int MPIDI_CH4_SHM_create_intercomm_from_lpids(MPID_Comm *newcomm_ptr,
+                                                            int size, const int lpids[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

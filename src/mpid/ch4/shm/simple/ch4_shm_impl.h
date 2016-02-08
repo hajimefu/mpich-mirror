@@ -189,7 +189,7 @@ fn_fail:                      \
    : __FILE__                                   \
 )
 
-int MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_t * barrier_region);
+int MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_t *barrier_region);
 extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Sendq;
 extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected;
 extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_posted;

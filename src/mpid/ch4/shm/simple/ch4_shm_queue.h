@@ -68,8 +68,8 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_init(MPIDI_CH4_SHMI_SIMPLE_Queue_
 
 #define MPIDI_CH4_SHMI_SIMPLE_USE_SHADOW_HEAD
 
-static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_SWAP_REL(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t * ptr,
-                                                        MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t val)
+static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_SWAP_REL(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t *ptr,
+                                                                                  MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t val)
 {
     MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t ret;
     OPA_store_ptr(&ret.p, OPA_swap_ptr(&(ptr->p), OPA_load_ptr(&val.p)));
@@ -77,8 +77,8 @@ static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_SWAP_RE
 }
 
 /* do a compare-and-swap with MPIDI_CH4_SHMI_SIMPLE_RELNULL */
-static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_CAS_REL_NULL(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t * ptr,
-                                                            MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t oldv)
+static inline MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t MPIDI_CH4_SHMI_SIMPLE_CAS_REL_NULL(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t *ptr,
+                                                                                      MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t oldv)
 {
     MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t ret;
     OPA_store_ptr(&ret.p, OPA_cas_ptr(&(ptr->p), OPA_load_ptr(&oldv.p), MPIDI_CH4_SHMI_SIMPLE_REL_NULL));
@@ -105,15 +105,15 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_Que
 
     /* enqueue at tail */
     r_prev = MPIDI_CH4_SHMI_SIMPLE_SWAP_REL(&(qhead->tail), r_element);
-    if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(r_prev)) {
+
+    if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(r_prev)) {
         /* queue was empty, element is the new head too */
 
         /* no write barrier needed, we believe atomic SWAP with a control
          * dependence (if) will enforce ordering between the SWAP and the head
          * assignment */
         qhead->head = r_element;
-    }
-    else {
+    } else {
         /* queue was not empty, swing old tail's next field to point to
          * our element */
         MPIDI_CH4_SHMI_SIMPLE_Q_assert(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(MPIDI_CH4_SHMI_SIMPLE_REL_TO_ABS(r_prev)->next));
@@ -140,14 +140,13 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_Queue_
      * contain a non-null value */
     MPIDI_CH4_SHMI_SIMPLE_Q_assert(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->my_head) || MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->head));
 
-    if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->my_head)) {
+    if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->my_head)) {
         /* the order of comparison between my_head and head does not
          * matter, no read barrier needed here */
-        if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->head)) {
+        if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->head)) {
             /* both null, nothing in queue */
             return 1;
-        }
-        else {
+        } else {
             /* shadow head null and head has value, move the value to
              * our private shadow head and zero the real head */
             qhead->my_head = qhead->head;
@@ -165,7 +164,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_Queue_
 
 
 /* Gets the head */
-static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t qhead, MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t * e)
+static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t qhead, MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t *e)
 {
     MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t _e;
     MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t _r_e;
@@ -179,10 +178,9 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Que
 
     /* no barrier needed, my_head is private to consumer, plus
      * head/my_head and _e->next are ordered by a data dependency */
-    if (!MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
+    if(!MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
         qhead->my_head = _e->next;
-    }
-    else {
+    } else {
         /* we've reached the end (tail) of the queue */
         MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t old_tail;
 
@@ -191,15 +189,17 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Que
          * my_head or the tail */
         old_tail = MPIDI_CH4_SHMI_SIMPLE_CAS_REL_NULL(&(qhead->tail), _r_e);
 
-        if (!MPIDI_CH4_SHMI_SIMPLE_REL_ARE_EQUAL(old_tail, _r_e)) {
+        if(!MPIDI_CH4_SHMI_SIMPLE_REL_ARE_EQUAL(old_tail, _r_e)) {
             /* FIXME is a barrier needed here because of the control-only dependency? */
-            while (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
+            while(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
                 MPIDI_CH4_SHMI_SIMPLE_SKIP;
             }
+
             /* no read barrier needed between loads from the same location */
             qhead->my_head = _e->next;
         }
     }
+
     MPIDI_CH4_SHMI_SIMPLE_SET_REL_NULL(_e->next);
 
     /* Conservative read barrier here to ensure loads from head are ordered
@@ -252,10 +252,10 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_Que
 
     r_prev = qhead->tail;
     qhead->tail = r_element;
-    if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(r_prev)) {
+
+    if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(r_prev)) {
         qhead->head = r_element;
-    }
-    else {
+    } else {
         MPIDI_CH4_SHMI_SIMPLE_REL_TO_ABS(r_prev)->next = r_element;
     }
 
@@ -274,11 +274,10 @@ static inline MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t MPIDI_CH4_SHMI_SIMPLE_Queue_head(
    atomics to provide atomic load/store operations for us. */
 static inline int MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t qhead)
 {
-    if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->my_head)) {
-        if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->head)) {
+    if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->my_head)) {
+        if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(qhead->head)) {
             return 1;
-        }
-        else {
+        } else {
             qhead->my_head = qhead->head;
             MPIDI_CH4_SHMI_SIMPLE_SET_REL_NULL(qhead->head); /* reset it for next time */
         }
@@ -287,7 +286,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_Queue_
     return 0;
 }
 
-static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t qhead, MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t * e)
+static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t qhead, MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t *e)
 {
     MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t _e;
     MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t _r_e;
@@ -296,19 +295,20 @@ static inline void MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_Que
     _e = MPIDI_CH4_SHMI_SIMPLE_REL_TO_ABS(_r_e);
 
 
-    if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
+    if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
         /* a REL_NULL _e->next or writing qhead->tail both require locking */
         MPIDI_CH4_SHMI_SIMPLE_Queue_mutex_lock(&qhead->lock);
         qhead->my_head = _e->next;
+
         /* We have to check _e->next again because it may have changed between
          * the time we checked it without the lock and the time that we acquired
          * the lock. */
-        if (MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
+        if(MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next)) {
             MPIDI_CH4_SHMI_SIMPLE_SET_REL_NULL(qhead->tail);
         }
+
         MPIDI_CH4_SHMI_SIMPLE_Queue_mutex_unlock(&qhead->lock);
-    }
-    else {      /* !MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next) */
+    } else {    /* !MPIDI_CH4_SHMI_SIMPLE_IS_REL_NULL(_e->next) */
         /* We don't need to lock because a non-null _e->next can't be changed by
          * anyone but us (the dequeuer) and we don't need to modify qhead->tail
          * because we aren't removing the last element from the queue. */

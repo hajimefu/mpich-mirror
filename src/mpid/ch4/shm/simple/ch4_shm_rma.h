@@ -14,35 +14,35 @@
 #include "ch4_shm_impl.h"
 
 static inline int MPIDI_CH4_SHM_put(const void *origin_addr,
-                                int origin_count,
-                                MPI_Datatype origin_datatype,
-                                int target_rank,
-                                MPI_Aint target_disp,
-                                int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                                    int origin_count,
+                                    MPI_Datatype origin_datatype,
+                                    int target_rank,
+                                    MPI_Aint target_disp,
+                                    int target_count, MPI_Datatype target_datatype, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_get(void *origin_addr,
-                                int origin_count,
-                                MPI_Datatype origin_datatype,
-                                int target_rank,
-                                MPI_Aint target_disp,
-                                int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                                    int origin_count,
+                                    MPI_Datatype origin_datatype,
+                                    int target_rank,
+                                    MPI_Aint target_disp,
+                                    int target_count, MPI_Datatype target_datatype, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_rput(const void *origin_addr,
-                                 int origin_count,
-                                 MPI_Datatype origin_datatype,
-                                 int target_rank,
-                                 MPI_Aint target_disp,
-                                 int target_count,
-                                 MPI_Datatype target_datatype,
-                                 MPID_Win * win, MPID_Request ** request)
+                                     int origin_count,
+                                     MPI_Datatype origin_datatype,
+                                     int target_rank,
+                                     MPI_Aint target_disp,
+                                     int target_count,
+                                     MPI_Datatype target_datatype,
+                                     MPID_Win *win, MPID_Request **request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -50,49 +50,49 @@ static inline int MPIDI_CH4_SHM_rput(const void *origin_addr,
 
 
 static inline int MPIDI_CH4_SHM_compare_and_swap(const void *origin_addr,
-                                             const void *compare_addr,
-                                             void *result_addr,
-                                             MPI_Datatype datatype,
-                                             int target_rank, MPI_Aint target_disp, MPID_Win * win)
+                                                 const void *compare_addr,
+                                                 void *result_addr,
+                                                 MPI_Datatype datatype,
+                                                 int target_rank, MPI_Aint target_disp, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_raccumulate(const void *origin_addr,
-                                        int origin_count,
-                                        MPI_Datatype origin_datatype,
-                                        int target_rank,
-                                        MPI_Aint target_disp,
-                                        int target_count,
-                                        MPI_Datatype target_datatype,
-                                        MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                            int origin_count,
+                                            MPI_Datatype origin_datatype,
+                                            int target_rank,
+                                            MPI_Aint target_disp,
+                                            int target_count,
+                                            MPI_Datatype target_datatype,
+                                            MPI_Op op, MPID_Win *win, MPID_Request **request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_rget_accumulate(const void *origin_addr,
-                                            int origin_count,
-                                            MPI_Datatype origin_datatype,
-                                            void *result_addr,
-                                            int result_count,
-                                            MPI_Datatype result_datatype,
-                                            int target_rank,
-                                            MPI_Aint target_disp,
-                                            int target_count,
-                                            MPI_Datatype target_datatype,
-                                            MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                                int origin_count,
+                                                MPI_Datatype origin_datatype,
+                                                void *result_addr,
+                                                int result_count,
+                                                MPI_Datatype result_datatype,
+                                                int target_rank,
+                                                MPI_Aint target_disp,
+                                                int target_count,
+                                                MPI_Datatype target_datatype,
+                                                MPI_Op op, MPID_Win *win, MPID_Request **request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_fetch_and_op(const void *origin_addr,
-                                         void *result_addr,
-                                         MPI_Datatype datatype,
-                                         int target_rank,
-                                         MPI_Aint target_disp, MPI_Op op, MPID_Win * win)
+                                             void *result_addr,
+                                             MPI_Datatype datatype,
+                                             int target_rank,
+                                             MPI_Aint target_disp, MPI_Op op, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -100,13 +100,13 @@ static inline int MPIDI_CH4_SHM_fetch_and_op(const void *origin_addr,
 
 
 static inline int MPIDI_CH4_SHM_rget(void *origin_addr,
-                                 int origin_count,
-                                 MPI_Datatype origin_datatype,
-                                 int target_rank,
-                                 MPI_Aint target_disp,
-                                 int target_count,
-                                 MPI_Datatype target_datatype,
-                                 MPID_Win * win, MPID_Request ** request)
+                                     int origin_count,
+                                     MPI_Datatype origin_datatype,
+                                     int target_rank,
+                                     MPI_Aint target_disp,
+                                     int target_count,
+                                     MPI_Datatype target_datatype,
+                                     MPID_Win *win, MPID_Request **request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -114,27 +114,27 @@ static inline int MPIDI_CH4_SHM_rget(void *origin_addr,
 
 
 static inline int MPIDI_CH4_SHM_get_accumulate(const void *origin_addr,
-                                           int origin_count,
-                                           MPI_Datatype origin_datatype,
-                                           void *result_addr,
-                                           int result_count,
-                                           MPI_Datatype result_datatype,
-                                           int target_rank,
-                                           MPI_Aint target_disp,
-                                           int target_count,
-                                           MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
+                                               int origin_count,
+                                               MPI_Datatype origin_datatype,
+                                               void *result_addr,
+                                               int result_count,
+                                               MPI_Datatype result_datatype,
+                                               int target_rank,
+                                               MPI_Aint target_disp,
+                                               int target_count,
+                                               MPI_Datatype target_datatype, MPI_Op op, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_SHM_accumulate(const void *origin_addr,
-                                       int origin_count,
-                                       MPI_Datatype origin_datatype,
-                                       int target_rank,
-                                       MPI_Aint target_disp,
-                                       int target_count,
-                                       MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
+                                           int origin_count,
+                                           MPI_Datatype origin_datatype,
+                                           int target_rank,
+                                           MPI_Aint target_disp,
+                                           int target_count,
+                                           MPI_Datatype target_datatype, MPI_Op op, MPID_Win *win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

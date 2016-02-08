@@ -96,9 +96,9 @@ typedef struct MPIDI_CH4_SHMI_SIMPLE_Cell {
     int rank;
     int tag;
     int context_id;
-    MPID_Request* pending;
+    MPID_Request *pending;
 #if MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN != 0
-    char padding[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN - 4 * sizeof(int) - sizeof(MPID_Request*)]; /* should be 64-16-16-16-8 = 8 */
+    char padding[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN - 4 * sizeof(int) - sizeof(MPID_Request *)]; /* should be 64-16-16-16-8 = 8 */
 #endif
     volatile MPIDI_CH4_SHMI_SIMPLE_Pkt_t pkt;
 } MPIDI_CH4_SHMI_SIMPLE_Cell_t;
