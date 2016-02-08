@@ -41,13 +41,6 @@ typedef MPIDU_Thread_mutex_t MPID_Thread_mutex_t;
 #define MPID_Thread_cond_wait      MPIDU_Thread_cond_wait
 #endif /* MPIDI_CH4_USE_TICKET_LOCK */
 
-
-typedef MPIDU_Thread_mutex_t MPID_Thread_mutex_t;
-typedef MPIDU_Thread_cond_t  MPID_Thread_cond_t;
-typedef MPIDU_Thread_id_t    MPID_Thread_id_t;
-typedef MPIDU_Thread_tls_t   MPID_Thread_tls_t;
-typedef MPIDU_Thread_func_t  MPID_Thread_func_t;
-
 #define MPID_Thread_create       MPIDU_Thread_create
 #define MPID_Thread_exit         MPIDU_Thread_exit
 #define MPID_Thread_self         MPIDU_Thread_self
