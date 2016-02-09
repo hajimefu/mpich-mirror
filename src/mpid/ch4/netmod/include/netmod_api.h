@@ -1,5 +1,6 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 #include "netmod_macros.h"
+#include "netmod.h"
 
 /* discover network resources, creates num_contexts (default 1), optionally PMI_Put business card */
 MPIDI_NETMOD_API(int,init,
@@ -584,6 +585,448 @@ MPIDI_NETMOD_API_NATIVE(int,win_lock_all,
 MPIDI_NETMOD_API_NATIVE(int, rank_is_local,
                         (int) target,
                         (MPID_Comm *) comm);
+
+/* Collectives */
+MPIDI_NETMOD_API_NATIVE(int, barrier,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, bcast,
+                        (void*) buffer,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, allreduce,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, allgather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, allgatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, scatter,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, scatterv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm_ptr,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, gather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, gatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, alltoall,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, alltoallv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, alltoallw,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (const MPI_Datatype *) sendtypes,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (const MPI_Datatype *) recvtypes,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, reduce,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (int) root,
+                        (MPID_Comm *) comm_ptr,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, reduce_scatter,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm_ptr,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, reduce_scatter_block,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm_ptr,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, scan,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, exscan,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPIR_Errflag_t *) errflag);
+
+MPIDI_NETMOD_API_NATIVE(int, neighbor_allgather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm);
+
+MPIDI_NETMOD_API_NATIVE(int, neighbor_allgatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm);
+
+MPIDI_NETMOD_API_NATIVE(int, neighbor_alltoallv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm);
+
+MPIDI_NETMOD_API_NATIVE(int, neighbor_alltoallw,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const MPI_Aint *) sdispls,
+                        (const MPI_Datatype *) sendtypes,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const MPI_Aint *) rdispls,
+                        (const MPI_Datatype *) recvtypes,
+                        (MPID_Comm *) comm);
+
+MPIDI_NETMOD_API_NATIVE(int, neighbor_alltoall,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm);
+
+MPIDI_NETMOD_API_NATIVE(int, ineighbor_allgather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ineighbor_allgatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ineighbor_alltoall,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ineighbor_alltoallv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ineighbor_alltoallw,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const MPI_Aint *) sdispls,
+                        (const MPI_Datatype *) sendtypes,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const MPI_Aint *) rdispls,
+                        (const MPI_Datatype *) recvtypes,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ibarrier,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ibcast,
+                        (void*) buffer,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iallgather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iallgatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iallreduce,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ialltoall,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ialltoallv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (MPI_Datatype) recvtype,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ialltoallw,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) sdispls,
+                        (const MPI_Datatype *) sendtypes,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) rdispls,
+                        (const MPI_Datatype *) recvtypes,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iexscan,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, igather,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, igatherv,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ireduce_scatter_block,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ireduce_scatter,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (const int *) recvcounts,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, ireduce,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (int) root,
+                        (MPID_Comm *) comm_ptr,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iscan,
+                        (const void *) sendbuf,
+                        (void *) recvbuf,
+                        (int) count,
+                        (MPI_Datatype) datatype,
+                        (MPI_Op) op,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iscatter,
+                        (const void *) sendbuf,
+                        (int) sendcount,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm,
+                        (MPI_Request *) req);
+
+MPIDI_NETMOD_API_NATIVE(int, iscatterv,
+                        (const void *) sendbuf,
+                        (const int *) sendcounts,
+                        (const int *) displs,
+                        (MPI_Datatype) sendtype,
+                        (void *) recvbuf,
+                        (int) recvcount,
+                        (MPI_Datatype) recvtype,
+                        (int) root,
+                        (MPID_Comm *) comm_ptr,
+                        (MPI_Request *) req);
 
 #undef MPIDI_NETMOD_API
 #undef MPIDI_NETMOD_API_NATIVE

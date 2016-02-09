@@ -151,6 +151,50 @@ MPIDI_CH4I_API(int, GPID_ToLpidArray, int, MPID_Gpid[], int[]);
 MPIDI_CH4I_API(int, Create_intercomm_from_lpids, MPID_Comm *, int, const int[]);
 MPIDI_CH4I_API(int, Comm_create, MPID_Comm *);
 MPIDI_CH4I_API(int, Comm_destroy, MPID_Comm *);
+MPIDI_CH4I_API(int, Barrier, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Bcast, void *, int, MPI_Datatype, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Allreduce, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Allgather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Allgatherv, const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Scatter, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Scatterv, const void *, const int *, const int *, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Gather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Gatherv, const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Alltoall, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Alltoallv, const void *, const int *, const int *, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Alltoallw, const void *, const int[], const int[], const MPI_Datatype[], void *, const int[], const int[], const MPI_Datatype[], MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Reduce, const void *, void *, int, MPI_Datatype, MPI_Op, int, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Reduce_scatter, const void *, void *, const int[], MPI_Datatype, MPI_Op, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Reduce_scatter_block, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Scan, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Exscan, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPIR_Errflag_t *);
+MPIDI_CH4I_API(int, Neighbor_allgather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *);
+MPIDI_CH4I_API(int, Neighbor_allgatherv, const void *, int, MPI_Datatype, void *, const int[], const int[], MPI_Datatype, MPID_Comm *);
+MPIDI_CH4I_API(int, Neighbor_alltoallv, const void *, const int[], const int[], MPI_Datatype, void *, const int[], const int[], MPI_Datatype, MPID_Comm *);
+MPIDI_CH4I_API(int, Neighbor_alltoallw, const void *, const int[], const MPI_Aint[], const MPI_Datatype[], void *, const int[], const MPI_Aint[], const MPI_Datatype[], MPID_Comm *);
+MPIDI_CH4I_API(int, Neighbor_alltoall, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *);
+MPIDI_CH4I_API(int, Ineighbor_allgather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ineighbor_allgatherv, const void *, int, MPI_Datatype, void *, const int[], const int[], MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ineighbor_alltoall, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ineighbor_alltoallv, const void *, const int[], const int[], MPI_Datatype, void *, const int[], const int[], MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ineighbor_alltoallw, const void *, const int[], const MPI_Aint[], const MPI_Datatype[], void *, const int[], const MPI_Aint[], const MPI_Datatype[], MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ibarrier, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ibcast, void *, int, MPI_Datatype, int, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iallgather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iallgatherv, const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iallreduce, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ialltoall, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ialltoallv, const void *, const int[], const int[], MPI_Datatype, void *, const int[], const int[], MPI_Datatype, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ialltoallw, const void *, const int[], const int[], const MPI_Datatype[], void *, const int[], const int[], const MPI_Datatype[], MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iexscan, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Igather, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Igatherv, const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, int, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ireduce_scatter_block, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ireduce_scatter, const void *, void *, const int[], MPI_Datatype, MPI_Op, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Ireduce, const void *, void *, int, MPI_Datatype, MPI_Op, int, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iscan, const void *, void *, int, MPI_Datatype, MPI_Op, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iscatter, const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPI_Request *);
+MPIDI_CH4I_API(int, Iscatterv, const void *, const int *, const int *, MPI_Datatype, void *, int, MPI_Datatype, int, MPID_Comm *, MPI_Request *);
 
 /* This function is not exposed to the upper layers but functions in a way
  * similar to the functions above. Other CH4-level functions should call this
@@ -186,6 +230,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 #include "ch4_progress.h"
 #include "ch4_spawn.h"
 #include "ch4_proc.h"
+#include "ch4_coll.h"
 
 #define MPID_Abort                       MPIDI_Abort
 #define MPID_Accumulate                  MPIDI_Accumulate
@@ -295,7 +340,50 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm);
 #define MPID_Request_mem                 MPIDI_Request_mem
 #define MPID_Comm_create                 MPIDI_Comm_create
 #define MPID_Comm_destroy                MPIDI_Comm_destroy
-
+#define MPID_Barrier                     MPIDI_Barrier
+#define MPID_Bcast                       MPIDI_Bcast
+#define MPID_Allreduce                   MPIDI_Allreduce
+#define MPID_Allgather                   MPIDI_Allgather
+#define MPID_Allgatherv                  MPIDI_Allgatherv
+#define MPID_Scatter                     MPIDI_Scatter
+#define MPID_Scatterv                    MPIDI_Scatterv
+#define MPID_Gather                      MPIDI_Gather
+#define MPID_Gatherv                     MPIDI_Gatherv
+#define MPID_Alltoall                    MPIDI_Alltoall
+#define MPID_Alltoallv                   MPIDI_Alltoallv
+#define MPID_Alltoallw                   MPIDI_Alltoallw
+#define MPID_Reduce                      MPIDI_Reduce
+#define MPID_Reduce_scatter              MPIDI_Reduce_scatter
+#define MPID_Reduce_scatter_block        MPIDI_Reduce_scatter_block
+#define MPID_Scan                        MPIDI_Scan
+#define MPID_Exscan                      MPIDI_Exscan
+#define MPID_Neighbor_allgather          MPIDI_Neighbor_allgather
+#define MPID_Neighbor_allgatherv         MPIDI_Neighbor_allgatherv
+#define MPID_Neighbor_alltoallv          MPIDI_Neighbor_alltoallv
+#define MPID_Neighbor_alltoallw          MPIDI_Neighbor_alltoallw
+#define MPID_Neighbor_alltoall           MPIDI_Neighbor_alltoall
+#define MPID_Ineighbor_allgather         MPIDI_Ineighbor_allgather
+#define MPID_Ineighbor_allgatherv        MPIDI_Ineighbor_allgatherv
+#define MPID_Ineighbor_alltoall          MPIDI_Ineighbor_alltoall
+#define MPID_Ineighbor_alltoallv         MPIDI_Ineighbor_alltoallv
+#define MPID_Ineighbor_alltoallw         MPIDI_Ineighbor_alltoallw
+#define MPID_Ibarrier                    MPIDI_Ibarrier
+#define MPID_Ibcast                      MPIDI_Ibcast
+#define MPID_Iallgather                  MPIDI_Iallgather
+#define MPID_Iallgatherv                 MPIDI_Iallgatherv
+#define MPID_Iallreduce                  MPIDI_Iallreduce
+#define MPID_Ialltoall                   MPIDI_Ialltoall
+#define MPID_Ialltoallv                  MPIDI_Ialltoallv
+#define MPID_Ialltoallw                  MPIDI_Ialltoallw
+#define MPID_Iexscan                     MPIDI_Iexscan
+#define MPID_Igather                     MPIDI_Igather
+#define MPID_Igatherv                    MPIDI_Igatherv
+#define MPID_Ireduce_scatter_block       MPIDI_Ireduce_scatter_block
+#define MPID_Ireduce_scatter             MPIDI_Ireduce_scatter
+#define MPID_Ireduce                     MPIDI_Ireduce
+#define MPID_Iscan                       MPIDI_Iscan
+#define MPID_Iscatter                    MPIDI_Iscatter
+#define MPID_Iscatterv                   MPIDI_Iscatterv
 
 #define MPIDI_MAX_NETMOD_STRING_LEN 64
 extern MPID_Request MPIDI_Request_direct[];

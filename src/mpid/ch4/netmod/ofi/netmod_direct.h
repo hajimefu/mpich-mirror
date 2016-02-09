@@ -18,6 +18,7 @@
 #include "progress.h"
 #include "unimpl.h"
 #include "init.h"
+#include "coll.h"
 
 #ifdef USE_OFI_TAGGED
 #include "probe.h"

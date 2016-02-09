@@ -22,6 +22,7 @@
 #include "ch4_shm_am.h"
 #include "ch4_shm_spawn.h"
 #include "ch4_shm_comm.h"
+#include "ch4_shm_coll.h"
 #include "ch4_shm_unimpl.h"
 
 #endif /* SHM_DIRECT_H_INCLUDED */
