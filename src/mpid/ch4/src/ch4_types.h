@@ -50,7 +50,12 @@ typedef struct progress_hook_slot {
 } progress_hook_slot_t;
 
 typedef enum {
-    MPIDI_CH4R_SEND = 0,
+    MPIDI_CH4R_SEND = 0, /* Eager send */
+
+    MPIDI_CH4R_SEND_LONG_REQ, /* Rendezvous send RTS (request to send) */
+    MPIDI_CH4R_SEND_LONG_ACK, /* Rendezvous send CTS (clear to send) */
+    MPIDI_CH4R_SEND_LONG_LMT, /* Rendezvous send LMT */
+
     MPIDI_CH4R_SSEND_REQ,
     MPIDI_CH4R_SSEND_ACK,
 
@@ -109,6 +114,21 @@ enum {
 typedef struct MPIDI_CH4R_Hdr_t {
     uint64_t msg_tag;
 } MPIDI_CH4R_Hdr_t;
+
+typedef struct MPIDI_CH4R_Send_long_req_msg_t {
+    MPIDI_CH4R_Hdr_t hdr;
+    size_t data_sz; /* Message size in bytes */
+    uint64_t sreq_ptr; /* Pointer value of the request object at the sender side */
+} MPIDI_CH4R_Send_long_req_msg_t;
+
+typedef struct MPIDI_CH4R_Send_long_ack_msg_t {
+    uint64_t sreq_ptr;
+    uint64_t rreq_ptr;
+} MPIDI_CH4R_Send_long_ack_msg_t;
+
+typedef struct MPIDI_CH4R_Send_long_lmt_msg_t {
+    uint64_t rreq_ptr;
+} MPIDI_CH4R_Send_long_lmt_msg_t;
 
 typedef struct MPIDI_CH4R_Ssend_req_msg_t {
     MPIDI_CH4R_Hdr_t hdr;

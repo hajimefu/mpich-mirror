@@ -141,7 +141,29 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
         MPIR_Comm_release(root_comm); /* -1 for removing from unexp_list */
         if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_BUSY) {
             MPIDI_CH4R_REQUEST(unexp_req, req->status) |= MPIDI_CH4R_REQ_MATCHED;
-        } else {
+        }
+        else if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_LONG_RTS) {
+            MPIDI_CH4R_Send_long_ack_msg_t msg;
+            int c;
+
+            /* Matching receive is now posted, sending CTS to the peer */
+            msg.sreq_ptr = MPIDI_CH4R_REQUEST(unexp_req, req->rreq.peer_req_ptr);
+            msg.rreq_ptr = (uint64_t) unexp_req;
+            MPIU_Assert((void *)msg.sreq_ptr != NULL);
+            MPIR_cc_incr(unexp_req->cc_ptr, &c);
+            mpi_errno = MPIDI_CH4_NM_send_am_hdr_reply(MPIDI_CH4R_REQUEST(unexp_req, req->rreq.reply_token),
+                                                       MPIDI_CH4R_SEND_LONG_ACK,
+                                                       &msg, sizeof(msg), unexp_req);
+            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+            dtype_add_ref_if_not_builtin(datatype);
+            MPIDI_CH4R_REQUEST(unexp_req, datatype) = datatype;
+            MPIDI_CH4R_REQUEST(unexp_req, buffer) = (char *) buf;
+            MPIDI_CH4R_REQUEST(unexp_req, count) = count;
+            *request = unexp_req;
+            goto fn_exit;
+        }
+        else {
             *request = unexp_req;
             mpi_errno = MPIDI_CH4I_handle_unexpected(buf, count, datatype,
                                                      root_comm, context_id, unexp_req);
@@ -290,6 +312,26 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
     /* MPIDI_CS_ENTER(); */
     if (MPIDI_CH4R_REQUEST(message, req->status) & MPIDI_CH4R_REQ_BUSY) {
         MPIDI_CH4R_REQUEST(message, req->status) |= MPIDI_CH4R_REQ_UNEXP_CLAIMED;
+    }
+    else if (MPIDI_CH4R_REQUEST(message, req->status) & MPIDI_CH4R_REQ_LONG_RTS) {
+        MPIDI_CH4R_Send_long_ack_msg_t msg;
+        int c;
+
+        /* Matching receive is now posted, sending CTS to the peer */
+        msg.sreq_ptr = MPIDI_CH4R_REQUEST(message, req->rreq.peer_req_ptr);
+        msg.rreq_ptr = (uint64_t) message;
+        MPIU_Assert((void *)msg.sreq_ptr != NULL);
+        MPIR_cc_incr(message->cc_ptr, &c);
+        mpi_errno = MPIDI_CH4_NM_send_am_hdr_reply(MPIDI_CH4R_REQUEST(message, req->rreq.reply_token),
+                                                   MPIDI_CH4R_SEND_LONG_ACK,
+                                                   &msg, sizeof(msg), message);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+        message->kind = MPID_REQUEST_RECV;
+        dtype_add_ref_if_not_builtin(datatype);
+        MPIDI_CH4R_REQUEST(message, datatype) = datatype;
+        MPIDI_CH4R_REQUEST(message, buffer) = (char *) buf;
+        MPIDI_CH4R_REQUEST(message, count) = count;
     }
     else {
         mpi_errno = MPIDI_CH4R_unexp_mrecv_cmpl_handler(message);

@@ -58,9 +58,35 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     else {
-        mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, MPIDI_CH4R_SEND,
-                                         &am_hdr, sizeof(am_hdr),
-                                         buf, count, datatype, sreq, NULL);
+        int dt_contig;
+        MPIDI_msg_sz_t dt_size;
+        MPID_Datatype *dt_ptr;
+        MPI_Aint dt_true_lb;
+        MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_size, dt_ptr, dt_true_lb);
+        (void) dt_true_lb; /* Just to make the compiler happy */
+        (void) dt_contig;
+        if (dt_size <= MPIR_CVAR_CH4R_EAGER_THRESHOLD) {
+            /* Eager send */
+            mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, MPIDI_CH4R_SEND,
+                                             &am_hdr, sizeof(am_hdr),
+                                             buf, count, datatype, sreq, NULL);
+        }
+        else {
+            int c;
+            MPIDI_CH4R_Send_long_req_msg_t lreq_hdr;
+            /* Rendezvous send */
+            lreq_hdr.hdr = am_hdr;
+            lreq_hdr.data_sz = dt_size;
+            lreq_hdr.sreq_ptr = (uint64_t) sreq;
+            MPIDI_CH4R_REQUEST(sreq, req->lreq).src_buf  = buf;
+            MPIDI_CH4R_REQUEST(sreq, req->lreq).count    = count;
+            dtype_add_ref_if_not_builtin(datatype);
+            MPIDI_CH4R_REQUEST(sreq, req->lreq).datatype = datatype;
+            MPIDI_CH4R_REQUEST(sreq, req->lreq).msg_tag  = match_bits;
+            MPIR_cc_incr(sreq->cc_ptr, &c); /* Additional +1 for long request */
+            mpi_errno = MPIDI_CH4_NM_send_am_hdr(rank, comm, MPIDI_CH4R_SEND_LONG_REQ,
+                                                 &lreq_hdr, sizeof(lreq_hdr), sreq, NULL);
+        }
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 

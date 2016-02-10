@@ -45,6 +45,7 @@ typedef enum {
 #define MPIDI_CH4R_REQ_UNEXP_CLAIMED  (0x1 << 4)
 #define MPIDI_CH4R_REQ_RCV_NON_CONTIG (0x1 << 5)
 #define MPIDI_CH4R_REQ_MATCHED (0x1 << 6)
+#define MPIDI_CH4R_REQ_LONG_RTS (0x1 << 7)
 
 #define MPIDI_PARENT_PORT_KVSKEY "PARENT_ROOT_PORT_NAME"
 #define MPIDI_MAX_KVS_VALUE_LEN  4096
@@ -52,6 +53,14 @@ typedef enum {
 typedef struct MPIDI_CH4R_Dev_sreq_t {
     /* persistent send fields */
 } MPIDI_CH4R_Dev_sreq_t;
+
+typedef struct MPIDI_CH4R_Dev_lreq_t {
+    /* Long send fields */
+    const void   *src_buf;
+    MPI_Count     count;
+    MPI_Datatype  datatype;
+    uint64_t      msg_tag;
+} MPIDI_CH4R_Dev_lreq_t;
 
 typedef struct MPIDI_CH4R_Dev_rreq_t {
     /* mrecv fields */
@@ -124,6 +133,7 @@ typedef struct MPIDI_CH4R_Dev_acc_req_t {
 typedef struct MPIDI_CH4R_req_t {
     union {
         MPIDI_CH4R_Dev_sreq_t sreq;
+        MPIDI_CH4R_Dev_lreq_t lreq;
         MPIDI_CH4R_Dev_rreq_t rreq;
         MPIDI_CH4R_Dev_put_req_t preq;
         MPIDI_CH4R_Dev_get_req_t greq;
