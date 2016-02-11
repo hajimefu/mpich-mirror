@@ -90,7 +90,7 @@ static inline int MPIDI_CH4R_win_set_info(MPID_Win *win, MPID_Info *info)
                     MPIDI_CH4R_WIN(win, info_args).accumulate_ordering =
                         (MPIDI_CH4R_WIN(win, info_args).accumulate_ordering | MPIDI_CH4I_ACCU_ORDER_WAW);
                 else
-                    MPIU_Assert(0);
+                    MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_ARG,goto fn_fail, "**info");
 
                 token = (char *) strtok_r(NULL,"," , &savePtr);
             }
@@ -107,9 +107,11 @@ static inline int MPIDI_CH4R_win_set_info(MPID_Win *win, MPID_Info *info)
     }
 
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
-
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_SET_INFO);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FUNCNAME

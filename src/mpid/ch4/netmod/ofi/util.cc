@@ -237,7 +237,8 @@ MPIDI_CH4_NMI_OFI_Win_lock_advance(MPID_Win *win)
             info.type = MPIDI_CH4_NMI_OFI_CTRL_LOCKALLACK;
             mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&info,lock->rank,win,1,0);
         } else
-            MPIU_Assert(0);
+            MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                                goto fn_fail, "**rmasync");
 
         MPL_free(lock);
         mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);

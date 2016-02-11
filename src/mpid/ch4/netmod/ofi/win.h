@@ -281,7 +281,7 @@ static inline int MPIDI_CH4_NM_win_set_info(MPID_Win *win, MPID_Info *info)
                         (MPIDI_CH4_NMI_OFI_Win_info_accumulate_ordering_t)
                         (MPIDI_CH4_NMI_OFI_WIN(win)->info_args.accumulate_ordering | MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_WAW);
                 else
-                    MPIU_Assert(0);
+                    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**rmasync");
 
                 token = (char *) strtok_r(NULL,"," , &savePtr);
             }
@@ -300,8 +300,11 @@ static inline int MPIDI_CH4_NM_win_set_info(MPID_Win *win, MPID_Info *info)
 
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
 
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
     return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -1145,7 +1148,7 @@ static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info *info,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
 
-    rc = MPIDI_CH4_NMI_OFI_Win_init(UINTPTR_MAX-(uintptr_t)MPI_BOTTOM,
+    rc = MPIDI_CH4_NMI_OFI_Win_init((uintptr_t)UINTPTR_MAX-(uintptr_t)MPI_BOTTOM,
                                     1,win_ptr, info, comm,
                                     MPI_WIN_FLAVOR_DYNAMIC,
                                     MPI_WIN_UNIFIED);

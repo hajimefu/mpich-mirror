@@ -109,9 +109,9 @@ fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_PROGRESS_REGISTER);
     return mpi_errno;
 fn_fail:
-    return MPIR_Err_create_code( MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
-                                 "MPIDI_Progress_register", __LINE__,
-                                 MPI_ERR_INTERN, "**progresshookstoomany", 0 );
+    mpi_errno = MPIR_Err_create_code( MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
+                                      "MPIDI_Progress_register", __LINE__,
+                                      MPI_ERR_INTERN, "**progresshookstoomany", 0 );
     goto fn_exit;
 }
 

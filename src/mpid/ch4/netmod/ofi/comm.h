@@ -113,12 +113,12 @@ static inline int MPIDI_CH4_NMI_OFI_Alloc_tables(MPID_Comm *comm)
     /* do some sanity checks */
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
         if(mapper->src_comm->comm_kind == MPID_INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
-                        mapper->dir == MPIR_COMM_MAP_DIR_L2R);
+            MPIU_Assertp(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
+                         mapper->dir == MPIR_COMM_MAP_DIR_L2R);
 
         if(comm->comm_kind == MPID_INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
-                        mapper->dir == MPIR_COMM_MAP_DIR_R2L);
+            MPIU_Assertp(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
+                         mapper->dir == MPIR_COMM_MAP_DIR_R2L);
     }
 
     /* First, handle all the mappers that contribute to the local part

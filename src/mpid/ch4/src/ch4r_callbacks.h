@@ -1644,7 +1644,7 @@ static inline int MPIDI_CH4R_win_lock_advance(MPID_Win *win)
         else if(lock->mtype == MPIDI_CH4R_WIN_LOCKALL)
             msg.type = MPIDI_CH4R_WIN_LOCKALL_ACK;
         else
-            MPIU_Assert(0);
+            MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**rmasync");
 
         mpi_errno = MPIDI_CH4_NM_inject_am_hdr(lock->rank, win->comm_ptr,
                                                MPIDI_CH4R_WIN_CTRL,

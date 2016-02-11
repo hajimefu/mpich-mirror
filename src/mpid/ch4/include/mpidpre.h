@@ -36,7 +36,7 @@ typedef enum {
     MPIDI_PTYPE_RECV,
     MPIDI_PTYPE_SEND,
     MPIDI_PTYPE_BSEND,
-    MPIDI_PTYPE_SSEND,
+    MPIDI_PTYPE_SSEND
 } MPIDI_ptype;
 
 #define MPIDI_CH4R_REQ_BUSY 		  (0x1)

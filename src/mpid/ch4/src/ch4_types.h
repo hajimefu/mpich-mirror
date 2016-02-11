@@ -72,7 +72,7 @@ typedef enum {
 
     MPIDI_CH4R_CSWAP_REQ,
     MPIDI_CH4R_CSWAP_ACK,
-    MPIDI_CH4R_FETCH_OP,
+    MPIDI_CH4R_FETCH_OP
 } MPIDI_CH4R_TYPE;
 
 typedef enum {
@@ -85,7 +85,7 @@ typedef enum {
     MPIDI_CH4R_WIN_LOCKALL,
     MPIDI_CH4R_WIN_LOCKALL_ACK,
     MPIDI_CH4R_WIN_UNLOCKALL,
-    MPIDI_CH4R_WIN_UNLOCKALL_ACK,
+    MPIDI_CH4R_WIN_UNLOCKALL_ACK
 } MPIDI_CH4R_WIN_CTRL_MSG_TYPE;
 
 enum {
@@ -95,7 +95,7 @@ enum {
     MPIDI_CH4R_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
     MPIDI_CH4R_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
     MPIDI_CH4R_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
-    MPIDI_CH4R_EPOTYPE_LOCK_ALL = 6,      /**< MPI_Win_lock_all access epoch */
+    MPIDI_CH4R_EPOTYPE_LOCK_ALL = 6       /**< MPI_Win_lock_all access epoch */
 };
 
 /* Enum for calling types between netmod and shm */

@@ -96,7 +96,7 @@ static inline int MPIDI_CH4R_anysource_matched(MPID_Request *rreq, int caller, i
     MPIU_Assert(MPIDI_CH4R_NETMOD == caller || MPIDI_CH4R_SHM == caller);
 
     if (MPIDI_CH4R_NETMOD == caller) {
-#if MPIDI_BUILD_CH4_SHM
+#ifdef MPIDI_BUILD_CH4_SHM
         mpi_errno = MPIDI_CH4_SHM_cancel_recv(rreq);
 
         /* If the netmod is cancelling the request, then shared memory will

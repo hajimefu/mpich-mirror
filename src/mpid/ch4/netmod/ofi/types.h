@@ -171,7 +171,7 @@ enum {
     MPIDI_CH4_NMI_OFI_CTRL_POST,      /**< Begin POST epoch      */
     MPIDI_CH4_NMI_OFI_CTRL_HUGE,      /**< Huge message          */
     MPIDI_CH4_NMI_OFI_CTRL_HUGEACK,   /**< Huge message ack      */
-    MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP,
+    MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP
     /**< Huge message cleanup  */
 };
 
@@ -196,7 +196,7 @@ enum {
 
 enum {
     MPIDI_CH4_NMI_OFI_REQUEST_LOCK,
-    MPIDI_CH4_NMI_OFI_REQUEST_LOCKALL,
+    MPIDI_CH4_NMI_OFI_REQUEST_LOCKALL
 };
 
 enum {

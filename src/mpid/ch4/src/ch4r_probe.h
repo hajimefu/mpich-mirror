@@ -167,7 +167,7 @@ __CH4_INLINE__ int MPIDI_CH4R_mprobe(int source,
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_MPROBE);
     while (!flag) {
-        MPIDI_CH4R_improbe(source, tag, comm, context_offset, &flag, message, status);
+        mpi_errno = MPIDI_CH4R_improbe(source, tag, comm, context_offset, &flag, message, status);
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_MPROBE);
     return mpi_errno;

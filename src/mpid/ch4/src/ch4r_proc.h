@@ -95,7 +95,7 @@ static inline int MPIDI_CH4R_build_nodemap(int             myrank,
 				    &errflag);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    *sz_out = -1;
+    *sz_out = (MPID_Node_id_t)-1;
     for(i=0;i<sz;i++) {
         node_map[i].node_id=nodeids[i];
         node_map[i].rank=i;
