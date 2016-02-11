@@ -54,8 +54,6 @@ struct MPIDI_CH4_SHMI_SIMPLE_Vcrt_t {
     unsigned                    size;         /**< Number of entries in the table */
     MPIDI_CH4_SHMI_SIMPLE_Vcr_t vcr_table[0]; /**< Array of virtual connection references */
 };
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Vcrt_t *MPIDI_CH4_SHMI_SIMPLE_Vcrt_t;
-
 /* ---------------------------------------------------- */
 /* general send/recv queue types, macros and objects    */
 /* ---------------------------------------------------- */
