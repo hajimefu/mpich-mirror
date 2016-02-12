@@ -102,7 +102,7 @@ MPIDI_CH4_SHM_native_funcs_t MPIDI_CH4_SHM_native_stub_funcs = {
     MPIDI_CH4_SHM_win_sync,
     MPIDI_CH4_SHM_win_flush_all,
     MPIDI_CH4_SHM_get_accumulate,
-    MPIDI_CH4_SHM_win_lock_all
+    MPIDI_CH4_SHM_win_lock_all,
     MPIDI_CH4_SHM_barrier,
     MPIDI_CH4_SHM_bcast,
     MPIDI_CH4_SHM_allreduce,

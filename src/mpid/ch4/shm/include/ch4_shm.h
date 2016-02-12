@@ -28,6 +28,7 @@ typedef int (*MPIDI_CH4_SHM_am_target_handler_fn)
 typedef MPID_Gpid MPID_Gpid_array_t[];
 typedef int intarray_t[];
 typedef MPID_Request *MPID_Request_array_t[];
+typedef MPI_Datatype MPI_Datatype_array_t[];
 #endif /*MPIDI_CH4_ARRAY_TYPEDEFS */
 
 #define USE_SHM_TYPEDEFS
