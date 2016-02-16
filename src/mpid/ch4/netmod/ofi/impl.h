@@ -41,35 +41,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __clang__ || __INTEL_COMPILER */
 
 #define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
-
-#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank)  MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].ep_idx
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS 256
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS 8
-#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ctx[x].tx_tag
-#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ctx[x].tx_rma
-#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ctx[x].tx_msg
-#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ctx[x].tx_ctr
-#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ctx[x].rx_tag
-#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ctx[x].rx_rma
-#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ctx[x].rx_msg
-#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ctx[x].rx_ctr
-#else
-#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank) 0
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS 0
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS 0
-#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ep
-#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ep
-#endif
-
-#define MPIDI_CH4_NMI_OFI_NUM_CQ_ENTRIES 8
-
 #define MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank) \
     MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].addr_idx
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE

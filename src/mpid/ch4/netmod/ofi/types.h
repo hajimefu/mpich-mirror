@@ -143,6 +143,33 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 
+
+#define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
+
+#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank)  MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].ep_idx
+#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ctx[x].tx_tag
+#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ctx[x].tx_rma
+#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ctx[x].tx_msg
+#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ctx[x].tx_ctr
+#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ctx[x].rx_tag
+#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ctx[x].rx_rma
+#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ctx[x].rx_msg
+#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ctx[x].rx_ctr
+#else
+#define MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm,rank) 0
+#define MPIDI_CH4_NMI_OFI_EP_TX_TAG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_RMA(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_MSG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_TX_CTR(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_TAG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_RMA(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_MSG(x) MPIDI_Global.ep
+#define MPIDI_CH4_NMI_OFI_EP_RX_CTR(x) MPIDI_Global.ep
+#endif
+
+#define MPIDI_CH4_NMI_OFI_NUM_CQ_ENTRIES 8
+
 /* Typedefs */
 typedef enum {
     MPIDI_CH4_NMI_OFI_ACCUMULATE_ORDER_RAR = 1,
@@ -284,53 +311,63 @@ typedef struct  {
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
 typedef struct {
-    int    jobid;
-    char   addrname[FI_NAME_MAX];
-    size_t addrnamelen;
+    /* OFI objects */
     struct fid_domain *domain;
     struct fid_fabric *fabric;
+    struct fid_av     *av;
     struct fid_ep     *ep;
     struct fid_cq     *p2p_cq;
     struct fid_cntr   *rma_ctr;
-    struct fid_av     *av;
+
+    /* Queryable limits */
+    uint64_t        max_buffered_send;
+    uint64_t        max_buffered_write;
+    uint64_t        max_send;
+    uint64_t        max_write;
+    uint64_t        max_short_send;
+    uint64_t        max_mr_key_size;
+    int             max_windows_bits;
+    int             max_huge_rma_bits;
+    int             max_huge_rmas;
+    int             huge_rma_shift;
+    int             context_shift;
+    size_t          iov_limit;
+    MPID_Node_id_t *node_map;
+    MPID_Node_id_t  max_node_id;
+
+    /* Mutexex and endpoints */
     MPIDI_CH4_NMI_OFI_Cacheline_mutex_t mutexes[4];
     MPIDI_CH4_NMI_OFI_Context_t         ctx[MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS];
-    uint64_t cntr;
-    uint64_t max_buffered_send;
-    uint64_t max_buffered_write;
-    uint64_t max_send;
-    uint64_t max_write;
-    uint64_t max_short_send;
-    uint64_t max_mr_key_size;
-    int      max_windows_bits;
-    int      max_huge_rma_bits;
-    int      max_huge_rmas;
-    int      huge_rma_shift;
-    int      context_shift;
-    size_t iov_limit;
-    int control_init;
-    MPID_Node_id_t *node_map;
-    MPID_Node_id_t max_node_id;
-    void *win_map;
-    MPIDI_CH4_NMI_OFI_Atomic_valid_t win_op_table[MPIDI_CH4_NMI_OFI_DT_SIZES][MPIDI_CH4_NMI_OFI_OP_SIZES];
-    MPID_CommOps MPID_Comm_fns_store;
-    struct iovec    am_iov[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
-    struct fi_msg   am_msg[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
-    void           *am_bufs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
-    MPIDI_CH4_NMI_OFI_Am_repost_request_t    am_reqs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
-    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
-    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
-    int coll_progress;
-    int pname_set;
-    int pname_len;
-    char kvsname[MPIDI_KVSAPPSTRLEN];
-    char pname[MPI_MAX_PROCESSOR_NAME];
-    int port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
-    MPIU_buf_pool_t *buf_pool;
+
+    /* Window/RMA Globals */
+    void                             *win_map;
+    uint64_t                          cntr;
+    MPIDI_CH4_NMI_OFI_Atomic_valid_t  win_op_table[MPIDI_CH4_NMI_OFI_DT_SIZES][MPIDI_CH4_NMI_OFI_OP_SIZES];
+
+    /* Active Message Globals */
+    struct iovec                           am_iov[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    struct fi_msg                          am_msg[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    void                                  *am_bufs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NMI_OFI_Am_repost_request_t  am_reqs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NM_am_target_handler_fn      am_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
+    MPIDI_CH4_NM_am_origin_handler_fn      am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
+    MPIU_buf_pool_t                       *am_buf_pool;
+
+    /* Completion queue buffering */
     MPIDI_CH4_NMI_OFI_Cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];
-    int cq_buff_head;
-    int cq_buff_tail;
-    struct slist cq_buff_list;
+    struct slist                      cq_buff_list;
+    int                               cq_buff_head;
+    int                               cq_buff_tail;
+
+    /* Process management and PMI globals */
+    int    pname_set;
+    int    pname_len;
+    int    jobid;
+    char   addrname[FI_NAME_MAX];
+    size_t addrnamelen;
+    char   kvsname[MPIDI_KVSAPPSTRLEN];
+    char   pname[MPI_MAX_PROCESSOR_NAME];
+    int    port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
 } MPIDI_CH4_NMI_OFI_Global_t;
 
 typedef struct {

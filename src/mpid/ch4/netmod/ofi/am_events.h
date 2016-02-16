@@ -150,7 +150,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_rdma_read(void                       *dst
         curr_len = MPL_MIN(rem, MPIDI_Global.max_send);
 
         MPIU_Assert(sizeof(MPIDI_CH4_NMI_OFI_Am_request_t) <= MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
-        am_req = (MPIDI_CH4_NMI_OFI_Am_request_t *)MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
+        am_req = (MPIDI_CH4_NMI_OFI_Am_request_t *)MPIDI_CH4R_get_buf(MPIDI_Global.am_buf_pool);
         MPIU_Assert(am_req);
 
         am_req->req_hdr  = MPIDI_CH4_NMI_OFI_AMREQUEST(rreq, req_hdr);
@@ -412,7 +412,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_lmt_ack(MPIDI_CH4_NMI_OFI_Am_header_t
 
     handler_id = MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, msg_hdr).handler_id;
     MPIDI_CH4_NMI_OFI_Am_request_complete(sreq);
-    mpi_errno = MPIDI_Global.send_cmpl_handlers[handler_id](sreq);
+    mpi_errno = MPIDI_Global.am_send_cmpl_handlers[handler_id](sreq);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -442,7 +442,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_long_hdr_ack(MPIDI_CH4_NMI_OFI_Am_hea
 
     handler_id = MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, msg_hdr).handler_id;
     MPIDI_CH4_NMI_OFI_Am_request_complete(sreq);
-    mpi_errno = MPIDI_Global.send_cmpl_handlers[handler_id](sreq);
+    mpi_errno = MPIDI_Global.am_send_cmpl_handlers[handler_id](sreq);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 

@@ -125,7 +125,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
 
     if(MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) == NULL) {
         req_hdr = (MPIDI_CH4_NMI_OFI_Am_request_header_t *)
-                  MPIDI_CH4R_get_buf(MPIDI_Global.buf_pool);
+                  MPIDI_CH4R_get_buf(MPIDI_Global.am_buf_pool);
         MPIU_Assert(req_hdr);
         MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) = req_hdr;
 

@@ -438,7 +438,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_send_event(struct fi_cq_tagged_entry *wc,
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
     }
 
-    mpi_errno = MPIDI_Global.send_cmpl_handlers[msg_hdr->handler_id](sreq);
+    mpi_errno = MPIDI_Global.am_send_cmpl_handlers[msg_hdr->handler_id](sreq);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 

@@ -367,7 +367,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* Initialize Active Message          */
     /* ---------------------------------- */
     if(do_am) {
-        MPIDI_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
+        MPIDI_Global.am_buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
         mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
 
         if(mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -400,7 +400,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
 
         /* Grow the header handlers down */
         MPIDI_Global.am_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL]        = MPIDI_CH4_NMI_OFI_Control_handler;
-        MPIDI_Global.send_cmpl_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL] = NULL;
+        MPIDI_Global.am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL] = NULL;
     }
 
     /* -------------------------------- */
@@ -546,7 +546,7 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
         for(i = 0; i < MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS; i++)
             MPL_free(MPIDI_Global.am_bufs[i]);
 
-        MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.buf_pool);
+        MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.am_buf_pool);
     }
 
     PMI_Finalize();
