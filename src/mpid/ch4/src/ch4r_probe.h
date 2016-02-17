@@ -129,6 +129,9 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
 
         (*message)->kind = MPID_REQUEST_MPROBE;
         (*message)->comm = comm;
+        /* Notes on refcounting comm:
+           We intentionally do nothing here because what we are supposed to do here
+           is -1 for dequeue(unexp_list) and +1 for (*message)->comm */
 
         unexp_req->status.MPI_ERROR = MPI_SUCCESS;
         unexp_req->status.MPI_SOURCE =

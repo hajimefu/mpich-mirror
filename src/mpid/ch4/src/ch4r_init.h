@@ -45,6 +45,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
         MPL_DL_FOREACH_SAFE(*uelist,
                             curr, tmp) {
             MPL_DL_DELETE(*uelist, curr);
+            MPIR_Comm_add_ref(comm); /* +1 for each entry in unexp_list */
             MPL_DL_APPEND(MPIDI_CH4R_COMM(comm, unexp_list), curr);
         }
         *uelist = NULL;

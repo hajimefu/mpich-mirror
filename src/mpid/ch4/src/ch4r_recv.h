@@ -138,6 +138,7 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
                                           &MPIDI_CH4R_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
+        MPIR_Comm_release(root_comm); /* -1 for removing from unexp_list */
         if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_BUSY) {
             MPIDI_CH4R_REQUEST(unexp_req, req->status) |= MPIDI_CH4R_REQ_MATCHED;
         } else {
@@ -286,7 +287,6 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
     MPIDI_CH4R_REQUEST(message, req->rreq.mrcv_count) = count;
     MPIDI_CH4R_REQUEST(message, req->rreq.mrcv_datatype) = datatype;
     *rreqp = message;
-    MPIR_Comm_add_ref(message->comm);
 
     /* MPIDI_CS_ENTER(); */
     if (MPIDI_CH4R_REQUEST(message, req->status) & MPIDI_CH4R_REQ_BUSY) {
