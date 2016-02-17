@@ -18,9 +18,6 @@
 #include <functional>
 #include <vector>
 #include <mpidimpl.h>
-#include "impl.h"
-#include "events.h"
-#include "control.h"
 EXTERN_C_BEGIN
 
 #undef FUNCNAME
