@@ -23,4 +23,5 @@
 #include "comm.h"
 #include "unimpl.h"
 #include "proc.h"
+#include "coll.h"
 #endif /* NETMOD_DIRECT_H_INCLUDED */
