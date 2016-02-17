@@ -179,6 +179,9 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
 
     if (!unexp_req) {
         /* MPIDI_CS_ENTER(); */
+        /* Increment refcnt for comm before posting rreq to posted_list,
+           to make sure comm is alive while holding an entry in the posted_list */
+        MPIR_Comm_add_ref(root_comm);
         MPIDI_CH4R_enqueue_posted(rreq, &MPIDI_CH4R_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     } else {
@@ -385,6 +388,7 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     if (found) {
         MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
         MPIR_STATUS_SET_COUNT(rreq->status, 0);
+        MPIR_Comm_release(root_comm); /* -1 for posted_list */
         MPIDI_CH4I_am_request_complete(rreq);
     }
     else {

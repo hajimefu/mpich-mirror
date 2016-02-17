@@ -642,8 +642,11 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
         if (root_comm)
             match_req = MPIDI_CH4R_dequeue_posted(msg_tag, &MPIDI_CH4R_COMM(root_comm, posted_list));
 
-        if (match_req)
+        if (match_req) {
             MPIDI_CH4R_delete_unexp(rreq, &MPIDI_CH4R_COMM(root_comm, unexp_list));
+            /* Decrement the counter when taking a request from posted_list */
+            MPIR_Comm_release(root_comm);
+        }
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -1321,6 +1324,12 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
             MPIDI_CH4R_enqueue_unexp(rreq, MPIDI_CH4R_context_id_to_uelist(context_id));
         }
         /* MPIDI_CS_EXIT(); */
+    }
+    else {
+        /* rreq != NULL <=> root_comm != NULL */
+        MPIU_Assert(root_comm);
+        /* Decrement the refcnt when popping a request out from posted_list */
+        MPIR_Comm_release(root_comm);
     }
 
     MPIDI_CH4R_REQUEST(rreq, tag) = hdr->msg_tag;
