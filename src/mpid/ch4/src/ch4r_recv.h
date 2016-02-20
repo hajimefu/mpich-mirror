@@ -249,7 +249,6 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
     MPIDI_CH4R_REQUEST(rreq, buffer) = (void *) buf;
     MPIDI_CH4R_REQUEST(rreq, count) = count;
     MPIDI_CH4R_REQUEST(rreq, datatype) = datatype;
-    MPIDI_CH4R_REQUEST(rreq, util_comm) = comm;
     MPIDI_CH4R_REQUEST(rreq, tag) =
         MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, rank, tag);
     rreq->partner_request = NULL;

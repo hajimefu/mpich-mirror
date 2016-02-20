@@ -151,7 +151,6 @@ typedef struct MPIDI_CH4R_Devreq_t {
     uint64_t          count;
     uint64_t          tag;
     MPI_Datatype      datatype;
-    struct MPID_Comm *util_comm;
 } MPIDI_CH4R_Devreq_t;
 
 typedef struct {
