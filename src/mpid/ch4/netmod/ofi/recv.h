@@ -70,17 +70,14 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
     recv_buf = (char *) buf + dt_true_lb;
 
     if(!dt_contig) {
-        MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr) = MPID_Segment_alloc();
-        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr) == NULL, mpi_errno,
-                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
-        MPID_Segment_init(buf, count, datatype, MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr), 0);
-
-        MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) = (char *) MPL_malloc(data_sz);
-        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) == NULL, mpi_errno,
+        MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig) = (MPIDI_CH4_NMI_OFI_Noncontig_t*) MPL_malloc(data_sz+sizeof(MPID_Segment));
+        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv Pack Buffer alloc");
-        recv_buf = MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer);
-    } else
-        MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer) = NULL;
+        recv_buf = MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer);
+        MPID_Segment_init(buf, count, datatype, &MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->segment), 0);
+    }
+    else
+        MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig) = NULL;
 
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm) = comm;
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id) = context_id;

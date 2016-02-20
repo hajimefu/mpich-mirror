@@ -156,14 +156,19 @@ typedef struct {
     MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
 } MPIDI_CH4_NMI_OFI_Am_request_t;
 
+
+typedef struct MPIDI_CH4_NMI_OFI_Noncontig_t{
+    struct MPID_Segment  segment;
+    char                 pack_buffer[0];
+}MPIDI_CH4_NMI_OFI_Noncontig_t;
+
 typedef struct {
     struct fi_context    context;  /* fixed field, do not move */
     int                  event_id; /* fixed field, do not move */
     int                  util_id;
     struct MPID_Comm    *util_comm;
     MPI_Datatype         datatype;
-    struct MPID_Segment *segment_ptr;
-    char                *pack_buffer;
+    MPIDI_CH4_NMI_OFI_Noncontig_t *noncontig;
     /* persistent send fields */
     union {
         struct {

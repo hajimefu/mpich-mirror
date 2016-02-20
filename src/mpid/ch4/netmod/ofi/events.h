@@ -105,12 +105,11 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
 
 #endif
 
-    if(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer)) {
+    if(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig)) {
         last = count;
-        MPID_Segment_unpack(MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr), 0, &last, MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer));
-        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, pack_buffer));
-        MPID_Segment_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, segment_ptr));
-
+        MPID_Segment_unpack(&MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->segment), 0, &last,
+                            MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer));
+        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer));
         if(last != (MPI_Aint)count) {
             rreq->status.MPI_ERROR =
                 MPIR_Err_create_code(MPI_SUCCESS,
@@ -205,8 +204,8 @@ static inline int MPIDI_CH4_NMI_OFI_Send_event(struct fi_cq_tagged_entry *wc, MP
     MPIR_cc_decr(sreq->cc_ptr, &c);
 
     if(c == 0) {
-        if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer))
-            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
+        if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig))
+            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
         MPIDI_CH4R_Request_release(sreq);
@@ -253,8 +252,8 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
             MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL));
         }
 
-        if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer))
-            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, pack_buffer));
+        if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig))
+            MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
         MPIDI_CH4R_Request_release(sreq);
