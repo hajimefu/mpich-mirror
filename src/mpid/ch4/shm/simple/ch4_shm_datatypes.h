@@ -47,7 +47,7 @@
 #define MPIDI_CH4_SHMI_SIMPLE_PKT_HEADER_FIELDS          \
     int source;                             \
     int dest;                               \
-    MPIU_Pint datalen;                      \
+    uintptr_t datalen;                      \
     unsigned short seqno;                   \
     unsigned short type;        /* currently used only with checkpointing */
 

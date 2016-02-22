@@ -126,7 +126,7 @@ extern MPL_dbg_class MPL_DBG_ROUTINE;
 extern MPL_dbg_class MPL_DBG_ALL;
 
 MPL_dbg_class MPL_dbg_class_alloc(const char *ucname, const char *lcname);
-void MPL_dbg_class_register(MPL_dbg_class class, const char *ucname, const char *lcname);
+void MPL_dbg_class_register(MPL_dbg_class in_class, const char *ucname, const char *lcname);
 
 #define MPL_DBG_CLASS_CLR(class)                \
     do {                                        \

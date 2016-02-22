@@ -82,4 +82,4 @@ extern MPIU_Object_alloc_t MPID_Request_mem __attribute__((alias("MPIDI_Request_
 extern MPID_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((alias("MPIDI_Request_direct")));
 
 
-MPL_DBG_Class MPIDI_CH4_DBG_GENERAL;
+MPL_dbg_class MPIDI_CH4_DBG_GENERAL;

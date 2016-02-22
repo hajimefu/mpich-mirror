@@ -224,6 +224,7 @@ static inline int MPIDI_CH4_NM_alltoallv(const void *sendbuf, const int *sendcou
     return mpi_errno;
 }
 
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_alltoallw
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -552,7 +553,7 @@ static inline int MPIDI_CH4_NM_ibarrier(MPID_Comm *comm_ptr, MPI_Request * req)
     MPIDI_STATE_DECL(MPID_STATE_CH4_NM_IBARRIER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_NM_IBARRIER);
 
-    MPIR_Ibarrier_impl(comm_ptr, req);
+    mpi_errno = MPIR_Ibarrier_impl(comm_ptr, req);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_NM_IBARRIER);
     return mpi_errno;
@@ -593,6 +594,26 @@ static inline int MPIDI_CH4_NM_iallgather(const void *sendbuf, int sendcount, MP
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_NM_IALLGATHER);
     return mpi_errno;
 }
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NM_iallreduce
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4_NM_iallreduce(const void *sendbuf, void *recvbuf, int count,
+                                          MPI_Datatype datatype, MPI_Op op,
+                                          MPID_Comm *comm_ptr, MPI_Request * req)
+{
+    int mpi_errno;
+    MPIDI_STATE_DECL(MPID_STATE_CH4_NM_IREDUCE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4_NM_IREDUCE);
+
+    mpi_errno = MPIR_Iallreduce_impl(sendbuf, recvbuf, count, datatype,
+                                     op, comm_ptr, req);
+
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4_NM_IREDUCE);
+    return mpi_errno;
+}
+
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_iallgatherv

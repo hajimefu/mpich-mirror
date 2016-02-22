@@ -390,7 +390,7 @@ extern MPID_Request MPIDI_Request_direct[];
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern int MPIDI_num_netmods;
 #if defined(MPL_USE_DBG_LOGGING)
-extern MPL_DBG_Class MPIDI_CH4_DBG_GENERAL;
+extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 #endif /* MPL_USE_DBG_LOGGING */
 
 
