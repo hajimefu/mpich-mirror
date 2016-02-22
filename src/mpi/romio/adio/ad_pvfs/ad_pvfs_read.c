@@ -236,7 +236,6 @@ void ADIOI_PVFS_ReadStridedListIO(ADIO_File fd, void *buf, int count,
 	   keep tracke of how much data was actually read adn placed in buf
 	   by ADIOI_BUFFERED_READ. */
 #endif
-	ADIOI_Delete_flattened(datatype);
 
 	return;
     } /* if (!buftype_is_contig && filetype_is_contig) */
@@ -245,8 +244,7 @@ void ADIOI_PVFS_ReadStridedListIO(ADIO_File fd, void *buf, int count,
     /* noncontiguous in file */
 
     /* filetype already flattened in ADIO_Open */
-    flat_file = ADIOI_Flatlist;
-    while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+    flat_file = ADIOI_Flatten_and_find(fd->filetype);
 
     disp = fd->disp;
 
@@ -779,6 +777,5 @@ void ADIOI_PVFS_ReadStridedListIO(ADIO_File fd, void *buf, int count,
        by ADIOI_BUFFERED_READ. */
 #endif
     
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 }
 #endif /* HAVE_PVFS_LISTIO */

@@ -70,6 +70,10 @@ int usleep(useconds_t usec);
 #include "mpidpre.h"
 #include "mpir_refcount.h"
 
+#if defined(HAVE_ROMIO)
+int MPIR_Comm_split_filesystem(MPI_Comm comm, int key, const char *dirname, MPI_Comm *newcomm);
+#endif
+
 #if defined(HAVE_LONG_LONG_INT)
 /* tt#1776: some platforms have "long long" but not a LLONG_MAX/ULLONG_MAX,
  * usually because some feature test macro has turned them off in glibc's
@@ -2127,16 +2131,16 @@ typedef struct MPICH_PerProcess_t {
 extern MPICH_PerProcess_t MPIR_Process;
 
 #if defined (MPL_USE_DBG_LOGGING)
-extern MPL_DBG_Class MPIR_DBG_INIT;
-extern MPL_DBG_Class MPIR_DBG_PT2PT;
-extern MPL_DBG_Class MPIR_DBG_THREAD;
-extern MPL_DBG_Class MPIR_DBG_DATATYPE;
-extern MPL_DBG_Class MPIR_DBG_COMM;
-extern MPL_DBG_Class MPIR_DBG_BSEND;
-extern MPL_DBG_Class MPIR_DBG_ERRHAND;
-extern MPL_DBG_Class MPIR_DBG_OTHER;
+extern MPL_dbg_class MPIR_DBG_INIT;
+extern MPL_dbg_class MPIR_DBG_PT2PT;
+extern MPL_dbg_class MPIR_DBG_THREAD;
+extern MPL_dbg_class MPIR_DBG_DATATYPE;
+extern MPL_dbg_class MPIR_DBG_COMM;
+extern MPL_dbg_class MPIR_DBG_BSEND;
+extern MPL_dbg_class MPIR_DBG_ERRHAND;
+extern MPL_dbg_class MPIR_DBG_OTHER;
 
-extern MPL_DBG_Class MPIR_DBG_ASSERT;
+extern MPL_dbg_class MPIR_DBG_ASSERT;
 #endif /* MPL_USE_DBG_LOGGING */
 
 /* ------------------------------------------------------------------------- */

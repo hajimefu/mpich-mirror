@@ -7,7 +7,6 @@
 
 #include "adio.h"
 
-ADIOI_Flatlist_node *ADIOI_Flatlist = NULL;
 ADIOI_Datarep *ADIOI_Datarep_head = NULL;
     /* list of datareps registered by the user */
 
@@ -53,19 +52,12 @@ void ADIO_Init(int *argc, char ***argv, int *error_code)
     char *c;
 #endif
 
-    ADIOI_UNREFERENCED_ARG(argc);
-    ADIOI_UNREFERENCED_ARG(argv);
+    MPL_UNREFERENCED_ARG(argc);
+    MPL_UNREFERENCED_ARG(argv);
     
 #ifdef ROMIO_INSIDE_MPICH
     MPIR_Ext_init();
 #endif
-
-/* initialize the linked list containing flattened datatypes */
-    ADIOI_Flatlist = (ADIOI_Flatlist_node *) ADIOI_Malloc(sizeof(ADIOI_Flatlist_node));
-    ADIOI_Flatlist->type = MPI_DATATYPE_NULL;
-    ADIOI_Flatlist->next = NULL;
-    ADIOI_Flatlist->blocklens = NULL;
-    ADIOI_Flatlist->indices = NULL;
 
 #if defined(ROMIO_XFS) || defined(ROMIO_LUSTRE)
     c = getenv("MPIO_DIRECT_READ");

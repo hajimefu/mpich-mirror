@@ -242,7 +242,6 @@ void ADIOI_GEN_ReadStridedColl(ADIO_File fd, void *buf, int count,
 			len_list, contig_access_count, min_st_offset,
 			fd_size, fd_start, fd_end, buf_idx, error_code);
 
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 
     /* free all memory allocated for collective I/O */
     for (i=0; i<nprocs; i++) {
@@ -351,9 +350,7 @@ void ADIOI_Calc_my_off_len(ADIO_File fd, int bufcount, MPI_Datatype
 
        /* First calculate what size of offset_list and len_list to allocate */
    
-       /* filetype already flattened in ADIO_Open or ADIO_Fcntl */
-	flat_file = ADIOI_Flatlist;
-	while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+	flat_file = ADIOI_Flatten_and_find(fd->filetype);
 	disp = fd->disp;
 
 #ifdef RDCOLL_DEBUG 
@@ -682,7 +679,7 @@ static void ADIOI_Read_and_exch(ADIO_File fd, void *buf, MPI_Datatype
 		    }
 		    if (req_off < real_off + real_size) {
 			count[i]++;
-      ADIOI_Assert((((ADIO_Offset)(MPIU_Upint)read_buf)+req_off-real_off) == (ADIO_Offset)(MPIU_Upint)(read_buf+req_off-real_off));
+      ADIOI_Assert((((ADIO_Offset)(uintptr_t)read_buf)+req_off-real_off) == (ADIO_Offset)(uintptr_t)(read_buf+req_off-real_off));
 			MPI_Address(read_buf+req_off-real_off, 
                                &(others_req[i].mem_ptrs[j]));
       ADIOI_Assert((real_off + real_size - req_off) == (int)(real_off + real_size - req_off));
@@ -735,7 +732,7 @@ static void ADIOI_Read_and_exch(ADIO_File fd, void *buf, MPI_Datatype
 
 	if (for_next_iter) {
 	    tmp_buf = (char *) ADIOI_Malloc(for_next_iter);
-      ADIOI_Assert((((ADIO_Offset)(MPIU_Upint)read_buf)+real_size-for_next_iter) == (ADIO_Offset)(MPIU_Upint)(read_buf+real_size-for_next_iter));
+      ADIOI_Assert((((ADIO_Offset)(uintptr_t)read_buf)+real_size-for_next_iter) == (ADIO_Offset)(uintptr_t)(read_buf+real_size-for_next_iter));
       ADIOI_Assert((for_next_iter+coll_bufsize) == (size_t)(for_next_iter+coll_bufsize));
 	    memcpy(tmp_buf, read_buf+real_size-for_next_iter, for_next_iter);
 	    ADIOI_Free(fd->io_buf);
@@ -929,7 +926,7 @@ static void ADIOI_R_Exchange_data(ADIO_File fd, void *buf, ADIOI_Flatlist_node
 { \
     while (size) { \
 	size_in_buf = MPL_MIN(size, flat_buf_sz); \
-  ADIOI_Assert((((ADIO_Offset)(MPIU_Upint)buf) + user_buf_idx) == (ADIO_Offset)(MPIU_Upint)((MPIU_Upint)buf + user_buf_idx)); \
+  ADIOI_Assert((((ADIO_Offset)(uintptr_t)buf) + user_buf_idx) == (ADIO_Offset)(uintptr_t)((uintptr_t)buf + user_buf_idx)); \
   ADIOI_Assert(size_in_buf == (size_t)size_in_buf); \
 	memcpy(((char *) buf) + user_buf_idx, \
 	       &(recv_buf[p][recv_buf_idx[p]]), size_in_buf); \
@@ -974,8 +971,8 @@ void ADIOI_Fill_user_buffer(ADIO_File fd, void *buf, ADIOI_Flatlist_node
     /* Not sure unsigned is necessary, but it makes the math safer */
     unsigned *curr_from_proc, *done_from_proc, *recv_buf_idx;
 
-    ADIOI_UNREFERENCED_ARG(requests);
-    ADIOI_UNREFERENCED_ARG(statuses);
+    MPL_UNREFERENCED_ARG(requests);
+    MPL_UNREFERENCED_ARG(statuses);
 
 /*  curr_from_proc[p] = amount of data recd from proc. p that has already
                         been accounted for so far

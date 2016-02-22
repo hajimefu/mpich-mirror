@@ -100,7 +100,7 @@ static inline void fill_in_derived_dtp_info(MPIDI_RMA_dtype_info * dtype_info, v
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
-                              MPID_Datatype * target_dtp, MPIDI_msg_sz_t stream_offset,
+                              MPID_Datatype * target_dtp, intptr_t stream_offset,
                               void **ext_hdr_ptr, MPI_Aint * ext_hdr_sz)
 {
     MPI_Aint _ext_hdr_sz = 0, _total_sz = 0;
@@ -119,6 +119,7 @@ static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
         _total_sz = _ext_hdr_sz + target_dtp->dataloop_size;
 
         _ext_hdr_ptr = (MPIDI_CH3_Ext_pkt_accum_stream_derived_t *) MPL_malloc(_total_sz);
+        MPL_VG_MEM_INIT(_ext_hdr_ptr, _total_sz);
         if (_ext_hdr_ptr == NULL) {
             MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem",
                                  "**nomem %s", "MPIDI_CH3_Ext_pkt_accum_stream_derived_t");
@@ -137,6 +138,7 @@ static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
         _total_sz = sizeof(MPIDI_CH3_Ext_pkt_accum_stream_t);
 
         _ext_hdr_ptr = (MPIDI_CH3_Ext_pkt_accum_stream_t *) MPL_malloc(_total_sz);
+        MPL_VG_MEM_INIT(_ext_hdr_ptr, _total_sz);
         if (_ext_hdr_ptr == NULL) {
             MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem",
                                  "**nomem %s", "MPIDI_CH3_Ext_pkt_accum_stream_t");
@@ -154,6 +156,7 @@ static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
         _total_sz = _ext_hdr_sz + target_dtp->dataloop_size;
 
         _ext_hdr_ptr = (MPIDI_CH3_Ext_pkt_accum_derived_t *) MPL_malloc(_total_sz);
+        MPL_VG_MEM_INIT(_ext_hdr_ptr, _total_sz);
         if (_ext_hdr_ptr == NULL) {
             MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem",
                                  "**nomem %s", "MPIDI_CH3_Ext_pkt_accum_derived_t");
@@ -183,7 +186,7 @@ static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int init_get_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
-                                  MPID_Datatype * target_dtp, MPIDI_msg_sz_t stream_offset,
+                                  MPID_Datatype * target_dtp, intptr_t stream_offset,
                                   void **ext_hdr_ptr, MPI_Aint * ext_hdr_sz)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -217,7 +220,7 @@ static int init_get_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int issue_from_origin_buffer(MPIDI_RMA_Op_t * rma_op, MPIDI_VC_t * vc,
                                     void *ext_hdr_ptr, MPI_Aint ext_hdr_sz,
-                                    MPIDI_msg_sz_t stream_offset, MPIDI_msg_sz_t stream_size,
+                                    intptr_t stream_offset, intptr_t stream_size,
                                     MPID_Request ** req_ptr)
 {
     MPI_Datatype target_datatype;
@@ -433,6 +436,7 @@ static int issue_put_op(MPIDI_RMA_Op_t * rma_op, MPID_Win * win_ptr,
              * TODO: support extended header array */
             ext_hdr_sz = sizeof(MPIDI_CH3_Ext_pkt_put_derived_t) + target_dtp_ptr->dataloop_size;
             ext_hdr_ptr = MPL_malloc(ext_hdr_sz);
+            MPL_VG_MEM_INIT(ext_hdr_ptr, ext_hdr_sz);
             if (!ext_hdr_ptr) {
                 MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem",
                                      "**nomem %s", "MPIDI_CH3_Ext_pkt_put_derived_t");
@@ -552,7 +556,7 @@ static int issue_acc_op(MPIDI_RMA_Op_t * rma_op, MPID_Win * win_ptr,
     rest_len = total_len;
     MPIU_Assert(rma_op->issued_stream_count >= 0);
     for (j = 0; j < stream_unit_count; j++) {
-        MPIDI_msg_sz_t stream_offset, stream_size;
+        intptr_t stream_offset, stream_size;
         MPID_Request *curr_req = NULL;
 
         if (j < rma_op->issued_stream_count)
@@ -745,7 +749,7 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPID_Win * win_ptr,
     MPIU_Assert(rma_op->issued_stream_count >= 0);
 
     for (j = 0; j < stream_unit_count; j++) {
-        MPIDI_msg_sz_t stream_offset, stream_size;
+        intptr_t stream_offset, stream_size;
         MPID_Request *resp_req = NULL;
         MPID_Request *curr_req = NULL;
 
@@ -938,6 +942,7 @@ static int issue_get_op(MPIDI_RMA_Op_t * rma_op, MPID_Win * win_ptr,
          * TODO: support extended header array */
         ext_hdr_sz = sizeof(MPIDI_CH3_Ext_pkt_get_derived_t) + dtp->dataloop_size;
         ext_hdr_ptr = MPL_malloc(ext_hdr_sz);
+        MPL_VG_MEM_INIT(ext_hdr_ptr, ext_hdr_sz);
         if (!ext_hdr_ptr) {
             MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem",
                                  "**nomem %s", "MPIDI_CH3_Ext_pkt_get_derived_t");

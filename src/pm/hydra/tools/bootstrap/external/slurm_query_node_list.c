@@ -35,12 +35,12 @@ static HYD_status group_to_nodes(char *str)
     *tmp = 0;   /* remove the closing ']' */
 
     /* Find the number of sets */
-    tnodes = HYDU_strdup(nodes);
+    tnodes = MPL_strdup(nodes);
     tmp = strtok(tnodes, ",");
     for (i = 1; tmp; i++)
         tmp = strtok(NULL, ",");
 
-    HYDU_MALLOC(set, char **, i * sizeof(char *), status);
+    HYDU_MALLOC_OR_JUMP(set, char **, i * sizeof(char *), status);
 
     /* Find the actual node sets */
     set[0] = strtok(nodes, ",");
@@ -58,7 +58,7 @@ static HYD_status group_to_nodes(char *str)
         for (j = start; j <= end; j++) {
             char *node_str[HYD_NUM_TMP_STRINGS];
 
-            node_str[0] = HYDU_strdup(str);
+            node_str[0] = MPL_strdup(str);
             node_str[1] = HYDU_int_to_str_pad(j, strlen(start_str));
             node_str[2] = NULL;
 
@@ -133,13 +133,13 @@ static HYD_status extract_tasks_per_node(int nnodes, char *task_list)
     int i, j, k, p, count = 0;
     HYD_status status = HYD_SUCCESS;
 
-    HYDU_MALLOC(tasks_per_node, int *, nnodes * sizeof(int), status);
-    HYDU_MALLOC(tmp_core_list, char **, nnodes * sizeof(char *), status);
+    HYDU_MALLOC_OR_JUMP(tasks_per_node, int *, nnodes * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(tmp_core_list, char **, nnodes * sizeof(char *), status);
 
     task_set = strtok(task_list, ",");
     i = 0;
     do {
-        HYDU_MALLOC(tmp_core_list[i], char *, strlen(task_set) + 1, status);
+        HYDU_MALLOC_OR_JUMP(tmp_core_list[i], char *, strlen(task_set) + 1, status);
         MPL_snprintf(tmp_core_list[i], strlen(task_set) + 1, "%s", task_set);
         i++;
         task_set = strtok(NULL, ",");
@@ -164,8 +164,8 @@ static HYD_status extract_tasks_per_node(int nnodes, char *task_list)
 
   fn_exit:
     for (i = 0; i < count; i++)
-        HYDU_FREE(tmp_core_list[i]);
-    HYDU_FREE(tmp_core_list);
+        MPL_free(tmp_core_list[i]);
+    MPL_free(tmp_core_list);
     return status;
 
   fn_fail:
@@ -203,7 +203,7 @@ HYD_status HYDT_bscd_slurm_query_node_list(struct HYD_node **node_list)
     *node_list = global_node_list;
 
   fn_exit:
-    HYDU_FREE(tasks_per_node);
+    MPL_free(tasks_per_node);
     HYDU_FUNC_EXIT();
     return status;
 

@@ -58,47 +58,6 @@ void ADIOI_Print_flatlist_node(ADIOI_Flatlist_node *flatlist_node_p)
     fprintf(stderr, "\n");
 }
 
-/* Since ADIOI_Flatten_datatype won't add a contig datatype to the
- * ADIOI_Flatlist, we can force it to do so with this function. */
-ADIOI_Flatlist_node * ADIOI_Add_contig_flattened(MPI_Datatype contig_type)
-{
-    MPI_Count contig_type_sz = -1;
-    ADIOI_Flatlist_node *flat_node_p = ADIOI_Flatlist;
-    
-    /* Add contig type to the end of the list if it doesn't already
-     * exist. */
-    while (flat_node_p->next)
-    {
-	if (flat_node_p->type == contig_type)
-	    return flat_node_p;
-	flat_node_p = flat_node_p->next;
-    }
-    if (flat_node_p->type == contig_type)
-	return flat_node_p;
-
-    MPI_Type_size_x(contig_type, &contig_type_sz);
-    if ((flat_node_p->next = (ADIOI_Flatlist_node *) ADIOI_Malloc
-	 (sizeof(ADIOI_Flatlist_node))) == NULL)
-    {
-	fprintf(stderr, "ADIOI_Add_contig_flattened: malloc next failed\n");
-    }
-    flat_node_p = flat_node_p->next;
-    flat_node_p->type = contig_type;
-    if ((flat_node_p->blocklens = (ADIO_Offset *) ADIOI_Malloc(sizeof(ADIO_Offset))) == NULL)
-    {
-	fprintf(stderr, "ADIOI_Flatlist_node: malloc blocklens failed\n");
-    }
-    if ((flat_node_p->indices = (ADIO_Offset *) 
-	 ADIOI_Malloc(sizeof(ADIO_Offset))) == NULL)
-    {
-	fprintf(stderr, "ADIOI_Flatlist_node: malloc indices failed\n");
-    }
-    flat_node_p->blocklens[0] = contig_type_sz;
-    flat_node_p->indices[0] = 0;
-    flat_node_p->count = 1;
-    flat_node_p->next = NULL;
-    return flat_node_p;
-}
 
 /* ADIOI_Exchange_file_views - Sends all the aggregators the file
  * views and file view states of the clients.  It fills in the
@@ -146,7 +105,7 @@ void ADIOI_Exch_file_views(int myrank, int nprocs, int file_ptr_type,
     MPI_Type_extent(datatype, &memtype_extent);
     if (memtype_sz == memtype_extent) {
 	memtype_is_contig = 1;
-	flat_mem_p = ADIOI_Add_contig_flattened(datatype);
+	flat_mem_p = ADIOI_Flatten_and_find(datatype);
 	flat_mem_p->blocklens[0] = memtype_sz*count;
     }
     else {
@@ -155,16 +114,11 @@ void ADIOI_Exch_file_views(int myrank, int nprocs, int file_ptr_type,
 
     MPI_Type_extent(fd->filetype, &filetype_extent);
     MPI_Type_size_x(fd->filetype, &filetype_sz);
+    flat_file_p = ADIOI_Flatten_and_find(fd->filetype);
     if (filetype_extent == filetype_sz) {
-	flat_file_p = ADIOI_Add_contig_flattened(fd->filetype);
 	flat_file_p->blocklens[0] = memtype_sz*count;
 	filetype_extent = memtype_sz*count;
 	filetype_sz = filetype_extent;
-    }
-    else {
-        flat_file_p = ADIOI_Flatlist;
-        while (flat_file_p->type != fd->filetype)
-            flat_file_p = flat_file_p->next; 
     }
 
     disp_off_sz_ext_typesz[0] = fd->fp_ind;
@@ -465,7 +419,7 @@ void ADIOI_Exch_file_views(int myrank, int nprocs, int file_ptr_type,
 #ifdef DEBUG
     if (fd->is_agg == 1)
     {
-	ADIOI_Flatlist_node *fr_node_p = ADIOI_Flatlist;
+	ADIOI_Flatlist_node *fr_node_p;
 	for (i = 0; i < nprocs; i++)
 	{
 	    fprintf(stderr, "client_file_view_state_arr[%d]=(fp_ind=%Ld,"
@@ -477,9 +431,8 @@ void ADIOI_Exch_file_views(int myrank, int nprocs, int file_ptr_type,
 		    client_file_view_state_arr[i].ext);
 	}
 	
-	while (fr_node_p->type != 
-	       fd->file_realm_types[fd->my_cb_nodes_index])
-	    fr_node_p = fr_node_p->next;
+	fr_node_p =
+	    ADIOI_Flatten_and_find(fd->file_realm_types[fd->my-cb_nodes_index]);
 	assert(fr_node_p != NULL);
 	
 	fprintf(stderr, "my file realm (idx=%d,st_off=%Ld) ", 

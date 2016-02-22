@@ -103,7 +103,7 @@ static HYD_status qsort_node_list(void)
     for (count = 0, node = HYD_server_info.node_list; node; node = node->next, count++)
         /* skip */ ;
 
-    HYDU_MALLOC(node_list, struct HYD_node **, count * sizeof(struct HYD_node *), status);
+    HYDU_MALLOC_OR_JUMP(node_list, struct HYD_node **, count * sizeof(struct HYD_node *), status);
     for (i = 0, node = HYD_server_info.node_list; node; node = node->next, i++)
         node_list[i] = node;
 
@@ -117,7 +117,7 @@ static HYD_status qsort_node_list(void)
     }
     HYD_server_info.node_list = new_list;
 
-    HYDU_FREE(node_list);
+    MPL_free(node_list);
 
   fn_exit:
     return status;
@@ -291,9 +291,9 @@ int main(int argc, char **argv)
         }
 
         if (node)
-            HYD_server_info.localhost = HYDU_strdup(node->hostname);
+            HYD_server_info.localhost = MPL_strdup(node->hostname);
         else {
-            HYDU_MALLOC(HYD_server_info.localhost, char *, MAX_HOSTNAME_LEN, status);
+            HYDU_MALLOC_OR_JUMP(HYD_server_info.localhost, char *, MAX_HOSTNAME_LEN, status);
             if (gethostname(HYD_server_info.localhost, MAX_HOSTNAME_LEN) < 0)
                 HYDU_ERR_SETANDJUMP(status, HYD_SOCK_ERROR, "unable to get local hostname\n");
         }
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
         MPL_env2str("MPICH_PORT_RANGE", (const char **) &HYD_server_info.port_range) ||
         MPL_env2str("MPIEXEC_PORTRANGE", (const char **) &HYD_server_info.port_range) ||
         MPL_env2str("MPIEXEC_PORT_RANGE", (const char **) &HYD_server_info.port_range))
-        HYD_server_info.port_range = HYDU_strdup(HYD_server_info.port_range);
+        HYD_server_info.port_range = MPL_strdup(HYD_server_info.port_range);
 
     /* Add the stdout/stderr callback handlers */
     HYD_server_info.stdout_cb = HYD_uiu_stdout_cb;

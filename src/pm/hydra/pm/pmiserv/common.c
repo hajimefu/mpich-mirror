@@ -30,7 +30,7 @@ HYD_status HYD_pmcd_pmi_parse_pmi_cmd(char *obuf, int pmi_version, char **pmi_cm
     HYDU_FUNC_ENTER();
 
     /* Make a copy of the original buffer */
-    buf = HYDU_strdup(obuf);
+    buf = MPL_strdup(obuf);
     if (buf[strlen(obuf) - 1] == '\n')
         buf[strlen(obuf) - 1] = '\0';
 
@@ -49,7 +49,7 @@ HYD_status HYD_pmcd_pmi_parse_pmi_cmd(char *obuf, int pmi_version, char **pmi_cm
         args[i] = strtok(NULL, delim);
         if (args[i] == NULL)
             break;
-        args[i] = HYDU_strdup(args[i]);
+        args[i] = MPL_strdup(args[i]);
     }
 
     /* Search for the PMI command in our table */
@@ -57,9 +57,9 @@ HYD_status HYD_pmcd_pmi_parse_pmi_cmd(char *obuf, int pmi_version, char **pmi_cm
     HYDU_ERR_POP(status, "string split returned error\n");
 
   fn_exit:
-    HYDU_FREE(buf);
+    MPL_free(buf);
     if (str1)
-        HYDU_FREE(str1);
+        MPL_free(str1);
     HYDU_FUNC_EXIT();
     return status;
 
@@ -75,10 +75,11 @@ HYD_status HYD_pmcd_pmi_args_to_tokens(char *args[], struct HYD_pmcd_token **tok
 
     for (i = 0; args[i]; i++);
     *count = i;
-    HYDU_MALLOC(*tokens, struct HYD_pmcd_token *, *count * sizeof(struct HYD_pmcd_token), status);
+    HYDU_MALLOC_OR_JUMP(*tokens, struct HYD_pmcd_token *, *count * sizeof(struct HYD_pmcd_token),
+                        status);
 
     for (i = 0; args[i]; i++) {
-        arg = HYDU_strdup(args[i]);
+        arg = MPL_strdup(args[i]);
         (*tokens)[i].key = arg;
         for (j = 0; arg[j] && arg[j] != '='; j++);
         if (!arg[j]) {
@@ -102,8 +103,8 @@ void HYD_pmcd_pmi_free_tokens(struct HYD_pmcd_token *tokens, int token_count)
     int i;
 
     for (i = 0; i < token_count; i++)
-        HYDU_FREE(tokens[i].key);
-    HYDU_FREE(tokens);
+        MPL_free(tokens[i].key);
+    MPL_free(tokens);
 }
 
 char *HYD_pmcd_pmi_find_token_keyval(struct HYD_pmcd_token *tokens, int count, const char *key)
@@ -124,7 +125,7 @@ HYD_status HYD_pmcd_pmi_allocate_kvs(struct HYD_pmcd_pmi_kvs ** kvs, int pgid)
 
     HYDU_FUNC_ENTER();
 
-    HYDU_MALLOC(*kvs, struct HYD_pmcd_pmi_kvs *, sizeof(struct HYD_pmcd_pmi_kvs), status);
+    HYDU_MALLOC_OR_JUMP(*kvs, struct HYD_pmcd_pmi_kvs *, sizeof(struct HYD_pmcd_pmi_kvs), status);
     MPL_snprintf((*kvs)->kvsname, PMI_MAXKVSLEN, "kvs_%d_%d", (int) getpid(), pgid);
     (*kvs)->key_pair = NULL;
 
@@ -145,10 +146,10 @@ void HYD_pmcd_free_pmi_kvs_list(struct HYD_pmcd_pmi_kvs *kvs_list)
     key_pair = kvs_list->key_pair;
     while (key_pair) {
         tmp = key_pair->next;
-        HYDU_FREE(key_pair);
+        MPL_free(key_pair);
         key_pair = tmp;
     }
-    HYDU_FREE(kvs_list);
+    MPL_free(kvs_list);
 
     HYDU_FUNC_EXIT();
 }
@@ -160,8 +161,8 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
 
     HYDU_FUNC_ENTER();
 
-    HYDU_MALLOC(key_pair, struct HYD_pmcd_pmi_kvs_pair *, sizeof(struct HYD_pmcd_pmi_kvs_pair),
-                status);
+    HYDU_MALLOC_OR_JUMP(key_pair, struct HYD_pmcd_pmi_kvs_pair *,
+                        sizeof(struct HYD_pmcd_pmi_kvs_pair), status);
     MPL_snprintf(key_pair->key, PMI_MAXKEYLEN, "%s", key);
     MPL_snprintf(key_pair->val, PMI_MAXVALLEN, "%s", val);
     key_pair->next = NULL;
@@ -189,6 +190,6 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
     return status;
 
   fn_fail:
-    HYDU_FREE(key_pair);
+    MPL_free(key_pair);
     goto fn_exit;
 }

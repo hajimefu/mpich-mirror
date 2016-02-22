@@ -155,9 +155,7 @@ void ADIOI_GEN_ReadStrided(ADIO_File fd, void *buf, int count,
 
     else {  /* noncontiguous in file */
 
-/* filetype already flattened in ADIO_Open */
-	flat_file = ADIOI_Flatlist;
-	while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+	flat_file = ADIOI_Flatten_and_find(fd->filetype);
 	disp = fd->disp;
 
 	if (file_ptr_type == ADIO_INDIVIDUAL) {
@@ -399,5 +397,4 @@ void ADIOI_GEN_ReadStrided(ADIO_File fd, void *buf, int count,
    by ADIOI_BUFFERED_READ. */
 #endif
 
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 }

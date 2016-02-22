@@ -168,7 +168,7 @@ static HYD_status check_pmi_cmd(char **buf, int *pmi_version, int *repeat)
     if (full_command) {
         /* We have a full command */
         buflen = bufptr - sptr + 1;
-        HYDU_MALLOC(*buf, char *, buflen, status);
+        HYDU_MALLOC_OR_JUMP(*buf, char *, buflen, status);
         memcpy(*buf, sptr, buflen);
         sptr += buflen;
         pmi_storage_len -= buflen;
@@ -222,7 +222,7 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
         }
     }
 
- read_cmd:
+  read_cmd:
     /* PMI-1 does not tell us how much to read. We read how much ever
      * we can, parse out full PMI commands from it, and process
      * them. When we don't have a full PMI command, we go back and
@@ -284,7 +284,7 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
         pmi_storage[pmi_storage_len] = 0;
     }
 
- check_cmd:
+  check_cmd:
     status = check_pmi_cmd(&buf, &hdr.pmi_version, &repeat);
     HYDU_ERR_POP(status, "error checking the PMI command\n");
 
@@ -304,9 +304,9 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
     else
         HYD_pmcd_pmip_pmi_handle = HYD_pmcd_pmip_pmi_v2;
 
-    HYDU_MALLOC(args, char **, MAX_PMI_ARGS * sizeof(char *), status);
-    for(i = 0;i < MAX_PMI_ARGS; i++)
-        args[i]= NULL;
+    HYDU_MALLOC_OR_JUMP(args, char **, MAX_PMI_ARGS * sizeof(char *), status);
+    for (i = 0; i < MAX_PMI_ARGS; i++)
+        args[i] = NULL;
 
     status = HYD_pmcd_pmi_parse_pmi_cmd(buf, hdr.pmi_version, &pmi_cmd, args);
     HYDU_ERR_POP(status, "unable to parse PMI command\n");
@@ -327,8 +327,7 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
     }
 
     if (HYD_pmcd_pmip.user_global.debug) {
-        HYDU_dump(stdout, "we don't understand this command %s; forwarding upstream\n",
-                  pmi_cmd);
+        HYDU_dump(stdout, "we don't understand this command %s; forwarding upstream\n", pmi_cmd);
     }
 
     /* We don't understand the command; forward it upstream */
@@ -353,13 +352,13 @@ static HYD_status pmi_cb(int fd, HYD_event_t events, void *userp)
 
   fn_exit:
     if (pmi_cmd)
-        HYDU_FREE(pmi_cmd);
+        MPL_free(pmi_cmd);
     if (args) {
         HYDU_free_strlist(args);
-        HYDU_free(args);
+        MPL_free(args);
     }
     if (buf)
-        HYDU_FREE(buf);
+        MPL_free(buf);
     HYDU_FUNC_EXIT();
     return status;
 
@@ -376,7 +375,7 @@ static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
 
     HYDU_FUNC_ENTER();
 
-    HYDU_MALLOC(buf, char *, hdr.buflen + 1, status);
+    HYDU_MALLOC_OR_JUMP(buf, char *, hdr.buflen + 1, status);
 
     status = HYDU_sock_read(fd, buf, hdr.buflen, &count, &closed, HYDU_SOCK_COMM_MSGWAIT);
     HYDU_ERR_POP(status, "unable to read PMI response from proxy\n");
@@ -384,7 +383,7 @@ static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
 
     buf[hdr.buflen] = 0;
 
-    HYDU_MALLOC(args, char **, MAX_PMI_INTERNAL_ARGS * sizeof(char *), status);
+    HYDU_MALLOC_OR_JUMP(args, char **, MAX_PMI_INTERNAL_ARGS * sizeof(char *), status);
     for (i = 0; i < MAX_PMI_INTERNAL_ARGS; i++)
         args[i] = NULL;
 
@@ -417,13 +416,13 @@ static HYD_status handle_pmi_response(int fd, struct HYD_pmcd_hdr hdr)
 
   fn_exit:
     if (pmi_cmd)
-        HYDU_FREE(pmi_cmd);
+        MPL_free(pmi_cmd);
     if (args) {
         HYDU_free_strlist(args);
-        HYDU_free(args);
+        MPL_free(args);
     }
     if (buf)
-        HYDU_FREE(buf);
+        MPL_free(buf);
     HYDU_FUNC_EXIT();
     return status;
 
@@ -488,20 +487,20 @@ static HYD_status launch_procs(void)
     for (exec = HYD_pmcd_pmip.exec_list; exec; exec = exec->next)
         HYD_pmcd_pmip.local.proxy_process_count += exec->proc_count;
 
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.out, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.err, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.pid, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.exit_status, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.pmi_rank, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.pmi_fd, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
-    HYDU_MALLOC(HYD_pmcd_pmip.downstream.pmi_fd_active, int *,
-                HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.out, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.err, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.pid, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.exit_status, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.pmi_rank, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.pmi_fd, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.downstream.pmi_fd_active, int *,
+                        HYD_pmcd_pmip.local.proxy_process_count * sizeof(int), status);
 
     /* Initialize the PMI_FD and PMI FD active state, and exit status */
     for (i = 0; i < HYD_pmcd_pmip.local.proxy_process_count; i++) {
@@ -564,7 +563,7 @@ static HYD_status launch_procs(void)
          * written value if needed. */
 
         if (!exec->env_prop && HYD_pmcd_pmip.user_global.global_env.prop)
-            exec->env_prop = HYDU_strdup(HYD_pmcd_pmip.user_global.global_env.prop);
+            exec->env_prop = MPL_strdup(HYD_pmcd_pmip.user_global.global_env.prop);
 
         if (!exec->env_prop) {
             /* user didn't specify anything; add inherited env to optional env */
@@ -582,9 +581,9 @@ static HYD_status launch_procs(void)
         }
         else if (!strncmp(exec->env_prop, "list", strlen("list"))) {
             if (exec->env_prop)
-                list = HYDU_strdup(exec->env_prop + strlen("list:"));
+                list = MPL_strdup(exec->env_prop + strlen("list:"));
             else
-                list = HYDU_strdup(HYD_pmcd_pmip.user_global.global_env.prop + strlen("list:"));
+                list = MPL_strdup(HYD_pmcd_pmip.user_global.global_env.prop + strlen("list:"));
 
             envstr = strtok(list, ",");
             while (envstr) {
@@ -640,7 +639,7 @@ static HYD_status launch_procs(void)
         if (exec->wdir && chdir(exec->wdir) < 0)
             HYDU_ERR_SETANDJUMP(status, HYD_INTERNAL_ERROR,
                                 "unable to change wdir to %s (%s)\n", exec->wdir,
-                                HYDU_strerror(errno));
+                                MPL_strerror(errno));
 
         for (i = 0; i < exec->proc_count; i++) {
             str = HYDU_int_to_str(exec->proc_count);
@@ -662,14 +661,14 @@ static HYD_status launch_procs(void)
                 str = HYDU_int_to_str(HYD_pmcd_pmip.downstream.pmi_rank[process_id]);
                 status = HYDU_append_env_to_list("PMI_ID", str, &force_env);
                 HYDU_ERR_POP(status, "unable to add env to list\n");
-                HYDU_FREE(str);
+                MPL_free(str);
             }
             else {
                 /* PMI_RANK */
                 str = HYDU_int_to_str(HYD_pmcd_pmip.downstream.pmi_rank[process_id]);
                 status = HYDU_append_env_to_list("PMI_RANK", str, &force_env);
                 HYDU_ERR_POP(status, "unable to add env to list\n");
-                HYDU_FREE(str);
+                MPL_free(str);
 
                 if (socketpair(AF_UNIX, SOCK_STREAM, 0, pmi_fds) < 0)
                     HYDU_ERR_SETANDJUMP(status, HYD_INTERNAL_ERROR, "pipe error\n");
@@ -685,18 +684,18 @@ static HYD_status launch_procs(void)
 
                 status = HYDU_append_env_to_list("PMI_FD", str, &force_env);
                 HYDU_ERR_POP(status, "unable to add env to list\n");
-                HYDU_FREE(str);
+                MPL_free(str);
 
                 /* PMI_SIZE */
                 str = HYDU_int_to_str(HYD_pmcd_pmip.system_global.global_process_count);
                 status = HYDU_append_env_to_list("PMI_SIZE", str, &force_env);
                 HYDU_ERR_POP(status, "unable to add env to list\n");
-                HYDU_FREE(str);
+                MPL_free(str);
             }
 
             HYD_STRING_STASH_INIT(stash);
             for (j = 0; exec->exec[j]; j++)
-                HYD_STRING_STASH(stash, HYDU_strdup(exec->exec[j]), status);
+                HYD_STRING_STASH(stash, MPL_strdup(exec->exec[j]), status);
 
             /* For non rank-0 processes, store the stdin socket in a
              * dummy variable instead of passing NULL.  Passing NULL
@@ -813,14 +812,14 @@ static HYD_status parse_exec_params(char **t_argv)
 
     /* Set default values */
     if (HYD_pmcd_pmip.user_global.binding == NULL)
-        HYD_pmcd_pmip.user_global.binding = HYDU_strdup("none");
+        HYD_pmcd_pmip.user_global.binding = MPL_strdup("none");
 
     if (HYD_pmcd_pmip.user_global.topolib == NULL && HYDRA_DEFAULT_TOPOLIB)
-        HYD_pmcd_pmip.user_global.topolib = HYDU_strdup(HYDRA_DEFAULT_TOPOLIB);
+        HYD_pmcd_pmip.user_global.topolib = MPL_strdup(HYDRA_DEFAULT_TOPOLIB);
 
 #ifdef HYDRA_DEFAULT_CKPOINTLIB
     if (HYD_pmcd_pmip.user_global.ckpointlib == NULL)
-        HYD_pmcd_pmip.user_global.ckpointlib = HYDU_strdup(HYDRA_DEFAULT_CKPOINTLIB);
+        HYD_pmcd_pmip.user_global.ckpointlib = MPL_strdup(HYDRA_DEFAULT_CKPOINTLIB);
 #endif
 
   fn_exit:
@@ -846,14 +845,14 @@ static HYD_status procinfo(int fd)
     HYDU_ERR_POP(status, "error reading data from upstream\n");
     HYDU_ASSERT(!closed, status);
 
-    HYDU_MALLOC(arglist, char **, (num_strings + 1) * sizeof(char *), status);
+    HYDU_MALLOC_OR_JUMP(arglist, char **, (num_strings + 1) * sizeof(char *), status);
 
     for (i = 0; i < num_strings; i++) {
         status = HYDU_sock_read(fd, &str_len, sizeof(int), &recvd, &closed, HYDU_SOCK_COMM_MSGWAIT);
         HYDU_ERR_POP(status, "error reading data from upstream\n");
         HYDU_ASSERT(!closed, status);
 
-        HYDU_MALLOC(arglist[i], char *, str_len, status);
+        HYDU_MALLOC_OR_JUMP(arglist[i], char *, str_len, status);
 
         status = HYDU_sock_read(fd, arglist[i], str_len, &recvd, &closed, HYDU_SOCK_COMM_MSGWAIT);
         HYDU_ERR_POP(status, "error reading data from upstream\n");
@@ -866,7 +865,7 @@ static HYD_status procinfo(int fd)
     HYDU_ERR_POP(status, "unable to parse argument list\n");
 
     HYDU_free_strlist(arglist);
-    HYDU_FREE(arglist);
+    MPL_free(arglist);
 
     /* Save this fd as we need to send back the exit status on
      * this. */
@@ -923,7 +922,7 @@ HYD_status HYD_pmcd_pmip_control_cmd_cb(int fd, HYD_event_t events, void *userp)
         int count;
 
         if (hdr.buflen) {
-            HYDU_MALLOC(buf, char *, hdr.buflen, status);
+            HYDU_MALLOC_OR_JUMP(buf, char *, hdr.buflen, status);
             HYDU_ERR_POP(status, "unable to allocate memory\n");
 
             status = HYDU_sock_read(fd, buf, hdr.buflen, &count, &closed, HYDU_SOCK_COMM_MSGWAIT);
@@ -931,7 +930,7 @@ HYD_status HYD_pmcd_pmip_control_cmd_cb(int fd, HYD_event_t events, void *userp)
             HYDU_ASSERT(!closed, status);
 
             if (HYD_pmcd_pmip.downstream.in == HYD_FD_CLOSED) {
-                HYDU_FREE(buf);
+                MPL_free(buf);
                 goto fn_exit;
             }
 
@@ -952,7 +951,7 @@ HYD_status HYD_pmcd_pmip_control_cmd_cb(int fd, HYD_event_t events, void *userp)
                 HYD_pmcd_pmip.downstream.in = HYD_FD_CLOSED;
             }
 
-            HYDU_FREE(buf);
+            MPL_free(buf);
         }
         else {
             close(HYD_pmcd_pmip.downstream.in);

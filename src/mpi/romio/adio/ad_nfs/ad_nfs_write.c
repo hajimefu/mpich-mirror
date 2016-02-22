@@ -376,9 +376,7 @@ void ADIOI_NFS_WriteStrided(ADIO_File fd, const void *buf, int count,
 
     else {  /* noncontiguous in file */
 
-/* filetype already flattened in ADIO_Open */
-	flat_file = ADIOI_Flatlist;
-	while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+	flat_file = ADIOI_Flatten_and_find(fd->filetype);
 	disp = fd->disp;
 
 	if (file_ptr_type == ADIO_INDIVIDUAL) {
@@ -667,7 +665,6 @@ void ADIOI_NFS_WriteStrided(ADIO_File fd, const void *buf, int count,
    keep track of how much data was actually written by ADIOI_BUFFERED_WRITE. */
 #endif
 
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 fn_exit:
     if (writebuf != NULL) ADIOI_Free(writebuf);
 

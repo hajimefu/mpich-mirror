@@ -41,15 +41,15 @@ static HYD_status control_port_fn(char *arg, char ***argv)
     HYDU_ERR_CHKANDJUMP(status, HYD_pmcd_pmip.upstream.server_name, HYD_INTERNAL_ERROR,
                         "duplicate control port setting\n");
 
-    port = HYDU_strdup(**argv);
-    HYD_pmcd_pmip.upstream.server_name = HYDU_strdup(strtok(port, ":"));
+    port = MPL_strdup(**argv);
+    HYD_pmcd_pmip.upstream.server_name = MPL_strdup(strtok(port, ":"));
     HYD_pmcd_pmip.upstream.server_port = atoi(strtok(NULL, ":"));
 
     (*argv)++;
 
   fn_exit:
     if (port)
-        HYDU_FREE(port);
+        MPL_free(port);
     return status;
 
   fn_fail:
@@ -183,7 +183,7 @@ static HYD_status pmi_spawner_kvsname_fn(char *arg, char ***argv)
 {
     HYD_status status = HYD_SUCCESS;
 
-    HYDU_MALLOC(HYD_pmcd_pmip.local.spawner_kvsname, char *, PMI_MAXKVSLEN, status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.local.spawner_kvsname, char *, PMI_MAXKVSLEN, status);
 
     MPL_snprintf(HYD_pmcd_pmip.local.spawner_kvsname, PMI_MAXKVSLEN, "%s", **argv);
     (*argv)++;
@@ -287,13 +287,13 @@ static HYD_status parse_ckpoint_prefix(char *pathlist)
     /* Add one more to the prefix list for a NULL ending string */
     prefixes++;
 
-    HYDU_MALLOC(HYD_pmcd_pmip.local.ckpoint_prefix_list, char **, prefixes * sizeof(char *),
-                status);
+    HYDU_MALLOC_OR_JUMP(HYD_pmcd_pmip.local.ckpoint_prefix_list, char **, prefixes * sizeof(char *),
+                        status);
 
     dummy = strtok(pathlist, ":");
     i = 0;
     while (dummy) {
-        HYD_pmcd_pmip.local.ckpoint_prefix_list[i] = HYDU_strdup(dummy);
+        HYD_pmcd_pmip.local.ckpoint_prefix_list[i] = MPL_strdup(dummy);
         dummy = strtok(NULL, ":");
         i++;
     }
@@ -375,7 +375,7 @@ static HYD_status global_core_map_fn(char *arg, char ***argv)
     HYD_status status = HYD_SUCCESS;
 
     /* Split the core map into three different segments */
-    map = HYDU_strdup(**argv);
+    map = MPL_strdup(**argv);
     HYDU_ASSERT(map, status);
 
     tmp = strtok(map, ",");
@@ -390,7 +390,7 @@ static HYD_status global_core_map_fn(char *arg, char ***argv)
     HYDU_ASSERT(tmp, status);
     HYD_pmcd_pmip.system_global.global_core_map.global_count = atoi(tmp);
 
-    HYDU_FREE(map);
+    MPL_free(map);
 
     (*argv)++;
 
@@ -408,7 +408,7 @@ static HYD_status pmi_id_map_fn(char *arg, char ***argv)
     HYD_status status = HYD_SUCCESS;
 
     /* Split the core map into three different segments */
-    map = HYDU_strdup(**argv);
+    map = MPL_strdup(**argv);
     HYDU_ASSERT(map, status);
 
     tmp = strtok(map, ",");
@@ -419,7 +419,7 @@ static HYD_status pmi_id_map_fn(char *arg, char ***argv)
     HYDU_ASSERT(tmp, status);
     HYD_pmcd_pmip.system_global.pmi_id_map.non_filler_start = atoi(tmp);
 
-    HYDU_FREE(map);
+    MPL_free(map);
 
     (*argv)++;
 
@@ -618,7 +618,7 @@ static HYD_status exec_args_fn(char *arg, char ***argv)
     count = atoi(**argv);
     for (i = 0; i < count; i++) {
         (*argv)++;
-        exec->exec[i] = HYDU_strdup(**argv);
+        exec->exec[i] = MPL_strdup(**argv);
     }
     exec->exec[i] = NULL;
     (*argv)++;
@@ -733,7 +733,7 @@ HYD_status HYD_pmcd_pmip_get_params(char **t_argv)
 
     HYDU_dbg_finalize();
     MPL_snprintf(dbg_prefix, 2 * MAX_HOSTNAME_LEN, "proxy:%d:%d",
-                  HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.local.id);
+                 HYD_pmcd_pmip.local.pgid, HYD_pmcd_pmip.local.id);
     status = HYDU_dbg_init((const char *) dbg_prefix);
     HYDU_ERR_POP(status, "unable to initialization debugging\n");
 

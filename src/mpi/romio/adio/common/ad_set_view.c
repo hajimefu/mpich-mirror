@@ -25,7 +25,6 @@ void ADIO_Set_view(ADIO_File fd, ADIO_Offset disp, MPI_Datatype etype,
 	if (combiner != MPI_COMBINER_NAMED) MPI_Type_free(&(fd->etype));
 
 	ADIOI_Datatype_iscontig(fd->filetype, &filetype_is_contig);
-	if (!filetype_is_contig) ADIOI_Delete_flattened(fd->filetype);
 
 	MPI_Type_get_envelope(fd->filetype, &i, &j, &k, &combiner);
 	if (combiner != MPI_COMBINER_NAMED) MPI_Type_free(&(fd->filetype));
@@ -49,10 +48,8 @@ void ADIO_Set_view(ADIO_File fd, ADIO_Offset disp, MPI_Datatype etype,
 	    MPI_Type_contiguous(1, filetype, &copy_filetype);
 	    MPI_Type_commit(&copy_filetype);
 	    fd->filetype = copy_filetype;
-	    ADIOI_Flatten_datatype(fd->filetype);
-            /* this function will not flatten the filetype if it turns out
-               to be all contiguous. */
 	}
+	ADIOI_Flatten_datatype(fd->filetype);
 
 	MPI_Type_size_x(fd->etype, &(fd->etype_size));
 	fd->disp = disp;
@@ -63,9 +60,7 @@ void ADIO_Set_view(ADIO_File fd, ADIO_Offset disp, MPI_Datatype etype,
         ADIOI_Datatype_iscontig(fd->filetype, &filetype_is_contig);
 	if (filetype_is_contig) fd->fp_ind = disp;
 	else {
-	    flat_file = ADIOI_Flatlist;
-	    while (flat_file->type != fd->filetype) 
-		flat_file = flat_file->next;
+	    flat_file = ADIOI_Flatten_and_find(fd->filetype);
 	    for (i=0; i<flat_file->count; i++) {
 		if (flat_file->blocklens[i]) {
 		    fd->fp_ind = disp + flat_file->indices[i];

@@ -141,7 +141,7 @@ void ADIOI_NOLOCK_WriteStrided(ADIO_File fd, const void *buf, int count,
 				    flat_buf->blocklens[i]);
 #endif
         ADIOI_Assert(flat_buf->blocklens[i] == (unsigned)flat_buf->blocklens[i]);
-        ADIOI_Assert((((ADIO_Offset)(MPIU_Upint)buf) + (ADIO_Offset)j*(ADIO_Offset)buftype_extent + flat_buf->indices[i]) == (ADIO_Offset)((MPIU_Upint)buf + (ADIO_Offset)j*(ADIO_Offset)buftype_extent + flat_buf->indices[i]));
+        ADIOI_Assert((((ADIO_Offset)(uintptr_t)buf) + (ADIO_Offset)j*(ADIO_Offset)buftype_extent + flat_buf->indices[i]) == (ADIO_Offset)((uintptr_t)buf + (ADIO_Offset)j*(ADIO_Offset)buftype_extent + flat_buf->indices[i]));
 #ifdef ADIOI_MPE_LOGGING
 		    MPE_Log_event( ADIOI_MPE_write_a, 0, NULL );
 #endif
@@ -204,10 +204,8 @@ void ADIOI_NOLOCK_WriteStrided(ADIO_File fd, const void *buf, int count,
 
 /* find starting location in the file */
 
-/* filetype already flattened in ADIO_Open */
-	flat_file = ADIOI_Flatlist;
-	while (flat_file->type != fd->filetype) flat_file = flat_file->next;
-        disp = fd->disp;
+	flat_file = ADIOI_Flatten_and_find(fd->filetype);
+	disp = fd->disp;
 
 	if (file_ptr_type == ADIO_INDIVIDUAL) {
 	    offset = fd->fp_ind; /* in bytes */
@@ -402,5 +400,4 @@ void ADIOI_NOLOCK_WriteStrided(ADIO_File fd, const void *buf, int count,
    keep track of how much data was actually written by ADIOI_BUFFERED_WRITE. */
 #endif
 
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 }

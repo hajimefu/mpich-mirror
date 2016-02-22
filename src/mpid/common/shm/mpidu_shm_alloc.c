@@ -202,9 +202,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
         MPIU_CHKPMEM_MALLOC(addr, char *, segment_len + MPIDU_SHM_CACHE_LINE_LEN, mpi_errno, "segment");
 
         memory->base_addr = addr;
-        current_addr =
-            (char *) (((MPIU_Upint) addr + (MPIU_Upint) MPIDU_SHM_CACHE_LINE_LEN - 1) &
-                      (~((MPIU_Upint) MPIDU_SHM_CACHE_LINE_LEN - 1)));
+        current_addr = (char *)(((uintptr_t)addr + (uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1) & (~((uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1)));
         memory->symmetrical = 0;
 
         /* must come before barrier_init since we use OPA in that function */
@@ -300,10 +298,8 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
         MPIU_CHKPMEM_MALLOC(addr, char *, segment_len + MPIDU_SHM_CACHE_LINE_LEN, mpi_errno, "segment");
 
         memory->base_addr = addr;
-        current_addr =
-            (char *) (((MPIU_Upint) addr + (MPIU_Upint) MPIDU_SHM_CACHE_LINE_LEN - 1) &
-                      (~((MPIU_Upint) MPIDU_SHM_CACHE_LINE_LEN - 1)));
-        memory->symmetrical = 0;
+        current_addr = (char *)(((uintptr_t)addr + (uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1) & (~((uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1)));
+        memory->symmetrical = 0 ;
 
         /* we still need to call barrier */
 	pmi_errno = PMI_Barrier();

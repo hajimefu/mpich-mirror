@@ -79,8 +79,7 @@ void ADIOI_PVFS2_OldWriteStrided(ADIO_File fd, const void *buf, int count,
      * lines down below).  We added a workaround, but common HDF5 file types
      * are actually contiguous and do not need the expensive workarond */
     if (!filetype_is_contig) {
-	flat_file = ADIOI_Flatlist;
-	while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+	flat_file = ADIOI_Flatten_and_find(fd->filetype);
 	if (flat_file->count == 1 && !buftype_is_contig)
 	    filetype_is_contig = 1;
     }
@@ -230,7 +229,6 @@ void ADIOI_PVFS2_OldWriteStrided(ADIO_File fd, const void *buf, int count,
    keep track of how much data was actually written by ADIOI_BUFFERED_WRITE. */
 #endif
 
-	ADIOI_Delete_flattened(datatype);
 	return;
     } /* if (!buftype_is_contig && filetype_is_contig) */
 
@@ -238,8 +236,7 @@ void ADIOI_PVFS2_OldWriteStrided(ADIO_File fd, const void *buf, int count,
     /* noncontiguous in file */
 
 /* filetype already flattened in ADIO_Open */
-    flat_file = ADIOI_Flatlist;
-    while (flat_file->type != fd->filetype) flat_file = flat_file->next;
+    flat_flie = ADIOI_Flatten_and_find(fd->filetype);
 
     disp = fd->disp;
     initial_off = offset;
@@ -692,7 +689,6 @@ void ADIOI_PVFS2_OldWriteStrided(ADIO_File fd, const void *buf, int count,
 		( (mem_list_count == MAX_ARRAY_SIZE) &&
 		    (new_buffer_write < flat_file->blocklens[0])) )
 	{
-	    ADIOI_Delete_flattened(datatype);
 	    ADIOI_GEN_WriteStrided_naive(fd, buf, count, datatype,
 		    file_ptr_type, initial_off, status, error_code);
 	    return;
@@ -959,5 +955,4 @@ error_state:
    keep track of how much data was actually written by ADIOI_BUFFERED_WRITE. */
 #endif
 
-    if (!buftype_is_contig) ADIOI_Delete_flattened(datatype);
 }

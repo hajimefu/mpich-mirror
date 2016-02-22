@@ -48,7 +48,8 @@ static HYD_status get_current_exec(struct HYD_exec **exec)
 static void help_help_fn(void)
 {
     printf("\n");
-    printf("Usage: ./mpiexec [global opts] [local opts for exec1] [exec1] [exec1 args] : [local opts for exec2] [exec2] [exec2 args] : ...\n\n");
+    printf
+        ("Usage: ./mpiexec [global opts] [local opts for exec1] [exec1] [exec1 args] : [local opts for exec2] [exec2] [exec2 args] : ...\n\n");
 
     printf("Global options (passed to all executables):\n");
 
@@ -194,29 +195,29 @@ static HYD_status genv_fn(char *arg, char ***argv)
     HYDU_ERR_POP(status, "string break returned error\n");
     (*argv)++;
 
-    env_name = HYDU_strdup(str[0]);
+    env_name = MPL_strdup(str[0]);
     if (str[1] == NULL) {       /* The environment is not of the form x=foo */
         if (**argv == NULL) {
             status = HYD_INTERNAL_ERROR;
             goto fn_fail;
         }
-        env_value = HYDU_strdup(**argv);
+        env_value = MPL_strdup(**argv);
         (*argv)++;
     }
     else {
-        env_value = HYDU_strdup(str[1]);
+        env_value = MPL_strdup(str[1]);
     }
 
     HYDU_append_env_to_list(env_name, env_value, &HYD_server_info.user_global.global_env.user);
 
     if (str[0])
-        HYDU_FREE(str[0]);
+        MPL_free(str[0]);
     if (str[1])
-        HYDU_FREE(str[1]);
+        MPL_free(str[1]);
     if (env_name)
-        HYDU_FREE(env_name);
+        MPL_free(env_name);
     if (env_value)
-        HYDU_FREE(env_value);
+        MPL_free(env_value);
 
   fn_exit:
     return status;
@@ -249,7 +250,7 @@ static HYD_status genvlist_fn(char *arg, char ***argv)
                         HYD_INTERNAL_ERROR, "duplicate environment setting\n");
 
     len = strlen("list:") + strlen(**argv) + 1;
-    HYDU_MALLOC(HYD_server_info.user_global.global_env.prop, char *, len, status);
+    HYDU_MALLOC_OR_JUMP(HYD_server_info.user_global.global_env.prop, char *, len, status);
     MPL_snprintf(HYD_server_info.user_global.global_env.prop, len, "list:%s", **argv);
 
   fn_exit:
@@ -359,7 +360,7 @@ static void hostlist_help_fn(void)
 
 static HYD_status hostlist_fn(char *arg, char ***argv)
 {
-    char *hostlist[HYD_NUM_TMP_STRINGS+1]; /* +1 for null termination of list */
+    char *hostlist[HYD_NUM_TMP_STRINGS + 1];    /* +1 for null termination of list */
     int count = 0;
     HYD_status status = HYD_SUCCESS;
 
@@ -608,7 +609,7 @@ static HYD_status config_fn(char *arg, char ***argv)
     HYD_status status = HYD_SUCCESS;
 
     HYDU_ASSERT(!config_file, status);
-    config_file = HYDU_strdup(**argv);
+    config_file = MPL_strdup(**argv);
     (*argv)++;
 
   fn_exit:
@@ -638,17 +639,17 @@ static HYD_status env_fn(char *arg, char ***argv)
     HYDU_ERR_POP(status, "string break returned error\n");
     (*argv)++;
 
-    env_name = HYDU_strdup(str[0]);
+    env_name = MPL_strdup(str[0]);
     if (str[1] == NULL) {       /* The environment is not of the form x=foo */
         if (**argv == NULL) {
             status = HYD_INTERNAL_ERROR;
             goto fn_fail;
         }
-        env_value = HYDU_strdup(**argv);
+        env_value = MPL_strdup(**argv);
         (*argv)++;
     }
     else {
-        env_value = HYDU_strdup(str[1]);
+        env_value = MPL_strdup(str[1]);
     }
 
     status = get_current_exec(&exec);
@@ -657,13 +658,13 @@ static HYD_status env_fn(char *arg, char ***argv)
     HYDU_append_env_to_list(env_name, env_value, &exec->user_env);
 
     if (str[0])
-        HYDU_FREE(str[0]);
+        MPL_free(str[0]);
     if (str[1])
-        HYDU_FREE(str[1]);
+        MPL_free(str[1]);
     if (env_name)
-        HYDU_FREE(env_name);
+        MPL_free(env_name);
     if (env_value)
-        HYDU_FREE(env_value);
+        MPL_free(env_value);
 
   fn_exit:
     return status;
@@ -695,7 +696,7 @@ static HYD_status envlist_fn(char *arg, char ***argv)
                         "duplicate environment setting\n");
 
     len = strlen("list:") + strlen(**argv) + 1;
-    HYDU_MALLOC(exec->env_prop, char *, len, status);
+    HYDU_MALLOC_OR_JUMP(exec->env_prop, char *, len, status);
     MPL_snprintf(exec->env_prop, len, "list:%s", **argv);
     (*argv)++;
 
@@ -1472,7 +1473,7 @@ static HYD_status set_default_values(void)
 
     if (HYD_server_info.user_global.ckpoint_prefix == NULL) {
         if (MPL_env2str("HYDRA_CKPOINT_PREFIX", (const char **) &tmp) != 0)
-            HYD_server_info.user_global.ckpoint_prefix = HYDU_strdup(tmp);
+            HYD_server_info.user_global.ckpoint_prefix = MPL_strdup(tmp);
         tmp = NULL;
     }
 
@@ -1504,7 +1505,7 @@ static HYD_status set_default_values(void)
     /* don't clobber existing iface values from the command line */
     if (HYD_server_info.user_global.iface == NULL) {
         if (MPL_env2str("HYDRA_IFACE", (const char **) &tmp) != 0)
-            HYD_server_info.user_global.iface = HYDU_strdup(tmp);
+            HYD_server_info.user_global.iface = MPL_strdup(tmp);
         tmp = NULL;
     }
 
@@ -1517,7 +1518,7 @@ static HYD_status set_default_values(void)
     if (HYD_server_info.user_global.global_env.prop == NULL &&
         MPL_env2str("HYDRA_ENV", (const char **) &tmp))
         HYD_server_info.user_global.global_env.prop =
-            !strcmp(tmp, "all") ? HYDU_strdup("all") : HYDU_strdup("none");
+            !strcmp(tmp, "all") ? MPL_strdup("all") : MPL_strdup("none");
 
     if (HYD_server_info.user_global.auto_cleanup == -1)
         HYD_server_info.user_global.auto_cleanup = 1;
@@ -1550,7 +1551,7 @@ static HYD_status set_default_values(void)
     /* If hostname propagation is requested (or not set), set the
      * environment variable for doing that */
     if (hostname_propagation || hostname_propagation == -1)
-        HYD_server_info.iface_ip_env_name = HYDU_strdup("MPIR_CVAR_CH3_INTERFACE_HOSTNAME");
+        HYD_server_info.iface_ip_env_name = MPL_strdup("MPIR_CVAR_CH3_INTERFACE_HOSTNAME");
 
     /* Default universe size if the user did not specify anything is
      * INFINITE */
@@ -1572,10 +1573,10 @@ static HYD_status process_config_token(char *token, int newline, struct HYD_node
         /* If this is a newline, but not the first one, and the
          * previous token was not a ":", add an executable delimiter
          * ':' */
-        config_argv[idx++] = HYDU_strdup(":");
+        config_argv[idx++] = MPL_strdup(":");
     }
 
-    config_argv[idx++] = HYDU_strdup(token);
+    config_argv[idx++] = MPL_strdup(token);
     config_argv[idx] = NULL;
 
     return HYD_SUCCESS;
@@ -1615,7 +1616,7 @@ static HYD_status parse_args(char **t_argv)
             i = 0;
             while (exec->exec[i] != NULL)
                 i++;
-            exec->exec[i] = HYDU_strdup(*argv);
+            exec->exec[i] = MPL_strdup(*argv);
             exec->exec[i + 1] = NULL;
         } while (++argv && *argv);
     } while (1);
@@ -1654,7 +1655,7 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
             ret = open(env_file, O_RDONLY);
             if (ret >= 0) {
                 close(ret);
-                config_file = HYDU_strdup(env_file);
+                config_file = MPL_strdup(env_file);
                 goto config_file_check_exit;
             }
         }
@@ -1664,12 +1665,12 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
         if (ret) {
             len = strlen(home) + strlen("/.mpiexec.hydra.conf") + 1;
 
-            HYDU_MALLOC(conf_file, char *, len, status);
+            HYDU_MALLOC_OR_JUMP(conf_file, char *, len, status);
             MPL_snprintf(conf_file, len, "%s/.mpiexec.hydra.conf", home);
 
             ret = open(conf_file, O_RDONLY);
             if (ret < 0) {
-                HYDU_FREE(conf_file);
+                MPL_free(conf_file);
             }
             else {
                 close(ret);
@@ -1679,10 +1680,10 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
         }
 
         /* Check if there's a config file in the hard-coded location */
-        conf_file = HYDU_strdup(HYDRA_CONF_FILE);
+        conf_file = MPL_strdup(HYDRA_CONF_FILE);
         ret = open(conf_file, O_RDONLY);
         if (ret < 0) {
-            HYDU_FREE(conf_file);
+            MPL_free(conf_file);
         }
         else {
             close(ret);
@@ -1694,7 +1695,7 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
   config_file_check_exit:
     if (config_file) {
         HYDU_ASSERT(config_argv == NULL, status);
-        HYDU_MALLOC(config_argv, char **, HYD_NUM_TMP_STRINGS * sizeof(char *), status);
+        HYDU_MALLOC_OR_JUMP(config_argv, char **, HYD_NUM_TMP_STRINGS * sizeof(char *), status);
 
         status = HYDU_parse_hostfile(config_file, NULL, process_config_token);
         HYDU_ERR_POP(status, "error parsing config file\n");
@@ -1704,12 +1705,12 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
         HYDU_ERR_POP(status, "error parsing config args\n");
         reading_config_file = 0;
 
-        HYDU_FREE(config_file);
+        MPL_free(config_file);
     }
 
     /* Get the base path */
     /* Find the last '/' in the executable name */
-    post = HYDU_strdup(progname);
+    post = MPL_strdup(progname);
     loc = strrchr(post, '/');
     if (!loc) { /* If there is no path */
         HYD_server_info.base_path = NULL;
@@ -1722,18 +1723,18 @@ HYD_status HYD_uii_mpx_get_parameters(char **t_argv)
         /* Check if its absolute or relative */
         if (post[0] != '/') {   /* relative */
             tmp[0] = HYDU_getcwd();
-            tmp[1] = HYDU_strdup("/");
-            tmp[2] = HYDU_strdup(post);
+            tmp[1] = MPL_strdup("/");
+            tmp[2] = MPL_strdup(post);
             tmp[3] = NULL;
             status = HYDU_str_alloc_and_join(tmp, &HYD_server_info.base_path);
             HYDU_ERR_POP(status, "unable to join strings\n");
             HYDU_free_strlist(tmp);
         }
         else {  /* absolute */
-            HYD_server_info.base_path = HYDU_strdup(post);
+            HYD_server_info.base_path = MPL_strdup(post);
         }
     }
-    HYDU_FREE(post);
+    MPL_free(post);
 
     status = set_default_values();
     HYDU_ERR_POP(status, "setting default values failed\n");

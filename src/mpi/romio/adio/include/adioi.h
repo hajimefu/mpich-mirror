@@ -124,7 +124,9 @@ typedef struct ADIOI_Fl_node {
      * (-1 indicates "not explicitly set") */
     ADIO_Offset lb_idx;
     ADIO_Offset ub_idx;
-    struct ADIOI_Fl_node *next;  /* pointer to next node */
+    int refct;                   /* when storing flattened representation on a
+				    type, attribute copy and delete routines
+				    will manage refct */
 } ADIOI_Flatlist_node;
 
 #ifdef ROMIO_PVFS2
@@ -345,10 +347,15 @@ typedef struct {
 /* prototypes for ADIO internal functions */
 
 void ADIOI_SetFunctions(ADIO_File fd);
-void ADIOI_Flatten_datatype(MPI_Datatype type);
+ADIOI_Flatlist_node * ADIOI_Flatten_datatype(MPI_Datatype type);
 void ADIOI_Flatten(MPI_Datatype type, ADIOI_Flatlist_node *flat,
 		  ADIO_Offset st_offset, MPI_Count *curr_index);
-void ADIOI_Delete_flattened(MPI_Datatype datatype);
+/* callbakcs for attribute-style flattened tracking */
+int ADIOI_Flattened_type_copy(MPI_Datatype oldtype,
+	int type_keyval, void *extra_state, void *attribute_val_in,
+	void *attribute_val_out, int *flag);
+int ADIOI_Flattened_type_delete(MPI_Datatype datatype,
+	int type_keyval, void *attribute_val, void *extra_state);
 ADIOI_Flatlist_node * ADIOI_Flatten_and_find(MPI_Datatype);
 MPI_Count ADIOI_Count_contiguous_blocks(MPI_Datatype type, MPI_Count *curr_index);
 void ADIOI_Complete_async(int *error_code);
@@ -938,6 +945,9 @@ char *ADIOI_Strdup( const char * );
 #define ADIOI_Info_delete(info_,key_str_) \
     MPI_Info_delete((info_),((char*)key_str_))
 
+/* the I/O related support for MPI_Comm_split_type */
+int MPIR_Comm_split_filesystem(MPI_Comm comm, int key,
+	const char *dirname, MPI_Comm * newcomm);
 
 /* Define attribute as empty if it has no definition */
 #ifndef ATTRIBUTE
@@ -1004,7 +1014,7 @@ int  ADIOI_MPE_iwrite_b;
          MPIU_AINT_CAST_TO_VOID_PTR from configure (mpi.h) */
   #include "glue_romio.h"
 
-  #define ADIOI_AINT_CAST_TO_VOID_PTR (void*)(MPIU_Pint)
+  #define ADIOI_AINT_CAST_TO_VOID_PTR (void*)(intptr_t)
   /* The next two casts are only used when you don't want sign extension
      when casting a (possible 4 byte) aint to a (8 byte) long long or offset */
   #define ADIOI_AINT_CAST_TO_LONG_LONG (long long)
@@ -1019,7 +1029,6 @@ int  ADIOI_MPE_iwrite_b;
   #define ADIOI_AINT_CAST_TO_OFFSET ADIOI_AINT_CAST_TO_LONG_LONG
   #define ADIOI_ENSURE_AINT_FITS_IN_PTR(aint_value) 
   #define ADIOI_Assert assert
-  #define MPIU_Upint unsigned long
 #endif
 
 #ifdef MPL_USE_DBG_LOGGING    /*todo fix dependency on mpich?*/

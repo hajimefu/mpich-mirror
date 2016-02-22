@@ -8,7 +8,7 @@
 #include "mpiinfo.h"
 #include "mpidrma.h"
 
-MPIR_T_PVAR_DOUBLE_TIMER_DECL_EXTERN(RMA, rma_wincreate_allgather);
+extern MPIR_T_pvar_timer_t PVAR_TIMER_rma_wincreate_allgather ATTRIBUTE((unused));
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_Win_fns_init
@@ -256,6 +256,7 @@ int MPIDI_CH3U_Win_allocate_no_shm(MPI_Aint size, int disp_unit, MPID_Info * inf
 
     if (size > 0) {
         MPIU_CHKPMEM_MALLOC(*base_pp, void *, size, mpi_errno, "(*win_ptr)->base");
+        MPL_VG_MEM_INIT(*base_pp, size);
     }
     else if (size == 0) {
         *base_pp = NULL;

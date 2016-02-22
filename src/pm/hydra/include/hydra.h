@@ -141,14 +141,14 @@ extern char *HYD_dbg_prefix;
         printf("\n");                                    \
     }
 
-#define HYD_CONVERT_FALSE_TO_NULL(x) \
+#define HYD_CONVERT_FALSE_TO_NULL(x)                                    \
     {                                                                   \
         if (!(x)) {                                                     \
         }                                                               \
         else if (!strcasecmp((x), "none") || !strcasecmp((x), "no") ||  \
                  !strcasecmp((x), "dummy") || !strcasecmp((x), "null") || \
                  !strcasecmp((x), "nil") || !strcasecmp((x), "false")) { \
-            HYDU_FREE((x));                                             \
+            MPL_free((x));                                              \
             (x) = NULL;                                                 \
         }                                                               \
     }
@@ -158,7 +158,7 @@ extern char **environ;
 #endif /* MANUAL_EXTERN_ENVIRON */
 
 #if defined NEEDS_HSTRERROR_DECL
-const char * hstrerror(int err);
+const char *hstrerror(int err);
 #endif /* NEEDS_HSTRERROR_DECL */
 
 #if defined NEEDS_GETTIMEOFDAY_DECL
@@ -193,9 +193,9 @@ struct HYD_string_stash {
 #define HYD_STRING_STASH(stash, str, status)                            \
     do {                                                                \
         if ((stash).cur_count >= (stash).max_count - 1) {               \
-            HYDU_REALLOC((stash).strlist, char **,                      \
-                         ((stash).max_count + HYD_NUM_TMP_STRINGS) * sizeof(char *), \
-                         (status));                                     \
+            HYDU_REALLOC_OR_JUMP((stash).strlist, char **,              \
+                                 ((stash).max_count + HYD_NUM_TMP_STRINGS) * sizeof(char *), \
+                                 (status));                             \
             (stash).max_count += HYD_NUM_TMP_STRINGS;                   \
         }                                                               \
         (stash).strlist[(stash).cur_count++] = (str);                   \
@@ -205,13 +205,13 @@ struct HYD_string_stash {
 #define HYD_STRING_SPIT(stash, str, status)                             \
     do {                                                                \
         if ((stash).cur_count == 0) {                                   \
-            (str) = HYDU_strdup("");                                    \
+            (str) = MPL_strdup("");                                     \
         }                                                               \
         else {                                                          \
             (status) = HYDU_str_alloc_and_join((stash).strlist, &(str)); \
             HYDU_ERR_POP((status), "unable to join strings\n");         \
             HYDU_free_strlist((stash).strlist);                         \
-            HYDU_FREE((stash).strlist);                                 \
+            MPL_free((stash).strlist);                                  \
             HYD_STRING_STASH_INIT((stash));                             \
         }                                                               \
     } while (0)
@@ -221,7 +221,7 @@ struct HYD_string_stash {
         if ((stash).strlist == NULL)            \
             break;                              \
         HYDU_free_strlist((stash).strlist);     \
-        HYDU_FREE((stash).strlist);             \
+        MPL_free((stash).strlist);              \
         (stash).max_count = 0;                  \
         (stash).cur_count = 0;                  \
     } while (0)
@@ -441,26 +441,26 @@ struct HYD_user_global {
         HYDU_dump_noprefix(stderr, __VA_ARGS__);                        \
     }
 #elif defined __FILE__
-#define HYDU_error_printf(...)                            \
-    {                                                     \
+#define HYDU_error_printf(...)                                          \
+    {                                                                   \
         HYDU_dump_prefix(stderr);                                       \
         HYDU_dump_noprefix(stderr, "%s (%d): ", __FILE__, __LINE__);    \
         HYDU_dump_noprefix(stderr, __VA_ARGS__);                        \
     }
 #else
-#define HYDU_error_printf(...)                                          \
-    {                                                                   \
-        HYDU_dump_prefix(stderr);                                       \
-        HYDU_dump_noprefix(stderr, __VA_ARGS__);                        \
+#define HYDU_error_printf(...)                          \
+    {                                                   \
+        HYDU_dump_prefix(stderr);                       \
+        HYDU_dump_noprefix(stderr, __VA_ARGS__);        \
     }
 #endif
 
-#define HYDU_ASSERT(x, status)                                          \
-    {                                                                   \
-        if (!(x)) {                                                     \
-            HYDU_ERR_SETANDJUMP(status, HYD_INTERNAL_ERROR,             \
-                                 "assert (%s) failed\n", #x);           \
-        }                                                               \
+#define HYDU_ASSERT(x, status)                                  \
+    {                                                           \
+        if (!(x)) {                                             \
+            HYDU_ERR_SETANDJUMP(status, HYD_INTERNAL_ERROR,     \
+                                "assert (%s) failed\n", #x);    \
+        }                                                       \
     }
 
 #define HYDU_IGNORE_TIMEOUT(status)             \
@@ -469,27 +469,27 @@ struct HYD_user_global {
             (status) = HYD_SUCCESS;             \
     }
 
-#define HYDU_ERR_POP(status, ...)                                       \
-    {                                                                   \
-        if (status && !HYD_SILENT_ERROR(status)) {                      \
-            HYDU_error_printf(__VA_ARGS__);                             \
-            goto fn_fail;                                               \
-        }                                                               \
-        else if (HYD_SILENT_ERROR(status)) {                            \
-            goto fn_exit;                                               \
-        }                                                               \
+#define HYDU_ERR_POP(status, ...)                       \
+    {                                                   \
+        if (status && !HYD_SILENT_ERROR(status)) {      \
+            HYDU_error_printf(__VA_ARGS__);             \
+            goto fn_fail;                               \
+        }                                               \
+        else if (HYD_SILENT_ERROR(status)) {            \
+            goto fn_exit;                               \
+        }                                               \
     }
 
-#define HYDU_ERR_SETANDJUMP(status, error, ...)                         \
-    {                                                                   \
-        status = error;                                                 \
-        HYDU_ERR_POP(status, __VA_ARGS__);                              \
+#define HYDU_ERR_SETANDJUMP(status, error, ...) \
+    {                                           \
+        status = error;                         \
+        HYDU_ERR_POP(status, __VA_ARGS__);      \
     }
 
-#define HYDU_ERR_CHKANDJUMP(status, chk, error, ...)                    \
-    {                                                                   \
-        if ((chk))                                                      \
-            HYDU_ERR_SETANDJUMP(status, error, __VA_ARGS__);            \
+#define HYDU_ERR_CHKANDJUMP(status, chk, error, ...)            \
+    {                                                           \
+        if ((chk))                                              \
+            HYDU_ERR_SETANDJUMP(status, error, __VA_ARGS__);    \
     }
 
 #if defined ENABLE_WARNINGS
@@ -612,59 +612,25 @@ HYD_status HYDU_sock_cloexec(int fd);
 /* Memory utilities */
 #include <ctype.h>
 
-#if defined USE_MEMORY_TRACING
-
-#define HYDU_mem_init()  MPL_trinit(0,0)
-
-#define HYDU_strdup(a) MPL_trstrdup(a,__LINE__,__FILE__)
-#ifdef strdup
-#undef strdup
-#endif
-#define strdup(a)      'Error use HYDU_strdup' :::
-
-#define HYDU_malloc(a) MPL_trmalloc((unsigned)(a),__LINE__,__FILE__)
-#define malloc(a)      'Error use HYDU_malloc' :::
-
-#define HYDU_realloc(a,b) MPL_trrealloc((void *)(a),(unsigned)(b),__LINE__,__FILE__)
-#define realloc(a)      'Error use HYDU_realloc' :::
-
-#define HYDU_free(a) MPL_trfree(a,__LINE__,__FILE__)
-#define free(a)      'Error use HYDU_free' :::
-
-#else /* if !defined USE_MEMORY_TRACING */
-
-#define HYDU_mem_init()
-#define HYDU_strdup MPL_strdup
-#define HYDU_malloc malloc
-#define HYDU_realloc realloc
-#define HYDU_free free
-
-#endif /* USE_MEMORY_TRACING */
-
-#define HYDU_MALLOC(p, type, size, status)                              \
+#define HYDU_MALLOC_OR_JUMP(p, type, size, status)                      \
     {                                                                   \
         (p) = NULL; /* initialize p in case assert fails */             \
         HYDU_ASSERT(size, status);                                      \
-        (p) = (type) HYDU_malloc((size));                               \
+        (p) = (type) MPL_malloc((size));                                \
         if ((p) == NULL)                                                \
             HYDU_ERR_SETANDJUMP((status), HYD_NO_MEM,                   \
                                 "failed to allocate %d bytes\n",        \
                                 (int) (size));                          \
     }
 
-#define HYDU_REALLOC(p, type, size, status)                             \
+#define HYDU_REALLOC_OR_JUMP(p, type, size, status)                     \
     {                                                                   \
         HYDU_ASSERT(size, status);                                      \
-        (p) = (type) HYDU_realloc((p),(size));                          \
+        (p) = (type) MPL_realloc((p),(size));                           \
         if ((p) == NULL)                                                \
             HYDU_ERR_SETANDJUMP((status), HYD_NO_MEM,                   \
                                 "failed to allocate %d bytes\n",        \
                                 (int) (size));                          \
-    }
-
-#define HYDU_FREE(p)                            \
-    {                                           \
-        HYDU_free((void *) p);                  \
     }
 
 HYD_status HYDU_list_append_strlist(char **exec, char **client_arg);
@@ -676,12 +642,6 @@ HYD_status HYDU_strdup_list(char *src[], char **dest[]);
 char *HYDU_size_t_to_str(size_t x);
 char *HYDU_int_to_str(int x);
 char *HYDU_int_to_str_pad(int x, int maxlen);
-
-#if defined HAVE_STRERROR
-#define HYDU_strerror strerror
-#else
-#define HYDU_strerror HYDU_int_to_str
-#endif /* HAVE_STRERROR */
 
 #if defined HAVE_HERROR
 #define HYDU_herror herror
