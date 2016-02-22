@@ -784,7 +784,7 @@ static inline int MPIDI_CH4R_win_allocate_shared(MPI_Aint size,
                                                  MPID_Comm *comm_ptr,
                                                  void **base_ptr, MPID_Win **win_ptr)
 {
-    int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
+    int            i = 0, fd = -1, rc, first = 0, mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP      = NULL;
     MPIDI_CH4R_win_info_t *winfo      = NULL;
@@ -930,7 +930,7 @@ fn_zero:
     *(void **) base_ptr = (void *) win->base;
     mpi_errno = MPIR_Barrier_impl(comm_ptr, &errflag);
 
-    close(fd);
+    if(fd >= 0) close(fd);
 
     if(first) shm_unlink(shm_key);
 
