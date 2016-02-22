@@ -404,7 +404,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_lmt_ack(MPIDI_CH4_NMI_OFI_Am_header_t
 
     index = fi_mr_key(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr)) >> MPIDI_Global.huge_rma_shift;
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(MPIR_Process.comm_world).rma_id_allocator, index);
-    MPIDI_CH4_NMI_OFI_CALL(fi_close(&MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr)->fid), mr_unreg);
+    MPIDI_CH4_NMI_OFI_CALL_NOLOCK(fi_close(&MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr)->fid), mr_unreg);
 
     if(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer) {
         MPL_free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
