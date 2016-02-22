@@ -166,8 +166,6 @@ static inline void MPIDI_CH4_NMI_OFI_Win_datatype_map(MPIDI_CH4_NMI_OFI_Win_data
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_DATATYPE_MAP);
 }
 
-
-
 __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_put_get(int                 origin_count,
                                                                      int                 target_count,
                                                                      int                 target_rank,
@@ -175,7 +173,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_put_get(int        
                                                                      MPI_Datatype        target_datatype,
                                                                      MPIDI_CH4_NMI_OFI_Win_request_t **winreq,
                                                                      uint64_t           *flags,
-                                                                     struct fid_ep **ep,
+                                                                     struct fid_ep     **ep,
                                                                      MPID_Request      **sigreq)
 {
     int   mpi_errno = MPI_SUCCESS;
@@ -184,11 +182,11 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_put_get(int        
 
     o_size=sizeof(struct iovec);
     t_size=sizeof(struct fi_rma_iov);
-    MPIDI_CH4_NMI_OFI_Am_win_request_alloc_and_init(req,1,o_size+t_size);
+    req = MPIDI_CH4_NMI_OFI_Win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size));
     *winreq = req;
 
     req->noncontig->buf.iov.put_get.originv = (struct iovec *)&req->noncontig->buf.iov_store[0];
-    req->noncontig->buf.iov.put_get.targetv = (struct fi_rma_iov *)&req->noncontig->buf.iov_store[o_size];
+    req->noncontig->buf.iov.put_get.targetv = (struct fi_rma_iov *)&req->noncontig->buf.iov_store[o_size*MPIDI_Global.iov_limit];
     MPIDI_CH4_NMI_OFI_INIT_SIGNAL_REQUEST(sigreq, flags, ep);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(origin_count,
                                          origin_datatype,
@@ -215,7 +213,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_accumulate(int     
                                                                         MPI_Datatype        target_datatype,
                                                                         MPIDI_CH4_NMI_OFI_Win_request_t **winreq,
                                                                         uint64_t           *flags,
-                                                                        struct fid_ep **ep,
+                                                                        struct fid_ep     **ep,
                                                                         MPID_Request      **sigreq)
 {
     int   mpi_errno = MPI_SUCCESS;
@@ -224,11 +222,11 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_accumulate(int     
 
     o_size=sizeof(struct fi_ioc);
     t_size=sizeof(struct fi_rma_ioc);
-    MPIDI_CH4_NMI_OFI_Am_win_request_alloc_and_init(req,1,o_size+t_size);
+    req = MPIDI_CH4_NMI_OFI_Win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size));
     *winreq = req;
 
     req->noncontig->buf.iov.accumulate.originv = (struct fi_ioc *)&req->noncontig->buf.iov_store[0];
-    req->noncontig->buf.iov.accumulate.targetv = (struct fi_rma_ioc *)&req->noncontig->buf.iov_store[o_size];
+    req->noncontig->buf.iov.accumulate.targetv = (struct fi_rma_ioc *)&req->noncontig->buf.iov_store[o_size*MPIDI_Global.iov_limit];
     MPIDI_CH4_NMI_OFI_INIT_SIGNAL_REQUEST(sigreq, flags, ep);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(origin_count,
                                          origin_datatype,
@@ -258,7 +256,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_get_accumulate(int 
                                                                             MPI_Datatype        result_datatype,
                                                                             MPIDI_CH4_NMI_OFI_Win_request_t **winreq,
                                                                             uint64_t           *flags,
-                                                                            struct fid_ep **ep,
+                                                                            struct fid_ep     **ep,
                                                                             MPID_Request      **sigreq)
 {
     int   mpi_errno = MPI_SUCCESS;
@@ -268,12 +266,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_get_accumulate(int 
     o_size=sizeof(struct fi_ioc);
     t_size=sizeof(struct fi_rma_ioc);
     r_size=sizeof(struct fi_ioc);
-    MPIDI_CH4_NMI_OFI_Am_win_request_alloc_and_init(req,1,o_size+t_size+r_size);
+    req = MPIDI_CH4_NMI_OFI_Win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size+r_size));
     *winreq = req;
 
     req->noncontig->buf.iov.get_accumulate.originv = (struct fi_ioc *)&req->noncontig->buf.iov_store[0];
-    req->noncontig->buf.iov.get_accumulate.targetv = (struct fi_rma_ioc *)&req->noncontig->buf.iov_store[o_size];
-    req->noncontig->buf.iov.get_accumulate.resultv = (struct fi_ioc *)&req->noncontig->buf.iov_store[o_size+t_size];
+    req->noncontig->buf.iov.get_accumulate.targetv = (struct fi_rma_ioc *)&req->noncontig->buf.iov_store[o_size*MPIDI_Global.iov_limit];
+    req->noncontig->buf.iov.get_accumulate.resultv = (struct fi_ioc *)&req->noncontig->buf.iov_store[(o_size+t_size)*MPIDI_Global.iov_limit];
     MPIDI_CH4_NMI_OFI_INIT_SIGNAL_REQUEST(sigreq, flags, ep);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(origin_count,origin_datatype,&req->noncontig->origin_dt);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(target_count,target_datatype,&req->noncontig->target_dt);
@@ -353,15 +351,13 @@ static inline int MPIDI_CH4_NMI_OFI_Do_put(const void    *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv   = req->noncontig->buf.iov.put_get.originv;
         targetv   = req->noncontig->buf.iov.put_get.targetv;
-        omax=tmax = 1;
-
+        omax=tmax = MPIDI_Global.iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,originv,
                                               omax,targetv,tmax,&oout,&tout);
 
         if(rc==MPIDI_CH4_NMI_OFI_IOV_DONE) break;
 
         for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
-
         MPIU_Assert(rc != MPIDI_CH4_NMI_OFI_IOV_ERROR);
         msg.msg_iov       = originv;
         msg.iov_count     = oout;
@@ -506,7 +502,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get(void          *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.put_get.originv;
         targetv=req->noncontig->buf.iov.put_get.targetv;
-        omax=tmax=1;
+        omax=tmax=MPIDI_Global.iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,originv,
                                               omax,targetv,tmax,&oout,&tout);
 
@@ -801,7 +797,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
 
     if((req->noncontig->origin_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
-        MPIDI_CH4_NMI_OFI_Win_request_t_complete(req);
+        MPIDI_CH4_NMI_OFI_Win_request_complete(req);
 
         if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
 
@@ -881,7 +877,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.accumulate.originv;
         targetv=req->noncontig->buf.iov.accumulate.targetv;
-        omax=tmax=1;
+        omax=tmax=MPIDI_Global.iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,(struct iovec *)originv,omax,
                                               (struct fi_rma_iov *)targetv,tmax,&oout,&tout);
 
@@ -911,7 +907,7 @@ fn_fail:
     goto fn_exit;
 am_fallback:
     /* Fall back to active message */
-    MPIDI_CH4_NMI_OFI_Win_request_t_complete(req);
+    MPIDI_CH4_NMI_OFI_Win_request_complete(req);
     return MPIDI_CH4R_accumulate(origin_addr, origin_count, origin_datatype,
                                  target_rank, target_disp,
                                  target_count, target_datatype,
@@ -966,7 +962,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
 
     if((req->noncontig->result_dt.size == 0) ||
        (target_rank == MPI_PROC_NULL)) {
-        MPIDI_CH4_NMI_OFI_Win_request_t_complete(req);
+        MPIDI_CH4_NMI_OFI_Win_request_complete(req);
 
         if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
 
@@ -1063,7 +1059,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
         originv        = req->noncontig->buf.iov.get_accumulate.originv;
         targetv        = req->noncontig->buf.iov.get_accumulate.targetv;
         resultv        = req->noncontig->buf.iov.get_accumulate.resultv;
-        omax=rmax=tmax = 1;
+        omax=rmax=tmax = MPIDI_Global.iov_limit;
 
         if(op != MPI_NO_OP)
             rc = MPIDI_CH4_NMI_OFI_Merge_iov_list2(&req->noncontig->iovs,(struct iovec *)originv,
@@ -1104,7 +1100,7 @@ fn_exit:
 fn_fail:
     goto fn_exit;
 am_fallback:
-    MPIDI_CH4_NMI_OFI_Win_request_t_complete(req);
+    MPIDI_CH4_NMI_OFI_Win_request_complete(req);
     return MPIDI_CH4R_get_accumulate(origin_addr, origin_count, origin_datatype,
                                      result_addr, result_count, result_datatype,
                                      target_rank, target_disp, target_count,

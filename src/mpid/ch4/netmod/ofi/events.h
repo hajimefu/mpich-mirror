@@ -362,7 +362,7 @@ static inline int MPIDI_CH4_NMI_OFI_Rma_done_event(struct fi_cq_tagged_entry *wc
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
 
     MPIDI_CH4_NMI_OFI_Win_request_t *req = (MPIDI_CH4_NMI_OFI_Win_request_t *)in_req;
-    MPIDI_CH4_NMI_OFI_Win_request_t_complete(req);
+    MPIDI_CH4_NMI_OFI_Win_request_complete(req);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_RMA_DONE_EVENT);
     return MPI_SUCCESS;

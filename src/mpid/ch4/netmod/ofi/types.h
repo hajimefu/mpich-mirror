@@ -34,7 +34,7 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS           (8)
 #define MPIDI_CH4_NMI_OFI_AM_BUFF_SZ               (1 * 1024 * 1024)
 #define MPIDI_CH4_NMI_OFI_CACHELINE_SIZE           (64)
-#define MPIDI_CH4_NMI_OFI_IOV_MAX                  1
+#define MPIDI_CH4_NMI_OFI_IOV_MAX                  (32)
 #define MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE            (1024)
 #define MPIDI_CH4_NMI_OFI_BUF_POOL_NUM             (1024)
 #define MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED          (1024)
@@ -435,6 +435,7 @@ typedef struct {
     uintptr_t  result_addr;
     uintptr_t  result_size;
     size_t     buf_limit;
+    size_t     buf_limit_left;
 } MPIDI_CH4_NMI_OFI_Iovec_state_t;
 
 typedef struct {

@@ -15,33 +15,6 @@
 
 static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
 
-#define MPIDI_CH4_NMI_OFI_Am_win_request_complete(req)                 \
-    ({							\
-	int count;					\
-	MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)	\
-		    == MPID_REQUEST);			\
-	MPIU_Object_release_ref(req, &count);		\
-	MPIU_Assert(count >= 0);			\
-	if (count == 0)					\
-	{						\
-	    MPL_free(req->noncontig);			\
-	    MPIDI_CH4_NMI_OFI_Win_request_t_tls_free(req);		\
-	}						\
-    })
-
-#define MPIDI_CH4_NMI_OFI_Am_win_request_alloc_and_init(req,count,extra)       \
-  ({                                                            \
-    MPIDI_CH4_NMI_OFI_Win_request_t_tls_alloc(req);                           \
-    MPIU_Assert(req != NULL);                                   \
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                \
-                == MPID_REQUEST);                               \
-    MPIU_Object_set_ref(req, count);                            \
-    memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,                \
-           sizeof(MPIDI_CH4_NMI_OFI_Win_request_t)-                           \
-           MPIDI_REQUEST_HDR_SIZE);                             \
-    req->noncontig = (MPIDI_CH4_NMI_OFI_Win_noncontig_t*)MPL_calloc(1,(extra)+sizeof(*(req->noncontig))); \
-  })
-
 #define MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(FUNC,STR)					\
 	do {								\
 		ssize_t _ret;                                           \
