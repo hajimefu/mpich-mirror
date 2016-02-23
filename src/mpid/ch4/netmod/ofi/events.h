@@ -109,7 +109,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
         last = count;
         MPID_Segment_unpack(&MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->segment), 0, &last,
                             MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer));
-        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer));
+        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig));
         if(last != (MPI_Aint)count) {
             rreq->status.MPI_ERROR =
                 MPIR_Err_create_code(MPI_SUCCESS,
