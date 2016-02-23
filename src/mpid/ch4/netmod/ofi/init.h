@@ -411,11 +411,20 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
      * tranlating gpids to lpids */
     MPIDI_Global.node_map = (MPID_Node_id_t *)
                             MPL_malloc(comm_world->local_size*sizeof(*MPIDI_Global.node_map));
+
+    /* max_inject_size is temporarily set to 1 inorder to avoid deadlock in
+     * shm initialization since PMI_Barrier does not call progress and flush its injects */
+    MPIDI_Global.max_buffered_send = 1;
+    MPIDI_Global.max_buffered_write = 1;
+
     MPIDI_CH4R_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
                              MPIDI_Global.node_map,
                              &MPIDI_Global.max_node_id);
+
+    MPIDI_Global.max_buffered_send  = prov_use->tx_attr->inject_size;
+    MPIDI_Global.max_buffered_write = prov_use->tx_attr->inject_size;
 
     for(i=0; i<comm_world->local_size; i++)
         MPIDI_CH4_NMI_OFI_COMM(comm_world).vcrt->vcr_table[i].is_local =
