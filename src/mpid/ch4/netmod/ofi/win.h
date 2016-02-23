@@ -711,8 +711,19 @@ static inline int MPIDI_CH4_NM_win_fence(int massert, MPID_Win *win)
 
     MPIDI_CH4R_EPOCH_FENCE_EVENT(win,massert);
 
-    if(!(massert & MPI_MODE_NOPRECEDE))
-        mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
+    /*
+      We always make a barrier even if MPI_MODE_NOPRECEDE is specified.
+      This is necessary because we no longer defer executions of RMA ops
+      until synchronization calls as CH3 did. Otherwise, the code like
+      this won't work correctly (cf. f77/rma/wingetf)
+
+      Rank 0                          Rank 1
+      ----                            ----
+                                      Store to local mem in window
+      MPI_Win_fence(MODE_NOPRECEDE)   MPI_Win_fence(MODE_NOPRECEDE)
+      MPI_Get(from rank 1)
+    */
+    mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FENCE);
