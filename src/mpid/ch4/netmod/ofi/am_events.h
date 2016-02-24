@@ -451,7 +451,7 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Dispatch_lmt_ack
+#define FUNCNAME MPIDI_CH4_NMI_OFI_Dispatch_ack
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Dispatch_ack(int        rank,
