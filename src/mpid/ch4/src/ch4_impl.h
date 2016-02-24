@@ -12,7 +12,6 @@
 #define MPIDCH4_IMPL_H_INCLUDED
 
 #include "ch4_types.h"
-#include "ch4r_buf.h"
 #include <mpidch4.h>
 
 /* Forward declarations used to resolve dependencies in inline builds */
