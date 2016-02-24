@@ -202,7 +202,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
                                             tsend);
         ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
-        MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq));
+        MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq, FALSE));
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
     }
 

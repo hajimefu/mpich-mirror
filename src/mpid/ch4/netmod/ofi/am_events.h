@@ -161,7 +161,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_rdma_read(void                       *dst
                                                 MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, reply_token.data.src_rank,MPIDI_CH4_NMI_OFI_API_TAG),
                                                 src + done,
                                                 MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).rma_key,
-                                                &am_req->context), read);
+                                                &am_req->context), FALSE /* no lock */, read);
         done += curr_len;
         rem -= curr_len;
     }
@@ -476,7 +476,7 @@ static inline int MPIDI_CH4_NMI_OFI_Dispatch_ack(int        rank,
     msg.hdr.src_rank   = comm->rank;
     msg.pyld.sreq_ptr  = sreq_ptr;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_inject(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), &msg, sizeof(msg),
-                                              MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG)), inject);
+                                              MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG)), FALSE /* no lock */, inject);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DISPATCH_ACK);
     return mpi_errno;

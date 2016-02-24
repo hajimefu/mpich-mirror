@@ -30,24 +30,15 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control
     control->win_id      = MPIDI_CH4_NMI_OFI_WIN(win)->win_id;
     control->origin_rank = win->comm_ptr->rank;
 
-    if(use_lock)
-        mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
-                                            win->comm_ptr,
-                                            -1ULL,
-                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
-                                            (void *)control,
-                                            sizeof(*control),NULL,
-                                            FALSE,
-                                            use_comm);
-    else
-        mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
-                                            win->comm_ptr,
-                                            -1ULL,
-                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
-                                            (void *)control,
-                                            sizeof(*control),NULL,
-                                            FALSE,
-                                            use_comm);
+    mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
+                                        win->comm_ptr,
+                                        -1ULL,
+                                        MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+                                        (void *)control,
+                                        sizeof(*control),NULL,
+                                        FALSE,
+                                        use_comm,
+                                        use_lock);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     return mpi_errno;
@@ -62,7 +53,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
                                                     size_t                msgsize,
                                                     int                   rank,
                                                     MPID_Comm            *comm_ptr,
-                                                    MPID_Request         *ackreq)
+                                                    MPID_Request         *ackreq,
+                                                    int                   need_lock)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
@@ -80,7 +72,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
                                         MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                         (void *)control,
                                         sizeof(*control),NULL,
-                                        FALSE,TRUE);
+                                        FALSE,TRUE,need_lock);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
     return mpi_errno;

@@ -249,7 +249,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
             MPIDI_CH4_NMI_OFI_CALL_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
             MPL_free(ptr);
             ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP;
-            MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL));
+            MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL, TRUE));
         }
 
         if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig))
@@ -306,7 +306,8 @@ static inline int MPIDI_CH4_NMI_OFI_Get_huge_event(struct fi_cq_tagged_entry *wc
             hc->done_fn(&hc->wc, hc->localreq);
             ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGEACK;
             MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
-                                                                             hc->comm_ptr,hc->remote_info.ackreq));
+                                                                             hc->comm_ptr,hc->remote_info.ackreq,
+                                                                             FALSE));
             MPL_free(hc);
             goto fn_exit;
         }
