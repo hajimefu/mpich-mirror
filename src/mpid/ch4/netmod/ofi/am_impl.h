@@ -15,27 +15,26 @@
 
 static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
 
-#define MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(FUNC,STR)					\
-	do {								\
-		ssize_t _ret;                                           \
-		do {							\
-			_ret = FUNC;                                    \
-			if(likely(_ret==0)) break;			\
-			MPIR_ERR_##CHKANDJUMP4(_ret != -FI_EAGAIN,	\
-					       mpi_errno,		\
-					       MPI_ERR_OTHER,		\
-					       "**ofi_"#STR,		\
-					       "**ofi_"#STR" %s %d %s %s", \
-					       __SHORT_FILE__,		\
-					       __LINE__,		\
-					       FCNAME,			\
-					       fi_strerror(-_ret));	\
-				mpi_errno = MPIDI_CH4_NMI_OFI_Progress_do_queue(NULL);\
-				if(mpi_errno != MPI_SUCCESS)		\
-					MPIR_ERR_POP(mpi_errno);	\
-		} while (_ret == -FI_EAGAIN);				\
-	} while (0)
-
+#define MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(FUNC,STR)                       \
+    do {                                                                \
+        ssize_t _ret;                                                   \
+        do {                                                            \
+            _ret = FUNC;                                                \
+            if(likely(_ret==0)) break;                                  \
+            MPIR_ERR_##CHKANDJUMP4(_ret != -FI_EAGAIN,                  \
+                                   mpi_errno,                           \
+                                   MPI_ERR_OTHER,                       \
+                                   "**ofi_"#STR,                        \
+                                   "**ofi_"#STR" %s %d %s %s",          \
+                                   __SHORT_FILE__,                      \
+                                   __LINE__,                            \
+                                   FCNAME,                              \
+                                   fi_strerror(-_ret));                 \
+            mpi_errno = MPIDI_CH4_NMI_OFI_Progress_do_queue(NULL);      \
+            if(mpi_errno != MPI_SUCCESS)                                \
+                MPIR_ERR_POP(mpi_errno);                                \
+        } while (_ret == -FI_EAGAIN);                                   \
+    } while (0)
 
 static inline MPID_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int count)
 {
