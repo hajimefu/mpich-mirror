@@ -321,7 +321,9 @@ typedef struct MPIDI_Devcomm_t {
 #define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4r).field
 
 typedef struct {
-    uint32_t pad[4 / 4];
+    union {
+        MPIDI_CH4_NETMOD_DT_DECL
+    }netmod;
 } MPIDI_Devdt_t;
 
 typedef struct {
@@ -342,6 +344,15 @@ typedef struct {
 #define HAVE_DEV_COMM_HOOK
 #define MPID_Dev_comm_create_hook(a)  (MPID_Comm_create(a))
 #define MPID_Dev_comm_destroy_hook(a) (MPID_Comm_destroy(a))
+
+#ifdef HAVE_MPIDI_CH4_NM_Datatype_commit_hook
+#define MPID_Dev_datatype_commit_hook  MPIDI_CH4_NM_Datatype_commit_hook
+#define MPID_Dev_datatype_dup_hook  MPIDI_CH4_NM_Datatype_dup_hook
+#endif
+
+#ifdef HAVE_MPIDI_CH4_NM_Datatype_commit_hook
+#define MPID_Dev_datatype_destroy_hook  MPIDI_CH4_NM_Datatype_destroy_hook
+#endif
 
 #define MPID_USE_NODE_IDS
 typedef uint16_t MPID_Node_id_t;

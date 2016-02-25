@@ -88,7 +88,7 @@ static inline int MPIDI_CH4_NMI_OFI_Query_datatype(MPI_Datatype   dt,
 
     /* OP_NULL is the oddball                          */
     /* todo...change configure to table this correctly */
-    dt_index = MPIDI_CH4_NMI_OFI_DATATYPE(dt_ptr)->index;
+    dt_index = MPIDI_CH4_NMI_OFI_DATATYPE(dt_ptr).index;
 
     if(op == MPI_OP_NULL) op_index = 14;
     else op_index = (0x000000FFU & op) - 1;

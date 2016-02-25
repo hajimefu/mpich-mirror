@@ -110,6 +110,14 @@ MPIDI_CH4_NMI_${net_upper}_Request_t ${net};"
         ch4_netmod_comm_decl="${ch4_netmod_comm_decl} \\
 MPIDI_CH4_NMI_${net_upper}_Comm_t ${net};"
     fi
+    if test -z "$ch4_netmod_dt_decl" ; then
+        ch4_netmod_dt_decl="MPIDI_CH4_NMI_${net_upper}_Dt_t ${net};"
+    else
+        ch4_netmod_dt_decl="${ch4_netmod_dt_decl} \\
+MPIDI_CH4_NMI_${net_upper}_Dt_t ${net};"
+    fi
+
+
 
 net_index=`expr $net_index + 1`
 done
@@ -128,10 +136,12 @@ AC_SUBST(ch4_netmod_pre_include)
 AC_SUBST(ch4_netmod_amrequest_decl)
 AC_SUBST(ch4_netmod_request_decl)
 AC_SUBST(ch4_netmod_comm_decl)
+AC_SUBST(ch4_netmod_dt_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_pre_include)
 AM_SUBST_NOTMAKE(ch4_netmod_amrequest_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_request_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_comm_decl)
+AM_SUBST_NOTMAKE(ch4_netmod_dt_decl)
 
 AC_ARG_ENABLE(ch4-netmod-direct,
     [--enable-ch4-netmod-direct

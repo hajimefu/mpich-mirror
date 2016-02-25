@@ -136,7 +136,6 @@ EXTERN_C_BEGIN
 
 /* Field accessor macros */
 #define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_Gpid_t*)(req)->dev.pad)
-#define MPIDI_CH4_NMI_OFI_DATATYPE(comm)           ((MPIDI_CH4_NMI_OFI_Datatype_t*)(comm)->dev.pad)
 #define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_Offset_checker_t,  pad)
 #define MPIDI_CH4_NMI_OFI_WIN(win)                 ((MPIDI_CH4_NMI_OFI_Win_t*)(win)->dev.pad)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
@@ -144,6 +143,7 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
 
 
+#define MPIDI_CH4_NMI_OFI_DATATYPE(dt)   ((dt)->dev.netmod.ofi)
 #define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS

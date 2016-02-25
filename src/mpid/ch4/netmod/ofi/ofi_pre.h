@@ -182,4 +182,8 @@ typedef struct {
     } util;
 } MPIDI_CH4_NMI_OFI_Request_t;
 
+typedef struct {
+    int index;
+} MPIDI_CH4_NMI_OFI_Dt_t;
+
 #endif

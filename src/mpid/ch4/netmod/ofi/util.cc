@@ -728,7 +728,7 @@ static inline void add_index(MPI_Datatype  datatype,
 {
     MPID_Datatype *dt_ptr;
     MPID_Datatype_get_ptr(datatype, dt_ptr);
-    MPIDI_CH4_NMI_OFI_DATATYPE(dt_ptr)->index=*index;
+    MPIDI_CH4_NMI_OFI_DATATYPE(dt_ptr).index=*index;
     (*index)++;
 }
 
