@@ -109,9 +109,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
         msg.data      = 0;
         msg.addr      = FI_ADDR_UNSPEC;
 
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
         MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_trecvmsg(MPIDI_CH4_NMI_OFI_EP_RX_TAG(0), &msg, flags), trecv);
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
     }
 
 fn_exit:
