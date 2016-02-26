@@ -16,8 +16,8 @@
 
 struct MPID_Request;
 struct MPID_Comm;
-#define HAVE_MPIDI_CH4_NM_Datatype_commit_hook
-#define HAVE_MPIDI_CH4_NM_Datatype_destroy_hook
+#define HAVE_MPIDI_CH4_NM_datatype_commit_hook
+#define HAVE_MPIDI_CH4_NM_datatype_destroy_hook
 typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;

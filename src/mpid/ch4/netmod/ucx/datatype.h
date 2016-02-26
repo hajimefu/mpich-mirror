@@ -96,7 +96,7 @@ static ucp_generic_dt_ops_t MPIDI_CH4_NMI_UCX_datatype_ops = {
 };
 
 
-static inline void MPIDI_CH4_NM_Datatype_destroy_hook(MPID_Datatype *datatype_p){
+static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPID_Datatype *datatype_p){
 
     int in_use;
 
@@ -108,7 +108,7 @@ static inline void MPIDI_CH4_NM_Datatype_destroy_hook(MPID_Datatype *datatype_p)
     }
 
 }
-static inline int MPIDI_CH4_NM_Datatype_commit_hook(MPI_Datatype *datatype_p){
+static inline int MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
     int mpi_errno = MPI_SUCCESS;
     ucp_datatype_t ucp_datatype;
     ucs_status_t status;
@@ -133,9 +133,9 @@ static inline int MPIDI_CH4_NM_Datatype_commit_hook(MPI_Datatype *datatype_p){
  fn_fail:
     goto fn_exit;
 }
-static inline int   MPIDI_CH4_NM_Datatype_dup_hook(MPID_Datatype* datatype_ptr) {
+static inline int   MPIDI_CH4_NM_datatype_dup_hook(MPID_Datatype* datatype_ptr) {
 
-    return  MPIDI_CH4_NM_Datatype_commit_hook(&datatype_ptr->handle);
+    return  MPIDI_CH4_NM_datatype_commit_hook(&datatype_ptr->handle);
 }
 
 #endif /*UCX_DATATYPE_H_INCLUDED*/

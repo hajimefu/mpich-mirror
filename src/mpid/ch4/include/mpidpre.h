@@ -345,13 +345,13 @@ typedef struct {
 #define MPID_Dev_comm_create_hook(a)  (MPID_Comm_create(a))
 #define MPID_Dev_comm_destroy_hook(a) (MPID_Comm_destroy(a))
 
-#ifdef HAVE_MPIDI_CH4_NM_Datatype_commit_hook
-#define MPID_Dev_datatype_commit_hook  MPIDI_CH4_NM_Datatype_commit_hook
-#define MPID_Dev_datatype_dup_hook  MPIDI_CH4_NM_Datatype_dup_hook
+#ifdef HAVE_MPIDI_CH4_NM_datatype_commit_hook
+#define MPID_Dev_datatype_commit_hook  MPIDI_CH4_NM_datatype_commit_hook
+#define MPID_Dev_datatype_dup_hook  MPIDI_CH4_NM_datatype_dup_hook
 #endif
 
-#ifdef HAVE_MPIDI_CH4_NM_Datatype_commit_hook
-#define MPID_Dev_datatype_destroy_hook  MPIDI_CH4_NM_Datatype_destroy_hook
+#ifdef HAVE_MPIDI_CH4_NM_datatype_commit_hook
+#define MPID_Dev_datatype_destroy_hook  MPIDI_CH4_NM_datatype_destroy_hook
 #endif
 
 #define MPID_USE_NODE_IDS
