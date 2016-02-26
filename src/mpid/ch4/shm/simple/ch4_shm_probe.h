@@ -126,7 +126,9 @@ static inline int MPIDI_CH4_SHM_iprobe(int source,
         MPIR_STATUS_SET_COUNT(*status, count);
     } else {
         *flag = 0;
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
         MPIDI_Progress_test();
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     }
 
 fn_exit:
