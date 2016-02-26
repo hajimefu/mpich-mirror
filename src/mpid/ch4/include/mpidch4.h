@@ -90,7 +90,7 @@ MPIDI_CH4I_API(int, Bsend_init, const void *, int, MPI_Datatype, int, int, MPID_
 MPIDI_CH4I_API(int, Rsend_init, const void *, int, MPI_Datatype, int, int, MPID_Comm *, int,
                MPID_Request **);
 MPIDI_CH4I_API(int, Startall, int, MPID_Request *[]);
-MPIDI_CH4I_API(int, GPID_Get, MPID_Comm *, int, MPID_Gpid *);
+MPIDI_CH4I_API(int, GPID_Get, MPID_Comm *, int, MPIR_Gpid *);
 MPIDI_CH4I_API(int, Accumulate, const void *, int, MPI_Datatype, int, MPI_Aint, int, MPI_Datatype,
                MPI_Op, MPID_Win *);
 MPIDI_CH4I_API(int, Win_create, void *, MPI_Aint, int, MPID_Info *, MPID_Comm *, MPID_Win **);
@@ -146,8 +146,8 @@ MPIDI_CH4I_API(int, Get_max_node_id, MPID_Comm *, MPID_Node_id_t *);
 MPIDI_CH4I_API(int, Request_is_pending_failure, MPID_Request *);
 MPIDI_CH4I_API(MPI_Aint, Aint_add, MPI_Aint, MPI_Aint);
 MPIDI_CH4I_API(MPI_Aint, Aint_diff, MPI_Aint, MPI_Aint);
-MPIDI_CH4I_API(int, GPID_GetAllInComm, MPID_Comm *, int, MPID_Gpid[], int *);
-MPIDI_CH4I_API(int, GPID_ToLpidArray, int, MPID_Gpid[], int[]);
+MPIDI_CH4I_API(int, GPID_GetAllInComm, MPID_Comm *, int, MPIR_Gpid[], int *);
+MPIDI_CH4I_API(int, GPID_ToLpidArray, int, MPIR_Gpid[], int[]);
 MPIDI_CH4I_API(int, Create_intercomm_from_lpids, MPID_Comm *, int, const int[]);
 MPIDI_CH4I_API(int, Comm_create, MPID_Comm *);
 MPIDI_CH4I_API(int, Comm_destroy, MPID_Comm *);

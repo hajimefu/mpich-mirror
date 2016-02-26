@@ -44,7 +44,7 @@ static inline int MPIDI_CH4_SHM_comm_get_lpid(MPID_Comm * comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_gpid_get(MPID_Comm * comm_ptr, int rank, MPID_Gpid * gpid)
+static inline int MPIDI_CH4_SHM_gpid_get(MPID_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -63,13 +63,13 @@ static inline int MPIDI_CH4_SHM_get_max_node_id(MPID_Comm * comm, MPID_Node_id_t
 }
 
 static inline int MPIDI_CH4_SHM_getallincomm(MPID_Comm * comm_ptr,
-                                         int local_size, MPID_Gpid local_gpids[], int *singlePG)
+                                         int local_size, MPIR_Gpid local_gpids[], int *singlePG)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
+static inline int MPIDI_CH4_SHM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

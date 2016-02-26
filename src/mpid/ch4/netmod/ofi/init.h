@@ -606,7 +606,7 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm *comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm *comm_ptr, int rank, MPID_Gpid *gpid)
+static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm *comm_ptr, int rank, MPIR_Gpid *gpid)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
@@ -634,7 +634,7 @@ static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *
 }
 
 static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm *comm_ptr,
-                                            int local_size, MPID_Gpid local_gpids[], int *singlePG)
+                                            int local_size, MPIR_Gpid local_gpids[], int *singlePG)
 {
     int i;
 
@@ -646,7 +646,7 @@ static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm *comm_ptr,
 }
 
 static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
-                                                        MPID_Gpid gpid[],
+                                                        MPIR_Gpid gpid[],
                                                         int       lpid[],
                                                         int       use_av_table)
 {
@@ -697,7 +697,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPID_Gpid gpid[], int lpid[])
+static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
     return MPIDI_CH4_NM_gpid_tolpidarray_generic(size,gpid,lpid,MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE);
 }

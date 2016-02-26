@@ -28,7 +28,7 @@ typedef int (*MPIDI_CH4_NM_am_target_handler_fn)
 /* These typedefs can be removed when  */
 /* we remove macro definitions of the  */
 /* api */
-typedef MPID_Gpid MPID_Gpid_array_t[];
+typedef MPIR_Gpid MPIR_Gpid_array_t[];
 typedef int intarray_t[];
 typedef MPID_Request *MPID_Request_array_t[];
 typedef MPI_Datatype MPI_Datatype_array_t[];

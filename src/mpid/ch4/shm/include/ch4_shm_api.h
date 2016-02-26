@@ -188,7 +188,7 @@ MPIDI_SHM_API(int,comm_get_lpid,
 MPIDI_SHM_API(int,gpid_get,
                  (MPID_Comm *) comm_ptr,
                  (int)         rank,
-                 (MPID_Gpid *) gpid);
+                 (MPIR_Gpid *) gpid);
 
 MPIDI_SHM_API(int,get_node_id,
                  (MPID_Comm *)      comm,
@@ -202,12 +202,12 @@ MPIDI_SHM_API(int,get_max_node_id,
 MPIDI_SHM_API(int,getallincomm,
                  (MPID_Comm *)       comm_ptr,
                  (int)               local_size,
-                 (MPID_Gpid_array_t) local_gpid,
+                 (MPIR_Gpid_array_t) local_gpid,
                  (int *)             singlePG);
 
 MPIDI_SHM_API(int,gpid_tolpidarray,
                  (int)               size,
-                 (MPID_Gpid_array_t) gpid,
+                 (MPIR_Gpid_array_t) gpid,
                  (intarray_t)        lpid);
 
 MPIDI_SHM_API(int,create_intercomm_from_lpids,
