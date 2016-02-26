@@ -220,6 +220,8 @@ static struct MPID_Collops *default_collops[MPID_HIERARCHY_SIZE] = { NULL };
 /* default for intercomms */
 static struct MPID_Collops *ic_default_collops = NULL;
 
+extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_COLLOPS_MUTEX;
+
 #undef FUNCNAME
 #define FUNCNAME cleanup_default_collops
 #undef FCNAME
@@ -382,6 +384,8 @@ static int set_collops(MPID_Comm * comm)
     if (comm->coll_fns != NULL)
         goto fn_exit;
 
+    MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
+
     if (unlikely(!initialized)) {
         mpi_errno = init_default_collops();
         if (mpi_errno)
@@ -399,6 +403,7 @@ static int set_collops(MPID_Comm * comm)
     }
 
     comm->coll_fns->ref_count++;
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
 
   fn_exit:
     return mpi_errno;
@@ -960,6 +965,8 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
             MPIU_Info_free(comm_ptr->info);
         }
 
+        MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
+
         /* release our reference to the collops structure, comes after the
          * destroy_hook to allow the device to manage these vtables in a custom
          * fashion */
@@ -967,6 +974,8 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
             MPL_free(comm_ptr->coll_fns);
             comm_ptr->coll_fns = NULL;
         }
+
+        MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
 
         if (comm_ptr->comm_kind == MPID_INTERCOMM && comm_ptr->local_comm)
             MPIR_Comm_release(comm_ptr->local_comm);

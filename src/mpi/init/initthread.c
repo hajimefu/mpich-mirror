@@ -177,6 +177,7 @@ MPID_Thread_mutex_t MPIR_THREAD_POBJ_MSGQ_MUTEX;
 MPID_Thread_mutex_t MPIR_THREAD_POBJ_COMPLETION_MUTEX;
 MPID_Thread_mutex_t MPIR_THREAD_POBJ_CTX_MUTEX;
 MPID_Thread_mutex_t MPIR_THREAD_POBJ_PMI_MUTEX;
+MPID_Thread_mutex_t MPIR_THREAD_POBJ_COLLOPS_MUTEX;
 #endif
 
 /* These routine handle any thread initialization that my be required */
@@ -206,6 +207,8 @@ static int thread_cs_init( void )
     MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_CTX_MUTEX, &err);
     MPIU_Assert(err == 0);
     MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_PMI_MUTEX, &err);
+    MPIU_Assert(err == 0);
+    MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_COLLOPS_MUTEX, &err);
     MPIU_Assert(err == 0);
 
 #elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_LOCK_FREE
