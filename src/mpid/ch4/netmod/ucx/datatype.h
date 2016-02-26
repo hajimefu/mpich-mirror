@@ -107,35 +107,34 @@ static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPID_Datatype *datatype_p)
         MPIU_Object_release_ref(datatype_p, &in_use);
     }
 
+    return;
 }
-static inline int MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
-    int mpi_errno = MPI_SUCCESS;
+static inline void MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
     ucp_datatype_t ucp_datatype;
     ucs_status_t status;
     size_t size;
     MPID_Datatype *datatype_ptr;
     int is_contig;
+
     MPID_Datatype_get_ptr(*datatype_p, datatype_ptr);
     datatype_ptr->dev.netmod.ucx.has_ucp = 0;
     MPID_Datatype_is_contig(*datatype_p, &is_contig);
-    if(is_contig)
-        goto fn_exit;
 
-    status = ucp_dt_create_generic(&MPIDI_CH4_NMI_UCX_datatype_ops,
-                                         datatype_p, &ucp_datatype);
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(status, create_generic_datatype);
-    datatype_ptr->dev.netmod.ucx.ucp_datatype = ucp_datatype;
+    if (!is_contig) {
+        status = ucp_dt_create_generic(&MPIDI_CH4_NMI_UCX_datatype_ops,
+                                       datatype_p, &ucp_datatype);
+        MPIU_Assertp(status == UCS_OK);
+        datatype_ptr->dev.netmod.ucx.ucp_datatype = ucp_datatype;
 
-    datatype_ptr->dev.netmod.ucx.has_ucp = 1;
-    MPIU_Object_add_ref(datatype_ptr);
- fn_exit:
-    return mpi_errno;
- fn_fail:
-    goto fn_exit;
+        datatype_ptr->dev.netmod.ucx.has_ucp = 1;
+        MPIU_Object_add_ref(datatype_ptr);
+    }
+
+    return;
 }
-static inline int   MPIDI_CH4_NM_datatype_dup_hook(MPID_Datatype* datatype_ptr) {
+static inline void MPIDI_CH4_NM_datatype_dup_hook(MPID_Datatype *datatype_p) {
 
-    return  MPIDI_CH4_NM_datatype_commit_hook(&datatype_ptr->handle);
+    return MPIDI_CH4_NM_datatype_commit_hook(&datatype_p->handle);
 }
 
 #endif /*UCX_DATATYPE_H_INCLUDED*/
