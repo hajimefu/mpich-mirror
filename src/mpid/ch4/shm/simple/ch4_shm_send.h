@@ -135,17 +135,6 @@ fn_exit:
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_SHM_rsend(const void *buf,
-                                      int count,
-                                      MPI_Datatype datatype,
-                                      int rank,
-                                      int tag,
-                                      MPID_Comm *comm, int context_offset, MPID_Request **request)
-{
-    int err = MPI_SUCCESS;
-    MPIU_Assert(0);
-    return err;
-}
 
 
 
@@ -156,8 +145,15 @@ static inline int MPIDI_CH4_SHM_irsend(const void *buf,
                                        int tag,
                                        MPID_Comm *comm, int context_offset, MPID_Request **request)
 {
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISEND);
+
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPEREADY);
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
+    return mpi_errno;
 }
 
 #undef FCNAME
@@ -170,13 +166,13 @@ static inline int MPIDI_CH4_SHM_ssend(const void *buf,
                                       MPID_Comm *comm, int context_offset, MPID_Request **request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_ISSEND);
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_SSEND);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SSEND);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESYNC);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SSEND);
     return mpi_errno;
 }
 

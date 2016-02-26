@@ -25,17 +25,6 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
     return err;
 }
 
-static inline int MPIDI_CH4_SHM_rsend(const void *buf,
-                                  int count,
-                                  MPI_Datatype datatype,
-                                  int rank,
-                                  int tag,
-                                  MPID_Comm * comm, int context_offset, MPID_Request ** request)
-{
-    int err = MPI_SUCCESS;
-    MPIU_Assert(0);
-    return err;
-}
 
 
 

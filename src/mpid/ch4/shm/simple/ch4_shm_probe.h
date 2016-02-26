@@ -13,24 +13,6 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_CH4_SHM_probe(int source,
-                                      int tag,
-                                      MPID_Comm *comm, int context_offset, MPI_Status *status)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
-    return mpi_errno;
-}
-
-
-static inline int MPIDI_CH4_SHM_mprobe(int source,
-                                       int tag,
-                                       MPID_Comm *comm,
-                                       int context_offset, MPID_Request **message, MPI_Status *status)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
 
 static inline int MPIDI_CH4_SHM_improbe(int source,
                                         int tag,

@@ -39,16 +39,6 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
 }
 
 
-static inline int MPIDI_CH4_SHM_mrecv(void *buf,
-                                  int count,
-                                  MPI_Datatype datatype,
-                                  MPID_Request * message, MPI_Status * status)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-
 static inline int MPIDI_CH4_SHM_imrecv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
