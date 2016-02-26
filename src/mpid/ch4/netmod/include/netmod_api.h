@@ -1028,5 +1028,14 @@ MPIDI_NETMOD_API_NATIVE(int, iscatterv,
                         (MPID_Comm *) comm_ptr,
                         (MPI_Request *) req);
 
+MPIDI_NETMOD_API_NATIVE(void, datatype_commit_hook,
+                        (MPI_Datatype *) datatype_p);
+
+MPIDI_NETMOD_API_NATIVE(void, datatype_dup_hook,
+                        (MPID_Datatype *) datatype_p);
+
+MPIDI_NETMOD_API_NATIVE(void, datatype_destroy_hook,
+                        (MPID_Datatype *) datatype_p);
+
 #undef MPIDI_NETMOD_API
 #undef MPIDI_NETMOD_API_NATIVE

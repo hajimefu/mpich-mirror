@@ -177,6 +177,10 @@ typedef struct MPIDI_CH4_NM_native_funcs {
     MPIDI_CH4_NM_iscan_t iscan;
     MPIDI_CH4_NM_iscatter_t iscatter;
     MPIDI_CH4_NM_iscatterv_t iscatterv;
+    /* Datatype hooks */
+    MPIDI_CH4_NM_datatype_commit_hook_t datatype_commit_hook;
+    MPIDI_CH4_NM_datatype_dup_hook_t datatype_dup_hook;
+    MPIDI_CH4_NM_datatype_destroy_hook_t datatype_destroy_hook;
 } MPIDI_CH4_NM_native_funcs_t;
 
 extern MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_funcs[];
