@@ -408,6 +408,7 @@ static int set_collops(MPID_Comm * comm)
   fn_exit:
     return mpi_errno;
   fn_fail:
+    MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
     goto fn_exit;
 }
 
