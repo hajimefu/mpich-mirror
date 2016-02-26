@@ -24,4 +24,8 @@ typedef struct {
     int dummy;
 } MPIDI_CH4_NMI_STUB_Comm_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_CH4_NMI_STUB_Dt_t;
+
 #endif
