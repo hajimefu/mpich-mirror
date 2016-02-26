@@ -16,8 +16,7 @@
 #define __netmod_direct_stub__   0
 #define __netmod_direct_ofi__    1
 #define __netmod_direct_shm__    2
-#define __netmod_direct_am_ofi__ 3
-#define __netmod_direct_ucx__    4
+#define __netmod_direct_ucx__    3
 
 #if NETMOD_DIRECT==__netmod_direct_stub__
 #include "../stub/netmod_direct.h"
@@ -25,8 +24,6 @@
 #include "../ofi/netmod_direct.h"
 #elif NETMOD_DIRECT==__netmod_direct_shm__
 #include "../shm/netmod_direct.h"
-#elif NETMOD_DIRECT==__netmod_direct_am_ofi__
-#include "../am_ofi/netmod_direct.h"
 #elif NETMOD_DIRECT==__netmod_direct_ucx__
 #include "../ucx/netmod_direct.h"
 #else
