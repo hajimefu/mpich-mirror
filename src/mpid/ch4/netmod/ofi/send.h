@@ -418,7 +418,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPID_Request *requests[])
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM
-                STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_CH4_NM_send, preq->comm->context_id);
+                STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_CH4_NM_isend, preq->comm->context_id);
 #else
                 STARTALL_CASE(MPIDI_PTYPE_SEND, MPIDI_Isend, preq->comm->context_id);
 #endif
