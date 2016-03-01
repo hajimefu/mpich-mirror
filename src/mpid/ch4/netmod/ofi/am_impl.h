@@ -490,10 +490,9 @@ static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
     struct fi_msg msg;
     struct iovec msg_iov[2];
     MPIDI_CH4_NMI_OFI_Am_reply_token_t  use_token;
+    uint64_t send_flag = FI_INJECT;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_INJECT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_INJECT);
-
-    MPIU_Assert(am_hdr_sz + sizeof(msg_hdr) < MPIDI_Global.max_buffered_send);
 
     MPIU_Assert(handler_id       < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
     MPIU_Assert(am_hdr_sz        < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
@@ -534,7 +533,29 @@ static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
                           MPIDI_CH4_NMI_OFI_Comm_to_phys(use_comm, use_rank, MPIDI_CH4_NMI_OFI_API_MSG):
                           MPIDI_CH4_NMI_OFI_To_phys(use_rank, MPIDI_CH4_NMI_OFI_API_MSG);
 
-    MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendmsg(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), &msg, FI_INJECT), send);
+    if (unlikely(am_hdr_sz + sizeof(msg_hdr) > MPIDI_Global.max_buffered_send)) {
+        MPID_Request *sreq;
+        char *ibuf;
+
+        sreq = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);
+        MPIU_Assert(sreq);
+        ibuf = (char *) MPL_malloc(am_hdr_sz + sizeof(msg_hdr));
+        MPIU_Assert(ibuf);
+        memcpy(ibuf, &msg_hdr, sizeof(msg_hdr));
+        memcpy(ibuf + sizeof(msg_hdr), am_hdr, am_hdr_sz);
+        msg_iov[0].iov_base = ibuf;
+        msg_iov[0].iov_len  = am_hdr_sz + sizeof(msg_hdr);
+        msg.iov_count = 1;
+
+        MPIDI_CH4_NMI_OFI_REQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_INJECT_EMU;
+        MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.inject_buf) = ibuf;
+        /* Cancel FI_INJECT and ask for completion event */
+        send_flag = FI_COMPLETION | FI_INJECT_COMPLETE;
+        msg.context = (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(sreq, context));
+        OPA_incr_int(&MPIDI_Global.am_inflight_inject_emus);
+    }
+
+    MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendmsg(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), &msg, send_flag), send);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_INJECT);

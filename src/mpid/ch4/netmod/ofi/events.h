@@ -352,6 +352,29 @@ static inline int MPIDI_CH4_NMI_OFI_Chunk_done_event(struct fi_cq_tagged_entry *
 }
 
 #undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NMI_OFI_Inject_emu_event
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_CH4_NMI_OFI_Inject_emu_event(struct fi_cq_tagged_entry *wc,
+                                                     MPID_Request *req)
+{
+    int incomplete;
+    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_EMU_EVENT);
+    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INJECT_EMU_EVENT);
+
+    MPIR_cc_decr(req->cc_ptr, &incomplete);
+
+    if(!incomplete) {
+        MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(req, util.inject_buf));
+        MPIDI_CH4R_Request_release(req);
+        OPA_decr_int(&MPIDI_Global.am_inflight_inject_emus);
+    }
+
+    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INJECT_EMU_EVENT);
+    return MPI_SUCCESS;
+}
+
+#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NMI_OFI_Rma_done_event
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -673,6 +696,10 @@ static inline int MPIDI_CH4_NMI_OFI_Dispatch_function(struct fi_cq_tagged_entry 
 
             case MPIDI_CH4_NMI_OFI_EVENT_CHUNK_DONE:
                 mpi_errno = MPIDI_CH4_NMI_OFI_Chunk_done_event(wc,req);
+                break;
+
+            case MPIDI_CH4_NMI_OFI_EVENT_INJECT_EMU:
+                mpi_errno = MPIDI_CH4_NMI_OFI_Inject_emu_event(wc,req);
                 break;
 
             case MPIDI_CH4_NMI_OFI_EVENT_DYNPROC_DONE:

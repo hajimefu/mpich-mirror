@@ -402,6 +402,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
         MPIDI_Global.am_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL]        = MPIDI_CH4_NMI_OFI_Control_handler;
         MPIDI_Global.am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL] = NULL;
     }
+    OPA_store_int(&MPIDI_Global.am_inflight_inject_emus, 0);
 
     /* -------------------------------- */
     /* Calculate per-node map           */
@@ -515,6 +516,11 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
     MPIDI_Global.max_buffered_send = 0;
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Allreduce_impl(&barrier[0], &barrier[1], 1, MPI_INT,
                                                        MPI_SUM, MPIR_Process.comm_world, &errflag));
+
+    /* Progress until we drain all inflight injection emulation requests */
+    while(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) > 0)
+        MPIDI_CH4_NMI_OFI_PROGRESS();
+    MPIU_Assert(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) == 0);
 
     MPIDI_CH4R_finalize();
 

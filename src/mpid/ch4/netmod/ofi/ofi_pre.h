@@ -179,6 +179,7 @@ typedef struct {
             void *buf;
         } persist;
         struct iovec iov;
+        void *inject_buf; /* Internal buffer for inject emulation */
     } util;
 } MPIDI_CH4_NMI_OFI_Request_t;
 

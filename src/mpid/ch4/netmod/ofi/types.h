@@ -217,6 +217,7 @@ enum {
     MPIDI_CH4_NMI_OFI_EVENT_SSEND_ACK,
     MPIDI_CH4_NMI_OFI_EVENT_GET_HUGE,
     MPIDI_CH4_NMI_OFI_EVENT_CHUNK_DONE,
+    MPIDI_CH4_NMI_OFI_EVENT_INJECT_EMU,
     MPIDI_CH4_NMI_OFI_EVENT_DYNPROC_DONE,
     MPIDI_CH4_NMI_OFI_EVENT_ACCEPT_PROBE
 };
@@ -352,6 +353,7 @@ typedef struct {
     MPIDI_CH4_NM_am_target_handler_fn      am_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     MPIDI_CH4_NM_am_origin_handler_fn      am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     MPIU_buf_pool_t                       *am_buf_pool;
+    OPA_int_t                              am_inflight_inject_emus;
 
     /* Completion queue buffering */
     MPIDI_CH4_NMI_OFI_Cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];

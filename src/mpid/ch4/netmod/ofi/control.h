@@ -74,7 +74,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
     control->comm_id     = comm_ptr->context_id;
     control->endpoint_id = MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
-    MPIU_Assert(sizeof(*control) <= MPIDI_Global.max_buffered_send);
 
     mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,comm_ptr,
                                         -1ULL,
