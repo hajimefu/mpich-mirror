@@ -376,6 +376,8 @@ fn_fail:
 
 static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
 {
+    if (unlikely(MPIDI_Global.max_buffered_send < sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)))
+        return 0;
     return MPIDI_Global.max_buffered_send - sizeof(MPIDI_CH4_NMI_OFI_Am_header_t);
 }
 
