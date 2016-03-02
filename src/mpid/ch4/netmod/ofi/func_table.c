@@ -147,5 +147,8 @@ MPIDI_CH4_NM_native_funcs_t MPIDI_CH4_NM_native_ofi_funcs = {
     MPIDI_CH4_NM_iscan,
     MPIDI_CH4_NM_iscatter,
     MPIDI_CH4_NM_iscatterv,
+    MPIDI_CH4_NM_datatype_commit_hook,
+    MPIDI_CH4_NM_datatype_dup_hook,
+    MPIDI_CH4_NM_datatype_destroy_hook,
 };
 #endif

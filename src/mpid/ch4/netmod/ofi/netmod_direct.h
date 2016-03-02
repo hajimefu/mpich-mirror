@@ -19,6 +19,7 @@
 #include "unimpl.h"
 #include "init.h"
 #include "coll.h"
+#include "datatype.h"
 
 #ifdef USE_OFI_TAGGED
 #include "probe.h"
