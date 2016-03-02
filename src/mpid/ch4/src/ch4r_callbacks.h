@@ -1715,8 +1715,7 @@ static inline void MPIDI_CH4R_win_lock_req_proc(const MPIDI_CH4R_win_cntrl_msg_t
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_lock_ack_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
-                                                MPID_Win                   *win,
-                                                unsigned                    peer)
+                                                MPID_Win                   *win)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_LOCK_ACK_PROC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_LOCK_ACK_PROC);
@@ -1767,8 +1766,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_complete_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
-                                                MPID_Win                   *win,
-                                                unsigned                    peer)
+                                                MPID_Win                   *win)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_COMPLETE_PROC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_COMPLETE_PROC);
@@ -1783,8 +1781,7 @@ static inline void MPIDI_CH4R_win_complete_proc(const MPIDI_CH4R_win_cntrl_msg_t
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_post_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
-                                            MPID_Win                   *win,
-                                            unsigned                    peer)
+                                            MPID_Win                   *win)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_POST_PROC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_POST_PROC);
@@ -1800,8 +1797,7 @@ static inline void MPIDI_CH4R_win_post_proc(const MPIDI_CH4R_win_cntrl_msg_t *in
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_unlock_done_cb(const MPIDI_CH4R_win_cntrl_msg_t *info,
-                                                 MPID_Win                   *win,
-                                                 unsigned                    peer)
+                                                 MPID_Win                   *win)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_UNLOCK_DONE_CB);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_UNLOCK_DONE_CB);
@@ -1828,7 +1824,7 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
                                                      MPIDI_CH4_NM_am_completion_handler_fn *
                                                      cmpl_handler_fn, MPID_Request ** req)
 {
-    int mpi_errno = MPI_SUCCESS, sender_rank;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4R_win_cntrl_msg_t *msg_hdr = (MPIDI_CH4R_win_cntrl_msg_t *) am_hdr;
     MPID_Win *win;
 
@@ -1838,7 +1834,6 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
     MPL_HASH_FIND(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
                   &msg_hdr->win_id, sizeof(uint64_t), win);
     /* TODO: check output win ptr */
-    sender_rank = msg_hdr->origin_rank;
 
     switch (msg_hdr->type) {
         char buff[32];
@@ -1850,7 +1845,7 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
 
     case MPIDI_CH4R_WIN_LOCK_ACK:
     case MPIDI_CH4R_WIN_LOCKALL_ACK:
-        MPIDI_CH4R_win_lock_ack_proc(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_lock_ack_proc(msg_hdr, win);
         break;
 
     case MPIDI_CH4R_WIN_UNLOCK:
@@ -1860,15 +1855,15 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
 
     case MPIDI_CH4R_WIN_UNLOCK_ACK:
     case MPIDI_CH4R_WIN_UNLOCKALL_ACK:
-        MPIDI_CH4R_win_unlock_done_cb(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_unlock_done_cb(msg_hdr, win);
         break;
 
     case MPIDI_CH4R_WIN_COMPLETE:
-        MPIDI_CH4R_win_complete_proc(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_complete_proc(msg_hdr, win);
         break;
 
     case MPIDI_CH4R_WIN_POST:
-        MPIDI_CH4R_win_post_proc(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_post_proc(msg_hdr, win);
         break;
 
     default:
