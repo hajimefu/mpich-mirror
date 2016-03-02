@@ -1656,9 +1656,9 @@ static inline int MPIDI_CH4R_win_lock_advance(MPID_Win *win)
         else
             MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**rmasync");
 
-        mpi_errno = MPIDI_CH4_NM_inject_am_hdr(lock->rank, win->comm_ptr,
-                                               MPIDI_CH4R_WIN_CTRL,
-                                               &msg, sizeof (msg), NULL);
+        mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(lock->reply_token,
+                                                     MPIDI_CH4R_WIN_CTRL,
+                                                     &msg, sizeof (msg));
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         MPL_free(lock);
 
@@ -1679,7 +1679,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_lock_req_proc(const MPIDI_CH4R_win_cntrl_msg_t  *info,
                                                 MPID_Win                   *win,
-                                                unsigned                    peer)
+                                                uint64_t                    reply_token)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_LOCK_REQ_PROC);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_LOCK_REQ_PROC);
@@ -1694,6 +1694,7 @@ static inline void MPIDI_CH4R_win_lock_req_proc(const MPIDI_CH4R_win_cntrl_msg_t
 
     lock->rank                = info->origin_rank;
     lock->type                = info->lock_type;
+    lock->reply_token         = reply_token;
     struct MPIDI_CH4R_win_queue *q = &MPIDI_CH4R_WIN(win, sync).lock.local.requested;
     MPIU_Assert((q->head != NULL) ^ (q->tail == NULL));
 
@@ -1734,7 +1735,7 @@ static inline void MPIDI_CH4R_win_lock_ack_proc(const MPIDI_CH4R_win_cntrl_msg_t
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_CH4R_win_unlock_proc(const MPIDI_CH4R_win_cntrl_msg_t *info,
                                               MPID_Win                   *win,
-                                              unsigned                    peer)
+                                              uint64_t                    reply_token)
 {
 
     int mpi_errno = MPI_SUCCESS;
@@ -1750,9 +1751,9 @@ static inline void MPIDI_CH4R_win_unlock_proc(const MPIDI_CH4R_win_cntrl_msg_t *
     msg.origin_rank = win->comm_ptr->rank;
     msg.type = MPIDI_CH4R_WIN_UNLOCK_ACK;
 
-    mpi_errno = MPIDI_CH4_NM_inject_am_hdr(peer, win->comm_ptr,
-                                           MPIDI_CH4R_WIN_CTRL,
-                                           &msg, sizeof (msg), NULL);
+    mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(reply_token,
+                                                 MPIDI_CH4R_WIN_CTRL,
+                                                 &msg, sizeof (msg));
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_UNLOCK_ACK_PROC);
@@ -1844,7 +1845,7 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
 
     case MPIDI_CH4R_WIN_LOCK:
     case MPIDI_CH4R_WIN_LOCKALL:
-        MPIDI_CH4R_win_lock_req_proc(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_lock_req_proc(msg_hdr, win, reply_token);
         break;
 
     case MPIDI_CH4R_WIN_LOCK_ACK:
@@ -1854,7 +1855,7 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
 
     case MPIDI_CH4R_WIN_UNLOCK:
     case MPIDI_CH4R_WIN_UNLOCKALL:
-        MPIDI_CH4R_win_unlock_proc(msg_hdr, win, sender_rank);
+        MPIDI_CH4R_win_unlock_proc(msg_hdr, win, reply_token);
         break;
 
     case MPIDI_CH4R_WIN_UNLOCK_ACK:

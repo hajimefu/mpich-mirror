@@ -213,6 +213,7 @@ typedef struct MPIDI_CH4R_win_info_args_t {
 
 struct MPIDI_CH4R_win_lock {
     struct MPIDI_CH4R_win_lock *next;
+    uint64_t reply_token;
     unsigned rank;
     uint16_t mtype;
     uint16_t type;
