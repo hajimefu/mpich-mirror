@@ -152,6 +152,7 @@ static inline int MPIDI_OFI_do_rdma_read(void                       *dst,
         am_req->event_id = MPIDI_OFI_EVENT_AM_READ;
         comm             = MPIDI_CH4U_context_id_to_comm(context_id);
         MPIU_Assert(comm);
+        MPIDI_OFI_CONDITIONAL_CNTR_INCR();
         MPIDI_OFI_CALL_RETRY_AM(fi_read(MPIDI_OFI_EP_TX_RMA(0),
                                                 (char *) dst + done,
                                                 curr_len, NULL,
