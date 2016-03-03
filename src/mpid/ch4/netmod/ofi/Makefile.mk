@@ -14,6 +14,8 @@ mpi_core_sources   += src/mpid/ch4/netmod/ofi/func_table.c \
                       src/mpid/ch4/netmod/ofi/util.cc
 errnames_txt_files += src/mpid/ch4/netmod/ofi/errnames.txt
 external_ldflags   += -ldl -lpthread
+external_subdirs   += @ofisrcdir@
+pmpi_convenience_libs += @ofilib@
 lib_lib@MPILIBNAME@_la_CXXFLAGS  = -fno-rtti -fno-exceptions
 
 endif

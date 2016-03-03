@@ -47,11 +47,11 @@ pkgconfigdir = @pkgconfigdir@
 # to build src/mpi/errhan/defmsg.h
 errnames_txt_files = 
 
-external_subdirs = @mplsrcdir@ @opasrcdir@ @libfabricsrcdir@
-external_ldflags = @mpllibdir@ @opalibdir@ @libfabriclibdir@
+external_subdirs = @mplsrcdir@ @opasrcdir@
+external_ldflags = @mpllibdir@ @opalibdir@
 external_libs = @WRAPPER_LIBS@
 mpi_convenience_libs =
-pmpi_convenience_libs = @opalib@ @mpllib@ @libfabriclib@
+pmpi_convenience_libs = @opalib@ @mpllib@
 
 # NOTE on our semi-unconventional usage of DIST_SUBDIRS:
 # The automake manual recommends thinking of DIST_SUBDIRS as the list of all
