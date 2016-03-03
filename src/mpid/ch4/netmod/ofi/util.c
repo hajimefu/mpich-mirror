@@ -299,10 +299,11 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OFI_Win_control_t  *info,
-                                                           MPID_Win                   *win,
-                                                           unsigned                    peer)
+static inline int MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OFI_Win_control_t  *info,
+                                                          MPID_Win                   *win,
+                                                          unsigned                    peer)
 {
+    int mpi_errno;
     struct MPIDI_CH4U_win_lock *lock =
         (struct MPIDI_CH4U_win_lock *)MPL_calloc(1, sizeof(struct MPIDI_CH4U_win_lock));
 
@@ -323,8 +324,15 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_O
 
     q->tail = lock;
 
-    MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
 
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
@@ -338,17 +346,28 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_W
 }
 
 
-static inline void MPIDI_CH4_NMI_OFI_Win_unlock_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
-                                                     MPID_Win                   *win,
-                                                     unsigned                    peer)
+static inline int MPIDI_CH4_NMI_OFI_Win_unlock_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+                                                    MPID_Win                   *win,
+                                                    unsigned                    peer)
 {
+    int mpi_errno;
     --MPIDI_CH4U_WIN(win, sync).lock.local.count;
     MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
-    MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
 
     MPIDI_CH4_NMI_OFI_Win_control_t new_info;
     new_info.type = MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK;
-    MPIDI_CH4_NMI_OFI_Do_control_win(&new_info,peer,win,1,0);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&new_info,peer,win,1,0);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline void MPIDI_CH4_NMI_OFI_Win_complete_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
@@ -475,7 +494,7 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
     switch(control->type) {
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKREQ:
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKALLREQ:
-            MPIDI_CH4_NMI_OFI_Win_lock_request_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_request_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKACK:
@@ -485,7 +504,7 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCK:
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALL:
-            MPIDI_CH4_NMI_OFI_Win_unlock_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Win_unlock_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK:
