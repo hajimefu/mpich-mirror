@@ -455,6 +455,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
     MPID_Datatype  *dt_ptr;
     MPIDI_CH4_NMI_OFI_Am_reply_token_t  use_token;
     int             need_lock = !is_reply;
+    size_t          threshold;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
@@ -495,7 +496,10 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
     }
 
-    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)) < MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE) ?
+    /* We don't want to do the long send if CH4R is doing eager send.
+       This looks somewhat ad-hoc, should be addressed in the upcoming AM API change. */
+    threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
+    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)) <= threshold) ?
                 MPIDI_CH4_NMI_OFI_Send_am_short(use_rank, use_comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                 am_hdr_sz, send_buf, data_sz, sreq, need_lock) :
                 MPIDI_CH4_NMI_OFI_Send_am_long(use_rank, use_comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),

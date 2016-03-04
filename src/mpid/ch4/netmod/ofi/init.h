@@ -367,6 +367,11 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     /* Initialize Active Message          */
     /* ---------------------------------- */
     if(do_am) {
+        /* Maximum possible message size for short message send (=eager send)
+           See MPIDI_CH4_NMI_OFI_Do_send_am for short/long switching logic */
+        size_t min_msg_sz = MPL_MAX(MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE,
+                                    MPIR_CVAR_CH4R_EAGER_THRESHOLD + MPIDI_CH4_NM_am_hdr_max_sz() + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
+        MPIU_Assert(min_msg_sz <= MPIDI_Global.max_send);
         MPIDI_Global.am_buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
         mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
 
@@ -374,7 +379,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
 
         slist_init(&MPIDI_Global.cq_buff_list);
         MPIDI_Global.cq_buff_head = MPIDI_Global.cq_buff_tail = 0;
-        optlen                    = MPIDI_CH4_NMI_OFI_MIN_MSG_SZ;
+        optlen                    = min_msg_sz;
 
         MPIDI_CH4_NMI_OFI_CALL(fi_setopt(&(MPIDI_CH4_NMI_OFI_EP_RX_MSG(0)->fid),
                                          FI_OPT_ENDPOINT,
