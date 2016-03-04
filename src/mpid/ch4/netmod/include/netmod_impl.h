@@ -17,6 +17,7 @@
 #define __netmod_direct_ofi__    1
 #define __netmod_direct_shm__    2
 #define __netmod_direct_ucx__    3
+#define __netmod_direct_portals4__ 4
 
 #if NETMOD_DIRECT==__netmod_direct_stub__
 #include "../stub/netmod_direct.h"
@@ -26,6 +27,8 @@
 #include "../shm/netmod_direct.h"
 #elif NETMOD_DIRECT==__netmod_direct_ucx__
 #include "../ucx/netmod_direct.h"
+#elif NETMOD_DIRECT==__netmod_direct_portals4__
+#include "../portals4/netmod_direct.h"
 #else
 #error "No direct netmod included"
 #endif
