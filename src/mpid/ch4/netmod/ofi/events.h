@@ -249,7 +249,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
             MPIDI_CH4_NMI_OFI_CALL_NOLOCK(fi_close(&cntr->mr->fid), mr_unreg);
             MPL_free(ptr);
             ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP;
-            MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL, TRUE));
+            MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Do_control_send(&ctrl, NULL, 0, MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id), comm, NULL, FALSE /* no lock */));
         }
 
         if(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig))
