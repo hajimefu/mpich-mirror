@@ -1016,13 +1016,13 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
 
     max_size            = MPIDI_CH4_NMI_OFI_QUERY_FETCH_ATOMIC_COUNT;
     MPIDI_CH4_NMI_OFI_Query_datatype(basic_type_res,&fi_dt,op,&fi_op,&max_size,&dt_size);
+    max_size            = max_size*dt_size;
+    if(max_size == 0)
+        goto am_fallback;
+
     req->event_id       = MPIDI_CH4_NMI_OFI_EVENT_RMA_DONE;
     req->next           = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
     MPIDI_CH4_NMI_OFI_WIN(win)->syncQ = req;
-    max_size            = max_size*dt_size;
-
-    if(max_size == 0)
-        goto am_fallback;
 
     if(op != MPI_NO_OP)
         MPIDI_CH4_NMI_OFI_Init_iovec_state2(&req->noncontig->iovs,
