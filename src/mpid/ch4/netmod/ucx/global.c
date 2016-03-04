@@ -5,4 +5,4 @@
 
 MPIDI_CH4_NMI_UCX_Global_t MPIDI_CH4_NMI_UCX_Global = { 0 };
 
-MPIDI_CH4_NMI_UCX_EP_t *MPIDI_CH4_NMI_Epts = NULL;
+ucp_ep_h *MPIDI_CH4_NMI_Epts = NULL;

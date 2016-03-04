@@ -79,7 +79,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_CH4_NMI_UCX_Am_header_t ucx_hdr;
@@ -156,7 +156,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_msg_sz_t  data_sz;
@@ -285,7 +285,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_msg_sz_t  data_sz;
@@ -386,7 +386,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_CH4_NMI_UCX_Am_header_t ucx_hdr;
@@ -438,7 +438,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_CH4_NMI_UCX_Am_header_t ucx_hdr;

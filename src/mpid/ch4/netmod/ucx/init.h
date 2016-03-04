@@ -80,7 +80,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_CH4_NMI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
     table = (char *) MPL_malloc(size * MPIDI_CH4_NMI_UCX_Global.addrname_len);
-    MPIDI_CH4_NMI_Epts = (MPIDI_CH4_NMI_UCX_EP_t *) MPL_malloc(size * sizeof(MPIDI_CH4_NMI_UCX_EP_t));
+    MPIDI_CH4_NMI_Epts = (ucp_ep_h *) MPL_malloc(size * sizeof(ucp_ep_h));
 
     maxlen = MPIDI_CH4_NMI_UCX_KVSAPPSTRLEN;
 

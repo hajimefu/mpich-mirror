@@ -28,7 +28,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *req;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
@@ -85,7 +85,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *req;
     MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
-    MPIDI_CH4_NMI_UCX_EP_t ep;
+    ucp_ep_h ep;
     uint64_t ucx_tag;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);

@@ -54,11 +54,8 @@ typedef struct {
     MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_CH4_NMI_UCX_MAX_AM_HANDLERS];
 } MPIDI_CH4_NMI_UCX_Global_t;
 
-typedef ucp_ep_h MPIDI_CH4_NMI_UCX_EP_t;        //cp_endpoints;
-
-
 extern MPIDI_CH4_NMI_UCX_Global_t MPIDI_CH4_NMI_UCX_Global;
-extern MPIDI_CH4_NMI_UCX_EP_t *MPIDI_CH4_NMI_Epts;
+extern ucp_ep_h *MPIDI_CH4_NMI_Epts;
 
 
 /* UCX TAG Layout */
