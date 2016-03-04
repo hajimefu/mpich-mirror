@@ -119,6 +119,7 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     sreq = MPIDI_CH4I_am_request_create();
     *request = sreq;
 
+    MPIR_Comm_add_ref(comm);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
     match_bits = MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, rank, tag);
@@ -283,7 +284,7 @@ __CH4_INLINE__ int MPIDI_CH4R_startall(int count, MPID_Request * requests[])
 
         tag = MPIDI_CH4R_get_tag(msg_tag);
         rank = MPIDI_CH4R_get_source(msg_tag);
-        context_offset = MPIDI_CH4R_get_context(msg_tag - preq->comm->context_id);
+        context_offset = MPIDI_CH4R_get_context(msg_tag) - preq->comm->context_id;
 
         switch (MPIDI_CH4R_REQUEST(preq, p_type)) {
 

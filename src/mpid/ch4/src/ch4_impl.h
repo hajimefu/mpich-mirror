@@ -22,12 +22,16 @@ int MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char 
 /* Static inlines */
 static inline int MPIDI_CH4R_get_source(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4R_SOURCE_MASK) >> MPIDI_CH4R_TAG_SHIFT));
+   int source = ((match_bits & MPIDI_CH4R_SOURCE_MASK) >> MPIDI_CH4R_TAG_SHIFT);
+   /* Left shift and right shift by MPIDI_CH4R_SOURCE_SHIFT_UNPACK is to make sure the sign of source is retained */
+   return ((source << MPIDI_CH4R_SOURCE_SHIFT_UNPACK) >> MPIDI_CH4R_SOURCE_SHIFT_UNPACK);
 }
 
 static inline int MPIDI_CH4R_get_tag(uint64_t match_bits)
 {
-    return ((int) (match_bits & MPIDI_CH4R_TAG_MASK));
+   int tag = (match_bits & MPIDI_CH4R_TAG_MASK);
+   /* Left shift and right shift by MPIDI_CH4R_TAG_SHIFT_UNPACK is to make sure the sign of tag is retained */
+    return ((tag << MPIDI_CH4R_TAG_SHIFT_UNPACK) >> MPIDI_CH4R_TAG_SHIFT_UNPACK);
 }
 
 static inline int MPIDI_CH4R_get_context(uint64_t match_bits)
@@ -343,7 +347,7 @@ static inline uint64_t MPIDI_CH4R_init_send_tag(MPIU_Context_id_t contextid, int
     uint64_t match_bits;
     match_bits = contextid;
     match_bits = (match_bits << MPIDI_CH4R_SOURCE_SHIFT);
-    match_bits |= source;
+    match_bits |= (source & (MPIDI_CH4R_SOURCE_MASK >> MPIDI_CH4R_TAG_SHIFT));
     match_bits = (match_bits << MPIDI_CH4R_TAG_SHIFT);
     match_bits |= (MPIDI_CH4R_TAG_MASK & tag);
     return match_bits;
