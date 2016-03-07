@@ -320,7 +320,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t      reply_token,
 static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 {
     /* Maximum size that fits in short send */
-    size_t max_shortsend = MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE -
+    size_t max_shortsend = MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE -
                            (sizeof(MPIDI_CH4_NMI_OFI_Am_header_t) + sizeof(MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t));
     /* Maximum payload size representable by MPIDI_CH4_NMI_OFI_Am_header_t::am_hdr_sz field */
     size_t max_representable = (1 << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS) - 1;

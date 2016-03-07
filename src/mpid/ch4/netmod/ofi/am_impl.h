@@ -271,7 +271,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);
 
-    MPIU_Assert((sizeof(*msg_hdr) + am_hdr_sz) <= MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE);
+    MPIU_Assert((sizeof(*msg_hdr) + am_hdr_sz) <= MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE);
     iov[1].iov_base = MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr);
     iov[1].iov_len = am_hdr_sz;
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
@@ -334,7 +334,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
 
     MPIR_cc_incr(sreq->cc_ptr, &c); /* send completion */
     MPIR_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
-    MPIU_Assert((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) <= MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE);
+    MPIU_Assert((sizeof(*msg_hdr) + sizeof(*lmt_info) + am_hdr_sz) <= MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE);
     if (need_lock)
         MPIDI_CH4_NMI_OFI_CALL(fi_mr_reg(MPIDI_Global.domain,
                                          data,
@@ -355,7 +355,6 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
                                                 0ULL,
                                                 &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr),
                                                 NULL), mr_reg);
-
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);
 
@@ -498,7 +497,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
 
     /* We don't want to do the long send if CH4R is doing eager send.
        This looks somewhat ad-hoc, should be addressed in the upcoming AM API change. */
-    threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_MAX_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
+    threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
     mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)) <= threshold) ?
                 MPIDI_CH4_NMI_OFI_Send_am_short(use_rank, use_comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                 am_hdr_sz, send_buf, data_sz, sreq, need_lock) :
