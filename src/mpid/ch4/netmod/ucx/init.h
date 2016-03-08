@@ -80,7 +80,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_CH4_NMI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
     table = (char *) MPL_malloc(size * MPIDI_CH4_NMI_UCX_Global.addrname_len);
-    MPIDI_CH4_NMI_Epts = (ucp_ep_h *) MPL_malloc(size * sizeof(ucp_ep_h));
+    MPIDI_CH4_NMI_UCX_eps = (ucp_ep_h *) MPL_malloc(size * sizeof(ucp_ep_h));
 
     maxlen = MPIDI_CH4_NMI_UCX_KVSAPPSTRLEN;
 
@@ -93,7 +93,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
         MPIDI_CH4_UCX_STR_ERRCHK(str_errno, buscard_len);
         ucx_status = ucp_ep_create(MPIDI_CH4_NMI_UCX_Global.worker,
                                 (ucp_address_t *) & table[i * MPIDI_CH4_NMI_UCX_Global.addrname_len],
-                                &MPIDI_CH4_NMI_Epts[i]);
+                                &MPIDI_CH4_NMI_UCX_eps[i]);
         MPIDI_CH4_NMI_UCX_CHK_STATUS(ucx_status, ep_create);
     }
 
@@ -149,10 +149,10 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_EXIT);
     return mpi_errno;
   fn_fail:
-    if (MPIDI_CH4_NMI_Epts != NULL) {
+    if (MPIDI_CH4_NMI_UCX_eps != NULL) {
         for (i = 0; i < size; i++) {
-            if (MPIDI_CH4_NMI_Epts[i] != NULL)
-                ucp_ep_destroy(MPIDI_CH4_NMI_Epts[i]);
+            if (MPIDI_CH4_NMI_UCX_eps[i] != NULL)
+                ucp_ep_destroy(MPIDI_CH4_NMI_UCX_eps[i]);
         }
     }
     if (MPIDI_CH4_NMI_UCX_Global.worker != NULL)
@@ -181,10 +181,10 @@ static inline int MPIDI_CH4_NM_finalize(void)
     }
 
     size = MPIR_Process.comm_world->local_size;
-    if (MPIDI_CH4_NMI_Epts != NULL) {
+    if (MPIDI_CH4_NMI_UCX_eps != NULL) {
         for (i = 0; i < size; i++) {
-            if (MPIDI_CH4_NMI_Epts[i] != NULL)
-                ucp_ep_destroy(MPIDI_CH4_NMI_Epts[i]);
+            if (MPIDI_CH4_NMI_UCX_eps[i] != NULL)
+                ucp_ep_destroy(MPIDI_CH4_NMI_UCX_eps[i]);
         }
     }
 

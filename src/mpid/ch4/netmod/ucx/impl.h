@@ -12,7 +12,7 @@
 #define MPIDI_CH4_NMI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
 #define MPIDI_CH4_NMI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)
 #define COMM_TO_INDEX(comm,rank) MPIDI_CH4_NMI_UCX_COMM(comm).vept->vep_table[rank].addr_idx
-#define MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm,rank)    MPIDI_CH4_NMI_Epts[COMM_TO_INDEX(comm,rank)]
+#define MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm,rank)    MPIDI_CH4_NMI_UCX_eps[COMM_TO_INDEX(comm,rank)]
 
 static inline uint64_t MPIDI_CH4_NMI_UCX_init_tag(MPIU_Context_id_t contextid, int source, uint64_t tag)
 {

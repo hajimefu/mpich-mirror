@@ -55,7 +55,7 @@ typedef struct {
 } MPIDI_CH4_NMI_UCX_Global_t;
 
 extern MPIDI_CH4_NMI_UCX_Global_t MPIDI_CH4_NMI_UCX_Global;
-extern ucp_ep_h *MPIDI_CH4_NMI_Epts;
+extern ucp_ep_h *MPIDI_CH4_NMI_UCX_eps;
 
 
 /* UCX TAG Layout */
