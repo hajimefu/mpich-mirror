@@ -31,7 +31,7 @@ typedef struct {
             uint32_t src_rank;
         } data;
     };
-} MPIDI_CH4_NMI_PTL_Am_reply_token_t;
+} MPIDI_CH4_NMI_PTL_am_reply_token_t;
 
 typedef struct {
     MPID_Node_id_t *node_map;
@@ -47,15 +47,15 @@ typedef struct {
     ptl_handle_eq_t eqs[2];
     ptl_pt_index_t  pt;
     ptl_handle_md_t md;
-} MPIDI_CH4_NMI_PTL_Global_t;
+} MPIDI_CH4_NMI_PTL_global_t;
 
 typedef struct {
     ptl_process_t  process;
     ptl_pt_index_t pt;
-} MPIDI_CH4_NMI_PTL_Addr_t;
+} MPIDI_CH4_NMI_PTL_addr_t;
 
-extern MPIDI_CH4_NMI_PTL_Global_t       MPIDI_CH4_NMI_PTL_Global;
-extern MPIDI_CH4_NMI_PTL_Addr_t        *MPIDI_CH4_NMI_PTL_Addr_table;
+extern MPIDI_CH4_NMI_PTL_global_t       MPIDI_CH4_NMI_PTL_global;
+extern MPIDI_CH4_NMI_PTL_addr_t        *MPIDI_CH4_NMI_PTL_addr_table;
 
 #define MPIDI_CH4_NMI_PTL_CONTEXT_ID_BITS 32
 #define MPIDI_CH4_NMI_PTL_TAG_BITS 32

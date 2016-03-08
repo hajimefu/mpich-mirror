@@ -13,7 +13,7 @@
 
 #include "impl.h"
 
-static inline int MPIDI_CH4_NMI_PTL_Am_handler(ptl_event_t *e)
+static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
     MPID_Request *rreq;
@@ -24,7 +24,7 @@ static inline int MPIDI_CH4_NMI_PTL_Am_handler(ptl_event_t *e)
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
-    MPIDI_CH4_NMI_PTL_Am_reply_token_t reply_token;
+    MPIDI_CH4_NMI_PTL_am_reply_token_t reply_token;
 
     /* reply_token.data.context_id = (e->match_bits >> MPIDI_CH4_NMI_PTL_TAG_BITS); */
     /* reply_token.data.src_rank   = (e->hdr_data & MPIDI_CH4_NMI_PTL_TAG_MASK); */
@@ -32,7 +32,7 @@ static inline int MPIDI_CH4_NMI_PTL_Am_handler(ptl_event_t *e)
     in_data = p_data = (e->start + (e->mlength - data_sz));
     int handler_id = e->hdr_data >> 48;
 
-    MPIDI_CH4_NMI_PTL_Global.am_handlers[handler_id](e->start,
+    MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id](e->start,
                                                      e->mlength - data_sz,
                                                      reply_token.val,
                                                      &p_data, &data_sz,
@@ -93,11 +93,11 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     ptl_event_t e;
     unsigned int which;
 
-    while (PtlEQPoll(MPIDI_CH4_NMI_PTL_Global.eqs, 2, 0, &e, &which) != PTL_EQ_EMPTY) {
+    while (PtlEQPoll(MPIDI_CH4_NMI_PTL_global.eqs, 2, 0, &e, &which) != PTL_EQ_EMPTY) {
         switch (e.type) {
         case PTL_EVENT_PUT:
             MPIU_Assert(e.ptl_list == PTL_OVERFLOW_LIST);
-            MPIDI_CH4_NMI_PTL_Am_handler(&e);
+            MPIDI_CH4_NMI_PTL_am_handler(&e);
             break;
         case PTL_EVENT_ACK:
             {

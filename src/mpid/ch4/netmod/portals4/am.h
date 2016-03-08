@@ -25,8 +25,8 @@ static inline int MPIDI_CH4_NM_reg_hdr_handler(int handler_id,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REG_HDR_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REG_HDR_HANDLER);
 
-    MPIDI_CH4_NMI_PTL_Global.am_handlers[handler_id] = target_handler_fn;
-    MPIDI_CH4_NMI_PTL_Global.send_cmpl_handlers[handler_id] = origin_handler_fn;
+    MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id] = target_handler_fn;
+    MPIDI_CH4_NMI_PTL_global.send_cmpl_handlers[handler_id] = origin_handler_fn;
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REG_HDR_HANDLER);
     return mpi_errno;
@@ -81,9 +81,9 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
         MPIU_Memcpy(send_buf + am_hdr_sz , data + dt_true_lb, data_sz);
         sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
 
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_Global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_Addr_table[rank].process,
-                     MPIDI_CH4_NMI_PTL_Addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
+                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
+                     MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
 
  fn_exit:
