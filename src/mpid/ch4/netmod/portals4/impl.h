@@ -39,17 +39,19 @@ static inline const char *MPIDI_CH4_NMI_PTL_strerror(int ret)
     }
 }
 
-/* #define MPIDI_CH4_NMI_PTL_CHK_STATUS(STATUS,STR)                        \ */
-/*     do {                                                                \ */
-/*         MPIR_ERR_CHKANDJUMP4(STATUS!=PTL_OK,                            \ */
-/*                              mpi_errno,                                 \ */
-/*                              MPI_ERR_OTHER,                             \ */
-/*                              "**"#STR,                                  \ */
-/*                              "**"#STR" %s %d %s %s",                    \ */
-/*                              __FILE__,                                  \ */
-/*                              __LINE__,                                  \ */
-/*                              FCNAME,                                    \ */
-/*                              MPIDI_CH4_NMI_PTL_strerror(STATUS));       \ */
-/*     } while (0) */
+#define MPIDI_CH4_NMI_PTL_ERR  MPIR_ERR_CHKANDJUMP4
+
+#define MPIDI_CH4_NMI_PTL_CHK_STATUS(STATUS,STR)                        \
+    do {                                                                \
+        MPIR_ERR_NMI_PTL_ERR(STATUS!=PTL_OK,                            \
+                             mpi_errno,                                 \
+                             MPI_ERR_OTHER,                             \
+                             "**"#STR,                                  \
+                             "**"#STR" %s %d %s %s",                    \
+                             __FILE__,                                  \
+                             __LINE__,                                  \
+                             FCNAME,                                    \
+                             MPIDI_CH4_NMI_PTL_strerror(STATUS));       \
+    } while (0)
 
 #endif /* NETMOD_PORTALS4_IMPL_H_INCLUDED */
