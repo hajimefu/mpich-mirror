@@ -14,7 +14,6 @@ typedef int (*MPIDI_CH4_NM_am_origin_handler_fn) (MPID_Request * req);
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_CH4_NM_am_target_handler_fn)
  (void                                   *am_hdr,
-  size_t                                  am_hdr_sz,
   uint64_t                                reply_token,    /* contains information about reply operation */
   void                                  **data,           /* data should be iovs if *is_contig is false */
   size_t                                 *data_sz,

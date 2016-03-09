@@ -31,7 +31,6 @@ static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg)
     in_data_sz = data_sz = msg_hdr->data_sz;
 
     MPIDI_CH4_NMI_UCX_Global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
-                                                              msg_hdr->am_hdr_sz,
                                                               reply_token.val,
                                                               &p_data, &data_sz,
                                                               &is_contig,

@@ -33,7 +33,6 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
     int handler_id = e->hdr_data >> 48;
 
     MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id](e->start,
-                                                     e->mlength - data_sz,
                                                      reply_token.val,
                                                      &p_data, &data_sz,
                                                      &is_contig,

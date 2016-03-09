@@ -385,7 +385,6 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *
 }
 
 int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
-                                      size_t     am_hdr_sz,
                                       uint64_t   reply_token,
                                       void     **data,
                                       size_t    *data_sz,

@@ -1281,7 +1281,6 @@ static inline int MPIDI_CH4R_cswap_ack_cmpl_handler(MPID_Request * rreq)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
-                                                 size_t am_hdr_sz,
                                                  uint64_t reply_token,
                                                  void **data,
                                                  size_t * p_data_sz,
@@ -1381,7 +1380,6 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_ssend_target_handler(void *am_hdr,
-                                                  size_t am_hdr_sz,
                                                   uint64_t reply_token,
                                                   void **data,
                                                   size_t * p_data_sz,
@@ -1395,7 +1393,7 @@ static inline int MPIDI_CH4R_ssend_target_handler(void *am_hdr,
     MPIDI_STATE_DECL(MPID_STATE_CH4R_SSEND_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SSEND_HANDLER);
 
-    mpi_errno = MPIDI_CH4R_send_target_handler(am_hdr, sizeof(MPIDI_CH4R_Hdr_t),
+    mpi_errno = MPIDI_CH4R_send_target_handler(am_hdr,
                                                reply_token, data, p_data_sz,
                                                is_contig, cmpl_handler_fn, req);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -1415,7 +1413,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4R_ssend_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr,
                                                       uint64_t reply_token, void **data,
                                                       size_t * p_data_sz, int *is_contig,
                                                       MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1443,7 +1441,7 @@ static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr, size_t am_hd
 #define FUNCNAME MPIDI_CH4R_put_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_put_ack_target_handler(void *am_hdr,
                                                     uint64_t reply_token, void **data,
                                                     size_t * p_data_sz, int *is_contig,
                                                     MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1483,7 +1481,7 @@ static inline int MPIDI_CH4R_put_ack_target_handler(void *am_hdr, size_t am_hdr_
 #define FUNCNAME MPIDI_CH4R_acc_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_acc_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_acc_ack_target_handler(void *am_hdr,
                                                     uint64_t reply_token, void **data,
                                                     size_t * p_data_sz, int *is_contig,
                                                     MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1523,7 +1521,7 @@ static inline int MPIDI_CH4R_acc_ack_target_handler(void *am_hdr, size_t am_hdr_
 #define FUNCNAME MPIDI_CH4R_get_acc_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr,
                                                         uint64_t reply_token, void **data,
                                                         size_t * p_data_sz, int *is_contig,
                                                         MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1594,7 +1592,7 @@ static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr, size_t am_
 #define FUNCNAME MPIDI_CH4R_cswap_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_cswap_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_cswap_ack_target_handler(void *am_hdr,
                                                       uint64_t reply_token, void **data,
                                                       size_t * p_data_sz, int *is_contig,
                                                       MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1823,7 +1821,7 @@ static inline void MPIDI_CH4R_win_unlock_done_cb(const MPIDI_CH4R_win_cntrl_msg_
 #define FUNCNAME MPIDI_CH4R_win_ctrl_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
                                                      uint64_t reply_token, void **data,
                                                      size_t * p_data_sz, int *is_contig,
                                                      MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1891,7 +1889,6 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr, size_t am_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
-                                                size_t am_hdr_sz,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -1994,7 +1991,6 @@ fn_exit:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_put_iov_target_handler(void *am_hdr,
-                                                    size_t am_hdr_sz,
                                                     uint64_t reply_token,
                                                     void **data,
                                                     size_t * p_data_sz,
@@ -2052,7 +2048,6 @@ static inline int MPIDI_CH4R_put_iov_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_put_iov_ack_target_handler(void *am_hdr,
-                                                        size_t am_hdr_sz,
                                                         uint64_t reply_token,
                                                         void **data,
                                                         size_t * p_data_sz,
@@ -2099,7 +2094,6 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_acc_iov_ack_target_handler(void *am_hdr,
-                                                        size_t am_hdr_sz,
                                                         uint64_t reply_token,
                                                         void **data,
                                                         size_t * p_data_sz,
@@ -2147,7 +2141,6 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_put_data_target_handler(void *am_hdr,
-                                                     size_t am_hdr_sz,
                                                      uint64_t reply_token,
                                                      void **data,
                                                      size_t * p_data_sz,
@@ -2190,7 +2183,6 @@ static inline int MPIDI_CH4R_put_data_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_acc_data_target_handler(void *am_hdr,
-                                                     size_t am_hdr_sz,
                                                      uint64_t reply_token,
                                                      void **data,
                                                      size_t * p_data_sz,
@@ -2245,7 +2237,6 @@ static inline int MPIDI_CH4R_acc_data_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
-                                                  size_t am_hdr_sz,
                                                   uint64_t reply_token,
                                                   void **data,
                                                   size_t * p_data_sz,
@@ -2310,7 +2301,6 @@ static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_handle_acc_request(void *am_hdr,
-                                                size_t am_hdr_sz,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -2399,7 +2389,6 @@ fn_exit:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_acc_iov_target_handler(void *am_hdr,
-                                                    size_t am_hdr_sz,
                                                     uint64_t reply_token,
                                                     void **data,
                                                     size_t * p_data_sz,
@@ -2467,7 +2456,6 @@ static inline int MPIDI_CH4R_acc_iov_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
-                                                size_t am_hdr_sz,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -2531,7 +2519,6 @@ static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_get_ack_target_handler(void *am_hdr,
-                                                    size_t am_hdr_sz,
                                                     uint64_t reply_token,
                                                     void **data,
                                                     size_t * p_data_sz,

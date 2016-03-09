@@ -38,7 +38,6 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_short_am(MPIDI_CH4_NMI_OFI_Am_header_
     in_data_sz = data_sz = msg_hdr->data_sz;
 
     MPIDI_Global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
-                                                  msg_hdr->am_hdr_sz,
                                                   reply_token.val,
                                                   &p_data, &data_sz,
                                                   &is_contig,
@@ -110,7 +109,6 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_short_am_hdr(MPIDI_CH4_NMI_OFI_Am_hea
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
 
     MPIDI_Global.am_handlers[msg_hdr->handler_id](am_hdr,
-                                                  msg_hdr->am_hdr_sz,
                                                   reply_token.val,
                                                   NULL, NULL, NULL,
                                                   &cmpl_handler_fn, &rreq);
@@ -275,7 +273,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_handle_long_am(MPIDI_CH4_NMI_OFI_Am_heade
 
     in_data_sz = data_sz = msg_hdr->data_sz;
     MPIDI_Global.am_handlers[msg_hdr->handler_id](am_hdr,
-                                                  msg_hdr->am_hdr_sz,
                                                   reply_token.val,
                                                   &p_data, &data_sz, &is_contig,
                                                   &cmpl_handler_fn, &rreq);
