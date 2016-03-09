@@ -161,8 +161,11 @@ static inline int MPIDI_CH4_NM_init(int rank,
 static inline int MPIDI_CH4_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
-    int ret;
+    int ret, i;
 
+    for (i = 0; i < MPIDI_CH4_NMI_PTL_NUM_OVERFLOW_BUFFERS; i++) {
+        ret = PtlMEUnlink(MPIDI_CH4_NMI_PTL_global.overflow_me_handles[i]);
+    }
     ret = PtlMDRelease(MPIDI_CH4_NMI_PTL_global.md);
     ret = PtlPTFree(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_global.pt);
     ret = PtlEQFree(MPIDI_CH4_NMI_PTL_global.eqs[1]);
