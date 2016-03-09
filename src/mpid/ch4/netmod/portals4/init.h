@@ -54,6 +54,11 @@ static inline int MPIDI_CH4_NM_init(int rank,
     ptl_md_t md;
     ptl_ni_limits_t desired;
     ptl_process_t my_ptl_id;
+    int key_max_sz;
+    int val_max_sz, val_sz_left;
+    int name_max_sz;
+    int len, i;
+    char *keyS, *valS, *buscard;
 
     /* Make sure our IOV is the same as portals4's IOV */
     MPIU_Assert(sizeof(ptl_iovec_t) == sizeof(MPL_IOV));
@@ -63,7 +68,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
 
     /* init portals */
     ret = PtlInit();
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlInit); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlInit);
 
     /* /\* do an interface pre-init to get the default limits struct *\/ */
     /* ret = PtlNIInit(PTL_IFACE_DEFAULT, PTL_NI_MATCHING | PTL_NI_PHYSICAL, */
@@ -85,18 +90,18 @@ static inline int MPIDI_CH4_NM_init(int rank,
     /* do the real init */
     ret = PtlNIInit(PTL_IFACE_DEFAULT, PTL_NI_MATCHING | PTL_NI_PHYSICAL,
                     PTL_PID_ANY, NULL, &MPIDI_CH4_NMI_PTL_global.ni_limits, &MPIDI_CH4_NMI_PTL_global.ni);
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlNIInit); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlNIInit);
 
     /* allocate EQs */
     ret = PtlEQAlloc(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_EVENT_COUNT, &MPIDI_CH4_NMI_PTL_global.eqs[0]);
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlEQAlloc); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlEQAlloc);
     ret = PtlEQAlloc(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_EVENT_COUNT, &MPIDI_CH4_NMI_PTL_global.eqs[1]);
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlEQAlloc); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlEQAlloc);
 
     /* allocate portal */
     ret = PtlPTAlloc(MPIDI_CH4_NMI_PTL_global.ni, PTL_PT_ONLY_USE_ONCE | PTL_PT_ONLY_TRUNCATE | PTL_PT_FLOWCTRL,
                      MPIDI_CH4_NMI_PTL_global.eqs[1], PTL_PT_ANY, &MPIDI_CH4_NMI_PTL_global.pt);
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlPTAlloc); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlPTAlloc);
 
     /* create an MD that covers all of memory */
     md.start = NULL;
@@ -105,21 +110,20 @@ static inline int MPIDI_CH4_NM_init(int rank,
     md.eq_handle = MPIDI_CH4_NMI_PTL_global.eqs[0];
     md.ct_handle = PTL_CT_NONE;
     ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &MPIDI_CH4_NMI_PTL_global.md);
-    /* MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlMDBind); */
+    MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlMDBind);
 
     /* create business card */
-    int key_max_sz;
-    int val_max_sz, val_sz_left;
-    int name_max_sz;
     ret = PMI_KVS_Get_key_length_max(&key_max_sz);
     ret = PMI_KVS_Get_value_length_max(&val_max_sz);
     ret = PMI_KVS_Get_name_length_max(&name_max_sz);
     MPIDI_CH4_NMI_PTL_global.kvsname = MPL_malloc(name_max_sz);
     ret = PMI_KVS_Get_my_name(MPIDI_CH4_NMI_PTL_global.kvsname, name_max_sz);
 
-    char keyS[key_max_sz], valS[val_max_sz], *buscard;
+    keyS = MPL_malloc(key_max_sz);
+    valS = MPL_malloc(val_max_sz);
     buscard = valS;
     val_sz_left = val_max_sz;
+
     ret = PtlGetId(MPIDI_CH4_NMI_PTL_global.ni, &my_ptl_id);
     ret = MPL_str_add_binary_arg(&buscard, &val_sz_left, "NID", (char *)&my_ptl_id.phys.nid, sizeof(my_ptl_id.phys.nid));
     ret = MPL_str_add_binary_arg(&buscard, &val_sz_left, "PID", (char *)&my_ptl_id.phys.pid, sizeof(my_ptl_id.phys.pid));
@@ -133,7 +137,6 @@ static inline int MPIDI_CH4_NM_init(int rank,
 
     /* get and store business cards in address table */
     MPIDI_CH4_NMI_PTL_addr_table = MPL_malloc(size * sizeof(MPIDI_CH4_NMI_PTL_addr_t));
-    int len, i;
     for (i = 0; i < size; i++) {
         sprintf(keyS, "PTL-%d", i);
         ret = PMI_KVS_Get(MPIDI_CH4_NMI_PTL_global.kvsname, keyS, valS, val_max_sz);
@@ -153,6 +156,9 @@ static inline int MPIDI_CH4_NM_init(int rank,
     mpi_errno = MPIDI_CH4R_build_nodemap(rank, comm_world, size, MPIDI_CH4_NMI_PTL_global.node_map, &MPIDI_CH4_NMI_PTL_global.max_node_id);
 
  fn_exit:
+    MPL_free(keyS);
+    MPL_free(valS);
+
     return mpi_errno;
  fn_fail:
     goto fn_exit;
