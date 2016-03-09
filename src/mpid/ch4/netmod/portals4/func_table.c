@@ -13,7 +13,7 @@
 #include "mpidimpl.h"
 #include "netmod_direct.h"
 
-MPIDI_CH4_NM_funcs_t MPIDI_CH4_NM_ptl_funcs = {
+MPIDI_CH4_NM_funcs_t MPIDI_CH4_NM_portals4_funcs = {
     MPIDI_CH4_NM_init,
     MPIDI_CH4_NM_finalize,
     MPIDI_CH4_NM_progress,
@@ -47,7 +47,7 @@ MPIDI_CH4_NM_funcs_t MPIDI_CH4_NM_ptl_funcs = {
     MPIDI_CH4_NM_am_inject_max_sz
 };
 
-MPIDI_CH4_NM_native_funcs_t MPIDI_CH4_NM_native_ptl_funcs = {
+MPIDI_CH4_NM_native_funcs_t MPIDI_CH4_NM_native_portals4_funcs = {
     MPIDI_CH4_NM_send,
     MPIDI_CH4_NM_ssend,
     MPIDI_CH4_NM_startall,
