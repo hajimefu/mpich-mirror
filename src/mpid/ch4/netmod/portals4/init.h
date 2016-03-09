@@ -39,6 +39,10 @@ static inline int MPIDI_CH4_NMI_PTL_append_overflow(int i)
                        &MPIDI_CH4_NMI_PTL_global.overflow_me_handles[i]);
 }
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_CH4_NM_init
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_init(int rank,
                                     int size,
                                     int appnum,
