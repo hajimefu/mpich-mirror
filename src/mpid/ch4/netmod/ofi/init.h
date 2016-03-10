@@ -567,6 +567,9 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
             MPL_free(MPIDI_Global.am_bufs[i]);
 
         MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.am_buf_pool);
+
+        MPIU_Assert(MPIDI_Global.cq_buff_head == MPIDI_Global.cq_buff_tail);
+        MPIU_Assert(slist_empty(&MPIDI_Global.cq_buff_list));
     }
 
     PMI_Finalize();
