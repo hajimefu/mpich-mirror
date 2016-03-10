@@ -392,7 +392,7 @@ static inline int MPIDI_CH4_NM_put(const void   *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PUT);
     int            target_contig,origin_contig,mpi_errno = MPI_SUCCESS;
-    MPIDI_msg_sz_t target_bytes,origin_bytes;
+    size_t target_bytes,origin_bytes;
     MPI_Aint       origin_true_lb,target_true_lb;
     size_t         offset;
 
@@ -543,7 +543,7 @@ static inline int MPIDI_CH4_NM_get(void         *origin_addr,
 {
     int            origin_contig,target_contig, mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Win_datatype_t   origin_dt, target_dt;
-    MPIDI_msg_sz_t origin_bytes;
+    size_t origin_bytes;
     size_t         offset;
     struct fi_rma_iov      riov;
     struct iovec        iov;
@@ -633,7 +633,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RPUT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RPUT);
     int            mpi_errno;
-    MPIDI_msg_sz_t origin_bytes;
+    size_t origin_bytes;
     size_t         offset;
     MPID_Request  *rreq;
 
@@ -1213,7 +1213,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RGET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RGET);
     int            mpi_errno;
-    MPIDI_msg_sz_t origin_bytes;
+    size_t origin_bytes;
     size_t         offset;
     MPID_Request  *rreq;
 

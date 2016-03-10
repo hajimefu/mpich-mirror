@@ -419,7 +419,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
     int             dt_contig, mpi_errno = MPI_SUCCESS, use_rank;
     MPID_Comm      *use_comm;
     char           *send_buf;
-    MPIDI_msg_sz_t  data_sz;
+    size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
     MPIDI_CH4_NMI_OFI_Am_reply_token_t  use_token;
@@ -444,7 +444,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
     }
 
     if(!dt_contig) {
-        MPIDI_msg_sz_t segment_first;
+        size_t segment_first;
         struct MPID_Segment *segment_ptr;
         segment_ptr = MPID_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,

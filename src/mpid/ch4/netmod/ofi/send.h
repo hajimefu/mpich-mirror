@@ -27,7 +27,7 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_lightweight(const void     *buf,
-                                                         MPIDI_msg_sz_t  data_sz,
+                                                         size_t  data_sz,
                                                          int             rank,
                                                          int             tag,
                                                          MPID_Comm      *comm,
@@ -53,7 +53,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_lightweight_request(const void     *buf,
-                                                                 MPIDI_msg_sz_t  data_sz,
+                                                                 size_t  data_sz,
                                                                  int             rank,
                                                                  int             tag,
                                                                  MPID_Comm      *comm,
@@ -84,7 +84,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS,
                                                     int              dt_contig,
-                                                    MPIDI_msg_sz_t   data_sz,
+                                                    size_t   data_sz,
                                                     MPID_Datatype   *dt_ptr,
                                                     MPI_Aint         dt_true_lb,
                                                     uint64_t         type)
@@ -129,7 +129,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
     send_buf = (char *) buf + dt_true_lb;
 
     if(!dt_contig) {
-        MPIDI_msg_sz_t segment_first;
+        size_t segment_first;
         segment_first = 0;
         last = data_sz;
         MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig) = (MPIDI_CH4_NMI_OFI_Noncontig_t *) MPL_malloc(data_sz+sizeof(MPID_Segment));
@@ -220,7 +220,7 @@ fn_fail:
 __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send(MPIDI_CH4_NMI_OFI_SENDPARAMS, int noreq, uint64_t syncflag)
 {
     int dt_contig, mpi_errno;
-    MPIDI_msg_sz_t data_sz;
+    size_t data_sz;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
 

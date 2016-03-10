@@ -141,7 +141,7 @@ static inline int ucx_send(const void *buf,
 {
 
     int dt_contig, mpi_errno;
-    MPIDI_msg_sz_t data_sz;
+    size_t data_sz;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
 

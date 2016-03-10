@@ -16,7 +16,7 @@ static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg, size_t msg_sz)
     MPID_Request *rreq;
     void *p_data;
     void *in_data;
-    MPIDI_msg_sz_t data_sz, in_data_sz;
+    size_t data_sz, in_data_sz;
     MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
     int i, is_contig, iov_len;

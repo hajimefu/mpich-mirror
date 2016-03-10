@@ -105,7 +105,7 @@ static inline int do_irecv(void *buf,
                            int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_msg_sz_t data_sz;
+    size_t data_sz;
     int dt_contig;
     MPID_Request *req;
     MPI_Aint dt_true_lb;

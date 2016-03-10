@@ -187,7 +187,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 	    (_dt_ptr)        = NULL;					\
 	    (_dt_contig_out) = TRUE;					\
 	    (_dt_true_lb)    = 0;					\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *		\
+	    (_data_sz_out)   = (size_t)(_count) *		\
 		MPID_Datatype_get_basic_size(_datatype);		\
 	}								\
 	else								\
@@ -197,7 +197,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
             {                                                           \
                 (_dt_contig_out) = (_dt_ptr)->is_contig;                \
                 (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
-                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                (_data_sz_out)   = (size_t)(_count) *           \
                     (_dt_ptr)->size;                                    \
             }                                                           \
             else                                                        \
@@ -215,13 +215,13 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 	if (IS_BUILTIN(_datatype))					\
 	{								\
 	    (_dt_ptr)        = NULL;					\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *		\
+	    (_data_sz_out)   = (size_t)(_count) *		\
 		MPID_Datatype_get_basic_size(_datatype);		\
 	}								\
 	else								\
 	{								\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
-	    (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+	    (_data_sz_out)   = (_dt_ptr) ? (size_t)(_count) *   \
                 (_dt_ptr)->size : 0;                                    \
 	}								\
     })
@@ -247,7 +247,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
       if (IS_BUILTIN(_datatype))					\
       {                                                                 \
 	  (_dt_contig_out) = TRUE;					\
-	  (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *			\
+	  (_data_sz_out)   = (size_t)(_count) *			\
 	      MPID_Datatype_get_basic_size(_datatype);			\
       }                                                                 \
       else								\
@@ -257,7 +257,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
           if (_dt_ptr)                                                  \
           {                                                             \
               (_dt_contig_out) = (_dt_ptr)->is_contig;                  \
-              (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *             \
+              (_data_sz_out)   = (size_t)(_count) *             \
                   (_dt_ptr)->size;                                      \
           }                                                             \
           else                                                          \
@@ -272,14 +272,14 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
     ({                                                                  \
         if (IS_BUILTIN(_datatype))                                      \
         {                                                               \
-            (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *               \
+            (_data_sz_out)   = (size_t)(_count) *               \
                 MPID_Datatype_get_basic_size(_datatype);                \
         }                                                               \
         else                                                            \
         {                                                               \
             MPID_Datatype *_dt_ptr;                                     \
             MPID_Datatype_get_ptr((_datatype), (_dt_ptr));              \
-            (_data_sz_out)   = (_dt_ptr) ? (MPIDI_msg_sz_t)(_count) *   \
+            (_data_sz_out)   = (_dt_ptr) ? (size_t)(_count) *   \
                 (_dt_ptr)->size : 0;                                    \
         }                                                               \
     })
@@ -292,7 +292,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 	if (IS_BUILTIN(_datatype))					\
 	{								\
 	    (_dt_contig_out) = TRUE;					\
-	    (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *		\
+	    (_data_sz_out)   = (size_t)(_count) *		\
 		MPID_Datatype_get_basic_size(_datatype);		\
 	    (_dt_true_lb)    = 0;					\
 	}								\
@@ -303,7 +303,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
             if (_dt_ptr)                                                \
             {                                                           \
                 (_dt_contig_out) = (_dt_ptr)->is_contig;                \
-                (_data_sz_out)   = (MPIDI_msg_sz_t)(_count) *           \
+                (_data_sz_out)   = (size_t)(_count) *           \
                     (_dt_ptr)->size;                                    \
                 (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
             }                                                           \

@@ -15,7 +15,6 @@
 #if defined(HAVE_SYS_TYPES_H)
 #include <sys/types.h>
 #endif
-typedef size_t MPIDI_msg_sz_t;
 
 #include "mpid_dataloop.h"
 #include "mpid_thread.h"

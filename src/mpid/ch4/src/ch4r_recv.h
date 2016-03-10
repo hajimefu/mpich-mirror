@@ -47,7 +47,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     int dt_contig;
     MPI_Aint dt_true_lb, last;
     MPID_Datatype *dt_ptr;
-    MPIDI_msg_sz_t in_data_sz, dt_sz, nbytes;
+    size_t in_data_sz, dt_sz, nbytes;
     MPID_Segment *segment_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_UNEXPECTED);

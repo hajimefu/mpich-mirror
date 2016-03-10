@@ -158,7 +158,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
     ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
-    MPIDI_msg_sz_t  data_sz;
+    size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
     int             dt_contig;
@@ -286,7 +286,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     ucp_ep_h ep;
     uint64_t ucx_tag;
     char *send_buf;
-    MPIDI_msg_sz_t  data_sz;
+    size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
     int             dt_contig;

@@ -25,7 +25,7 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_short_am(MPIDI_CH4_NMI_OFI_Am_header_
     void *p_data;
     void *in_data;
 
-    MPIDI_msg_sz_t data_sz, in_data_sz;
+    size_t data_sz, in_data_sz;
     MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
     int i, is_contig, iov_len;

@@ -533,7 +533,7 @@ static inline int MPIDI_CH4R_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
-    MPIDI_msg_sz_t data_sz, dt_sz;
+    size_t data_sz, dt_sz;
     MPID_Segment *segment_ptr;
     void *buf;
     int count;
@@ -616,7 +616,7 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
-    MPIDI_msg_sz_t dt_sz;
+    size_t dt_sz;
     MPID_Segment *segment_ptr;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_UNEXP_CMPL_HANDLER);

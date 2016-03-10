@@ -35,7 +35,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
     MPID_Request *rreq = NULL;
     uint64_t match_bits, mask_bits;
     MPIU_Context_id_t context_id = comm->recvcontext_id + context_offset;
-    MPIDI_msg_sz_t data_sz;
+    size_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;

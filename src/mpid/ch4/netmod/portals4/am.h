@@ -56,7 +56,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
                                        MPID_Request * sreq, void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret, c;
-    MPIDI_msg_sz_t  data_sz;
+    size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
     int             dt_contig;

@@ -74,7 +74,7 @@ static inline ptl_match_bits_t MPIDI_CH4_NMI_PTL_init_tag(MPIU_Context_id_t cont
 
 #define MPIDI_CH4_NMI_PTL_MSG_SZ_MASK   (0x0000FFFFFFFFFFFFULL)
 
-static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, MPIDI_msg_sz_t msg_sz)
+static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, size_t msg_sz)
 {
     ptl_hdr_data_t hdr = 0;
     hdr = handler_id;
