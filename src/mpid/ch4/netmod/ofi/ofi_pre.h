@@ -152,6 +152,10 @@ typedef struct {
     int index;
 } MPIDI_OFI_dt_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_OFI_op_t;
+
 struct MPIDI_OFI_win_request;
 
 typedef struct {

@@ -20,6 +20,7 @@
 #include "ofi_init.h"
 #include "ofi_coll.h"
 #include "ofi_datatype.h"
+#include "ofi_op.h"
 
 #ifdef USE_OFI_TAGGED
 #include "ofi_probe.h"

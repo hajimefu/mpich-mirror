@@ -159,9 +159,11 @@ typedef int (*MPIDI_NM_ireduce_t)(const void * sendbuf, void * recvbuf, int coun
 typedef int (*MPIDI_NM_iscan_t)(const void * sendbuf, void * recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm * comm, MPI_Request * req);
 typedef int (*MPIDI_NM_iscatter_t)(const void * sendbuf, int sendcount, MPI_Datatype sendtype, void * recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPIR_Comm * comm, MPI_Request * req);
 typedef int (*MPIDI_NM_iscatterv_t)(const void * sendbuf, const int * sendcounts, const int * displs, MPI_Datatype sendtype, void * recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPIR_Comm * comm_ptr, MPI_Request * req);
-typedef void (*MPIDI_NM_datatype_commit_hook_t)(MPI_Datatype * datatype_p);
-typedef void (*MPIDI_NM_datatype_dup_hook_t)(MPIR_Datatype * datatype_p);
-typedef void (*MPIDI_NM_datatype_destroy_hook_t)(MPIR_Datatype * datatype_p);
+typedef void (*MPIDI_NM_datatype_commit_t)(MPIR_Datatype * datatype_p);
+typedef void (*MPIDI_NM_datatype_dup_t)(MPIR_Datatype * old_datatype_p, MPIR_Datatype * new_datatype_p);
+typedef void (*MPIDI_NM_datatype_destroy_t)(MPIR_Datatype * datatype_p);
+typedef void (*MPIDI_NM_op_commit_t)(MPIR_Op * op_p);
+typedef void (*MPIDI_NM_op_destroy_t)(MPIR_Op * op_p);
 
 typedef struct MPIDI_NM_funcs {
     MPIDI_NM_init_t init;
@@ -303,9 +305,12 @@ typedef struct MPIDI_NM_native_funcs {
     MPIDI_NM_iscatter_t iscatter;
     MPIDI_NM_iscatterv_t iscatterv;
     /* Datatype hooks */
-    MPIDI_NM_datatype_commit_hook_t datatype_commit_hook;
-    MPIDI_NM_datatype_dup_hook_t datatype_dup_hook;
-    MPIDI_NM_datatype_destroy_hook_t datatype_destroy_hook;
+    MPIDI_NM_datatype_commit_t datatype_commit;
+    MPIDI_NM_datatype_dup_t datatype_dup;
+    MPIDI_NM_datatype_destroy_t datatype_destroy;
+    /* Op hooks */
+    MPIDI_NM_op_commit_t op_commit;
+    MPIDI_NM_op_destroy_t op_destroy;
 } MPIDI_NM_native_funcs_t;
 
 extern MPIDI_NM_funcs_t *MPIDI_NM_funcs[];
@@ -453,9 +458,11 @@ MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_ireduce(const void * sendbuf, void * 
 MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_iscan(const void * sendbuf, void * recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm * comm, MPI_Request * req) MPIDI_NM_STATIC_INLINE_SUFFIX;
 MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_iscatter(const void * sendbuf, int sendcount, MPI_Datatype sendtype, void * recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPIR_Comm * comm, MPI_Request * req) MPIDI_NM_STATIC_INLINE_SUFFIX;
 MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_iscatterv(const void * sendbuf, const int * sendcounts, const int * displs, MPI_Datatype sendtype, void * recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPIR_Comm * comm_ptr, MPI_Request * req) MPIDI_NM_STATIC_INLINE_SUFFIX;
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_commit_hook(MPI_Datatype * datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_dup_hook(MPIR_Datatype * datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype * datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_commit(MPIR_Datatype * datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_dup(MPIR_Datatype * old_datatype_p, MPIR_Datatype *new_datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_destroy(MPIR_Datatype * datatype_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_op_commit(MPIR_Op * op_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_op_destroy(MPIR_Op * op_p) MPIDI_NM_STATIC_INLINE_SUFFIX;
 
 #endif
 

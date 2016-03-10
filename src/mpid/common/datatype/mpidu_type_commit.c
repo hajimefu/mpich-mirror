@@ -64,8 +64,8 @@ int MPIDU_Type_commit(MPI_Datatype *datatype_p)
 #endif
 
 #ifdef MPIDU_Dev_datatype_commit_hook
-       MPIDU_Dev_datatype_commit_hook(datatype_p);
-#endif /* MPIDU_Dev_datatype_commit_hook */
+       MPIDU_Dev_datatype_commit_hook(datatype_ptr);
+#endif /* MPID_Dev_datatype_commit_hook */
 
     }
     return mpi_errno;

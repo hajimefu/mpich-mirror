@@ -116,6 +116,12 @@ MPIDI_${net_upper}_comm_t ${net};"
         ch4_netmod_dt_decl="${ch4_netmod_dt_decl} \\
 MPIDI_${net_upper}_dt_t ${net};"
     fi
+    if test -z "$ch4_netmod_op_decl" ; then
+        ch4_netmod_op_decl="MPIDI_${net_upper}_op_t ${net};"
+    else
+        ch4_netmod_op_decl="${ch4_netmod_op_decl} \\
+MPIDI_${net_upper}_op_t ${net};"
+    fi
 
     if test -z "$ch4_netmod_win_decl" ; then
         ch4_netmod_win_decl="MPIDI_${net_upper}_win_t ${net};"
@@ -160,6 +166,7 @@ AC_SUBST(ch4_netmod_dt_decl)
 AC_SUBST(ch4_netmod_win_decl)
 AC_SUBST(ch4_netmod_gpid_decl)
 AC_SUBST(ch4_netmod_addr_decl)
+AC_SUBST(ch4_netmod_op_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_pre_include)
 AM_SUBST_NOTMAKE(ch4_netmod_amrequest_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_request_decl)
@@ -168,6 +175,7 @@ AM_SUBST_NOTMAKE(ch4_netmod_dt_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_win_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_gpid_decl)
 AM_SUBST_NOTMAKE(ch4_netmod_addr_decl)
+AM_SUBST_NOTMAKE(ch4_netmod_op_decl)
 
 AC_ARG_ENABLE(ch4-netmod-direct,
     [--enable-ch4-netmod-direct

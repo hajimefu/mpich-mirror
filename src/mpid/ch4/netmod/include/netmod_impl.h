@@ -540,18 +540,25 @@ MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_iscatterv(const void * sendbuf, const
     return MPIDI_NM_native_func->iscatterv( sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm_ptr, req);
 };
 
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_commit_hook(MPI_Datatype * datatype_p) {
-    return MPIDI_NM_native_func->datatype_commit_hook( datatype_p);
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_commit(MPIR_Datatype * datatype_p) {
+    return MPIDI_NM_native_func->datatype_commit( datatype_p);
 };
 
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_dup_hook(MPIR_Datatype * datatype_p) {
-    return MPIDI_NM_native_func->datatype_dup_hook( datatype_p);
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_dup(MPIR_Datatype * old_datatype_p, MPIR_Datatype *new_datatype_p) {
+    return MPIDI_NM_native_func->datatype_dup( old_datatype_p, new_datatype_p);
 };
 
-MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype * datatype_p) {
-    return MPIDI_NM_native_func->datatype_destroy_hook( datatype_p);
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_datatype_destroy(MPIR_Datatype * datatype_p) {
+    return MPIDI_NM_native_func->datatype_destroy( datatype_p);
 };
 
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_op_commit(MPIR_Op * op_p) {
+    return MPIDI_NM_native_func->op_commit( op_p);
+};
+
+MPIDI_NM_STATIC_INLINE_PREFIX void MPIDI_NM_op_destroy(MPIR_Op * op_p) {
+    return MPIDI_NM_native_func->op_destroy( op_p);
+};
 
 #endif /* NETMOD_DISABLE_INLINES  */
 

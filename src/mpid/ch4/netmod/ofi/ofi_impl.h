@@ -40,6 +40,9 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
 
+#define MPIDI_OFI_DT(dt)         ((dt)->dev.netmod.ofi)
+#define MPIDI_OFI_OP(op)         ((op)->dev.netmod.ofi)
+#define MPIDI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 #define MPIDI_OFI_COMM_TO_INDEX(comm,rank) \
     MPIDIU_comm_rank_to_pid(comm, rank, NULL, NULL)
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE

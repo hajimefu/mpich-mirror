@@ -147,8 +147,10 @@ MPIDI_NM_native_funcs_t MPIDI_NM_native_ofi_funcs = {
     MPIDI_NM_iscan,
     MPIDI_NM_iscatter,
     MPIDI_NM_iscatterv,
-    MPIDI_NM_datatype_commit_hook,
-    MPIDI_NM_datatype_dup_hook,
-    MPIDI_NM_datatype_destroy_hook,
+    MPIDI_NM_datatype_commit,
+    MPIDI_NM_datatype_dup,
+    MPIDI_NM_datatype_destroy,
+    MPIDI_NM_op_commit,
+    MPIDI_NM_op_destroy,
 };
 #endif

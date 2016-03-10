@@ -30,6 +30,10 @@ typedef struct {
 
 typedef struct {
     int dummy;
+} MPIDI_STUBNM_op_t;
+
+typedef struct {
+    int dummy;
 } MPIDI_STUBNM_win_t;
 
 typedef struct {

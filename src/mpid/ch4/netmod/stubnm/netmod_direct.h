@@ -24,4 +24,6 @@
 #include "stubnm_unimpl.h"
 #include "stubnm_proc.h"
 #include "stubnm_coll.h"
+#include "stubnm_datatype.h"
+#include "stubnm_op.h"
 #endif /* NETMOD_DIRECT_H_INCLUDED */

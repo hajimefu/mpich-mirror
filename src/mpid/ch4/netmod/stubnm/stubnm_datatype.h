@@ -8,24 +8,28 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_OFI_DATATYPE_H_INCLUDED
-#define NETMOD_OFI_DATATYPE_H_INCLUDED
+#ifndef NETMOD_STUBNM_DATATYPE_H_INCLUDED
+#define NETMOD_STUBNM_DATATYPE_H_INCLUDED
 
-#include "ofi_impl.h"
+#include "stubnm_impl.h"
 
 static inline void MPIDI_NM_datatype_destroy(MPIR_Datatype *datatype_p)
 {
+    MPIU_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_datatype_commit(MPIR_Datatype *datatype_p)
 {
+    MPIU_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_datatype_dup(MPIR_Datatype *old_datatype_p,
-                                             MPIR_Datatype *new_datatype_p)
+                                         MPIR_Datatype *new_datatype_p)
 {
+    MPIU_Assert(0);
     return;
 }
+
 #endif

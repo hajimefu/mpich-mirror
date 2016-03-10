@@ -393,6 +393,12 @@ typedef uint16_t MPID_Node_id_t;
 
 typedef struct {
     union {
+        MPIDI_CH4_NETMOD_OP_DECL
+    }netmod;
+} MPIDI_Devop_t;
+
+typedef struct {
+    union {
         MPIDI_CH4_NETMOD_GPID_DECL
     } netmod;
     MPID_Node_id_t node;
@@ -401,6 +407,7 @@ typedef struct {
 #define MPID_DEV_REQUEST_DECL    MPIDI_Devreq_t  dev;
 #define MPID_DEV_WIN_DECL        MPIDI_Devwin_t  dev;
 #define MPID_DEV_COMM_DECL       MPIDI_Devcomm_t dev;
+#define MPID_DEV_OP_DECL         MPIDI_Devop_t   dev;
 #define MPID_DEV_GPID_DECL       MPIDI_Devgpid_t dev;
 
 #define MPIDII_GPID(gpid) (gpid)->dev
@@ -437,14 +444,12 @@ extern MPIDII_av_table_t *MPIDII_av_table0;
 #define MPID_Dev_comm_create_hook(a)  (MPID_Comm_create(a))
 #define MPID_Dev_comm_destroy_hook(a) (MPID_Comm_destroy(a))
 
-#ifdef HAVE_MPIDI_NM_datatype_commit_hook
-#define MPID_Dev_datatype_commit_hook  MPIDI_NM_datatype_commit_hook
-#define MPID_Dev_datatype_dup_hook  MPIDI_NM_datatype_dup_hook
-#endif
+#define MPIDU_Dev_datatype_commit_hook   MPIDI_NM_datatype_commit
+#define MPIDU_Dev_datatype_dup_hook      MPIDI_NM_datatype_dup
+#define MPIDU_Dev_datatype_destroy_hook  MPIDI_NM_datatype_destroy
 
-#ifdef HAVE_MPIDI_NM_datatype_commit_hook
-#define MPID_Dev_datatype_destroy_hook  MPIDI_NM_datatype_destroy_hook
-#endif
+#define MPID_Dev_op_commit_hook          MPIDI_NM_op_commit
+#define MPID_Dev_op_destroy_hook         MPIDI_NM_op_destroy
 
 /* operation for (avtid, lpid) to/from "lpid64" */
 /* hard code limit on number of live comm worlds. This should be fixed by future
