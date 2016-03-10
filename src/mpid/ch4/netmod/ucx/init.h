@@ -79,8 +79,8 @@ static inline int MPIDI_CH4_NM_init(int rank,
     pmi_errno =  PMI_Barrier();
     MPIDI_CH4_NMI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
-    table = (char *) MPL_malloc(size * MPIDI_CH4_NMI_UCX_Global.addrname_len);
-    MPIDI_CH4_NMI_UCX_eps = (ucp_ep_h *) MPL_malloc(size * sizeof(ucp_ep_h));
+    table = MPL_malloc(size * MPIDI_CH4_NMI_UCX_Global.addrname_len);
+    MPIDI_CH4_NMI_UCX_eps = MPL_malloc(size * sizeof(ucp_ep_h));
 
     maxlen = MPIDI_CH4_NMI_UCX_KVSAPPSTRLEN;
 
@@ -129,7 +129,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     /* -------------------------------- */
     /* Calculate per-node map           */
     /* -------------------------------- */
-    MPIDI_CH4_NMI_UCX_Global.node_map = (MPID_Node_id_t *)  MPL_malloc(comm_world->local_size * sizeof(*MPIDI_CH4_NMI_UCX_Global.node_map));
+    MPIDI_CH4_NMI_UCX_Global.node_map = MPL_malloc(comm_world->local_size * sizeof(*MPIDI_CH4_NMI_UCX_Global.node_map));
 
     MPIDI_CH4_NMI_UCX_Global.max_node_id = 1024;
     mpi_errno = MPIDI_CH4R_build_nodemap(comm_world->rank,
