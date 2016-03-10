@@ -10,7 +10,7 @@
 #include "impl.h"
 //#include "events.h"
 
-static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg)
+static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg, size_t msg_sz)
 {
     int mpi_errno;
     MPID_Request *rreq;
@@ -27,7 +27,7 @@ static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg)
     reply_token.data.context_id = msg_hdr->context_id;
     reply_token.data.src_rank   = msg_hdr->src_rank;
 
-    p_data = in_data = (char *) msg_hdr->payload + msg_hdr->am_hdr_sz;
+    p_data = in_data = (char *) msg_hdr->payload + (msg_sz - msg_hdr->data_sz - sizeof(*msg_hdr));
     in_data_sz = data_sz = msg_hdr->data_sz;
 
     MPIDI_CH4_NMI_UCX_Global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
@@ -96,7 +96,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_am_recv(void *request, ucs_status_t 
     }
 
     /* call the AM handler */
-    MPIDI_CH4_NMI_UCX_Am_handler(MPIDI_CH4_NMI_UCX_Global.am_bufs[am_recv_idx]);
+    MPIDI_CH4_NMI_UCX_Am_handler(MPIDI_CH4_NMI_UCX_Global.am_bufs[am_recv_idx], info->length);
 
     /* update the idx */
     ++am_recv_idx;

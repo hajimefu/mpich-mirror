@@ -39,7 +39,6 @@ typedef struct {
 
 typedef struct MPIDI_CH4_NMI_UCX_Am_header_t {
     uint64_t handler_id;
-    uint64_t am_hdr_sz;
     uint64_t data_sz;
     uint64_t context_id;
     uint64_t src_rank;

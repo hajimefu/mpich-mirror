@@ -92,7 +92,6 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.am_hdr_sz = am_hdr_sz;
     ucx_hdr.context_id = comm->context_id;
     ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = 0;
@@ -175,7 +174,6 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.am_hdr_sz = am_hdr_sz;
     ucx_hdr.context_id = comm->context_id;
     ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = data_sz;
@@ -310,7 +308,6 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.am_hdr_sz = am_hdr_sz;
     ucx_hdr.context_id = use_comm->context_id;
     ucx_hdr.src_rank = use_comm->rank;
     ucx_hdr.data_sz = data_sz;
@@ -399,7 +396,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.am_hdr_sz = am_hdr_sz;
     ucx_hdr.context_id = comm->context_id;
     ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = 0;
@@ -457,7 +453,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.am_hdr_sz = am_hdr_sz;
     ucx_hdr.context_id = use_comm->context_id;
     ucx_hdr.src_rank = use_comm->rank;
 
