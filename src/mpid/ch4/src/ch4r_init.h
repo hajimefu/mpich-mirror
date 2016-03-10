@@ -116,12 +116,12 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     mpi_errno = MPIDI_CH4_NM_reg_hdr_handler(MPIDI_CH4R_SEND_LONG_REQ,
-                                             &MPIDI_CH4R_send_long_req_origin_cmpl_handler,
+                                             NULL /* Injection only */,
                                              &MPIDI_CH4R_send_long_req_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     mpi_errno = MPIDI_CH4_NM_reg_hdr_handler(MPIDI_CH4R_SEND_LONG_ACK,
-                                             &MPIDI_CH4R_send_long_ack_origin_cmpl_handler,
+                                             NULL /* Injection only */,
                                              &MPIDI_CH4R_send_long_ack_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 

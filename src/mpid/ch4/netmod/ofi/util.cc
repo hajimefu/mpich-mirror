@@ -398,9 +398,6 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
     MPIDI_CH4_NMI_OFI_Win_control_t *control    = (MPIDI_CH4_NMI_OFI_Win_control_t *)buf;
     *req                            = NULL;
     *cmpl_handler_fn                = NULL;
-    *data                           = NULL;
-    *data_sz                        = 0;
-    *is_contig                      = 1;
 
     switch(control->type) {
         case MPIDI_CH4_NMI_OFI_CTRL_HUGEACK: {

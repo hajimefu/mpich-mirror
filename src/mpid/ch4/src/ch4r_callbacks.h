@@ -81,34 +81,6 @@ static inline int MPIDI_CH4R_send_origin_cmpl_handler(MPID_Request * sreq)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_req_origin_cmpl_handler
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_req_origin_cmpl_handler(MPID_Request * sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_REQ_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_REQ_TX_HANDLER);
-    MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_REQ_TX_HANDLER);
-    return mpi_errno;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_ack_origin_cmpl_handler
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_ack_origin_cmpl_handler(MPID_Request * sreq)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_ACK_TX_HANDLER);
-    MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_ACK_TX_HANDLER);
-    return mpi_errno;
-}
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4R_send_long_lmt_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -1490,7 +1462,6 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
         /* MPIDI_CS_EXIT(); */
     }
     else {
-        int c;
         MPIDI_CH4R_Send_long_ack_msg_t msg;
 
         MPIR_Comm_release(root_comm); /* -1 for posted_list */
@@ -1499,10 +1470,9 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
         msg.sreq_ptr = lreq_hdr->sreq_ptr;
         msg.rreq_ptr = (uint64_t) rreq;
         MPIU_Assert((void *) msg.sreq_ptr != NULL);
-        MPIR_cc_incr(rreq->cc_ptr, &c);
-        mpi_errno = MPIDI_CH4_NM_send_am_hdr_reply(reply_token,
-                                                   MPIDI_CH4R_SEND_LONG_ACK,
-                                                   &msg, sizeof(msg), rreq);
+        mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(reply_token,
+                                                     MPIDI_CH4R_SEND_LONG_ACK,
+                                                     &msg, sizeof(msg));
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
     }

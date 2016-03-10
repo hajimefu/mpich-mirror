@@ -144,16 +144,15 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
         }
         else if (MPIDI_CH4R_REQUEST(unexp_req, req->status) & MPIDI_CH4R_REQ_LONG_RTS) {
             MPIDI_CH4R_Send_long_ack_msg_t msg;
-            int c;
 
             /* Matching receive is now posted, sending CTS to the peer */
             msg.sreq_ptr = MPIDI_CH4R_REQUEST(unexp_req, req->rreq.peer_req_ptr);
             msg.rreq_ptr = (uint64_t) unexp_req;
             MPIU_Assert((void *)msg.sreq_ptr != NULL);
-            MPIR_cc_incr(unexp_req->cc_ptr, &c);
-            mpi_errno = MPIDI_CH4_NM_send_am_hdr_reply(MPIDI_CH4R_REQUEST(unexp_req, req->rreq.reply_token),
-                                                       MPIDI_CH4R_SEND_LONG_ACK,
-                                                       &msg, sizeof(msg), unexp_req);
+
+            mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(MPIDI_CH4R_REQUEST(unexp_req, req->rreq.reply_token),
+                                                         MPIDI_CH4R_SEND_LONG_ACK,
+                                                         &msg, sizeof(msg));
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             dtype_add_ref_if_not_builtin(datatype);

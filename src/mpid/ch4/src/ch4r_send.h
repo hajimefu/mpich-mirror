@@ -72,7 +72,6 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
                                              buf, count, datatype, sreq, NULL);
         }
         else {
-            int c;
             MPIDI_CH4R_Send_long_req_msg_t lreq_hdr;
             /* Rendezvous send */
             lreq_hdr.hdr = am_hdr;
@@ -83,9 +82,8 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
             dtype_add_ref_if_not_builtin(datatype);
             MPIDI_CH4R_REQUEST(sreq, req->lreq).datatype = datatype;
             MPIDI_CH4R_REQUEST(sreq, req->lreq).msg_tag  = match_bits;
-            MPIR_cc_incr(sreq->cc_ptr, &c); /* Additional +1 for long request */
-            mpi_errno = MPIDI_CH4_NM_send_am_hdr(rank, comm, MPIDI_CH4R_SEND_LONG_REQ,
-                                                 &lreq_hdr, sizeof(lreq_hdr), sreq, NULL);
+            mpi_errno = MPIDI_CH4_NM_inject_am_hdr(rank, comm, MPIDI_CH4R_SEND_LONG_REQ,
+                                                   &lreq_hdr, sizeof(lreq_hdr), NULL);
         }
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
