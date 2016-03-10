@@ -15,6 +15,4 @@ mpi_core_sources   += src/mpid/ch4/netmod/ucx/func_table.c\
 
 errnames_txt_files += src/mpid/ch4/netmod/ucx/errnames.txt
 
-lib_lib@MPILIBNAME@_la_CXXFLAGS  = -fno-rtti -fno-exceptions
-
 endif
