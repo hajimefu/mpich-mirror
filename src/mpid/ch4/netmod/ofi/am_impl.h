@@ -538,7 +538,7 @@ static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
     msg_hdr.handler_id  = handler_id;
     msg_hdr.am_hdr_sz   = am_hdr_sz;
     msg_hdr.data_sz     = 0;
-    msg_hdr.am_type     = MPIDI_AMTYPE_SHORT;
+    msg_hdr.am_type     = MPIDI_AMTYPE_SHORT_HDR;
 
     if(is_reply) {
         use_token.val      = reply_token;
