@@ -70,24 +70,25 @@ typedef int (*req_fn) (MPIDI_VC_t *, MPID_Request *, int *);
 /* Global Object for state tracking */
 /* ******************************** */
 typedef struct {
-    char bound_addr[OFI_MAX_ADDR_LEN];       /* This ranks bound address    */
-    fi_addr_t any_addr;         /* Specifies any source        */
-    size_t bound_addrlen;       /* length of the bound address */
-    struct fid_fabric *fabric;  /* fabric object               */
-    struct fid_domain *domain;  /* domain object               */
-    struct fid_ep *endpoint;    /* endpoint object             */
-    struct fid_cq *cq;          /* completion queue            */
-    struct fid_av *av;          /* address vector              */
-    struct fid_mr *mr;          /* memory region               */
-    MPIDI_PG_t *pg_p;           /* MPI Process group           */
-    MPIDI_VC_t *cm_vcs;         /* temporary VC's              */
-    MPID_Request *persistent_req;       /* Unexpected request queue    */
-    MPID_Request *conn_req;     /* Connection request          */
-    MPIDI_Comm_ops_t comm_ops;
-    size_t iov_limit;           /* Max send iovec limit        */
-    int rts_cts_in_flight;
-    int api_set;
-} MPID_nem_ofi_global_t;
+    char bound_addr[OFI_MAX_ADDR_LEN]; /* This ranks bound address    */
+    size_t bound_addrlen;              /* length of the bound address */
+    struct fid_fabric *fabric;         /* fabric object               */
+    struct fid_domain *domain;         /* domain object               */
+    struct fid_ep *endpoint;           /* endpoint object             */
+    struct fid_cq *cq;                 /* completion queue            */
+    struct fid_av *av;                 /* address vector              */
+    struct fid_mr *mr;                 /* memory region               */
+    size_t iov_limit;                  /* Max send iovec limit        */
+    size_t max_buffered_send;          /* Buffered send threshold     */
+    int rts_cts_in_flight;             /* Count of incompleted        */
+                                       /*   RTS-CTS-DATA exchanges    */
+    int api_set;                       /* Used OFI API for send       */
+                                       /*   operations                */
+    MPID_Request *persistent_req;      /* Unexpected request queue    */
+    MPID_Request *conn_req;            /* Connection request          */
+    MPIDI_PG_t *pg_p;                  /* MPI Process group           */
+    MPIDI_VC_t *cm_vcs;                /* temporary VC's              */
+} MPID_nem_ofi_global_t __attribute__ ((aligned (MPID_NEM_CACHE_LINE_LEN)));
 
 /* ******************************** */
 /* Device channel specific data     */
@@ -223,7 +224,7 @@ fn_fail:                      \
     remote_proc = VC_OFI(vc)->direct_addr;  \
   } else {                                  \
     MPIU_Assert(vc == NULL);                \
-    remote_proc = gl_data.any_addr;         \
+    remote_proc = FI_ADDR_UNSPEC;           \
   }                                         \
 })
 
@@ -249,12 +250,48 @@ static inline int MPID_nem_ofi_create_req(MPID_Request ** request, int refcnt)
     MPID_Request *req;
     req = MPID_Request_create();
     MPIU_Assert(req);
+    MPIDI_Request_clear_dbg(req);
     MPIU_Object_set_ref(req, refcnt);
     MPID_nem_ofi_init_req(req);
     *request = req;
     return mpi_errno;
 }
 
+static inline int MPID_nem_ofi_create_req_lw(MPID_Request ** request, int refcnt)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPID_Request *req;
+
+    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPID_Request_mem);
+    if (req == NULL)
+        MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
+
+    MPIU_Assert(req != NULL);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+
+    MPIU_Object_set_ref(req, refcnt);
+    req->kind = MPID_REQUEST_SEND;
+    MPIR_cc_set(&req->cc, 0); // request is already completed
+    req->cc_ptr  = &req->cc;
+    req->status.MPI_ERROR  = MPI_SUCCESS;
+    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
+    req->comm = NULL;
+    req->greq_fns = NULL;
+    req->errflag = MPIR_ERR_NONE;
+    req->request_completed_cb = NULL;
+    req->dev.state = 0;
+    req->dev.datatype_ptr = NULL;
+    req->dev.segment_ptr = NULL;
+    req->dev.flags = MPIDI_CH3_PKT_FLAG_NONE;
+    req->dev.OnDataAvail = NULL;
+    req->dev.ext_hdr_ptr = NULL;
+    MPIDI_Request_clear_dbg(req);
+
+    MPID_nem_ofi_init_req(req);
+
+    *request = req;
+    return mpi_errno;
+}
 
 /* ************************************************************************** */
 /* MPICH Comm Override and Netmod functions                                   */
