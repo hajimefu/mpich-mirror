@@ -15,13 +15,6 @@
    ? strrchr(__FILE__,'/')+1                    \
    : __FILE__                                   \
 )
-#ifndef MIN
-#define MIN(x,y) (((x)<(y))?(x):(y))
-#endif
-#ifndef MAX
-#define MAX(x,y) ((x)>(y))?(x):(y))
-#endif
-
 
 #define UCP_PEER_NAME_MAX         HOST_NAME_MAX
 #define MPIDI_CH4_NMI_UCX_KVSAPPSTRLEN 1024
