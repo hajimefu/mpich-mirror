@@ -1411,7 +1411,6 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
-                                                          size_t am_hdr_sz,
                                                           uint64_t reply_token,
                                                           void **data,
                                                           size_t * p_data_sz,
@@ -1428,8 +1427,6 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
 
     MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_REQ_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_REQ_HANDLER);
-
-    MPIU_Assert(am_hdr_sz == sizeof(*lreq_hdr));
 
     context_id = MPIDI_CH4R_get_context(hdr->msg_tag);
     root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
@@ -1491,7 +1488,6 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_send_long_lmt_target_handler(void *am_hdr,
-                                                          size_t am_hdr_sz,
                                                           uint64_t reply_token,
                                                           void **data,
                                                           size_t * p_data_sz,
@@ -1506,7 +1502,6 @@ static inline int MPIDI_CH4R_send_long_lmt_target_handler(void *am_hdr,
     MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_LMT_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_LMT_HANDLER);
 
-    MPIU_Assert(am_hdr_sz == sizeof(*lmt_hdr));
     rreq = (MPID_Request *) lmt_hdr->rreq_ptr;
     MPIU_Assert(rreq);
     mpi_errno = MPIDI_CH4I_do_send_target_handler(reply_token, data, p_data_sz, is_contig,
@@ -1584,7 +1579,7 @@ static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr,
 #define FUNCNAME MPIDI_CH4R_send_long_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_ack_target_handler(void *am_hdr, size_t am_hdr_sz,
+static inline int MPIDI_CH4R_send_long_ack_target_handler(void *am_hdr,
                                                           uint64_t reply_token, void **data,
                                                           size_t * p_data_sz, int *is_contig,
                                                           MPIDI_CH4_NM_am_completion_handler_fn *

@@ -59,7 +59,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
     }
     else {
         int dt_contig;
-        MPIDI_msg_sz_t dt_size;
+        size_t dt_size;
         MPID_Datatype *dt_ptr;
         MPI_Aint dt_true_lb;
         MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_size, dt_ptr, dt_true_lb);
