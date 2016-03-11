@@ -430,8 +430,6 @@ static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
         MPID_END_ERROR_CHECKS;                                          \
     })
 
-#define MPIDI_CH4R_EPOCH_CHECK1() MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail)
-
 #define MPIDI_CH4R_EPOCH_CHECK_TYPE(win,mpi_errno,stmt)            \
     ({                                                             \
         MPID_BEGIN_ERROR_CHECKS;                                        \
@@ -441,8 +439,6 @@ static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
                                 stmt, "**rmasync");                     \
         MPID_END_ERROR_CHECKS;                                          \
     })
-
-#define MPIDI_CH4R_EPOCH_CHECK2() MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail)
 
 #define MPIDI_CH4R_EPOCH_START_CHECK(win,mpi_errno,stmt)                \
     ({                                                                  \
@@ -535,8 +531,6 @@ static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
 #else /* HAVE_ERROR_CHECKING */
 #define MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, stmt)               if(0) goto fn_fail;
 #define MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, stmt)               if(0) goto fn_fail;
-#define MPIDI_CH4R_EPOCH_CHECK1()                                       if(0) goto fn_fail;
-#define MPIDI_CH4R_EPOCH_CHECK2()                                       if(0) goto fn_fail;
 #define MPIDI_CH4R_EPOCH_START_CHECK(win, mpi_errno, stmt)              if(0) goto fn_fail;
 #define MPIDI_CH4R_EPOCH_START_CHECK2(win, mpi_errno, stmt)             if(0) goto fn_fail;
 #define MPIDI_CH4R_EPOCH_FENCE_CHECK(win, mpi_errno, stmt)              if(0) goto fn_fail;

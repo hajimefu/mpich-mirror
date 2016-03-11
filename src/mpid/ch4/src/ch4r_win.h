@@ -265,7 +265,7 @@ static inline int MPIDI_CH4R_win_start(MPID_Group *group, int assert, MPID_Win *
     MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_START);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_START);
 
-    MPIDI_CH4R_EPOCH_CHECK2();
+    MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail);
 
     MPIR_Group_add_ref(group);
 
@@ -471,7 +471,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
     if (!MPIDI_CH4R_WIN(win, sync).lock.remote.locked) {
-        MPIDI_CH4R_EPOCH_CHECK2();
+        MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail);
     }
 
     MPIDI_CH4R_win_cntrl_msg_t msg;
@@ -1261,7 +1261,7 @@ static inline int MPIDI_CH4R_win_lock_all(int assert, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_LOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_LOCK_ALL);
 
-    MPIDI_CH4R_EPOCH_CHECK2();
+    MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail);
 
     int size;
     size = win->comm_ptr->local_size;

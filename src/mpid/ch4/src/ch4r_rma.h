@@ -38,7 +38,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4I_DO_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_DO_PUT);
 
-    MPIDI_CH4R_EPOCH_CHECK1();
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail);
 
     offset = target_disp * MPIDI_CH4R_WINFO_DISP_UNIT(win, target_rank);
 
@@ -163,7 +163,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_MPIDI_CH4I_DO_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_MPIDI_CH4I_DO_GET);
 
-    MPIDI_CH4R_EPOCH_CHECK1();
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail);
 
     offset = target_disp * MPIDI_CH4R_WINFO_DISP_UNIT(win, target_rank);
 
@@ -386,7 +386,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_ACCUMULATE);
 
-    MPIDI_CH4R_EPOCH_CHECK1();
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail);
 
     offset = target_disp * MPIDI_CH4R_WINFO_DISP_UNIT(win, target_rank);
 
@@ -688,7 +688,7 @@ __CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_COMPARE_AND_SWAP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_COMPARE_AND_SWAP);
 
-    MPIDI_CH4R_EPOCH_CHECK1();
+    MPIDI_CH4R_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail);
 
     offset = target_disp * MPIDI_CH4R_WINFO_DISP_UNIT(win, target_rank);
 
