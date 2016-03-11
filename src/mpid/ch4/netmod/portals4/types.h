@@ -61,24 +61,26 @@ extern MPIDI_CH4_NMI_PTL_addr_t        *MPIDI_CH4_NMI_PTL_addr_table;
 #define MPIDI_CH4_NMI_PTL_TAG_BITS 32
 
 #define MPIDI_CH4_NMI_PTL_TAG_MASK      (0x00000000FFFFFFFFULL)
+#define MPIDI_CH4_NMI_PTL_CTX_MASK      (0xFFFFFFFF00000000ULL)
 #define MPIDI_CH4_NMI_PTL_TAG_SHIFT     (MPIDI_CH4_NMI_PTL_TAG_BITS)
 
 static inline ptl_match_bits_t MPIDI_CH4_NMI_PTL_init_tag(MPIU_Context_id_t contextid, int tag)
 {
     ptl_match_bits_t match_bits = 0;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4_NMI_PTL_TAG_SHIFT);
+    match_bits <<= MPIDI_CH4_NMI_PTL_TAG_SHIFT;
     match_bits |= (MPIDI_CH4_NMI_PTL_TAG_MASK & tag);
     return match_bits;
 }
 
-#define MPIDI_CH4_NMI_PTL_MSG_SZ_MASK   (0x0000FFFFFFFFFFFFULL)
+#define MPIDI_CH4_NMI_PTL_MSG_SZ_MASK   (0x00000000FFFFFFFFULL)
+#define MPIDI_CH4_NMI_PTL_SRC_RANK_MASK (0x00FFFFFF00000000ULL)
 
-static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, size_t msg_sz)
+static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, int rank, size_t msg_sz)
 {
     ptl_hdr_data_t hdr = 0;
-    hdr = handler_id;
-    hdr = (hdr << 48);
+    hdr = (ptl_hdr_data_t)handler_id << 56;
+    hdr |= (MPIDI_CH4_NMI_PTL_SRC_RANK_MASK & ((ptl_hdr_data_t)rank << 32));
     hdr |= (MPIDI_CH4_NMI_PTL_MSG_SZ_MASK & msg_sz);
     return hdr;
 }

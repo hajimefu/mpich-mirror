@@ -13,6 +13,11 @@
 
 #include "impl.h"
 
+static inline void MPIDI_CH4_NMI_PTL_am_reply_handler(ptl_event_t *e)
+{
+    *(int *)(e->user_ptr)--;
+}
+
 static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
@@ -26,11 +31,11 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
     size_t done, curr_len, rem;
     MPIDI_CH4_NMI_PTL_am_reply_token_t reply_token;
 
-    /* reply_token.data.context_id = (e->match_bits >> MPIDI_CH4_NMI_PTL_TAG_BITS); */
-    /* reply_token.data.src_rank   = (e->hdr_data & MPIDI_CH4_NMI_PTL_TAG_MASK); */
+    reply_token.data.context_id = (e->match_bits >> MPIDI_CH4_NMI_PTL_TAG_BITS);
+    reply_token.data.src_rank   = (e->hdr_data & MPIDI_CH4_NMI_PTL_SRC_RANK_MASK) >> MPIDI_CH4_NMI_PTL_TAG_BITS;
     in_data_sz = data_sz = (e->hdr_data & MPIDI_CH4_NMI_PTL_MSG_SZ_MASK);
     in_data = p_data = (e->start + (e->mlength - data_sz));
-    int handler_id = e->hdr_data >> 48;
+    int handler_id = e->hdr_data >> 56;
 
     MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id](e->start,
                                                      reply_token.val,
@@ -100,15 +105,19 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
             break;
         case PTL_EVENT_ACK:
             {
-                int count;
-                MPID_Request *sreq = (MPID_Request *)e.user_ptr;
-                MPIR_cc_decr(sreq->cc_ptr, &count);
-                MPIU_Assert(count >= 0);
+                if (*(int *)e.user_ptr) {
+                    int count;
+                    MPID_Request *sreq = (MPID_Request *)e.user_ptr;
+                    MPIR_cc_decr(sreq->cc_ptr, &count);
+                    MPIU_Assert(count >= 0);
 
-                if(count == 0) {
-                    MPIDI_CH4R_Request_release(sreq);
+                    if(count == 0) {
+                        MPIDI_CH4R_Request_release(sreq);
+                    }
+                    MPIDI_CH4R_send_origin_cmpl_handler(sreq);
+                } else {
+                    *(int *)e.user_ptr = TRUE;
                 }
-                MPIDI_CH4R_send_origin_cmpl_handler(sreq);
             }
             break;
         case PTL_EVENT_SEND:
