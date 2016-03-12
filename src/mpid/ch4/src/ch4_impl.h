@@ -392,13 +392,23 @@ static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
     int lpid;
     int size = grp->size;
     int z;
+    int ret;
+
+    if (unlikely(rank == MPI_PROC_NULL)) {
+        /* Treat PROC_NULL as always valid */
+        ret = 1;
+        goto fn_exit;
+    }
 
     MPIDI_CH4_NM_comm_get_lpid(comm, rank, &lpid, FALSE);
 
     for(z = 0; z < size &&lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
 
+    ret = (z < size);
+
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_VALID_GROUP_RANK);
-    return (z < size);
+fn_exit:
+    return ret;
 }
 
 #define MPIDI_CH4R_PROGRESS()                                   \
