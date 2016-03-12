@@ -588,7 +588,7 @@ static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
         MPIDI_CH4_NMI_OFI_REQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_INJECT_EMU;
         MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.inject_buf) = ibuf;
         /* Cancel FI_INJECT and ask for completion event */
-        send_flag = FI_COMPLETION | FI_INJECT_COMPLETE;
+        send_flag = FI_COMPLETION;
         msg.context = (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(sreq, context));
         OPA_incr_int(&MPIDI_Global.am_inflight_inject_emus);
     }
