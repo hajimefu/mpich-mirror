@@ -126,9 +126,9 @@ __CH4_INLINE__ int MPIDI_Progress_deregister(int id)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEREGISTER);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX);
-    MPIU_Assert(id >= 0 &&
-                id < MAX_PROGRESS_HOOKS &&
-                MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
+    MPIU_Assert(id >= 0);
+    MPIU_Assert(id < MAX_PROGRESS_HOOKS);
+    MPIU_Assert(MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].func_ptr = NULL;
     MPIDI_CH4_Global.progress_hooks[id].active = FALSE;
 
@@ -149,9 +149,10 @@ __CH4_INLINE__ int MPIDI_Progress_activate(int id)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_ACTIVATE);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX);
-    MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
-                MPIDI_CH4_Global.progress_hooks[id].active == FALSE &&
-                MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
+    MPIU_Assert(id >= 0);
+    MPIU_Assert(id < MAX_PROGRESS_HOOKS);
+    MPIU_Assert(MPIDI_CH4_Global.progress_hooks[id].active == FALSE);
+    MPIU_Assert(MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].active = TRUE;
 
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX);
@@ -170,9 +171,10 @@ __CH4_INLINE__ int MPIDI_Progress_deactivate(int id)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_PROGRESS_DEACTIVATE);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX);
-    MPIU_Assert(id >= 0 && id < MAX_PROGRESS_HOOKS &&
-                MPIDI_CH4_Global.progress_hooks[id].active == TRUE &&
-                MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
+    MPIU_Assert(id >= 0);
+    MPIU_Assert(id < MAX_PROGRESS_HOOKS);
+    MPIU_Assert(MPIDI_CH4_Global.progress_hooks[id].active == TRUE);
+    MPIU_Assert(MPIDI_CH4_Global.progress_hooks[id].func_ptr != NULL);
     MPIDI_CH4_Global.progress_hooks[id].active = FALSE;
 
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX);
