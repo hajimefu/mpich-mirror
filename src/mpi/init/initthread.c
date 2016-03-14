@@ -258,7 +258,7 @@ int MPIR_Thread_CS_Finalize( void )
     MPIU_Assert(err == 0);
     MPID_Thread_mutex_destroy(&MPIR_THREAD_POBJ_PMI_MUTEX, &err);
     MPIU_Assert(err == 0);
-    MPID_Thread_mutex_destroy(&MPIR_THREAD_POBJ_CALLOPS_MUTEX, &err);
+    MPID_Thread_mutex_destroy(&MPIR_THREAD_POBJ_COLLOPS_MUTEX, &err);
     MPIU_Assert(err == 0);
 
 
