@@ -149,7 +149,7 @@ typedef struct MPIDI_CH4U_win_cntrl_msg_t {
 typedef struct MPIDI_CH4U_put_msg_t {
     uint64_t win_id;
     uint64_t preq_ptr;
-    uint64_t addr;
+    MPI_Aint target_disp;
     uint64_t count;
     MPI_Datatype datatype;
     int n_iov;
@@ -173,7 +173,7 @@ typedef struct MPIDI_CH4U_put_ack_msg_t {
 typedef struct MPIDI_CH4U_get_req_msg_t {
     uint64_t win_id;
     uint64_t greq_ptr;
-    uint64_t addr;
+    MPI_Aint target_disp;
     uint64_t count;
     MPI_Datatype datatype;
     int n_iov;
@@ -186,7 +186,7 @@ typedef struct MPIDI_CH4U_get_ack_msg_t {
 typedef struct MPIDI_CH4U_cswap_req_msg_t {
     uint64_t win_id;
     uint64_t req_ptr;
-    uint64_t addr;
+    MPI_Aint target_disp;
     MPI_Datatype datatype;
 } MPIDI_CH4U_cswap_req_msg_t;
 
@@ -203,7 +203,7 @@ typedef struct MPIDI_CH4U_acc_req_msg_t {
     MPI_Datatype target_datatype;
     MPI_Op op;
     int do_get;
-    uint64_t target_addr;
+    MPI_Aint target_disp;
     uint64_t result_data_sz;
     int n_iov;
 } MPIDI_CH4U_acc_req_msg_t;

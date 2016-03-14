@@ -134,7 +134,6 @@ static inline int MPIDI_CH4U_get_cmpl_handler(MPID_Request * req)
     MPIDI_CH4U_get_ack_msg_t get_ack;
     struct iovec *iov;
     char *p_data;
-    MPID_Win *win;
     uintptr_t base;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_CMPL_HANDLER);
@@ -143,8 +142,7 @@ static inline int MPIDI_CH4U_get_cmpl_handler(MPID_Request * req)
     if (!MPIDI_CH4U_check_cmpl_order(req, MPIDI_CH4U_get_cmpl_handler))
         return mpi_errno;
 
-    win = (MPID_Win *) MPIDI_CH4U_REQUEST(req, req->greq.win_ptr);
-    base = MPIDI_CH4I_win_base_at_target(win);
+    base = MPIDI_CH4U_REQUEST(req, req->greq.addr);
 
     MPIR_cc_incr(req->cc_ptr, &c);
     get_ack.greq_ptr = MPIDI_CH4U_REQUEST(req, req->greq.greq_ptr);
@@ -2094,6 +2092,7 @@ static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
     size_t data_sz;
     struct iovec *iov, *dt_iov;
     uintptr_t base; /* Base address of the window */
+    size_t             offset;
 
     int dt_contig, n_iov;
     MPI_Aint dt_true_lb, last, num_iov;
@@ -2126,6 +2125,7 @@ static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
     *cmpl_handler_fn = MPIDI_CH4U_put_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
+    offset = win->disp_unit * msg_hdr->target_disp;
     if (msg_hdr->n_iov) {
         int i;
         dt_iov = (struct iovec *)MPL_malloc(sizeof(struct iovec) * msg_hdr->n_iov);
@@ -2133,7 +2133,7 @@ static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
 
         iov = (struct iovec *)((char *)am_hdr + sizeof(*msg_hdr));
         for (i = 0; i < msg_hdr->n_iov; i++)
-            iov[i].iov_base = (char *) iov[i].iov_base + base;
+            iov[i].iov_base = (char *) iov[i].iov_base + base + offset;
         MPIU_Memcpy(dt_iov, iov, sizeof(struct iovec) * msg_hdr->n_iov);
         MPIDI_CH4U_REQUEST(rreq, req->preq.dt_iov) = dt_iov;
         MPIDI_CH4U_REQUEST(rreq, req->preq.n_iov) = msg_hdr->n_iov;
@@ -2150,13 +2150,13 @@ static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
 
     if (dt_contig) {
         *p_data_sz = data_sz;
-        *data = (char *) (msg_hdr->addr + base + dt_true_lb);
+        *data = (char *) (offset + base + dt_true_lb);
     }
     else {
         segment_ptr = MPIDU_Segment_alloc();
         MPIU_Assert(segment_ptr);
 
-        MPIDU_Segment_init((void *) (msg_hdr->addr + base), msg_hdr->count, msg_hdr->datatype,
+        MPIDU_Segment_init((void *) (offset + base), msg_hdr->count, msg_hdr->datatype,
                           segment_ptr, 0);
         last = data_sz;
         MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
@@ -2388,7 +2388,6 @@ static inline int MPIDI_CH4U_acc_data_target_handler(void *am_hdr,
     size_t data_sz;
     void *p_data = NULL;
     MPIDI_CH4U_acc_dat_msg_t *msg_hdr = (MPIDI_CH4U_acc_dat_msg_t *) am_hdr;
-    MPID_Win *win;
     uintptr_t base;
     int i;
     struct iovec *iov;
@@ -2397,8 +2396,7 @@ static inline int MPIDI_CH4U_acc_data_target_handler(void *am_hdr,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_DATA_HANDLER);
 
     rreq = (MPID_Request *) msg_hdr->preq_ptr;
-    win = (MPID_Win *) MPIDI_CH4U_REQUEST(rreq, req->areq.win_ptr);
-    base = MPIDI_CH4I_win_base_at_target(win);
+    base = (uintptr_t)MPIDI_CH4U_REQUEST(rreq, req->areq.target_addr);
 
     MPIDI_Datatype_check_size(MPIDI_CH4U_REQUEST(rreq, req->areq.origin_datatype),
                               MPIDI_CH4U_REQUEST(rreq, req->areq.origin_count), data_sz);
@@ -2442,6 +2440,7 @@ static inline int MPIDI_CH4U_cswap_target_handler(void *am_hdr,
     size_t data_sz;
     MPID_Win *win;
     uintptr_t base;
+    size_t offset;
 
     int dt_contig;
     void *p_data;
@@ -2470,12 +2469,13 @@ static inline int MPIDI_CH4U_cswap_target_handler(void *am_hdr,
     /* MPIDI_CS_ENTER(); */
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
+    offset = win->disp_unit * msg_hdr->target_disp;
 
     MPIDI_CH4U_REQUEST(*req, req->creq.win_ptr) = (uint64_t) win;
     MPIDI_CH4U_REQUEST(*req, req->creq.creq_ptr) = msg_hdr->req_ptr;
     MPIDI_CH4U_REQUEST(*req, req->creq.reply_token) = reply_token;
     MPIDI_CH4U_REQUEST(*req, req->creq.datatype) = msg_hdr->datatype;
-    MPIDI_CH4U_REQUEST(*req, req->creq.addr) = msg_hdr->addr + base;
+    MPIDI_CH4U_REQUEST(*req, req->creq.addr) = offset + base;
 
     MPIU_Assert(dt_contig == 1);
     p_data = MPL_malloc(data_sz * 2);
@@ -2508,6 +2508,7 @@ static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
     struct iovec *iov, *dt_iov;
     MPID_Win *win;
     uintptr_t base;
+    size_t offset;
     int i;
 
     MPIDI_CH4U_acc_req_msg_t *msg_hdr = (MPIDI_CH4U_acc_req_msg_t *) am_hdr;
@@ -2539,7 +2540,7 @@ static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
     MPIU_Assert(win);
 
     base = MPIDI_CH4I_win_base_at_target(win);
-
+    offset = win->disp_unit * msg_hdr->target_disp;
     /* MPIDI_CS_ENTER(); */
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
@@ -2551,7 +2552,7 @@ static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->areq.target_datatype) = msg_hdr->target_datatype;
     MPIDI_CH4U_REQUEST(*req, req->areq.origin_count) = msg_hdr->origin_count;
     MPIDI_CH4U_REQUEST(*req, req->areq.target_count) = msg_hdr->target_count;
-    MPIDI_CH4U_REQUEST(*req, req->areq.target_addr) = (void *) (msg_hdr->target_addr + base);
+    MPIDI_CH4U_REQUEST(*req, req->areq.target_addr) = (void *) (offset + base);
     MPIDI_CH4U_REQUEST(*req, req->areq.op) = msg_hdr->op;
     MPIDI_CH4U_REQUEST(*req, req->areq.data) = p_data;
     MPIDI_CH4U_REQUEST(*req, req->areq.n_iov) = msg_hdr->n_iov;
@@ -2567,7 +2568,7 @@ static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
 
     iov = (struct iovec *) ((char *) msg_hdr + sizeof(*msg_hdr));
     for (i = 0; i < msg_hdr->n_iov; i++) {
-        dt_iov[i].iov_base = (char *) iov[i].iov_base + base;
+        dt_iov[i].iov_base = (char *) iov[i].iov_base + base + offset;
         dt_iov[i].iov_len  = iov[i].iov_len;
     }
     MPIDI_CH4U_REQUEST(rreq, req->areq.dt_iov) = dt_iov;
@@ -2594,6 +2595,7 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
     struct iovec *dt_iov;
     MPID_Win *win;
     uintptr_t base;
+    size_t offset;
 
     MPIDI_CH4U_acc_req_msg_t *msg_hdr = (MPIDI_CH4U_acc_req_msg_t *) am_hdr;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_HANDLE_ACC_IOV_REQ);
@@ -2610,6 +2612,7 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
 
     base = MPIDI_CH4I_win_base_at_target(win);
 
+    offset = win->disp_unit * msg_hdr->target_disp;
     /* MPIDI_CS_ENTER(); */
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
@@ -2621,7 +2624,7 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->areq.target_datatype) = msg_hdr->target_datatype;
     MPIDI_CH4U_REQUEST(*req, req->areq.origin_count) = msg_hdr->origin_count;
     MPIDI_CH4U_REQUEST(*req, req->areq.target_count) = msg_hdr->target_count;
-    MPIDI_CH4U_REQUEST(*req, req->areq.target_addr) = (void *) (msg_hdr->target_addr + base);
+    MPIDI_CH4U_REQUEST(*req, req->areq.target_addr) = (void *) (offset + base);
     MPIDI_CH4U_REQUEST(*req, req->areq.op) = msg_hdr->op;
     MPIDI_CH4U_REQUEST(*req, req->areq.n_iov) = msg_hdr->n_iov;
     MPIDI_CH4U_REQUEST(*req, req->areq.data_sz) = msg_hdr->result_data_sz;
@@ -2662,6 +2665,7 @@ static inline int MPIDI_CH4U_get_target_handler(void *am_hdr,
     struct iovec *iov;
     MPID_Win *win;
     uintptr_t base;
+    size_t offset;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_HANDLER);
@@ -2684,9 +2688,10 @@ static inline int MPIDI_CH4U_get_target_handler(void *am_hdr,
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));
     /* MPIDI_CS_EXIT(); */
 
+    offset = win->disp_unit * msg_hdr->target_disp;
     MPIDI_CH4U_REQUEST(rreq, req->greq.win_ptr) = (uint64_t) win;
     MPIDI_CH4U_REQUEST(rreq, req->greq.n_iov) = msg_hdr->n_iov;
-    MPIDI_CH4U_REQUEST(rreq, req->greq.addr) = msg_hdr->addr + base;
+    MPIDI_CH4U_REQUEST(rreq, req->greq.addr) = offset + base;
     MPIDI_CH4U_REQUEST(rreq, req->greq.count) = msg_hdr->count;
     MPIDI_CH4U_REQUEST(rreq, req->greq.datatype) = msg_hdr->datatype;
     MPIDI_CH4U_REQUEST(rreq, req->greq.dt_iov) = NULL;
