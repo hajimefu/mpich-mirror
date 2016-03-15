@@ -59,12 +59,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
     if (dt_contig) {
-        /* just pack and send for now */
-        send_buf = MPL_malloc(am_hdr_sz);
-        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
-        sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
-
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
@@ -250,11 +245,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
     if (dt_contig) {
-        /* just pack and send for now */
-        send_buf = MPL_malloc(am_hdr_sz);
-        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
-
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, &complete, ptl_hdr);
     }
@@ -263,7 +254,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     while (!complete) {
         MPIDI_CH4_NM_progress(NULL, FALSE);
     }
-    MPL_free(send_buf);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
@@ -300,11 +290,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(use_comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
     if (dt_contig) {
-        /* just pack and send for now */
-        send_buf = MPL_malloc(am_hdr_sz);
-        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
-
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, &complete, ptl_hdr);
     }
@@ -313,7 +299,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     while (!complete) {
         MPIDI_CH4_NM_progress(NULL, FALSE);
     }
-    MPL_free(send_buf);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
