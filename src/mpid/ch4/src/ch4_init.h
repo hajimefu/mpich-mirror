@@ -22,8 +22,8 @@ categories:
       description : cvars that control behavior of the CH4 device
 
 cvars:
-    - name        : MPIR_CVAR_NETMOD
-      category    : NEMESIS
+    - name        : MPIR_CVAR_CH4_NETMOD
+      category    : CH4
       type        : string
       default     : ""
       class       : device
@@ -32,8 +32,8 @@ cvars:
       description : >-
         If non-empty, this cvar specifies which network module to use
 
-    - name        : MPIR_CVAR_SHM
-      category    : NEMESIS
+    - name        : MPIR_CVAR_CH4_SHM
+      category    : CH4
       type        : string
       default     : ""
       class       : device
@@ -65,9 +65,9 @@ static inline int MPIDI_choose_netmod(void)
     MPIDI_STATE_DECL(MPID_STATE_CH4_CHOOSE_NETMOD);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CHOOSE_NETMOD);
 
-    MPIU_Assert(MPIR_CVAR_NETMOD != NULL);
+    MPIU_Assert(MPIR_CVAR_CH4_NETMOD != NULL);
 
-    if (strcmp(MPIR_CVAR_NETMOD, "") == 0) {
+    if (strcmp(MPIR_CVAR_CH4_NETMOD, "") == 0) {
         /* netmod not specified, using the default */
         MPIDI_CH4_NM_func = MPIDI_CH4_NM_funcs[0];
         MPIDI_CH4_NM_native_func = MPIDI_CH4_NM_native_funcs[0];
@@ -77,7 +77,7 @@ static inline int MPIDI_choose_netmod(void)
     for (i = 0; i < MPIDI_num_netmods; ++i) {
         /* use MPL variant of strncasecmp if we get one */
         if (!strncasecmp
-            (MPIR_CVAR_NETMOD, MPIDI_CH4_NM_strings[i], MPIDI_MAX_NETMOD_STRING_LEN)) {
+            (MPIR_CVAR_CH4_NETMOD, MPIDI_CH4_NM_strings[i], MPIDI_MAX_NETMOD_STRING_LEN)) {
             MPIDI_CH4_NM_func = MPIDI_CH4_NM_funcs[i];
             MPIDI_CH4_NM_native_func = MPIDI_CH4_NM_native_funcs[i];
             goto fn_exit;
@@ -85,7 +85,7 @@ static inline int MPIDI_choose_netmod(void)
     }
 
     MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**invalid_netmod", "**invalid_netmod %s",
-                         MPIR_CVAR_NETMOD);
+                         MPIR_CVAR_CH4_NETMOD);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_CHOOSE_NETMOD);
     return mpi_errno;
@@ -108,9 +108,9 @@ static inline int MPIDI_choose_shm(void)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CHOOSE_SHM);
 
 
-    MPIU_Assert(MPIR_CVAR_SHM != NULL);
+    MPIU_Assert(MPIR_CVAR_CH4_SHM != NULL);
 
-    if (strcmp(MPIR_CVAR_SHM, "") == 0) {
+    if (strcmp(MPIR_CVAR_CH4_SHM, "") == 0) {
         /* shm not specified, using the default */
         MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[0];
         MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[0];
@@ -120,7 +120,7 @@ static inline int MPIDI_choose_shm(void)
     for (i = 0; i < MPIDI_num_shms; ++i) {
         /* use MPL variant of strncasecmp if we get one */
         if (!strncasecmp
-            (MPIR_CVAR_SHM, MPIDI_CH4_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
+            (MPIR_CVAR_CH4_SHM, MPIDI_CH4_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
             MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[i];
             MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[i];
             goto fn_exit;
@@ -128,7 +128,7 @@ static inline int MPIDI_choose_shm(void)
     }
 
     MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**ch4|invalid_shm", "**ch4|invalid_shm %s",
-                         MPIR_CVAR_SHM);
+                         MPIR_CVAR_CH4_SHM);
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_CHOOSE_SHM);
     return mpi_errno;
