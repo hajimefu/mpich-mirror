@@ -44,7 +44,6 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
     int mpi_errno = MPI_SUCCESS, ret, c;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    char *send_buf = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
@@ -188,7 +187,6 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    char *send_buf = NULL;
     MPIDI_CH4_NMI_PTL_am_reply_token_t use_token;
     MPID_Comm *use_comm;
     int use_rank;
