@@ -88,7 +88,6 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
     int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    char *send_buf = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
@@ -116,6 +115,24 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 
         ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &sreq->dev.ch4.ch4r.netmod_am.portals4.md);
         ret = PtlPut(sreq->dev.ch4.ch4r.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
+                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
+                     MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
+    } else {
+        /* copy everything into pack_buffer */
+        MPID_Segment *segment;
+        MPI_Aint last;
+        char *send_buf = NULL;
+
+        send_buf = MPL_malloc(am_hdr_sz + data_sz);
+        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
+        segment = MPID_Segment_alloc();
+        MPID_Segment_init(data, count, datatype, segment, 0);
+        last = data_sz;
+        MPID_Segment_pack(segment, 0, &last, send_buf + am_hdr_sz);
+        MPIU_Assert(last == data_sz);
+        sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
+
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
@@ -211,6 +228,24 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
 
         ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &sreq->dev.ch4.ch4r.netmod_am.portals4.md);
         ret = PtlPut(sreq->dev.ch4.ch4r.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
+                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
+                     MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, sreq, ptl_hdr);
+    } else {
+        /* copy everything into pack_buffer */
+        MPID_Segment *segment;
+        MPI_Aint last;
+        char *send_buf = NULL;
+
+        send_buf = MPL_malloc(am_hdr_sz + data_sz);
+        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
+        segment = MPID_Segment_alloc();
+        MPID_Segment_init(data, count, datatype, segment, 0);
+        last = data_sz;
+        MPID_Segment_pack(segment, 0, &last, send_buf + am_hdr_sz);
+        MPIU_Assert(last == data_sz);
+        sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
+
+        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
