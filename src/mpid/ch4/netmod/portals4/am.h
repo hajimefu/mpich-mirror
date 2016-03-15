@@ -124,6 +124,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
         last = data_sz;
         MPID_Segment_pack(segment, 0, &last, send_buf + am_hdr_sz);
         MPIU_Assert(last == data_sz);
+        MPID_Segment_free(segment);
         sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
 
         ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
@@ -237,6 +238,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
         last = data_sz;
         MPID_Segment_pack(segment, 0, &last, send_buf + am_hdr_sz);
         MPIU_Assert(last == data_sz);
+        MPID_Segment_free(segment);
         sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
 
         ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
