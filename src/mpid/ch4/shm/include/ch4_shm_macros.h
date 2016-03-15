@@ -5,13 +5,14 @@
 /* Ok to use this?                                                        */
 #define EAT(...)
 #define REM(...) __VA_ARGS__
+#define EXPAND(x) x
 #define STRIP(x) EAT x
 #define PAIR(x)  REM x
 #define NARGS_SEQ(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,N,...) N
-#define NARGS(...) NARGS_SEQ(__VA_ARGS__,13,12,11,10,9,8,7,6,5,4,3,2,1)
+#define NARGS(...) EXPAND(NARGS_SEQ(__VA_ARGS__,13,12,11,10,9,8,7,6,5,4,3,2,1))
 #define PRIMITIVE_CAT(x, y) x ## y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
-#define APPLY(macro, ...) CAT(APPLY_, NARGS(__VA_ARGS__))(macro, __VA_ARGS__)
+#define APPLY(macro, ...) EXPAND(CAT(APPLY_, NARGS(__VA_ARGS__))(macro, __VA_ARGS__))
 #define APPLY_1(m, x1) m(x1)
 #define APPLY_2(m, x1, x2) m(x1), m(x2)
 #define APPLY_3(m, x1, x2, x3) m(x1), m(x2), m(x3)
