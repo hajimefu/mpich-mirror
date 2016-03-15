@@ -100,13 +100,22 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
     if (dt_contig) {
-        /* just pack and send for now */
-        send_buf = MPL_malloc(am_hdr_sz + data_sz);
-        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
-        MPIU_Memcpy(send_buf + am_hdr_sz , data + dt_true_lb, data_sz);
-        sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
+        /* create a two element iovec and send */
+        ptl_md_t md;
+        ptl_iovec_t iovec[2];
 
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
+        iovec[0].iov_base = (char *)am_hdr;
+        iovec[0].iov_len = am_hdr_sz;
+        iovec[1].iov_base = (char *)data + dt_true_lb;
+        iovec[1].iov_len = data_sz;
+        md.start = iovec;
+        md.length = 2;
+        md.options = PTL_IOVEC;
+        md.eq_handle = MPIDI_CH4_NMI_PTL_global.eqs[0];
+        md.ct_handle = PTL_CT_NONE;
+
+        ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &sreq->dev.ch4.ch4r.netmod_am.portals4.md);
+        ret = PtlPut(sreq->dev.ch4.ch4r.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
@@ -186,13 +195,22 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
     if (dt_contig) {
-        /* just pack and send for now */
-        send_buf = MPL_malloc(am_hdr_sz + data_sz);
-        MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
-        MPIU_Memcpy(send_buf + am_hdr_sz , data + dt_true_lb, data_sz);
-        sreq->dev.ch4.ch4r.netmod_am.portals4.pack_buffer = send_buf;
+        /* create a two element iovec and send */
+        ptl_md_t md;
+        ptl_iovec_t iovec[2];
 
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
+        iovec[0].iov_base = (char *)am_hdr;
+        iovec[0].iov_len = am_hdr_sz;
+        iovec[1].iov_base = (char *)data + dt_true_lb;
+        iovec[1].iov_len = data_sz;
+        md.start = iovec;
+        md.length = 2;
+        md.options = PTL_IOVEC;
+        md.eq_handle = MPIDI_CH4_NMI_PTL_global.eqs[0];
+        md.ct_handle = PTL_CT_NONE;
+
+        ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &sreq->dev.ch4.ch4r.netmod_am.portals4.md);
+        ret = PtlPut(sreq->dev.ch4.ch4r.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
                      PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
                      MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, sreq, ptl_hdr);
     }

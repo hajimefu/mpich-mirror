@@ -96,7 +96,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
                     PTL_PID_ANY, NULL, &MPIDI_CH4_NMI_PTL_global.ni_limits, &MPIDI_CH4_NMI_PTL_global.ni);
     MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlNIInit);
 
-    /* allocate EQs */
+    /* allocate EQs: 0 is origin, 1 is target */
     ret = PtlEQAlloc(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_EVENT_COUNT, &MPIDI_CH4_NMI_PTL_global.eqs[0]);
     MPIDI_CH4_NMI_PTL_CHK_STATUS(ret, PtlEQAlloc);
     ret = PtlEQAlloc(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_EVENT_COUNT, &MPIDI_CH4_NMI_PTL_global.eqs[1]);

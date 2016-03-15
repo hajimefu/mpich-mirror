@@ -12,8 +12,11 @@
 #ifndef NETMOD_PORTALS4_PRE_H_INCLUDED
 #define NETMOD_PORTALS4_PRE_H_INCLUDED
 
+#include "portals4.h"
+
 typedef struct {
     char *pack_buffer;
+    ptl_handle_md_t md;
 } MPIDI_CH4_NMI_PORTALS4_Am_request_t;
 
 typedef struct {
