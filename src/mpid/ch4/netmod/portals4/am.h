@@ -42,10 +42,6 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
                                            MPID_Request * sreq, void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret, c;
-    size_t  data_sz;
-    MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
-    int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
     char *send_buf = NULL;
@@ -58,11 +54,9 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
-    if (dt_contig) {
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
-                     MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
-    }
+    ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
+                 PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
+                 MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
@@ -282,13 +276,8 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
                                              size_t am_hdr_sz, void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret, c;
-    size_t  data_sz;
-    MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
-    int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    char *send_buf = NULL;
     int complete = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
@@ -297,11 +286,9 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, comm->rank, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
-    if (dt_contig) {
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
-                     MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, &complete, ptl_hdr);
-    }
+    ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
+                 PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
+                 MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, &complete, ptl_hdr);
 
     /* wait until request is complete */
     while (!complete) {
@@ -320,13 +307,8 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
                                                    const void *am_hdr, size_t am_hdr_sz)
 {
     int mpi_errno = MPI_SUCCESS, ret, c;
-    size_t  data_sz;
-    MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
-    int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    char *send_buf = NULL;
     int complete = 0;
     MPIDI_CH4_NMI_PTL_am_reply_token_t use_token;
     MPID_Comm *use_comm;
@@ -342,11 +324,9 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, use_comm->rank, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(use_comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
-    if (dt_contig) {
-        ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
-                     MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, &complete, ptl_hdr);
-    }
+    ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
+                 PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
+                 MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, &complete, ptl_hdr);
 
     /* wait until request is complete */
     while (!complete) {
