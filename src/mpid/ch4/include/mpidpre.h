@@ -205,10 +205,10 @@ typedef struct {
 #define MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)  NULL
 #endif
 
-typedef struct MPIDI_CH4U_win_info_t {
-    uint64_t base_addr;
+typedef struct MPIDI_CH4U_win_shared_info{
     uint32_t disp_unit;
-} __attribute__ ((packed)) MPIDI_CH4U_win_info_t;
+    size_t  size;
+} __attribute__ ((packed)) MPIDI_CH4U_win_shared_info_t;
 
 #define MPIDI_CH4I_ACCU_ORDER_RAR (1)
 #define MPIDI_CH4I_ACCU_ORDER_RAW (1 << 1)
@@ -280,8 +280,8 @@ typedef struct MPIDI_CH4U_win_t {
     MPI_Aint *sizes;
     MPIDI_CH4U_win_lock_info *lockQ;
     MPIDI_CH4U_win_sync_t sync;
-    MPIDI_CH4U_win_info_t *info_table;
     MPIDI_CH4U_win_info_args_t info_args;
+    MPIDI_CH4U_win_shared_info_t *shared_table;
     MPL_UT_hash_handle hash_handle;
 } MPIDI_CH4U_win_t;
 
@@ -291,20 +291,9 @@ typedef struct {
         MPIDI_CH4_NETMOD_WIN_DECL
     }netmod;
 } MPIDI_Devwin_t;
+
 #define MPIDI_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
 #define MPIDI_CH4U_WINFO(win,rank) (MPIDI_CH4U_win_info_t*) &(MPIDI_CH4U_WIN(win, info_table)[rank])
-#define MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)                              \
-    ({                                                                  \
-        uint32_t _v;                                                    \
-        if(MPIDI_CH4U_WIN(w, info_table)) {                             \
-            _v = ((MPIDI_CH4U_win_info_t *) MPIDI_CH4U_WINFO(w, rank))->disp_unit; \
-        }                                                               \
-        else {                                                          \
-            _v = w->disp_unit;                                          \
-        }                                                               \
-        _v;                                                             \
-    })
-
 
 typedef struct {
     unsigned is_local : 1;

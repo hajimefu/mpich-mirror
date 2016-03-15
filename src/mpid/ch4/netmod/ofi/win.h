@@ -21,16 +21,15 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
                                                   void            *base,
-                                                  int              disp_unit,
-                                                  int              do_optimize)
+                                                  int              disp_unit)
 {
     int             i,same_disp,mpi_errno = MPI_SUCCESS;
     uint32_t        first;
     MPIR_Errflag_t  errflag      = MPIR_ERR_NONE;
     MPID_Comm      *comm_ptr     = win->comm_ptr;
-    MPIDI_CH4U_win_info_t *my_winfo = NULL;
     int raw_prefix,idx,bitpos;
     unsigned gen_id;
+    uint32_t *disp_units;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
@@ -71,37 +70,30 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
                                      &MPIDI_CH4_NMI_OFI_WIN(win).mr,                  /* Out: memregion object    */
                                      NULL), mr_reg);                     /* In:  context             */
 
-    my_winfo = (MPIDI_CH4U_win_info_t *)WINFO(win,0);
-    my_winfo->base_addr = (uint64_t) base;
-    my_winfo->disp_unit = disp_unit;
+    MPIDI_CH4_NMI_OFI_WIN(win).disp_units =
+                                    (uint32_t*)MPL_malloc(sizeof(uint32_t)*comm_ptr->local_size);
 
-    my_winfo = (MPIDI_CH4U_win_info_t *)WINFO(win,comm_ptr->rank);
-    my_winfo->base_addr = (uint64_t) base;
-    my_winfo->disp_unit = disp_unit;
-    mpi_errno        = MPIR_Allgather_impl(MPI_IN_PLACE,
-                                           0,
-                                           MPI_DATATYPE_NULL,
-                                           MPIDI_CH4U_WIN(win, info_table),
-                                           sizeof(MPIDI_CH4U_win_info_t),
-                                           MPI_BYTE,
-                                           comm_ptr,
-                                           &errflag);
+    disp_units = MPIDI_CH4_NMI_OFI_WIN(win).disp_units;
+    disp_units[comm_ptr->rank] = disp_unit;
+    mpi_errno = MPIR_Allgather_impl(MPI_IN_PLACE, 0,
+                                    MPI_DATATYPE_NULL,
+                                    disp_units,
+                                    sizeof(uint32_t),
+                                    MPI_BYTE,
+                                    comm_ptr,
+                                    &errflag);
 
-    if(do_optimize) {
-        first     = MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,0);
-        same_disp = 1;
-
-        for(i=1; i<comm_ptr->local_size; i++) {
-            if(MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,i) != first)
-                same_disp=0;
-
+    first = disp_units[0];
+    same_disp = 1;
+    for(i=1; i<comm_ptr->local_size; i++) {
+        if(disp_units[i] != first){
+            same_disp=0;
             break;
         }
-
-        if(same_disp) {
-            MPL_free(MPIDI_CH4U_WIN(win, info_table));
-            MPIDI_CH4U_WIN(win, info_table) = NULL;
-        }
+    }
+    if(same_disp){
+        MPL_free(MPIDI_CH4_NMI_OFI_WIN(win).disp_units);
+        MPIDI_CH4_NMI_OFI_WIN(win).disp_units = NULL;
     }
 
 fn_exit:
@@ -547,6 +539,10 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
                                            window_instance);
     MPIDI_CH4_NMI_OFI_CALL(fi_close(& MPIDI_CH4_NMI_OFI_WIN(win).mr->fid), mr_unreg);
+     if(MPIDI_CH4_NMI_OFI_WIN(win).disp_units){
+        MPL_free( MPIDI_CH4_NMI_OFI_WIN(win).disp_units);
+        MPIDI_CH4_NMI_OFI_WIN(win).disp_units = NULL;
+    }
 
     MPIDI_CH4R_win_finalize(win_ptr);
 
@@ -626,9 +622,9 @@ static inline int MPIDI_CH4_NM_win_create(void       *base,
     win              = *win_ptr;
     win->base        = base;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,base,disp_unit,1);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,base,disp_unit);
 
-    if(mpi_errno != MPI_SUCCESS) goto fn_fail;
+   if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     mpi_errno = MPIR_Barrier_impl(comm_ptr,&errflag);
 
@@ -676,9 +672,11 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
     void           *baseP      = NULL;
     MPID_Win       *win        = NULL;
     ssize_t         total_size = 0LL;
-    MPI_Aint       *sizes, size_out = 0;
+    MPI_Aint        size_out = 0;
     char            shm_key[64];
     void           *map_ptr;
+    MPIDI_CH4U_win_shared_info_t *shared_table = NULL;
+
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
 
@@ -686,14 +684,18 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                            MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
-    MPIDI_CH4U_WIN(win, sizes) = (MPI_Aint *)MPL_malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
-    sizes                 = MPIDI_CH4U_WIN(win, sizes);
-    sizes[comm_ptr->rank] = size;
+    MPIDI_CH4U_WIN(win, shared_table) = (MPIDI_CH4U_win_shared_info_t*)MPL_malloc(
+        sizeof(MPIDI_CH4U_win_shared_info_t)*comm_ptr->local_size);
+    shared_table          = MPIDI_CH4U_WIN(win, shared_table);
+
+    shared_table[comm_ptr->rank].size = size;
+    shared_table[comm_ptr->rank].disp_unit = disp_unit;
+
     mpi_errno             = MPIR_Allgather_impl(MPI_IN_PLACE,
                                                 0,
                                                 MPI_DATATYPE_NULL,
-                                                sizes,
-                                                sizeof(MPI_Aint),
+                                                shared_table,
+                                                sizeof(MPIDI_CH4U_win_shared_info_t),
                                                 MPI_BYTE,
                                                 comm_ptr,
                                                 &errflag);
@@ -705,7 +707,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
      * and a non performance sensitive API.
      */
     for(i=0; i<comm_ptr->local_size; i++)
-        total_size+=sizes[i];
+        total_size+=shared_table[i].size;
 
     if(total_size == 0) goto fn_zero;
 
@@ -798,15 +800,14 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
     /* Scan for my offset into the buffer             */
     /* Could use exscan if this is expensive at scale */
     for(i=0; i<comm_ptr->rank; i++)
-        size_out+=sizes[i];
+        size_out+=shared_table[i].size;
 
 fn_zero:
 
     baseP            = (size==0)?NULL:(void *)((char *)map_ptr + size_out);
     win->base        =  baseP;
     win->size        =  size;
-
-    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,baseP,disp_unit,0);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,baseP,disp_unit);
 
     if(mpi_errno != MPI_SUCCESS)
         return mpi_errno;
@@ -858,13 +859,23 @@ static inline int MPIDI_CH4_NM_win_shared_query(MPID_Win *win,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
     int offset = rank;
+    int i;
+    uintptr_t  base = (uintptr_t) MPIDI_CH4U_WIN(win, mmap_addr);
+
+    MPIDI_CH4U_win_shared_info_t *shared_table = MPIDI_CH4U_WIN(win, shared_table);
 
     if(rank < 0)
         offset = 0;
 
-    *(void **)baseptr = MPIDI_CH4_NMI_OFI_WINFO_BASE_FORCE(win, offset);
-    *size             = MPIDI_CH4U_WIN(win, sizes)[offset];
-    *disp_unit        = MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,offset);
+    *size             = shared_table[offset].size;
+    *disp_unit        = shared_table[offset].disp_unit;
+    if(*size > 0) {
+         for(i = 0; i<offset; i++)
+            base +=shared_table[i].size;
+        *(void **)baseptr = (void*)base;
+    }
+    else
+        *(void **)baseptr = NULL;
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
     return mpi_errno;
@@ -901,7 +912,7 @@ static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint     size,
 
     win       = *win_ptr;
     win->base =  baseP;
-    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,baseP,disp_unit,1);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_allgather(win,baseP,disp_unit);
 
     if(mpi_errno != MPI_SUCCESS)
         goto fn_fail;
@@ -1033,7 +1044,7 @@ static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info *info,
     win       = *win_ptr;
     win->base =  MPI_BOTTOM;
 
-    rc = MPIDI_CH4_NMI_OFI_Win_allgather(win,win->base,1,1);
+    rc = MPIDI_CH4_NMI_OFI_Win_allgather(win,win->base,1);
 
     if(rc != MPI_SUCCESS)
         goto fn_fail;
