@@ -47,6 +47,7 @@ typedef struct {
     ptl_handle_eq_t eqs[2];
     ptl_pt_index_t  pt;
     ptl_handle_md_t md;
+    int inject_done;
 } MPIDI_CH4_NMI_PTL_global_t;
 
 typedef struct {

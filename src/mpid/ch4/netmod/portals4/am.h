@@ -278,7 +278,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     int mpi_errno = MPI_SUCCESS, ret, c;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    int complete = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
@@ -286,12 +285,13 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, comm->rank, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
+    MPIDI_CH4_NMI_PTL_global.inject_done = 0;
     ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
                  PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[rank].process,
-                 MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, &complete, ptl_hdr);
+                 MPIDI_CH4_NMI_PTL_addr_table[rank].pt, match_bits, 0, &MPIDI_CH4_NMI_PTL_global.inject_done, ptl_hdr);
 
     /* wait until request is complete */
-    while (!complete) {
+    while (!MPIDI_CH4_NMI_PTL_global.inject_done) {
         MPIDI_CH4_NM_progress(NULL, FALSE);
     }
 
@@ -309,7 +309,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     int mpi_errno = MPI_SUCCESS, ret, c;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    int complete = 0;
     MPIDI_CH4_NMI_PTL_am_reply_token_t use_token;
     MPID_Comm *use_comm;
     int use_rank;
@@ -324,12 +323,13 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, use_comm->rank, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(use_comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
+    MPIDI_CH4_NMI_PTL_global.inject_done = 0;
     ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)am_hdr, am_hdr_sz,
                  PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
-                 MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, &complete, ptl_hdr);
+                 MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, &MPIDI_CH4_NMI_PTL_global.inject_done, ptl_hdr);
 
     /* wait until request is complete */
-    while (!complete) {
+    while (!MPIDI_CH4_NMI_PTL_global.inject_done) {
         MPIDI_CH4_NM_progress(NULL, FALSE);
     }
 
