@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_SPAWN_H_INCLUDED
-#define MPIDCH4_SPAWN_H_INCLUDED
+#ifndef CH4_SPAWN_H_INCLUDED
+#define CH4_SPAWN_H_INCLUDED
 
 #include "ch4_impl.h"
 
@@ -319,4 +319,4 @@ fn_fail:
     goto fn_exit;
 }
 
-#endif /* MPIDCH4_SPAWN_H_INCLUDED */
+#endif /* CH4_SPAWN_H_INCLUDED */

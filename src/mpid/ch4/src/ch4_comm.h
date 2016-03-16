@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_COMM_H_INCLUDED
-#define MPIDCH4_COMM_H_INCLUDED
+#ifndef CH4_COMM_H_INCLUDED
+#define CH4_COMM_H_INCLUDED
 
 #include "ch4_impl.h"
 
@@ -178,4 +178,4 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
 }
 
 
-#endif /* MPIDCH4_COMM_H_INCLUDED */
+#endif /* CH4_COMM_H_INCLUDED */

@@ -8,7 +8,6 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-
 #ifndef MPIDPRE_H_INCLUDED
 #define MPIDPRE_H_INCLUDED
 

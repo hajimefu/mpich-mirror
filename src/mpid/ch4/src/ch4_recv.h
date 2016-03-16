@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_RECV_H_INCLUDED
-#define MPIDCH4_RECV_H_INCLUDED
+#ifndef CH4_RECV_H_INCLUDED
+#define CH4_RECV_H_INCLUDED
 
 #include "ch4_impl.h"
 
@@ -362,4 +362,4 @@ __CH4_INLINE__ int MPIDI_Cancel_recv(MPID_Request * rreq)
     goto fn_exit;
 }
 
-#endif /* MPIDCH4_RECV_H_INCLUDED */
+#endif /* CH4_RECV_H_INCLUDED */

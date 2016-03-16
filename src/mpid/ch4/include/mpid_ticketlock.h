@@ -7,8 +7,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef __include_mpid_ticketlock_h__
-#define __include_mpid_ticketlock_h__
+#ifndef MPID_TICKETLOCK_H_INCLUDED
+#define MPID_TICKETLOCK_H_INCLUDED
 
 #include "mpiutil.h"
 
@@ -165,4 +165,4 @@ MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m
 #define MPIDI_CH4I_THREAD_CS_TRY(name, mutex)  MPIDI_CH4I_THREAD_CS_TRY_##name(mutex)
 #define MPIDI_CH4I_THREAD_CS_YIELD(name, mutex) MPIDI_CH4I_THREAD_CS_YIELD_##name(mutex)
 
-#endif /* __include_mpid_ticketlock_h__ */
+#endif /* MPID_TICKETLOCK_H_INCLUDED */

@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_IMPL_H_INCLUDED
-#define MPIDCH4_IMPL_H_INCLUDED
+#ifndef CH4_IMPL_H_INCLUDED
+#define CH4_IMPL_H_INCLUDED
 
 #include "ch4_types.h"
 #include <mpidch4.h>
@@ -604,4 +604,4 @@ static inline uintptr_t MPIDI_CH4I_win_base_at_target(const MPID_Win *win)
     return (uintptr_t) win->base;
 }
 
-#endif /* MPIDCH4_IMPL_H_INCLUDED */
+#endif /* CH4_IMPL_H_INCLUDED */

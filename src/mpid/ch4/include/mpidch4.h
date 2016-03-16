@@ -8,9 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-
-#if !defined(MPICH_MPIDCH4_H_INCLUDED)
-#define MPICH_MPIDCH4_H_INCLUDED
+#ifndef MPIDCH4_H_INCLUDED
+#define MPIDCH4_H_INCLUDED
 
 #define __CH4_INLINE__ __attribute__((always_inline)) static inline
 
@@ -396,4 +395,4 @@ extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 
 
 
-#endif /* !defined(MPICH_MPIDCH4_H_INCLUDED) */
+#endif /* MPIDCH4_H_INCLUDED */

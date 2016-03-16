@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_TYPES_H_INCLUDED
-#define MPIDCH4_TYPES_H_INCLUDED
+#ifndef CH4_TYPES_H_INCLUDED
+#define CH4_TYPES_H_INCLUDED
 
 #include <mpidimpl.h>
 #include <stdio.h>
@@ -266,4 +266,4 @@ extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 #define MPIDI_CH4I_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
 
-#endif /* MPIDCH4_TYPES_H_INCLUDED */
+#endif /* CH4_TYPES_H_INCLUDED */

@@ -1,4 +1,3 @@
-
 /* -*- Mode: C ; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 /*
  *  (C) 2006 by Argonne National Laboratory.
@@ -9,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_COLL_H_INCLUDED
-#define MPIDCH4_COLL_H_INCLUDED
+#ifndef CH4_COLL_H_INCLUDED
+#define CH4_COLL_H_INCLUDED
 
 #include "ch4_impl.h"
 #include "ch4r_proc.h"
@@ -372,4 +371,4 @@ __CH4_INLINE__ int MPIDI_Iscatterv(const void * sendbuf, const int * sendcounts,
             recvbuf, recvcount, recvtype, root, comm, req);
 }
 
-#endif /* MPIDCH4_COLL_H_INCLUDED */
+#endif /* CH4_COLL_H_INCLUDED */

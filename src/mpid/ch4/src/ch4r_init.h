@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4U_INIT_H_INCLUDED
-#define MPIDCH4U_INIT_H_INCLUDED
+#ifndef CH4R_INIT_H_INCLUDED
+#define CH4R_INIT_H_INCLUDED
 
 #include "ch4_impl.h"
 #include "ch4i_util.h"
@@ -295,4 +295,4 @@ __CH4_INLINE__ int MPIDI_CH4R_free_mem(void *ptr)
 }
 
 
-#endif /* MPIDCH4_INIT_H_INCLUDED */
+#endif /* CH4R_INIT_H_INCLUDED */

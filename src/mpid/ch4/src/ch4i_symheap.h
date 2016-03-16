@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDI_CH4I_SYMHEAP_H_INCLUDED
-#define MPIDI_CH4I_SYMHEAP_H_INCLUDED
+#ifndef CH4I_SYMHEAP_H_INCLUDED
+#define CH4I_SYMHEAP_H_INCLUDED
 
 #include <opa_primitives.h>
 #include <sys/mman.h>
@@ -193,4 +193,4 @@ fn_fail:
   goto fn_exit;
 }
 
-#endif
+#endif /* CH4I_SYMHEAP_H_INCLUDED */

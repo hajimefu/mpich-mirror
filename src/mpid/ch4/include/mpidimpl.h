@@ -8,8 +8,9 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#if !defined(MPICH_MPIDIMPL_H_INCLUDED)
-#define MPICH_MPIDIMPL_H_INCLUDED
+#ifndef MPIDIMPL_H_INCLUDED
+#define MPIDIMPL_H_INCLUDED
+
 #include "mpichconf.h"
 #include <stdio.h>
 
@@ -42,4 +43,4 @@ EXTERN_C_END
 
 #include "mpidch4.h"
 
-#endif /* !defined(MPICH_MPIDIMPL_H_INCLUDED) */
+#endif /* MPIDIMPL_H_INCLUDED */

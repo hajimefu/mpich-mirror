@@ -8,9 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-
-#if !defined(MPICH_MPIDCH4R_H_INCLUDED)
-#define MPICH_MPIDCH4R_H_INCLUDED
+#ifndef MPIDCH4R_H_INCLUDED
+#define MPIDCH4R_H_INCLUDED
 
 #include "ch4r_recvq.h"
 #include "ch4r_init.h"
@@ -23,4 +22,4 @@
 #include "ch4r_buf.h"
 #include "ch4r_request.h"
 
-#endif /* !defined(MPICH_MPIDCH4R_H_INCLUDED) */
+#endif /* MPIDCH4R_H_INCLUDED */

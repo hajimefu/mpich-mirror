@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4U_CALLBACKS_H_INCLUDED
-#define MPIDCH4U_CALLBACKS_H_INCLUDED
+#ifndef CH4R_CALLBACKS_H_INCLUDED
+#define CH4R_CALLBACKS_H_INCLUDED
 
 #include "ch4r_request.h"
 
@@ -2769,4 +2769,4 @@ static inline int MPIDI_CH4R_get_ack_target_handler(void *am_hdr,
     return mpi_errno;
 }
 
-#endif
+#endif /* CH4R_CALLBACKS_H_INCLUDED */

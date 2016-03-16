@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4U_PROC_H_INCLUDED
-#define MPIDCH4U_PROC_H_INCLUDED
+#ifndef CH4R_PROC_H_INCLUDED
+#define CH4R_PROC_H_INCLUDED
 
 #include "ch4_types.h"
 
@@ -143,4 +143,4 @@ static inline int MPIDI_CH4R_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *ma
     return mpi_errno;
 }
 
-#endif /*MPIDCH4U_PROC_H_INCLUDED */
+#endif /* CH4R_PROC_H_INCLUDED */

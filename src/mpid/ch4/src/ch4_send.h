@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_SEND_H_INCLUDED
-#define MPIDCH4_SEND_H_INCLUDED
+#ifndef CH4_SEND_H_INCLUDED
+#define CH4_SEND_H_INCLUDED
 
 #include "ch4_impl.h"
 #include "ch4r_proc.h"
@@ -449,4 +449,4 @@ __CH4_INLINE__ int MPIDI_Cancel_send(MPID_Request * sreq)
     goto fn_exit;
 }
 
-#endif /* MPIDCH4_SEND_H_INCLUDED */
+#endif /* CH4_SEND_H_INCLUDED */

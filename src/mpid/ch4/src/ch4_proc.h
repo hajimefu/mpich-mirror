@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4_PROC_H_INCLUDED
-#define MPIDCH4_PROC_H_INCLUDED
+#ifndef CH4_PROC_H_INCLUDED
+#define CH4_PROC_H_INCLUDED
 
 #include "ch4_impl.h"
 
@@ -34,4 +34,4 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_FUNC_EXIT(MPIDI_STATE_CH4_RANK_IS_LOCAL);
     return ret;
 }
-#endif
+#endif /* CH4_PROC_H_INCLUDED */

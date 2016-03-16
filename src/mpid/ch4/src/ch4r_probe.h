@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef MPIDCH4U_PROBE_H_INCLUDED
-#define MPIDCH4U_PROBE_H_INCLUDED
+#ifndef CH4R_PROBE_H_INCLUDED
+#define CH4R_PROBE_H_INCLUDED
 
 #include "ch4_impl.h"
 
@@ -176,4 +176,4 @@ __CH4_INLINE__ int MPIDI_CH4R_mprobe(int source,
     return mpi_errno;
 }
 
-#endif /* MPIDCH4U_WIN_H_INCLUDED */
+#endif /* CH4R_WIN_H_INCLUDED */

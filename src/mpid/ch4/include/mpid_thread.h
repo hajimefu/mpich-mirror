@@ -3,8 +3,7 @@
  *  (C) 2001 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  */
-
-#if !defined(MPID_THREAD_H_INCLUDED)
+#ifndef MPID_THREAD_H_INCLUDED
 #define MPID_THREAD_H_INCLUDED
 
 #include "mpidu_thread_fallback.h"
@@ -62,4 +61,4 @@ typedef MPIDU_Thread_mutex_t MPID_Thread_mutex_t;
 #define MPID_THREADPRIV_KEY_DESTROY MPIDU_THREADPRIV_KEY_DESTROY
 
 
-#endif /* !defined(MPID_THREAD_H_INCLUDED) */
+#endif /* MPID_THREAD_H_INCLUDED */

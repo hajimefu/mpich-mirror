@@ -8,9 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-
-#ifndef MPIDI_CH4R_BUF_H_INCLUDED
-#define MPIDI_CH4R_BUF_H_INCLUDED
+#ifndef CH4R_BUF_H_INCLUDED
+#define CH4R_BUF_H_INCLUDED
 
 #include "ch4_impl.h"
 #include "ch4i_util.h"
@@ -167,4 +166,4 @@ static inline void MPIDI_CH4R_destroy_buf_pool(MPIU_buf_pool_t *pool)
     MPL_free(pool);
 }
 
-#endif /* MPIDCH4_BUF_H_INCLUDED */
+#endif /* CH4R_BUF_H_INCLUDED */

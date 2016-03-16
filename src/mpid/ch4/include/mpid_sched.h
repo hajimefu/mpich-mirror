@@ -3,7 +3,6 @@
  *  (C) 2015 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  */
-
 #ifndef MPID_SCHED_H_INCLUDED
 #define MPID_SCHED_H_INCLUDED
 #include "mpidu_sched.h"
