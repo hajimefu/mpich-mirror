@@ -56,6 +56,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_irecv(void *buf,
     MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_buf = (char *)buf + dt_true_lb;
     MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_count = count;
     MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->datatype = datatype;
+    MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->data_sz = data_sz;
     MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->next = NULL;
     MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->segment_ptr = NULL;
     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq) = NULL;

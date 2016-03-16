@@ -115,26 +115,43 @@ match_l: {
                     MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req_ack, MPIDI_CH4_SHMI_SIMPLE_Sendq);
                 }
 
-                /*
-                 * TODO: check for not overflowing recv buffer
-                 */
-                if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
+                if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER)
                     /* eager message */
                     data_sz = in_cell ? cell->pkt.mpich.datalen : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->data_sz;
+                else if(type == MPIDI_CH4_SHMI_SIMPLE_TYPELMT)
+                    data_sz = MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
+                else
+                    MPIU_Assert(0);
 
-                    if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr) {
-                        /* non-contig */
-                        size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + data_sz;
-                        MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint *)&last, send_buffer);
+                /* check for user buffer overflow */
+                size_t user_data_sz = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz;
+                if(user_data_sz < data_sz) {
+                    req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
+                    data_sz = user_data_sz;
+                } else
+                    req->status.MPI_ERROR = MPI_SUCCESS;
+
+                /* copy to user buffer */
+                if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr) {
+                    /* non-contig */
+                    size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + data_sz;
+                    MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint *)&last, send_buffer);
+                    if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
                         MPID_Segment_free(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr);
-                    } else {
-                        /* contig */
-                        if(send_buffer) MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
-                    }
+                        if (last != (MPI_Aint)data_sz)
+                            req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
+                    } else
+                        MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first = last;
+                } else
+                    /* contig */
+                    if(send_buffer) MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz -= data_sz;
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->user_buf += data_sz;
 
-                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz = data_sz;
-                    /* set status */
-
+                /* set status and dequeue receive request if done */
+                count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
+                MPIR_STATUS_SET_COUNT(req->status,count);
+                if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
                     if(in_cell) {
                         req->status.MPI_SOURCE = cell->rank;
                         req->status.MPI_TAG = cell->tag;
@@ -142,31 +159,10 @@ match_l: {
                         req->status.MPI_SOURCE = sreq->status.MPI_SOURCE;
                         req->status.MPI_TAG = sreq->status.MPI_TAG;
                     }
-
-                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)data_sz;
-                    MPIR_STATUS_SET_COUNT(req->status,count);
-                    /* dequeue rreq */
                     MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_Recvq_posted,
-                                                                        mpi_errno);
-                } else if(type == MPIDI_CH4_SHMI_SIMPLE_TYPELMT) {
-                    /* long message */
-                    if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr) {
-                        /* non-contig */
-                        size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
-                        MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint *)&last, send_buffer);
-                        MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first = last;
-                    } else {
-                        /* contig */
-                        if(send_buffer) MPIU_Memcpy(recv_buffer, (void *) send_buffer, MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD);
-                    }
-
-                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->data_sz -= MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
-                    MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->user_buf += MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
-                    count = MPIR_STATUS_GET_COUNT(req->status) + (MPI_Count)MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD;
-                    MPIR_STATUS_SET_COUNT(req->status,count);
-                } else {
-                    MPIU_Assert(0);
+                                                                        req->status.MPI_ERROR);
                 }
+
 
                 goto release_cell_l;
             }              /* if matched  */
