@@ -170,6 +170,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
     if (message == NULL) {
         /* treat as though MPI_MESSAGE_NO_PROC was passed */
         MPIR_Status_set_procnull(status);
+        mpi_errno = MPI_SUCCESS;
         goto fn_exit;
     }
 
