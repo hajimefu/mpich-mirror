@@ -470,9 +470,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
     MPIDI_CH4R_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
-    if (!MPIDI_CH4R_WIN(win, sync).lock.remote.locked) {
-        MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail);
-    }
+    MPIDI_CH4R_EPOCH_CHECK_TYPE(win, mpi_errno, goto fn_fail);
 
     MPIDI_CH4R_win_cntrl_msg_t msg;
     msg.win_id = MPIDI_CH4R_WIN(win, win_id);
@@ -512,6 +510,8 @@ static inline int MPIDI_CH4R_win_unlock(int rank, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_UNLOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_UNLOCK);
     if(rank == MPI_PROC_NULL) goto fn_exit0;
+
+    MPIDI_CH4R_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4R_EPOTYPE_LOCK, mpi_errno, return mpi_errno);
 
     mpi_errno = MPIDI_CH4I_progress_win_fence(win);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
