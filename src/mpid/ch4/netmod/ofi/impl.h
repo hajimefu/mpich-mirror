@@ -40,7 +40,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
 
-#define MPIDI_CH4_NMI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)
 #define MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank) \
     MPIDI_CH4_NMI_OFI_COMM(comm).vcrt->vcr_table[rank].addr_idx
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE
@@ -52,7 +51,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     MPIDI_Addr_table->table[MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm,rank)].dest
 #define MPIDI_CH4_NMI_OFI_TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
 #endif
-#define MPIDI_CH4_NMI_OFI_REQUEST(req,field)       ((req)->dev.ch4.netmod.ofi.field)
 
 /*
  * Helper routines and macros for request completion
