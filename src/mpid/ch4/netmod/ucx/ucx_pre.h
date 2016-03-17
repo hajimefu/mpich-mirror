@@ -21,17 +21,17 @@ struct MPID_Comm;
 typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;
-} MPIDI_CH4_NMI_UCX_Dt_t;
+} MPIDI_CH4_NMI_UCX_dt_t;
 
 
 typedef struct {
   ucp_tag_message_h  message_handler;
-} MPIDI_CH4_NMI_UCX_Request_t;
+} MPIDI_CH4_NMI_UCX_request_t;
 
 
 typedef struct {
     char *pack_buffer;
-} MPIDI_CH4_NMI_UCX_Am_request_t;
+} MPIDI_CH4_NMI_UCX_am_request_t;
 
 typedef struct {
     struct MPID_Request* req;

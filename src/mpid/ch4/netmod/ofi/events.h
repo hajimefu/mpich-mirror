@@ -559,12 +559,12 @@ static inline int MPIDI_CH4_NMI_OFI_Am_read_event(struct fi_cq_tagged_entry *wc,
     int                           mpi_errno      = MPI_SUCCESS;
     void                         *netmod_context = NULL;
     MPID_Request                 *rreq;
-    MPIDI_CH4_NMI_OFI_Am_request_t *ofi_req;
+    MPIDI_CH4_NMI_OFI_am_request_t *ofi_req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_READ_COMPLETION);
 
-    ofi_req = container_of(wc->op_context, MPIDI_CH4_NMI_OFI_Am_request_t, context);
+    ofi_req = container_of(wc->op_context, MPIDI_CH4_NMI_OFI_am_request_t, context);
     ofi_req->req_hdr->lmt_cntr--;
 
     if(ofi_req->req_hdr->lmt_cntr)

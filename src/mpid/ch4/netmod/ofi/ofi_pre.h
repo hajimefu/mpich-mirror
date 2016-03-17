@@ -75,7 +75,7 @@ typedef struct {
     void                          *huge_recv_counters;
     void                          *win_id_allocator;
     void                          *rma_id_allocator;
-} MPIDI_CH4_NMI_OFI_Comm_t;
+} MPIDI_CH4_NMI_OFI_comm_t;
 enum {
     MPIDI_AMTYPE_SHORT_HDR = 0,
     MPIDI_AMTYPE_SHORT,
@@ -154,7 +154,7 @@ typedef struct {
     struct fi_context                      context;  /* fixed field, do not move */
     int                                    event_id; /* fixed field, do not move */
     MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
-} MPIDI_CH4_NMI_OFI_Am_request_t;
+} MPIDI_CH4_NMI_OFI_am_request_t;
 
 
 typedef struct MPIDI_CH4_NMI_OFI_Noncontig_t{
@@ -181,10 +181,10 @@ typedef struct {
         struct iovec iov;
         void *inject_buf; /* Internal buffer for inject emulation */
     } util;
-} MPIDI_CH4_NMI_OFI_Request_t;
+} MPIDI_CH4_NMI_OFI_request_t;
 
 typedef struct {
     int index;
-} MPIDI_CH4_NMI_OFI_Dt_t;
+} MPIDI_CH4_NMI_OFI_dt_t;
 
 #endif

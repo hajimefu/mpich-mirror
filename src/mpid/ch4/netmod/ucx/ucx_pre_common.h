@@ -29,7 +29,7 @@ typedef struct  MPIDI_VEPT * MPIDI_CH4_NMI_UCX_VEP_t;
 typedef struct {
     MPIDI_CH4_NMI_UCX_VEP_t vept;
     MPIDI_CH4_NMI_UCX_VEP_t local_vept;
-} MPIDI_CH4_NMI_UCX_Comm_t;
+} MPIDI_CH4_NMI_UCX_comm_t;
 
 
 #endif

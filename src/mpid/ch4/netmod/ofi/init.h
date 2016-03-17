@@ -81,7 +81,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
                             offsetof(MPIDI_CH4_NMI_OFI_Win_request_t,context));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.ch4r.netmod_am.ofi.context) ==
                             offsetof(struct MPID_Request, dev.ch4.netmod.ofi.context));
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_CH4_NMI_OFI_Request_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_CH4_NMI_OFI_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request)>=sizeof(MPIDI_CH4_NMI_OFI_Win_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_CH4_NMI_OFI_Gpid_t));
 

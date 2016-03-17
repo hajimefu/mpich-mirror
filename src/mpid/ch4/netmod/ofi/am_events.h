@@ -137,7 +137,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_rdma_read(void                       *dst
 {
     int mpi_errno = MPI_SUCCESS;
     size_t done = 0, curr_len, rem = 0;
-    MPIDI_CH4_NMI_OFI_Am_request_t *am_req;
+    MPIDI_CH4_NMI_OFI_am_request_t *am_req;
     MPID_Comm *comm;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_RDMA_READ);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_RDMA_READ);
@@ -147,8 +147,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_rdma_read(void                       *dst
     while(done != data_sz) {
         curr_len = MPL_MIN(rem, MPIDI_Global.max_send);
 
-        MPIU_Assert(sizeof(MPIDI_CH4_NMI_OFI_Am_request_t) <= MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
-        am_req = (MPIDI_CH4_NMI_OFI_Am_request_t *)MPIDI_CH4R_get_buf(MPIDI_Global.am_buf_pool);
+        MPIU_Assert(sizeof(MPIDI_CH4_NMI_OFI_am_request_t) <= MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
+        am_req = (MPIDI_CH4_NMI_OFI_am_request_t *)MPIDI_CH4R_get_buf(MPIDI_Global.am_buf_pool);
         MPIU_Assert(am_req);
 
         am_req->req_hdr  = MPIDI_CH4_NMI_OFI_AMREQUEST(rreq, req_hdr);
