@@ -86,7 +86,7 @@ for net in $ch4_netmods ; do
         ch4_netmod_pre_include="#include \"${net}_pre.h\""
     else
         ch4_netmod_pre_include="${ch4_netmod_pre_include}
-        #include \"${net}_pre.h\""
+#include \"${net}_pre.h\""
     fi
 
     net_upper=`echo ${net} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
