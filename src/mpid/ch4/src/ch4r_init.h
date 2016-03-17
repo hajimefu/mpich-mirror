@@ -29,6 +29,18 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
+    /*
+      Prevents double initialization of some special communicators.
+
+      comm_world and comm_self may exhibit this function twice, first during MPIDI_CH4R_init
+      and the second during MPIR_Comm_commit in MPIDI_Init.
+      If there is an early arrival of an unexpected message before the second visit,
+      the following code will wipe out the unexpected queue andthe message is lost forever.
+    */
+    if (unlikely(MPIDI_CH4_Global.is_ch4r_initialized &&
+                 (comm == MPIR_Process.comm_world || comm == MPIR_Process.comm_self)))
+        goto fn_exit;
+
     comm_idx     = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
     subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
     is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
@@ -52,6 +64,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
     }
 
     MPIDI_CH4R_COMM(comm, window_instance) = 0;
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
     return mpi_errno;
 }
