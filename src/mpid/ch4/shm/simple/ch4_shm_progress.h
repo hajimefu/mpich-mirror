@@ -128,19 +128,18 @@ match_l: {
                 if(user_data_sz < data_sz) {
                     req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
                     data_sz = user_data_sz;
-                } else
-                    req->status.MPI_ERROR = MPI_SUCCESS;
+                }
 
                 /* copy to user buffer */
                 if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr) {
                     /* non-contig */
                     size_t last = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + data_sz;
                     MPID_Segment_unpack(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr, MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first, (MPI_Aint *)&last, send_buffer);
-                    if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER) {
+                    if (last != MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first + data_sz )
+                        req->status.MPI_ERROR = MPI_ERR_TYPE;
+                    if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER)
                         MPID_Segment_free(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_ptr);
-                        if (last != (MPI_Aint)data_sz)
-                            req->status.MPI_ERROR = MPI_ERR_TRUNCATE;
-                    } else
+                    else
                         MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->segment_first = last;
                 } else
                     /* contig */
@@ -162,7 +161,6 @@ match_l: {
                     MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_Recvq_posted,
                                                                         req->status.MPI_ERROR);
                 }
-
 
                 goto release_cell_l;
             }              /* if matched  */
