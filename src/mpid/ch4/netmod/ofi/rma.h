@@ -336,8 +336,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_put(const void    *origin_addr,
     msg.addr               = MPIDI_CH4_NMI_OFI_Comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_CH4_NMI_OFI_API_CTR);
     msg.context            = NULL;
     msg.data               = 0;
-    req->next              = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
-    MPIDI_CH4_NMI_OFI_WIN(win)->syncQ    = req;
+    req->next              = MPIDI_CH4_NMI_OFI_WIN(win).syncQ;
+    MPIDI_CH4_NMI_OFI_WIN(win).syncQ    = req;
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                        (uintptr_t)origin_addr,
                                        (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
@@ -487,8 +487,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get(void          *origin_addr,
     msg.addr               = MPIDI_CH4_NMI_OFI_Comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_CH4_NMI_OFI_API_CTR);
     msg.context            = NULL;
     msg.data               = 0;
-    req->next              = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
-    MPIDI_CH4_NMI_OFI_WIN(win)->syncQ    = req;
+    req->next              = MPIDI_CH4_NMI_OFI_WIN(win).syncQ;
+    MPIDI_CH4_NMI_OFI_WIN(win).syncQ    = req;
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                        (uintptr_t)origin_addr,
                                        (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
@@ -852,8 +852,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
         goto am_fallback;
 
     req->event_id          = MPIDI_CH4_NMI_OFI_EVENT_ABORT;
-    req->next              = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
-    MPIDI_CH4_NMI_OFI_WIN(win)->syncQ    = req;
+    req->next              = MPIDI_CH4_NMI_OFI_WIN(win).syncQ;
+    MPIDI_CH4_NMI_OFI_WIN(win).syncQ    = req;
     max_size               = max_size*dt_size;
 
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
@@ -1021,8 +1021,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
         goto am_fallback;
 
     req->event_id       = MPIDI_CH4_NMI_OFI_EVENT_RMA_DONE;
-    req->next           = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
-    MPIDI_CH4_NMI_OFI_WIN(win)->syncQ = req;
+    req->next           = MPIDI_CH4_NMI_OFI_WIN(win).syncQ;
+    MPIDI_CH4_NMI_OFI_WIN(win).syncQ = req;
 
     if(op != MPI_NO_OP)
         MPIDI_CH4_NMI_OFI_Init_iovec_state2(&req->noncontig->iovs,
@@ -1230,7 +1230,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
     if(target_rank == win->comm_ptr->rank) {
         rreq       = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        offset     = target_disp * MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,target_rank);
+        offset = win->disp_unit * target_disp;
         mpi_errno  = MPIR_Localcopy((char *)win->base + offset,
                                     target_count,
                                     target_datatype,

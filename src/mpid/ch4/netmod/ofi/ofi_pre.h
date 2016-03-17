@@ -187,4 +187,14 @@ typedef struct {
     int index;
 } MPIDI_CH4_NMI_OFI_dt_t;
 
+struct MPIDI_CH4_NMI_OFI_Win_request;
+
+typedef struct {
+    struct fid_mr                     *mr;
+    uint64_t                           mr_key;
+    uint64_t                           win_id;
+    struct MPIDI_CH4_NMI_OFI_Win_request   *syncQ;
+    uint32_t *disp_units;
+} MPIDI_CH4_NMI_OFI_Win_t;
+
 #endif

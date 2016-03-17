@@ -52,6 +52,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define MPIDI_CH4_NMI_OFI_TO_PHYS(rank)            MPIDI_Addr_table->table[rank].dest
 #endif
 
+#define MPIDI_CH4_NMI_OFI_WIN(win)     ((win)->dev.netmod.ofi)
 /*
  * Helper routines and macros for request completion
  */
@@ -272,7 +273,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(w,rank)                          \
 ({                                                                      \
   uint64_t _v;                                                          \
-  _v = MPIDI_CH4_NMI_OFI_WIN(w)->mr_key;                                              \
+  _v = MPIDI_CH4_NMI_OFI_WIN(w).mr_key;                                              \
   _v;                                                                   \
 })
 

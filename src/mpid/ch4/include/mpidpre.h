@@ -287,7 +287,9 @@ typedef struct MPIDI_CH4U_win_t {
 
 typedef struct {
     MPIDI_CH4U_win_t ch4u;
-    uint64_t pad[192 / 8];
+    union {
+        MPIDI_CH4_NETMOD_WIN_DECL
+    }netmod;
 } MPIDI_Devwin_t;
 #define MPIDI_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
 #define MPIDI_CH4U_WINFO(win,rank) (MPIDI_CH4U_win_info_t*) &(MPIDI_CH4U_WIN(win, info_table)[rank])

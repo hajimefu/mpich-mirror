@@ -42,7 +42,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
     gen_id     = (idx*MPIR_CONTEXT_INT_BITS) + (31-bitpos);
 
     int       total_bits_avail      = MPIDI_Global.max_mr_key_size * 8;
-    uint64_t  window_instance       = ((uint64_t)MPIDI_CH4_NMI_OFI_WIN(win)->win_id)>>32;
+    uint64_t  window_instance       = (uint64_t)(MPIDI_CH4_NMI_OFI_WIN(win).win_id)>>32;
     int       bits_for_instance_id  = MPIDI_Global.max_windows_bits;
     int       bits_for_context_id;
     uint64_t  max_contexts_allowed;
@@ -59,15 +59,16 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
                         goto fn_fail,"**ofid_mr_reg");
 
     /* Context id in lower bits, instance in upper bits */
-    MPIDI_CH4_NMI_OFI_WIN(win)->mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
+    MPIDI_CH4_NMI_OFI_WIN(win).mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
+
     MPIDI_CH4_NMI_OFI_CALL(fi_mr_reg(MPIDI_Global.domain,                /* In:  Domain Object       */
                                      base,                               /* In:  Lower memory address*/
                                      win->size,                          /* In:  Length              */
                                      FI_REMOTE_READ | FI_REMOTE_WRITE,   /* In:  Expose MR for read  */
                                      0ULL,                               /* In:  offset(not used)    */
-                                     MPIDI_CH4_NMI_OFI_WIN(win)->mr_key,               /* In:  requested key       */
+                                     MPIDI_CH4_NMI_OFI_WIN(win).mr_key,               /* In:  requested key       */
                                      0ULL,                               /* In:  flags               */
-                                     &MPIDI_CH4_NMI_OFI_WIN(win)->mr,                  /* Out: memregion object    */
+                                     &MPIDI_CH4_NMI_OFI_WIN(win).mr,                  /* Out: memregion object    */
                                      NULL), mr_reg);                     /* In:  context             */
 
     my_winfo = (MPIDI_CH4U_win_info_t *)WINFO(win,0);
@@ -140,12 +141,12 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
                         "**nomem");
     *win_ptr = win;
 
-    memset(MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(*MPIDI_CH4_NMI_OFI_WIN(win)));
+    memset(&MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(MPIDI_CH4_NMI_OFI_Win_t));
 
     /* context id lower bits, window instance upper bits */
     window_instance = MPIDI_CH4_NMI_OFI_Index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator);
-    MPIDI_CH4_NMI_OFI_WIN(win)->win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
-    MPIDI_CH4_NMI_OFI_Map_set(MPIDI_Global.win_map,MPIDI_CH4_NMI_OFI_WIN(win)->win_id,win);
+    MPIDI_CH4_NMI_OFI_WIN(win).win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
+    MPIDI_CH4_NMI_OFI_Map_set(MPIDI_Global.win_map,MPIDI_CH4_NMI_OFI_WIN(win).win_id,win);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
     return mpi_errno;
@@ -200,7 +201,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
     while(OPA_load_int(&MPIDI_CH4U_WIN(win, outstanding_ops)) != 0)
         MPIDI_CH4_NMI_OFI_PROGRESS();
 
-    r = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
+    r = MPIDI_CH4_NMI_OFI_WIN(win).syncQ;
 
     while(r)  {
         MPIDI_CH4_NMI_OFI_Win_request_t *next = r->next;
@@ -208,7 +209,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
         r = next;
     }
 
-    MPIDI_CH4_NMI_OFI_WIN(win)->syncQ = NULL;
+    MPIDI_CH4_NMI_OFI_WIN(win).syncQ = NULL;
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
@@ -541,11 +542,11 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
 
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-    window_instance       = (uint32_t)(MPIDI_CH4_NMI_OFI_WIN(win)->win_id>>32);
+    window_instance       = (uint32_t)(MPIDI_CH4_NMI_OFI_WIN(win).win_id>>32);
+
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
                                            window_instance);
-
-    MPIDI_CH4_NMI_OFI_CALL(fi_close(&MPIDI_CH4_NMI_OFI_WIN(win)->mr->fid), mr_unreg);
+    MPIDI_CH4_NMI_OFI_CALL(fi_close(& MPIDI_CH4_NMI_OFI_WIN(win).mr->fid), mr_unreg);
 
     MPIDI_CH4R_win_finalize(win_ptr);
 
@@ -710,7 +711,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
 
     sprintf(shm_key, "/mpi-%X-%" PRIx64,
             MPIDI_Global.jobid,
-            MPIDI_CH4_NMI_OFI_WIN(win)->win_id);
+            MPIDI_CH4_NMI_OFI_WIN(win).win_id);
 
     rc    = shm_open(shm_key,
                      O_CREAT|O_EXCL|O_RDWR,

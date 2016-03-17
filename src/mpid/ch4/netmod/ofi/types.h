@@ -138,7 +138,6 @@ EXTERN_C_BEGIN
 /* Field accessor macros */
 #define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_Gpid_t*)(req)->dev.pad)
 #define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_Offset_checker_t,  pad)
-#define MPIDI_CH4_NMI_OFI_WIN(win)                 ((MPIDI_CH4_NMI_OFI_Win_t*)(win)->dev.pad)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr)
@@ -507,13 +506,6 @@ typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
     uint16_t       outstanding;
     struct fid_mr *mr;
 } MPIDI_CH4_NMI_OFI_Huge_counter_t;
-
-typedef struct {
-    struct fid_mr                     *mr;
-    uint64_t                           mr_key;
-    uint64_t                           win_id;
-    MPIDI_CH4_NMI_OFI_Win_request_t   *syncQ;
-} MPIDI_CH4_NMI_OFI_Win_t;
 
 /* Externs */
 extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;

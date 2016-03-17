@@ -21,5 +21,5 @@
 #define MPIDI_CH4_NETMOD_COMM_DECL       @ch4_netmod_comm_decl@
 #define MPIDI_CH4_SHM_COMM_DECL          @ch4_shm_comm_decl@
 #define MPIDI_CH4_NETMOD_DT_DECL         @ch4_netmod_dt_decl@
-
+#define MPIDI_CH4_NETMOD_WIN_DECL        @ch4_netmod_win_decl@
 #endif /* NETMODPRE_H_INCLUDED */

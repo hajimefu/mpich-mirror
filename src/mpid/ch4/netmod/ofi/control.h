@@ -27,7 +27,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
-    control->win_id      = MPIDI_CH4_NMI_OFI_WIN(win)->win_id;
+    control->win_id      = MPIDI_CH4_NMI_OFI_WIN(win).win_id;
     control->origin_rank = win->comm_ptr->rank;
 
     mpi_errno = MPIDI_CH4_NMI_Do_inject(rank,
