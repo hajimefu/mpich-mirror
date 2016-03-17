@@ -239,6 +239,7 @@ typedef struct MPIDI_CH4_Global_t {
     int pname_len;
     char pname[MPI_MAX_PROCESSOR_NAME];
     int is_initialized;
+    int is_ch4r_initialized;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPID_Node_id_t *node_map, max_node_id;
 #endif

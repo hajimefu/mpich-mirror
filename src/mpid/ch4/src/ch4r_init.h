@@ -97,6 +97,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT);
 
+    MPIDI_CH4_Global.is_ch4r_initialized = 0;
 #ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
     MPIDI_CH4_Global.posted_list = NULL;
     MPIDI_CH4_Global.unexp_list = NULL;
@@ -228,6 +229,8 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_CH4_Global.win_hash = NULL;
+
+    MPIDI_CH4_Global.is_ch4r_initialized = 1;
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
 
   fn_exit:
@@ -244,6 +247,7 @@ __CH4_INLINE__ void MPIDI_CH4R_finalize()
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
+    MPIDI_CH4_Global.is_ch4r_initialized = 0;
     MPL_HASH_CLEAR(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash);
     MPIDI_CH4R_destroy_buf_pool(MPIDI_CH4_Global.buf_pool);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
