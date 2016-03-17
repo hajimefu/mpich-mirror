@@ -6,7 +6,6 @@
 #include "mpidch4r.h"
 #include "ch4_impl.h"
 
-#include <ucx_types.h>
 #include <ucs/type/status.h>
 
 #define MPIDI_CH4_NMI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
