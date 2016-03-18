@@ -13,11 +13,6 @@
 
 #include "impl.h"
 
-static inline void MPIDI_CH4_NMI_PTL_am_reply_handler(ptl_event_t *e)
-{
-    *(int *)(e->user_ptr)--;
-}
-
 static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
