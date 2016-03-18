@@ -88,6 +88,8 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
         cmpl_handler_fn(rreq);
     }
 
+    MPIDI_CH4_NMI_PTL_append_overflow((size_t)e->user_ptr);
+
  fn_exit:
     return mpi_errno;
 }

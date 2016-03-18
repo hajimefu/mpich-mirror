@@ -16,7 +16,7 @@
 #include "impl.h"
 #include "portals4.h"
 
-static inline int MPIDI_CH4_NMI_PTL_append_overflow(int i)
+static inline int MPIDI_CH4_NMI_PTL_append_overflow(size_t i)
 {
     ptl_me_t me;
     ptl_process_t id_any;
@@ -35,7 +35,7 @@ static inline int MPIDI_CH4_NMI_PTL_append_overflow(int i)
     me.ignore_bits = ~((ptl_match_bits_t)0);
     me.min_free = MPIDI_CH4_NMI_PTL_MAX_AM_EAGER_SZ;
 
-    return PtlMEAppend(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_global.pt, &me, PTL_OVERFLOW_LIST, (void *)(size_t)i,
+    return PtlMEAppend(MPIDI_CH4_NMI_PTL_global.ni, MPIDI_CH4_NMI_PTL_global.pt, &me, PTL_OVERFLOW_LIST, (void *)i,
                        &MPIDI_CH4_NMI_PTL_global.overflow_me_handles[i]);
 }
 
