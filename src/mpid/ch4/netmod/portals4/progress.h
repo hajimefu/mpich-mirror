@@ -16,11 +16,11 @@
 static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
-    MPID_Request *rreq;
+    MPID_Request *rreq = NULL;
     void *p_data;
     void *in_data;
     size_t data_sz, in_data_sz;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
+    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn = NULL;
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
