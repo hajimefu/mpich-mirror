@@ -125,6 +125,7 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
         case PTL_EVENT_SEND:
             break;
         default:
+            printf("ABORT: event = %d\n", e.type);
             abort();
         }
     }
