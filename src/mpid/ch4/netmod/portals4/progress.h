@@ -83,8 +83,6 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
         cmpl_handler_fn(rreq);
     }
 
-    MPIDI_CH4_NMI_PTL_append_overflow((size_t)e->user_ptr);
-
  fn_exit:
     return mpi_errno;
 }
@@ -116,6 +114,12 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
                     *(int *)e.user_ptr = TRUE;
                 }
             }
+            break;
+        case PTL_EVENT_AUTO_UNLINK:
+            MPIDI_CH4_NMI_PTL_global.overflow_me_handles[(size_t)e.user_ptr] = PTL_INVALID_HANDLE;
+            break;
+        case PTL_EVENT_AUTO_FREE:
+            MPIDI_CH4_NMI_PTL_append_overflow((size_t)e.user_ptr);
             break;
         case PTL_EVENT_SEND:
             break;
