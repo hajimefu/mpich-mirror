@@ -355,6 +355,8 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
                                                 0ULL,
                                                 &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_mr),
                                                 NULL), mr_reg);
+    OPA_incr_int(&MPIDI_Global.am_inflight_rma_send_mrs);
+
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);
 

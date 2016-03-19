@@ -342,6 +342,7 @@ typedef struct {
     MPIDI_CH4_NM_am_origin_handler_fn      am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     MPIU_buf_pool_t                       *am_buf_pool;
     OPA_int_t                              am_inflight_inject_emus;
+    OPA_int_t                              am_inflight_rma_send_mrs;
 
     /* Completion queue buffering */
     MPIDI_CH4_NMI_OFI_Cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];
