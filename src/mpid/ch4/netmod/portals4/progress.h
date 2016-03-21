@@ -99,20 +99,19 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
             MPIDI_CH4_NMI_PTL_am_handler(&e);
             break;
         case PTL_EVENT_ACK:
-            {
-                if (*(int *)e.user_ptr) {
-                    int count;
-                    MPID_Request *sreq = (MPID_Request *)e.user_ptr;
-                    MPIR_cc_decr(sreq->cc_ptr, &count);
-                    MPIU_Assert(count >= 0);
+            if (e.user_ptr) {
+                int count;
+                MPID_Request *sreq = (MPID_Request *)e.user_ptr;
+                int handler_id = sreq->dev.ch4.ch4r.netmod_am.portals4.handler_id;
 
-                    if(count == 0) {
-                        MPIDI_CH4R_Request_release(sreq);
-                    }
-                    MPIDI_CH4R_send_origin_cmpl_handler(sreq);
-                } else {
-                    *(int *)e.user_ptr = TRUE;
+                MPIR_cc_decr(sreq->cc_ptr, &count);
+                MPIU_Assert(count >= 0);
+
+                if (count == 0) {
+                    MPIDI_CH4R_Request_release(sreq);
+                    break;
                 }
+                MPIDI_CH4_NMI_PTL_global.send_cmpl_handlers[handler_id](sreq);
             }
             break;
         case PTL_EVENT_AUTO_UNLINK:

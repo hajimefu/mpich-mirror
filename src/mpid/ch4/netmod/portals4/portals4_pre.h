@@ -15,6 +15,7 @@
 #include "portals4.h"
 
 typedef struct {
+    int handler_id;
     char *pack_buffer;
     ptl_handle_md_t md;
 } MPIDI_CH4_NMI_PORTALS4_am_request_t;
