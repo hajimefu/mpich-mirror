@@ -11,7 +11,6 @@
 #define SHM_COMM_H_INCLUDED
 
 #include "ch4_shm_impl.h"
-#include "impl.h"
 #include "mpl_utlist.h"
 
 #undef FUNCNAME
