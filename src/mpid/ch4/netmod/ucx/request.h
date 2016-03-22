@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_MPIDI_CH4_NMI_UCX_REQUEST_H_INCLUDED
-#define NETMOD_MPIDI_CH4_NMI_UCX_REQUEST_H_INCLUDED
+#ifndef REQUEST_H_INCLUDED
+#define REQUEST_H_INCLUDED
 
 #include "impl.h"
 #include "mpidch4.h"
@@ -237,4 +237,5 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_sta
   fn_fail:
     rreq->status.MPI_ERROR = mpi_errno;
 }
-#endif
+
+#endif /* REQUEST_H_INCLUDED */

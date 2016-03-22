@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_UCX_SEND_H_INCLUDED
-#define NETMOD_UCX_SEND_H_INCLUDED
+#ifndef SEND_H_INCLUDED
+#define SEND_H_INCLUDED
 #include <ucp/api/ucp.h>
 #include "impl.h"
 #include "ucx_types.h"
@@ -31,8 +31,8 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
+    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -62,7 +62,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
+    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -88,8 +88,8 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
+    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -120,7 +120,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_SEND_CONTINOUS);
+    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -145,8 +145,8 @@ static inline int ucx_send(const void *buf,
     MPI_Aint dt_true_lb;
     MPID_Datatype *dt_ptr;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_SEND);
+    MPIDI_STATE_DECL(MPID_STATE_SEND);
+    MPIDI_FUNC_ENTER(MPID_STATE_SEND);
 
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
@@ -172,7 +172,7 @@ static inline int ucx_send(const void *buf,
                                have_request, dt_ptr);
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_SEND);
+    MPIDI_FUNC_EXIT(MPID_STATE_SEND);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -192,10 +192,10 @@ static inline int MPIDI_CH4_NM_send(const void *buf,
 {
 
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_SEND);
+    MPIDI_STATE_DECL(MPID_STATE_SEND);
+    MPIDI_FUNC_ENTER(MPID_STATE_SEND);
     mpi_errno = ucx_send(buf, count, datatype, rank, tag, comm, context_offset, request, 0);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_SEND);
+    MPIDI_FUNC_EXIT(MPID_STATE_SEND);
     return mpi_errno;
 }
 
@@ -352,4 +352,4 @@ static inline int MPIDI_CH4_NM_cancel_send(MPID_Request * sreq)
     return MPIDI_CH4R_cancel_send(sreq);
 }
 
-#endif /* NETMOD_AM_OFI_SEND_H_INCLUDED */
+#endif /* SEND_H_INCLUDED */

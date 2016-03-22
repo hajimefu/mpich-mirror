@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_UCX_WIN_H_INCLUDED
-#define NETMOD_UCX_WIN_H_INCLUDED
+#ifndef WIN_H_INCLUDED
+#define WIN_H_INCLUDED
 
 #include "impl.h"
 
@@ -159,4 +159,4 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win * win)
 }
 
 
-#endif /* NETMOD_AM_OFI_WIN_H_INCLUDED */
+#endif /* WIN_H_INCLUDED */

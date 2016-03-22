@@ -3,8 +3,8 @@
  *  (C) 2006 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  */
-#ifndef NETMOD_UCX_COLL_H_INCLUDED
-#define NETMOD_UCX_COLL_H_INCLUDED
+#ifndef COLL_H_INCLUDED
+#define COLL_H_INCLUDED
 
 #include "impl.h"
 
@@ -867,4 +867,4 @@ static inline int MPIDI_CH4_NM_iscatterv(const void * sendbuf, const int * sendc
     return mpi_errno;
 }
 
-#endif
+#endif /* COLL_H_INCLUDED */

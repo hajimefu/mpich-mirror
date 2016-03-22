@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_UCX_RECV_H_INCLUDED
-#define NETMOD_UCX_OFI_RECV_H_INCLUDED
+#ifndef RECV_H_INCLUDED
+#define RECV_H_INCLUDED
 
 #include "impl.h"
 
@@ -187,4 +187,4 @@ static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
     return MPIDI_CH4R_cancel_recv(rreq);
 }
 
-#endif /* NETMOD_AM_OFI_RECV_H_INCLUDED */
+#endif /* RECV_H_INCLUDED */

@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_UCX_DATAYPE_H_INCLUDED
-#define NETMOD_UCX_DATAYPE_H_INCLUDED
+#ifndef DATATYPE_H_INCLUDED
+#define DATATYPE_H_INCLUDED
 
 #include "impl.h"
 #include "ucx_types.h"
@@ -137,4 +137,4 @@ static inline void MPIDI_CH4_NM_datatype_dup_hook(MPID_Datatype *datatype_p) {
     return MPIDI_CH4_NM_datatype_commit_hook(&datatype_p->handle);
 }
 
-#endif /*UCX_DATATYPE_H_INCLUDED*/
+#endif /* DATATYPE_H_INCLUDED */

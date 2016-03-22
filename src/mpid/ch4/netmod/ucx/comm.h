@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_UCX_COMM_H_INCLUDED
-#define NETMOD_UCX_COMM_H_INCLUDED
+#ifndef COMM_H_INCLUDED
+#define COMM_H_INCLUDED
 
 #include "impl.h"
  static inline int dup_vep(MPIDI_VEP orig_vep, MPIDI_VEP * new_vep)
@@ -246,4 +246,5 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 fn_fail:
     return mpi_errno;
 }
-#endif
+
+#endif /* COMM_H_INCLUDED */

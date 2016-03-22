@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_UCX_INIT_H_INCLUDED
-#define NETMOD_UCX_INIT_H_INCLUDED
+#ifndef INIT_H_INCLUDED
+#define INIT_H_INCLUDED
 
 #include "impl.h"
 #include "mpich_cvars.h"
@@ -39,8 +39,8 @@ static inline int MPIDI_CH4_NM_init(int rank,
 
     size_t address_length = 0;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_INIT);
+    MPIDI_STATE_DECL(MPID_STATE_INIT);
+    MPIDI_FUNC_ENTER(MPID_STATE_INIT);
 
    // MPID_Thread_mutex_create(&MPIDI_THREAD_WORKER_MUTEX, &thr_err);
     ucx_status = ucp_config_read("MPI", NULL, &config);
@@ -146,7 +146,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_EXIT);
+    MPIDI_FUNC_EXIT(MPID_STATE_EXIT);
     return mpi_errno;
   fn_fail:
     if (MPIDI_CH4_NMI_UCX_eps != NULL) {
@@ -265,4 +265,5 @@ static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     return  MPIDI_CH4R_alloc_mem(size, info_ptr);
 }
-#endif
+
+#endif /* INIT_H_INCLUDED */

@@ -1,5 +1,5 @@
-#ifndef NETMOD_UCX_IMPL_H_INCLUDED
-#define NETMOD_UCX_IMPL_H_INCLUDED
+#ifndef IMPL_H_INCLUDED
+#define IMPL_H_INCLUDED
 
 #include <mpidimpl.h>
 #include "ucx_types.h"
@@ -167,4 +167,5 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 int MPIDI_CH4_NMI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr);
 extern int MPIR_Datatype_init_names(void);
-#endif
+
+#endif /* IMPL_H_INCLUDED */

@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_UCX_PROGRESS_H_INCLUDED
-#define NETMOD_UCX_PROGRESS_H_INCLUDED
+#ifndef PROGRESS_H_INCLUDED
+#define PROGRESS_H_INCLUDED
 
 #include "impl.h"
 //#include "events.h"
@@ -150,4 +150,5 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
   fn_fail:
     goto fn_exit;
 }
-#endif
+
+#endif /* PROGRESS_H_INCLUDED */

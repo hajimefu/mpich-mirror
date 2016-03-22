@@ -5,8 +5,8 @@
  *    *
  *    */
 
-#ifndef NETMOD_UCX_TYPES_H_INCLUDED
-#define NETMOD_UCX_TYPES_H_INCLUDED
+#ifndef TYPES_H_INCLUDED
+#define TYPES_H_INCLUDED
 #include <ucp/api/ucp.h>
 #include <ucp/api/ucp_def.h>
 #include "mpiimpl.h"
@@ -70,4 +70,5 @@ extern ucp_ep_h *MPIDI_CH4_NMI_UCX_eps;
 #define MPIDI_CH4_NMI_UCX_SOURCE_MASK   (0x0000FFFF00000000ULL)
 #define MPIDI_CH4_NMI_UCX_TAG_SHIFT     (32)
 #define MPIDI_CH4_NMI_UCX_SOURCE_SHIFT  (16)
-#endif
+
+#endif /* TYPES_H_INCLUDED */

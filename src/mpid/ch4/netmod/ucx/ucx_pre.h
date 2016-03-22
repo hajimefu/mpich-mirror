@@ -4,9 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-
-#ifndef NETMOD_UCX_PRE_H_INCLUDED
-#define NETMOD_UCX_PRE_H_INCLUDED
+#ifndef UCX_PRE_H_INCLUDED
+#define UCX_PRE_H_INCLUDED
 
 #include <ucp/api/ucp.h>
 #include "ucx_pre_common.h"
@@ -46,4 +45,4 @@ typedef struct {
     };
 } MPIDI_CH4_NMI_UCX_Am_reply_token_t;
 
-#endif /* NETMOD_UCX_PRE_H_INCLUDED */
+#endif /* UCX_PRE_H_INCLUDED */

@@ -8,9 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-
-#ifndef NETMOD_UCX_PRE_COMMON_H_INCLUDED
-#define NETMOD_UCX_PRE_COMMON_H_INCLUDED
+#ifndef UCX_PRE_COMMON_H_INCLUDED
+#define UCX_PRE_COMMON_H_INCLUDED
 
 #include <mpi.h>
 #include "mpihandlemem.h"
@@ -31,5 +30,4 @@ typedef struct {
     MPIDI_CH4_NMI_UCX_VEP_t local_vept;
 } MPIDI_CH4_NMI_UCX_comm_t;
 
-
-#endif
+#endif /* UCX_PRE_COMMON_H_INCLUDED */

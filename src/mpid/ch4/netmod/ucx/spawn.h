@@ -4,8 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  *
  */
-#ifndef NETMOD_UCX_SPAWN_H_INCLUDED
-#define NETMOD_UCX_SPWAN_H_INCLUDED
+#ifndef SPAWN_H_INCLUDED
+#define SPWAN_H_INCLUDED
 
 #include "impl.h"
 
@@ -65,13 +65,13 @@ static inline int MPIDI_CH4_NM_comm_disconnect(MPID_Comm * comm_ptr)
     int mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_DISCONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_COMM_DISCONNECT);
+    MPIDI_STATE_DECL(MPID_STATE_COMM_DISCONNECT);
+    MPIDI_FUNC_ENTER(MPID_STATE_COMM_DISCONNECT);
 
 
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_COMM_DISCONNECT);
+    MPIDI_FUNC_EXIT(MPID_STATE_COMM_DISCONNECT);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -87,16 +87,16 @@ static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_ACCEPT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_COMM_ACCEPT);
+    MPIDI_STATE_DECL(MPID_STATE_COMM_ACCEPT);
+    MPIDI_FUNC_ENTER(MPID_STATE_COMM_ACCEPT);
 
 
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_COMM_ACCEPT);
+    MPIDI_FUNC_EXIT(MPID_STATE_COMM_ACCEPT);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
 }
 
-#endif
+#endif /* SPAWN_H_INCLUDED */
