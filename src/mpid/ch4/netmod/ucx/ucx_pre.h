@@ -11,7 +11,6 @@
 #include <mpi.h>
 
 #include <ucp/api/ucp.h>
-#include "mpihandlemem.h"
 #include "ucx_pre_common.h"
 
 struct MPID_Request;
@@ -32,10 +31,6 @@ typedef struct {
 typedef struct {
     char *pack_buffer;
 } MPIDI_CH4_NMI_UCX_am_request_t;
-
-typedef struct {
-    struct MPID_Request* req;
-} MPIDI_CH4_NMI_UCX_Ucp_request_t;
 
 typedef struct MPIDI_CH4_NMI_UCX_Am_header_t {
     uint64_t handler_id;

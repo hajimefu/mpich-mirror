@@ -9,6 +9,7 @@
 #define NETMOD_UCX_TYPES_H_INCLUDED
 #include <ucp/api/ucp.h>
 #include <ucp/api/ucp_def.h>
+#include "mpiimpl.h"
 
 #define __SHORT_FILE__                          \
   (strrchr(__FILE__,'/')                        \
@@ -29,6 +30,10 @@
 
 #define MPIDI_CH4_NMI_UCX_BUF_POOL_SIZE            (1024)
 #define MPIDI_CH4_NMI_UCX_BUF_POOL_NUM             (1024)
+
+typedef struct {
+    MPID_Request *req;
+} MPIDI_CH4_NMI_UCX_Ucp_request_t;
 
 typedef struct {
     ucp_context_h context;
