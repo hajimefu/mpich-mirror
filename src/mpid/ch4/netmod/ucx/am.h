@@ -49,11 +49,13 @@ static inline void MPIDI_CH4_NMI_UCX_Send_am_callback(void *request, ucs_status_
     MPIDI_CH4_NMI_UCX_Ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
     if(ucp_request->req){
         MPID_Request *req = ucp_request->req;
+        int handler_id = req->dev.ch4.ch4r.netmod_am.ucx.handler_id;
+
         if (req->dev.ch4.ch4r.netmod_am.ucx.pack_buffer) {
             MPL_free(req->dev.ch4.ch4r.netmod_am.ucx.pack_buffer);
         }
         MPIDI_CH4_NMI_UCX_Am_request_complete(req);
-        MPIDI_CH4R_send_origin_cmpl_handler(req);
+        MPIDI_CH4_NMI_UCX_Global.send_cmpl_handlers[handler_id](req);
         ucp_request->req = NULL;
     } else {
         ucp_request->req = (void *)TRUE;
@@ -128,6 +130,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
     } else {
         /* set the ch4r request inside the UCP request */
         sreq->dev.ch4.ch4r.netmod_am.ucx.pack_buffer = send_buf;
+        sreq->dev.ch4.ch4r.netmod_am.ucx.handler_id = handler_id;
         ucp_request->req = sreq;
         ucp_request_release(ucp_request);
     }
@@ -213,6 +216,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
     } else {
         /* set the ch4r request inside the UCP request */
         sreq->dev.ch4.ch4r.netmod_am.ucx.pack_buffer = send_buf;
+        sreq->dev.ch4.ch4r.netmod_am.ucx.handler_id = handler_id;
         ucp_request->req = sreq;
         ucp_request_release(ucp_request);
     }
@@ -347,6 +351,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     } else {
         /* set the ch4r request inside the UCP request */
         sreq->dev.ch4.ch4r.netmod_am.ucx.pack_buffer = send_buf;
+        sreq->dev.ch4.ch4r.netmod_am.ucx.handler_id = handler_id;
         ucp_request->req = sreq;
         ucp_request_release(ucp_request);
     }

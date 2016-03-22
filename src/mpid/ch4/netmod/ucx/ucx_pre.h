@@ -24,6 +24,7 @@ typedef struct {
 } MPIDI_CH4_NMI_UCX_request_t;
 
 typedef struct {
+    int handler_id;
     char *pack_buffer;
 } MPIDI_CH4_NMI_UCX_am_request_t;
 
