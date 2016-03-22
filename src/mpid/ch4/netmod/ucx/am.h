@@ -42,11 +42,10 @@ static inline void MPIDI_CH4_NMI_UCX_Am_request_complete(MPID_Request *req)
     }
 }
 
-static inline void MPIDI_CH4_NMI_UCX_Send_am_callback(void *request, ucs_status_t status)
+static inline void MPIDI_CH4_NMI_UCX_send_am_callback(void *request, ucs_status_t status)
 {
-    int mpi_errno = MPI_SUCCESS;
-
     MPIDI_CH4_NMI_UCX_Ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
+
     if(ucp_request->req){
         MPID_Request *req = ucp_request->req;
         int handler_id = req->dev.ch4.ch4r.netmod_am.ucx.handler_id;
@@ -108,7 +107,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
     ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
                                                                      ucp_dt_make_contig(1), ucx_tag,
-                                                                     &MPIDI_CH4_NMI_UCX_Send_am_callback);
+                                                                     &MPIDI_CH4_NMI_UCX_send_am_callback);
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
     /* send is done. free all resources and complete the request */
@@ -193,7 +192,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
         ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                          data_sz + am_hdr_sz + sizeof(ucx_hdr),
                                                                          ucp_dt_make_contig(1), ucx_tag,
-                                                                         &MPIDI_CH4_NMI_UCX_Send_am_callback);
+                                                                         &MPIDI_CH4_NMI_UCX_send_am_callback);
         MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
     }
 
@@ -328,7 +327,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
         ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                          data_sz + am_hdr_sz + sizeof(ucx_hdr),
                                                                          ucp_dt_make_contig(1), ucx_tag,
-                                                                         &MPIDI_CH4_NMI_UCX_Send_am_callback);
+                                                                         &MPIDI_CH4_NMI_UCX_send_am_callback);
         MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
     }
 
