@@ -1,8 +1,10 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 /*
- *  (C) 2015 by Argonne National Laboratory.
+ *  (C) 2016 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  *
+ *  Portions of this code were written by Mellanox Technologies Ltd.
+ *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
 #ifndef AM_H_INCLUDED
 #define AM_H_INCLUDED

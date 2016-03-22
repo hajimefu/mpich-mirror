@@ -3,6 +3,8 @@
  *  (C) 2016 by Argonne National Laboratory.
  *      See COPYRIGHT in top-level directory.
  *
+ *  Portions of this code were written by Mellanox Technologies Ltd.
+ *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
 #ifndef DATATYPE_H_INCLUDED
 #define DATATYPE_H_INCLUDED

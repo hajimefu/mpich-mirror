@@ -1,10 +1,11 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
 /*
- *  *  (C) 2006 by Argonne National Laboratory.
- *   *      See COPYRIGHT in top-level directory.
- *    *
- *    */
-
+ *  (C) 2016 by Argonne National Laboratory.
+ *      See COPYRIGHT in top-level directory.
+ *
+ *  Portions of this code were written by Mellanox Technologies Ltd.
+ *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
+ */
 #ifndef TYPES_H_INCLUDED
 #define TYPES_H_INCLUDED
 #include <ucp/api/ucp.h>
