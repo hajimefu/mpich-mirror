@@ -14,18 +14,18 @@
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_Am_request_t;
+} MPIDI_CH4_NMI_STUB_am_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_Request_t;
+} MPIDI_CH4_NMI_STUB_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_Comm_t;
+} MPIDI_CH4_NMI_STUB_comm_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_Dt_t;
+} MPIDI_CH4_NMI_STUB_dt_t;
 
 #endif
