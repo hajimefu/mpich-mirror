@@ -8,25 +8,20 @@
 #ifndef NETMOD_UCX_PRE_H_INCLUDED
 #define NETMOD_UCX_PRE_H_INCLUDED
 
-#include <mpi.h>
-
 #include <ucp/api/ucp.h>
 #include "ucx_pre_common.h"
 
-struct MPID_Request;
-struct MPID_Comm;
 #define HAVE_MPIDI_CH4_NM_datatype_commit_hook
 #define HAVE_MPIDI_CH4_NM_datatype_destroy_hook
+
 typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;
 } MPIDI_CH4_NMI_UCX_dt_t;
 
-
 typedef struct {
   ucp_tag_message_h  message_handler;
 } MPIDI_CH4_NMI_UCX_request_t;
-
 
 typedef struct {
     char *pack_buffer;
