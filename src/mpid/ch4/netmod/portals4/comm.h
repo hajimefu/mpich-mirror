@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_COMM_H_INCLUDED
-#define NETMOD_PORTALS4_COMM_H_INCLUDED
+#ifndef COMM_H_INCLUDED
+#define COMM_H_INCLUDED
 
 #include "impl.h"
 
@@ -36,4 +36,4 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 }
 
 
-#endif /* NETMOD_PORTALS4_COMM_H_INCLUDED */
+#endif /* COMM_H_INCLUDED */

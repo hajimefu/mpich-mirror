@@ -9,8 +9,8 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef NETMOD_PORTALS4_PRE_H_INCLUDED
-#define NETMOD_PORTALS4_PRE_H_INCLUDED
+#ifndef PRE_H_INCLUDED
+#define PRE_H_INCLUDED
 
 #include "portals4.h"
 

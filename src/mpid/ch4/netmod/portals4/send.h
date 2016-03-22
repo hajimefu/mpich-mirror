@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_SEND_H_INCLUDED
-#define NETMOD_PORTALS4_SEND_H_INCLUDED
+#ifndef SEND_H_INCLUDED
+#define SEND_H_INCLUDED
 
 #include "impl.h"
 
@@ -129,4 +129,4 @@ static inline int MPIDI_CH4_NM_cancel_send(MPID_Request * sreq)
     return MPIDI_CH4R_cancel_send(sreq);
 }
 
-#endif /* NETMOD_PORTALS4_SEND_H_INCLUDED */
+#endif /* SEND_H_INCLUDED */

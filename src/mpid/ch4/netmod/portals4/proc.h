@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_PROC_H_INCLUDED
-#define NETMOD_PORTALS4_PROC_H_INCLUDED
+#ifndef PROC_H_INCLUDED
+#define PROC_H_INCLUDED
 
 #include "impl.h"
 
@@ -25,4 +25,4 @@ static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPID_Comm * comm)
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;
 }
-#endif /*NETMOD_PORTALS4_PROC_H_INCLUDED */
+#endif /*PROC_H_INCLUDED */

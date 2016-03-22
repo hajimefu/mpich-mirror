@@ -5,8 +5,8 @@
  *    *
  *    */
 
-#ifndef NETMOD_PORTALS4_TYPES_H_INCLUDED
-#define NETMOD_PORTALS4_TYPES_H_INCLUDED
+#ifndef TYPES_H_INCLUDED
+#define TYPES_H_INCLUDED
 
 #include "mpidimpl.h"
 #include "portals4.h"

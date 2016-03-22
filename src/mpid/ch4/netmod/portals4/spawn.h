@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_DYNPROC_H_INCLUDED
-#define NETMOD_PORTALS4_DYNPROC_H_INCLUDED
+#ifndef DYNPROC_H_INCLUDED
+#define DYNPROC_H_INCLUDED
 
 #include "impl.h"
 
@@ -47,4 +47,4 @@ static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
     return MPI_SUCCESS;
 }
 
-#endif /* NETMOD_PORTALS4_WIN_H_INCLUDED */
+#endif /* WIN_H_INCLUDED */

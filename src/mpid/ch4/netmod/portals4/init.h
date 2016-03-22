@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_INIT_H_INCLUDED
-#define NETMOD_PORTALS4_INIT_H_INCLUDED
+#ifndef INIT_H_INCLUDED
+#define INIT_H_INCLUDED
 
 #include "mpidch4r.h"
 #include "types.h"
@@ -243,4 +243,4 @@ static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 }
 
 
-#endif /* NETMOD_PORTALS4_INIT_H_INCLUDED */
+#endif /* INIT_H_INCLUDED */

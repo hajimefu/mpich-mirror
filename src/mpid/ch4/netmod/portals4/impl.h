@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_IMPL_H_INCLUDED
-#define NETMOD_PORTALS4_IMPL_H_INCLUDED
+#ifndef IMPL_H_INCLUDED
+#define IMPL_H_INCLUDED
 
 #include <mpidimpl.h>
 #include "portals4.h"
@@ -54,4 +54,4 @@ static inline const char *MPIDI_CH4_NMI_PTL_strerror(int ret)
                               MPIDI_CH4_NMI_PTL_strerror(STATUS));      \
     } while (0)
 
-#endif /* NETMOD_PORTALS4_IMPL_H_INCLUDED */
+#endif /* IMPL_H_INCLUDED */

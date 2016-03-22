@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_PROBE_H_INCLUDED
-#define NETMOD_PORTALS4_PROBE_H_INCLUDED
+#ifndef PROBE_H_INCLUDED
+#define PROBE_H_INCLUDED
 
 #include "impl.h"
 
@@ -37,4 +37,4 @@ static inline int MPIDI_CH4_NM_iprobe(int source,
     return MPIDI_CH4R_iprobe(source, tag, comm, context_offset, flag, status);
 }
 
-#endif /* NETMOD_PORTALS4_PROBE_H_INCLUDED */
+#endif /* PROBE_H_INCLUDED */

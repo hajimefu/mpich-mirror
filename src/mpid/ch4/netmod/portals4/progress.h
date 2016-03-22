@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PORTALS4_PROGRESS_H_INCLUDED
-#define NETMOD_PORTALS4_PROGRESS_H_INCLUDED
+#ifndef PROGRESS_H_INCLUDED
+#define PROGRESS_H_INCLUDED
 
 #include "impl.h"
 
@@ -185,4 +185,4 @@ static inline int MPIDI_CH4_NM_progress_deactivate(int id)
     return MPI_SUCCESS;
 }
 
-#endif /* NETMOD_PORTALS4_PROGRESS_H_INCLUDED */
+#endif /* PROGRESS_H_INCLUDED */
