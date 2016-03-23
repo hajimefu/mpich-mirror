@@ -309,19 +309,19 @@ typedef struct {
     unsigned index    : 31;
 }MPIDI_CH4R_locality_t;
 
-typedef struct MPIDI_CH4R_Devcomm_t {
+typedef struct MPIDI_CH4U_comm_t {
     MPIDI_CH4U_rreq_t *posted_list;
     MPIDI_CH4U_rreq_t *unexp_list;
     uint32_t   window_instance;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPIDI_CH4R_locality_t *locality;
 #endif
-} MPIDI_CH4R_Devcomm_t;
+} MPIDI_CH4U_comm_t;
 
 typedef struct MPIDI_Devcomm_t {
     struct {
         /* The first fields are used by the CH4U apis */
-        MPIDI_CH4R_Devcomm_t ch4r;
+        MPIDI_CH4U_comm_t ch4u;
 
         /* Used by the netmod direct apis */
         union {
@@ -333,7 +333,7 @@ typedef struct MPIDI_Devcomm_t {
         }shm;
     }ch4;
 } MPIDI_Devcomm_t;
-#define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4r).field
+#define MPIDI_CH4U_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
 
 
 typedef struct {

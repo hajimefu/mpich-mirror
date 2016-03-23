@@ -655,10 +655,10 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
     } else {
         /* MPIDI_CS_ENTER(); */
         if (root_comm)
-            match_req = MPIDI_CH4R_dequeue_posted(msg_tag, &MPIDI_CH4R_COMM(root_comm, posted_list));
+            match_req = MPIDI_CH4R_dequeue_posted(msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
 
         if (match_req) {
-            MPIDI_CH4R_delete_unexp(rreq, &MPIDI_CH4R_COMM(root_comm, unexp_list));
+            MPIDI_CH4R_delete_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
             /* Decrement the counter twice, one for posted_list and the other for unexp_list */
             MPIR_Comm_release(root_comm);
             MPIR_Comm_release(root_comm);
@@ -1383,7 +1383,7 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
     root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
     if (root_comm) {
         /* MPIDI_CS_ENTER(); */
-        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4R_COMM(root_comm, posted_list));
+        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -1399,7 +1399,7 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
         /* MPIDI_CS_ENTER(); */
         if (root_comm) {
             MPIR_Comm_add_ref(root_comm);
-            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4R_COMM(root_comm, unexp_list));
+            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
         }
         else {
             MPIDI_CH4R_enqueue_unexp(rreq, MPIDI_CH4R_context_id_to_uelist(context_id));
@@ -1449,7 +1449,7 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
     root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
     if (root_comm) {
         /* MPIDI_CS_ENTER(); */
-        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4R_COMM(root_comm, posted_list));
+        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -1468,7 +1468,7 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
         /* MPIDI_CS_ENTER(); */
         if (root_comm) {
             MPIR_Comm_add_ref(root_comm);
-            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4R_COMM(root_comm, unexp_list));
+            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
         }
         else {
             MPIDI_CH4R_enqueue_unexp(rreq, MPIDI_CH4R_context_id_to_uelist(context_id));

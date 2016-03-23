@@ -114,7 +114,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
     if (comm != MPIR_Process.comm_world && comm != MPIR_Process.comm_self) {
         int i, lpid, is_local;
 
-        MPIDI_CH4R_COMM(comm,locality) = (MPIDI_CH4R_locality_t*)
+        MPIDI_CH4U_COMM(comm,locality) = (MPIDI_CH4R_locality_t*)
             MPL_malloc(comm->remote_size * sizeof(MPIDI_CH4R_locality_t));
 
         /* For now, we'll only deal with locality for intracommunicators. For
@@ -124,16 +124,16 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
                 MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
                 is_local = MPIDI_CH4_rank_is_local(lpid, MPIR_Process.comm_world);
 
-                MPIDI_CH4R_COMM(comm,locality)[i].is_local = is_local;
-                MPIDI_CH4R_COMM(comm,locality)[i].index    = lpid;
+                MPIDI_CH4U_COMM(comm,locality)[i].is_local = is_local;
+                MPIDI_CH4U_COMM(comm,locality)[i].index    = lpid;
             }
         } else {
             /* TODO - Set up locality information for intercommunicators. */
             for (i = 0; i < comm->remote_size; i++) {
                 MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
 
-                MPIDI_CH4R_COMM(comm,locality)[i].is_local = 0;
-                MPIDI_CH4R_COMM(comm,locality)[i].index    = lpid;
+                MPIDI_CH4U_COMM(comm,locality)[i].is_local = 0;
+                MPIDI_CH4U_COMM(comm,locality)[i].index    = lpid;
             }
         }
     }
@@ -166,7 +166,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
     }
 #endif
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPL_free(MPIDI_CH4R_COMM(comm,locality));
+    MPL_free(MPIDI_CH4U_COMM(comm,locality));
 #endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);

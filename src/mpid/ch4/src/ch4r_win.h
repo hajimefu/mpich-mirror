@@ -185,7 +185,7 @@ static inline int MPIDI_CH4R_win_init(MPI_Aint     length,
 
     /* context id lower bits, window instance upper bits */
     MPIDI_CH4R_WIN(win, win_id) = 1 + (((uint64_t)comm_ptr->context_id) |
-                                      ((uint64_t)((MPIDI_CH4R_COMM(comm_ptr, window_instance))++)<<32));
+                                      ((uint64_t)((MPIDI_CH4U_COMM(comm_ptr, window_instance))++)<<32));
     MPL_HASH_ADD(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash,
 		    dev.ch4r.win_id, sizeof(uint64_t), win);
 

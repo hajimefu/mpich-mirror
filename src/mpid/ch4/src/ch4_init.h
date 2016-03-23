@@ -229,12 +229,12 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     int i;
 
     /* Build up locality information if the netmod doesn't want to do it. */
-    MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality) =
+    MPIDI_CH4U_COMM(MPIR_Process.comm_world,locality) =
         (MPIDI_CH4R_locality_t *) MPL_malloc(size * sizeof(MPIDI_CH4R_locality_t));
     for (i = 0; i < MPIR_Process.comm_world->local_size; i++)
-        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
+        MPIDI_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local = 0;
 
-    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality) =
+    MPIDI_CH4U_COMM(MPIR_Process.comm_self,locality) =
         (MPIDI_CH4R_locality_t *) MPL_malloc(sizeof(MPIDI_CH4R_locality_t));
 
     /* This requires a partially built MPI_COMM_WORLD in order to be able to
@@ -250,15 +250,15 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
                              &MPIDI_CH4_Global.max_node_id);
 
     for(i=0; i<MPIR_Process.comm_world->local_size; i++) {
-        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local =
+        MPIDI_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local =
             (MPIDI_CH4_Global.node_map[i] == MPIDI_CH4_Global.node_map[MPIR_Process.comm_world->rank])?1:0;
-        MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].index = i;
+        MPIDI_CH4U_COMM(MPIR_Process.comm_world,locality)[i].index = i;
         MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_GENERAL, VERBOSE, (MPL_DBG_FDEST, "WORLD RANK %d %s local", i,
-                MPIDI_CH4R_COMM(MPIR_Process.comm_world,locality)[i].is_local ? "is" : "is not"));
+                MPIDI_CH4U_COMM(MPIR_Process.comm_world,locality)[i].is_local ? "is" : "is not"));
     }
 
-    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality)[0].is_local = 1;
-    MPIDI_CH4R_COMM(MPIR_Process.comm_self,locality)[0].index = MPIR_Process.comm_self->rank;
+    MPIDI_CH4U_COMM(MPIR_Process.comm_self,locality)[0].is_local = 1;
+    MPIDI_CH4U_COMM(MPIR_Process.comm_self,locality)[0].index = MPIR_Process.comm_self->rank;
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM

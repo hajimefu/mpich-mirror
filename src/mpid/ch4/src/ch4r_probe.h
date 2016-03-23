@@ -41,7 +41,7 @@ __CH4_INLINE__ int MPIDI_CH4R_iprobe(int source,
 
     /* MPIDI_CS_ENTER(); */
     unexp_req = MPIDI_CH4R_find_unexp(match_bits, mask_bits,
-                                      &MPIDI_CH4R_COMM(root_comm, unexp_list));
+                                      &MPIDI_CH4U_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
         *flag = 1;
@@ -121,7 +121,7 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
 
     /* MPIDI_CS_ENTER(); */
     unexp_req = MPIDI_CH4R_dequeue_unexp(match_bits, mask_bits,
-                                         &MPIDI_CH4R_COMM(root_comm, unexp_list));
+                                         &MPIDI_CH4U_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
         *flag = 1;
