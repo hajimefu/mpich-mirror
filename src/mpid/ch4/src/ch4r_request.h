@@ -28,11 +28,11 @@ static inline MPID_Request *MPIDI_CH4I_am_request_create()
     req = MPIDI_CH4I_alloc_and_init_req(2);
     MPIDI_CH4_NM_am_request_init(req);
 
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
-    MPIDI_CH4R_REQUEST(req, req)    =
-        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
-    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
-    MPIDI_CH4R_REQUEST(req, req->status) = 0;
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4U_REQUEST(req, req)    =
+        (MPIDI_CH4U_req_ext_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4U_REQUEST(req, req));
+    MPIDI_CH4U_REQUEST(req, req->status) = 0;
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_CREATE);
 
@@ -53,11 +53,11 @@ static inline MPID_Request *MPIDI_CH4I_am_win_request_create()
     req = MPIDI_CH4I_alloc_and_init_req(1);
     MPIDI_CH4_NM_am_request_init(req);
 
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4R_req_t) <= MPIDI_CH4I_BUF_POOL_SZ);
-    MPIDI_CH4R_REQUEST(req, req)         =
-        (MPIDI_CH4R_req_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
-    MPIU_Assert(MPIDI_CH4R_REQUEST(req, req));
-    MPIDI_CH4R_REQUEST(req, req->status) = 0;
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
+    MPIDI_CH4U_REQUEST(req, req)         =
+        (MPIDI_CH4U_req_ext_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
+    MPIU_Assert(MPIDI_CH4U_REQUEST(req, req));
+    MPIDI_CH4U_REQUEST(req, req->status) = 0;
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
     return req;
@@ -72,9 +72,9 @@ __CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
     if (!incomplete) {
-        if (MPIDI_CH4R_REQUEST(req, req) && MPIR_cc_is_complete(&req->cc)) {
-            MPIDI_CH4R_release_buf(MPIDI_CH4R_REQUEST(req, req));
-            MPIDI_CH4R_REQUEST(req, req) = NULL;
+        if (MPIDI_CH4U_REQUEST(req, req) && MPIR_cc_is_complete(&req->cc)) {
+            MPIDI_CH4R_release_buf(MPIDI_CH4U_REQUEST(req, req));
+            MPIDI_CH4U_REQUEST(req, req) = NULL;
         }
         MPIDI_CH4_NM_am_request_finalize(req);
         MPIDI_CH4R_Request_release(req);

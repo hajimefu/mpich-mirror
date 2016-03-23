@@ -102,7 +102,7 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
             {
                 int count;
                 MPID_Request *sreq = (MPID_Request *)e.user_ptr;
-                int handler_id = sreq->dev.ch4.ch4r.netmod_am.portals4.handler_id;
+                int handler_id = sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id;
 
                 MPIR_cc_decr(sreq->cc_ptr, &count);
                 MPIU_Assert(count >= 0);

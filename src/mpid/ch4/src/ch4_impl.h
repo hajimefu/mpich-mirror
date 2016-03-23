@@ -55,7 +55,7 @@ static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
     return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
 }
 
-static inline MPIDI_CH4R_Dev_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t context_id)
+static inline MPIDI_CH4U_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t context_id)
 {
     int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
     int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
@@ -79,7 +79,7 @@ static inline MPID_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIDI_CH4R_REQUEST(req, req) = NULL;
+    MPIDI_CH4U_REQUEST(req, req) = NULL;
     MPIR_cc_set(&req->cc, 1);
     MPIU_Object_set_ref(req, refcount);
     MPIR_STATUS_SET_COUNT(req->status, 0);

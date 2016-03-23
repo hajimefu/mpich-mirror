@@ -291,7 +291,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int cou
 
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIDI_CH4R_REQUEST(req, req) = NULL;
+    MPIDI_CH4U_REQUEST(req, req) = NULL;
     MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
@@ -316,7 +316,7 @@ __ALWAYS_INLINE__ MPID_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw
     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
-    MPIDI_CH4R_REQUEST(req, req) = NULL;
+    MPIDI_CH4U_REQUEST(req, req) = NULL;
     MPIR_cc_set(&req->cc, 0);
     req->cc_ptr  = &req->cc;
     MPIU_Object_set_ref(req, count);

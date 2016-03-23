@@ -214,7 +214,7 @@ typedef struct MPIDI_CH4R_acc_ack_msg_t {
 
 typedef struct MPIDI_CH4_Comm_req_list_t {
     MPID_Comm             *comm[2][4];
-    MPIDI_CH4R_Dev_rreq_t *uelist[2][4];
+    MPIDI_CH4U_rreq_t *uelist[2][4];
 } MPIDI_CH4_Comm_req_list_t;
 
 typedef struct MPIU_buf_pool_t {
@@ -251,10 +251,10 @@ typedef struct MPIDI_CH4_Global_t {
     MPID_Win *win_hash;
     int jobid;
 #ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
-    MPIDI_CH4R_Dev_rreq_t *posted_list;
-    MPIDI_CH4R_Dev_rreq_t *unexp_list;
+    MPIDI_CH4U_rreq_t *posted_list;
+    MPIDI_CH4U_rreq_t *unexp_list;
 #endif
-    MPIDI_CH4R_req_t *cmpl_list;
+    MPIDI_CH4U_req_ext_t *cmpl_list;
     OPA_int_t exp_seq_no;
     OPA_int_t nxt_seq_no;
     void *netmod_context[8];

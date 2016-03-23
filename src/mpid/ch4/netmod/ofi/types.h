@@ -139,9 +139,9 @@ EXTERN_C_BEGIN
 #define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_Gpid_t*)(req)->dev.pad)
 #define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_Offset_checker_t,  pad)
 #define MPIDI_CH4_NMI_OFI_WIN(win)                 ((MPIDI_CH4_NMI_OFI_Win_t*)(win)->dev.pad)
-#define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4r.netmod_am.ofi.field)
-#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr->field)
-#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4r.netmod_am.ofi.req_hdr)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
+#define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr)
 #define MPIDI_CH4_NMI_OFI_REQUEST(req,field)       ((req)->dev.ch4.netmod.ofi.field)
 
 #define MPIDI_CH4_NMI_OFI_DATATYPE(dt)   ((dt)->dev.netmod.ofi)

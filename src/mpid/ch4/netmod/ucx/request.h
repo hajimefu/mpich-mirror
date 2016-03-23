@@ -21,13 +21,13 @@
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
 static inline void MPIDI_CH4_NM_am_request_init(MPID_Request *req)
 {
-    req->dev.ch4.ch4r.netmod_am.ucx.pack_buffer = NULL;
+    req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer = NULL;
 }
 
 static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
 {
-    if ((req)->dev.ch4.ch4r.netmod_am.ucx.pack_buffer) {
-        MPL_free((req)->dev.ch4.ch4r.netmod_am.ucx.pack_buffer);
+    if ((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
+        MPL_free((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
     }
     /* MPIDI_CH4R_Request_release(req); */
 }

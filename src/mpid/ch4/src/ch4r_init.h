@@ -24,7 +24,7 @@
 __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type,is_localcomm;
-    MPIDI_CH4R_Dev_rreq_t **uelist;
+    MPIDI_CH4U_rreq_t **uelist;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
@@ -53,7 +53,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
 
     uelist = MPIDI_CH4R_context_id_to_uelist(comm->context_id);
     if (*uelist) {
-        MPIDI_CH4R_Dev_rreq_t *curr, *tmp;
+        MPIDI_CH4U_rreq_t *curr, *tmp;
         MPL_DL_FOREACH_SAFE(*uelist,
                             curr, tmp) {
             MPL_DL_DELETE(*uelist, curr);

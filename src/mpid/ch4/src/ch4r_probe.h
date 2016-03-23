@@ -47,14 +47,14 @@ __CH4_INLINE__ int MPIDI_CH4R_iprobe(int source,
         *flag = 1;
         unexp_req->status.MPI_ERROR = MPI_SUCCESS;
         unexp_req->status.MPI_SOURCE =
-            MPIDI_CH4R_get_source(MPIDI_CH4R_REQUEST(unexp_req, tag));
+            MPIDI_CH4R_get_source(MPIDI_CH4U_REQUEST(unexp_req, tag));
         unexp_req->status.MPI_TAG =
-            MPIDI_CH4R_get_tag(MPIDI_CH4R_REQUEST(unexp_req, tag));
-        MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4R_REQUEST(unexp_req, count));
+            MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(unexp_req, tag));
+        MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4U_REQUEST(unexp_req, count));
 
         status->MPI_TAG = unexp_req->status.MPI_TAG;
         status->MPI_SOURCE = unexp_req->status.MPI_SOURCE;
-        MPIR_STATUS_SET_COUNT(*status, MPIDI_CH4R_REQUEST(unexp_req, count));
+        MPIR_STATUS_SET_COUNT(*status, MPIDI_CH4U_REQUEST(unexp_req, count));
     }
     else {
         *flag = 0;
@@ -135,15 +135,15 @@ __CH4_INLINE__ int MPIDI_CH4R_improbe(int source,
 
         unexp_req->status.MPI_ERROR = MPI_SUCCESS;
         unexp_req->status.MPI_SOURCE =
-            MPIDI_CH4R_get_source(MPIDI_CH4R_REQUEST(unexp_req, tag));
+            MPIDI_CH4R_get_source(MPIDI_CH4U_REQUEST(unexp_req, tag));
         unexp_req->status.MPI_TAG =
-            MPIDI_CH4R_get_tag(MPIDI_CH4R_REQUEST(unexp_req, tag));
-        MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4R_REQUEST(unexp_req, count));
-        MPIDI_CH4R_REQUEST(unexp_req, req->status) |= MPIDI_CH4R_REQ_UNEXP_DQUED;
+            MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(unexp_req, tag));
+        MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4U_REQUEST(unexp_req, count));
+        MPIDI_CH4U_REQUEST(unexp_req, req->status) |= MPIDI_CH4U_REQ_UNEXP_DQUED;
 
         status->MPI_TAG = unexp_req->status.MPI_TAG;
         status->MPI_SOURCE = unexp_req->status.MPI_SOURCE;
-        MPIR_STATUS_SET_COUNT(*status, MPIDI_CH4R_REQUEST(unexp_req, count));
+        MPIR_STATUS_SET_COUNT(*status, MPIDI_CH4U_REQUEST(unexp_req, count));
     }
     else {
         *flag = 0;
