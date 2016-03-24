@@ -94,8 +94,8 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     MPIDI_CH4U_REQUEST(rreq, req->status) &= ~MPIDI_CH4U_REQ_UNEXPECTED;
     MPL_free(MPIDI_CH4U_REQUEST(rreq, buffer));
 
-    rreq->status.MPI_SOURCE = MPIDI_CH4R_get_source(MPIDI_CH4U_REQUEST(rreq, tag));
-    rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
+    rreq->status.MPI_SOURCE = MPIDI_CH4U_get_source(MPIDI_CH4U_REQUEST(rreq, tag));
+    rreq->status.MPI_TAG = MPIDI_CH4U_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
         mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
@@ -132,9 +132,9 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DO_IRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DO_IRECV);
 
-    match_bits = MPIDI_CH4R_init_recvtag(&mask_bits, context_id, rank, tag);
-    root_comm  = MPIDI_CH4R_context_id_to_comm(comm->recvcontext_id);
-    unexp_req  = MPIDI_CH4R_dequeue_unexp(match_bits, mask_bits,
+    match_bits = MPIDI_CH4U_init_recvtag(&mask_bits, context_id, rank, tag);
+    root_comm  = MPIDI_CH4U_context_id_to_comm(comm->recvcontext_id);
+    unexp_req  = MPIDI_CH4U_dequeue_unexp(match_bits, mask_bits,
                                           &MPIDI_CH4U_COMM(root_comm, unexp_list));
 
     if (unexp_req) {
@@ -204,7 +204,7 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
         /* Increment refcnt for comm before posting rreq to posted_list,
            to make sure comm is alive while holding an entry in the posted_list */
         MPIR_Comm_add_ref(root_comm);
-        MPIDI_CH4R_enqueue_posted(rreq, &MPIDI_CH4U_COMM(root_comm, posted_list));
+        MPIDI_CH4U_enqueue_posted(rreq, &MPIDI_CH4U_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     } else {
         MPIDI_CH4U_REQUEST(unexp_req, req->rreq.match_req) = (uint64_t) rreq;
@@ -217,10 +217,10 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_recv
+#define FUNCNAME MPIDI_CH4U_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_recv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_recv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    int rank,
@@ -244,10 +244,10 @@ __CH4_INLINE__ int MPIDI_CH4R_recv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_recv_init
+#define FUNCNAME MPIDI_CH4U_recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_recv_init(void *buf,
                                         int count,
                                         MPI_Datatype datatype,
                                         int rank,
@@ -271,7 +271,7 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
     MPIDI_CH4U_REQUEST(rreq, count) = count;
     MPIDI_CH4U_REQUEST(rreq, datatype) = datatype;
     MPIDI_CH4U_REQUEST(rreq, tag) =
-        MPIDI_CH4R_init_send_tag(comm->context_id + context_offset, rank, tag);
+        MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, rank, tag);
     rreq->partner_request = NULL;
     MPIDI_CH4I_am_request_complete(rreq);
     MPIDI_CH4U_REQUEST(rreq, p_type) = MPIDI_PTYPE_RECV;
@@ -283,10 +283,10 @@ __CH4_INLINE__ int MPIDI_CH4R_recv_init(void *buf,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_imrecv
+#define FUNCNAME MPIDI_CH4U_imrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_imrecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      MPID_Request * message, MPID_Request ** rreqp)
@@ -344,10 +344,10 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_mrecv
+#define FUNCNAME MPIDI_CH4U_mrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_mrecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_mrecv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     MPID_Request * message, MPI_Status * status)
@@ -379,10 +379,10 @@ __CH4_INLINE__ int MPIDI_CH4R_mrecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_irecv
+#define FUNCNAME MPIDI_CH4U_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_irecv(void *buf,
+__CH4_INLINE__ int MPIDI_CH4U_irecv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -404,10 +404,10 @@ __CH4_INLINE__ int MPIDI_CH4R_irecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_cancel_recv
+#define FUNCNAME MPIDI_CH4U_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
+__CH4_INLINE__ int MPIDI_CH4U_cancel_recv(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, found;
     MPID_Comm *root_comm;
@@ -417,10 +417,10 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CANCEL_RECV);
 
     msg_tag   = MPIDI_CH4U_REQUEST(rreq, tag);
-    root_comm = MPIDI_CH4R_context_id_to_comm(MPIDI_CH4R_get_context(msg_tag));
+    root_comm = MPIDI_CH4U_context_id_to_comm(MPIDI_CH4U_get_context(msg_tag));
 
     /* MPIDI_CS_ENTER(); */
-    found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4u.req->rreq, &MPIDI_CH4U_COMM(root_comm, posted_list));
+    found = MPIDI_CH4U_delete_posted(&rreq->dev.ch4.ch4u.req->rreq, &MPIDI_CH4U_COMM(root_comm, posted_list));
     /* MPIDI_CS_EXIT(); */
 
     if (found) {

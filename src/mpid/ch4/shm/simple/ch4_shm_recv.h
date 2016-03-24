@@ -75,7 +75,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_irecv(void *buf,
     MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(rreq, MPIDI_CH4_SHMI_SIMPLE_Recvq_posted);
     MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                     (MPL_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
-                     MPIDI_CH4R_rank_to_lpid(rank, comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, comm->comm_kind,
+                     MPIDI_CH4U_rank_to_lpid(rank, comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, comm->comm_kind,
                      rank, tag, comm->context_id + context_offset));
     *request = rreq;
 

@@ -227,7 +227,7 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm *comm)
     MPIDI_CH4_NMI_OFI_Index_allocator_create(&MPIDI_CH4_NMI_OFI_COMM(comm).win_id_allocator,0);
     MPIDI_CH4_NMI_OFI_Index_allocator_create(&MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator,1);
 
-    MPIDI_CH4R_init_comm(comm);
+    MPIDI_CH4U_init_comm(comm);
 
     /* Do not handle intercomms */
     if(comm->comm_kind == MPID_INTERCOMM)
@@ -249,7 +249,7 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm *comm)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
 
-    MPIDI_CH4R_destroy_comm(comm);
+    MPIDI_CH4U_destroy_comm(comm);
     MPIDI_CH4_NMI_OFI_Map_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters);
     MPIDI_CH4_NMI_OFI_Map_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).huge_recv_counters);
     MPIDI_CH4_NMI_OFI_Index_allocator_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).win_id_allocator);

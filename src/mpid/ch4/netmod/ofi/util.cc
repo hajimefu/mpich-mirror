@@ -342,7 +342,7 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge_cleanup(MPIDI_CH4_NMI_OFI_Send_con
     uint64_t            mapid;
     /* Look up the communicator */
     mapid    = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
-    comm_ptr = MPIDI_CH4R_context_id_to_comm(mapid);
+    comm_ptr = MPIDI_CH4U_context_id_to_comm(mapid);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);
@@ -357,7 +357,7 @@ static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *
     MPIDI_CH4_NMI_OFI_Huge_chunk_t *hc;
     MPID_Comm          *comm_ptr;
     /* Look up the communicator */
-    comm_ptr = MPIDI_CH4R_context_id_to_comm(info->comm_id);
+    comm_ptr = MPIDI_CH4U_context_id_to_comm(info->comm_id);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);

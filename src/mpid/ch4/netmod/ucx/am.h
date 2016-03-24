@@ -40,7 +40,7 @@ static inline void MPIDI_CH4_NMI_UCX_Am_request_complete(MPID_Request *req)
     MPIU_Assert(count >= 0);
 
     if(count == 0) {
-        MPIDI_CH4R_Request_release(req);
+        MPIDI_CH4U_request_release(req);
     }
 }
 
@@ -304,7 +304,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
     use_token.val = reply_token;
-    use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
     use_rank = use_token.data.src_rank;
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, use_rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(0, 0, MPIDI_CH4_NMI_UCX_AM_TAG);
@@ -452,7 +452,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
 
     use_token.val = reply_token;
-    use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
     use_rank = use_token.data.src_rank;
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, use_rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(0, 0, MPIDI_CH4_NMI_UCX_AM_TAG);

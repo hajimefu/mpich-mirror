@@ -114,7 +114,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     /* -------------------------------- */
     /* Setup CH4U Active Messages       */
     /* -------------------------------- */
-    MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
+    MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
     for (i = 0; i < MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS; i++) {
         MPIDI_CH4_NMI_UCX_Global.am_bufs[i] = MPL_malloc(MPIDI_CH4_NMI_UCX_MAX_AM_EAGER_SZ);
         MPIDI_CH4_NMI_UCX_Global.ucp_am_requests[i] =
@@ -134,7 +134,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_CH4_NMI_UCX_Global.node_map = MPL_malloc(comm_world->local_size * sizeof(*MPIDI_CH4_NMI_UCX_Global.node_map));
 
     MPIDI_CH4_NMI_UCX_Global.max_node_id = 1024;
-    mpi_errno = MPIDI_CH4R_build_nodemap(comm_world->rank,
+    mpi_errno = MPIDI_CH4U_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
                              MPIDI_CH4_NMI_UCX_Global.node_map, &MPIDI_CH4_NMI_UCX_Global.max_node_id);
@@ -172,7 +172,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
     int mpi_errno = MPI_SUCCESS, thr_err, pmi_errno;
     int i, size;
 
-    MPIDI_CH4R_finalize();
+    MPIDI_CH4U_finalize();
 
     /* cancel and free active message buffers */
     for (i = 0; i < MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS; i++) {
@@ -260,12 +260,12 @@ static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 
 static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 {
-    return MPIDI_CH4R_free_mem(ptr);
+    return MPIDI_CH4U_free_mem(ptr);
 }
 
 static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
-    return  MPIDI_CH4R_alloc_mem(size, info_ptr);
+    return  MPIDI_CH4U_alloc_mem(size, info_ptr);
 }
 
 #endif /* INIT_H_INCLUDED */

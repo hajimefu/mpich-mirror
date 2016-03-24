@@ -13,11 +13,11 @@
 
 #include "ch4_types.h"
 
-static inline int MPIDI_CH4R_rank_is_local(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
 {
     int ret;
-    MPIDI_STATE_DECL(MPIDI_CH4R_STATE_IS_LOCAL);
-    MPIDI_FUNC_ENTER(MPIDI_CH4R_STATE_IS_LOCAL);
+    MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
+    MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     if (NULL == MPIDI_CH4U_COMM(comm,locality)) {
@@ -32,16 +32,16 @@ static inline int MPIDI_CH4R_rank_is_local(int rank, MPID_Comm * comm)
     ret = 0;
 #endif
 
-    MPIDI_FUNC_EXIT(MPIDI_CH4R_STATE_IS_LOCAL);
+    MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
     return ret;
 }
 
 
-static inline int MPIDI_CH4R_rank_to_lpid(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPID_Comm * comm)
 {
     int ret;
-    MPIDI_STATE_DECL(MPIDI_CH4R_STATE_IS_LOCAL);
-    MPIDI_FUNC_ENTER(MPIDI_CH4R_STATE_IS_LOCAL);
+    MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
+    MPIDI_FUNC_ENTER(MPIDI_CH4U_STATE_IS_LOCAL);
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     ret = MPIDI_CH4U_COMM(comm,locality)[rank].index;
@@ -49,7 +49,7 @@ static inline int MPIDI_CH4R_rank_to_lpid(int rank, MPID_Comm * comm)
     ret = -1;
 #endif
 
-    MPIDI_FUNC_EXIT(MPIDI_CH4R_STATE_IS_LOCAL);
+    MPIDI_FUNC_EXIT(MPIDI_CH4U_STATE_IS_LOCAL);
     return ret;
 }
 
@@ -58,7 +58,7 @@ typedef struct node_map_t{
     int      rank;
 }node_map_t;
 
-static inline int MPIDI_CH4R_cmpfunc (const void * a, const void * b)
+static inline int MPIDI_CH4U_cmpfunc (const void * a, const void * b)
 {
     node_map_t *n_a, *n_b;
     n_a = (node_map_t*)a;
@@ -66,7 +66,7 @@ static inline int MPIDI_CH4R_cmpfunc (const void * a, const void * b)
     return ( n_a->node_id - n_b->node_id);
 }
 
-static inline int MPIDI_CH4R_build_nodemap(int             myrank,
+static inline int MPIDI_CH4U_build_nodemap(int             myrank,
                                            MPID_Comm      *comm,
                                            int             sz,
                                            MPID_Node_id_t *out_nodemap,
@@ -100,7 +100,7 @@ static inline int MPIDI_CH4R_build_nodemap(int             myrank,
         node_map[i].node_id=nodeids[i];
         node_map[i].rank=i;
     }
-    qsort(node_map, sz, sizeof(node_map_t), MPIDI_CH4R_cmpfunc);
+    qsort(node_map, sz, sizeof(node_map_t), MPIDI_CH4U_cmpfunc);
 
     idx=0;
     out_nodemap[node_map[0].rank]=idx;
@@ -117,7 +117,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4R_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
+static inline int MPIDI_CH4U_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     int mpi_errno = MPI_SUCCESS;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
@@ -130,7 +130,7 @@ static inline int MPIDI_CH4R_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4R_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
+static inline int MPIDI_CH4U_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
 {
     int mpi_errno = MPI_SUCCESS;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO

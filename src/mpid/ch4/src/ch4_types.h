@@ -250,7 +250,7 @@ typedef struct MPIDI_CH4_Global_t {
     MPID_Thread_mutex_t  m[2];
     MPID_Win *win_hash;
     int jobid;
-#ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
+#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4U_rreq_t *posted_list;
     MPIDI_CH4U_rreq_t *unexp_list;
 #endif

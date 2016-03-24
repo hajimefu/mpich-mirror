@@ -243,7 +243,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     MPIDI_CH4_Global.node_map =
         (MPID_Node_id_t *) MPL_malloc(MPIR_Process.comm_world->local_size * sizeof(MPID_Node_id_t));
-    MPIDI_CH4R_build_nodemap(MPIR_Process.comm_world->rank,
+    MPIDI_CH4U_build_nodemap(MPIR_Process.comm_world->rank,
                              MPIR_Process.comm_world,
                              MPIR_Process.comm_world->local_size,
                              MPIDI_CH4_Global.node_map,

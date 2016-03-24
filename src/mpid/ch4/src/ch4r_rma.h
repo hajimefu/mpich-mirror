@@ -251,10 +251,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put
+#define FUNCNAME MPIDI_CH4U_put
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_put(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_put(const void *origin_addr,
                                   int origin_count,
                                   MPI_Datatype origin_datatype,
                                   int target_rank,
@@ -277,10 +277,10 @@ __CH4_INLINE__ int MPIDI_CH4R_put(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_rput
+#define FUNCNAME MPIDI_CH4U_rput
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_rput(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_rput(const void *origin_addr,
                                    int origin_count,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
@@ -306,10 +306,10 @@ __CH4_INLINE__ int MPIDI_CH4R_rput(const void *origin_addr,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get
+#define FUNCNAME MPIDI_CH4U_get
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_get(void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_get(void *origin_addr,
                                   int origin_count,
                                   MPI_Datatype origin_datatype,
                                   int target_rank,
@@ -332,10 +332,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_rget
+#define FUNCNAME MPIDI_CH4U_rget
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_rget(void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_rget(void *origin_addr,
                                    int origin_count,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
@@ -500,10 +500,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_raccumulate
+#define FUNCNAME MPIDI_CH4U_raccumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_raccumulate(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_raccumulate(const void *origin_addr,
                                           int origin_count,
                                           MPI_Datatype origin_datatype,
                                           int target_rank,
@@ -543,10 +543,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_accumulate
+#define FUNCNAME MPIDI_CH4U_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_accumulate(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_accumulate(const void *origin_addr,
                                          int origin_count,
                                          MPI_Datatype origin_datatype,
                                          int target_rank,
@@ -559,7 +559,7 @@ __CH4_INLINE__ int MPIDI_CH4R_accumulate(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACCUMULATE);
 
-    mpi_errno = MPIDI_CH4R_raccumulate(origin_addr,
+    mpi_errno = MPIDI_CH4U_raccumulate(origin_addr,
                                        origin_count,
                                        origin_datatype,
                                        target_rank,
@@ -577,10 +577,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_rget_accumulate
+#define FUNCNAME MPIDI_CH4U_rget_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_rget_accumulate(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_rget_accumulate(const void *origin_addr,
                                               int origin_count,
                                               MPI_Datatype origin_datatype,
                                               void *result_addr,
@@ -629,10 +629,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_accumulate
+#define FUNCNAME MPIDI_CH4U_get_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_get_accumulate(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_get_accumulate(const void *origin_addr,
                                              int origin_count,
                                              MPI_Datatype origin_datatype,
                                              void *result_addr,
@@ -648,7 +648,7 @@ __CH4_INLINE__ int MPIDI_CH4R_get_accumulate(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACCUMULATE);
 
-    mpi_errno = MPIDI_CH4R_rget_accumulate(origin_addr,
+    mpi_errno = MPIDI_CH4U_rget_accumulate(origin_addr,
                                            origin_count,
                                            origin_datatype,
                                            result_addr,
@@ -668,10 +668,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_compare_and_swap
+#define FUNCNAME MPIDI_CH4U_compare_and_swap
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_compare_and_swap(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
                                                const void *compare_addr,
                                                void *result_addr,
                                                MPI_Datatype datatype,
@@ -737,10 +737,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_fetch_and_op
+#define FUNCNAME MPIDI_CH4U_fetch_and_op
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_fetch_and_op(const void *origin_addr,
+__CH4_INLINE__ int MPIDI_CH4U_fetch_and_op(const void *origin_addr,
                                            void *result_addr,
                                            MPI_Datatype datatype,
                                            int target_rank,
@@ -750,7 +750,7 @@ __CH4_INLINE__ int MPIDI_CH4R_fetch_and_op(const void *origin_addr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FETCH_AND_OP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FETCH_AND_OP);
 
-    mpi_errno = MPIDI_CH4R_get_accumulate(origin_addr, 1, datatype,
+    mpi_errno = MPIDI_CH4U_get_accumulate(origin_addr, 1, datatype,
                                           result_addr, 1, datatype,
                                           target_rank, target_disp, 1, datatype,
                                           op, win);

@@ -15,27 +15,27 @@
 #include <mpidch4.h>
 
 /* Static inlines */
-static inline int MPIDI_CH4R_get_source(uint64_t match_bits)
+static inline int MPIDI_CH4U_get_source(uint64_t match_bits)
 {
    int source = ((match_bits & MPIDI_CH4U_SOURCE_MASK) >> MPIDI_CH4U_TAG_SHIFT);
    /* Left shift and right shift by MPIDI_CH4U_SOURCE_SHIFT_UNPACK is to make sure the sign of source is retained */
    return ((source << MPIDI_CH4U_SOURCE_SHIFT_UNPACK) >> MPIDI_CH4U_SOURCE_SHIFT_UNPACK);
 }
 
-static inline int MPIDI_CH4R_get_tag(uint64_t match_bits)
+static inline int MPIDI_CH4U_get_tag(uint64_t match_bits)
 {
    int tag = (match_bits & MPIDI_CH4U_TAG_MASK);
    /* Left shift and right shift by MPIDI_CH4U_TAG_SHIFT_UNPACK is to make sure the sign of tag is retained */
     return ((tag << MPIDI_CH4U_TAG_SHIFT_UNPACK) >> MPIDI_CH4U_TAG_SHIFT_UNPACK);
 }
 
-static inline int MPIDI_CH4R_get_context(uint64_t match_bits)
+static inline int MPIDI_CH4U_get_context(uint64_t match_bits)
 {
     return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >>
                    (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
 }
 
-static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
+static inline int MPIDI_CH4U_get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
     raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX, context_id);
@@ -45,9 +45,9 @@ static inline int MPIDI_CH4R_get_context_index(uint64_t context_id)
     return gen_id;
 }
 
-static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
+static inline MPID_Comm *MPIDI_CH4U_context_id_to_comm(uint64_t context_id)
 {
-    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
     int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
     int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
     MPIU_Assert(subcomm_type <= 3);
@@ -55,9 +55,9 @@ static inline MPID_Comm *MPIDI_CH4R_context_id_to_comm(uint64_t context_id)
     return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
 }
 
-static inline MPIDI_CH4U_rreq_t **MPIDI_CH4R_context_id_to_uelist(uint64_t context_id)
+static inline MPIDI_CH4U_rreq_t **MPIDI_CH4U_context_id_to_uelist(uint64_t context_id)
 {
-    int comm_idx     = MPIDI_CH4R_get_context_index(context_id);
+    int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
     int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
     int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
     MPIU_Assert(subcomm_type <= 3);
@@ -128,10 +128,10 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPID_Request * req)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_Request_release
+#define FUNCNAME MPIDI_CH4U_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4R_Request_release(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_CH4U_request_release(MPID_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
@@ -144,15 +144,15 @@ __CH4_INLINE__ void MPIDI_CH4R_Request_release(MPID_Request * req)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_request_complete
+#define FUNCNAME MPIDI_CH4U_request_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
+__CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
     if (!incomplete)
-        MPIDI_CH4R_Request_release(req);
+        MPIDI_CH4U_request_release(req);
 }
 
 #ifndef dtype_add_ref_if_not_builtin
@@ -341,7 +341,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPIDI_CH4R_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4U_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
@@ -352,7 +352,7 @@ static inline uint64_t MPIDI_CH4R_init_send_tag(MPIU_Context_id_t contextid, int
     return match_bits;
 }
 
-static inline uint64_t MPIDI_CH4R_init_recvtag(uint64_t * mask_bits,
+static inline uint64_t MPIDI_CH4U_init_recvtag(uint64_t * mask_bits,
                                               MPIU_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;

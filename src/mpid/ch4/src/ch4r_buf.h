@@ -58,7 +58,7 @@ static inline MPIU_buf_pool_t *create_buf_pool(int num, int size,
     return buf_pool;
 }
 
-static inline MPIU_buf_pool_t *MPIDI_CH4R_create_buf_pool(int num, int size)
+static inline MPIU_buf_pool_t *MPIDI_CH4U_create_buf_pool(int num, int size)
 {
     MPIU_buf_pool_t *buf_pool;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CREATE_BUF_POOL);
@@ -70,7 +70,7 @@ static inline MPIU_buf_pool_t *MPIDI_CH4R_create_buf_pool(int num, int size)
     return buf_pool;
 }
 
-static inline void *MPIDI_CH4R_get_head_buf(MPIU_buf_pool_t *pool)
+static inline void *MPIDI_CH4U_get_head_buf(MPIU_buf_pool_t *pool)
 {
     void *buf;
     MPIU_buf_t *curr;
@@ -94,7 +94,7 @@ static inline void *MPIDI_CH4R_get_buf_safe(MPIU_buf_pool_t *pool)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_BUF_SAFE);
 
     if (pool->head) {
-        buf = MPIDI_CH4R_get_head_buf(pool);
+        buf = MPIDI_CH4U_get_head_buf(pool);
         goto fn_exit;
     }
 
@@ -105,7 +105,7 @@ static inline void *MPIDI_CH4R_get_buf_safe(MPIU_buf_pool_t *pool)
     curr_pool->next = create_buf_pool(pool->num, pool->size, pool);
     MPIU_Assert(curr_pool->next);
     pool->head = curr_pool->next->head;
-    buf = MPIDI_CH4R_get_head_buf(pool);
+    buf = MPIDI_CH4U_get_head_buf(pool);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_BUF_SAFE);

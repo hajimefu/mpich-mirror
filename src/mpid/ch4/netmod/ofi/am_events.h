@@ -153,7 +153,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_rdma_read(void                       *dst
 
         am_req->req_hdr  = MPIDI_CH4_NMI_OFI_AMREQUEST(rreq, req_hdr);
         am_req->event_id = MPIDI_CH4_NMI_OFI_EVENT_AM_READ;
-        comm             = MPIDI_CH4R_context_id_to_comm(reply_token.data.context_id);
+        comm             = MPIDI_CH4U_context_id_to_comm(reply_token.data.context_id);
         MPIU_Assert(comm);
         MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_read(MPIDI_CH4_NMI_OFI_EP_TX_RMA(0),
                                                 (char *) dst + done,
@@ -467,7 +467,7 @@ static inline int MPIDI_CH4_NMI_OFI_Dispatch_ack(int        rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DISPATCH_ACK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DISPATCH_ACK);
 
-    comm =  MPIDI_CH4R_context_id_to_comm(context_id);
+    comm =  MPIDI_CH4U_context_id_to_comm(context_id);
 
     msg.hdr.am_hdr_sz  = sizeof(msg.pyld);
     msg.hdr.data_sz    = 0;

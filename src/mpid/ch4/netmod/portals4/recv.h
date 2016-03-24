@@ -22,7 +22,7 @@ static inline int MPIDI_CH4_NM_recv(void *buf,
                                     int context_offset,
                                     MPI_Status * status, MPID_Request ** request)
 {
-    return MPIDI_CH4R_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
+    return MPIDI_CH4U_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
 }
 
 static inline int MPIDI_CH4_NM_recv_init(void *buf,
@@ -53,7 +53,7 @@ static inline int MPIDI_CH4_NM_irecv(void *buf,
                                      int tag,
                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4R_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)

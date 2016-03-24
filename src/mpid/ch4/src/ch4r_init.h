@@ -18,10 +18,10 @@
 #include "mpl_uthash.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_init_comm
+#define FUNCNAME MPIDI_CH4U_init_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type,is_localcomm;
     MPIDI_CH4U_rreq_t **uelist;
@@ -32,7 +32,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
     /*
       Prevents double initialization of some special communicators.
 
-      comm_world and comm_self may exhibit this function twice, first during MPIDI_CH4R_init
+      comm_world and comm_self may exhibit this function twice, first during MPIDI_CH4U_init
       and the second during MPIR_Comm_commit in MPIDI_Init.
       If there is an early arrival of an unexpected message before the second visit,
       the following code will wipe out the unexpected queue andthe message is lost forever.
@@ -41,7 +41,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
                  (comm == MPIR_Process.comm_world || comm == MPIR_Process.comm_self)))
         goto fn_exit;
 
-    comm_idx     = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
+    comm_idx     = MPIDI_CH4U_get_context_index(comm->recvcontext_id);
     subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
     is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
@@ -51,7 +51,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init_comm(MPID_Comm * comm)
     MPIDI_CH4U_COMM(comm, posted_list) = NULL;
     MPIDI_CH4U_COMM(comm, unexp_list)  = NULL;
 
-    uelist = MPIDI_CH4R_context_id_to_uelist(comm->context_id);
+    uelist = MPIDI_CH4U_context_id_to_uelist(comm->context_id);
     if (*uelist) {
         MPIDI_CH4U_rreq_t *curr, *tmp;
         MPL_DL_FOREACH_SAFE(*uelist,
@@ -70,16 +70,16 @@ fn_exit:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_destroy_comm
+#define FUNCNAME MPIDI_CH4U_destroy_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_destroy_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type, is_localcomm;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DESTROY_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DESTROY_COMM);
 
-    comm_idx     = MPIDI_CH4R_get_context_index(comm->recvcontext_id);
+    comm_idx     = MPIDI_CH4U_get_context_index(comm->recvcontext_id);
     subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
     is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
@@ -100,10 +100,10 @@ __CH4_INLINE__ int MPIDI_CH4R_destroy_comm(MPID_Comm * comm)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_init
+#define FUNCNAME MPIDI_CH4U_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
+__CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
                                    int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -111,7 +111,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT);
 
     MPIDI_CH4_Global.is_ch4r_initialized = 0;
-#ifndef MPIDI_CH4R_USE_PER_COMM_QUEUE
+#ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4_Global.posted_list = NULL;
     MPIDI_CH4_Global.unexp_list = NULL;
 #endif
@@ -120,7 +120,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
     OPA_store_int(&MPIDI_CH4_Global.exp_seq_no, 0);
     OPA_store_int(&MPIDI_CH4_Global.nxt_seq_no, 0);
 
-    MPIDI_CH4_Global.buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4I_BUF_POOL_NUM,
+    MPIDI_CH4_Global.buf_pool = MPIDI_CH4U_create_buf_pool(MPIDI_CH4I_BUF_POOL_NUM,
                                                            MPIDI_CH4I_BUF_POOL_SZ);
     MPIU_Assert(MPIDI_CH4_Global.buf_pool);
 
@@ -235,10 +235,10 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4U_acc_data_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPIDI_CH4R_init_comm(comm_world);
+    mpi_errno = MPIDI_CH4U_init_comm(comm_world);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPIDI_CH4R_init_comm(comm_self);
+    mpi_errno = MPIDI_CH4U_init_comm(comm_self);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIDI_CH4_Global.win_hash = NULL;
@@ -253,10 +253,10 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_init
+#define FUNCNAME MPIDI_CH4U_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4R_finalize()
+__CH4_INLINE__ void MPIDI_CH4U_finalize()
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
@@ -267,10 +267,10 @@ __CH4_INLINE__ void MPIDI_CH4R_finalize()
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_alloc_mem
+#define FUNCNAME MPIDI_CH4U_alloc_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void *MPIDI_CH4R_alloc_mem(size_t size, MPID_Info * info_ptr)
+__CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
@@ -281,10 +281,10 @@ __CH4_INLINE__ void *MPIDI_CH4R_alloc_mem(size_t size, MPID_Info * info_ptr)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_free_mem
+#define FUNCNAME MPIDI_CH4U_free_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4R_free_mem(void *ptr)
+__CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);

@@ -57,7 +57,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         rreq->status.MPI_SOURCE = rank;
         rreq->status.MPI_TAG = tag;
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -175,7 +175,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id)            = comm->context_id + context_offset;
     rreq->partner_request             = NULL;
 
-    MPIDI_CH4R_request_complete(rreq);
+    MPIDI_CH4U_request_complete(rreq);
 
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util.persist.type) = MPIDI_PTYPE_RECV;
 
@@ -273,7 +273,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPID_Request *rreq)
         if(MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) {
             MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
             MPIR_STATUS_SET_COUNT(rreq->status, 0);
-            MPIDI_CH4R_request_complete(rreq);
+            MPIDI_CH4U_request_complete(rreq);
         }
     }
 

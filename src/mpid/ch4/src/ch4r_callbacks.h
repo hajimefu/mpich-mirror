@@ -558,8 +558,8 @@ static inline int MPIDI_CH4U_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_UNEXP_MRECV_CMPL_HANDLER);
 
     msg_tag = MPIDI_CH4U_REQUEST(rreq, tag);
-    rreq->status.MPI_SOURCE = MPIDI_CH4R_get_source(msg_tag);
-    rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(msg_tag);
+    rreq->status.MPI_SOURCE = MPIDI_CH4U_get_source(msg_tag);
+    rreq->status.MPI_TAG = MPIDI_CH4U_get_tag(msg_tag);
 
     buf = MPIDI_CH4U_REQUEST(rreq, req->rreq.mrcv_buffer);
     count = MPIDI_CH4U_REQUEST(rreq, req->rreq.mrcv_count);
@@ -648,17 +648,17 @@ static inline int MPIDI_CH4U_unexp_cmpl_handler(MPID_Request * rreq)
     /* MPIDI_CS_EXIT(); */
 
     msg_tag   = MPIDI_CH4U_REQUEST(rreq, tag);
-    root_comm = MPIDI_CH4R_context_id_to_comm(MPIDI_CH4R_get_context(msg_tag));
+    root_comm = MPIDI_CH4U_context_id_to_comm(MPIDI_CH4U_get_context(msg_tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_MATCHED) {
         match_req = (MPID_Request *) MPIDI_CH4U_REQUEST(rreq, req->rreq.match_req);
     } else {
         /* MPIDI_CS_ENTER(); */
         if (root_comm)
-            match_req = MPIDI_CH4R_dequeue_posted(msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
+            match_req = MPIDI_CH4U_dequeue_posted(msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
 
         if (match_req) {
-            MPIDI_CH4R_delete_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
+            MPIDI_CH4U_delete_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
             /* Decrement the counter twice, one for posted_list and the other for unexp_list */
             MPIR_Comm_release(root_comm);
             MPIR_Comm_release(root_comm);
@@ -671,8 +671,8 @@ static inline int MPIDI_CH4U_unexp_cmpl_handler(MPID_Request * rreq)
         goto fn_exit;
     }
 
-    match_req->status.MPI_SOURCE = MPIDI_CH4R_get_source(msg_tag);
-    match_req->status.MPI_TAG = MPIDI_CH4R_get_tag(msg_tag);
+    match_req->status.MPI_SOURCE = MPIDI_CH4U_get_source(msg_tag);
+    match_req->status.MPI_TAG = MPIDI_CH4U_get_tag(msg_tag);
 
     MPIDI_Datatype_get_info(MPIDI_CH4U_REQUEST(match_req, count),
                             MPIDI_CH4U_REQUEST(match_req, datatype),
@@ -755,8 +755,8 @@ static inline int MPIDI_CH4U_recv_cmpl_handler(MPID_Request * rreq)
         goto fn_exit;
     }
 
-    rreq->status.MPI_SOURCE = MPIDI_CH4R_get_source(MPIDI_CH4U_REQUEST(rreq, tag));
-    rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
+    rreq->status.MPI_SOURCE = MPIDI_CH4U_get_source(MPIDI_CH4U_REQUEST(rreq, tag));
+    rreq->status.MPI_TAG = MPIDI_CH4U_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
         mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
@@ -1379,11 +1379,11 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
     int context_id;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_HANDLER);
-    context_id = MPIDI_CH4R_get_context(hdr->msg_tag);
-    root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
+    context_id = MPIDI_CH4U_get_context(hdr->msg_tag);
+    root_comm  = MPIDI_CH4U_context_id_to_comm(context_id);
     if (root_comm) {
         /* MPIDI_CS_ENTER(); */
-        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
+        rreq = MPIDI_CH4U_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -1399,10 +1399,10 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
         /* MPIDI_CS_ENTER(); */
         if (root_comm) {
             MPIR_Comm_add_ref(root_comm);
-            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
+            MPIDI_CH4U_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
         }
         else {
-            MPIDI_CH4R_enqueue_unexp(rreq, MPIDI_CH4R_context_id_to_uelist(context_id));
+            MPIDI_CH4U_enqueue_unexp(rreq, MPIDI_CH4U_context_id_to_uelist(context_id));
         }
         /* MPIDI_CS_EXIT(); */
     }
@@ -1445,11 +1445,11 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
     MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
 
-    context_id = MPIDI_CH4R_get_context(hdr->msg_tag);
-    root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
+    context_id = MPIDI_CH4U_get_context(hdr->msg_tag);
+    root_comm  = MPIDI_CH4U_context_id_to_comm(context_id);
     if (root_comm) {
         /* MPIDI_CS_ENTER(); */
-        rreq = MPIDI_CH4R_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
+        rreq = MPIDI_CH4U_dequeue_posted(hdr->msg_tag, &MPIDI_CH4U_COMM(root_comm, posted_list));
         /* MPIDI_CS_EXIT(); */
     }
 
@@ -1468,10 +1468,10 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
         /* MPIDI_CS_ENTER(); */
         if (root_comm) {
             MPIR_Comm_add_ref(root_comm);
-            MPIDI_CH4R_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
+            MPIDI_CH4U_enqueue_unexp(rreq, &MPIDI_CH4U_COMM(root_comm, unexp_list));
         }
         else {
-            MPIDI_CH4R_enqueue_unexp(rreq, MPIDI_CH4R_context_id_to_uelist(context_id));
+            MPIDI_CH4U_enqueue_unexp(rreq, MPIDI_CH4U_context_id_to_uelist(context_id));
         }
         /* MPIDI_CS_EXIT(); */
     }

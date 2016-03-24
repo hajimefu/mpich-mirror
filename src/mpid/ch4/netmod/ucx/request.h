@@ -29,7 +29,7 @@ static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
     if ((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
         MPL_free((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
     }
-    /* MPIDI_CH4R_Request_release(req); */
+    /* MPIDI_CH4U_request_release(req); */
 }
 
 
@@ -230,7 +230,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_sta
         rreq->status.MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info->sender_tag);
         count = info->length;
         MPIR_STATUS_SET_COUNT(rreq->status, count);
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         ucp_request->req = NULL;
     }
 

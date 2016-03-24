@@ -20,7 +20,7 @@
 static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    mpi_errno = MPIDI_CH4R_init_comm(comm);
+    mpi_errno = MPIDI_CH4U_init_comm(comm);
     return mpi_errno;
 }
 
@@ -31,7 +31,7 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    mpi_errno = MPIDI_CH4R_destroy_comm(comm);
+    mpi_errno = MPIDI_CH4U_destroy_comm(comm);
     return mpi_errno;
 }
 

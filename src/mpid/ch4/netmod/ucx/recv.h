@@ -116,7 +116,7 @@ static inline int do_irecv(void *buf,
         req->status.MPI_ERROR = MPI_SUCCESS;
         req->status.MPI_SOURCE = rank;
         req->status.MPI_TAG = tag;
-        MPIDI_CH4R_request_complete(req);
+        MPIDI_CH4U_request_complete(req);
         *request = req;
         goto fn_exit;
     }
@@ -156,7 +156,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void *buf,
                                          MPID_Comm * comm,
                                          int context_offset, MPID_Request ** request)
 {
-    return MPIDI_CH4R_recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
+    return MPIDI_CH4U_recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
 __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
@@ -164,7 +164,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
                                       MPI_Datatype datatype,
                                       MPID_Request * message, MPID_Request ** rreqp)
 {
-    return MPIDI_CH4R_imrecv(buf, count, datatype, message, rreqp);
+    return MPIDI_CH4U_imrecv(buf, count, datatype, message, rreqp);
 }
  __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
                                      int count,
@@ -182,7 +182,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
 
 static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
 {
-    return MPIDI_CH4R_cancel_recv(rreq);
+    return MPIDI_CH4U_cancel_recv(rreq);
 }
 
 #endif /* RECV_H_INCLUDED */

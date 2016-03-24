@@ -643,7 +643,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -657,7 +657,7 @@ static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
                                    (char *)win->base + offset,
                                    target_count,
                                    target_datatype);
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -799,7 +799,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_CH4_NMI_OFI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4U_request_release(*sigreq);
 
         return MPI_SUCCESS;
     }
@@ -907,7 +907,7 @@ fn_fail:
 am_fallback:
     /* Fall back to active message */
     MPIDI_CH4_NMI_OFI_Win_request_complete(req);
-    return MPIDI_CH4R_accumulate(origin_addr, origin_count, origin_datatype,
+    return MPIDI_CH4U_accumulate(origin_addr, origin_count, origin_datatype,
                                  target_rank, target_disp,
                                  target_count, target_datatype,
                                  op, win);
@@ -963,7 +963,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
        (target_rank == MPI_PROC_NULL)) {
         MPIDI_CH4_NMI_OFI_Win_request_complete(req);
 
-        if(sigreq) MPIDI_CH4R_Request_release(*sigreq);
+        if(sigreq) MPIDI_CH4U_request_release(*sigreq);
 
         goto fn_exit;
     }
@@ -1100,7 +1100,7 @@ fn_fail:
     goto fn_exit;
 am_fallback:
     MPIDI_CH4_NMI_OFI_Win_request_complete(req);
-    return MPIDI_CH4R_get_accumulate(origin_addr, origin_count, origin_datatype,
+    return MPIDI_CH4U_get_accumulate(origin_addr, origin_count, origin_datatype,
                                      result_addr, result_count, result_datatype,
                                      target_rank, target_disp, target_count,
                                      target_datatype, op, win);
@@ -1223,7 +1223,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
         mpi_errno  = MPI_SUCCESS;
         rreq       = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);
         rreq->kind = MPID_WIN_REQUEST;
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
@@ -1237,7 +1237,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
                                     origin_addr,
                                     origin_count,
                                     origin_datatype);
-        MPIDI_CH4R_request_complete(rreq);
+        MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 

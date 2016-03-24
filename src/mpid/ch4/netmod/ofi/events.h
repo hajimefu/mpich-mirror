@@ -135,7 +135,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
 
     }
 
-    MPIDI_CH4R_request_complete(rreq);
+    MPIDI_CH4U_request_complete(rreq);
 
     /* Polling loop will check for truncation */
 fn_exit:
@@ -208,7 +208,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_event(struct fi_cq_tagged_entry *wc, MP
             MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
-        MPIDI_CH4R_Request_release(sreq);
+        MPIDI_CH4U_request_release(sreq);
     }   /* c != 0, ssend */
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_EVENT);
@@ -256,7 +256,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_huge_event(struct fi_cq_tagged_entry *w
             MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig));
 
         dtype_release_if_not_builtin(MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype));
-        MPIDI_CH4R_Request_release(sreq);
+        MPIDI_CH4U_request_release(sreq);
     }   /* c != 0, ssend */
 
 fn_exit:
@@ -345,7 +345,7 @@ static inline int MPIDI_CH4_NMI_OFI_Chunk_done_event(struct fi_cq_tagged_entry *
     MPIDI_CH4_NMI_OFI_Chunk_request *creq = (MPIDI_CH4_NMI_OFI_Chunk_request *)req;
     MPIR_cc_decr(creq->parent->cc_ptr, &c);
 
-    if(c == 0)MPIDI_CH4R_Request_release(creq->parent);
+    if(c == 0)MPIDI_CH4U_request_release(creq->parent);
 
     MPL_free(creq);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CHUNK_DONE_EVENT);
@@ -367,7 +367,7 @@ static inline int MPIDI_CH4_NMI_OFI_Inject_emu_event(struct fi_cq_tagged_entry *
 
     if(!incomplete) {
         MPL_free(MPIDI_CH4_NMI_OFI_REQUEST(req, util.inject_buf));
-        MPIDI_CH4R_Request_release(req);
+        MPIDI_CH4U_request_release(req);
         OPA_decr_int(&MPIDI_Global.am_inflight_inject_emus);
     }
 

@@ -218,7 +218,7 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 
     alloc_tables(comm);
 
-    MPIDI_CH4R_init_comm(comm);
+    MPIDI_CH4U_init_comm(comm);
 
     return MPI_SUCCESS;
 
@@ -233,7 +233,7 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
     int mpi_errno = MPI_SUCCESS;
     int in_use;
 
-    MPIDI_CH4R_destroy_comm(comm);
+    MPIDI_CH4U_destroy_comm(comm);
     MPIU_Object_release_ref(MPIDI_CH4_NMI_UCX_COMM(comm).vept, &in_use);
     if(in_use == 0)
         MPL_free(MPIDI_CH4_NMI_UCX_COMM(comm).vept);

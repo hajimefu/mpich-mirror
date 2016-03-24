@@ -250,7 +250,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
 
     if(is_reply) {
         use_token.val       = reply_token;
-        use_comm            = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_comm            = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
         use_rank            = use_token.data.src_rank;
         MPIU_Assert(use_token.data.context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr->context_id = use_token.data.context_id;
@@ -469,7 +469,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
 
     if(is_reply) {
         use_token.val = reply_token;
-        use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
         use_rank = use_token.data.src_rank;
     } else {
         use_comm = comm;
@@ -542,7 +542,7 @@ static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
 
     if(is_reply) {
         use_token.val      = reply_token;
-        use_comm           = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+        use_comm           = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
         use_rank           = use_token.data.src_rank;
         MPIU_Assert(use_token.data.context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
         msg_hdr.context_id = use_token.data.context_id;
@@ -609,7 +609,7 @@ static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPID_Request *req)
     MPIR_cc_decr(req->cc_ptr, &incomplete);
 
     if(!incomplete) {
-        MPIDI_CH4R_Request_release(req);
+        MPIDI_CH4U_request_release(req);
     }
 }
 

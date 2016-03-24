@@ -372,8 +372,8 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
         size_t min_msg_sz = MPL_MAX(MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE,
                                     MPIR_CVAR_CH4R_EAGER_THRESHOLD + MPIDI_CH4_NM_am_hdr_max_sz() + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
         MPIU_Assert(min_msg_sz <= MPIDI_Global.max_send);
-        MPIDI_Global.am_buf_pool = MPIDI_CH4R_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
-        mpi_errno             = MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
+        MPIDI_Global.am_buf_pool = MPIDI_CH4U_create_buf_pool(MPIDI_CH4_NMI_OFI_BUF_POOL_NUM, MPIDI_CH4_NMI_OFI_BUF_POOL_SIZE);
+        mpi_errno             = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
 
         if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -423,7 +423,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     MPIDI_Global.max_buffered_send = 1;
     MPIDI_Global.max_buffered_write = 1;
 
-    MPIDI_CH4R_build_nodemap(comm_world->rank,
+    MPIDI_CH4U_build_nodemap(comm_world->rank,
                              comm_world,
                              comm_world->local_size,
                              MPIDI_Global.node_map,
@@ -527,7 +527,7 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
         MPIDI_CH4_NMI_OFI_PROGRESS();
     MPIU_Assert(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) == 0);
 
-    MPIDI_CH4R_finalize();
+    MPIDI_CH4U_finalize();
 
     if(do_scalable_ep) {
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_TAG(0)), epclose);

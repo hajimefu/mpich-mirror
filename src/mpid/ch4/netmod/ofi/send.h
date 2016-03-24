@@ -233,7 +233,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Send(MPIDI_CH4_NMI_OFI_SENDPARAMS, int n
         if(!noreq) {
             MPIDI_CH4_NMI_OFI_REQUEST_CREATE((*request));
             (*request)->kind = MPID_REQUEST_SEND;
-            MPIDI_CH4R_request_complete((*request));
+            MPIDI_CH4U_request_complete((*request));
         }
 
         goto fn_exit;
@@ -283,7 +283,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Persistent_send(MPIDI_CH4_NMI_OFI_SENDPA
     MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_comm)          = comm;
     MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id)            = comm->context_id + context_offset;
     sreq->partner_request             = NULL;
-    MPIDI_CH4R_request_complete(sreq);
+    MPIDI_CH4U_request_complete(sreq);
 
     if(HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
         MPID_Datatype *dt_ptr;

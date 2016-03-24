@@ -207,7 +207,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
     use_token.val = reply_token;
-    use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
     use_rank = use_token.data.src_rank;
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
@@ -338,7 +338,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
     use_token.val = reply_token;
-    use_comm = MPIDI_CH4R_context_id_to_comm(use_token.data.context_id);
+    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
     use_rank = use_token.data.src_rank;
 
     ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, use_comm->rank, 0);

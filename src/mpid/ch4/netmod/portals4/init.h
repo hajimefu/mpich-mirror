@@ -150,14 +150,14 @@ static inline int MPIDI_CH4_NM_init(int rank,
     }
 
     /* Setup CH4R Active Messages */
-    MPIDI_CH4R_init(comm_world, comm_self, num_contexts, netmod_contexts);
+    MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
     for (i = 0; i < MPIDI_CH4_NMI_PTL_NUM_OVERFLOW_BUFFERS; i++) {
         MPIDI_CH4_NMI_PTL_global.overflow_bufs[i] = MPL_malloc(MPIDI_CH4_NMI_PTL_OVERFLOW_BUFFER_SZ);
         MPIDI_CH4_NMI_PTL_append_overflow(i);
     }
 
     MPIDI_CH4_NMI_PTL_global.node_map = MPL_malloc(size * sizeof(*MPIDI_CH4_NMI_PTL_global.node_map));
-    mpi_errno = MPIDI_CH4R_build_nodemap(rank, comm_world, size, MPIDI_CH4_NMI_PTL_global.node_map, &MPIDI_CH4_NMI_PTL_global.max_node_id);
+    mpi_errno = MPIDI_CH4U_build_nodemap(rank, comm_world, size, MPIDI_CH4_NMI_PTL_global.node_map, &MPIDI_CH4_NMI_PTL_global.max_node_id);
 
  fn_exit:
     MPL_free(keyS);
@@ -234,12 +234,12 @@ static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm * newcomm_p
 
 static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 {
-    return MPIDI_CH4R_free_mem(ptr);
+    return MPIDI_CH4U_free_mem(ptr);
 }
 
 static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info * info_ptr)
 {
-    return MPIDI_CH4R_alloc_mem(size, info_ptr);
+    return MPIDI_CH4U_alloc_mem(size, info_ptr);
 }
 
 

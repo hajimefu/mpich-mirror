@@ -73,7 +73,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_isend(const void *buf,
     *request = sreq;
     MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                     (MPL_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
-                     MPIDI_CH4R_rank_to_lpid(rank, comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, comm->comm_kind,
+                     MPIDI_CH4U_rank_to_lpid(rank, comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, comm->comm_kind,
                      comm->rank, tag, comm->context_id + context_offset));
 
 fn_exit:
@@ -105,7 +105,7 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
     /* try to send immediately, contig, short message */
     if(dt_contig && data_sz <= MPIDI_CH4_SHMI_SIMPLE_EAGER_THRESHOLD) {
         /* eager message */
-        int grank = MPIDI_CH4R_rank_to_lpid(rank, comm);
+        int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
 
         /* Try freeQ */
         if(!MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ)) {

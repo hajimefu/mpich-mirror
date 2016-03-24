@@ -77,7 +77,7 @@ __CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
             MPIDI_CH4U_REQUEST(req, req) = NULL;
         }
         MPIDI_CH4_NM_am_request_finalize(req);
-        MPIDI_CH4R_Request_release(req);
+        MPIDI_CH4U_request_release(req);
     }
 }
 

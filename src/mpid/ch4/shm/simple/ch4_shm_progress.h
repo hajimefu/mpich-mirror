@@ -58,7 +58,7 @@ match_l: {
             MPIU_Assert(in_cell);
             MPIU_Assert(pending);
             MPIR_cc_decr(pending->cc_ptr, &c);
-            MPIDI_CH4R_Request_release(pending);
+            MPIDI_CH4U_request_release(pending);
             goto release_cell_l;
         }
 
@@ -68,7 +68,7 @@ match_l: {
             MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_GET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), sender_rank, tag, context_id);
             MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                             (MPL_DBG_FDEST, "Posted from grank %d to %d in progress %d,%d,%d\n",
-                             MPIDI_CH4R_rank_to_lpid(sender_rank, req->comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank,
+                             MPIDI_CH4U_rank_to_lpid(sender_rank, req->comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank,
                              sender_rank, tag, context_id));
 
             if((in_cell && MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(cell, sender_rank, tag, context_id)) ||
@@ -81,7 +81,7 @@ match_l: {
                 if(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
                     MPIDI_CH4R_anysource_matched(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req),
                                                  MPIDI_CH4R_SHM, &continue_matching);
-                    MPIDI_CH4R_Request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
+                    MPIDI_CH4U_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
 
                     /* Decouple requests */
                     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) = NULL;
@@ -259,7 +259,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Progress_send(int blocking, int *complet
         /*
          * TODO: make request field dest_lpid (or even recvQ[dest_lpid]) instead of dest - no need to do rank_to_lpid each time
          */
-        int grank = MPIDI_CH4R_rank_to_lpid(dest, sreq->comm);
+        int grank = MPIDI_CH4U_rank_to_lpid(dest, sreq->comm);
         cell->pending = NULL;
 
         if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type == MPIDI_CH4_SHMI_SIMPLE_TYPESYNC) {

@@ -68,7 +68,7 @@ typedef struct {
     MPIR_cc_decr((req_)->cc_ptr, &incomplete__); \
     dtype_release_if_not_builtin(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_)->datatype); \
     if (!incomplete__) \
-        MPIDI_CH4R_Request_release(req_);    \
+        MPIDI_CH4U_request_release(req_);    \
 }
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req,queue) \
