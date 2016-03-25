@@ -47,7 +47,15 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
         if (mpi_errno != MPI_SUCCESS) {
             MPIR_ERR_POP(mpi_errno);
         }
+        /* cancel the shm request if netmod/am handles the request from unexpected queue. */
         else if (*request) {
+            if(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request)->status.MPI_SOURCE != MPI_UNDEFINED) {
+                mpi_errno = MPIDI_CH4_SHM_cancel_recv(*request);
+                if (MPIR_STATUS_GET_CANCEL_BIT((*request)->status)) {
+                    (*request)->status = MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request)->status;
+                }
+                goto fn_exit;
+            }
             MPIDI_CH4I_REQUEST(*request, is_local) = 1;
             MPIDI_CH4I_REQUEST(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request), is_local) = 0;
         }

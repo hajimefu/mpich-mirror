@@ -763,6 +763,17 @@ static inline int MPIDI_CH4R_recv_cmpl_handler(MPID_Request * rreq)
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
+#ifdef MPIDI_BUILD_CH4_SHM
+    if(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq)){
+        int continue_matching = 1;
+        MPIDI_CH4R_anysource_matched(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq), MPIDI_CH4R_NETMOD, &continue_matching);
+        if(unlikely(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq))) {
+            MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq)) = NULL;
+            MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(rreq) = NULL;
+        }
+    }
+#endif
+
     dtype_release_if_not_builtin(MPIDI_CH4R_REQUEST(rreq, datatype));
     MPIDI_CH4I_am_request_complete(rreq);
 fn_exit:

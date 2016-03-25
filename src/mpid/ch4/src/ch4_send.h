@@ -372,7 +372,10 @@ __CH4_INLINE__ int MPIDI_Bsend_init(const void *buf,
     else
         mpi_errno = MPIDI_CH4_NM_bsend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
-    if(mpi_errno == MPI_SUCCESS) MPIDI_CH4I_REQUEST(*request, is_local) = r;
+    if(mpi_errno == MPI_SUCCESS && *request) {
+        MPIDI_CH4I_REQUEST(*request, is_local) = r;
+        MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request) = NULL;
+    }
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -409,7 +412,10 @@ __CH4_INLINE__ int MPIDI_Rsend_init(const void *buf,
     else
         mpi_errno = MPIDI_CH4_NM_rsend_init(buf, count, datatype, rank, tag,
                                             comm, context_offset, request);
-    if(mpi_errno == MPI_SUCCESS) MPIDI_CH4I_REQUEST(*request, is_local) = r;
+    if(mpi_errno == MPI_SUCCESS && *request) {
+        MPIDI_CH4I_REQUEST(*request, is_local) = r;
+        MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(*request) = NULL;
+    }
 #endif
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);

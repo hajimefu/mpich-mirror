@@ -313,27 +313,51 @@ __CH4_INLINE__ int MPIDI_CH4R_startall(int count, MPID_Request * requests[])
         switch (MPIDI_CH4R_REQUEST(preq, p_type)) {
 
         case MPIDI_PTYPE_RECV:
+#ifdef MPIDI_BUILD_CH4_SHM
+            mpi_errno = MPIDI_CH4_NM_irecv(MPIDI_CH4R_REQUEST(preq, buffer),
+                                    MPIDI_CH4R_REQUEST(preq, count),
+                                    datatype, rank, tag,
+                                    preq->comm,
+                                    context_offset, &preq->partner_request);
+#else
             mpi_errno = MPIDI_Irecv(MPIDI_CH4R_REQUEST(preq, buffer),
                                     MPIDI_CH4R_REQUEST(preq, count),
                                     datatype, rank, tag,
                                     preq->comm,
                                     context_offset, &preq->partner_request);
+#endif
             break;
 
         case MPIDI_PTYPE_SEND:
+#ifdef MPIDI_BUILD_CH4_SHM
+            mpi_errno = MPIDI_CH4_NM_isend(MPIDI_CH4R_REQUEST(preq, buffer),
+                                    MPIDI_CH4R_REQUEST(preq, count),
+                                    datatype, rank, tag,
+                                    preq->comm,
+                                    context_offset, &preq->partner_request);
+#else
             mpi_errno = MPIDI_Isend(MPIDI_CH4R_REQUEST(preq, buffer),
                                     MPIDI_CH4R_REQUEST(preq, count),
                                     datatype, rank, tag,
                                     preq->comm,
                                     context_offset, &preq->partner_request);
+#endif
             break;
 
         case MPIDI_PTYPE_SSEND:
+#ifdef MPIDI_BUILD_CH4_SHM
+           mpi_errno = MPIDI_CH4_NM_issend(MPIDI_CH4R_REQUEST(preq, buffer),
+                                     MPIDI_CH4R_REQUEST(preq, count),
+                                     datatype, rank, tag,
+                                     preq->comm,
+                                     context_offset, &preq->partner_request);
+#else
             mpi_errno = MPIDI_Issend(MPIDI_CH4R_REQUEST(preq, buffer),
                                      MPIDI_CH4R_REQUEST(preq, count),
                                      datatype, rank, tag,
                                      preq->comm,
                                      context_offset, &preq->partner_request);
+#endif
             break;
 
         case MPIDI_PTYPE_BSEND:
