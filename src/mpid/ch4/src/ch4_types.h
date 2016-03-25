@@ -212,10 +212,10 @@ typedef struct MPIDI_CH4U_acc_ack_msg_t {
     uint64_t req_ptr;
 } MPIDI_CH4U_acc_ack_msg_t;
 
-typedef struct MPIDI_CH4_Comm_req_list_t {
+typedef struct MPIDI_CH4_comm_req_list_t {
     MPID_Comm             *comm[2][4];
     MPIDI_CH4U_rreq_t *uelist[2][4];
-} MPIDI_CH4_Comm_req_list_t;
+} MPIDI_CH4_comm_req_list_t;
 
 typedef struct MPIU_buf_pool_t {
     int size;
@@ -243,7 +243,7 @@ typedef struct MPIDI_CH4_Global_t {
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPID_Node_id_t *node_map, max_node_id;
 #endif
-    MPIDI_CH4_Comm_req_list_t *comm_req_lists;
+    MPIDI_CH4_comm_req_list_t *comm_req_lists;
     OPA_int_t active_progress_hooks;
     MPID_CommOps         MPID_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
