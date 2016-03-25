@@ -11,9 +11,12 @@
 #ifndef NETMOD_OFI_IOVEC_UTIL_H_INCLUDED
 #define NETMOD_OFI_IOVEC_UTIL_H_INCLUDED
 
-#include <stdint.h>
-#include <sys/uio.h>
-#include <stdio.h>
+#ifdef HAVE_STDINT_H
+#  include <stdint.h>
+#endif /* HAVE_STDINT_H */
+#ifdef HAVE_SYS_UIO_H
+#  include <sys/uio.h>
+#endif /* HAVE_SYS_UIO_H */
 #include <assert.h>
 #include "types.h"
 

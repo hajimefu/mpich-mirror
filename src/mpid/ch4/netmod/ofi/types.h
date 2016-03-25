@@ -14,7 +14,9 @@
 #include <netdb.h>
 #include <stddef.h>
 #include <inttypes.h>
-#include <stdint.h>
+#ifdef HAVE_STDINT_H
+#  include <stdint.h>
+#endif
 #include "ofi_pre.h"
 #include "ch4_types.h"
 #include "mpidch4r.h"
