@@ -16,7 +16,9 @@
 #include <opa_primitives.h>
 #include "mpiinfo.h"
 #include "mpl_uthash.h"
-#include <sys/mman.h>
+#ifdef HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+#endif /* HAVE_SYS_MMAN_H */
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_win_allgather

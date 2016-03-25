@@ -11,13 +11,24 @@
 #ifndef CH4R_SYMHEAP_H_INCLUDED
 #define CH4R_SYMHEAP_H_INCLUDED
 
+#include <mpichconf.h>
+
 #include <opa_primitives.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdint.h>
+#ifdef HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+#endif /* HAVE_SYS_MMAN_H */
+#ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+#endif /* HAVE_SYS_TIME_H */
+#ifdef HAVE_SYS_STAT_H
+#  include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
+#ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
+#ifdef HAVE_STDINT_H
+#  include <stdint.h>
+#endif /* HAVE_STDINT_H */
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4R_get_mapsize

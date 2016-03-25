@@ -339,6 +339,8 @@ PAC_ARG_SHARED_MEMORY
 
 AM_CONDITIONAL([BUILD_CH4_SHM],[test "$ch4_shm_level" = "yes" -o "$ch4_shm_level" = "exclusive"])
 
+AC_CHECK_HEADERS(sys/mman.h sys/stat.h fcntl.h)
+
 ])dnl end _BODY
 
 [#] end of __file__
