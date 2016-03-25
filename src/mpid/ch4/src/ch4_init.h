@@ -195,8 +195,6 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 
     MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
-    MPIDI_CH4_Global.comm_req_lists = (MPIDI_CH4_comm_req_list_t *)
-        MPL_calloc(MPIR_MAX_CONTEXT_MASK*MPIR_CONTEXT_INT_BITS,sizeof(MPIDI_CH4_comm_req_list_t));
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF           */
@@ -344,7 +342,6 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     MPL_free(MPIDI_CH4_Global.node_map);
 #endif
 
-    MPL_free(MPIDI_CH4_Global.comm_req_lists);
     MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX, &thr_err);
   fn_exit:
