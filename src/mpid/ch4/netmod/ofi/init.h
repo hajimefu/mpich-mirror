@@ -86,7 +86,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_CH4_NMI_OFI_Gpid_t));
 
 
-    *tag_ub = (1 << MPIDI_CH4_NMI_OFI_TAG_SHIFT) - 1;
+    *tag_ub = INT32_MAX;
 
     MPID_Thread_mutex_create(&MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_CH4_NMI_OFI_THREAD_PROGRESS_MUTEX, &thr_err);

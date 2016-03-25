@@ -28,7 +28,7 @@ static inline int MPIDI_CH4_NMI_OFI_Peek_event(struct fi_cq_tagged_entry *wc, MP
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id)  = MPIDI_CH4_NMI_OFI_PEEK_FOUND;
-    rreq->status.MPI_SOURCE = MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag);
+    rreq->status.MPI_SOURCE = wc->data;
     rreq->status.MPI_TAG    = MPIDI_CH4_NMI_OFI_Init_get_tag(wc->tag);
     count                   = wc->len;
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
@@ -80,7 +80,7 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_EVENT);
 
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
-    rreq->status.MPI_SOURCE = MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag);
+    rreq->status.MPI_SOURCE = wc->data;
     rreq->status.MPI_TAG    = MPIDI_CH4_NMI_OFI_Init_get_tag(wc->tag);
     count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
@@ -124,14 +124,14 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_event(struct fi_cq_tagged_entry *wc, MP
     /* If syncronous, ack and complete when the ack is done */
     if(unlikely(MPIDI_CH4_NMI_OFI_Is_tag_sync(wc->tag))) {
         uint64_t ss_bits = MPIDI_CH4_NMI_OFI_Init_sendtag(MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id),
-                                                          MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm->rank),
                                                           rreq->status.MPI_TAG,
                                                           MPIDI_CH4_NMI_OFI_SYNC_SEND_ACK);
         MPID_Comm *c = MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm);
         int r = rreq->status.MPI_SOURCE;
-        MPIDI_CH4_NMI_OFI_CALL_RETRY_NOLOCK(fi_tinject(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), NULL, 0,
-                                                       MPIDI_CH4_NMI_OFI_Comm_to_phys(c, r, MPIDI_CH4_NMI_OFI_API_TAG),
-                                                       ss_bits), tsendsync);
+        MPIDI_CH4_NMI_OFI_CALL_RETRY_NOLOCK(fi_tinjectdata(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), NULL, 0,
+                                                           MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm->rank),
+                                                           MPIDI_CH4_NMI_OFI_Comm_to_phys(c, r, MPIDI_CH4_NMI_OFI_API_TAG),
+                                                           ss_bits), tsendsync);
 
     }
 
@@ -161,13 +161,13 @@ static inline int MPIDI_CH4_NMI_OFI_Recv_huge_event(struct fi_cq_tagged_entry *w
     /* Look up the receive sequence number and chunk queue */
     comm_ptr = MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm);
     recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *) MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
-                                                                          MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag));
+                                                                          wc->data);
 
     if(recv == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
         recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *) MPL_malloc(sizeof(*recv));
         recv->seqno = 0;
         MPIDI_CH4_NMI_OFI_Map_create(&recv->chunk_q);
-        MPIDI_CH4_NMI_OFI_Map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters, MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag), recv);
+        MPIDI_CH4_NMI_OFI_Map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters, wc->data, recv);
     }
 
     /* Look up the receive in the chunk queue */
@@ -402,7 +402,7 @@ static inline int MPIDI_CH4_NMI_OFI_Accept_probe_event(struct fi_cq_tagged_entry
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIDI_CH4_NMI_OFI_Dynamic_process_request_t *ctrl = (MPIDI_CH4_NMI_OFI_Dynamic_process_request_t *)rreq;
-    ctrl->source = MPIDI_CH4_NMI_OFI_Init_get_source(wc->tag);
+    ctrl->source = wc->data;
     ctrl->tag    = MPIDI_CH4_NMI_OFI_Init_get_tag(wc->tag);
     ctrl->msglen = wc->len;
     ctrl->done   = MPIDI_CH4_NMI_OFI_PEEK_FOUND;

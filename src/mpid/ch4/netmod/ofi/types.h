@@ -68,21 +68,19 @@ EXTERN_C_BEGIN
 
 /* match/ignore bit manipulation
  *
- * 0123 4567 01234567 0123 4567 01234567 0123 4567 01234567 01234567 01234567
- *     |                  |                  |
- * ^   |    context id    |       source     |       message tag
- * |   |                  |                  |
+ * 0123 4567 01234567 01234567 01234567 01234567 01234567 01234567 01234567
+ *     |             |                 |
+ * ^   |   Unused    |    context id   |           message tag
+ * |   |             |                 |
  * +---- protocol
  */
 #define MPIDI_CH4_NMI_OFI_PROTOCOL_MASK (0x9000000000000000ULL)
-#define MPIDI_CH4_NMI_OFI_CONTEXT_MASK  (0x0FFFF00000000000ULL)
-#define MPIDI_CH4_NMI_OFI_SOURCE_MASK   (0x00000FFFF0000000ULL)
-#define MPIDI_CH4_NMI_OFI_TAG_MASK      (0x000000000FFFFFFFULL)
+#define MPIDI_CH4_NMI_OFI_CONTEXT_MASK  (0x0000FFFF00000000ULL)
+#define MPIDI_CH4_NMI_OFI_TAG_MASK      (0x00000000FFFFFFFFULL)
 #define MPIDI_CH4_NMI_OFI_SYNC_SEND     (0x1000000000000000ULL)
 #define MPIDI_CH4_NMI_OFI_SYNC_SEND_ACK (0x2000000000000000ULL)
 #define MPIDI_CH4_NMI_OFI_DYNPROC_SEND  (0x4000000000000000ULL)
-#define MPIDI_CH4_NMI_OFI_TAG_SHIFT     (28)
-#define MPIDI_CH4_NMI_OFI_SOURCE_SHIFT  (16)
+#define MPIDI_CH4_NMI_OFI_TAG_SHIFT     (32)
 
 /* RMA Key Space division
  *    |                  |                  |                    |
