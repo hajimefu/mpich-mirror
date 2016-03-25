@@ -53,7 +53,7 @@ static inline int MPIDI_OFI_do_iprobe(int source,
     else
         rreq = &r;
 
-    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, comm->context_id + context_offset, source, tag);
+    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, comm->context_id + context_offset, tag);
 
     MPIDI_OFI_REQUEST(rreq, event_id) = MPIDI_OFI_EVENT_PEEK;
     MPIDI_OFI_REQUEST(rreq, util_id)  = MPIDI_OFI_PEEK_START;
@@ -67,7 +67,7 @@ static inline int MPIDI_OFI_do_iprobe(int source,
     msg.context = (void *) &(MPIDI_OFI_REQUEST(rreq, context));
     msg.data = 0;
 
-    MPIDI_OFI_CALL(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION), trecv);
+    MPIDI_OFI_CALL(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION | FI_REMOTE_CQ_DATA), trecvmsg);
     MPIDI_OFI_PROGRESS_WHILE(MPIDI_OFI_REQUEST(rreq, util_id) == MPIDI_OFI_PEEK_START);
 
     switch(MPIDI_OFI_REQUEST(rreq, util_id)) {

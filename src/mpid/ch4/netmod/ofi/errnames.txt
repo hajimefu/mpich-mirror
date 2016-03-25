@@ -45,12 +45,20 @@
 **ofid_avclose %s %d %s %s:OFI av close failed (%s:%d:%s:%s)
 **ofid_tsend:OFI tagged send failed
 **ofid_tsend %s %d %s %s:OFI tagged send failed (%s:%d:%s:%s)
+**ofid_tsenddata:OFI tagged senddata failed
+**ofid_tsenddata %s %d %s %s:OFI tagged senddata failed (%s:%d:%s:%s)
+**ofid_tsendmsg:OFI tagged sendmsg failed
+**ofid_tsendmsg %s %d %s %s:OFI tagged sendmsg failed (%s:%d:%s:%s)
 **ofid_tinject:OFI tagged inject failed
 **ofid_tinject %s %d %s %s:OFI tagged inject failed (%s:%d:%s:%s)
+**ofid_tinjectdata:OFI tagged injectdata failed
+**ofid_tinjectdata %s %d %s %s:OFI tagged injectdata failed (%s:%d:%s:%s)
 **ofid_tsendsync:OFI tagged send sync failed
 **ofid_tsendsync %s %d %s %s:OFI tagged send sync failed (%s:%d:%s:%s)
 **ofid_trecv:OFI tagged recv failed
 **ofid_trecv %s %d %s %s:OFI tagged recv failed (%s:%d:%s:%s)
+**ofid_trecvmsg:OFI tagged recvmsg failed
+**ofid_trecvmsg %s %d %s %s:OFI tagged recvmsg failed (%s:%d:%s:%s)
 **ofid_trecvsync:OFI tagged recv sync failed
 **ofid_trecvsync %s %d %s %s:OFI tagged recv sync failed (%s:%d:%s:%s)
 **ofid_poll:OFI poll failed

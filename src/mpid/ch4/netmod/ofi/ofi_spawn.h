@@ -258,7 +258,6 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
     req[1].done            = MPIDI_OFI_PEEK_START;
     req[1].event_id        = MPIDI_OFI_EVENT_ACCEPT_PROBE;
     match_bits             = MPIDI_OFI_init_recvtag(&mask_bits,port_id,
-                                                            MPI_ANY_SOURCE,
                                                             MPI_ANY_TAG);
     match_bits            |= MPIDI_OFI_DYNPROC_SEND;
 
@@ -327,9 +326,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         MPID_Node_id_t  nodetblsz = sizeof(*my_node_table)*comm_ptr->local_size;
         my_node_table             = (MPID_Node_id_t *)MPL_malloc(nodetblsz);
 
-        match_bits                = MPIDI_OFI_init_sendtag(port_id,
-                                                                   comm_ptr->rank,
-                                                                   tag,MPIDI_OFI_DYNPROC_SEND);
+        match_bits                = MPIDI_OFI_init_sendtag(port_id, tag, MPIDI_OFI_DYNPROC_SEND);
 
         for(i=0; i<comm_ptr->local_size; i++) {
             size_t sz = MPIDI_Global.addrnamelen;
@@ -349,20 +346,22 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         req[0].event_id = MPIDI_OFI_EVENT_DYNPROC_DONE;
         req[1].done     = 0;
         req[1].event_id = MPIDI_OFI_EVENT_DYNPROC_DONE;
-        MPIDI_OFI_CALL_RETRY(fi_tsend(MPIDI_OFI_EP_TX_TAG(0),
+        MPIDI_OFI_CALL_RETRY(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0),
                                               my_addr_table,
                                               tblsz,
                                               NULL,
+                                              comm_ptr->rank,
                                               *conn,
                                               match_bits,
-                                              (void *) &req[0].context),tsend);
-        MPIDI_OFI_CALL_RETRY(fi_tsend(MPIDI_OFI_EP_TX_TAG(0),
+                                              (void *) &req[0].context),tsenddata);
+        MPIDI_OFI_CALL_RETRY(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0),
                                               my_node_table,
                                               nodetblsz,
                                               NULL,
+                                              comm_ptr->rank,
                                               *conn,
                                               match_bits,
-                                              (void *) &req[1].context),tsend);
+                                              (void *) &req[1].context),tsenddata);
 
         MPIDI_OFI_PROGRESS_WHILE(!req[0].done || !req[1].done);
 

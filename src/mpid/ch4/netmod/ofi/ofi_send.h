@@ -36,10 +36,10 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_lightweight(const void     *buf,
     uint64_t match_bits;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
-    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
-    MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz,
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, tag, 0);
+    MPIDI_OFI_CALL_RETRY(fi_tinjectdata(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz, comm->rank,
                                             MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
-                                            match_bits), tinject);
+                                            match_bits), tinjectdata);
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
     return mpi_errno;
@@ -66,10 +66,10 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_lightweight_request(const void     *buf,
     MPIR_Request *r;
     MPIDI_OFI_SEND_REQUEST_CREATE_LW(r);
     *request = r;
-    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
-    MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz,
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, tag, 0);
+    MPIDI_OFI_CALL_RETRY(fi_tinjectdata(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz, comm->rank,
                                             MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
-                                            match_bits), tinject);
+                                            match_bits), tinjectdata);
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
     return mpi_errno;
@@ -100,7 +100,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
     MPIDI_OFI_REQUEST_CREATE(sreq);
     sreq->kind = MPIR_REQUEST_KIND__SEND;
     *request = sreq;
-    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, type);
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, tag, type);
     MPIDI_OFI_REQUEST(sreq, event_id) = MPIDI_OFI_EVENT_SEND;
     MPIDI_OFI_REQUEST(sreq, datatype) = datatype;
     dtype_add_ref_if_not_builtin(datatype);
@@ -113,7 +113,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
         ackreq->event_id = MPIDI_OFI_EVENT_SSEND_ACK;
         ackreq->signal_req = sreq;
         MPIR_cc_incr(sreq->cc_ptr, &c);
-        ssend_match = MPIDI_OFI_init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
+        ssend_match = MPIDI_OFI_init_recvtag(&ssend_mask, comm->context_id + context_offset, tag);
         ssend_match |= MPIDI_OFI_SYNC_SEND_ACK;
         MPIDI_OFI_CALL_RETRY(fi_trecv(MPIDI_OFI_EP_RX_TAG(0),      /* endpoint    */
                                               NULL,              /* recvbuf     */
@@ -143,14 +143,14 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
         MPIDI_OFI_REQUEST(sreq, noncontig) = NULL;
 
     if(data_sz <= MPIDI_Global.max_buffered_send) {
-        MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), send_buf, data_sz,
-                                                MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG), match_bits), tinject);
+        MPIDI_OFI_CALL_RETRY(fi_tinjectdata(MPIDI_OFI_EP_TX_TAG(0), send_buf, data_sz, comm->rank,
+                                                MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG), match_bits), tinjectdata);
         MPIDI_OFI_send_event(NULL, sreq);
     } else if(data_sz <= MPIDI_Global.max_send)
-        MPIDI_OFI_CALL_RETRY(fi_tsend(MPIDI_OFI_EP_TX_TAG(0), send_buf,data_sz, NULL,
+        MPIDI_OFI_CALL_RETRY(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0), send_buf,data_sz, NULL, comm->rank,
                                               MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
                                               match_bits, (void *) &(MPIDI_OFI_REQUEST(sreq, context))),
-                                     tsend);
+                                              tsenddata);
     else if(unlikely(1)) {
         MPIDI_OFI_send_control_t ctrl;
         int c;
@@ -193,12 +193,13 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
         MPIR_Assert(cntr->counter != USHRT_MAX);
         MPIDI_OFI_REQUEST(sreq, util_comm) = comm;
         MPIDI_OFI_REQUEST(sreq, util_id)   = rank;
-        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tsend(MPIDI_OFI_EP_TX_TAG(0), send_buf,
+        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0), send_buf,
                                                      MPIDI_Global.max_send,
                                                      NULL,
+                                                     comm->rank,
                                                      MPIDI_OFI_comm_to_phys(comm, rank,MPIDI_OFI_API_TAG),
                                                      match_bits, (void *) &(MPIDI_OFI_REQUEST(sreq, context))),
-                                            tsend);
+                                            tsenddata);
         ctrl.type = MPIDI_OFI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
         MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq, FALSE));

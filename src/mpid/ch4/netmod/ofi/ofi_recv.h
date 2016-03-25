@@ -61,7 +61,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
         goto fn_exit;
     }
 
-    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, context_id, rank, tag);
+    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, context_id, tag);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_OFI_REQUEST(rreq, datatype) = datatype;

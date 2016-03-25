@@ -28,7 +28,7 @@ static inline int MPIDI_OFI_peek_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_OFI_REQUEST(rreq, util_id)  = MPIDI_OFI_PEEK_FOUND;
-    rreq->status.MPI_SOURCE = MPIDI_OFI_init_get_source(wc->tag);
+    rreq->status.MPI_SOURCE = wc->data;
     rreq->status.MPI_TAG    = MPIDI_OFI_init_get_tag(wc->tag);
     count                   = wc->len;
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
@@ -80,7 +80,7 @@ static inline int MPIDI_OFI_recv_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_RECV_EVENT);
 
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
-    rreq->status.MPI_SOURCE = MPIDI_OFI_init_get_source(wc->tag);
+    rreq->status.MPI_SOURCE = wc->data;
     rreq->status.MPI_TAG    = MPIDI_OFI_init_get_tag(wc->tag);
     count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
@@ -124,14 +124,14 @@ static inline int MPIDI_OFI_recv_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     /* If syncronous, ack and complete when the ack is done */
     if(unlikely(MPIDI_OFI_is_tag_sync(wc->tag))) {
         uint64_t ss_bits = MPIDI_OFI_init_sendtag(MPIDI_OFI_REQUEST(rreq, util_id),
-                                                          MPIDI_OFI_REQUEST(rreq, util_comm->rank),
                                                           rreq->status.MPI_TAG,
                                                           MPIDI_OFI_SYNC_SEND_ACK);
         MPIR_Comm *c = MPIDI_OFI_REQUEST(rreq, util_comm);
         int r = rreq->status.MPI_SOURCE;
-        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), NULL, 0,
-                                                       MPIDI_OFI_comm_to_phys(c, r, MPIDI_OFI_API_TAG),
-                                                       ss_bits), tsendsync);
+        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tinjectdata(MPIDI_OFI_EP_TX_TAG(0), NULL, 0,
+                                                   MPIDI_OFI_REQUEST(rreq, util_comm->rank),
+                                                   MPIDI_OFI_comm_to_phys(c, r, MPIDI_OFI_API_TAG),
+                                                   ss_bits), tsendsync);
 
     }
 
@@ -160,10 +160,10 @@ static inline int MPIDI_OFI_recv_huge_event(struct fi_cq_tagged_entry *wc, MPIR_
     /* Look up the receive sequence number and chunk queue */
     comm_ptr = MPIDI_OFI_REQUEST(rreq, util_comm);
     recv = (MPIDI_OFI_huge_recv_t *) MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
-                                                                          MPIDI_OFI_init_get_source(wc->tag));
+                                                          wc->data);
     if(recv == MPIDI_OFI_MAP_NOT_FOUND) {
         recv = (MPIDI_OFI_huge_recv_t *) MPL_calloc(sizeof(*recv), 1);
-        MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters, MPIDI_OFI_init_get_source(wc->tag), recv);
+        MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters, wc->data, recv);
     }
 
     recv->event_id = MPIDI_OFI_EVENT_GET_HUGE;
@@ -388,7 +388,7 @@ static inline int MPIDI_OFI_accept_probe_event(struct fi_cq_tagged_entry *wc,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIDI_OFI_dynamic_process_request_t *ctrl = (MPIDI_OFI_dynamic_process_request_t *)rreq;
-    ctrl->source = MPIDI_OFI_init_get_source(wc->tag);
+    ctrl->source = wc->data;
     ctrl->tag    = MPIDI_OFI_init_get_tag(wc->tag);
     ctrl->msglen = wc->len;
     ctrl->done   = MPIDI_OFI_PEEK_FOUND;

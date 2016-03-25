@@ -84,7 +84,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_OFI_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIR_Request)>=sizeof(MPIDI_OFI_win_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFI_gpid_t));
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIU_Context_id_t)*8 >= MPIDI_OFI_AM_CONTEXT_ID_BITS);
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIR_Context_id_t)*8 >= MPIDI_OFI_AM_CONTEXT_ID_BITS);
 
     *tag_ub = (1ULL << MPIDI_OFI_TAG_SHIFT) - 1;
 
@@ -113,6 +113,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     /*           Tagged: used to support tag matching, 2-sided                  */
     /*           RMA|Atomics:  supports MPI 1-sided                             */
     /*           MSG|MULTI_RECV:  Supports synchronization protocol for 1-sided */
+    /*           FI_DIRECTED_RECV: Support not putting the source in the match  */
+    /*                             bits                                         */
     /*           We expect to register all memory up front for use with this    */
     /*           endpoint, so the netmod requires dynamic memory regions        */
     /* ------------------------------------------------------------------------ */
@@ -137,6 +139,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
         hints->caps |= FI_MSG;                   /* Message Queue apis      */
         hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
     }
+
+    hints->caps |= FI_DIRECTED_RECV;         /* Match source address    */
 
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
