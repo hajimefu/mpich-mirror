@@ -266,7 +266,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPID_Request *rreq)
 
     if(ret == 0) {
         while((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPIR_cc_is_complete(&rreq->cc))) {
-            if((mpi_errno = MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0)) != MPI_SUCCESS)
+            if((mpi_errno = MPIDI_CH4_NM_progress(&MPIDI_CH4_NMI_OFI_REQUEST(rreq, context), 0)) != MPI_SUCCESS)
                 goto fn_exit;
         }
 
