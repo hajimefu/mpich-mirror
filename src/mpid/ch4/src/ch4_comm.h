@@ -13,8 +13,6 @@
 
 #include "ch4_impl.h"
 
-extern int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **newcomm_ptr);
-
 __CH4_INLINE__ int MPIDI_Comm_AS_enabled(MPID_Comm * comm)
 {
     MPIU_Assert(0);

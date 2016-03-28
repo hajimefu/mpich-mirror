@@ -14,11 +14,6 @@
 #include "ch4_types.h"
 #include <mpidch4.h>
 
-/* Forward declarations used to resolve dependencies in inline builds */
-/* Any MPIR_XXX functions used in CH4 need to have prototypes here    */
-/* Todo:  Is this really the right place for the forward declarations */
-int MPIR_Info_get_impl(MPID_Info *info_ptr, const char *key, int valuelen, char *value, int *flag);
-
 /* Static inlines */
 static inline int MPIDI_CH4R_get_source(uint64_t match_bits)
 {
