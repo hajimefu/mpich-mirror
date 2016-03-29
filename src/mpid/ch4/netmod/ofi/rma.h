@@ -17,14 +17,6 @@
 #define MPIDI_OFI_QUERY_FETCH_ATOMIC_COUNT   1
 #define MPIDI_OFI_QUERY_COMPARE_ATOMIC_COUNT 2
 
-#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-#define MPIDI_OFI_CONDITIONAL_CNTR_INCR()
-#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.cntr++
-#else
-#define MPIDI_OFI_CONDITIONAL_CNTR_INCR() MPIDI_Global.cntr++
-#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.cntr++
-#endif
-
 #define MPIDI_OFI_INIT_CHUNK_CONTEXT(sigreq)                    \
     do {                                                                \
         if(sigreq)                                                      \

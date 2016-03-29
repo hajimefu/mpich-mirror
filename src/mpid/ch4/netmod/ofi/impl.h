@@ -264,6 +264,14 @@ static inline uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
     return MPIDI_OFI_WIN(w).mr_key;
 }
 
+#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+#define MPIDI_OFI_CONDITIONAL_CNTR_INCR()
+#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.cntr++
+#else
+#define MPIDI_OFI_CONDITIONAL_CNTR_INCR() MPIDI_Global.cntr++
+#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.cntr++
+#endif
+
 /*  Prototypes */
 
 /* Common Utility functions used by the
