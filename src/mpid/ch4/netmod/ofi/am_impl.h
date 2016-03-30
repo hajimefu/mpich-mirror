@@ -294,7 +294,6 @@ static inline int MPIDI_CH4_NMI_OFI_send_am_long(int           rank,
     MPIU_Assert(handler_id       < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
     MPIU_Assert(am_hdr_sz        < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
     MPIU_Assert(data_sz          < (1ULL << MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS));
-    MPIU_Assert(comm->context_id < (1    << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
     MPIU_Assert((uint64_t)comm->rank       < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_hdr             = &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, msg_hdr);
@@ -382,7 +381,6 @@ static inline int MPIDI_CH4_NMI_OFI_send_am_short(int           rank,
     MPIU_Assert(handler_id           < (1    << MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS));
     MPIU_Assert(am_hdr_sz            < (1ULL << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS));
     MPIU_Assert((uint64_t)count      < (1ULL << MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS));
-    MPIU_Assert(comm->context_id     < (1    << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
     MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_hdr = &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, msg_hdr);
