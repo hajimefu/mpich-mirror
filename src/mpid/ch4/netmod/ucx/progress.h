@@ -116,7 +116,6 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     int mpi_errno = MPI_SUCCESS;
     static int am_repost_idx = 0;
 
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
     ucp_worker_progress(MPIDI_CH4_NMI_UCX_global.worker);
 
     while (ucp_request_is_completed(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx])) {
