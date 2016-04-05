@@ -34,7 +34,7 @@
 #include <unistd.h>
 
 #include "mpiimpl.h"
-#include "mpid_dataloop.h"
+#include "mpid_datatype_fallback.h"
 #include <pami.h>
 
 /* provides "pre" typedefs and such for NBC scheduling mechanism */
@@ -87,8 +87,8 @@ int MPID_Wtime_init(void);
 #else
 #define MPID_DEV_DATATYPE_DECL void *device_datatype;
 #endif
-#define MPID_Dev_datatype_commit_hook(ptr) MPIDI_PAMI_datatype_commit_hook(ptr)
-#define MPID_Dev_datatype_destroy_hook(ptr) MPIDI_PAMI_datatype_destroy_hook(ptr)
-#define MPID_Dev_datatype_dup_hook(ptr) MPIDI_PAMI_datatype_dup_hook(ptr)
+#define MPIDU_Dev_datatype_commit_hook(ptr) MPIDI_PAMI_datatype_commit_hook(ptr)
+#define MPIDU_Dev_datatype_destroy_hook(ptr) MPIDI_PAMI_datatype_destroy_hook(ptr)
+#define MPIDU_Dev_datatype_dup_hook(ptr) MPIDI_PAMI_datatype_dup_hook(ptr)
 
 #endif
