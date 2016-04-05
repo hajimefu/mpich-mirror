@@ -15,6 +15,7 @@
 #include <mpi.h>
 
 struct MPID_Request;
+struct MPIDU_Segment;
 
 typedef struct {
     struct MPID_Request *next;
@@ -28,7 +29,7 @@ typedef struct {
     int                  type;
     int                  user_count;
     MPI_Datatype         datatype;
-    struct MPID_Segment *segment_ptr;
+    struct MPIDU_Segment *segment_ptr;
     size_t               segment_first;
     size_t               segment_size;
 } MPIDI_CH4_SHMI_SIMPLE_Request_t;
