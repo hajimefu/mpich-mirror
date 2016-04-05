@@ -158,8 +158,8 @@ static inline void MPIDI_CH4_NMI_OFI_Win_datatype_map(MPIDI_CH4_NMI_OFI_Win_data
 
         MPID_Segment seg;
         DLOOP_Offset last = dt->pointer->size*dt->count;
-        MPID_Segment_init(NULL, dt->count, dt->type, &seg, 0);
-        MPID_Segment_pack_vector(&seg, 0, &last, dt->map, &dt->num_contig);
+        MPIDU_Segment_init(NULL, dt->count, dt->type, &seg, 0);
+        MPIDU_Segment_pack_vector(&seg, 0, &last, dt->map, &dt->num_contig);
         MPIU_Assert((unsigned)dt->num_contig <= map_size);
     }
 

@@ -2087,8 +2087,6 @@ typedef struct PreDefined_attrs {
     int wtime_is_global; /* Wtime is global over processes in COMM_WORLD */
 } PreDefined_attrs;
 
-struct MPID_Datatype;
-
 typedef struct MPICH_PerProcess_t {
     OPA_int_t mpich_state; /* State of MPICH. Use OPA_int_t to make MPI_Initialized() etc.
                               thread-safe per MPI-3.1.  See MPI-Forum ticket 357 */

@@ -15,12 +15,20 @@
 #include <sys/types.h>
 #endif
 
-#include "mpid_dataloop.h"
+#include "mpidu_dataloop.h"
 #include "mpid_thread.h"
 #include "mpid_sched.h"
 #include "mpid_timers_fallback.h"
 #include "netmodpre.h"
 #include "mpl_uthash.h"
+
+typedef struct {
+    union {
+        MPIDI_CH4_NETMOD_DT_DECL
+    }netmod;
+} MPIDI_Devdt_t;
+#define MPID_DEV_DATATYPE_DECL   MPIDI_Devdt_t   dev;
+#include "mpid_datatype_fallback.h"
 
 #define MPID_PROGRESS_STATE_DECL
 #define HAVE_GPID_ROUTINES
@@ -327,11 +335,6 @@ typedef struct MPIDI_Devcomm_t {
 } MPIDI_Devcomm_t;
 #define MPIDI_CH4R_COMM(comm,field) ((comm)->dev.ch4.ch4r).field
 
-typedef struct {
-    union {
-        MPIDI_CH4_NETMOD_DT_DECL
-    }netmod;
-} MPIDI_Devdt_t;
 
 typedef struct {
     uint64_t pad[64 / 8];
@@ -340,7 +343,6 @@ typedef struct {
 #define MPID_DEV_REQUEST_DECL    MPIDI_Devreq_t  dev;
 #define MPID_DEV_WIN_DECL        MPIDI_Devwin_t  dev;
 #define MPID_DEV_COMM_DECL       MPIDI_Devcomm_t dev;
-#define MPID_DEV_DATATYPE_DECL   MPIDI_Devdt_t   dev;
 #define MPID_DEV_GPID_DECL       MPIDI_Devgpid_t dev;
 
 #define MPID_Progress_register_hook(fn_, id_) MPID_Progress_register(fn_, id_)

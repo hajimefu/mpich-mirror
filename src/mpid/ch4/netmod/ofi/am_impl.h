@@ -478,18 +478,18 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
 
     if(!dt_contig) {
         size_t segment_first;
-        struct MPID_Segment *segment_ptr;
-        segment_ptr = MPID_Segment_alloc();
+        struct MPIDU_Segment *segment_ptr;
+        segment_ptr = MPIDU_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
-                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send MPID_Segment_alloc");
-        MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
+                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send MPIDU_Segment_alloc");
+        MPIDU_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
         last = data_sz;
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = (char *) MPL_malloc(data_sz);
         MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
-        MPID_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
-        MPID_Segment_free(segment_ptr);
+        MPIDU_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
+        MPIDU_Segment_free(segment_ptr);
         send_buf = (char *) MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer;
     } else {
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;

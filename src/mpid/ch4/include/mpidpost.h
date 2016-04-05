@@ -11,7 +11,7 @@
 #ifndef MPIDPOST_H_INCLUDED
 #define MPIDPOST_H_INCLUDED
 
-#include "mpid_datatype.h"
+#include "mpidu_datatype.h"
 #include "mpidch4.h"
 
 #endif /* MPIDPOST_H_INCLUDED */

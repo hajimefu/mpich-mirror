@@ -580,14 +580,14 @@ static inline int MPIDI_CH4R_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     if (!dt_contig) {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
-                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
-        MPID_Segment_init(buf, count, datatype, segment_ptr, 0);
+                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPIDU_Segment_alloc");
+        MPIDU_Segment_init(buf, count, datatype, segment_ptr, 0);
 
         last = count * dt_sz;
-        MPID_Segment_unpack(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, buffer));
-        MPID_Segment_free(segment_ptr);
+        MPIDU_Segment_unpack(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, buffer));
+        MPIDU_Segment_free(segment_ptr);
         if (last != (MPI_Aint)(count * dt_sz)) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
@@ -692,15 +692,15 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
     MPIDI_CH4R_REQUEST(rreq, count) = count;
 
     if (!dt_contig) {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
-                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPID_Segment_alloc");
-        MPID_Segment_init(MPIDI_CH4R_REQUEST(match_req, buffer), count,
+                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv MPIDU_Segment_alloc");
+        MPIDU_Segment_init(MPIDI_CH4R_REQUEST(match_req, buffer), count,
                           MPIDI_CH4R_REQUEST(match_req, datatype), segment_ptr, 0);
 
         last = count * dt_sz;
-        MPID_Segment_unpack(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, buffer));
-        MPID_Segment_free(segment_ptr);
+        MPIDU_Segment_unpack(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, buffer));
+        MPIDU_Segment_free(segment_ptr);
         if (last != (MPI_Aint)(count * dt_sz)) {
             mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
                                              __FUNCTION__, __LINE__,
@@ -1024,7 +1024,7 @@ static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count
         void *curr_loc;
         int accumulated_count;
 
-        segp = MPID_Segment_alloc();
+        segp = MPIDU_Segment_alloc();
         /* --BEGIN ERROR HANDLING-- */
         if (!segp) {
             mpi_errno =
@@ -1034,7 +1034,7 @@ static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count
             return mpi_errno;
         }
         /* --END ERROR HANDLING-- */
-        MPID_Segment_init(NULL, target_count, target_dtp, segp, 0);
+        MPIDU_Segment_init(NULL, target_count, target_dtp, segp, 0);
         first = stream_offset;
         last = first + source_count * source_dtp_size;
 
@@ -1053,7 +1053,7 @@ static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count
         }
         /* --END ERROR HANDLING-- */
 
-        MPID_Segment_pack_vector(segp, first, &last, dloop_vec, &vec_len);
+        MPIDU_Segment_pack_vector(segp, first, &last, dloop_vec, &vec_len);
 
         type = dtp->basic_type;
         MPIU_Assert(type != MPI_DATATYPE_NULL);
@@ -1094,7 +1094,7 @@ static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count
             accumulated_count += count;
         }
 
-        MPID_Segment_free(segp);
+        MPIDU_Segment_free(segp);
         MPL_free(dloop_vec);
     }
 
@@ -1328,22 +1328,22 @@ static inline int MPIDI_CH4I_do_send_target_handler(uint64_t reply_token,
         *data = (char *) MPIDI_CH4R_REQUEST(rreq, buffer) + dt_true_lb;
     }
     else {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIU_Assert(segment_ptr);
 
-        MPID_Segment_init(MPIDI_CH4R_REQUEST(rreq, buffer),
+        MPIDU_Segment_init(MPIDI_CH4R_REQUEST(rreq, buffer),
                           MPIDI_CH4R_REQUEST(rreq, count),
                           MPIDI_CH4R_REQUEST(rreq, datatype), segment_ptr, 0);
 
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
         n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIDI_CH4R_REQUEST(rreq, req->iov) = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIDI_CH4R_REQUEST(rreq, req->iov));
 
         last = data_sz;
-        MPID_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
+        MPIDU_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
         MPIU_Assert(last == (MPI_Aint)data_sz);
         *data = MPIDI_CH4R_REQUEST(rreq, req->iov);
         *p_data_sz = n_iov;
@@ -1747,23 +1747,23 @@ static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr,
         *data = (char *) MPIDI_CH4R_REQUEST(areq, req->areq.result_addr) + dt_true_lb;
     }
     else {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIU_Assert(segment_ptr);
 
-        MPID_Segment_init(MPIDI_CH4R_REQUEST(areq, req->areq.result_addr),
+        MPIDU_Segment_init(MPIDI_CH4R_REQUEST(areq, req->areq.result_addr),
                           MPIDI_CH4R_REQUEST(areq, req->areq.result_count),
                           MPIDI_CH4R_REQUEST(areq, req->areq.result_datatype),
                           segment_ptr, 0);
 
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
         n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIDI_CH4R_REQUEST(areq, req->iov) = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIDI_CH4R_REQUEST(areq, req->iov));
 
         last = data_sz;
-        MPID_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(areq, req->iov), &n_iov);
+        MPIDU_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(areq, req->iov), &n_iov);
         MPIU_Assert(last == (MPI_Aint)data_sz);
         *data = MPIDI_CH4R_REQUEST(areq, req->iov);
         *p_data_sz = n_iov;
@@ -2147,20 +2147,20 @@ static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
         *data = (char *) (msg_hdr->addr + base + dt_true_lb);
     }
     else {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIU_Assert(segment_ptr);
 
-        MPID_Segment_init((void *) (msg_hdr->addr + base), msg_hdr->count, msg_hdr->datatype,
+        MPIDU_Segment_init((void *) (msg_hdr->addr + base), msg_hdr->count, msg_hdr->datatype,
                           segment_ptr, 0);
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
         n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIDI_CH4R_REQUEST(rreq, req->iov) = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIDI_CH4R_REQUEST(rreq, req->iov));
 
         last = data_sz;
-        MPID_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
+        MPIDU_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
         MPIU_Assert(last == (MPI_Aint)data_sz);
         *data = MPIDI_CH4R_REQUEST(rreq, req->iov);
         *p_data_sz = n_iov;
@@ -2753,22 +2753,22 @@ static inline int MPIDI_CH4R_get_ack_target_handler(void *am_hdr,
         *data = (char *) (MPIDI_CH4R_REQUEST(rreq, req->greq.addr) + dt_true_lb);
     }
     else {
-        segment_ptr = MPID_Segment_alloc();
+        segment_ptr = MPIDU_Segment_alloc();
         MPIU_Assert(segment_ptr);
 
-        MPID_Segment_init((void *)MPIDI_CH4R_REQUEST(rreq, req->greq.addr),
+        MPIDU_Segment_init((void *)MPIDI_CH4R_REQUEST(rreq, req->greq.addr),
                           MPIDI_CH4R_REQUEST(rreq, req->greq.count),
                           MPIDI_CH4R_REQUEST(rreq, req->greq.datatype),
                           segment_ptr, 0);
         last = data_sz;
-        MPID_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
+        MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
         n_iov = (int) num_iov;
         MPIU_Assert(n_iov > 0);
         MPIDI_CH4R_REQUEST(rreq, req->iov) = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIDI_CH4R_REQUEST(rreq, req->iov));
 
         last = data_sz;
-        MPID_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
+        MPIDU_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
         MPIU_Assert(last == (MPI_Aint)data_sz);
         *data = MPIDI_CH4R_REQUEST(rreq, req->iov);
         *p_data_sz = n_iov;

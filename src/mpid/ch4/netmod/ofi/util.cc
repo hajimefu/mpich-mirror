@@ -20,6 +20,7 @@
 #include <mpidimpl.h>
 #include "impl.h"
 #include "events.h"
+
 EXTERN_C_BEGIN
 
 #undef FUNCNAME
