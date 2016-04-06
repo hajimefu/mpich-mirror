@@ -320,6 +320,7 @@ typedef struct {
     int             huge_rma_shift;
     int             context_shift;
     size_t          iov_limit;
+    size_t          rma_iov_limit;
     MPID_Node_id_t *node_map;
     MPID_Node_id_t  max_node_id;
 

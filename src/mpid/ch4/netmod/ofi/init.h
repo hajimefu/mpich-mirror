@@ -190,6 +190,7 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     MPIDI_Global.max_send           = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.max_write          = prov_use->ep_attr->max_msg_size;
     MPIDI_Global.iov_limit          = MIN(prov_use->tx_attr->iov_limit,MPIDI_CH4_NMI_OFI_IOV_MAX);
+    MPIDI_Global.rma_iov_limit      = MIN(prov_use->tx_attr->rma_iov_limit,MPIDI_CH4_NMI_OFI_IOV_MAX);
     MPIDI_Global.max_mr_key_size    = prov_use->domain_attr->mr_key_size;
 
     if(MPIDI_Global.max_mr_key_size >= 8) {
