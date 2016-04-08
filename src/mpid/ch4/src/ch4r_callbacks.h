@@ -1335,6 +1335,10 @@ static inline int MPIDI_CH4I_do_send_target_handler(uint64_t reply_token,
                           MPIDI_CH4R_REQUEST(rreq, count),
                           MPIDI_CH4R_REQUEST(rreq, datatype), segment_ptr, 0);
 
+        if(*p_data_sz > data_sz) {
+            rreq->status.MPI_ERROR = MPI_ERR_TRUNCATE;
+            *p_data_sz = data_sz;
+        }
         last = data_sz;
         MPIDU_Segment_count_contig_blocks(segment_ptr, 0, &last, &num_iov);
         n_iov = (int) num_iov;
@@ -1342,9 +1346,11 @@ static inline int MPIDI_CH4I_do_send_target_handler(uint64_t reply_token,
         MPIDI_CH4R_REQUEST(rreq, req->iov) = (struct iovec *) MPL_malloc(n_iov * sizeof(struct iovec));
         MPIU_Assert(MPIDI_CH4R_REQUEST(rreq, req->iov));
 
-        last = data_sz;
+        last = *p_data_sz;
         MPIDU_Segment_pack_vector(segment_ptr, 0, &last, MPIDI_CH4R_REQUEST(rreq, req->iov), &n_iov);
-        MPIU_Assert(last == (MPI_Aint)data_sz);
+        if(last != (MPI_Aint)*p_data_sz) {
+            rreq->status.MPI_ERROR = MPI_ERR_TYPE;
+        }
         *data = MPIDI_CH4R_REQUEST(rreq, req->iov);
         *p_data_sz = n_iov;
         MPIDI_CH4R_REQUEST(rreq, req->status) |= MPIDI_CH4R_REQ_RCV_NON_CONTIG;
