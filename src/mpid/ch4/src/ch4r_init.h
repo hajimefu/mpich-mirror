@@ -199,7 +199,7 @@ __CH4_INLINE__ int MPIDI_CH4R_init(MPID_Comm * comm_world, MPID_Comm * comm_self
                                              &MPIDI_CH4R_get_acc_ack_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPIDI_CH4_NM_reg_hdr_handler(MPIDI_CH4R_WIN_CTRL,
+    mpi_errno = MPIDI_CH4_NM_reg_hdr_handler(MPIDI_CH4U_WIN_CTRL,
                                              NULL,
                                              &MPIDI_CH4R_win_ctrl_target_handler);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -261,7 +261,7 @@ __CH4_INLINE__ void MPIDI_CH4R_finalize()
     MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
     MPIDI_CH4_Global.is_ch4r_initialized = 0;
-    MPL_HASH_CLEAR(dev.ch4r.hash_handle, MPIDI_CH4_Global.win_hash);
+    MPL_HASH_CLEAR(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash);
     MPIDI_CH4R_destroy_buf_pool(MPIDI_CH4_Global.buf_pool);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
 }

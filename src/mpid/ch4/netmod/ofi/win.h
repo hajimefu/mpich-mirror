@@ -28,7 +28,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
     uint32_t        first;
     MPIR_Errflag_t  errflag      = MPIR_ERR_NONE;
     MPID_Comm      *comm_ptr     = win->comm_ptr;
-    MPIDI_CH4R_win_info_t *my_winfo = NULL;
+    MPIDI_CH4U_win_info_t *my_winfo = NULL;
     int raw_prefix,idx,bitpos;
     unsigned gen_id;
 
@@ -70,18 +70,18 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
                                      &MPIDI_CH4_NMI_OFI_WIN(win)->mr,                  /* Out: memregion object    */
                                      NULL), mr_reg);                     /* In:  context             */
 
-    my_winfo = (MPIDI_CH4R_win_info_t *)WINFO(win,0);
+    my_winfo = (MPIDI_CH4U_win_info_t *)WINFO(win,0);
     my_winfo->base_addr = (uint64_t) base;
     my_winfo->disp_unit = disp_unit;
 
-    my_winfo = (MPIDI_CH4R_win_info_t *)WINFO(win,comm_ptr->rank);
+    my_winfo = (MPIDI_CH4U_win_info_t *)WINFO(win,comm_ptr->rank);
     my_winfo->base_addr = (uint64_t) base;
     my_winfo->disp_unit = disp_unit;
     mpi_errno        = MPIR_Allgather_impl(MPI_IN_PLACE,
                                            0,
                                            MPI_DATATYPE_NULL,
-                                           MPIDI_CH4R_WIN(win, info_table),
-                                           sizeof(MPIDI_CH4R_win_info_t),
+                                           MPIDI_CH4U_WIN(win, info_table),
+                                           sizeof(MPIDI_CH4U_win_info_t),
                                            MPI_BYTE,
                                            comm_ptr,
                                            &errflag);
@@ -98,8 +98,8 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
         }
 
         if(same_disp) {
-            MPL_free(MPIDI_CH4R_WIN(win, info_table));
-            MPIDI_CH4R_WIN(win, info_table) = NULL;
+            MPL_free(MPIDI_CH4U_WIN(win, info_table));
+            MPIDI_CH4U_WIN(win, info_table) = NULL;
         }
     }
 
@@ -131,7 +131,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_CH4_NMI_OFI_Win_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_CH4_NMI_OFI_Datatype_t));
 
-    /* Note: MPIDI_CH4R_win_init will interpret the info object */
+    /* Note: MPIDI_CH4U_win_init will interpret the info object */
     mpi_errno = MPIDI_CH4R_win_init(length, disp_unit, &win, info, comm_ptr, create_flavor, model);
     MPIR_ERR_CHKANDSTMT(mpi_errno != MPI_SUCCESS,
                         mpi_errno,
@@ -197,7 +197,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
         }
     }
 
-    while(OPA_load_int(&MPIDI_CH4R_WIN(win, outstanding_ops)) != 0)
+    while(OPA_load_int(&MPIDI_CH4U_WIN(win, outstanding_ops)) != 0)
         MPIDI_CH4_NMI_OFI_PROGRESS();
 
     r = MPIDI_CH4_NMI_OFI_WIN(win)->syncQ;
@@ -249,20 +249,20 @@ static inline int MPIDI_CH4_NM_win_start(MPID_Group *group, int assert, MPID_Win
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_START);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_START);
 
-    MPIDI_CH4R_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
 
     MPIR_Group_add_ref(group);
 
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(group->size != (int)MPIDI_CH4R_WIN(win, sync).pw.count);
+    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(group->size != (int)MPIDI_CH4U_WIN(win, sync).pw.count);
 
-    MPIDI_CH4R_WIN(win, sync).pw.count = 0;
+    MPIDI_CH4U_WIN(win, sync).pw.count = 0;
 
-    MPIR_ERR_CHKANDJUMP((MPIDI_CH4R_WIN(win, sync).sc.group != NULL),
+    MPIR_ERR_CHKANDJUMP((MPIDI_CH4U_WIN(win, sync).sc.group != NULL),
                         mpi_errno,
                         MPI_ERR_GROUP,
                         "**group");
-    MPIDI_CH4R_WIN(win, sync).sc.group          = group;
-    MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_START;
+    MPIDI_CH4U_WIN(win, sync).sc.group          = group;
+    MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_START;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_START);
@@ -283,12 +283,12 @@ static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
 
-    MPIDI_CH4R_EPOCH_START_CHECK2(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_START_CHECK2(win,mpi_errno,goto fn_fail);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
     MPID_Group *group;
-    group = MPIDI_CH4R_WIN(win, sync).sc.group;
+    group = MPIDI_CH4U_WIN(win, sync).sc.group;
     MPIU_Assert(group != NULL);
     MPIDI_CH4_NMI_OFI_Win_control_t msg;
     msg.type = MPIDI_CH4_NMI_OFI_CTRL_COMPLETE;
@@ -304,10 +304,10 @@ static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
                                 goto fn_fail, "**rmasync");
     }
 
-    MPIDI_CH4R_EPOCH_TARGET_EVENT(win);
+    MPIDI_CH4U_EPOCH_TARGET_EVENT(win);
 
-    MPIR_Group_release(MPIDI_CH4R_WIN(win, sync).sc.group);
-    MPIDI_CH4R_WIN(win, sync).sc.group = NULL;
+    MPIR_Group_release(MPIDI_CH4U_WIN(win, sync).sc.group);
+    MPIDI_CH4U_WIN(win, sync).sc.group = NULL;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
@@ -328,14 +328,14 @@ static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_POST);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_POST);
 
-    MPIDI_CH4R_EPOCH_POST_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_POST_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIR_Group_add_ref(group);
-    MPIR_ERR_CHKANDJUMP((MPIDI_CH4R_WIN(win, sync).pw.group != NULL),
+    MPIR_ERR_CHKANDJUMP((MPIDI_CH4U_WIN(win, sync).pw.group != NULL),
                         mpi_errno, MPI_ERR_GROUP,
                         "**group");
 
-    MPIDI_CH4R_WIN(win, sync).pw.group = group;
+    MPIDI_CH4U_WIN(win, sync).pw.group = group;
     MPIU_Assert(group != NULL);
 
     msg.type = MPIDI_CH4_NMI_OFI_CTRL_POST;
@@ -349,7 +349,7 @@ static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win 
                                 goto fn_fail, "**rmasync");
     }
 
-    MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_POST;
+    MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_POST;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_POST);
@@ -369,19 +369,19 @@ static inline int MPIDI_CH4_NM_win_wait(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_WAIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_WAIT);
 
-    MPIDI_CH4R_EPOCH_TARGET_CHECK(win,MPIDI_CH4R_EPOTYPE_POST,mpi_errno,return mpi_errno);
+    MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
     MPID_Group *group;
-    group = MPIDI_CH4R_WIN(win, sync).pw.group;
+    group = MPIDI_CH4U_WIN(win, sync).pw.group;
 
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(group->size != (int)MPIDI_CH4R_WIN(win, sync).sc.count);
+    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(group->size != (int)MPIDI_CH4U_WIN(win, sync).sc.count);
 
-    MPIDI_CH4R_WIN(win, sync).sc.count = 0;
-    MPIDI_CH4R_WIN(win, sync).pw.group = NULL;
+    MPIDI_CH4U_WIN(win, sync).sc.count = 0;
+    MPIDI_CH4U_WIN(win, sync).pw.group = NULL;
 
     MPIR_Group_release(group);
 
-    MPIDI_CH4R_EPOCH_ORIGIN_EVENT(win);
+    MPIDI_CH4U_EPOCH_ORIGIN_EVENT(win);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_WAIT);
@@ -401,17 +401,17 @@ static inline int MPIDI_CH4_NM_win_test(MPID_Win *win, int *flag)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_TEST);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_TEST);
 
-    MPIDI_CH4R_EPOCH_TARGET_CHECK(win,MPIDI_CH4R_EPOTYPE_POST,mpi_errno,return mpi_errno);
+    MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
     MPID_Group *group;
-    group = MPIDI_CH4R_WIN(win, sync).pw.group;
+    group = MPIDI_CH4U_WIN(win, sync).pw.group;
 
-    if(group->size == (int)MPIDI_CH4R_WIN(win, sync).sc.count) {
-        MPIDI_CH4R_WIN(win, sync).sc.count = 0;
-        MPIDI_CH4R_WIN(win, sync).pw.group = NULL;
+    if(group->size == (int)MPIDI_CH4U_WIN(win, sync).sc.count) {
+        MPIDI_CH4U_WIN(win, sync).sc.count = 0;
+        MPIDI_CH4U_WIN(win, sync).pw.group = NULL;
         *flag          = 1;
         MPIR_Group_release(group);
-        MPIDI_CH4R_EPOCH_ORIGIN_EVENT(win);
+        MPIDI_CH4U_EPOCH_ORIGIN_EVENT(win);
     } else {
         MPIDI_CH4_NMI_OFI_PROGRESS();
         *flag=0;
@@ -435,8 +435,8 @@ static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPI
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK);
 
-    MPIDI_CH4R_win_sync_lock *slock = &MPIDI_CH4R_WIN(win, sync).lock;
-    MPIDI_CH4R_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_win_sync_lock *slock = &MPIDI_CH4U_WIN(win, sync).lock;
+    MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
 
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
@@ -454,7 +454,7 @@ static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPI
     MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(!slock->remote.locked);
 
 fn_exit0:
-    MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_LOCK;
+    MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_LOCK;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK);
@@ -473,7 +473,7 @@ static inline int MPIDI_CH4_NM_win_unlock(int rank, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
 
-    MPIDI_CH4R_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4R_EPOTYPE_LOCK, mpi_errno, return mpi_errno);
+    MPIDI_CH4U_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4U_EPOTYPE_LOCK, mpi_errno, return mpi_errno);
 
     if(rank == MPI_PROC_NULL) goto fn_exit0;
 
@@ -487,10 +487,10 @@ static inline int MPIDI_CH4_NM_win_unlock(int rank, MPID_Win *win)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
 
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(MPIDI_CH4R_WIN(win, sync).lock.remote.locked);
+    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(MPIDI_CH4U_WIN(win, sync).lock.remote.locked);
 fn_exit0:
-    MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_NONE;
-    MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_NONE;
+    MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
+    MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
@@ -535,7 +535,7 @@ static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FREE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FREE);
 
-    MPIDI_CH4R_EPOCH_FREE_CHECK(win,mpi_errno,return mpi_errno);
+    MPIDI_CH4U_EPOCH_FREE_CHECK(win,mpi_errno,return mpi_errno);
 
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
 
@@ -567,11 +567,11 @@ static inline int MPIDI_CH4_NM_win_fence(int massert, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FENCE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FENCE);
 
-    MPIDI_CH4R_EPOCH_FENCE_CHECK(win, mpi_errno, goto fn_fail);
+    MPIDI_CH4U_EPOCH_FENCE_CHECK(win, mpi_errno, goto fn_fail);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
-    MPIDI_CH4R_EPOCH_FENCE_EVENT(win,massert);
+    MPIDI_CH4U_EPOCH_FENCE_EVENT(win,massert);
 
     /*
       We always make a barrier even if MPI_MODE_NOPRECEDE is specified.
@@ -685,8 +685,8 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                            MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
 
     win                   = *win_ptr;
-    MPIDI_CH4R_WIN(win, sizes) = (MPI_Aint *)MPL_malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
-    sizes                 = MPIDI_CH4R_WIN(win, sizes);
+    MPIDI_CH4U_WIN(win, sizes) = (MPI_Aint *)MPL_malloc(sizeof(MPI_Aint)*comm_ptr->local_size);
+    sizes                 = MPIDI_CH4U_WIN(win, sizes);
     sizes[comm_ptr->rank] = size;
     mpi_errno             = MPIR_Allgather_impl(MPI_IN_PLACE,
                                                 0,
@@ -764,8 +764,8 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
 
         if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
-        MPIDI_CH4R_WIN(win, mmap_addr) = map_ptr;
-        MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
+        MPIDI_CH4U_WIN(win, mmap_addr) = map_ptr;
+        MPIDI_CH4U_WIN(win, mmap_sz)   = mapsize;
     } else {
         mpi_errno = MPIR_Bcast_impl(&map_ptr,1,MPI_UNSIGNED_LONG,
                                     0,comm_ptr,&errflag);
@@ -781,8 +781,8 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                        PROT_READ|PROT_WRITE,
                        MAP_SHARED|MAP_FIXED,
                        fd, 0);
-        MPIDI_CH4R_WIN(win, mmap_addr) = map_ptr;
-        MPIDI_CH4R_WIN(win, mmap_sz)   = mapsize;
+        MPIDI_CH4U_WIN(win, mmap_addr) = map_ptr;
+        MPIDI_CH4U_WIN(win, mmap_sz)   = mapsize;
 
         if(map_ptr == NULL || map_ptr == MAP_FAILED) {
             close(fd);
@@ -862,7 +862,7 @@ static inline int MPIDI_CH4_NM_win_shared_query(MPID_Win *win,
         offset = 0;
 
     *(void **)baseptr = MPIDI_CH4_NMI_OFI_WINFO_BASE_FORCE(win, offset);
-    *size             = MPIDI_CH4R_WIN(win, sizes)[offset];
+    *size             = MPIDI_CH4U_WIN(win, sizes)[offset];
     *disp_unit        = MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(win,offset);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
@@ -927,7 +927,7 @@ static inline int MPIDI_CH4_NM_win_flush(int rank, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
 
-    MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
@@ -948,7 +948,7 @@ static inline int MPIDI_CH4_NM_win_flush_local_all(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
 
-    MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
 fn_exit:
@@ -968,15 +968,15 @@ static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
     int i;
-    MPIDI_CH4R_winLock_info *lockQ;
+    MPIDI_CH4U_win_lock_info *lockQ;
 
-    MPIDI_CH4R_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4R_EPOTYPE_LOCK_ALL, mpi_errno, return mpi_errno);
+    MPIDI_CH4U_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4U_EPOTYPE_LOCK_ALL, mpi_errno, return mpi_errno);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
-    MPIU_Assert(MPIDI_CH4R_WIN(win, lockQ) != NULL);
+    MPIU_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
 
-    lockQ = (MPIDI_CH4R_winLock_info *) MPIDI_CH4R_WIN(win, lockQ);
+    lockQ = (MPIDI_CH4U_win_lock_info *) MPIDI_CH4U_WIN(win, lockQ);
 
     for(i = 0; i < win->comm_ptr->local_size; i++) {
         MPIDI_CH4_NMI_OFI_Win_control_t msg;
@@ -990,14 +990,14 @@ static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win *win)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
 
-        if(MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked == 1)
+        if(MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked == 1)
             lockQ[i].done = 1;
     }
 
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked);
+    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked);
 
-    MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_NONE;
-    MPIDI_CH4R_WIN(win, sync).target_epoch_type = MPIDI_CH4R_EPOTYPE_NONE;
+    MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
+    MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
@@ -1056,7 +1056,7 @@ static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
 
-    MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
@@ -1078,7 +1078,7 @@ static inline int MPIDI_CH4_NM_win_sync(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SYNC);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SYNC);
 
-    MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     OPA_read_write_barrier();
 
@@ -1099,7 +1099,7 @@ static inline int MPIDI_CH4_NM_win_flush_all(MPID_Win *win)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
 
-    MPIDI_CH4R_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
 fn_exit:
@@ -1116,22 +1116,22 @@ fn_fail:
 static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_CH4R_winLock_info *lockQ;
+    MPIDI_CH4U_win_lock_info *lockQ;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
 
-    MPIDI_CH4R_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
+    MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
 
     int size;
     size = win->comm_ptr->local_size;
 
-    if(!MPIDI_CH4R_WIN(win, lockQ)) {
-        MPIDI_CH4R_WIN(win, lockQ) = (MPIDI_CH4R_winLock_info *) MPL_calloc(size, sizeof(MPIDI_CH4R_winLock_info));
-        MPIU_Assert(MPIDI_CH4R_WIN(win, lockQ) != NULL);
+    if(!MPIDI_CH4U_WIN(win, lockQ)) {
+        MPIDI_CH4U_WIN(win, lockQ) = (MPIDI_CH4U_win_lock_info *) MPL_calloc(size, sizeof(MPIDI_CH4U_win_lock_info));
+        MPIU_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
     }
 
-    lockQ = MPIDI_CH4R_WIN(win, lockQ);
+    lockQ = MPIDI_CH4U_WIN(win, lockQ);
     int i;
 
     for(i = 0; i < size; i++) {
@@ -1150,13 +1150,13 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
 
-        if(MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked == 1)
+        if(MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked == 1)
             lockQ[i].done = 1;
     }
 
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(size != (int)MPIDI_CH4R_WIN(win, sync).lock.remote.allLocked);
+    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(size != (int)MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked);
 
-    MPIDI_CH4R_WIN(win, sync).origin_epoch_type = MPIDI_CH4R_EPOTYPE_LOCK_ALL;
+    MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_LOCK_ALL;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);

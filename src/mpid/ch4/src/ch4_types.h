@@ -59,7 +59,7 @@ typedef enum {
     MPIDI_CH4R_SSEND_REQ,
     MPIDI_CH4R_SSEND_ACK,
 
-    MPIDI_CH4R_WIN_CTRL,
+    MPIDI_CH4U_WIN_CTRL,
 
     MPIDI_CH4R_PUT_REQ,
     MPIDI_CH4R_PUT_ACK,
@@ -83,26 +83,26 @@ typedef enum {
 } MPIDI_CH4R_TYPE;
 
 typedef enum {
-    MPIDI_CH4R_WIN_COMPLETE,
-    MPIDI_CH4R_WIN_POST,
-    MPIDI_CH4R_WIN_LOCK,
-    MPIDI_CH4R_WIN_LOCK_ACK,
-    MPIDI_CH4R_WIN_UNLOCK,
-    MPIDI_CH4R_WIN_UNLOCK_ACK,
-    MPIDI_CH4R_WIN_LOCKALL,
-    MPIDI_CH4R_WIN_LOCKALL_ACK,
-    MPIDI_CH4R_WIN_UNLOCKALL,
-    MPIDI_CH4R_WIN_UNLOCKALL_ACK
-} MPIDI_CH4R_WIN_CTRL_MSG_TYPE;
+    MPIDI_CH4U_WIN_COMPLETE,
+    MPIDI_CH4U_WIN_POST,
+    MPIDI_CH4U_WIN_LOCK,
+    MPIDI_CH4U_WIN_LOCK_ACK,
+    MPIDI_CH4U_WIN_UNLOCK,
+    MPIDI_CH4U_WIN_UNLOCK_ACK,
+    MPIDI_CH4U_WIN_LOCKALL,
+    MPIDI_CH4U_WIN_LOCKALL_ACK,
+    MPIDI_CH4U_WIN_UNLOCKALL,
+    MPIDI_CH4U_WIN_UNLOCKALL_ACK
+} MPIDI_CH4U_WIN_CTRL_MSG_TYPE;
 
 enum {
-    MPIDI_CH4R_EPOTYPE_NONE = 0,          /**< No epoch in affect */
-    MPIDI_CH4R_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
-    MPIDI_CH4R_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
-    MPIDI_CH4R_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
-    MPIDI_CH4R_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
-    MPIDI_CH4R_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
-    MPIDI_CH4R_EPOTYPE_LOCK_ALL = 6       /**< MPI_Win_lock_all access epoch */
+    MPIDI_CH4U_EPOTYPE_NONE = 0,          /**< No epoch in affect */
+    MPIDI_CH4U_EPOTYPE_LOCK = 1,          /**< MPI_Win_lock access epoch */
+    MPIDI_CH4U_EPOTYPE_START = 2,         /**< MPI_Win_start access epoch */
+    MPIDI_CH4U_EPOTYPE_POST = 3,          /**< MPI_Win_post exposure epoch */
+    MPIDI_CH4U_EPOTYPE_FENCE = 4,         /**< MPI_Win_fence access/exposure epoch */
+    MPIDI_CH4U_EPOTYPE_REFENCE = 5,       /**< MPI_Win_fence possible access/exposure epoch */
+    MPIDI_CH4U_EPOTYPE_LOCK_ALL = 6       /**< MPI_Win_lock_all access epoch */
 };
 
 /* Enum for calling types between netmod and shm */
@@ -139,12 +139,12 @@ typedef struct MPIDI_CH4R_Ssend_ack_msg_t {
     uint64_t sreq_ptr;
 } MPIDI_CH4R_Ssend_ack_msg_t;
 
-typedef struct MPIDI_CH4R_win_cntrl_msg_t {
+typedef struct MPIDI_CH4U_win_cntrl_msg_t {
     uint64_t win_id;
     uint32_t origin_rank;
     int16_t lock_type;
     int16_t type;
-} MPIDI_CH4R_win_cntrl_msg_t;
+} MPIDI_CH4U_win_cntrl_msg_t;
 
 typedef struct MPIDI_CH4R_put_msg_t {
     uint64_t win_id;

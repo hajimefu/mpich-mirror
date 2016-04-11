@@ -205,10 +205,10 @@ typedef struct {
 #define MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)  NULL
 #endif
 
-typedef struct MPIDI_CH4R_win_info_t {
+typedef struct MPIDI_CH4U_win_info_t {
     uint64_t base_addr;
     uint32_t disp_unit;
-} __attribute__ ((packed)) MPIDI_CH4R_win_info_t;
+} __attribute__ ((packed)) MPIDI_CH4U_win_info_t;
 
 #define MPIDI_CH4I_ACCU_ORDER_RAR (1)
 #define MPIDI_CH4I_ACCU_ORDER_RAW (1 << 1)
@@ -218,84 +218,84 @@ typedef struct MPIDI_CH4R_win_info_t {
 typedef enum {
     MPIDI_CH4I_ACCU_SAME_OP,
     MPIDI_CH4I_ACCU_SAME_OP_NO_OP
-} MPIDI_CH4R_win_info_accumulate_ops;
+} MPIDI_CH4U_win_info_accumulate_ops;
 
-typedef struct MPIDI_CH4R_win_info_args_t {
+typedef struct MPIDI_CH4U_win_info_args_t {
     int no_locks;
     int same_size;
     int accumulate_ordering;
     int alloc_shared_noncontig;
-    MPIDI_CH4R_win_info_accumulate_ops accumulate_ops;
-} MPIDI_CH4R_win_info_args_t;
+    MPIDI_CH4U_win_info_accumulate_ops accumulate_ops;
+} MPIDI_CH4U_win_info_args_t;
 
-struct MPIDI_CH4R_win_lock {
-    struct MPIDI_CH4R_win_lock *next;
+struct MPIDI_CH4U_win_lock {
+    struct MPIDI_CH4U_win_lock *next;
     uint64_t reply_token;
     unsigned rank;
     uint16_t mtype;
     uint16_t type;
 };
 
-struct MPIDI_CH4R_win_queue {
-    struct MPIDI_CH4R_win_lock *head;
-    struct MPIDI_CH4R_win_lock *tail;
+struct MPIDI_CH4U_win_queue {
+    struct MPIDI_CH4U_win_lock *head;
+    struct MPIDI_CH4U_win_lock *tail;
 };
 
-typedef struct MPIDI_CH4R_winLock_info {
+typedef struct MPIDI_CH4U_win_lock_info {
     unsigned peer;
     int lock_type;
     struct MPID_Win *win;
     volatile unsigned done;
-} MPIDI_CH4R_winLock_info;
+} MPIDI_CH4U_win_lock_info;
 
-typedef struct MPIDI_CH4R_win_sync_lock {
+typedef struct MPIDI_CH4U_win_sync_lock {
     struct {
         volatile unsigned locked;
         volatile unsigned allLocked;
     } remote;
     struct {
-        struct MPIDI_CH4R_win_queue requested;
+        struct MPIDI_CH4U_win_queue requested;
         int type;
         unsigned count;
     } local;
-} MPIDI_CH4R_win_sync_lock;
+} MPIDI_CH4U_win_sync_lock;
 
-typedef struct MPIDI_CH4R_win_sync_pscw {
+typedef struct MPIDI_CH4U_win_sync_pscw {
     struct MPID_Group *group;
     volatile unsigned count;
-} MPIDI_CH4R_win_sync_pscw;
+} MPIDI_CH4U_win_sync_pscw;
 
-typedef struct MPIDI_CH4R_win_sync_t {
+typedef struct MPIDI_CH4U_win_sync_t {
     volatile int origin_epoch_type;
     volatile int target_epoch_type;
-    MPIDI_CH4R_win_sync_pscw sc, pw;
-    MPIDI_CH4R_win_sync_lock lock;
-} MPIDI_CH4R_win_sync_t;
+    MPIDI_CH4U_win_sync_pscw sc, pw;
+    MPIDI_CH4U_win_sync_lock lock;
+} MPIDI_CH4U_win_sync_t;
 
-typedef struct MPIDI_CH4R_win_t {
+typedef struct MPIDI_CH4U_win_t {
     uint64_t win_id;
     void *mmap_addr;
     int64_t mmap_sz;
     OPA_int_t outstanding_ops;
     MPI_Aint *sizes;
-    MPIDI_CH4R_winLock_info *lockQ;
-    MPIDI_CH4R_win_sync_t sync;
-    MPIDI_CH4R_win_info_t *info_table;
-    MPIDI_CH4R_win_info_args_t info_args;
+    MPIDI_CH4U_win_lock_info *lockQ;
+    MPIDI_CH4U_win_sync_t sync;
+    MPIDI_CH4U_win_info_t *info_table;
+    MPIDI_CH4U_win_info_args_t info_args;
     MPL_UT_hash_handle hash_handle;
-} MPIDI_CH4R_win_t;
+} MPIDI_CH4U_win_t;
 
 typedef struct {
-    MPIDI_CH4R_win_t ch4r;
+    MPIDI_CH4U_win_t ch4u;
     uint64_t pad[192 / 8];
 } MPIDI_Devwin_t;
-#define MPIDI_CH4R_WIN(win,field)        (((win)->dev.ch4r).field)
-#define MPIDI_CH4R_WINFO(win,rank) (MPIDI_CH4R_win_info_t*) &(MPIDI_CH4R_WIN(win, info_table)[rank])
-#define MPIDI_CH4R_WINFO_DISP_UNIT(w,rank)                              \
+#define MPIDI_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
+#define MPIDI_CH4U_WINFO(win,rank) (MPIDI_CH4U_win_info_t*) &(MPIDI_CH4U_WIN(win, info_table)[rank])
+#define MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)                              \
     ({                                                                  \
         uint32_t _v;                                                    \
-        if(MPIDI_CH4R_WIN(w, info_table)) {                             \
-            _v = ((MPIDI_CH4R_win_info_t *) MPIDI_CH4R_WINFO(w, rank))->disp_unit; \
+        if(MPIDI_CH4U_WIN(w, info_table)) {                             \
+            _v = ((MPIDI_CH4U_win_info_t *) MPIDI_CH4U_WINFO(w, rank))->disp_unit; \
         }                                                               \
         else {                                                          \
             _v = w->disp_unit;                                          \
