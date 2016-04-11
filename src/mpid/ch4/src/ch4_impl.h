@@ -155,6 +155,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
         MPIDI_CH4R_Request_release(req);
 }
 
+#ifndef dtype_add_ref_if_not_builtin
 #define dtype_add_ref_if_not_builtin(datatype_)                         \
     do {								\
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\
@@ -165,7 +166,9 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 	    MPID_Datatype_add_ref(dtp_);				\
 	}								\
     } while (0)
+#endif
 
+#ifndef dtype_release_if_not_builtin
 #define dtype_release_if_not_builtin(datatype_)				\
     do {								\
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\
@@ -176,6 +179,7 @@ __CH4_INLINE__ void MPIDI_CH4R_request_complete(MPID_Request *req)
 	    MPID_Datatype_release(dtp_);				\
 	}								\
     } while (0)
+#endif
 
 #define MPIDI_Datatype_get_info(_count, _datatype,                      \
                                 _dt_contig_out, _data_sz_out,           \
