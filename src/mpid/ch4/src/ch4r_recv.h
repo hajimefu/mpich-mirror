@@ -417,7 +417,7 @@ __CH4_INLINE__ int MPIDI_CH4R_cancel_recv(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CANCEL_RECV);
 
     msg_tag   = MPIDI_CH4U_REQUEST(rreq, tag);
-    root_comm = MPIDI_CH4R_context_id_to_comm(MPIDI_CH4R_get_context(MPIDI_CH4R_get_context(msg_tag)));
+    root_comm = MPIDI_CH4R_context_id_to_comm(MPIDI_CH4R_get_context(msg_tag));
 
     /* MPIDI_CS_ENTER(); */
     found = MPIDI_CH4R_delete_posted(&rreq->dev.ch4.ch4u.req->rreq, &MPIDI_CH4U_COMM(root_comm, posted_list));
