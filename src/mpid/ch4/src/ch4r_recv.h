@@ -98,7 +98,7 @@ static inline int MPIDI_CH4I_handle_unexpected(void *buf,
     rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
+        mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4I_am_request_complete(rreq);
@@ -331,7 +331,7 @@ __CH4_INLINE__ int MPIDI_CH4R_imrecv(void *buf,
         MPIDI_CH4U_REQUEST(message, count) = count;
     }
     else {
-        mpi_errno = MPIDI_CH4R_unexp_mrecv_cmpl_handler(message);
+        mpi_errno = MPIDI_CH4U_unexp_mrecv_cmpl_handler(message);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     /* MPIDI_CS_EXIT(); */

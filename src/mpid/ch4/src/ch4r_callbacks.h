@@ -14,10 +14,10 @@
 #include "ch4r_request.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_progress_cmpl_list
+#define FUNCNAME MPIDI_CH4U_progress_cmpl_list
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_progress_cmpl_list(void)
+static inline void MPIDI_CH4U_progress_cmpl_list(void)
 {
     MPID_Request *req;
     MPIDI_CH4U_req_ext_t *curr, *tmp;
@@ -42,10 +42,10 @@ do_check_again:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_check_cmpl_order
+#define FUNCNAME MPIDI_CH4U_check_cmpl_order
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_check_cmpl_order(MPID_Request *req,
+static inline int MPIDI_CH4U_check_cmpl_order(MPID_Request *req,
                                               MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_CHECK_CMPL_ORDER);
@@ -67,45 +67,45 @@ static inline int MPIDI_CH4R_check_cmpl_order(MPID_Request *req,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_send_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_send_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_lmt_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_send_long_lmt_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_lmt_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_send_long_lmt_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_LMT_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_LMT_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_LMT_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_LMT_TX_HANDLER);
     dtype_release_if_not_builtin(MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_LMT_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_LONG_LMT_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ssend_ack_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_ssend_ack_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ssend_ack_origin_cmpl_handler(MPID_Request * req)
+static inline int MPIDI_CH4U_ssend_ack_origin_cmpl_handler(MPID_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SSEND_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SSEND_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SSEND_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SSEND_ACK_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SSEND_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SSEND_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
@@ -116,18 +116,18 @@ static inline int MPIDI_CH4R_ssend_ack_origin_cmpl_handler(MPID_Request * req)
 static inline int MPIDI_CH4U_put_ack_origin_cmpl_handler(MPID_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_ACK_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_get_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_cmpl_handler(MPID_Request * req)
+static inline int MPIDI_CH4U_get_cmpl_handler(MPID_Request * req)
 {
     int mpi_errno = MPI_SUCCESS, i, c;
     size_t data_sz, offset;
@@ -137,10 +137,10 @@ static inline int MPIDI_CH4R_get_cmpl_handler(MPID_Request * req)
     MPID_Win *win;
     uintptr_t base;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(req, MPIDI_CH4R_get_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(req, MPIDI_CH4U_get_cmpl_handler))
         return mpi_errno;
 
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(req, req->greq.win_ptr);
@@ -188,9 +188,9 @@ static inline int MPIDI_CH4R_get_cmpl_handler(MPID_Request * req)
                                            p_data, data_sz, MPI_BYTE, req);
     MPIDI_CH4I_am_request_complete(req);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-    MPIDI_CH4R_progress_cmpl_list();
+    MPIDI_CH4U_progress_cmpl_list();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_CMPL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -204,24 +204,24 @@ fn_fail:
 static inline int MPIDI_CH4U_acc_ack_origin_cmpl_handler(MPID_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_ACK_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_acc_ack_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_get_acc_ack_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_acc_ack_origin_cmpl_handler(MPID_Request * req)
+static inline int MPIDI_CH4U_get_acc_ack_origin_cmpl_handler(MPID_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACC_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACC_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACC_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACC_ACK_TX_HANDLER);
     MPL_free(MPIDI_CH4U_REQUEST(req, req->areq.data));
 
     win = (MPID_Win *)MPIDI_CH4U_REQUEST(req, req->areq.win_ptr);
@@ -230,7 +230,7 @@ static inline int MPIDI_CH4R_get_acc_ack_origin_cmpl_handler(MPID_Request * req)
     /* MPIDI_CS_EXIT(); */
 
     MPIDI_CH4I_am_request_complete(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACC_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACC_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
@@ -243,8 +243,8 @@ static inline int MPIDI_CH4U_cswap_ack_origin_cmpl_handler(MPID_Request * req)
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_ACK_TX_HANDLER);
 
     MPL_free(MPIDI_CH4U_REQUEST(req, req->creq.data));
     win = (MPID_Win *)MPIDI_CH4U_REQUEST(req, req->creq.win_ptr);
@@ -254,7 +254,7 @@ static inline int MPIDI_CH4U_cswap_ack_origin_cmpl_handler(MPID_Request * req)
 
     MPIDI_CH4I_am_request_complete(req);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
@@ -267,8 +267,8 @@ static inline int MPIDI_CH4U_get_ack_origin_cmpl_handler(MPID_Request * req)
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACK_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACK_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACK_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACK_TX_HANDLER);
 
     if (MPIDI_CH4U_REQUEST(req, req->greq.dt_iov)) {
         MPL_free(MPIDI_CH4U_REQUEST(req, req->greq.dt_iov));
@@ -280,77 +280,77 @@ static inline int MPIDI_CH4U_get_ack_origin_cmpl_handler(MPID_Request * req)
     /* MPIDI_CS_EXIT(); */
 
     MPIDI_CH4I_am_request_complete(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACK_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACK_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_put_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_put_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_cswap_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_cswap_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_cswap_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_cswap_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_acc_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_acc_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_acc_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_acc_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put_data_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_put_data_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_data_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_put_data_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_DATA_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_DATA_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_DATA_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_DATA_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_DATA_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_DATA_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_acc_data_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_acc_data_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_acc_data_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_acc_data_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_DATA_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_DATA_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_DATA_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_DATA_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_DATA_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_DATA_TX_HANDLER);
     return mpi_errno;
 }
 
@@ -361,10 +361,10 @@ static inline int MPIDI_CH4R_acc_data_origin_cmpl_handler(MPID_Request * sreq)
 static inline int MPIDI_CH4U_put_iov_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_IOV_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_IOV_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_IOV_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_IOV_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_IOV_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_IOV_TX_HANDLER);
     return mpi_errno;
 }
 
@@ -375,32 +375,32 @@ static inline int MPIDI_CH4U_put_iov_origin_cmpl_handler(MPID_Request * sreq)
 static inline int MPIDI_CH4U_acc_iov_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_IOV_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_IOV_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_IOV_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_IOV_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_IOV_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_IOV_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_origin_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_get_origin_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_origin_cmpl_handler(MPID_Request * sreq)
+static inline int MPIDI_CH4U_get_origin_cmpl_handler(MPID_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_TX_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_TX_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_TX_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_TX_HANDLER);
     MPIDI_CH4I_am_request_complete(sreq);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_TX_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_TX_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_reply_ssend
+#define FUNCNAME MPIDI_CH4U_reply_ssend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_reply_ssend(MPID_Request * rreq)
+static inline int MPIDI_CH4U_reply_ssend(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4U_ssend_ack_msg_t ack_msg;
@@ -421,10 +421,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ack_put
+#define FUNCNAME MPIDI_CH4U_ack_put
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ack_put(MPID_Request * rreq)
+static inline int MPIDI_CH4U_ack_put(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_put_ack_msg_t ack_msg;
@@ -443,10 +443,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ack_cswap
+#define FUNCNAME MPIDI_CH4U_ack_cswap
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ack_cswap(MPID_Request * rreq)
+static inline int MPIDI_CH4U_ack_cswap(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4U_cswap_ack_msg_t ack_msg;
@@ -477,10 +477,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ack_acc
+#define FUNCNAME MPIDI_CH4U_ack_acc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ack_acc(MPID_Request * rreq)
+static inline int MPIDI_CH4U_ack_acc(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_acc_ack_msg_t ack_msg;
@@ -507,10 +507,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ack_get_acc
+#define FUNCNAME MPIDI_CH4U_ack_get_acc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ack_get_acc(MPID_Request * rreq)
+static inline int MPIDI_CH4U_ack_get_acc(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4U_acc_ack_msg_t ack_msg;
@@ -536,10 +536,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_unexp_mrecv_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_unexp_mrecv_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     uint64_t msg_tag;
@@ -603,7 +603,7 @@ static inline int MPIDI_CH4R_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     rreq->kind = MPID_REQUEST_RECV;
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
+        mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4I_am_request_complete(rreq);
@@ -617,10 +617,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_unexp_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_unexp_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_unexp_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPID_Comm *root_comm;
@@ -640,7 +640,7 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
     /* MPIDI_CS_ENTER(); */
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_UNEXP_DQUED) {
         if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_UNEXP_CLAIMED) {
-            MPIDI_CH4R_unexp_mrecv_cmpl_handler(rreq);
+            MPIDI_CH4U_unexp_mrecv_cmpl_handler(rreq);
         }
         /* MPIDI_CS_EXIT(); */
         goto fn_exit;
@@ -715,7 +715,7 @@ static inline int MPIDI_CH4R_unexp_cmpl_handler(MPID_Request * rreq)
 
     MPIDI_CH4U_REQUEST(rreq, req->status) &= ~MPIDI_CH4U_REQ_UNEXPECTED;
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
+        mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
@@ -732,17 +732,17 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_recv_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_recv_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_recv_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_recv_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_RECV_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_RECV_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_RECV_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_RECV_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4R_recv_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_recv_cmpl_handler))
         return mpi_errno;
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_RCV_NON_CONTIG) {
@@ -750,7 +750,7 @@ static inline int MPIDI_CH4R_recv_cmpl_handler(MPID_Request * rreq)
     }
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_UNEXPECTED) {
-        mpi_errno = MPIDI_CH4R_unexp_cmpl_handler(rreq);
+        mpi_errno = MPIDI_CH4U_unexp_cmpl_handler(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         goto fn_exit;
     }
@@ -759,7 +759,7 @@ static inline int MPIDI_CH4R_recv_cmpl_handler(MPID_Request * rreq)
     rreq->status.MPI_TAG = MPIDI_CH4R_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
-        mpi_errno = MPIDI_CH4R_reply_ssend(rreq);
+        mpi_errno = MPIDI_CH4U_reply_ssend(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
@@ -777,26 +777,26 @@ static inline int MPIDI_CH4R_recv_cmpl_handler(MPID_Request * rreq)
     dtype_release_if_not_builtin(MPIDI_CH4U_REQUEST(rreq, datatype));
     MPIDI_CH4I_am_request_complete(rreq);
 fn_exit:
-    MPIDI_CH4R_progress_cmpl_list();
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_RECV_CMPL_HANDLER);
+    MPIDI_CH4U_progress_cmpl_list();
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_RECV_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_acc_ack_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_get_acc_ack_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_acc_ack_cmpl_handler(MPID_Request * areq)
+static inline int MPIDI_CH4U_get_acc_ack_cmpl_handler(MPID_Request * areq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACC_ACK_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACC_ACK_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACC_ACK_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACC_ACK_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(areq, MPIDI_CH4R_get_acc_ack_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(areq, MPIDI_CH4U_get_acc_ack_cmpl_handler))
         return mpi_errno;
 
     if (MPIDI_CH4U_REQUEST(areq, req->status) & MPIDI_CH4U_REQ_RCV_NON_CONTIG) {
@@ -811,24 +811,24 @@ static inline int MPIDI_CH4R_get_acc_ack_cmpl_handler(MPID_Request * areq)
     dtype_release_if_not_builtin(MPIDI_CH4U_REQUEST(areq, req->areq.result_datatype));
     MPIDI_CH4I_am_request_complete(areq);
 
-    MPIDI_CH4R_progress_cmpl_list();
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACC_ACK_CMPL_HANDLER);
+    MPIDI_CH4U_progress_cmpl_list();
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACC_ACK_CMPL_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_put_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_put_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4R_put_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_put_cmpl_handler))
         return mpi_errno;
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_RCV_NON_CONTIG) {
@@ -839,7 +839,7 @@ static inline int MPIDI_CH4R_put_cmpl_handler(MPID_Request * rreq)
         MPL_free(MPIDI_CH4U_REQUEST(rreq, req->preq.dt_iov));
     }
 
-    mpi_errno = MPIDI_CH4R_ack_put(rreq);
+    mpi_errno = MPIDI_CH4U_ack_put(rreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(rreq, req->preq.win_ptr);
@@ -849,9 +849,9 @@ static inline int MPIDI_CH4R_put_cmpl_handler(MPID_Request * rreq)
     /* MPIDI_CS_EXIT(); */
 
     MPIDI_CH4I_am_request_complete(rreq);
-    MPIDI_CH4R_progress_cmpl_list();
+    MPIDI_CH4U_progress_cmpl_list();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_CMPL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -866,8 +866,8 @@ static inline int MPIDI_CH4U_put_iov_cmpl_handler(MPID_Request * rreq)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_put_iov_ack_msg_t ack_msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_IOV_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_IOV_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_IOV_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_IOV_CMPL_HANDLER);
 
     ack_msg.origin_preq_ptr = (uint64_t) MPIDI_CH4U_REQUEST(rreq, req->preq.preq_ptr);
     ack_msg.target_preq_ptr = (uint64_t) rreq;
@@ -878,7 +878,7 @@ static inline int MPIDI_CH4U_put_iov_cmpl_handler(MPID_Request * rreq)
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_IOV_CMPL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_IOV_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -893,8 +893,8 @@ static inline int MPIDI_CH4U_acc_iov_cmpl_handler(MPID_Request * rreq)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_acc_iov_ack_msg_t ack_msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_IOV_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_IOV_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_IOV_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_IOV_CMPL_HANDLER);
 
     ack_msg.origin_preq_ptr = (uint64_t) MPIDI_CH4U_REQUEST(rreq, req->areq.req_ptr);
     ack_msg.target_preq_ptr = (uint64_t) rreq;
@@ -905,27 +905,27 @@ static inline int MPIDI_CH4U_acc_iov_cmpl_handler(MPID_Request * rreq)
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_IOV_CMPL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_IOV_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_cswap_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_cswap_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_cswap_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_cswap_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
     void *compare_addr;
     void *origin_addr;
     size_t data_sz;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4R_cswap_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_cswap_cmpl_handler))
         return mpi_errno;
 
     MPIDI_Datatype_check_size(MPIDI_CH4U_REQUEST(rreq, req->creq.datatype), 1, data_sz);
@@ -944,22 +944,22 @@ static inline int MPIDI_CH4R_cswap_cmpl_handler(MPID_Request * rreq)
 
     /* MPIDI_CS_EXIT(); */
 
-    mpi_errno = MPIDI_CH4R_ack_cswap(rreq);
+    mpi_errno = MPIDI_CH4U_ack_cswap(rreq);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     MPIDI_CH4I_am_request_complete(rreq);
-    MPIDI_CH4R_progress_cmpl_list();
+    MPIDI_CH4U_progress_cmpl_list();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_CMPL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_CMPL_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_do_accumulate_op
+#define FUNCNAME MPIDI_CH4U_do_accumulate_op
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count, MPI_Datatype source_dtp,
+static inline int MPIDI_CH4U_do_accumulate_op(void *source_buf, int source_count, MPI_Datatype source_dtp,
                                               void *target_buf, int target_count, MPI_Datatype target_dtp,
                                               MPI_Aint stream_offset, MPI_Op acc_op)
 {
@@ -1103,10 +1103,10 @@ static inline int MPIDI_CH4R_do_accumulate_op(void *source_buf, int source_count
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_handle_acc_cmpl
+#define FUNCNAME MPIDI_CH4U_handle_acc_cmpl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_handle_acc_cmpl(MPID_Request * rreq, int do_get)
+static inline int MPIDI_CH4U_handle_acc_cmpl(MPID_Request * rreq, int do_get)
 {
     int mpi_errno = MPI_SUCCESS, i;
     MPI_Aint basic_sz, count, offset = 0;
@@ -1140,7 +1140,7 @@ static inline int MPIDI_CH4R_handle_acc_cmpl(MPID_Request * rreq, int do_get)
                         basic_sz * MPIDI_CH4U_REQUEST(rreq, req->areq.target_count));
         }
 
-        mpi_errno = MPIDI_CH4R_do_accumulate_op(MPIDI_CH4U_REQUEST(rreq, req->areq.data),
+        mpi_errno = MPIDI_CH4U_do_accumulate_op(MPIDI_CH4U_REQUEST(rreq, req->areq.data),
                                                 MPIDI_CH4U_REQUEST(rreq, req->areq.origin_count),
                                                 MPIDI_CH4U_REQUEST(rreq, req->areq.origin_datatype),
                                                 MPIDI_CH4U_REQUEST(rreq, req->areq.target_addr),
@@ -1160,7 +1160,7 @@ static inline int MPIDI_CH4R_handle_acc_cmpl(MPID_Request * rreq, int do_get)
                 offset += count * basic_sz;
             }
 
-            mpi_errno = MPIDI_CH4R_do_accumulate_op(src_ptr, count,
+            mpi_errno = MPIDI_CH4U_do_accumulate_op(src_ptr, count,
                                                     MPIDI_CH4U_REQUEST(rreq, req->areq.origin_datatype),
                                                     iov[i].iov_base, count,
                                                     MPIDI_CH4U_REQUEST(rreq, req->areq.target_datatype), 0,
@@ -1177,11 +1177,11 @@ static inline int MPIDI_CH4R_handle_acc_cmpl(MPID_Request * rreq, int do_get)
 
     if (original) {
         MPIDI_CH4U_REQUEST(rreq, req->areq.data) = original;
-        mpi_errno = MPIDI_CH4R_ack_get_acc(rreq);
+        mpi_errno = MPIDI_CH4U_ack_get_acc(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     } else {
         MPIDI_CH4U_REQUEST(rreq, req->areq.data) = NULL;
-        mpi_errno = MPIDI_CH4R_ack_acc(rreq);
+        mpi_errno = MPIDI_CH4U_ack_acc(rreq);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     MPIDI_CH4I_am_request_complete(rreq);
@@ -1193,48 +1193,48 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_acc_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_acc_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_acc_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_acc_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4R_acc_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_acc_cmpl_handler))
         return mpi_errno;
 
-    mpi_errno = MPIDI_CH4R_handle_acc_cmpl(rreq, 0);
+    mpi_errno = MPIDI_CH4U_handle_acc_cmpl(rreq, 0);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDI_CH4R_progress_cmpl_list();
+    MPIDI_CH4U_progress_cmpl_list();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_acc_cmpl_handler
+#define FUNCNAME MPIDI_CH4U_get_acc_cmpl_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_acc_cmpl_handler(MPID_Request * rreq)
+static inline int MPIDI_CH4U_get_acc_cmpl_handler(MPID_Request * rreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACC_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACC_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACC_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACC_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4R_get_acc_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_get_acc_cmpl_handler))
         return mpi_errno;
 
-    mpi_errno = MPIDI_CH4R_handle_acc_cmpl(rreq, 1);
+    mpi_errno = MPIDI_CH4U_handle_acc_cmpl(rreq, 1);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    MPIDI_CH4R_progress_cmpl_list();
+    MPIDI_CH4U_progress_cmpl_list();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACC_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACC_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1250,10 +1250,10 @@ static inline int MPIDI_CH4U_get_ack_cmpl_handler(MPID_Request * rreq)
     MPID_Request *greq;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACK_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACK_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACK_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACK_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4U_get_ack_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_get_ack_cmpl_handler))
         return mpi_errno;
 
     greq = (MPID_Request *) MPIDI_CH4U_REQUEST(rreq, req->greq.greq_ptr);
@@ -1268,8 +1268,8 @@ static inline int MPIDI_CH4U_get_ack_cmpl_handler(MPID_Request * rreq)
 
     MPIDI_CH4I_am_request_complete(greq);
     MPIDI_CH4I_am_request_complete(rreq);
-    MPIDI_CH4R_progress_cmpl_list();
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACK_CMPL_HANDLER);
+    MPIDI_CH4U_progress_cmpl_list();
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACK_CMPL_HANDLER);
     return mpi_errno;
 }
 
@@ -1282,10 +1282,10 @@ static inline int MPIDI_CH4U_cswap_ack_cmpl_handler(MPID_Request * rreq)
     int mpi_errno = MPI_SUCCESS;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_ACK_CMPL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_ACK_CMPL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_ACK_CMPL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_ACK_CMPL_HANDLER);
 
-    if (!MPIDI_CH4R_check_cmpl_order(rreq, MPIDI_CH4U_cswap_ack_cmpl_handler))
+    if (!MPIDI_CH4U_check_cmpl_order(rreq, MPIDI_CH4U_cswap_ack_cmpl_handler))
         return mpi_errno;
 
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(rreq, req->creq.win_ptr);
@@ -1296,8 +1296,8 @@ static inline int MPIDI_CH4U_cswap_ack_cmpl_handler(MPID_Request * rreq)
     MPL_free(MPIDI_CH4U_REQUEST(rreq, req->creq.data));
     MPIDI_CH4I_am_request_complete(rreq);
 
-    MPIDI_CH4R_progress_cmpl_list();
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_ACK_CMPL_HANDLER);
+    MPIDI_CH4U_progress_cmpl_list();
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_ACK_CMPL_HANDLER);
     return mpi_errno;
 }
 
@@ -1315,7 +1315,7 @@ static inline int MPIDI_CH4I_do_send_target_handler(uint64_t reply_token,
     MPID_Segment *segment_ptr;
     size_t data_sz;
 
-    *cmpl_handler_fn = MPIDI_CH4R_recv_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_recv_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_Datatype_get_info(MPIDI_CH4U_REQUEST(rreq, count),
@@ -1361,10 +1361,10 @@ static inline int MPIDI_CH4I_do_send_target_handler(uint64_t reply_token,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_target_handler
+#define FUNCNAME MPIDI_CH4U_send_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
                                                  uint64_t reply_token,
                                                  void **data,
                                                  size_t * p_data_sz,
@@ -1377,8 +1377,8 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
     MPID_Comm *root_comm;
     MPIDI_CH4U_hdr_t *hdr = (MPIDI_CH4U_hdr_t *) am_hdr;
     int context_id;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_HANDLER);
     context_id = MPIDI_CH4R_get_context(hdr->msg_tag);
     root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
     if (root_comm) {
@@ -1419,15 +1419,15 @@ static inline int MPIDI_CH4R_send_target_handler(void *am_hdr,
     mpi_errno = MPIDI_CH4I_do_send_target_handler(reply_token, data, p_data_sz, is_contig,
                                                   cmpl_handler_fn, rreq);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_req_target_handler
+#define FUNCNAME MPIDI_CH4U_send_long_req_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
                                                           uint64_t reply_token,
                                                           void **data,
                                                           size_t * p_data_sz,
@@ -1442,8 +1442,8 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
     MPIDI_CH4U_send_long_req_msg_t *lreq_hdr = (MPIDI_CH4U_send_long_req_msg_t *) am_hdr;
     int context_id;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_REQ_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_REQ_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
 
     context_id = MPIDI_CH4R_get_context(hdr->msg_tag);
     root_comm  = MPIDI_CH4R_context_id_to_comm(context_id);
@@ -1494,17 +1494,17 @@ static inline int MPIDI_CH4R_send_long_req_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_REQ_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_lmt_target_handler
+#define FUNCNAME MPIDI_CH4U_send_long_lmt_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_lmt_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_send_long_lmt_target_handler(void *am_hdr,
                                                           uint64_t reply_token,
                                                           void **data,
                                                           size_t * p_data_sz,
@@ -1516,8 +1516,8 @@ static inline int MPIDI_CH4R_send_long_lmt_target_handler(void *am_hdr,
     MPID_Request *rreq;
     MPIDI_CH4U_send_long_lmt_msg_t *lmt_hdr = (MPIDI_CH4U_send_long_lmt_msg_t *) am_hdr;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_LMT_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_LMT_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_LMT_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_LMT_HANDLER);
 
     rreq = (MPID_Request *) lmt_hdr->rreq_ptr;
     MPIU_Assert(rreq);
@@ -1525,16 +1525,16 @@ static inline int MPIDI_CH4R_send_long_lmt_target_handler(void *am_hdr,
                                                   cmpl_handler_fn, rreq);
     *req = rreq;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_LMT_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_LONG_LMT_HANDLER);
 
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ssend_target_handler
+#define FUNCNAME MPIDI_CH4U_ssend_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ssend_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_ssend_target_handler(void *am_hdr,
                                                   uint64_t reply_token,
                                                   void **data,
                                                   size_t * p_data_sz,
@@ -1545,10 +1545,10 @@ static inline int MPIDI_CH4R_ssend_target_handler(void *am_hdr,
     int mpi_errno = MPI_SUCCESS;
 
     MPIDI_CH4U_ssend_req_msg_t *msg_hdr = (MPIDI_CH4U_ssend_req_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SSEND_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SSEND_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SSEND_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SSEND_HANDLER);
 
-    mpi_errno = MPIDI_CH4R_send_target_handler(am_hdr,
+    mpi_errno = MPIDI_CH4U_send_target_handler(am_hdr,
                                                reply_token, data, p_data_sz,
                                                is_contig, cmpl_handler_fn, req);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -1558,17 +1558,17 @@ static inline int MPIDI_CH4R_ssend_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->rreq.reply_token) = reply_token;
     MPIDI_CH4U_REQUEST(*req, req->status) |= MPIDI_CH4U_REQ_PEER_SSEND;
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SSEND_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SSEND_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_ssend_ack_target_handler
+#define FUNCNAME MPIDI_CH4U_ssend_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_ssend_ack_target_handler(void *am_hdr,
                                                       uint64_t reply_token, void **data,
                                                       size_t * p_data_sz, int *is_contig,
                                                       MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1577,8 +1577,8 @@ static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr,
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *sreq;
     MPIDI_CH4U_ssend_ack_msg_t *msg_hdr = (MPIDI_CH4U_ssend_ack_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SSEND_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SSEND_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SSEND_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SSEND_ACK_HANDLER);
 
     sreq = (MPID_Request *)msg_hdr->sreq_ptr;
     MPIDI_CH4I_am_request_complete(sreq);
@@ -1588,15 +1588,15 @@ static inline int MPIDI_CH4R_ssend_ack_target_handler(void *am_hdr,
     if (cmpl_handler_fn)
         *cmpl_handler_fn = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SSEND_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SSEND_ACK_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_send_long_ack_target_handler
+#define FUNCNAME MPIDI_CH4U_send_long_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_send_long_ack_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_send_long_ack_target_handler(void *am_hdr,
                                                           uint64_t reply_token, void **data,
                                                           size_t * p_data_sz, int *is_contig,
                                                           MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1606,8 +1606,8 @@ static inline int MPIDI_CH4R_send_long_ack_target_handler(void *am_hdr,
     MPID_Request *sreq;
     MPIDI_CH4U_send_long_ack_msg_t *msg_hdr = (MPIDI_CH4U_send_long_ack_msg_t *) am_hdr;
     MPIDI_CH4U_send_long_lmt_msg_t send_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_SEND_LONG_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_SEND_LONG_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_ACK_HANDLER);
 
     sreq = (MPID_Request *)msg_hdr->sreq_ptr;
     MPIU_Assert(sreq != NULL);
@@ -1624,9 +1624,9 @@ static inline int MPIDI_CH4R_send_long_ack_target_handler(void *am_hdr,
         MPIR_ERR_POP(mpi_errno);
 
     if (cmpl_handler_fn)
-        *cmpl_handler_fn = MPIDI_CH4R_send_origin_cmpl_handler;
+        *cmpl_handler_fn = MPIDI_CH4U_send_origin_cmpl_handler;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_SEND_LONG_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_LONG_ACK_HANDLER);
 
 fn_exit:
     return mpi_errno;
@@ -1649,8 +1649,8 @@ static inline int MPIDI_CH4U_put_ack_target_handler(void *am_hdr,
     MPID_Win *win;
     MPID_Request *preq;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_ACK_HANDLER);
 
     preq = (MPID_Request *)msg_hdr->preq_ptr;
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(preq, req->preq.win_ptr);
@@ -1670,7 +1670,7 @@ static inline int MPIDI_CH4U_put_ack_target_handler(void *am_hdr,
     if (cmpl_handler_fn)
         *cmpl_handler_fn = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_ACK_HANDLER);
     return mpi_errno;
 }
 
@@ -1689,8 +1689,8 @@ static inline int MPIDI_CH4U_acc_ack_target_handler(void *am_hdr,
     MPID_Win *win;
     MPID_Request *areq;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_ACK_HANDLER);
 
     areq = (MPID_Request *)msg_hdr->req_ptr;
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(areq, req->areq.win_ptr);
@@ -1710,15 +1710,15 @@ static inline int MPIDI_CH4U_acc_ack_target_handler(void *am_hdr,
     if (cmpl_handler_fn)
         *cmpl_handler_fn = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_ACK_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_acc_ack_target_handler
+#define FUNCNAME MPIDI_CH4U_get_acc_ack_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_get_acc_ack_target_handler(void *am_hdr,
                                                         uint64_t reply_token, void **data,
                                                         size_t * p_data_sz, int *is_contig,
                                                         MPIDI_CH4_NM_am_completion_handler_fn *
@@ -1734,8 +1734,8 @@ static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr,
     MPID_Datatype *dt_ptr;
     MPID_Segment *segment_ptr;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_ACK_HANDLER);
 
     areq = (MPID_Request *)msg_hdr->req_ptr;
 
@@ -1778,10 +1778,10 @@ static inline int MPIDI_CH4R_get_acc_ack_target_handler(void *am_hdr,
     }
 
     *req = areq;
-    *cmpl_handler_fn = MPIDI_CH4R_get_acc_ack_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_get_acc_ack_cmpl_handler;
     MPIDI_CH4U_REQUEST(areq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_ACK_HANDLER);
     return mpi_errno;
 }
 
@@ -1800,8 +1800,8 @@ static inline int MPIDI_CH4U_cswap_ack_target_handler(void *am_hdr,
     MPID_Request *creq;
     uint64_t data_sz;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_ACK_HANDLER);
 
     creq = (MPID_Request *)msg_hdr->req_ptr;
     MPIDI_Datatype_check_size(MPIDI_CH4U_REQUEST(creq, req->creq.datatype), 1, data_sz);
@@ -1813,22 +1813,22 @@ static inline int MPIDI_CH4U_cswap_ack_target_handler(void *am_hdr,
     *cmpl_handler_fn = MPIDI_CH4U_cswap_ack_cmpl_handler;
     MPIDI_CH4U_REQUEST(creq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_ACK_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_lock_advance
+#define FUNCNAME MPIDI_CH4U_win_lock_advance
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_win_lock_advance(MPID_Win *win)
+static inline int MPIDI_CH4U_win_lock_advance(MPID_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     struct MPIDI_CH4U_win_sync_lock *slock = &MPIDI_CH4U_WIN(win, sync).lock;
     struct MPIDI_CH4U_win_queue *q     = &slock->local.requested;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_LOCK_ADVANCE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_LOCK_ADVANCE);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_LOCK_ADVANCE);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_LOCK_ADVANCE);
 
     if( (q->head != NULL) && ((slock->local.count == 0) ||
                               ((slock->local.type == MPI_LOCK_SHARED) &&
@@ -1859,27 +1859,27 @@ static inline int MPIDI_CH4R_win_lock_advance(MPID_Win *win)
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         MPL_free(lock);
 
-        mpi_errno = MPIDI_CH4R_win_lock_advance(win);
+        mpi_errno = MPIDI_CH4U_win_lock_advance(win);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_LOCK_ADVANCE);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_LOCK_ADVANCE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_lock_req_proc
+#define FUNCNAME MPIDI_CH4U_win_lock_req_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t  *info,
+static inline void MPIDI_CH4U_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t  *info,
                                                 MPID_Win                   *win,
                                                 uint64_t                    reply_token)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_LOCK_REQ_PROC);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_LOCK_REQ_PROC);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_LOCK_REQ_PROC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_LOCK_REQ_PROC);
 
     struct MPIDI_CH4U_win_lock *lock = (struct MPIDI_CH4U_win_lock *)
         MPL_calloc(1, sizeof(struct MPIDI_CH4U_win_lock));
@@ -1902,45 +1902,45 @@ static inline void MPIDI_CH4R_win_lock_req_proc(const MPIDI_CH4U_win_cntrl_msg_t
 
     q->tail = lock;
 
-    MPIDI_CH4R_win_lock_advance(win);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_LOCK_REQ_PROC);
+    MPIDI_CH4U_win_lock_advance(win);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_LOCK_REQ_PROC);
     return;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_lock_ack_proc
+#define FUNCNAME MPIDI_CH4U_win_lock_ack_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4U_win_lock_ack_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
                                                 MPID_Win                   *win)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_LOCK_ACK_PROC);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_LOCK_ACK_PROC);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_LOCK_ACK_PROC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_LOCK_ACK_PROC);
 
     if(info->type == MPIDI_CH4U_WIN_LOCK_ACK)
         MPIDI_CH4U_WIN(win, sync).lock.remote.locked += 1;
     else  if(info->type == MPIDI_CH4U_WIN_LOCKALL_ACK)
         MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked += 1;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_LOCK_ACK_PROC);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_LOCK_ACK_PROC);
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_unlock_ack_proc
+#define FUNCNAME MPIDI_CH4U_win_unlock_ack_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4U_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
                                               MPID_Win                   *win,
                                               uint64_t                    reply_token)
 {
 
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_UNLOCK_ACK_PROC);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_UNLOCK_ACK_PROC);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_UNLOCK_ACK_PROC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_UNLOCK_ACK_PROC);
 
     --MPIDI_CH4U_WIN(win, sync).lock.local.count;
     MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
-    MPIDI_CH4R_win_lock_advance(win);
+    MPIDI_CH4U_win_lock_advance(win);
 
     MPIDI_CH4U_win_cntrl_msg_t msg;
     msg.win_id = MPIDI_CH4U_WIN(win, win_id);
@@ -1952,52 +1952,52 @@ static inline void MPIDI_CH4R_win_unlock_proc(const MPIDI_CH4U_win_cntrl_msg_t *
                                                  &msg, sizeof (msg));
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_UNLOCK_ACK_PROC);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_UNLOCK_ACK_PROC);
     return;
 fn_fail:
     goto fn_exit;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_complete_proc
+#define FUNCNAME MPIDI_CH4U_win_complete_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4U_win_complete_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
                                                 MPID_Win                   *win)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_COMPLETE_PROC);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_COMPLETE_PROC);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_COMPLETE_PROC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_COMPLETE_PROC);
 
     ++MPIDI_CH4U_WIN(win, sync).sc.count;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_COMPLETE_PROC);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_COMPLETE_PROC);
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_post_proc
+#define FUNCNAME MPIDI_CH4U_win_post_proc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4U_win_post_proc(const MPIDI_CH4U_win_cntrl_msg_t *info,
                                             MPID_Win                   *win)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_POST_PROC);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_POST_PROC);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_POST_PROC);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_POST_PROC);
 
     ++MPIDI_CH4U_WIN(win, sync).pw.count;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_POST_PROC);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_POST_PROC);
 }
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_unlock_done_cb
+#define FUNCNAME MPIDI_CH4U_win_unlock_done_cb
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4R_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_t *info,
+static inline void MPIDI_CH4U_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_t *info,
                                                  MPID_Win                   *win)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_UNLOCK_DONE_CB);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_UNLOCK_DONE_CB);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_UNLOCK_DONE_CB);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_UNLOCK_DONE_CB);
 
     if (MPIDI_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4U_EPOTYPE_LOCK) {
         MPIDI_CH4U_WIN(win, sync).lock.remote.locked--;
@@ -2008,14 +2008,14 @@ static inline void MPIDI_CH4R_win_unlock_done_cb(const MPIDI_CH4U_win_cntrl_msg_
         MPIU_Assert(0);
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_UNLOCK_DONE_CB);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_UNLOCK_DONE_CB);
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_win_ctrl_target_handler
+#define FUNCNAME MPIDI_CH4U_win_ctrl_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_win_ctrl_target_handler(void *am_hdr,
                                                      uint64_t reply_token, void **data,
                                                      size_t * p_data_sz, int *is_contig,
                                                      MPIDI_CH4_NM_am_completion_handler_fn *
@@ -2025,8 +2025,8 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
     MPIDI_CH4U_win_cntrl_msg_t *msg_hdr = (MPIDI_CH4U_win_cntrl_msg_t *) am_hdr;
     MPID_Win *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_WIN_CTRL_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_WIN_CTRL_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_WIN_CTRL_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_WIN_CTRL_HANDLER);
 
     MPL_HASH_FIND(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash,
                   &msg_hdr->win_id, sizeof(uint64_t), win);
@@ -2037,30 +2037,30 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
 
     case MPIDI_CH4U_WIN_LOCK:
     case MPIDI_CH4U_WIN_LOCKALL:
-        MPIDI_CH4R_win_lock_req_proc(msg_hdr, win, reply_token);
+        MPIDI_CH4U_win_lock_req_proc(msg_hdr, win, reply_token);
         break;
 
     case MPIDI_CH4U_WIN_LOCK_ACK:
     case MPIDI_CH4U_WIN_LOCKALL_ACK:
-        MPIDI_CH4R_win_lock_ack_proc(msg_hdr, win);
+        MPIDI_CH4U_win_lock_ack_proc(msg_hdr, win);
         break;
 
     case MPIDI_CH4U_WIN_UNLOCK:
     case MPIDI_CH4U_WIN_UNLOCKALL:
-        MPIDI_CH4R_win_unlock_proc(msg_hdr, win, reply_token);
+        MPIDI_CH4U_win_unlock_proc(msg_hdr, win, reply_token);
         break;
 
     case MPIDI_CH4U_WIN_UNLOCK_ACK:
     case MPIDI_CH4U_WIN_UNLOCKALL_ACK:
-        MPIDI_CH4R_win_unlock_done_cb(msg_hdr, win);
+        MPIDI_CH4U_win_unlock_done_cb(msg_hdr, win);
         break;
 
     case MPIDI_CH4U_WIN_COMPLETE:
-        MPIDI_CH4R_win_complete_proc(msg_hdr, win);
+        MPIDI_CH4U_win_complete_proc(msg_hdr, win);
         break;
 
     case MPIDI_CH4U_WIN_POST:
-        MPIDI_CH4R_win_post_proc(msg_hdr, win);
+        MPIDI_CH4U_win_post_proc(msg_hdr, win);
         break;
 
     default:
@@ -2073,15 +2073,15 @@ static inline int MPIDI_CH4R_win_ctrl_target_handler(void *am_hdr,
     if (cmpl_handler_fn)
         *cmpl_handler_fn = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_WIN_CTRL_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_WIN_CTRL_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put_target_handler
+#define FUNCNAME MPIDI_CH4U_put_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -2101,8 +2101,8 @@ static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
     MPID_Segment *segment_ptr;
     MPID_Win *win;
     MPIDI_CH4U_put_msg_t *msg_hdr = (MPIDI_CH4U_put_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
@@ -2123,7 +2123,7 @@ static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
     /* MPIDI_CS_EXIT(); */
     MPIDI_CH4U_REQUEST(rreq, req->preq.win_ptr) = (uint64_t) win;
 
-    *cmpl_handler_fn = MPIDI_CH4R_put_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_put_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     if (msg_hdr->n_iov) {
@@ -2175,7 +2175,7 @@ static inline int MPIDI_CH4R_put_target_handler(void *am_hdr,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_HANDLER);
     return mpi_errno;
 }
 
@@ -2197,8 +2197,8 @@ static inline int MPIDI_CH4U_put_iov_target_handler(void *am_hdr,
 
     MPID_Win *win;
     MPIDI_CH4U_put_msg_t *msg_hdr = (MPIDI_CH4U_put_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_IOV_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_IOV_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_IOV_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_IOV_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
@@ -2221,7 +2221,7 @@ static inline int MPIDI_CH4U_put_iov_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     /* Base adjustment for iov will be done after we get the entire iovs,
-       at MPIDI_CH4R_put_data_target_handler */
+       at MPIDI_CH4U_put_data_target_handler */
     MPIU_Assert(msg_hdr->n_iov);
     dt_iov = (struct iovec *)MPL_malloc(sizeof(struct iovec) * msg_hdr->n_iov);
     MPIU_Assert(dt_iov);
@@ -2232,7 +2232,7 @@ static inline int MPIDI_CH4U_put_iov_target_handler(void *am_hdr,
     *data = dt_iov;
     *p_data_sz = msg_hdr->n_iov * sizeof(struct iovec);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_IOV_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_IOV_HANDLER);
     return mpi_errno;
 }
 
@@ -2253,8 +2253,8 @@ static inline int MPIDI_CH4U_put_iov_ack_target_handler(void *am_hdr,
     MPIDI_CH4U_put_iov_ack_msg_t *msg_hdr = (MPIDI_CH4U_put_iov_ack_msg_t *) am_hdr;
     MPIDI_CH4U_put_dat_msg_t dat_msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_IOV_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_IOV_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_IOV_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_IOV_ACK_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
@@ -2276,7 +2276,7 @@ static inline int MPIDI_CH4U_put_iov_ack_target_handler(void *am_hdr,
     *req = NULL;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_IOV_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_IOV_ACK_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -2299,8 +2299,8 @@ static inline int MPIDI_CH4U_acc_iov_ack_target_handler(void *am_hdr,
     MPIDI_CH4U_acc_iov_ack_msg_t *msg_hdr = (MPIDI_CH4U_acc_iov_ack_msg_t *) am_hdr;
     MPIDI_CH4U_acc_dat_msg_t dat_msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_IOV_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_IOV_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_IOV_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_IOV_ACK_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
@@ -2322,7 +2322,7 @@ static inline int MPIDI_CH4U_acc_iov_ack_target_handler(void *am_hdr,
     *req = NULL;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_IOV_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_IOV_ACK_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -2330,10 +2330,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_put_data_target_handler
+#define FUNCNAME MPIDI_CH4U_put_data_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_put_data_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_put_data_target_handler(void *am_hdr,
                                                      uint64_t reply_token,
                                                      void **data,
                                                      size_t * p_data_sz,
@@ -2349,8 +2349,8 @@ static inline int MPIDI_CH4R_put_data_target_handler(void *am_hdr,
     uintptr_t base;
     int i;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_PUT_DATA_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_PUT_DATA_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_DATA_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_DATA_HANDLER);
 
     rreq = (MPID_Request *) msg_hdr->preq_ptr;
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(rreq, req->preq.win_ptr);
@@ -2365,17 +2365,17 @@ static inline int MPIDI_CH4R_put_data_target_handler(void *am_hdr,
     *is_contig = 0;
     *p_data_sz = MPIDI_CH4U_REQUEST(rreq, req->preq.n_iov);
     *req = rreq;
-    *cmpl_handler_fn = MPIDI_CH4R_put_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_put_cmpl_handler;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_PUT_DATA_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_PUT_DATA_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_acc_data_target_handler
+#define FUNCNAME MPIDI_CH4U_acc_data_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_acc_data_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_acc_data_target_handler(void *am_hdr,
                                                      uint64_t reply_token,
                                                      void **data,
                                                      size_t * p_data_sz,
@@ -2393,8 +2393,8 @@ static inline int MPIDI_CH4R_acc_data_target_handler(void *am_hdr,
     int i;
     struct iovec *iov;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_ACC_DATA_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_ACC_DATA_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_ACC_DATA_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ACC_DATA_HANDLER);
 
     rreq = (MPID_Request *) msg_hdr->preq_ptr;
     win = (MPID_Win *) MPIDI_CH4U_REQUEST(rreq, req->areq.win_ptr);
@@ -2419,17 +2419,17 @@ static inline int MPIDI_CH4R_acc_data_target_handler(void *am_hdr,
     *p_data_sz = data_sz;
     *req = rreq;
     *cmpl_handler_fn = MPIDI_CH4U_REQUEST(rreq, req->areq.do_get) ?
-        MPIDI_CH4R_get_acc_cmpl_handler : MPIDI_CH4R_acc_cmpl_handler;
+        MPIDI_CH4U_get_acc_cmpl_handler : MPIDI_CH4U_acc_cmpl_handler;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_ACC_DATA_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ACC_DATA_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_cswap_target_handler
+#define FUNCNAME MPIDI_CH4U_cswap_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_cswap_target_handler(void *am_hdr,
                                                   uint64_t reply_token,
                                                   void **data,
                                                   size_t * p_data_sz,
@@ -2447,15 +2447,15 @@ static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
     void *p_data;
 
     MPIDI_CH4U_cswap_req_msg_t *msg_hdr = (MPIDI_CH4U_cswap_req_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CSWAP_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CSWAP_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_CSWAP_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_CSWAP_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
     rreq->kind = MPID_WIN_REQUEST;
     *req = rreq;
 
-    *cmpl_handler_fn = MPIDI_CH4R_cswap_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_cswap_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPIDI_Datatype_check_contig_size(msg_hdr->datatype, 1, dt_contig, data_sz);
@@ -2485,15 +2485,15 @@ static inline int MPIDI_CH4R_cswap_target_handler(void *am_hdr,
     *data = p_data;
     MPIDI_CH4U_REQUEST(*req, req->creq.data) = p_data;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CSWAP_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_CSWAP_HANDLER);
     return mpi_errno;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_handle_acc_request
+#define FUNCNAME MPIDI_CH4U_handle_acc_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_handle_acc_request(void *am_hdr,
+static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -2526,8 +2526,8 @@ static inline int MPIDI_CH4R_handle_acc_request(void *am_hdr,
         MPIU_Assert(p_data);
     }
 
-    *cmpl_handler_fn = (msg_hdr->do_get) ? MPIDI_CH4R_get_acc_cmpl_handler :
-        MPIDI_CH4R_acc_cmpl_handler;
+    *cmpl_handler_fn = (msg_hdr->do_get) ? MPIDI_CH4U_get_acc_cmpl_handler :
+        MPIDI_CH4U_acc_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     *is_contig = 1;
@@ -2632,7 +2632,7 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
     MPIU_Assert(dt_iov);
 
     /* Base adjustment for iov will be done after we get the entire iovs,
-       at MPIDI_CH4R_acc_data_target_handler */
+       at MPIDI_CH4U_acc_data_target_handler */
     *is_contig = 1;
     *p_data_sz = sizeof(struct iovec) * msg_hdr->n_iov;
     *data = (void *) dt_iov;
@@ -2645,10 +2645,10 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_get_target_handler
+#define FUNCNAME MPIDI_CH4U_get_target_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
+static inline int MPIDI_CH4U_get_target_handler(void *am_hdr,
                                                 uint64_t reply_token,
                                                 void **data,
                                                 size_t * p_data_sz,
@@ -2663,15 +2663,15 @@ static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
     MPID_Win *win;
     uintptr_t base;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_HANDLER);
 
     rreq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(rreq);
     rreq->kind = MPID_WIN_REQUEST;
 
     *req = rreq;
-    *cmpl_handler_fn = MPIDI_CH4R_get_cmpl_handler;
+    *cmpl_handler_fn = MPIDI_CH4U_get_cmpl_handler;
     MPIDI_CH4U_REQUEST(rreq, req->seq_no) = OPA_fetch_and_add_int(&MPIDI_CH4_Global.nxt_seq_no, 1);
 
     MPL_HASH_FIND(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash,
@@ -2703,7 +2703,7 @@ static inline int MPIDI_CH4R_get_target_handler(void *am_hdr,
         MPIDI_CH4U_REQUEST(rreq, req->greq.dt_iov) = iov;
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_HANDLER);
     return mpi_errno;
 }
 
@@ -2729,8 +2729,8 @@ static inline int MPIDI_CH4U_get_ack_target_handler(void *am_hdr,
     MPID_Segment *segment_ptr;
 
     MPIDI_CH4U_get_ack_msg_t *msg_hdr = (MPIDI_CH4U_get_ack_msg_t *) am_hdr;
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_ACK_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_ACK_HANDLER);
+    MPIDI_STATE_DECL(MPID_STATE_CH4U_GET_ACK_HANDLER);
+    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_GET_ACK_HANDLER);
 
     greq = MPIDI_CH4I_am_win_request_create();
     MPIU_Assert(greq);
@@ -2782,7 +2782,7 @@ static inline int MPIDI_CH4U_get_ack_target_handler(void *am_hdr,
         MPL_free(segment_ptr);
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_ACK_HANDLER);
+    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_GET_ACK_HANDLER);
     return mpi_errno;
 }
 
