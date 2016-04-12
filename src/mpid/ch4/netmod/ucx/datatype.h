@@ -41,7 +41,7 @@ static inline void* MPIDI_CH4_NMI_UCX_Start_unpack(void *context, void *buffer, 
     struct MPIDI_CH4_NMI_UCX_pack_state *state;
     MPI_Aint packsize;
 
-    state = MPL_malloc(sizeof(struct MPIDI_CH4_NMI_UCX_pack_state)); 
+    state = MPL_malloc(sizeof(struct MPIDI_CH4_NMI_UCX_pack_state));
     MPIR_Pack_size_impl(count, *datatype, &packsize);
 
     segment_ptr = MPID_Segment_alloc();

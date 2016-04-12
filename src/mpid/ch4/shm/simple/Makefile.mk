@@ -30,6 +30,6 @@ noinst_HEADERS += src/mpid/ch4/shm/simple/ch4_shm_am.h        \
 
 mpi_core_sources += src/mpid/ch4/shm/simple/ch4_shm_globals.c    \
                     src/mpid/ch4/shm/simple/ch4_shm_func_table.c \
-                    src/mpid/ch4/shm/simple/ch4_shm_barrier.c    
+                    src/mpid/ch4/shm/simple/ch4_shm_barrier.c
 
 endif

@@ -247,7 +247,7 @@ static inline int MPIDI_CH4I_progress_win_fence(MPID_Win *win)
     do {
         MPIDI_CH4R_PROGRESS();
     } while(OPA_load_int(&MPIDI_CH4U_WIN(win, outstanding_ops)) != 0);
-        
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_PROGRESS_WIN_FENCE);
     return mpi_errno;
@@ -363,7 +363,7 @@ static inline int MPIDI_CH4R_win_post(MPID_Group *group, int assert, MPID_Win *w
     MPIR_ERR_CHKANDJUMP((MPIDI_CH4U_WIN(win, sync).pw.group != NULL),
                         mpi_errno, MPI_ERR_GROUP,
                         "**group");
-    
+
     MPIDI_CH4U_WIN(win, sync).pw.group = group;
     MPIU_Assert(group != NULL);
 
@@ -491,7 +491,7 @@ static inline int MPIDI_CH4R_win_lock(int lock_type, int rank, int assert, MPID_
 
 fn_exit0:
     MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_LOCK;
-    
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_LOCK);
     return mpi_errno;
@@ -1132,7 +1132,7 @@ static inline int MPIDI_CH4R_win_unlock_all(MPID_Win *win)
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
-        
+
         if(MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked == 1)
             lockQ[i].done = 1;
     }
@@ -1297,7 +1297,7 @@ static inline int MPIDI_CH4R_win_lock_all(int assert, MPID_Win *win)
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
-        
+
         if(MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked == 1)
             lockQ[i].done = 1;
     }
