@@ -512,16 +512,16 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NMI_Do_inject(int           rank,
-                                          MPID_Comm    *comm,
-                                          uint64_t      reply_token,
-                                          int           handler_id,
-                                          const void   *am_hdr,
-                                          size_t        am_hdr_sz,
-                                          void         *netmod_context,
-                                          int           is_reply,
-                                          int           use_comm_table,
-                                          int           need_lock)
+static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
+                                              MPID_Comm    *comm,
+                                              uint64_t      reply_token,
+                                              int           handler_id,
+                                              const void   *am_hdr,
+                                              size_t        am_hdr_sz,
+                                              void         *netmod_context,
+                                              int           is_reply,
+                                              int           use_comm_table,
+                                              int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS, use_rank;
     MPID_Comm *use_comm;

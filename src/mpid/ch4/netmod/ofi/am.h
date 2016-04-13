@@ -338,9 +338,9 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int         rank,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);
-    mpi_errno = MPIDI_CH4_NMI_Do_inject(rank, comm, -1ULL,
-                                        handler_id, am_hdr, am_hdr_sz,
-                                        netmod_context, FALSE, TRUE, TRUE);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(rank, comm, -1ULL,
+                                            handler_id, am_hdr, am_hdr_sz,
+                                            netmod_context, FALSE, TRUE, TRUE);
 
     if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
@@ -361,9 +361,9 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t    reply_token,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR_REPLY);
 
-    mpi_errno = MPIDI_CH4_NMI_Do_inject(-1,NULL,reply_token,
-                                        handler_id,am_hdr,
-                                        am_hdr_sz, NULL, TRUE, TRUE, FALSE);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(-1,NULL,reply_token,
+                                            handler_id,am_hdr,
+                                            am_hdr_sz, NULL, TRUE, TRUE, FALSE);
 
     if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
