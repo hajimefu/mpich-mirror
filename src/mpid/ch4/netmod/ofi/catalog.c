@@ -1,5 +1,5 @@
 /* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
-static inline void MPIDI_Unused_gen_catalog()
+static inline void MPIDI_CH4_NMI_OFI_Unused_gen_catalog()
 {
 #if 0
     char *a;
