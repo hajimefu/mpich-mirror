@@ -47,4 +47,8 @@ typedef struct {
     };
 } MPIDI_CH4_NMI_UCX_Am_reply_token_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_CH4_NMI_UCX_win_t;
+
 #endif /* UCX_PRE_H_INCLUDED */
