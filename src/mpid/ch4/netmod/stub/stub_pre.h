@@ -26,6 +26,10 @@ typedef struct {
 
 typedef struct {
     int dummy;
+} MPIDI_CH4_NMI_STUB_Win_t;
+
+typedef struct {
+    int dummy;
 } MPIDI_CH4_NMI_STUB_dt_t;
 
 typedef struct {
