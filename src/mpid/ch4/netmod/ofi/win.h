@@ -121,7 +121,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
 
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_CH4_NMI_OFI_Win_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_CH4_NMI_OFI_win_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_CH4_NMI_OFI_Datatype_t));
 
     /* Note: MPIDI_CH4U_win_init will interpret the info object */
@@ -133,7 +133,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
                         "**nomem");
     *win_ptr = win;
 
-    memset(&MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(MPIDI_CH4_NMI_OFI_Win_t));
+    memset(&MPIDI_CH4_NMI_OFI_WIN(win), 0, sizeof(MPIDI_CH4_NMI_OFI_win_t));
 
     /* context id lower bits, window instance upper bits */
     window_instance = MPIDI_CH4_NMI_OFI_Index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator);

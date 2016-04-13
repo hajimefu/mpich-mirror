@@ -118,10 +118,10 @@ MPIDI_CH4_NMI_${net_upper}_dt_t ${net};"
     fi
 
     if test -z "$ch4_netmod_win_decl" ; then
-        ch4_netmod_win_decl="MPIDI_CH4_NMI_${net_upper}_Win_t ${net};"
+        ch4_netmod_win_decl="MPIDI_CH4_NMI_${net_upper}_win_t ${net};"
     else
         ch4_netmod_win_decl="${ch4_netmod_win_decl} \\
-MPIDI_CH4_NMI_${net_upper}_Win_t ${net};"
+MPIDI_CH4_NMI_${net_upper}_win_t ${net};"
     fi
 
 
