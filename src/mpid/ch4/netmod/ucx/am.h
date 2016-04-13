@@ -68,6 +68,24 @@ fn_fail:
     goto fn_exit;
 }
 
+static inline void MPIDI_CH4_NMI_UCX_inject_am_callback(void *request, ucs_status_t status)
+{
+    MPIDI_CH4_NMI_UCX_Ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
+
+    if(ucp_request->req){
+        MPL_free(ucp_request->req);
+        ucp_request->req = NULL;
+        ucp_request_release(ucp_request);
+    } else {
+        ucp_request->req = (void *)TRUE;
+    }
+
+fn_exit:
+    return;
+fn_fail:
+    goto fn_exit;
+}
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_send_am_hdr
 #undef FCNAME
@@ -414,17 +432,17 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
                                                                      ucp_dt_make_contig(1), ucx_tag,
-                                                                     NULL);
+                                                                     &MPIDI_CH4_NMI_UCX_inject_am_callback);
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
-    /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
+        /* inject is done */
         MPL_free(send_buf);
-    } else {
-        while (!ucp_request_is_completed(ucp_request)) {
-            ucp_worker_progress(MPIDI_CH4_NMI_UCX_Global.worker);
-        }
+    } else if (ucp_request->req) {
+        MPL_free(send_buf);
         ucp_request_release(ucp_request);
+    } else {
+        ucp_request->req = send_buf;
     }
 
  fn_exit:
@@ -469,17 +487,17 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
                                                                      ucp_dt_make_contig(1), ucx_tag,
-                                                                     NULL);
+                                                                     &MPIDI_CH4_NMI_UCX_inject_am_callback);
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
-    /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
+        /* inject is done */
         MPL_free(send_buf);
-    } else {
-        while (!ucp_request_is_completed(ucp_request)) {
-            ucp_worker_progress(MPIDI_CH4_NMI_UCX_Global.worker);
-        }
+    } else if (ucp_request->req) {
+        MPL_free(send_buf);
         ucp_request_release(ucp_request);
+    } else {
+        ucp_request->req = send_buf;
     }
 
  fn_exit:
