@@ -56,25 +56,25 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /*
  * Helper routines and macros for request completion
  */
-#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req)                           \
-  ({                                                                    \
-  (req) = (MPIDI_CH4_NMI_OFI_Ssendack_request_t*)                                     \
-    MPIU_Handle_obj_alloc(&MPIDI_Request_mem);                          \
-  if (req == NULL)                                                      \
-    MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1,                              \
-               "Cannot allocate Ssendack Request");                     \
-  })
+#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req)             \
+    do {                                                                \
+        (req) = (MPIDI_CH4_NMI_OFI_Ssendack_request_t*)                 \
+            MPIU_Handle_obj_alloc(&MPIDI_Request_mem);                  \
+        if (req == NULL)                                                \
+            MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1,                      \
+                       "Cannot allocate Ssendack Request");             \
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_free(req) \
   MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
 
-#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_alloc_and_init(req)      \
-  ({                                                    \
-    MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);              \
-    MPIU_Assert(req != NULL);                           \
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
-                == MPID_SSENDACK_REQUEST);              \
-  })
+#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_alloc_and_init(req)        \
+    do {                                                                \
+        MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);            \
+        MPIU_Assert(req != NULL);                                       \
+        MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                    \
+                    == MPID_SSENDACK_REQUEST);                          \
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
   do {                                                                  \
@@ -91,16 +91,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 
 
 #define MPIDI_CH4_NMI_OFI_PROGRESS()                              \
-  ({                                                     \
-    mpi_errno = MPIDI_Progress_test();                   \
-    if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno); \
-  })
+    do {                                                          \
+        mpi_errno = MPIDI_Progress_test();                        \
+        if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);      \
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(cond)                 \
-  ({                                                  \
-  while (cond)                                        \
-       MPIDI_CH4_NMI_OFI_PROGRESS();                           \
-  })
+    while (cond) MPIDI_CH4_NMI_OFI_PROGRESS()
 
 #define MPIDI_CH4_NMI_OFI_ERR  MPIR_ERR_CHKANDJUMP4
 #define MPIDI_CH4_NMI_OFI_CALL(FUNC,STR)                                     \
@@ -237,38 +234,34 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                             #STR);                              \
     } while (0)
 
-#define MPIDI_CH4_NMI_OFI_REQUEST_CREATE(req)                           \
-  ({                                              \
-    req = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);        \
-  })
+#define MPIDI_CH4_NMI_OFI_REQUEST_CREATE(req)                 \
+    do {                                                      \
+        (req) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);  \
+    } while (0)
 
-#define MPIDI_CH4_NMI_OFI_SEND_REQUEST_CREATE_LW(req)                     \
-  ({                                               \
-    req = MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(1); \
-  })
+#define MPIDI_CH4_NMI_OFI_SEND_REQUEST_CREATE_LW(req)                   \
+    do {                                                                \
+        (req) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(1);    \
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_SSEND_ACKREQUEST_CREATE(req)            \
-  ({                                       \
-    MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req); \
-  })
+    do {                                                          \
+        MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);      \
+    } while (0)
 
 #define WINFO(w,rank) MPIDI_CH4U_WINFO(w,rank)
 
-#define MPIDI_CH4_NMI_OFI_WINFO_BASE(w,rank)                                              \
-({                                                                      \
-  void *_p;                                                             \
-  _p = NULL;                                                            \
-  _p;                                                                   \
-})
+static inline void *MPIDI_CH4_NMI_OFI_WINFO_BASE(MPID_Win *w, int rank)
+{
+    return NULL;
+}
 
 #define MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
-#define MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(w,rank)                          \
-({                                                                      \
-  uint64_t _v;                                                          \
-  _v = MPIDI_CH4_NMI_OFI_WIN(w).mr_key;                                              \
-  _v;                                                                   \
-})
+static inline uint64_t MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(MPID_Win *w, int rank)
+{
+    return MPIDI_CH4_NMI_OFI_WIN(w).mr_key;
+}
 
 /*  Prototypes */
 

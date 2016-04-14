@@ -26,7 +26,7 @@
 #define MPIDI_CH4_NMI_OFI_IOV_ERROR   -1
 
 #define MPIDI_CH4_NMI_OFI_INIT_IOV_STATE(var)                                             \
-  ({                                                                    \
+  do {                                                                  \
     iov_state->var## _base_addr = var;                                  \
     iov_state->var## _count     = var## _count;                         \
     iov_state->var## _iov       = var## _iov;                           \
@@ -42,10 +42,10 @@
         break;                                                          \
       }                                                                 \
     }                                                                   \
-  })
+  } while (0)
 
 #define MPIDI_CH4_NMI_OFI_NEXT_IOV_STATE(var)                                             \
-  ({                                                                    \
+  do {                                                                  \
     *var## _addr_next       = iov_state->var## _addr;                   \
     iov_state->var## _addr += buf_size;                                 \
     iov_state->var## _size -= buf_size;                                 \
@@ -58,25 +58,25 @@
         break;                                                          \
       }                                                                 \
     }                                                                   \
-  })
+  } while (0)
 
 #define MPIDI_CH4_NMI_OFI_INIT_IOV(var)                                                   \
-  ({                                                                    \
+  do {                                                                  \
     ((struct iovec*)(&var## _iov[0]))->iov_len  = last_len;                  \
     ((struct iovec*)(&var## _iov[0]))->iov_base = (void*)var## _last_addr;   \
     *var## _iovs_nout = 1;                                              \
-  })
+  } while (0)
 
 #define MPIDI_CH4_NMI_OFI_UPDATE_IOV(var)                                                 \
-  ({                                                                    \
+  do {                                                                  \
   var## _idx++;                                                         \
   (*var## _iovs_nout)++;                                                \
   ((struct iovec*)(&var## _iov[var## _idx]))->iov_base = (void *)var## _addr; \
   ((struct iovec*)(&var## _iov[var## _idx]))->iov_len  = len;                \
-  })
+  } while (0)
 
 #define MPIDI_CH4_NMI_OFI_UPDATE_IOV_STATE1(var1,var2)                                    \
-  ({                                                                    \
+  do {                                                                  \
     if(*var2## _iovs_nout>=var2## _max_iovs) return MPIDI_CH4_NMI_OFI_IOV_EAGAIN;   \
     ((struct iovec*)(&var1## _iov[var1## _idx]))->iov_len += len;            \
     var2## _idx++;                                                      \
@@ -84,10 +84,10 @@
     ((struct iovec*)(&var2## _iov[var2## _idx]))->iov_base = (void *)var2## _addr; \
     ((struct iovec*)(&var2## _iov[var2## _idx]))->iov_len  = len;            \
     MPIDI_CH4_NMI_OFI_Next_iovec_state(iov_state,&origin_addr, &target_addr, &len); \
-})
+  } while (0)
 
 #define MPIDI_CH4_NMI_OFI_UPDATE_IOV_STATE2(var1,var2,var3)                               \
-  ({                                                                    \
+  do {                                                                  \
     if(*var2## _iovs_nout>=var2## _max_iovs) return MPIDI_CH4_NMI_OFI_IOV_EAGAIN;   \
     if(*var3## _iovs_nout>=var3## _max_iovs) return MPIDI_CH4_NMI_OFI_IOV_EAGAIN;   \
     ((struct iovec*)(&var1## _iov[var1## _idx]))->iov_len += len;            \
@@ -100,7 +100,7 @@
     ((struct iovec*)(&var3## _iov[var3## _idx]))->iov_base = (void *)var3## _addr; \
     ((struct iovec*)(&var3## _iov[var3## _idx]))->iov_len  = len;            \
     MPIDI_CH4_NMI_OFI_Next_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr,&len); \
-})
+  } while (0)
 
 static inline
 int MPIDI_CH4_NMI_OFI_Init_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,

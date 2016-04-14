@@ -26,7 +26,7 @@
 #endif
 
 #define MPIDI_CH4_NMI_OFI_INIT_CHUNK_CONTEXT(sigreq)                    \
-    ({                                                                  \
+    do {                                                                \
         if(sigreq)                                                      \
         {                                                               \
             int tmp;                                                    \
@@ -39,10 +39,10 @@
             MPIDI_CH4_NMI_OFI_CONDITIONAL_CNTR_INCR();                  \
         }                                                               \
         else MPIDI_CH4_NMI_OFI_CNTR_INCR();                             \
-    })
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_INIT_SIGNAL_REQUEST(sigreq,flags,ep)          \
-    ({                                                                  \
+    do {                                                                \
         if(sigreq)                                                      \
         {                                                               \
             MPIDI_CH4_NMI_OFI_REQUEST_CREATE((*(sigreq)));              \
@@ -55,10 +55,10 @@
             *(ep) = MPIDI_CH4_NMI_OFI_EP_TX_CTR(0);                     \
             *(flags)                    = 0ULL;                         \
         }                                                               \
-    })
+    } while (0)
 
 #define MPIDI_CH4_NMI_OFI_GET_BASIC_TYPE(a,b)   \
-    ({                                          \
+    do {                                        \
         if (MPIR_DATATYPE_IS_PREDEFINED(a))     \
             b = a;                              \
         else {                                  \
@@ -66,7 +66,7 @@
             MPID_Datatype_get_ptr(a,dt_ptr);    \
             b = dt_ptr->basic_type;             \
         }                                       \
-    })
+    } while (0)
 
 static inline uint32_t MPIDI_CH4_NMI_OFI_Disp_unit(MPID_Win* win, int rank)
 {
