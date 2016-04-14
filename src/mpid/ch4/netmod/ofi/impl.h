@@ -261,13 +261,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
   _p;                                                                   \
 })
 
-#define MPIDI_CH4_NMI_OFI_WINFO_BASE_FORCE(w,rank)                                        \
-({                                                                      \
-  void *_p;                                                             \
-  _p = (void *) ((MPIDI_CH4U_win_info_t *) WINFO(w, rank))->base_addr;  \
-  _p;                                                                   \
-})
-
 #define MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
 #define MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(w,rank)                          \
