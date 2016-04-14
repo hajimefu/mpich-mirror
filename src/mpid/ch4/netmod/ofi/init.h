@@ -532,8 +532,6 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
         MPIDI_CH4_NMI_OFI_PROGRESS();
     MPIU_Assert(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) == 0);
 
-    MPIDI_CH4U_finalize();
-
     if(do_scalable_ep) {
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_TAG(0)), epclose);
         MPIDI_CH4_NMI_OFI_CALL(fi_close((fid_t) MPIDI_CH4_NMI_OFI_EP_TX_RMA(0)), epclose);
@@ -561,6 +559,8 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
 
     comm = MPIR_Process.comm_self;
     MPIR_Comm_release_always(comm);
+
+    MPIDI_CH4U_finalize();
 
     MPL_free(MPIDI_Addr_table);
     MPL_free(MPIDI_Global.node_map);
