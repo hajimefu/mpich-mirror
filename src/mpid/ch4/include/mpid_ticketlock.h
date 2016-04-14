@@ -101,10 +101,10 @@ MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m
 #define MPIDI_CH4I_THREAD_CS_TRY_POBJ(mutex)
 #define MPIDI_CH4I_THREAD_CS_YIELD_POBJ(mutex)
 
-#define MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_acquire(&m); }})
-#define MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(m)  ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); }})
-#define MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(m)   ({ (0==MPIDI_CH4I_Thread_mutex_try_acquire(&m)); })
-#define MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(m) ({ if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); sched_yield(); MPIDI_CH4I_Thread_mutex_acquire(&m); }})
+#define MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(m) do { if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_acquire(&m); }} while (0)
+#define MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(m)  do { if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); }} while (0)
+#define MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(m)   do { (0==MPIDI_CH4I_Thread_mutex_try_acquire(&m));}} while (0)
+#define MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(m) do { if (MPIR_ThreadInfo.isThreaded) {  MPIDI_CH4I_Thread_mutex_release(&m); sched_yield(); MPIDI_CH4I_Thread_mutex_acquire(&m); }} while (0)
 
 #define MPIDI_CH4I_THREAD_CS_ENTER_ALLGRAN(mutex) MPIDI_CH4I_THREAD_CS_ENTER_GLOBAL(m)
 #define MPIDI_CH4I_THREAD_CS_EXIT_ALLGRAN(mutex)  MPIDI_CH4I_THREAD_CS_EXIT_GLOBAL(m)
