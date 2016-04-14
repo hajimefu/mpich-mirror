@@ -146,7 +146,7 @@ typedef struct {
  * Helper routines and macros for request completion
  */
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_ALLOC_AND_INIT(req,count)     \
-  ({                                                    \
+  do {                                                              \
     (req) = (MPID_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);      \
     if (req == NULL)                                                       \
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
@@ -163,7 +163,7 @@ typedef struct {
     req->status.MPI_ERROR     = MPI_SUCCESS;            \
     req->comm                 = NULL;                   \
     MPIR_REQUEST_CLEAR_DBG(req);                        \
-  })
+  } while (0)
 
 #define DECL_FUNC(FUNCNAME)  MPL_QUOTE(FUNCNAME)
 
