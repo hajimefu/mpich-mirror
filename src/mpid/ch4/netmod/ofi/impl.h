@@ -251,14 +251,14 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 
 #define WINFO(w,rank) MPIDI_CH4U_WINFO(w,rank)
 
-static inline void *MPIDI_CH4_NMI_OFI_WINFO_BASE(MPID_Win *w, int rank)
+static inline void *MPIDI_CH4_NMI_OFI_Winfo_base(MPID_Win *w, int rank)
 {
     return NULL;
 }
 
 #define MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
-static inline uint64_t MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(MPID_Win *w, int rank)
+static inline uint64_t MPIDI_CH4_NMI_OFI_Winfo_mr_key(MPID_Win *w, int rank)
 {
     return MPIDI_CH4_NMI_OFI_WIN(w).mr_key;
 }

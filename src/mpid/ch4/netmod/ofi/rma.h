@@ -348,7 +348,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_put(const void    *origin_addr,
     MPIDI_CH4_NMI_OFI_WIN(win).syncQ    = req;
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                        (uintptr_t)origin_addr,
-                                       (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
+                                       (uintptr_t)MPIDI_CH4_NMI_OFI_Winfo_base(win,req->target_rank) + offset,
                                        req->noncontig->origin_dt.num_contig,
                                        req->noncontig->target_dt.num_contig,
                                        INT64_MAX,
@@ -365,7 +365,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_put(const void    *origin_addr,
 
         if(rc==MPIDI_CH4_NMI_OFI_IOV_DONE) break;
 
-        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
+        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);
         MPIU_Assert(rc != MPIDI_CH4_NMI_OFI_IOV_ERROR);
         msg.msg_iov       = originv;
         msg.iov_count     = oout;
@@ -434,9 +434,9 @@ static inline int MPIDI_CH4_NM_put(const void   *origin_addr,
         MPIDI_CH4_NMI_OFI_CALL_RETRY2(MPIDI_CH4_NMI_OFI_CNTR_INCR(),
                                       fi_inject_write(MPIDI_CH4_NMI_OFI_EP_TX_CTR(0),(char *)origin_addr+origin_true_lb,
                                                       target_bytes,MPIDI_CH4_NMI_OFI_Comm_to_phys(win->comm_ptr,target_rank,MPIDI_CH4_NMI_OFI_API_CTR),
-                                                      (uint64_t)(char *)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,target_rank)+
+                                                      (uint64_t)(char *)MPIDI_CH4_NMI_OFI_Winfo_base(win,target_rank)+
                                                       target_disp*MPIDI_CH4_NMI_OFI_Disp_unit(win,target_rank)+target_true_lb,
-                                                      MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank)),
+                                                      MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank)),
                                       rdma_inject_write);
     } else {
         mpi_errno = MPIDI_CH4_NMI_OFI_Do_put(origin_addr,
@@ -499,7 +499,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get(void          *origin_addr,
     MPIDI_CH4_NMI_OFI_WIN(win).syncQ    = req;
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                        (uintptr_t)origin_addr,
-                                       (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
+                                       (uintptr_t)MPIDI_CH4_NMI_OFI_Winfo_base(win,req->target_rank) + offset,
                                        req->noncontig->origin_dt.num_contig,
                                        req->noncontig->target_dt.num_contig,
                                        INT64_MAX,
@@ -518,7 +518,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get(void          *origin_addr,
 
         MPIU_Assert(rc != MPIDI_CH4_NMI_OFI_IOV_ERROR);
 
-        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
+        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);
 
         msg.msg_iov       = originv;
         msg.iov_count     = oout;
@@ -599,9 +599,9 @@ static inline int MPIDI_CH4_NM_get(void         *origin_addr,
         msg.data          = 0;
         iov.iov_base      = (char *)origin_addr + origin_dt.true_lb;
         iov.iov_len       = target_dt.size;
-        riov.addr         = (uint64_t)((char *)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,target_rank) + offset + target_dt.true_lb);
+        riov.addr         = (uint64_t)((char *)MPIDI_CH4_NMI_OFI_Winfo_base(win,target_rank) + offset + target_dt.true_lb);
         riov.len          = target_dt.size;
-        riov.key          = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
+        riov.key          = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);
         MPIDI_CH4_NMI_OFI_CALL_RETRY2(MPIDI_CH4_NMI_OFI_CNTR_INCR(),
                                       fi_readmsg(MPIDI_CH4_NMI_OFI_EP_TX_CTR(0), &msg, 0),
                                       rdma_write);
@@ -724,7 +724,7 @@ static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
 
     buffer  = (char *)origin_addr + origin_dt.true_lb;
     rbuffer = (char *)result_addr + result_dt.true_lb;
-    tbuffer = (char *)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,target_rank) + offset;
+    tbuffer = (char *)MPIDI_CH4_NMI_OFI_Winfo_base(win,target_rank) + offset;
 
     MPIDI_CH4U_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
@@ -739,7 +739,7 @@ static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
     comparev.count = 1;
     targetv.addr   = (uint64_t)tbuffer;
     targetv.count  = 1;
-    targetv.key    = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);;
+    targetv.key    = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);;
 
     msg.msg_iov       = &originv;
     msg.desc          = NULL;
@@ -866,7 +866,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
 
     MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                        (uintptr_t)origin_addr,
-                                       (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
+                                       (uintptr_t)MPIDI_CH4_NMI_OFI_Winfo_base(win,req->target_rank) + offset,
                                        req->noncontig->origin_dt.num_contig,
                                        req->noncontig->target_dt.num_contig,
                                        max_size,
@@ -892,7 +892,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
 
         MPIU_Assert(rc != MPIDI_CH4_NMI_OFI_IOV_ERROR);
 
-        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
+        for(i=0; i<tout; i++) targetv[i].key = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);
 
         for(i=0; i<oout; i++)originv[i].count/=dt_size;
 
@@ -1036,7 +1036,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
         MPIDI_CH4_NMI_OFI_Init_iovec_state2(&req->noncontig->iovs,
                                             (uintptr_t)origin_addr,
                                             (uintptr_t)result_addr,
-                                            (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
+                                            (uintptr_t)MPIDI_CH4_NMI_OFI_Winfo_base(win,req->target_rank) + offset,
                                             req->noncontig->origin_dt.num_contig,
                                             req->noncontig->result_dt.num_contig,
                                             req->noncontig->target_dt.num_contig,
@@ -1047,7 +1047,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
     else
         MPIDI_CH4_NMI_OFI_Init_iovec_state(&req->noncontig->iovs,
                                            (uintptr_t)result_addr,
-                                           (uintptr_t)MPIDI_CH4_NMI_OFI_WINFO_BASE(win,req->target_rank) + offset,
+                                           (uintptr_t)MPIDI_CH4_NMI_OFI_Winfo_base(win,req->target_rank) + offset,
                                            req->noncontig->result_dt.num_contig,
                                            req->noncontig->target_dt.num_contig,
                                            max_size,
@@ -1088,7 +1088,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
 
         for(i=0; i<tout; i++) {
             targetv[i].count/=dt_size;
-            targetv[i].key = MPIDI_CH4_NMI_OFI_WINFO_MR_KEY(win,target_rank);
+            targetv[i].key = MPIDI_CH4_NMI_OFI_Winfo_mr_key(win,target_rank);
         }
 
         msg.msg_iov       = originv;
