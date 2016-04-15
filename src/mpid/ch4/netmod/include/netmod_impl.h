@@ -152,7 +152,7 @@ MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_ssend(const void * buf, int c
     return MPIDI_CH4_NM_native_func->ssend( buf, count, datatype, rank, tag, comm, context_offset, request);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_startall(int count, MPID_Request requests[]) {
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_startall(int count, MPID_Request *requests[]) {
     return MPIDI_CH4_NM_native_func->startall( count, requests);
 };
 

@@ -64,7 +64,7 @@ typedef void (*MPIDI_CH4_SHM_am_request_init_t)(MPID_Request * req);
 typedef void (*MPIDI_CH4_SHM_am_request_finalize_t)(MPID_Request * req);
 typedef int (*MPIDI_CH4_SHM_send_t)(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request);
 typedef int (*MPIDI_CH4_SHM_ssend_t)(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request);
-typedef int (*MPIDI_CH4_SHM_startall_t)(int count, MPID_Request requests[]);
+typedef int (*MPIDI_CH4_SHM_startall_t)(int count, MPID_Request *requests[]);
 typedef int (*MPIDI_CH4_SHM_send_init_t)(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request);
 typedef int (*MPIDI_CH4_SHM_ssend_init_t)(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request);
 typedef int (*MPIDI_CH4_SHM_rsend_init_t)(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request);
