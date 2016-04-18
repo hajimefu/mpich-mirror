@@ -48,7 +48,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
         MPIDI_Request_add_ref(sreq);
     }
 
-    MPIDI_CH4U_REQUEST(sreq, req->preq.win_ptr) = (uint64_t) win;
+    MPIDI_CH4U_REQUEST(sreq, req->preq.win_ptr) = win;
     MPIDI_Datatype_check_size(origin_datatype, origin_count, data_sz);
     if (data_sz == 0 || target_rank == MPI_PROC_NULL) {
         MPIDI_CH4I_am_request_complete(sreq);
@@ -178,7 +178,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
         goto fn_exit;
     }
 
-    MPIDI_CH4U_REQUEST(sreq, req->greq.win_ptr) = (uint64_t) win;
+    MPIDI_CH4U_REQUEST(sreq, req->greq.win_ptr) = win;
     MPIDI_CH4U_REQUEST(sreq, req->greq.addr) = (uint64_t)((char *) origin_addr);
     MPIDI_CH4U_REQUEST(sreq, req->greq.count) = origin_count;
     MPIDI_CH4U_REQUEST(sreq, req->greq.datatype) = origin_datatype;
@@ -398,7 +398,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
         goto fn_exit;
     }
 
-    MPIDI_CH4U_REQUEST(sreq, req->areq.win_ptr) = (uint64_t) win;
+    MPIDI_CH4U_REQUEST(sreq, req->areq.win_ptr) = win;
     MPIDI_CH4U_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
@@ -701,7 +701,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     MPIU_Memcpy(p_data, (char *)origin_addr, data_sz);
     MPIU_Memcpy((char *)p_data + data_sz, (char *)compare_addr, data_sz);
 
-    MPIDI_CH4U_REQUEST(sreq, req->creq.win_ptr) = (uint64_t) win;
+    MPIDI_CH4U_REQUEST(sreq, req->creq.win_ptr) = win;
     MPIDI_CH4U_REQUEST(sreq, req->creq.addr) = (uint64_t)((char *) result_addr);
     MPIDI_CH4U_REQUEST(sreq, req->creq.datatype) = datatype;
     MPIDI_CH4U_REQUEST(sreq, req->creq.result_addr) = result_addr;

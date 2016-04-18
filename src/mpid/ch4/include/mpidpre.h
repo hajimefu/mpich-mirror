@@ -38,6 +38,10 @@ typedef struct {
 #define CH4_COMPILE_TIME_ASSERT(expr_)                                  \
   do { switch(0) { case 0: case (expr_): default: break; } } while (0)
 
+/* Forward declaration of MPID_Win so that we can refer to it in this file */
+struct MPID_Win;
+typedef struct MPID_Win MPID_Win;
+
 typedef enum {
     MPIDI_PTYPE_RECV,
     MPIDI_PTYPE_SEND,
@@ -85,7 +89,7 @@ typedef struct MPIDI_CH4U_rreq_t {
 } MPIDI_CH4U_rreq_t;
 
 typedef struct MPIDI_CH4U_put_req_t {
-    uint64_t win_ptr;
+    MPID_Win *win_ptr;
     uint64_t preq_ptr;
     uint64_t reply_token;
     void *dt_iov;
@@ -96,7 +100,7 @@ typedef struct MPIDI_CH4U_put_req_t {
 } MPIDI_CH4U_put_req_t;
 
 typedef struct MPIDI_CH4U_get_req_t {
-    uint64_t win_ptr;
+    MPID_Win *win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
@@ -107,7 +111,7 @@ typedef struct MPIDI_CH4U_get_req_t {
 } MPIDI_CH4U_get_req_t;
 
 typedef struct MPIDI_CH4U_cswap_req_t {
-    uint64_t win_ptr;
+    MPID_Win *win_ptr;
     uint64_t creq_ptr;
     uint64_t reply_token;
     uint64_t addr;
@@ -117,7 +121,7 @@ typedef struct MPIDI_CH4U_cswap_req_t {
 } MPIDI_CH4U_cswap_req_t;
 
 typedef struct MPIDI_CH4U_acc_req_t {
-    uint64_t win_ptr;
+    MPID_Win *win_ptr;
     uint64_t req_ptr;
     uint64_t reply_token;
     MPI_Datatype origin_datatype;
