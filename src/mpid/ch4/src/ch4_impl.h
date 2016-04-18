@@ -15,13 +15,6 @@
 #include <mpidch4.h>
 
 /* Static inlines */
-static inline int MPIDI_CH4U_get_source(uint64_t match_bits)
-{
-   int source = ((match_bits & MPIDI_CH4U_SOURCE_MASK) >> MPIDI_CH4U_TAG_SHIFT);
-   /* Left shift and right shift by MPIDI_CH4U_SOURCE_SHIFT_UNPACK is to make sure the sign of source is retained */
-   return ((source << MPIDI_CH4U_SOURCE_SHIFT_UNPACK) >> MPIDI_CH4U_SOURCE_SHIFT_UNPACK);
-}
-
 static inline int MPIDI_CH4U_get_tag(uint64_t match_bits)
 {
    int tag = (match_bits & MPIDI_CH4U_TAG_MASK);

@@ -113,6 +113,7 @@ enum {
 
 typedef struct MPIDI_CH4U_hdr_t {
     uint64_t msg_tag;
+    int src_rank;
 } MPIDI_CH4U_hdr_t;
 
 typedef struct MPIDI_CH4U_send_long_req_msg_t {

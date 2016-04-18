@@ -47,7 +47,7 @@ __CH4_INLINE__ int MPIDI_CH4U_iprobe(int source,
         *flag = 1;
         unexp_req->status.MPI_ERROR = MPI_SUCCESS;
         unexp_req->status.MPI_SOURCE =
-            MPIDI_CH4U_get_source(MPIDI_CH4U_REQUEST(unexp_req, tag));
+            MPIDI_CH4U_REQUEST(unexp_req, src_rank);
         unexp_req->status.MPI_TAG =
             MPIDI_CH4U_get_tag(MPIDI_CH4U_REQUEST(unexp_req, tag));
         MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4U_REQUEST(unexp_req, count));
@@ -135,7 +135,7 @@ __CH4_INLINE__ int MPIDI_CH4U_improbe(int source,
 
         unexp_req->status.MPI_ERROR = MPI_SUCCESS;
         unexp_req->status.MPI_SOURCE =
-            MPIDI_CH4U_get_source(MPIDI_CH4U_REQUEST(unexp_req, tag));
+            MPIDI_CH4U_REQUEST(unexp_req, src_rank);
         unexp_req->status.MPI_TAG =
             MPIDI_CH4U_get_tag(MPIDI_CH4U_REQUEST(unexp_req, tag));
         MPIR_STATUS_SET_COUNT(unexp_req->status, MPIDI_CH4U_REQUEST(unexp_req, count));

@@ -556,7 +556,7 @@ static inline int MPIDI_CH4U_unexp_mrecv_cmpl_handler(MPID_Request * rreq)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_UNEXP_MRECV_CMPL_HANDLER);
 
     msg_tag = MPIDI_CH4U_REQUEST(rreq, tag);
-    rreq->status.MPI_SOURCE = MPIDI_CH4U_get_source(msg_tag);
+    rreq->status.MPI_SOURCE = MPIDI_CH4U_REQUEST(rreq, src_rank);
     rreq->status.MPI_TAG = MPIDI_CH4U_get_tag(msg_tag);
 
     buf = MPIDI_CH4U_REQUEST(rreq, req->rreq.mrcv_buffer);
@@ -669,7 +669,7 @@ static inline int MPIDI_CH4U_unexp_cmpl_handler(MPID_Request * rreq)
         goto fn_exit;
     }
 
-    match_req->status.MPI_SOURCE = MPIDI_CH4U_get_source(msg_tag);
+    match_req->status.MPI_SOURCE = MPIDI_CH4U_REQUEST(rreq, src_rank);
     match_req->status.MPI_TAG = MPIDI_CH4U_get_tag(msg_tag);
 
     MPIDI_Datatype_get_info(MPIDI_CH4U_REQUEST(match_req, count),
@@ -753,7 +753,7 @@ static inline int MPIDI_CH4U_recv_cmpl_handler(MPID_Request * rreq)
         goto fn_exit;
     }
 
-    rreq->status.MPI_SOURCE = MPIDI_CH4U_get_source(MPIDI_CH4U_REQUEST(rreq, tag));
+    rreq->status.MPI_SOURCE = MPIDI_CH4U_REQUEST(rreq, src_rank);
     rreq->status.MPI_TAG = MPIDI_CH4U_get_tag(MPIDI_CH4U_REQUEST(rreq, tag));
 
     if (MPIDI_CH4U_REQUEST(rreq, req->status) & MPIDI_CH4U_REQ_PEER_SSEND) {
