@@ -14,14 +14,6 @@
 #include "ch4_types.h"
 #include <mpidch4.h>
 
-/* Static inlines */
-static inline int MPIDI_CH4U_get_source(uint64_t match_bits)
-{
-   int source = ((match_bits & MPIDI_CH4U_SOURCE_MASK) >> MPIDI_CH4U_TAG_SHIFT);
-   /* Left shift and right shift by MPIDI_CH4U_SOURCE_SHIFT_UNPACK is to make sure the sign of source is retained */
-   return ((source << MPIDI_CH4U_SOURCE_SHIFT_UNPACK) >> MPIDI_CH4U_SOURCE_SHIFT_UNPACK);
-}
-
 static inline int MPIDI_CH4U_get_tag(uint64_t match_bits)
 {
    int tag = (match_bits & MPIDI_CH4U_TAG_MASK);
@@ -31,10 +23,8 @@ static inline int MPIDI_CH4U_get_tag(uint64_t match_bits)
 
 static inline int MPIDI_CH4U_get_context(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >>
-                   (MPIDI_CH4U_TAG_SHIFT + MPIDI_CH4U_SOURCE_SHIFT)));
+    return (int) ((match_bits & MPIDI_CH4U_CONTEXT_MASK) >> MPIDI_CH4U_TAG_SHIFT);
 }
-
 static inline int MPIDI_CH4U_get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
@@ -341,33 +331,21 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPIDI_CH4U_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4U_init_send_tag(MPIU_Context_id_t contextid, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4U_SOURCE_SHIFT);
-    match_bits |= (source & (MPIDI_CH4U_SOURCE_MASK >> MPIDI_CH4U_TAG_SHIFT));
     match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
     match_bits |= (MPIDI_CH4U_TAG_MASK & tag);
     return match_bits;
 }
 
 static inline uint64_t MPIDI_CH4U_init_recvtag(uint64_t * mask_bits,
-                                              MPIU_Context_id_t contextid, int source, int tag)
+                                              MPIU_Context_id_t contextid, int tag)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_CH4U_PROTOCOL_MASK;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4U_SOURCE_SHIFT);
-
-    if (MPI_ANY_SOURCE == source) {
-        match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
-        *mask_bits |= MPIDI_CH4U_SOURCE_MASK;
-    }
-    else {
-        match_bits |= source;
-        match_bits = (match_bits << MPIDI_CH4U_TAG_SHIFT);
-    }
 
     if (MPI_ANY_TAG == tag)
         *mask_bits |= MPIDI_CH4U_TAG_MASK;

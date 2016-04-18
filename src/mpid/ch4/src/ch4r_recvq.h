@@ -59,7 +59,7 @@ __CH4_INLINE__ void MPIDI_CH4U_delete_unexp(MPID_Request * req, MPIDI_CH4U_rreq_
 #define FUNCNAME MPIDI_CH4U_dequeue_unexp_strict
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint64_t ignore, int src_rank,
                                                              MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -70,7 +70,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint6
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         req = (MPID_Request *) curr->request;
         if (!(MPIDI_CH4U_REQUEST(req, req->status) & MPIDI_CH4U_REQ_BUSY) &&
-            ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore))) {
+            ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) &&
+            (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -84,7 +85,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint6
 #define FUNCNAME MPIDI_CH4U_dequeue_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ignore, int src_rank,
                                                       MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -94,7 +95,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ign
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) {
+        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore) &&
+            (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -108,7 +110,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ign
 #define FUNCNAME MPIDI_CH4U_find_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore, int src_rank,
                                                    MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -118,7 +120,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) {
+        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore) &&
+           (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             break;
         }
         req = NULL;
@@ -131,7 +134,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore
 #define FUNCNAME MPIDI_CH4U_dequeue_posted
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, MPIDI_CH4U_rreq_t ** list)
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, int src_rank, MPIDI_CH4U_rreq_t ** list)
 {
     MPID_Request *req = NULL;
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -140,8 +143,9 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, MPIDI_CH4U_
 
     MPL_DL_FOREACH_SAFE(*list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if ((tag & ~(MPIDI_CH4U_REQUEST(req, req->rreq.ignore))) ==
-            (MPIDI_CH4U_REQUEST(req, tag) & ~(MPIDI_CH4U_REQUEST(req, req->rreq.ignore)))) {
+        if (((tag & ~(MPIDI_CH4U_REQUEST(req, req->rreq.ignore))) ==
+            (MPIDI_CH4U_REQUEST(req, tag) & ~(MPIDI_CH4U_REQUEST(req, req->rreq.ignore)))) &&
+            (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(*list, curr);
             break;
         }
@@ -218,7 +222,7 @@ __CH4_INLINE__ void MPIDI_CH4U_delete_unexp(MPID_Request * req, MPIDI_CH4U_rreq_
 #define FUNCNAME MPIDI_CH4U_dequeue_unexp_strict
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint64_t ignore, int src_rank,
                                                              MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -228,8 +232,9 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint6
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if (!(MPIDI_CH4U_REQUEST(req, req->status) & MPIDI_CH4U_REQ_BUSY) &&
-            ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore))) {
+        if (!(MPIDI_CH4U_REQUEST(req, req->status) & MPIDI_CH4R_REQ_BUSY) &&
+            ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) &&
+            (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, curr);
             break;
         }
@@ -243,7 +248,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp_strict(uint64_t tag, uint6
 #define FUNCNAME MPIDI_CH4U_dequeue_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ignore, int src_rank,
                                                       MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -253,7 +258,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ign
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) {
+        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore) &&
+           (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(MPIDI_CH4_Global.unexp_list, curr);
             break;
         }
@@ -267,7 +273,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_unexp(uint64_t tag, uint64_t ign
 #define FUNCNAME MPIDI_CH4U_find_unexp
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore,
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore, int src_rank,
                                                    MPIDI_CH4U_rreq_t ** list)
 {
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -277,7 +283,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore
 
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.unexp_list, curr, tmp) {
         req = (MPID_Request *) curr->request;
-        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore)) {
+        if ((tag & ~ignore) == (MPIDI_CH4U_REQUEST(req, tag) & ~ignore) &&
+           (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             break;
         }
         req = NULL;
@@ -290,7 +297,7 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_find_unexp(uint64_t tag, uint64_t ignore
 #define FUNCNAME MPIDI_CH4U_dequeue_posted
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, MPIDI_CH4U_rreq_t ** list)
+__CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, int src_rank, MPIDI_CH4U_rreq_t ** list)
 {
     MPID_Request *req = NULL;
     MPIDI_CH4U_rreq_t *curr, *tmp;
@@ -300,7 +307,8 @@ __CH4_INLINE__ MPID_Request *MPIDI_CH4U_dequeue_posted(uint64_t tag, MPIDI_CH4U_
     MPL_DL_FOREACH_SAFE(MPIDI_CH4_Global.posted_list, curr, tmp) {
         req = (MPID_Request *) curr->request;
         if ((tag & ~MPIDI_CH4U_REQUEST(req, req->rreq.ignore)) ==
-            (MPIDI_CH4U_REQUEST(req, tag) & ~MPIDI_CH4U_REQUEST(req, req->rreq.ignore))) {
+            (MPIDI_CH4U_REQUEST(req, tag) & ~MPIDI_CH4U_REQUEST(req, req->rreq.ignore)) &&
+            (src_rank == MPIDI_CH4U_REQUEST(req, src_rank) || src_rank == MPI_ANY_SOURCE)) {
             MPL_DL_DELETE(MPIDI_CH4_Global.posted_list, curr);
             break;
         }
