@@ -68,6 +68,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
 
     MPIDI_CH4U_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     MPIR_cc_incr(sreq->cc_ptr, &c);
+    am_hdr.src_rank = win->comm_ptr->rank;
     am_hdr.target_disp = target_disp;
     am_hdr.count = target_count;
     am_hdr.datatype = target_datatype;
@@ -121,6 +122,7 @@ static inline int MPIDI_CH4I_do_put(const void *origin_addr,
         MPIDI_CH4U_REQUEST(sreq, req->preq.origin_addr) = (void *)origin_addr;
         MPIDI_CH4U_REQUEST(sreq, req->preq.origin_count) = origin_count;
         MPIDI_CH4U_REQUEST(sreq, req->preq.origin_datatype) = origin_datatype;
+        MPIDI_CH4U_REQUEST(sreq, src_rank) = target_rank;
         dtype_add_ref_if_not_builtin(origin_datatype);
 
         mpi_errno = MPIDI_CH4_NM_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_PUT_IOV_REQ,
@@ -201,6 +203,7 @@ static inline int MPIDI_CH4I_do_get(void          *origin_addr,
     am_hdr.datatype = target_datatype;
     am_hdr.greq_ptr = (uint64_t) sreq;
     am_hdr.win_id = MPIDI_CH4U_WIN(win, win_id);
+    am_hdr.src_rank = win->comm_ptr->rank;
 
     /* MPIDI_CS_ENTER(); */
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));
@@ -419,6 +422,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
     am_hdr.target_disp = target_disp;
     am_hdr.op = op;
     am_hdr.win_id = MPIDI_CH4U_WIN(win, win_id);
+    am_hdr.src_rank = win->comm_ptr->rank;
 
     if (do_get) {
         MPIDI_Datatype_check_size(MPIDI_CH4U_REQUEST(sreq, req->areq.result_datatype),
@@ -481,6 +485,7 @@ __CH4_INLINE__ int MPIDI_CH4I_do_accumulate(const void *origin_addr,
         MPIDI_CH4U_REQUEST(sreq, req->areq.origin_addr) = (void *) origin_addr;
         MPIDI_CH4U_REQUEST(sreq, req->areq.origin_count) = origin_count;
         MPIDI_CH4U_REQUEST(sreq, req->areq.origin_datatype) = origin_datatype;
+        MPIDI_CH4U_REQUEST(sreq, src_rank) = target_rank;
         dtype_add_ref_if_not_builtin(origin_datatype);
 
         mpi_errno = MPIDI_CH4_NM_send_am(target_rank, win->comm_ptr, MPIDI_CH4U_ACC_IOV_REQ,
@@ -714,6 +719,7 @@ __CH4_INLINE__ int MPIDI_CH4U_compare_and_swap(const void *origin_addr,
     am_hdr.datatype = datatype;
     am_hdr.req_ptr = (uint64_t) sreq;
     am_hdr.win_id = MPIDI_CH4U_WIN(win, win_id);
+    am_hdr.src_rank = win->comm_ptr->rank;
 
     /* MPIDI_CS_ENTER(); */
     OPA_incr_int(&MPIDI_CH4U_WIN(win, outstanding_ops));

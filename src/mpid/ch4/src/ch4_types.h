@@ -148,6 +148,7 @@ typedef struct MPIDI_CH4U_win_cntrl_msg_t {
 } MPIDI_CH4U_win_cntrl_msg_t;
 
 typedef struct MPIDI_CH4U_put_msg_t {
+    int src_rank;
     uint64_t win_id;
     uint64_t preq_ptr;
     MPI_Aint target_disp;
@@ -157,6 +158,7 @@ typedef struct MPIDI_CH4U_put_msg_t {
 } MPIDI_CH4U_put_msg_t;
 
 typedef struct MPIDI_CH4U_put_iov_ack_msg_t {
+    int src_rank;
     uint64_t target_preq_ptr;
     uint64_t origin_preq_ptr;
 } MPIDI_CH4U_put_iov_ack_msg_t;
@@ -172,6 +174,7 @@ typedef struct MPIDI_CH4U_put_ack_msg_t {
 } MPIDI_CH4U_put_ack_msg_t;
 
 typedef struct MPIDI_CH4U_get_req_msg_t {
+    int src_rank;
     uint64_t win_id;
     uint64_t greq_ptr;
     MPI_Aint target_disp;
@@ -185,6 +188,7 @@ typedef struct MPIDI_CH4U_get_ack_msg_t {
 } MPIDI_CH4U_get_ack_msg_t;
 
 typedef struct MPIDI_CH4U_cswap_req_msg_t {
+    int src_rank;
     uint64_t win_id;
     uint64_t req_ptr;
     MPI_Aint target_disp;
@@ -196,6 +200,7 @@ typedef struct MPIDI_CH4U_cswap_ack_msg_t {
 } MPIDI_CH4U_cswap_ack_msg_t;
 
 typedef struct MPIDI_CH4U_acc_req_msg_t {
+    int src_rank;
     uint64_t win_id;
     uint64_t req_ptr;
     int origin_count;

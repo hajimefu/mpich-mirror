@@ -867,6 +867,7 @@ static inline int MPIDI_CH4U_put_iov_cmpl_handler(MPID_Request * rreq)
     MPIDI_STATE_DECL(MPID_STATE_CH4U_PUT_IOV_CMPL_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_PUT_IOV_CMPL_HANDLER);
 
+    ack_msg.src_rank = MPIDI_CH4U_REQUEST(rreq, src_rank);
     ack_msg.origin_preq_ptr = (uint64_t) MPIDI_CH4U_REQUEST(rreq, req->preq.preq_ptr);
     ack_msg.target_preq_ptr = (uint64_t) rreq;
 
@@ -2112,6 +2113,7 @@ static inline int MPIDI_CH4U_put_target_handler(void *am_hdr,
 
     MPIDI_CH4U_REQUEST(*req, req->preq.preq_ptr) = msg_hdr->preq_ptr;
     MPIDI_CH4U_REQUEST(*req, req->preq.reply_token) = reply_token;
+    MPIDI_CH4U_REQUEST(*req, src_rank) = msg_hdr->src_rank;
 
     MPL_HASH_FIND(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash,
                   &msg_hdr->win_id, sizeof(uint64_t), win);
@@ -2209,6 +2211,7 @@ static inline int MPIDI_CH4U_put_iov_target_handler(void *am_hdr,
 
     MPIDI_CH4U_REQUEST(*req, req->preq.preq_ptr) = msg_hdr->preq_ptr;
     MPIDI_CH4U_REQUEST(*req, req->preq.reply_token) = reply_token;
+    MPIDI_CH4U_REQUEST(*req, src_rank) = msg_hdr->src_rank;
 
     MPL_HASH_FIND(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash,
                   &msg_hdr->win_id, sizeof(uint64_t), win);
@@ -2478,6 +2481,7 @@ static inline int MPIDI_CH4U_cswap_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->creq.reply_token) = reply_token;
     MPIDI_CH4U_REQUEST(*req, req->creq.datatype) = msg_hdr->datatype;
     MPIDI_CH4U_REQUEST(*req, req->creq.addr) = offset + base;
+    MPIDI_CH4U_REQUEST(*req, src_rank) = msg_hdr->src_rank;
 
     MPIU_Assert(dt_contig == 1);
     p_data = MPL_malloc(data_sz * 2);
@@ -2559,6 +2563,7 @@ static inline int MPIDI_CH4U_handle_acc_request(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->areq.data) = p_data;
     MPIDI_CH4U_REQUEST(*req, req->areq.n_iov) = msg_hdr->n_iov;
     MPIDI_CH4U_REQUEST(*req, req->areq.data_sz) = msg_hdr->result_data_sz;
+    MPIDI_CH4U_REQUEST(*req, src_rank) = msg_hdr->src_rank;
 
     if (!msg_hdr->n_iov) {
         MPIDI_CH4U_REQUEST(rreq, req->areq.dt_iov) = NULL;
@@ -2631,6 +2636,7 @@ static inline int MPIDI_CH4U_acc_iov_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(*req, req->areq.n_iov) = msg_hdr->n_iov;
     MPIDI_CH4U_REQUEST(*req, req->areq.data_sz) = msg_hdr->result_data_sz;
     MPIDI_CH4U_REQUEST(*req, req->areq.do_get) = msg_hdr->do_get;
+    MPIDI_CH4U_REQUEST(*req, src_rank) = msg_hdr->src_rank;
 
     dt_iov = (struct iovec *) MPL_malloc(sizeof(struct iovec) * msg_hdr->n_iov);
     MPIDI_CH4U_REQUEST(rreq, req->areq.dt_iov) = dt_iov;
@@ -2699,6 +2705,7 @@ static inline int MPIDI_CH4U_get_target_handler(void *am_hdr,
     MPIDI_CH4U_REQUEST(rreq, req->greq.dt_iov) = NULL;
     MPIDI_CH4U_REQUEST(rreq, req->greq.greq_ptr) = msg_hdr->greq_ptr;
     MPIDI_CH4U_REQUEST(rreq, req->greq.reply_token) = reply_token;
+    MPIDI_CH4U_REQUEST(rreq, src_rank) = msg_hdr->src_rank;
 
     if (msg_hdr->n_iov) {
         iov = (struct iovec *) MPL_malloc(msg_hdr->n_iov * sizeof(*iov));
