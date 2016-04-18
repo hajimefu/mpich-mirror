@@ -58,6 +58,19 @@ static inline MPIDI_CH4U_rreq_t **MPIDI_CH4U_context_id_to_uelist(uint64_t conte
     return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
 }
 
+static inline uint64_t MPIDI_CH4U_generate_win_id(MPID_Comm *comm_ptr)
+{
+    /* context id lower bits, window instance upper bits */
+    return 1 + (((uint64_t)comm_ptr->context_id) |
+                ((uint64_t)((MPIDI_CH4U_COMM(comm_ptr, window_instance))++)<<32));
+}
+
+static inline MPIU_Context_id_t MPIDI_CH4U_win_id_to_context(uint64_t win_id)
+{
+    /* pick the lower 32-bit to extract context id */
+    return (win_id - 1) & 0xffffffff;
+}
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_alloc_and_init_req
 #undef FCNAME
