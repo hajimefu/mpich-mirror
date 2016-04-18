@@ -267,8 +267,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     }
 #endif
 
-    /* CH4U uses a 32-bit tag space */
-    MPIR_Process.attrs.tag_ub = MPIR_Process.attrs.tag_ub < INT32_MAX ? MPIR_Process.attrs.tag_ub : INT32_MAX;
+    MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;
     /* discuss */
 
     if (mpi_errno != MPI_SUCCESS) {

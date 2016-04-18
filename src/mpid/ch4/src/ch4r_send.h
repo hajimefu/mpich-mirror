@@ -44,10 +44,9 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
     sreq->kind = MPID_REQUEST_SEND;
 
     *request = sreq;
-    match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, tag);
+    match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, comm->rank, tag);
 
     am_hdr.msg_tag = match_bits;
-    am_hdr.src_rank = comm->rank;
     if (type == MPIDI_CH4U_SSEND_REQ) {
         ssend_req.hdr = am_hdr;
         ssend_req.sreq_ptr = (uint64_t) sreq;
@@ -83,7 +82,6 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
             dtype_add_ref_if_not_builtin(datatype);
             MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype = datatype;
             MPIDI_CH4U_REQUEST(sreq, req->lreq).msg_tag  = match_bits;
-            MPIDI_CH4U_REQUEST(sreq, req->lreq).src_rank = comm->rank;
             mpi_errno = MPIDI_CH4_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
                                                    &lreq_hdr, sizeof(lreq_hdr), NULL);
         }
@@ -148,13 +146,12 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     MPIR_Comm_add_ref(comm);
     sreq->kind = MPID_PREQUEST_SEND;
     sreq->comm = comm;
-    match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, tag);
+    match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, rank, tag);
 
     MPIDI_CH4U_REQUEST(sreq, buffer) = (void *) buf;
     MPIDI_CH4U_REQUEST(sreq, count) = count;
     MPIDI_CH4U_REQUEST(sreq, datatype) = datatype;
     MPIDI_CH4U_REQUEST(sreq, tag) = match_bits;
-    MPIDI_CH4U_REQUEST(sreq, src_rank) = rank;
 
     sreq->partner_request = NULL;
     MPIDI_Request_complete(sreq);
@@ -310,7 +307,7 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPID_Request * requests[])
         datatype = MPIDI_CH4U_REQUEST(preq, datatype);
 
         tag = MPIDI_CH4U_get_tag(msg_tag);
-        rank = MPIDI_CH4U_REQUEST(preq, src_rank);
+        rank = MPIDI_CH4U_get_source(msg_tag);
         context_offset = MPIDI_CH4U_get_context(msg_tag) - preq->comm->context_id;
 
         switch (MPIDI_CH4U_REQUEST(preq, p_type)) {
