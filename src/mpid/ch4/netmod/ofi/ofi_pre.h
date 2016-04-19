@@ -97,16 +97,6 @@ typedef struct {
     uint64_t sreq_ptr;
 } MPIDI_CH4_NMI_OFI_Ack_msg_payload_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Am_reply_token_t {
-    union {
-        uint64_t val;
-        struct {
-            uint32_t context_id;
-            uint32_t src_rank;
-        } data;
-    };
-} MPIDI_CH4_NMI_OFI_Am_reply_token_t;
-
 typedef struct MPIDI_CH4_NMI_OFI_Am_header_t {
 uint64_t handler_id  :
     MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
@@ -137,10 +127,7 @@ typedef struct {
     MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t  lmt_info;
     uint64_t                             lmt_cntr;
     struct fid_mr                        *lmt_mr;
-    union  {
-        void                               *pack_buffer;
-        MPIDI_CH4_NMI_OFI_Am_reply_token_t  reply_token;
-    } clientdata;
+    void                          *pack_buffer;
     void                          *rreq_ptr;
     void                          *am_hdr;
     int (*cmpl_handler_fn)(struct MPID_Request *req);

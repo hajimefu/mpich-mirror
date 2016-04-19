@@ -250,7 +250,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     MPIU_Assert(comm->context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
     MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
-    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
+    MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = NULL;
     MPIR_cc_incr(sreq->cc_ptr, &c);
 
     iov[0].iov_base = msg_hdr;
@@ -460,14 +460,14 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
         MPIDU_Segment_init(buf, count, datatype, segment_ptr, 0);
         segment_first = 0;
         last = data_sz;
-        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = (char *) MPL_malloc(data_sz);
-        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer == NULL, mpi_errno,
+        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = (char *) MPL_malloc(data_sz);
+        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
-        MPIDU_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
+        MPIDU_Segment_pack(segment_ptr, segment_first, &last, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer));
         MPIDU_Segment_free(segment_ptr);
-        send_buf = (char *) MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer;
+        send_buf = (char *) MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer);
     } else {
-        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
+        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = NULL;
     }
 
     /* We don't want to do the long send if CH4R is doing eager send.

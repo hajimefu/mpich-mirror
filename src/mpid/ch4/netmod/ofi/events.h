@@ -453,9 +453,9 @@ static inline int MPIDI_CH4_NMI_OFI_Am_send_event(struct fi_cq_tagged_entry *wc,
             break;
     }
 
-    if(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer) {
-        MPL_free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer);
-        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
+    if(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer)) {
+        MPL_free(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer));
+        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = NULL;
     }
 
     mpi_errno = MPIDI_Global.am_send_cmpl_handlers[msg_hdr->handler_id](sreq);
@@ -478,61 +478,57 @@ static inline int MPIDI_CH4_NMI_OFI_Am_recv_event(struct fi_cq_tagged_entry *wc,
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Am_header_t         *am_hdr;
-    MPIDI_CH4_NMI_OFI_Am_reply_token_t  reply_token;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_RECV_COMPLETION);
 
-    am_hdr                      = (MPIDI_CH4_NMI_OFI_Am_header_t *) wc->buf;
-    reply_token.data.context_id = am_hdr->context_id;
-    reply_token.data.src_rank   = am_hdr->src_rank;
+    am_hdr = (MPIDI_CH4_NMI_OFI_Am_header_t *) wc->buf;
 
     switch(am_hdr->am_type) {
         case MPIDI_AMTYPE_SHORT_HDR:
             mpi_errno = MPIDI_CH4_NMI_OFI_Handle_short_am_hdr(am_hdr,
-                                                              am_hdr->payload,
-                                                              reply_token);
+                                                              am_hdr->payload);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_SHORT:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_short_am(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_short_am(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_LMT_REQ:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_am(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_am(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_LMT_HDR_REQ:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_am_hdr(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_am_hdr(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_LMT_ACK:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_lmt_ack(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_lmt_ack(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_LONG_HDR_REQ:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_hdr(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_hdr(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
             break;
 
         case MPIDI_AMTYPE_LONG_HDR_ACK:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_hdr_ack(am_hdr, reply_token);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Handle_long_hdr_ack(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -576,8 +572,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_read_event(struct fi_cq_tagged_entry *wc,
             MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, msg_hdr).am_type = MPIDI_AMTYPE_LMT_REQ;
             mpi_errno = MPIDI_CH4_NMI_OFI_Do_handle_long_am(&MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, msg_hdr),
                                                             &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info),
-                                                            MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr),
-                                                            MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, clientdata).reply_token);
+                                                            MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr));
 
             if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
@@ -594,8 +589,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_read_event(struct fi_cq_tagged_entry *wc,
             if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
             mpi_errno = MPIDI_CH4_NMI_OFI_Handle_short_am_hdr(&MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, msg_hdr),
-                                                              MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr),
-                                                              MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, clientdata).reply_token);
+                                                              MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr));
 
             if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
 
