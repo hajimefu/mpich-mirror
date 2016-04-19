@@ -33,7 +33,7 @@
 #define MPIDI_CH4_NMI_UCX_BUF_POOL_NUM             (1024)
 
 typedef struct {
-    MPID_Request *req;
+    void *req;
 } MPIDI_CH4_NMI_UCX_Ucp_request_t;
 
 typedef struct {
