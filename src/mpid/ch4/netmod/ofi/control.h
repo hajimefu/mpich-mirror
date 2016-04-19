@@ -32,7 +32,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control
 
     mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(rank,
                                             win->comm_ptr,
-                                            -1ULL,
                                             MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                             (void *)control,
                                             sizeof(*control),NULL,
@@ -68,7 +67,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
     control->ackreq      = ackreq;
 
     mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(rank,comm_ptr,
-                                            -1ULL,
                                             MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
                                             (void *)control,
                                             sizeof(*control),NULL,

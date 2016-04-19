@@ -150,7 +150,8 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
             msg.rreq_ptr = (uint64_t) unexp_req;
             MPIU_Assert((void *)msg.sreq_ptr != NULL);
 
-            mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(MPIDI_CH4U_REQUEST(unexp_req, req->rreq.reply_token),
+            mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(unexp_req, tag)),
+                                                         MPIDI_CH4U_REQUEST(unexp_req, src_rank),
                                                          MPIDI_CH4U_SEND_LONG_ACK,
                                                          &msg, sizeof(msg));
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -319,7 +320,8 @@ __CH4_INLINE__ int MPIDI_CH4U_imrecv(void *buf,
         msg.sreq_ptr = MPIDI_CH4U_REQUEST(message, req->rreq.peer_req_ptr);
         msg.rreq_ptr = (uint64_t) message;
         MPIU_Assert((void *)msg.sreq_ptr != NULL);
-        mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(MPIDI_CH4U_REQUEST(message, req->rreq.reply_token),
+        mpi_errno = MPIDI_CH4_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(message, tag)),
+                                                     MPIDI_CH4U_REQUEST(message, src_rank),
                                                      MPIDI_CH4U_SEND_LONG_ACK,
                                                      &msg, sizeof(msg));
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);

@@ -23,7 +23,6 @@ typedef int (*MPIDI_CH4_NM_am_origin_handler_fn) (MPID_Request * req);
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_CH4_NM_am_target_handler_fn)
  (void                                   *am_hdr,
-  uint64_t                                reply_token,    /* contains information about reply operation */
   void                                  **data,           /* data should be iovs if *is_contig is false */
   size_t                                 *data_sz,
   int                                    *is_contig,
@@ -44,10 +43,10 @@ typedef int (*MPIDI_CH4_NM_inject_am_hdr_t)(int rank, MPID_Comm * comm, int hand
 typedef int (*MPIDI_CH4_NM_send_am_t)(int rank, MPID_Comm * comm, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * netmod_context);
 typedef int (*MPIDI_CH4_NM_send_amv_t)(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * netmod_context);
 typedef int (*MPIDI_CH4_NM_send_amv_hdr_t)(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, MPID_Request * sreq, void * netmod_context);
-typedef int (*MPIDI_CH4_NM_send_am_hdr_reply_t)(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq);
-typedef int (*MPIDI_CH4_NM_inject_am_hdr_reply_t)(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz);
-typedef int (*MPIDI_CH4_NM_send_am_reply_t)(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
-typedef int (*MPIDI_CH4_NM_send_amv_reply_t)(uint64_t reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_NM_send_am_hdr_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_NM_inject_am_hdr_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz);
+typedef int (*MPIDI_CH4_NM_send_am_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_NM_send_amv_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
 typedef size_t (*MPIDI_CH4_NM_am_hdr_max_sz_t)(void);
 typedef size_t (*MPIDI_CH4_NM_am_inject_max_sz_t)(void);
 typedef int (*MPIDI_CH4_NM_comm_get_lpid_t)(MPID_Comm * comm_ptr, int idx, int * lpid_ptr, MPIU_BOOL is_remote);
@@ -338,10 +337,10 @@ MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_inject_am_hdr(int rank, MPID_
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am(int rank, MPID_Comm * comm, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * netmod_context) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * netmod_context) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_hdr(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, MPID_Request * sreq, void * netmod_context) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_reply(uint64_t reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_NM_am_hdr_max_sz(void) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_NM_am_inject_max_sz(void) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm * comm_ptr, int idx, int * lpid_ptr, MPIU_BOOL is_remote) MPIDI_CH4_NM_STATIC_INLINE_SUFFIX;

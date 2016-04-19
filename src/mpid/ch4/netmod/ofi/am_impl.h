@@ -218,7 +218,6 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                         rank,
                                                       MPID_Comm                  *comm,
-                                                      uint64_t                    reply_token,
                                                       int                         handler_id,
                                                       const void                 *am_hdr,
                                                       size_t                      am_hdr_sz,
@@ -227,9 +226,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
 {
     struct iovec iov[2];
     MPIDI_CH4_NMI_OFI_Am_header_t *msg_hdr;
-    int mpi_errno = MPI_SUCCESS, c, use_rank;
-    MPID_Comm *use_comm;
-    MPIDI_CH4_NMI_OFI_Am_reply_token_t use_token;
+    int mpi_errno = MPI_SUCCESS, c;
     int need_lock = !is_reply;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -247,23 +244,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     msg_hdr->am_hdr_sz  = am_hdr_sz;
     msg_hdr->data_sz    = 0;
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT_HDR;
+    msg_hdr->context_id = comm->context_id;
+    msg_hdr->src_rank   = comm->rank;
 
-    if(is_reply) {
-        use_token.val       = reply_token;
-        use_comm            = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-        use_rank            = use_token.data.src_rank;
-        MPIU_Assert(use_token.data.context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
-        msg_hdr->context_id = use_token.data.context_id;
-        msg_hdr->src_rank   = use_comm->rank;
-    } else {
-        use_comm = comm;
-        use_rank = rank;
-        MPIU_Assert(use_comm->context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
-        msg_hdr->context_id = use_comm->context_id;
-        msg_hdr->src_rank   = use_comm->rank;
-    }
-
-    MPIU_Assert((uint64_t)use_comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
+    MPIU_Assert(comm->context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
+    MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, clientdata).pack_buffer = NULL;
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -276,7 +261,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     iov[1].iov_len = am_hdr_sz;
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendv(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), iov, NULL, 2,
-                                             MPIDI_CH4_NMI_OFI_Comm_to_phys(use_comm, use_rank, MPIDI_CH4_NMI_OFI_API_TAG),
+                                             MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
                                              &MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, context)), need_lock, sendv);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -438,7 +423,6 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
                                                MPID_Comm    *comm,
-                                               uint64_t      reply_token,
                                                int           handler_id,
                                                const void   *am_hdr,
                                                size_t        am_hdr_sz,
@@ -448,13 +432,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
                                                MPID_Request *sreq,
                                                int           is_reply)
 {
-    int             dt_contig, mpi_errno = MPI_SUCCESS, use_rank;
-    MPID_Comm      *use_comm;
+    int             dt_contig, mpi_errno = MPI_SUCCESS;
     char           *send_buf;
     size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
     MPID_Datatype  *dt_ptr;
-    MPIDI_CH4_NMI_OFI_Am_reply_token_t  use_token;
     int             need_lock = !is_reply;
     size_t          threshold;
 
@@ -468,15 +450,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     send_buf = (char *) buf + dt_true_lb;
-
-    if(is_reply) {
-        use_token.val = reply_token;
-        use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-        use_rank = use_token.data.src_rank;
-    } else {
-        use_comm = comm;
-        use_rank = rank;
-    }
 
     if(!dt_contig) {
         size_t segment_first;
@@ -501,9 +474,9 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
        This looks somewhat ad-hoc, should be addressed in the upcoming AM API change. */
     threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
     mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)) <= threshold) ?
-                MPIDI_CH4_NMI_OFI_Send_am_short(use_rank, use_comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+                MPIDI_CH4_NMI_OFI_Send_am_short(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                 am_hdr_sz, send_buf, data_sz, sreq, need_lock) :
-                MPIDI_CH4_NMI_OFI_Send_am_long(use_rank, use_comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+                MPIDI_CH4_NMI_OFI_Send_am_long(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                am_hdr_sz, send_buf, data_sz, sreq, need_lock);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DO_SEND_AM);
@@ -514,7 +487,6 @@ fn_fail:
 
 static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
                                               MPID_Comm    *comm,
-                                              uint64_t      reply_token,
                                               int           handler_id,
                                               const void   *am_hdr,
                                               size_t        am_hdr_sz,
@@ -523,12 +495,10 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
                                               int           use_comm_table,
                                               int           need_lock)
 {
-    int mpi_errno = MPI_SUCCESS, use_rank;
-    MPID_Comm *use_comm;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Am_header_t msg_hdr;
     struct fi_msg msg;
     struct iovec msg_iov[2];
-    MPIDI_CH4_NMI_OFI_Am_reply_token_t  use_token;
     uint64_t send_flag = FI_INJECT;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_INJECT);
@@ -541,23 +511,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
     msg_hdr.am_hdr_sz   = am_hdr_sz;
     msg_hdr.data_sz     = 0;
     msg_hdr.am_type     = MPIDI_AMTYPE_SHORT_HDR;
+    msg_hdr.context_id  = comm->context_id;
+    msg_hdr.src_rank    = comm->rank;
 
-    if(is_reply) {
-        use_token.val      = reply_token;
-        use_comm           = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-        use_rank           = use_token.data.src_rank;
-        MPIU_Assert(use_token.data.context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
-        msg_hdr.context_id = use_token.data.context_id;
-        msg_hdr.src_rank   = use_comm->rank;
-    } else {
-        use_comm           = comm;
-        use_rank           = rank;
-        MPIU_Assert(use_comm->context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
-        msg_hdr.context_id = use_comm->context_id;
-        msg_hdr.src_rank   = use_comm->rank;
-    }
-
-    MPIU_Assert((uint64_t)use_comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
+    MPIU_Assert(comm->context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
+    MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
 
     msg_iov[0].iov_base = (void *) &msg_hdr;
     msg_iov[0].iov_len  = sizeof(msg_hdr);
@@ -570,8 +528,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
     msg.iov_count       = 2;
     msg.context         = NULL;
     msg.addr            = use_comm_table ?
-                          MPIDI_CH4_NMI_OFI_Comm_to_phys(use_comm, use_rank, MPIDI_CH4_NMI_OFI_API_MSG):
-                          MPIDI_CH4_NMI_OFI_To_phys(use_rank, MPIDI_CH4_NMI_OFI_API_MSG);
+                          MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_MSG):
+                          MPIDI_CH4_NMI_OFI_To_phys(rank, MPIDI_CH4_NMI_OFI_API_MSG);
 
     if (unlikely(am_hdr_sz + sizeof(msg_hdr) > MPIDI_Global.max_buffered_send)) {
         MPID_Request *sreq;

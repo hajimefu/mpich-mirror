@@ -71,6 +71,11 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_id_to_context(uint64_t win_id)
     return (win_id - 1) & 0xffffffff;
 }
 
+static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPID_Win *win)
+{
+    return MPIDI_CH4U_win_id_to_context(MPIDI_CH4U_WIN(win, win_id));
+}
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_alloc_and_init_req
 #undef FCNAME

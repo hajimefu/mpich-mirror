@@ -76,20 +76,20 @@ MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_hdr(int rank, MPID_C
     return MPIDI_CH4_NM_func->send_amv_hdr( rank, comm, handler_id, am_hdrs, iov_len, sreq, netmod_context);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) {
-    return MPIDI_CH4_NM_func->send_am_hdr_reply( reply_token, handler_id, am_hdr, am_hdr_sz, sreq);
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) {
+    return MPIDI_CH4_NM_func->send_am_hdr_reply( context_id, src_rank, handler_id, am_hdr, am_hdr_sz, sreq);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
-    return MPIDI_CH4_NM_func->inject_am_hdr_reply( reply_token, handler_id, am_hdr, am_hdr_sz);
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
+    return MPIDI_CH4_NM_func->inject_am_hdr_reply( context_id, src_rank, handler_id, am_hdr, am_hdr_sz);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
-    return MPIDI_CH4_NM_func->send_am_reply( reply_token, handler_id, am_hdr, am_hdr_sz, data, count, datatype, sreq);
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
+    return MPIDI_CH4_NM_func->send_am_reply( context_id, src_rank, handler_id, am_hdr, am_hdr_sz, data, count, datatype, sreq);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_reply(uint64_t reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
-    return MPIDI_CH4_NM_func->send_amv_reply( reply_token, handler_id, am_hdr, iov_len, data, count, datatype, sreq);
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
+    return MPIDI_CH4_NM_func->send_amv_reply( context_id, src_rank, handler_id, am_hdr, iov_len, data, count, datatype, sreq);
 };
 
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_NM_am_hdr_max_sz(void) {

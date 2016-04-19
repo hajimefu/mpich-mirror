@@ -80,7 +80,6 @@ typedef struct MPIDI_CH4U_rreq_t {
     MPI_Datatype  mrcv_datatype;
 
     uint64_t      ignore;
-    uint64_t      reply_token;
     uint64_t      peer_req_ptr;
     uint64_t      match_req;
     uint64_t      request;
@@ -91,7 +90,6 @@ typedef struct MPIDI_CH4U_rreq_t {
 typedef struct MPIDI_CH4U_put_req_t {
     MPID_Win *win_ptr;
     uint64_t preq_ptr;
-    uint64_t reply_token;
     void *dt_iov;
     void *origin_addr;
     int origin_count;
@@ -106,14 +104,12 @@ typedef struct MPIDI_CH4U_get_req_t {
     MPI_Datatype datatype;
     int count;
     int n_iov;
-    uint64_t reply_token;
     void *dt_iov;
 } MPIDI_CH4U_get_req_t;
 
 typedef struct MPIDI_CH4U_cswap_req_t {
     MPID_Win *win_ptr;
     uint64_t creq_ptr;
-    uint64_t reply_token;
     uint64_t addr;
     MPI_Datatype datatype;
     void *data;
@@ -123,7 +119,6 @@ typedef struct MPIDI_CH4U_cswap_req_t {
 typedef struct MPIDI_CH4U_acc_req_t {
     MPID_Win *win_ptr;
     uint64_t req_ptr;
-    uint64_t reply_token;
     MPI_Datatype origin_datatype;
     MPI_Datatype target_datatype;
     int origin_count;
@@ -235,8 +230,7 @@ typedef struct MPIDI_CH4U_win_info_args_t {
 
 struct MPIDI_CH4U_win_lock {
     struct MPIDI_CH4U_win_lock *next;
-    uint64_t reply_token;
-    unsigned rank;
+    int rank;
     uint16_t mtype;
     uint16_t type;
 };

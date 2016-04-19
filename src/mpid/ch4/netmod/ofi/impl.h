@@ -440,7 +440,7 @@ static inline MPID_Request *MPIDI_CH4_NMI_OFI_Context_to_request(void *context)
 
 /* Utility functions */
 extern int   MPIDI_CH4_NMI_OFI_Handle_cq_error_util(ssize_t ret);
-extern int   MPIDI_CH4_NMI_OFI_Control_handler(void *am_hdr,uint64_t reply_token,
+extern int   MPIDI_CH4_NMI_OFI_Control_handler(void *am_hdr,
                                                void **data,size_t *data_sz,int *is_contig,
                                                MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                                                MPID_Request **req);
