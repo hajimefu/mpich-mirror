@@ -1374,7 +1374,7 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
     MPID_Request *rreq = NULL;
     MPID_Comm *root_comm;
     MPIDI_CH4U_hdr_t *hdr = (MPIDI_CH4U_hdr_t *) am_hdr;
-    int context_id;
+    MPIU_Context_id_t context_id;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_HANDLER);
     context_id = MPIDI_CH4U_get_context(hdr->msg_tag);
@@ -1391,6 +1391,8 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
         MPIDI_CH4U_REQUEST(rreq, buffer) = (char *) MPL_malloc(*p_data_sz);
         MPIDI_CH4U_REQUEST(rreq, datatype) = MPI_BYTE;
         MPIDI_CH4U_REQUEST(rreq, count) = *p_data_sz;
+        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
+        MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_BUSY;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_UNEXPECTED;
         /* MPIDI_CS_ENTER(); */
@@ -1408,10 +1410,10 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
         MPIU_Assert(root_comm);
         /* Decrement the refcnt when popping a request out from posted_list */
         MPIR_Comm_release(root_comm);
+        MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
+        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
     }
 
-    MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
-    MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
     *req = rreq;
 
     mpi_errno = MPIDI_CH4I_do_send_target_handler(reply_token, data, p_data_sz, is_contig,
@@ -1438,7 +1440,7 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
     MPID_Comm *root_comm;
     MPIDI_CH4U_hdr_t *hdr = (MPIDI_CH4U_hdr_t *) am_hdr;
     MPIDI_CH4U_send_long_req_msg_t *lreq_hdr = (MPIDI_CH4U_send_long_req_msg_t *) am_hdr;
-    int context_id;
+    MPIU_Context_id_t context_id;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
@@ -1458,7 +1460,6 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
         MPIDI_CH4U_REQUEST(rreq, buffer) = NULL;
         MPIDI_CH4U_REQUEST(rreq, datatype) = MPI_BYTE;
         MPIDI_CH4U_REQUEST(rreq, count) = lreq_hdr->data_sz;
-        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_LONG_RTS;
         MPIDI_CH4U_REQUEST(rreq, req->rreq.peer_req_ptr) = lreq_hdr->sreq_ptr;
         MPIDI_CH4U_REQUEST(rreq, req->rreq.reply_token)  = reply_token;

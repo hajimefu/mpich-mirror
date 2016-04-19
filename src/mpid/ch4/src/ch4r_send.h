@@ -83,6 +83,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
             dtype_add_ref_if_not_builtin(datatype);
             MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype = datatype;
             MPIDI_CH4U_REQUEST(sreq, req->lreq).msg_tag  = match_bits;
+            MPIDI_CH4U_REQUEST(sreq, src_rank)           = rank;
             mpi_errno = MPIDI_CH4_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
                                                    &lreq_hdr, sizeof(lreq_hdr), NULL);
         }
@@ -153,6 +154,7 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     MPIDI_CH4U_REQUEST(sreq, count) = count;
     MPIDI_CH4U_REQUEST(sreq, datatype) = datatype;
     MPIDI_CH4U_REQUEST(sreq, tag) = match_bits;
+    MPIDI_CH4U_REQUEST(sreq, src_rank) = rank;
 
     sreq->partner_request = NULL;
     MPIDI_Request_complete(sreq);
