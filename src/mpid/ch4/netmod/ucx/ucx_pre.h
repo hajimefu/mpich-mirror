@@ -32,20 +32,8 @@ typedef struct {
 typedef struct MPIDI_CH4_NMI_UCX_Am_header_t {
     uint64_t handler_id;
     uint64_t data_sz;
-    uint64_t context_id;
-    uint64_t src_rank;
     uint64_t payload[0];
 } MPIDI_CH4_NMI_UCX_Am_header_t;
-
-typedef struct {
-    union {
-        uint64_t val;
-        struct {
-            uint32_t context_id;
-            uint32_t src_rank;
-        } data;
-    };
-} MPIDI_CH4_NMI_UCX_Am_reply_token_t;
 
 typedef struct {
     int dummy;

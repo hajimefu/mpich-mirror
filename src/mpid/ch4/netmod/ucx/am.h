@@ -113,8 +113,6 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.context_id = comm->context_id;
-    ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = 0;
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -196,8 +194,6 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.context_id = comm->context_id;
-    ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = data_sz;
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -284,7 +280,8 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
 #define FUNCNAME MPIDI_CH4_NM_send_am_hdr_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
+                                                 int src_rank,
                                                  int handler_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPID_Request * sreq)
@@ -297,7 +294,8 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token,
 #define FUNCNAME MPIDI_CH4_NM_send_am_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
+                                             int src_rank,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
@@ -314,25 +312,19 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     MPID_Datatype  *dt_ptr;
     int             dt_contig;
     MPIDI_CH4_NMI_UCX_Am_header_t ucx_hdr;
-    MPIDI_CH4_NMI_UCX_Am_reply_token_t use_token;
     MPID_Comm *use_comm;
-    int use_rank;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
-    use_token.val = reply_token;
-    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-    use_rank = use_token.data.src_rank;
-    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, use_rank);
+    use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
+    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, src_rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(0, 0, MPIDI_CH4_NMI_UCX_AM_TAG);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.context_id = use_comm->context_id;
-    ucx_hdr.src_rank = use_comm->rank;
     ucx_hdr.data_sz = data_sz;
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -382,7 +374,8 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
+                                              int src_rank,
                                               int handler_id,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
@@ -420,8 +413,6 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.context_id = comm->context_id;
-    ucx_hdr.src_rank = comm->rank;
     ucx_hdr.data_sz = 0;
 
     /* just pack and send for now */
@@ -452,7 +443,8 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
+                                                   int src_rank,
                                                    int handler_id,
                                                    const void *am_hdr, size_t am_hdr_sz)
 {
@@ -462,23 +454,17 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_CH4_NMI_UCX_Am_header_t ucx_hdr;
-    MPIDI_CH4_NMI_UCX_Am_reply_token_t use_token;
     MPID_Comm *use_comm;
-    int use_rank;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
 
-    use_token.val = reply_token;
-    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-    use_rank = use_token.data.src_rank;
-    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, use_rank);
+    use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
+    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(use_comm, src_rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(0, 0, MPIDI_CH4_NMI_UCX_AM_TAG);
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
-    ucx_hdr.context_id = use_comm->context_id;
-    ucx_hdr.src_rank = use_comm->rank;
 
     /* just pack and send for now */
     send_buf = MPL_malloc(am_hdr_sz + sizeof(ucx_hdr));

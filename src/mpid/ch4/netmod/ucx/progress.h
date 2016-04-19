@@ -23,17 +23,12 @@ static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg, size_t msg_sz)
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
-    MPIDI_CH4_NMI_UCX_Am_reply_token_t reply_token;
     MPIDI_CH4_NMI_UCX_Am_header_t *msg_hdr = (MPIDI_CH4_NMI_UCX_Am_header_t *)msg;
-
-    reply_token.data.context_id = msg_hdr->context_id;
-    reply_token.data.src_rank   = msg_hdr->src_rank;
 
     p_data = in_data = (char *) msg_hdr->payload + (msg_sz - msg_hdr->data_sz - sizeof(*msg_hdr));
     in_data_sz = data_sz = msg_hdr->data_sz;
 
     MPIDI_CH4_NMI_UCX_Global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
-                                                              reply_token.val,
                                                               &p_data, &data_sz,
                                                               &is_contig,
                                                               &cmpl_handler_fn,
