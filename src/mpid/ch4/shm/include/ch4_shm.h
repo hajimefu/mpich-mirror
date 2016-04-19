@@ -22,7 +22,7 @@ typedef int (*MPIDI_CH4_SHM_am_origin_handler_fn) (MPID_Request * req);
 /* Callback function setup by handler register function */
 /* for short cases, output arguments are NULL */
 typedef int (*MPIDI_CH4_SHM_am_target_handler_fn)
- (void *am_hdr, size_t am_hdr_sz, uint64_t reply_token,    /* contains information about reply operation */
+ (void *am_hdr, size_t am_hdr_sz,
   void **data,                  /* CH4 manages this buffer - shm only fills with data */
   MPI_Datatype * datatype, MPI_Count * count, int *noncontig,   /* if TRUE: data/data_sz are actually iovec/count */
   MPIDI_CH4_SHM_am_completion_handler_fn * cmpl_handler_fn, /* completion handler */
@@ -43,12 +43,12 @@ typedef int (*MPIDI_CH4_SHM_send_am_t)(int rank, MPID_Comm * comm, int handler_i
 typedef int (*MPIDI_CH4_SHM_inject_am_t)(int rank, MPID_Comm * comm, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, void * shm_context);
 typedef int (*MPIDI_CH4_SHM_send_amv_t)(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * shm_context);
 typedef int (*MPIDI_CH4_SHM_inject_amv_t)(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, void * shm_context);
-typedef int (*MPIDI_CH4_SHM_send_am_hdr_reply_t)(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq);
-typedef int (*MPIDI_CH4_SHM_inject_am_hdr_reply_t)(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz);
-typedef int (*MPIDI_CH4_SHM_send_am_reply_t)(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
-typedef int (*MPIDI_CH4_SHM_inject_am_reply_t)(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype);
-typedef int (*MPIDI_CH4_SHM_send_amv_reply_t)(void * reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
-typedef int (*MPIDI_CH4_SHM_inject_amv_reply_t)(void * reply_token, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype);
+typedef int (*MPIDI_CH4_SHM_send_am_hdr_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_SHM_inject_am_hdr_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz);
+typedef int (*MPIDI_CH4_SHM_send_am_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_SHM_inject_am_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype);
+typedef int (*MPIDI_CH4_SHM_send_amv_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq);
+typedef int (*MPIDI_CH4_SHM_inject_amv_reply_t)(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype);
 typedef size_t (*MPIDI_CH4_SHM_am_hdr_max_sz_t)(void);
 typedef size_t (*MPIDI_CH4_SHM_am_inject_max_sz_t)(void);
 typedef int (*MPIDI_CH4_SHM_comm_get_lpid_t)(MPID_Comm * comm_ptr, int idx, int * lpid_ptr, MPIU_BOOL is_remote);
@@ -332,12 +332,12 @@ MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am(int rank, MPID_Comm
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am(int rank, MPID_Comm * comm, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, void * shm_context) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_amv(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq, void * shm_context) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv(int rank, MPID_Comm * comm, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, void * shm_context) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_hdr_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_hdr_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_amv_reply(void * reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv_reply(void * reply_token, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_SHM_am_hdr_max_sz(void) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_SHM_am_inject_max_sz(void) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_comm_get_lpid(MPID_Comm * comm_ptr, int idx, int * lpid_ptr, MPIU_BOOL is_remote) MPIDI_CH4_SHM_STATIC_INLINE_SUFFIX;

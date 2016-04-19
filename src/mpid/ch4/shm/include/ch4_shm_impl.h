@@ -79,28 +79,28 @@ MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv(int rank, MPID_C
     return MPIDI_CH4_SHM_func->inject_amv( rank, comm, handler_id, am_hdrs, iov_len, data, count, datatype, shm_context);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_hdr_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) {
-    return MPIDI_CH4_SHM_func->send_am_hdr_reply( reply_token, handler_id, am_hdr, am_hdr_sz, sreq);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPID_Request * sreq) {
+    return MPIDI_CH4_SHM_func->send_am_hdr_reply( context_id, handler_id, am_hdr, am_hdr_sz, sreq);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_hdr_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
-    return MPIDI_CH4_SHM_func->inject_am_hdr_reply( reply_token, handler_id, am_hdr, am_hdr_sz);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
+    return MPIDI_CH4_SHM_func->inject_am_hdr_reply( context_id, handler_id, am_hdr, am_hdr_sz);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
-    return MPIDI_CH4_SHM_func->send_am_reply( reply_token, handler_id, am_hdr, am_hdr_sz, data, count, datatype, sreq);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
+    return MPIDI_CH4_SHM_func->send_am_reply( context_id, handler_id, am_hdr, am_hdr_sz, data, count, datatype, sreq);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_reply(void * reply_token, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) {
-    return MPIDI_CH4_SHM_func->inject_am_reply( reply_token, handler_id, am_hdr, am_hdr_sz, data, count, datatype);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) {
+    return MPIDI_CH4_SHM_func->inject_am_reply( context_id, handler_id, am_hdr, am_hdr_sz, data, count, datatype);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_amv_reply(void * reply_token, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
-    return MPIDI_CH4_SHM_func->send_amv_reply( reply_token, handler_id, am_hdr, iov_len, data, count, datatype, sreq);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPID_Request * sreq) {
+    return MPIDI_CH4_SHM_func->send_amv_reply( context_id, handler_id, am_hdr, iov_len, data, count, datatype, sreq);
 };
 
-MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv_reply(void * reply_token, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) {
-    return MPIDI_CH4_SHM_func->inject_amv_reply( reply_token, handler_id, am_hdrs, iov_len, data, count, datatype);
+MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_inject_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) {
+    return MPIDI_CH4_SHM_func->inject_amv_reply( context_id, handler_id, am_hdrs, iov_len, data, count, datatype);
 };
 
 MPIDI_CH4_SHM_STATIC_INLINE_PREFIX size_t MPIDI_CH4_SHM_am_hdr_max_sz(void) {
