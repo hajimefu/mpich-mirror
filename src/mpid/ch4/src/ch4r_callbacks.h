@@ -1490,6 +1490,7 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
     }
 
     MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
+    MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);
