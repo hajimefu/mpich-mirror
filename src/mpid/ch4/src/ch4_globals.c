@@ -59,7 +59,35 @@ void MPID_Request_init(MPIR_Request *req)
 #ifdef MPIDI_BUILD_CH4_SHM
     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
 #endif
-}
+
+#if defined(HAVE_PRAGMA_WEAK)
+#pragma weak MPID_Request_mem = MPIDI_Request_mem
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#pragma _HP_SECONDARY_DEF MPID_Request_mem  MPIDI_Request_mem
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#pragma _CRI duplicate MPID_Request_mem as MPIDI_Request_mem
+#elif defined(HAVE_WEAK_ATTRIBUTE)
+extern MPIU_Object_alloc_t MPID_Request_mem __attribute__((weak,alias("MPIDI_Request_mem")));
+#endif
+#ifndef MPICH_MPI_FROM_PMPI
+#undef MPID_Request_mem
+#define MPID_Request_mem MPIDI_Request_mem
+#endif
+
+#if defined(HAVE_PRAGMA_WEAK)
+#pragma weak MPID_Request_direct = MPIDI_Request_direct
+#elif defined(HAVE_PRAGMA_HP_SEC_DEF)
+#pragma _HP_SECONDARY_DEF MPID_Request_direct  MPIDI_Request_direct
+#elif defined(HAVE_PRAGMA_CRI_DUP)
+#pragma _CRI duplicate MPID_Request_direct as MPIDI_Request_direct
+#elif defined(HAVE_WEAK_ATTRIBUTE)
+extern MPID_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((weak,alias("MPIDI_Request_direct")));
+#endif
+#ifndef MPICH_MPI_FROM_PMPI
+#undef MPID_Request_direct
+#define MPID_Request_direct MPIDI_Request_direct
+#endif
+
 
 void MPID_Request_finalize(MPIR_Request *req)
 {
