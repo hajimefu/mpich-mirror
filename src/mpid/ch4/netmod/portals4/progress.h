@@ -24,16 +24,12 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
-    MPIDI_CH4_NMI_PTL_am_reply_token_t reply_token;
 
-    reply_token.data.context_id = (e->match_bits >> MPIDI_CH4_NMI_PTL_TAG_BITS);
-    reply_token.data.src_rank   = (e->hdr_data & MPIDI_CH4_NMI_PTL_SRC_RANK_MASK) >> MPIDI_CH4_NMI_PTL_TAG_BITS;
     in_data_sz = data_sz = (e->hdr_data & MPIDI_CH4_NMI_PTL_MSG_SZ_MASK);
     in_data = p_data = (e->start + (e->mlength - data_sz));
     int handler_id = e->hdr_data >> 56;
 
     MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id](e->start,
-                                                     reply_token.val,
                                                      &p_data, &data_sz,
                                                      &is_contig,
                                                      &cmpl_handler_fn,

@@ -73,14 +73,12 @@ static inline ptl_match_bits_t MPIDI_CH4_NMI_PTL_init_tag(MPIU_Context_id_t cont
     return match_bits;
 }
 
-#define MPIDI_CH4_NMI_PTL_MSG_SZ_MASK   (0x00000000FFFFFFFFULL)
-#define MPIDI_CH4_NMI_PTL_SRC_RANK_MASK (0x00FFFFFF00000000ULL)
+#define MPIDI_CH4_NMI_PTL_MSG_SZ_MASK   (0x00FFFFFFFFFFFFFFULL)
 
-static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, int rank, size_t msg_sz)
+static inline ptl_hdr_data_t MPIDI_CH4_NMI_PTL_init_am_hdr(int handler_id, size_t msg_sz)
 {
     ptl_hdr_data_t hdr = 0;
     hdr = (ptl_hdr_data_t)handler_id << 56;
-    hdr |= (MPIDI_CH4_NMI_PTL_SRC_RANK_MASK & ((ptl_hdr_data_t)rank << 32));
     hdr |= (MPIDI_CH4_NMI_PTL_MSG_SZ_MASK & msg_sz);
     return hdr;
 }

@@ -49,7 +49,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
-    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, comm->rank, 0);
+    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
     sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id = handler_id;
 
@@ -94,7 +94,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
-    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, comm->rank, data_sz);
+    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, data_sz);
     sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id = handler_id;
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -174,7 +174,8 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
+                                                 int src_rank,
                                                  int handler_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPID_Request * sreq)
@@ -183,7 +184,8 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(uint64_t reply_token,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
+                                             int src_rank,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
@@ -198,21 +200,17 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     int             dt_contig;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    MPIDI_CH4_NMI_PTL_am_reply_token_t use_token;
     MPID_Comm *use_comm;
-    int use_rank;
     char *send_buf = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
-    use_token.val = reply_token;
-    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-    use_rank = use_token.data.src_rank;
+    use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(use_comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
-    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, use_comm->rank, data_sz);
+    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, data_sz);
     sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id = handler_id;
 
     MPIR_cc_incr(sreq->cc_ptr, &c);
@@ -238,8 +236,8 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
 
         ret = PtlMDBind(MPIDI_CH4_NMI_PTL_global.ni, &md, &sreq->dev.ch4.ch4u.netmod_am.portals4.md);
         ret = PtlPut(sreq->dev.ch4.ch4u.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
-                     MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[src_rank].process,
+                     MPIDI_CH4_NMI_PTL_addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
     } else {
         /* copy everything into pack_buffer */
         MPID_Segment *segment;
@@ -256,8 +254,8 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
         sreq->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
         ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
-                     MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[src_rank].process,
+                     MPIDI_CH4_NMI_PTL_addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
 
  fn_exit:
@@ -267,7 +265,8 @@ static inline int MPIDI_CH4_NM_send_am_reply(uint64_t reply_token,
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_send_amv_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
+                                              int src_rank,
                                               int handler_id,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
@@ -300,7 +299,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
-    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, comm->rank, 0);
+    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
     /* create an internal request for the inject */
@@ -321,27 +320,24 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
+static inline int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
+                                                   int src_rank,
                                                    int handler_id,
                                                    const void *am_hdr, size_t am_hdr_sz)
 {
     int mpi_errno = MPI_SUCCESS, ret, c;
     ptl_hdr_data_t   ptl_hdr;
     ptl_match_bits_t match_bits;
-    MPIDI_CH4_NMI_PTL_am_reply_token_t use_token;
     MPID_Comm *use_comm;
-    int use_rank;
     char *send_buf = NULL;
     MPID_Request *inject_req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
-    use_token.val = reply_token;
-    use_comm = MPIDI_CH4U_context_id_to_comm(use_token.data.context_id);
-    use_rank = use_token.data.src_rank;
+    use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
 
-    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, use_comm->rank, 0);
+    ptl_hdr = MPIDI_CH4_NMI_PTL_init_am_hdr(handler_id, 0);
     match_bits = MPIDI_CH4_NMI_PTL_init_tag(use_comm->context_id, MPIDI_CH4_NMI_PTL_AM_TAG);
 
     /* create an internal request for the inject */
@@ -352,8 +348,8 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(uint64_t reply_token,
     inject_req->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
     ret = PtlPut(MPIDI_CH4_NMI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
-                 PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[use_rank].process,
-                 MPIDI_CH4_NMI_PTL_addr_table[use_rank].pt, match_bits, 0, inject_req, ptl_hdr);
+                 PTL_ACK_REQ, MPIDI_CH4_NMI_PTL_addr_table[src_rank].process,
+                 MPIDI_CH4_NMI_PTL_addr_table[src_rank].pt, match_bits, 0, inject_req, ptl_hdr);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
