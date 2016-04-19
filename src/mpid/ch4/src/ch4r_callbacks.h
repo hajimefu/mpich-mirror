@@ -1391,7 +1391,6 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
         MPIDI_CH4U_REQUEST(rreq, buffer) = (char *) MPL_malloc(*p_data_sz);
         MPIDI_CH4U_REQUEST(rreq, datatype) = MPI_BYTE;
         MPIDI_CH4U_REQUEST(rreq, count) = *p_data_sz;
-        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_BUSY;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_UNEXPECTED;
         /* MPIDI_CS_ENTER(); */
@@ -1412,6 +1411,7 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
     }
 
     MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
+    MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
     *req = rreq;
 
     mpi_errno = MPIDI_CH4I_do_send_target_handler(reply_token, data, p_data_sz, is_contig,
