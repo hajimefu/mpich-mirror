@@ -382,11 +382,14 @@ static inline bool MPIDI_CH4_NMI_OFI_Is_tag_sync(uint64_t match_bits)
 }
 
 static inline uint64_t MPIDI_CH4_NMI_OFI_Init_sendtag(MPIU_Context_id_t contextid,
+                                                      int               source,
                                                       int               tag,
                                                       uint64_t          type)
 {
     uint64_t match_bits;
     match_bits = contextid;
+    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_SOURCE_SHIFT);
+    match_bits |= source;
     match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
     match_bits |= (MPIDI_CH4_NMI_OFI_TAG_MASK & tag) | type;
     return match_bits;
@@ -395,12 +398,21 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Init_sendtag(MPIU_Context_id_t contexti
 /* receive posting */
 static inline uint64_t MPIDI_CH4_NMI_OFI_Init_recvtag(uint64_t          *mask_bits,
                                                       MPIU_Context_id_t  contextid,
+                                                      int                source,
                                                       int                tag)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_CH4_NMI_OFI_PROTOCOL_MASK;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
+    match_bits = (match_bits << MPIDI_CH4_NMI_OFI_SOURCE_SHIFT);
+
+    if(MPI_ANY_SOURCE == source) {
+        match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
+        *mask_bits |= MPIDI_CH4_NMI_OFI_SOURCE_MASK;
+    } else {
+        match_bits |= source;
+        match_bits = (match_bits << MPIDI_CH4_NMI_OFI_TAG_SHIFT);
+    }
 
     if(MPI_ANY_TAG == tag)
         *mask_bits |= MPIDI_CH4_NMI_OFI_TAG_MASK;
@@ -413,6 +425,11 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Init_recvtag(uint64_t          *mask_bi
 static inline int MPIDI_CH4_NMI_OFI_Init_get_tag(uint64_t match_bits)
 {
     return ((int)(match_bits & MPIDI_CH4_NMI_OFI_TAG_MASK));
+}
+
+static inline int MPIDI_CH4_NMI_OFI_Init_get_source(uint64_t match_bits)
+{
+    return ((int)((match_bits & MPIDI_CH4_NMI_OFI_SOURCE_MASK) >> MPIDI_CH4_NMI_OFI_TAG_SHIFT));
 }
 
 static inline MPID_Request *MPIDI_CH4_NMI_OFI_Context_to_request(void *context)
