@@ -198,8 +198,8 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_long_am_hdr(MPIDI_CH4_NMI_OFI_Am_head
     MPIDI_CH4_NMI_OFI_Do_rdma_read(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr),
                                    lmt_msg->am_hdr_src,
                                    msg_hdr->am_hdr_sz,
-                                   msg_hdr->context_id,
-                                   msg_hdr->src_rank,
+                                   lmt_msg->context_id,
+                                   lmt_msg->src_rank,
                                    rreq);
 
 fn_exit:
@@ -239,8 +239,8 @@ static inline int MPIDI_CH4_NMI_OFI_Handle_long_hdr(MPIDI_CH4_NMI_OFI_Am_header_
     MPIDI_CH4_NMI_OFI_Do_rdma_read(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, am_hdr),
                                    lmt_msg->am_hdr_src,
                                    msg_hdr->am_hdr_sz,
-                                   msg_hdr->context_id,
-                                   msg_hdr->src_rank,
+                                   lmt_msg->context_id,
+                                   lmt_msg->src_rank,
                                    rreq);
 
 fn_exit:
@@ -304,7 +304,12 @@ static inline int MPIDI_CH4_NMI_OFI_Do_handle_long_am(MPIDI_CH4_NMI_OFI_Am_heade
 
         data_sz = MPL_MIN(data_sz, in_data_sz);
         MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_cntr) = ((data_sz - 1) / MPIDI_Global.max_send) + 1;
-        MPIDI_CH4_NMI_OFI_Do_rdma_read(p_data, lmt_msg->src_offset, data_sz, msg_hdr->context_id, msg_hdr->src_rank, rreq);
+        MPIDI_CH4_NMI_OFI_Do_rdma_read(p_data,
+                                       lmt_msg->src_offset,
+                                       data_sz,
+                                       lmt_msg->context_id,
+                                       lmt_msg->src_rank,
+                                       rreq);
         MPIR_STATUS_SET_COUNT(rreq->status, data_sz);
     } else {
         done = 0;
@@ -330,7 +335,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_handle_long_am(MPIDI_CH4_NMI_OFI_Am_heade
         for(i = 0; i < iov_len && rem > 0; i++) {
             curr_len = MPL_MIN(rem, iov[i].iov_len);
             MPIDI_CH4_NMI_OFI_Do_rdma_read(iov[i].iov_base, lmt_msg->src_offset + done,
-                                           curr_len, msg_hdr->context_id, msg_hdr->src_rank, rreq);
+                                           curr_len, lmt_msg->context_id, lmt_msg->src_rank, rreq);
             rem -= curr_len;
             done += curr_len;
         }
@@ -466,8 +471,6 @@ static inline int MPIDI_CH4_NMI_OFI_Dispatch_ack(int        rank,
     msg.hdr.am_hdr_sz  = sizeof(msg.pyld);
     msg.hdr.data_sz    = 0;
     msg.hdr.am_type    = am_type;
-    msg.hdr.context_id = comm->context_id;
-    msg.hdr.src_rank   = comm->rank;
     msg.pyld.sreq_ptr  = sreq_ptr;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_inject(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), &msg, sizeof(msg),
                                               MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG)), FALSE /* no lock */, inject);

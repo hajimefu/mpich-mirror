@@ -581,8 +581,8 @@ static inline int MPIDI_CH4_NMI_OFI_Am_read_event(struct fi_cq_tagged_entry *wc,
 
         case MPIDI_AMTYPE_LONG_HDR_REQ:
             rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
-            mpi_errno = MPIDI_CH4_NMI_OFI_Dispatch_ack(ofi_req->req_hdr->msg_hdr.src_rank,
-                                                       ofi_req->req_hdr->msg_hdr.context_id,
+            mpi_errno = MPIDI_CH4_NMI_OFI_Dispatch_ack(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).src_rank,
+                                                       MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).context_id,
                                                        MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info.sreq_ptr),
                                                        MPIDI_AMTYPE_LONG_HDR_ACK, netmod_context);
 
@@ -601,8 +601,8 @@ static inline int MPIDI_CH4_NMI_OFI_Am_read_event(struct fi_cq_tagged_entry *wc,
     }
 
     rreq = (MPID_Request *)ofi_req->req_hdr->rreq_ptr;
-    mpi_errno = MPIDI_CH4_NMI_OFI_Dispatch_ack(ofi_req->req_hdr->msg_hdr.src_rank,
-                                               ofi_req->req_hdr->msg_hdr.context_id,
+    mpi_errno = MPIDI_CH4_NMI_OFI_Dispatch_ack(MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).src_rank,
+                                               MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).context_id,
                                                MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(rreq, lmt_info).sreq_ptr,
                                                MPIDI_AMTYPE_LMT_ACK,netmod_context);
 

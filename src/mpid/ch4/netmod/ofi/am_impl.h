@@ -244,8 +244,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     msg_hdr->am_hdr_sz  = am_hdr_sz;
     msg_hdr->data_sz    = 0;
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT_HDR;
-    msg_hdr->context_id = comm->context_id;
-    msg_hdr->src_rank   = comm->rank;
 
     MPIU_Assert(comm->context_id  < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
     MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));
@@ -304,11 +302,10 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
     msg_hdr->am_hdr_sz  = am_hdr_sz;
     msg_hdr->data_sz    = data_sz;
     msg_hdr->am_type    = MPIDI_AMTYPE_LMT_REQ;
-    msg_hdr->context_id = comm->context_id;
-    msg_hdr->src_rank   = comm->rank;
-
 
     lmt_info = &MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, lmt_info);
+    lmt_info->context_id = comm->context_id;
+    lmt_info->src_rank = comm->rank;
     lmt_info->src_offset = (uint64_t) 0; /* TODO: Set to data if MR_BASIC */
     lmt_info->sreq_ptr = (uint64_t) sreq;
     /* Always allocates RMA ID from COMM_WORLD as the actual associated communicator
@@ -393,8 +390,6 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
     msg_hdr->am_hdr_sz  = am_hdr_sz;
     msg_hdr->data_sz    = count;
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT;
-    msg_hdr->context_id = comm->context_id;
-    msg_hdr->src_rank   = comm->rank;
 
     iov[0].iov_base     = msg_hdr;
     iov[0].iov_len      = sizeof(*msg_hdr);
@@ -511,8 +506,6 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
     msg_hdr.am_hdr_sz   = am_hdr_sz;
     msg_hdr.data_sz     = 0;
     msg_hdr.am_type     = MPIDI_AMTYPE_SHORT_HDR;
-    msg_hdr.context_id  = comm->context_id;
-    msg_hdr.src_rank    = comm->rank;
 
     MPIU_Assert(comm->context_id < (1 << MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS));
     MPIU_Assert((uint64_t)comm->rank < (1ULL << MPIDI_CH4_NMI_OFI_AM_RANK_BITS));

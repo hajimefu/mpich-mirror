@@ -87,6 +87,11 @@ enum {
 };
 
 typedef struct {
+    /* context id and src rank so the target side can
+       issue RDMA read operation */
+    MPIU_Context_id_t context_id;
+    int src_rank;
+
     uint64_t src_offset;
     uint64_t sreq_ptr;
     uint64_t am_hdr_src;
@@ -106,10 +111,6 @@ uint64_t am_hdr_sz   :
     MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS;
 uint64_t data_sz     :
     MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
-uint64_t context_id  :
-    MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS;
-uint64_t src_rank    :
-    MPIDI_CH4_NMI_OFI_AM_RANK_BITS;
     uint64_t payload[0];
 } MPIDI_CH4_NMI_OFI_Am_header_t;
 
