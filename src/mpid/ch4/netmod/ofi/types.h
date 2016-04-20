@@ -22,7 +22,6 @@
 #include "mpidch4r.h"
 #include "fi_list.h"
 
-EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
     (strrchr(__FILE__,'/')                      \
      ? strrchr(__FILE__,'/')+1                  \
@@ -515,5 +514,4 @@ extern MPIU_Object_alloc_t              MPIDI_Request_mem;
 extern MPID_Request                     MPIDI_Request_direct[];
 extern int                              MPIR_Datatype_init_names(void);
 
-EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */
