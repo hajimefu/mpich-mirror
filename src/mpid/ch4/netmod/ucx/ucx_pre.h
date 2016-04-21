@@ -29,11 +29,11 @@ typedef struct {
     char *pack_buffer;
 } MPIDI_CH4_NMI_UCX_am_request_t;
 
-typedef struct MPIDI_CH4_NMI_UCX_Am_header_t {
+typedef struct MPIDI_CH4_NMI_UCX_am_header_t {
     uint64_t handler_id;
     uint64_t data_sz;
     uint64_t payload[0];
-} MPIDI_CH4_NMI_UCX_Am_header_t;
+} MPIDI_CH4_NMI_UCX_am_header_t;
 
 typedef struct {
     int dummy;

@@ -12,7 +12,7 @@
 #include "impl.h"
 //#include "events.h"
 
-static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg, size_t msg_sz)
+static inline int MPIDI_CH4_NMI_UCX_am_handler(void *msg, size_t msg_sz)
 {
     int mpi_errno;
     MPID_Request *rreq;
@@ -23,12 +23,12 @@ static inline int MPIDI_CH4_NMI_UCX_Am_handler(void *msg, size_t msg_sz)
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
-    MPIDI_CH4_NMI_UCX_Am_header_t *msg_hdr = (MPIDI_CH4_NMI_UCX_Am_header_t *)msg;
+    MPIDI_CH4_NMI_UCX_am_header_t *msg_hdr = (MPIDI_CH4_NMI_UCX_am_header_t *)msg;
 
     p_data = in_data = (char *) msg_hdr->payload + (msg_sz - msg_hdr->data_sz - sizeof(*msg_hdr));
     in_data_sz = data_sz = msg_hdr->data_sz;
 
-    MPIDI_CH4_NMI_UCX_Global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
+    MPIDI_CH4_NMI_UCX_global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
                                                               &p_data, &data_sz,
                                                               &is_contig,
                                                               &cmpl_handler_fn,
@@ -93,7 +93,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_am_recv(void *request, ucs_status_t 
     }
 
     /* call the AM handler */
-    MPIDI_CH4_NMI_UCX_Am_handler(MPIDI_CH4_NMI_UCX_Global.am_bufs[am_recv_idx], info->length);
+    MPIDI_CH4_NMI_UCX_am_handler(MPIDI_CH4_NMI_UCX_global.am_bufs[am_recv_idx], info->length);
 
     /* update the idx */
     ++am_recv_idx;
@@ -117,22 +117,22 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     static int am_repost_idx = 0;
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
-    ucp_worker_progress(MPIDI_CH4_NMI_UCX_Global.worker);
+    ucp_worker_progress(MPIDI_CH4_NMI_UCX_global.worker);
 
-    while (ucp_request_is_completed(MPIDI_CH4_NMI_UCX_Global.ucp_am_requests[am_repost_idx])) {
+    while (ucp_request_is_completed(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx])) {
         /* release the ucp request */
-        ucp_request_release(MPIDI_CH4_NMI_UCX_Global.ucp_am_requests[am_repost_idx]);
+        ucp_request_release(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx]);
 
         /* repost the buffer */
-        MPIDI_CH4_NMI_UCX_Global.ucp_am_requests[am_repost_idx] =
-            (MPIDI_CH4_NMI_UCX_Ucp_request_t*)ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_Global.worker,
-                                                              MPIDI_CH4_NMI_UCX_Global.am_bufs[am_repost_idx],
+        MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx] =
+            (MPIDI_CH4_NMI_UCX_ucp_request_t*)ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
+                                                              MPIDI_CH4_NMI_UCX_global.am_bufs[am_repost_idx],
                                                               MPIDI_CH4_NMI_UCX_MAX_AM_EAGER_SZ,
                                                               ucp_dt_make_contig(1),
                                                               MPIDI_CH4_NMI_UCX_AM_TAG,
                                                               ~MPIDI_CH4_NMI_UCX_AM_TAG,
                                                               &MPIDI_CH4_NMI_UCX_Handle_am_recv);
-        MPIDI_CH4_UCX_REQUEST(MPIDI_CH4_NMI_UCX_Global.ucp_am_requests[am_repost_idx], tag_recv_nb);
+        MPIDI_CH4_UCX_REQUEST(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx], tag_recv_nb);
 
         /* update the idx */
         ++am_repost_idx;

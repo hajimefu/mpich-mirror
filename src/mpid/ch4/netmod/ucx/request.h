@@ -176,7 +176,7 @@ static inline MPID_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
 static inline void MPIDI_CH4_NMI_UCX_Request_init_callback(void *request)
 {
 
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
     ucp_request->req = NULL;
 
 }
@@ -186,7 +186,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_send_callback(void *request, ucs_sta
     int c;
     int mpi_errno;
 
-    MPIDI_CH4_NMI_UCX_Ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
     MPID_Request *req = NULL;
     if(ucp_request->req){
         req = ucp_request->req;
@@ -213,7 +213,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_sta
 {
     int count;
     int mpi_errno;
-    MPIDI_CH4_NMI_UCX_Ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
     MPID_Request *rreq = NULL;
     if(!ucp_request->req) {
         rreq = MPIDI_CH4_NM_UCX_Alloc_recv_request_done();

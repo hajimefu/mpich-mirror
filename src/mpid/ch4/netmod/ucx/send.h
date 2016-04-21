@@ -25,7 +25,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *req;
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
@@ -35,7 +35,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, buf, data_sz, ucp_dt_make_contig(1),
+    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, data_sz, ucp_dt_make_contig(1),
                                      ucx_tag, &MPIDI_CH4_NMI_UCX_Handle_send_callback);
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
@@ -82,7 +82,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_Request *req;
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
@@ -92,7 +92,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
     ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_send_nb(ep, buf, count, datatype->dev.netmod.ucx.ucp_datatype,
+    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, count, datatype->dev.netmod.ucx.ucp_datatype,
                                      ucx_tag, &MPIDI_CH4_NMI_UCX_Handle_send_callback);
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);

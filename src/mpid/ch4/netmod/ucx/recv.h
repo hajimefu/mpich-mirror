@@ -22,12 +22,12 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
     MPID_Request *req;
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
     ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_Global.worker,
+    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
                                                 buf, data_sz, ucp_dt_make_contig(1),
                                                 ucp_tag, tag_mask, &MPIDI_CH4_NMI_UCX_Handle_recv_callback);
 
@@ -64,12 +64,12 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
     MPID_Request *req;
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_request;
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
     ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_Ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_Global.worker,
+    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
                                                 buf, count, datatype->dev.netmod.ucx.ucp_datatype,
                                                 ucp_tag, tag_mask, &MPIDI_CH4_NMI_UCX_Handle_recv_callback);
 

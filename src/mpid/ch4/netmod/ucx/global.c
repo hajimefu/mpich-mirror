@@ -10,6 +10,6 @@
 #include "impl.h"
 #include "ucx_types.h"
 
-MPIDI_CH4_NMI_UCX_Global_t MPIDI_CH4_NMI_UCX_Global = { 0 };
+MPIDI_CH4_NMI_UCX_global_t MPIDI_CH4_NMI_UCX_global = { 0 };
 
 ucp_ep_h *MPIDI_CH4_NMI_UCX_eps = NULL;

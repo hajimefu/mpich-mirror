@@ -24,7 +24,7 @@ static inline int ucx_do_iprobe(int source,
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, source);
     ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
 
-    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_Global.worker, ucp_tag,
+    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_global.worker, ucp_tag,
                                         tag_mask, 0, &info);
     if(message_handler == NULL) {
         *flag = 0;
@@ -82,7 +82,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, source);
     ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
 
-    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_Global.worker, ucp_tag,
+    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_global.worker, ucp_tag,
                                         tag_mask, 1, &info);
     if(message_handler == NULL) {
         *flag = 0;

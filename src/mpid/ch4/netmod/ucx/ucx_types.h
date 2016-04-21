@@ -34,7 +34,7 @@
 
 typedef struct {
     void *req;
-} MPIDI_CH4_NMI_UCX_Ucp_request_t;
+} MPIDI_CH4_NMI_UCX_ucp_request_t;
 
 typedef struct {
     ucp_context_h context;
@@ -48,12 +48,12 @@ typedef struct {
     char pname[MPI_MAX_PROCESSOR_NAME];
     struct iovec    am_iov[MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS];
     void           *am_bufs[MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS];
-    MPIDI_CH4_NMI_UCX_Ucp_request_t *ucp_am_requests[MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS];
+    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_am_requests[MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS];
     MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_CH4_NMI_UCX_MAX_AM_HANDLERS];
     MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_CH4_NMI_UCX_MAX_AM_HANDLERS];
-} MPIDI_CH4_NMI_UCX_Global_t;
+} MPIDI_CH4_NMI_UCX_global_t;
 
-extern MPIDI_CH4_NMI_UCX_Global_t MPIDI_CH4_NMI_UCX_Global;
+extern MPIDI_CH4_NMI_UCX_global_t MPIDI_CH4_NMI_UCX_global;
 extern ucp_ep_h *MPIDI_CH4_NMI_UCX_eps;
 
 
