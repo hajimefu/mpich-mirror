@@ -27,7 +27,7 @@ int MPID_Close_port(const char *port_name)
   MPID_abort();
   return 0;
 }
-int MPID_Open_port(MPID_Info *info_ptr,
+int MPIR_Open_port(MPIR_Info *info_ptr,
                    char *port_name)
 {
   MPID_abort();
@@ -35,24 +35,24 @@ int MPID_Open_port(MPID_Info *info_ptr,
 }
 
 int MPID_Comm_accept(const char *port_name,
-                     MPID_Info *info_ptr,
+                     MPIR_Info *info_ptr,
                      int root,
-                     MPID_Comm *comm_ptr,
-                     MPID_Comm **newcomm)
+                     MPIR_Comm *comm_ptr,
+                     MPIR_Comm **newcomm)
 {
   MPID_abort();
   return 0;
 }
 int MPID_Comm_connect(const char *port_name,
-                      MPID_Info *info_ptr,
+                      MPIR_Info *info_ptr,
                       int root,
-                      MPID_Comm *comm_ptr,
-                      MPID_Comm **newcomm)
+                      MPIR_Comm *comm_ptr,
+                      MPIR_Comm **newcomm)
 {
   MPID_abort();
   return 0;
 }
-int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
+int MPID_Comm_disconnect(MPIR_Comm *comm_ptr)
 {
   MPID_abort();
   return 0;
@@ -61,10 +61,10 @@ int MPID_Comm_spawn_multiple(int count,
                              char *array_of_commands[],
                              char* *array_of_argv[],
                              const int array_of_maxprocs[],
-                             MPID_Info *array_of_info[],
+                             MPIR_Info *array_of_info[],
                              int root,
-                             MPID_Comm *comm_ptr,
-                             MPID_Comm **intercomm,
+                             MPIR_Comm *comm_ptr,
+                             MPIR_Comm **intercomm,
                              int array_of_errcodes[])
 {
   MPID_abort();
@@ -72,38 +72,38 @@ int MPID_Comm_spawn_multiple(int count,
 }
 #endif
 
-int MPID_Comm_failure_ack(MPID_Comm *comm_ptr)
+int MPID_Comm_failure_ack(MPIR_Comm *comm_ptr)
 {
   MPID_abort();
   return 0;
 }
 
-int MPID_Comm_failure_get_acked(MPID_Comm *comm_ptr, MPID_Group **failed_group_ptr)
+int MPID_Comm_failure_get_acked(MPIR_Comm *comm_ptr, MPIR_Group **failed_group_ptr)
 {
   MPID_abort();
   return 0;
 }
 
-int MPID_Comm_get_all_failed_procs(MPID_Comm *comm_ptr, MPID_Group **failed_group, int tag)
+int MPID_Comm_get_all_failed_procs(MPIR_Comm *comm_ptr, MPIR_Group **failed_group, int tag)
 {
   MPID_abort();
   return 0;
 }
 
-int MPID_Comm_revoke(MPID_Comm *comm_ptr, int is_remote)
+int MPID_Comm_revoke(MPIR_Comm *comm_ptr, int is_remote)
 {
   MPID_abort();
   return 0;
 }
 
-int MPID_Comm_AS_enabled(MPID_Comm *comm_ptr)
+int MPID_Comm_AS_enabled(MPIR_Comm *comm_ptr)
 {
   /* This function must return 1 in the default case and should not be ignored
    * by the implementation. */
   return 1;
 }
 
-int MPID_Request_is_anysource(MPID_Request *request_ptr)
+int MPID_Request_is_anysource(MPIR_Request *request_ptr)
 {
   /* This function must not abort in the default case since it is used in many
    * MPI functions. As long as the device does not implement FT, it doesn't

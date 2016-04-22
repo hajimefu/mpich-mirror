@@ -73,9 +73,9 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[],
                           MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
-    MPID_Comm *comm_dist_graph_ptr = NULL;
-    MPID_Request **reqs = NULL;
+    MPIR_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_dist_graph_ptr = NULL;
+    MPIR_Request **reqs = NULL;
     MPIR_Topology *topo_ptr = NULL;
     MPIR_Dist_graph_topology *dist_graph_ptr = NULL;
     int i;
@@ -116,7 +116,7 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[],
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm_old, comm_ptr);
+    MPIR_Comm_get_ptr(comm_old, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -124,7 +124,7 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[],
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             /* If comm_ptr is not valid, it will be reset to null */
             if (comm_ptr) {
                 MPIR_ERRTEST_COMM_INTRA(comm_ptr, mpi_errno);
@@ -271,7 +271,7 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[],
     idx = 0;
     /* must be 2*comm_size requests because we will possibly send inbound and
      * outbound edges to everyone in our communicator */
-    MPIU_CHKLMEM_MALLOC(reqs, MPID_Request **, 2*comm_size*sizeof(MPID_Request *), mpi_errno, "temp request array");
+    MPIU_CHKLMEM_MALLOC(reqs, MPIR_Request **, 2*comm_size*sizeof(MPIR_Request *), mpi_errno, "temp request array");
     for (i = 0; i < comm_size; ++i) {
         if (rin_sizes[i]) {
             /* send edges where i is a destination to process i */

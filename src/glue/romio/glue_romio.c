@@ -83,10 +83,10 @@ int MPIR_Ext_datatype_iscommitted(MPI_Datatype datatype)
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPID_Datatype *datatype_ptr = NULL;
+        MPIR_Datatype *datatype_ptr = NULL;
         MPID_Datatype_get_ptr(datatype, datatype_ptr);
 
-        MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+        MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
         MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
@@ -101,10 +101,10 @@ fn_fail:
  * node ids */
 int MPIR_Get_node_id(MPI_Comm comm, int rank, int *id)
 {
-    MPID_Comm *comm_ptr;
+    MPIR_Comm *comm_ptr;
     MPID_Node_id_t node_id;
 
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
     MPID_Get_node_id(comm_ptr, rank, &node_id);
     *id = node_id;
 

@@ -55,7 +55,7 @@ MPIDI_Win_DoneCB(pami_context_t  context,
         ((req->type >= MPIDI_WIN_REQUEST_COMPARE_AND_SWAP) && 
          (req->origin.completed == req->origin.dt.num_contig)))
     {
-      MPID_Request * req_handle = req->req_handle;
+      MPIR_Request * req_handle = req->req_handle;
 
       if (req->buffer_free) {
           MPL_free(req->buffer);
@@ -77,7 +77,7 @@ MPIDI_Win_DoneCB(pami_context_t  context,
            * portion of the request structure after decrementing the completion
            * counter.
            *
-           * See MPID_Request_release_inline()
+           * See MPID_Request_free_inline()
            */
           MPIR_cc_set(req_handle->cc_ptr, 0);
       }

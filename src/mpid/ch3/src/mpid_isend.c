@@ -28,14 +28,14 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_Isend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank,
-	       int tag, MPID_Comm * comm, int context_offset,
-               MPID_Request ** request)
+	       int tag, MPIR_Comm * comm, int context_offset,
+               MPIR_Request ** request)
 {
     intptr_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPIDU_Datatype* dt_ptr;
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     MPIDI_VC_t * vc=0;
 #if defined(MPID_USE_SEQUENCE_NUMBERS)
     MPID_Seqnum_t seqnum;
@@ -58,7 +58,7 @@ int MPID_Isend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank
         MPIR_ERR_SETANDJUMP(mpi_errno,MPIX_ERR_REVOKED,"**revoked");
     }
     
-    if (rank == comm->rank && comm->comm_kind != MPID_INTERCOMM)
+    if (rank == comm->rank && comm->comm_kind != MPIR_COMM_KIND__INTERCOMM)
     {
 	mpi_errno = MPIDI_Isend_self(buf, count, datatype, rank, tag, comm, 
 			    context_offset, MPIDI_REQUEST_TYPE_SEND, &sreq);
@@ -117,7 +117,7 @@ int MPID_Isend(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank
 	/* --BEGIN ERROR HANDLING-- */
 	if (mpi_errno != MPI_SUCCESS)
 	{
-            MPID_Request_release(sreq);
+            MPIR_Request_free(sreq);
 	    sreq = NULL;
             MPIR_ERR_SET(mpi_errno, MPI_ERR_OTHER, "**ch3|eagermsg");
 	    goto fn_exit;

@@ -20,7 +20,7 @@
  *   MPIR_Bsend_attach - Performs the work of MPI_Buffer_attach
  *   MPIR_Bsend_detach - Performs the work of MPI_Buffer_detach
  *   MPIR_Bsend_isend  - Essentially performs an MPI_Ibsend.  Returns
- *                an MPID_Request that is also stored internally in the
+ *                an MPIR_Request that is also stored internally in the
  *                corresponding MPIR_Bsend_data_t entry
  *   MPIR_Bsend_free_segment - Free a buffer that is no longer needed,
  *                merging with adjacent segments
@@ -208,8 +208,8 @@ int MPIR_Bsend_detach( void *bufferp, int *size )
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Bsend_isend(const void *buf, int count, MPI_Datatype dtype,
-                     int dest, int tag, MPID_Comm *comm_ptr,
-                     MPIR_Bsend_kind_t kind, MPID_Request **request )
+                     int dest, int tag, MPIR_Comm *comm_ptr,
+                     MPIR_Bsend_kind_t kind, MPIR_Request **request )
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Bsend_data_t *p;
@@ -272,7 +272,7 @@ int MPIR_Bsend_isend(const void *buf, int count, MPI_Datatype dtype,
 	       because this call must not block */
 	    mpi_errno = MPID_Isend(msg->msgbuf, msg->count, MPI_PACKED, 
 				   dest, tag, comm_ptr,
-				   MPID_CONTEXT_INTRA_PT2PT, &p->request );
+				   MPIR_CONTEXT_INTRA_PT2PT, &p->request );
             MPIR_ERR_CHKINTERNAL(mpi_errno, mpi_errno, "Bsend internal error: isend returned err");
             /* If the error is "request not available", we should 
                put this on the pending list.  This will depend on
@@ -326,7 +326,7 @@ int MPIR_Bsend_isend(const void *buf, int count, MPI_Datatype dtype,
 #define FUNCNAME MPIR_Bsend_free_seg
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Bsend_free_req_seg( MPID_Request* req )
+int MPIR_Bsend_free_req_seg( MPIR_Request* req )
 {
     int mpi_errno = MPI_ERR_INTERN;
     MPIR_Bsend_data_t *active = BsendBuffer.active;

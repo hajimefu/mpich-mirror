@@ -35,7 +35,7 @@ MPIDI_SendDoneCB_inline(pami_context_t   context,
                         void           * clientdata,
                         pami_result_t    result)
 {
-  MPID_Request * sreq = (MPID_Request*)clientdata;
+  MPIR_Request * sreq = (MPIR_Request*)clientdata;
   MPID_assert(sreq != NULL);
   MPIDI_Request_complete(sreq);
 }
@@ -78,13 +78,13 @@ MPIDI_Send(const void    * buf,
            MPI_Datatype    datatype,
            int             rank,
            int             tag,
-           MPID_Comm     * comm,
+           MPIR_Comm     * comm,
            int             context_offset,
            unsigned        is_blocking,
            unsigned        is_sync,
-           MPID_Request ** request)
+           MPIR_Request ** request)
 {
-  MPID_Request * sreq = NULL;
+  MPIR_Request * sreq = NULL;
 
   /* --------------------- */
   /* create a send request */
@@ -106,7 +106,7 @@ MPIDI_Send(const void    * buf,
   MPIDI_Request_setPeerRank_comm(sreq, rank);
 
   /* message type info */
-  sreq->kind = MPID_REQUEST_SEND;
+  sreq->kind = MPIR_REQUEST_KIND__SEND;
   /* ----------------------------------------- */
   /*      start the message                    */
   /* ----------------------------------------- */

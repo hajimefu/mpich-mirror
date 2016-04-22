@@ -83,7 +83,7 @@ static int MPIR_Reduce_binomial (
     MPI_Datatype datatype,
     MPI_Op op,
     int root,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
     int mpi_errno = MPI_SUCCESS;
@@ -289,7 +289,7 @@ static int MPIR_Reduce_redscat_gather (
     MPI_Datatype datatype,
     MPI_Op op,
     int root,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
     int mpi_errno = MPI_SUCCESS;
@@ -733,14 +733,14 @@ int MPIR_Reduce_intra (
     MPI_Datatype datatype,
     MPI_Op op,
     int root,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
     int mpi_errno = MPI_SUCCESS;
     int mpi_errno_ret = MPI_SUCCESS;
     int comm_size, is_commutative, type_size, pof2;
     int nbytes = 0;
-    MPID_Op *op_ptr;
+    MPIR_Op *op_ptr;
     MPIU_CHKLMEM_DECL(1);
 
     if (count == 0) return MPI_SUCCESS;
@@ -752,8 +752,8 @@ int MPIR_Reduce_intra (
     if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN)
         is_commutative = 1;
     else {
-        MPID_Op_get_ptr(op, op_ptr);
-        is_commutative = (op_ptr->kind == MPID_OP_USER_NONCOMMUTE) ? 0 : 1;
+        MPIR_Op_get_ptr(op, op_ptr);
+        is_commutative = (op_ptr->kind == MPIR_OP_KIND__USER_NONCOMMUTE) ? 0 : 1;
     }
 
     MPID_Datatype_get_size_macro(datatype, type_size);
@@ -924,7 +924,7 @@ int MPIR_Reduce_inter (
     MPI_Datatype datatype,
     MPI_Op op,
     int root,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
 /*  Intercommunicator reduce.
@@ -939,7 +939,7 @@ int MPIR_Reduce_inter (
     MPI_Status status;
     MPI_Aint true_extent, true_lb, extent;
     void *tmp_buf=NULL;
-    MPID_Comm *newcomm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
     MPIU_CHKLMEM_DECL(1);
 
     if (root == MPI_PROC_NULL) {
@@ -1035,11 +1035,11 @@ int MPIR_Reduce_inter (
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                MPI_Op op, int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                MPI_Op op, int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
-    if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
         /* intracommunicator */
         mpi_errno = MPIR_Reduce_intra(sendbuf, recvbuf, count, datatype,
                                       op, root, comm_ptr, errflag);
@@ -1066,7 +1066,7 @@ int MPIR_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype data
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Reduce_impl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                     MPI_Op op, int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                     MPI_Op op, int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
@@ -1077,7 +1077,7 @@ int MPIR_Reduce_impl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 	/* --END USEREXTENSION-- */
     } else {
-        if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+        if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
             /* intracommunicator */
             mpi_errno = MPIR_Reduce_intra(sendbuf, recvbuf, count, datatype,
                                           op, root, comm_ptr, errflag);
@@ -1140,7 +1140,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
 	       MPI_Op op, int root, MPI_Comm comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_REDUCE);
 
@@ -1161,28 +1161,28 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-	    MPID_Datatype *datatype_ptr = NULL;
-            MPID_Op *op_ptr = NULL;
+	    MPIR_Datatype *datatype_ptr = NULL;
+            MPIR_Op *op_ptr = NULL;
             int rank;
 	    
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-	    if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+	    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
 		MPIR_ERRTEST_INTRA_ROOT(comm_ptr, root, mpi_errno);
 
                 MPIR_ERRTEST_COUNT(count, mpi_errno);
                 MPIR_ERRTEST_DATATYPE(datatype, "datatype", mpi_errno);
                 if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                     MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                    MPID_Datatype_valid_ptr( datatype_ptr, mpi_errno );
+                    MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -1203,7 +1203,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                     MPIR_ERRTEST_SENDBUF_INPLACE(sendbuf, count, mpi_errno);
             }
 
-	    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+	    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 		MPIR_ERRTEST_INTER_ROOT(comm_ptr, root, mpi_errno);
 
                 if (root == MPI_ROOT) {
@@ -1211,7 +1211,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                     MPIR_ERRTEST_DATATYPE(datatype, "datatype", mpi_errno);
                     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                        MPID_Datatype_valid_ptr( datatype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -1225,7 +1225,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                     MPIR_ERRTEST_DATATYPE(datatype, "datatype", mpi_errno);
                     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                        MPID_Datatype_valid_ptr( datatype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -1239,8 +1239,8 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
 
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             if (HANDLE_GET_KIND(op) != HANDLE_KIND_BUILTIN) {
-                MPID_Op_get_ptr(op, op_ptr);
-                MPID_Op_valid_ptr( op_ptr, mpi_errno );
+                MPIR_Op_get_ptr(op, op_ptr);
+                MPIR_Op_valid_ptr( op_ptr, mpi_errno );
             }
             if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN) {
                 mpi_errno = 

@@ -24,7 +24,7 @@
 
 
 void
-MPIDI_RecvMsg_Unexp(MPID_Request  * rreq,
+MPIDI_RecvMsg_Unexp(MPIR_Request  * rreq,
                     void          * buf,
                     MPI_Aint        count,
                     MPI_Datatype    datatype)
@@ -137,10 +137,10 @@ MPIDI_RecvMsg_Unexp(MPID_Request  * rreq,
 
 
 void
-MPIDI_RecvMsg_procnull(MPID_Comm     * comm,
+MPIDI_RecvMsg_procnull(MPIR_Comm     * comm,
                        unsigned        is_blocking,
                        MPI_Status    * status,
-                       MPID_Request ** request)
+                       MPIR_Request ** request)
 {
   if (is_blocking)
     {
@@ -149,10 +149,10 @@ MPIDI_RecvMsg_procnull(MPID_Comm     * comm,
     }
   else
     {
-      MPID_Request * rreq;
+      MPIR_Request * rreq;
       rreq = MPIDI_Request_create2();
       MPIR_Status_set_procnull(&rreq->status);
-      rreq->kind = MPID_REQUEST_RECV;
+      rreq->kind = MPIR_REQUEST_KIND__RECV;
       rreq->comm = comm;
       MPIR_Comm_add_ref(comm);
       MPIDI_Request_complete(rreq);

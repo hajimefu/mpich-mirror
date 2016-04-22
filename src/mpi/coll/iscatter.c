@@ -35,27 +35,27 @@ struct shared_state {
     int nbytes;
     MPI_Status status;
 };
-static int get_count(MPID_Comm *comm, int tag, void *state)
+static int get_count(MPIR_Comm *comm, int tag, void *state)
 {
     struct shared_state *ss = state;
     MPIR_Get_count_impl(&ss->status, MPI_BYTE, &ss->curr_count);
     return MPI_SUCCESS;
 }
-static int calc_send_count_root(MPID_Comm *comm, int tag, void *state, void *state2)
+static int calc_send_count_root(MPIR_Comm *comm, int tag, void *state, void *state2)
 {
     struct shared_state *ss = state;
     int mask = (int)(size_t)state2;
     ss->send_subtree_count = ss->curr_count - ss->sendcount * mask;
     return MPI_SUCCESS;
 }
-static int calc_send_count_non_root(MPID_Comm *comm, int tag, void *state, void *state2)
+static int calc_send_count_non_root(MPIR_Comm *comm, int tag, void *state, void *state2)
 {
     struct shared_state *ss = state;
     int mask = (int)(size_t)state2;
     ss->send_subtree_count = ss->curr_count - ss->nbytes * mask;
     return MPI_SUCCESS;
 }
-static int calc_curr_count(MPID_Comm *comm, int tag, void *state)
+static int calc_curr_count(MPIR_Comm *comm, int tag, void *state)
 {
     struct shared_state *ss = state;
     ss->curr_count -= ss->send_subtree_count;
@@ -90,7 +90,7 @@ static int calc_curr_count(MPID_Comm *comm, int tag, void *state)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Iscatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                         void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                        int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+                        int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint extent = 0;
@@ -432,7 +432,7 @@ int MPIR_Iscatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Iscatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                         void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                        int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+                        int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
 /*  Intercommunicator scatter.
     For short messages, root sends to rank 0 in remote group. rank 0
@@ -447,7 +447,7 @@ int MPIR_Iscatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     int i, nbytes, sendtype_size, recvtype_size;
     MPI_Aint extent, true_extent, true_lb = 0;
     void *tmp_buf = NULL;
-    MPID_Comm *newcomm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
     MPIR_SCHED_CHKPMEM_DECL(1);
 
     if (root == MPI_PROC_NULL) {
@@ -547,10 +547,10 @@ fn_fail:
 #define FUNCNAME MPIR_Iscatter_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iscatter_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPID_Comm *comm_ptr, MPI_Request *request)
+int MPIR_Iscatter_impl(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPIR_Comm *comm_ptr, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *reqp = NULL;
+    MPIR_Request *reqp = NULL;
     int tag = -1;
     MPID_Sched_t s = MPID_SCHED_NULL;
 
@@ -610,7 +610,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                  MPI_Comm comm, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_ISCATTER);
 
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -630,16 +630,16 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS
         {
-            MPID_Datatype *sendtype_ptr, *recvtype_ptr;
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
-            if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+            MPIR_Datatype *sendtype_ptr, *recvtype_ptr;
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 MPIR_ERRTEST_INTRA_ROOT(comm_ptr, root, mpi_errno);
 
                 if (comm_ptr->rank == root) {
@@ -647,7 +647,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     MPIR_ERRTEST_DATATYPE(sendtype, "sendtype", mpi_errno);
                     if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
-                        MPID_Datatype_valid_ptr(sendtype_ptr, mpi_errno);
+                        MPIR_Datatype_valid_ptr(sendtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr(sendtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -670,7 +670,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     MPIR_ERRTEST_DATATYPE(recvtype, "recvtype", mpi_errno);
                     if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
-                        MPID_Datatype_valid_ptr(recvtype_ptr, mpi_errno);
+                        MPIR_Datatype_valid_ptr(recvtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr(recvtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -679,7 +679,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 }
             }
 
-            if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
                 MPIR_ERRTEST_INTER_ROOT(comm_ptr, root, mpi_errno);
 
                 if (root == MPI_ROOT) {
@@ -687,7 +687,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     MPIR_ERRTEST_DATATYPE(sendtype, "sendtype", mpi_errno);
                     if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
-                        MPID_Datatype_valid_ptr(sendtype_ptr, mpi_errno);
+                        MPIR_Datatype_valid_ptr(sendtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr(sendtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -700,7 +700,7 @@ int MPI_Iscatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     MPIR_ERRTEST_DATATYPE(recvtype, "recvtype", mpi_errno);
                     if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
-                        MPID_Datatype_valid_ptr(recvtype_ptr, mpi_errno);
+                        MPIR_Datatype_valid_ptr(recvtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr(recvtype_ptr, mpi_errno);
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;

@@ -46,9 +46,9 @@ int MPIR_Comm_create_keyval_impl(MPI_Comm_copy_attr_function *comm_copy_attr_fn,
                                  int *comm_keyval, void *extra_state)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Keyval *keyval_ptr;
+    MPIR_Keyval *keyval_ptr;
         
-    keyval_ptr = (MPID_Keyval *)MPIU_Handle_obj_alloc( &MPID_Keyval_mem );
+    keyval_ptr = (MPIR_Keyval *)MPIU_Handle_obj_alloc( &MPIR_Keyval_mem );
     MPIR_ERR_CHKANDJUMP(!keyval_ptr, mpi_errno, MPI_ERR_OTHER,"**nomem");
 
     /* Initialize the attribute dup function */
@@ -60,10 +60,10 @@ int MPIR_Comm_create_keyval_impl(MPI_Comm_copy_attr_function *comm_copy_attr_fn,
     /* The handle encodes the keyval kind.  Modify it to have the correct
        field */
     keyval_ptr->handle           = (keyval_ptr->handle & ~(0x03c00000)) |
-	                           (MPID_COMM << 22);
+	                           (MPIR_COMM << 22);
     MPIU_Object_set_ref(keyval_ptr,1);
     keyval_ptr->was_freed        = 0;
-    keyval_ptr->kind	         = MPID_COMM;
+    keyval_ptr->kind	         = MPIR_COMM;
     keyval_ptr->extra_state      = extra_state;
     keyval_ptr->copyfn.user_function = comm_copy_attr_fn;
     keyval_ptr->copyfn.proxy = MPIR_Attr_copy_c_proxy;

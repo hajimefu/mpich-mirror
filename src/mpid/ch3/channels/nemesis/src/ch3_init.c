@@ -23,8 +23,8 @@ static int nemesis_initialized = 0;
 #define FUNCNAME split_type
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int split_type(MPID_Comm * comm_ptr, int stype, int key,
-                      MPID_Info *info_ptr, MPID_Comm ** newcomm_ptr)
+static int split_type(MPIR_Comm * comm_ptr, int stype, int key,
+                      MPIR_Info *info_ptr, MPIR_Comm ** newcomm_ptr)
 {
     MPID_Node_id_t id;
     MPIDI_Rank_t nid;
@@ -65,7 +65,7 @@ int MPIDI_CH3I_Shm_supported(void)
     return !mutex_err;
 }
 
-static MPID_CommOps comm_fns = {
+static MPIR_Commops comm_fns = {
     split_type
 };
 
@@ -83,7 +83,7 @@ int MPIDI_CH3_Init(int has_parent, MPIDI_PG_t *pg_p, int pg_rank)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3_INIT);
 
     /* Override split_type */
-    MPID_Comm_fns = &comm_fns;
+    MPIR_Comm_fns = &comm_fns;
 
     mpi_errno = MPID_nem_init (pg_rank, pg_p, has_parent);
     if (mpi_errno) MPIR_ERR_POP (mpi_errno);

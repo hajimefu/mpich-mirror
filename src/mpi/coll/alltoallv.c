@@ -62,7 +62,7 @@ int MPI_Alltoallv(const void *sendbuf, const int *sendcounts, const int *sdispls
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *sdispls,
                          MPI_Datatype sendtype, void *recvbuf, const int *recvcounts,
-                         const int *rdispls, MPI_Datatype recvtype, MPID_Comm *comm_ptr,
+                         const int *rdispls, MPI_Datatype recvtype, MPIR_Comm *comm_ptr,
                          MPIR_Errflag_t *errflag)
 {
     int        comm_size, i, j;
@@ -71,7 +71,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
     int mpi_errno_ret = MPI_SUCCESS;
     MPI_Status *starray;
     MPI_Status status;
-    MPID_Request **reqarray;
+    MPIR_Request **reqarray;
     int dst, rank, req_cnt;
     int ii, ss, bblock;
     int type_size;
@@ -139,7 +139,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
         MPID_Datatype_get_extent_macro(sendtype, send_extent);
 
         MPIU_CHKLMEM_MALLOC(starray,  MPI_Status*,  2*bblock*sizeof(MPI_Status),  mpi_errno, "starray");
-        MPIU_CHKLMEM_MALLOC(reqarray, MPID_Request**, 2*bblock*sizeof(MPID_Request *), mpi_errno, "reqarray");
+        MPIU_CHKLMEM_MALLOC(reqarray, MPIR_Request**, 2*bblock*sizeof(MPIR_Request *), mpi_errno, "reqarray");
 
         /* post only bblock isends/irecvs at a time as suggested by Tony Ladd */
         for (ii=0; ii<comm_size; ii+=bblock) {
@@ -237,7 +237,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Alltoallv_inter(const void *sendbuf, const int *sendcounts, const int *sdispls,
                          MPI_Datatype sendtype, void *recvbuf, const int *recvcounts,
-                         const int *rdispls, MPI_Datatype recvtype, MPID_Comm *comm_ptr,
+                         const int *rdispls, MPI_Datatype recvtype, MPIR_Comm *comm_ptr,
                          MPIR_Errflag_t *errflag)
 {
 /* Intercommunicator alltoallv. We use a pairwise exchange algorithm
@@ -327,11 +327,11 @@ int MPIR_Alltoallv_inter(const void *sendbuf, const int *sendcounts, const int *
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Alltoallv(const void *sendbuf, const int *sendcounts, const int *sdispls,
                    MPI_Datatype sendtype, void *recvbuf, const int *recvcounts, const int *rdispls,
-                   MPI_Datatype recvtype, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                   MPI_Datatype recvtype, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
-    if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
         /* intracommunicator */
         mpi_errno = MPIR_Alltoallv_intra(sendbuf, sendcounts, sdispls,
                                          sendtype, recvbuf, recvcounts,
@@ -358,7 +358,7 @@ int MPIR_Alltoallv(const void *sendbuf, const int *sendcounts, const int *sdispl
 int MPIR_Alltoallv_impl(const void *sendbuf, const int *sendcounts, const int *sdispls,
                         MPI_Datatype sendtype, void *recvbuf, const int *recvcounts,
                         const int *rdispls, MPI_Datatype recvtype,
-                        MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                        MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
@@ -432,7 +432,7 @@ int MPI_Alltoallv(const void *sendbuf, const int *sendcounts,
                   MPI_Comm comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_ALLTOALLV);
 
@@ -453,21 +453,21 @@ int MPI_Alltoallv(const void *sendbuf, const int *sendcounts,
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-	    MPID_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
+	    MPIR_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
             int i, comm_size;
-            int check_send = (comm_ptr->comm_kind == MPID_INTRACOMM && sendbuf != MPI_IN_PLACE);
+            int check_send = (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM && sendbuf != MPI_IN_PLACE);
 
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-            if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 comm_size = comm_ptr->local_size;
 
                 if (sendbuf != MPI_IN_PLACE && sendtype == recvtype && sendcounts == recvcounts)
@@ -475,7 +475,7 @@ int MPI_Alltoallv(const void *sendbuf, const int *sendcounts,
             } else
                 comm_size = comm_ptr->remote_size;
 
-            if (comm_ptr->comm_kind == MPID_INTERCOMM && sendbuf == MPI_IN_PLACE) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM && sendbuf == MPI_IN_PLACE) {
                 MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**sendbuf_inplace");
             }
 
@@ -489,14 +489,14 @@ int MPI_Alltoallv(const void *sendbuf, const int *sendcounts,
             }
             if (check_send && HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                 MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
-                MPID_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
+                MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             }
             if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                 MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
-                MPID_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
+                MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;

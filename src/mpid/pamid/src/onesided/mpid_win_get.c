@@ -234,7 +234,7 @@ MPID_Get(void         *origin_addr,
          MPI_Aint      target_disp,
          int           target_count,
          MPI_Datatype  target_datatype,
-         MPID_Win     *win)
+         MPIR_Win     *win)
 {
 
   int mpi_errno = MPI_SUCCESS;
@@ -316,7 +316,7 @@ MPID_Get(void         *origin_addr,
        * portion of the request structure after decrementing the completion
        * counter.
        *
-       * See MPID_Request_release_inline()
+       * See MPID_Request_free_inline()
        */
       if(req->req_handle)
         MPIR_cc_set(req->req_handle->cc_ptr, 0);
@@ -409,7 +409,7 @@ MPID_Get(void         *origin_addr,
   if ((MPIDI_Process.typed_onesided == 1) && (!req->target.dt.contig || !req->origin.dt.contig)) {
     /* We will use the PAMI_Rget_typed call so we need to make sure any MPI_Type_free before the context
      * executes the get does not free the MPIDU_Datatype, which would also free the associated PAMI datatype which
-     * is still needed for communication -- decrement the ref in the callback to allow the MPID_Datatype
+     * is still needed for communication -- decrement the ref in the callback to allow the MPIR_Datatype
      * to be freed once the PAMI communication has completed.
      */
     MPIDU_Datatype_add_ref(req->origin.dt.pointer);

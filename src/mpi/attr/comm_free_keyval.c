@@ -33,14 +33,14 @@ int MPI_Comm_free_keyval(int *comm_keyval) __attribute__((weak,alias("PMPI_Comm_
 void MPIR_Comm_free_keyval_impl(int keyval)
 {
     int in_use;
-    MPID_Keyval *keyval_ptr;
+    MPIR_Keyval *keyval_ptr;
     
-    MPID_Keyval_get_ptr(keyval, keyval_ptr);
+    MPIR_Keyval_get_ptr(keyval, keyval_ptr);
     if (!keyval_ptr->was_freed) {
         keyval_ptr->was_freed = 1;
         MPIR_Keyval_release_ref( keyval_ptr, &in_use);
         if (!in_use) {
-            MPIU_Handle_obj_free( &MPID_Keyval_mem, keyval_ptr );
+            MPIU_Handle_obj_free( &MPIR_Keyval_mem, keyval_ptr );
         }
     }
     return;
@@ -87,7 +87,7 @@ int MPI_Comm_free_keyval(int *comm_keyval)
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_ARGNULL(comm_keyval, "comm_keyval", mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(*comm_keyval, MPID_COMM, "communicator", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(*comm_keyval, MPIR_COMM, "communicator", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(*comm_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -99,12 +99,12 @@ int MPI_Comm_free_keyval(int *comm_keyval)
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-            MPID_Keyval *keyval_ptr = NULL;
+            MPIR_Keyval *keyval_ptr = NULL;
 
             /* Convert MPI object handles to object pointers */
-            MPID_Keyval_get_ptr( *comm_keyval, keyval_ptr );
+            MPIR_Keyval_get_ptr( *comm_keyval, keyval_ptr );
 
-	    MPID_Keyval_valid_ptr( keyval_ptr, mpi_errno );
+	    MPIR_Keyval_valid_ptr( keyval_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;

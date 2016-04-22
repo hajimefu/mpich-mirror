@@ -33,9 +33,9 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
 {
     static const char FCNAME[] = "MPIR_TypeSetAttr";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Datatype *type_ptr = NULL;
-    MPID_Keyval *keyval_ptr = NULL;
-    MPID_Attribute *p, **old_p;
+    MPIR_Datatype *type_ptr = NULL;
+    MPIR_Keyval *keyval_ptr = NULL;
+    MPIR_Attribute *p, **old_p;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_TYPE_SET_ATTR);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -51,7 +51,7 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_DATATYPE(datatype, "datatype", mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(type_keyval, MPID_DATATYPE, "datatype", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(type_keyval, MPIR_DATATYPE, "datatype", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(type_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -60,7 +60,7 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
 
     /* Convert MPI object handles to object pointers */
     MPID_Datatype_get_ptr( datatype, type_ptr );
-    MPID_Keyval_get_ptr( type_keyval, keyval_ptr );
+    MPIR_Keyval_get_ptr( type_keyval, keyval_ptr );
     
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -68,10 +68,10 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate type_ptr */
-            MPID_Datatype_valid_ptr( type_ptr, mpi_errno );
+            MPIR_Datatype_valid_ptr( type_ptr, mpi_errno );
 	    /* If type_ptr is not valid, it will be reset to null */
 	    /* Validate keyval_ptr */
-		MPID_Keyval_valid_ptr( keyval_ptr, mpi_errno );
+		MPIR_Keyval_valid_ptr( keyval_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;
@@ -95,18 +95,18 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
 		goto fn_fail;
 	    }
 	    /* --END ERROR HANDLING-- */
-	    p->value    = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	    p->value    = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	    p->attrType = attrType;
 	    break;
 	}
 	else if (p->keyval->handle > keyval_ptr->handle) {
-	    MPID_Attribute *new_p = MPID_Attr_alloc();
+	    MPIR_Attribute *new_p = MPID_Attr_alloc();
 	    MPIR_ERR_CHKANDJUMP1(!new_p,mpi_errno,MPI_ERR_OTHER,
-				 "**nomem","**nomem %s", "MPID_Attribute" );
+				 "**nomem","**nomem %s", "MPIR_Attribute" );
 	    new_p->keyval	 = keyval_ptr;
 	    new_p->attrType      = attrType;
 	    new_p->pre_sentinal	 = 0;
-	    new_p->value	 = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	    new_p->value	 = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	    new_p->post_sentinal = 0;
 	    new_p->next		 = p->next;
 	    MPIR_Keyval_add_ref( keyval_ptr );
@@ -118,14 +118,14 @@ int MPIR_TypeSetAttr(MPI_Datatype datatype, int type_keyval, void *attribute_val
     }
     if (!p)
     {
-	MPID_Attribute *new_p = MPID_Attr_alloc();
+	MPIR_Attribute *new_p = MPID_Attr_alloc();
 	MPIR_ERR_CHKANDJUMP1(!new_p,mpi_errno,MPI_ERR_OTHER,
-			     "**nomem","**nomem %s", "MPID_Attribute" );
+			     "**nomem","**nomem %s", "MPIR_Attribute" );
 	/* Did not find in list.  Add at end */
 	new_p->keyval	     = keyval_ptr;
 	new_p->attrType      = attrType;
 	new_p->pre_sentinal  = 0;
-	new_p->value	     = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	new_p->value	     = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	new_p->post_sentinal = 0;
 	new_p->next	     = 0;
 	MPIR_Keyval_add_ref( keyval_ptr );

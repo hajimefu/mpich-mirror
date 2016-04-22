@@ -25,10 +25,10 @@
 
 struct MPIDI_Recvq_t
 {
-  struct MPID_Request * posted_head;      /**< \brief The Head of the Posted queue */
-  struct MPID_Request * posted_tail;      /**< \brief The Tail of the Posted queue */
-  struct MPID_Request * unexpected_head;  /**< \brief The Head of the Unexpected queue */
-  struct MPID_Request * unexpected_tail;  /**< \brief The Tail of the Unexpected queue */
+  struct MPIR_Request * posted_head;      /**< \brief The Head of the Posted queue */
+  struct MPIR_Request * posted_tail;      /**< \brief The Tail of the Posted queue */
+  struct MPIR_Request * unexpected_head;  /**< \brief The Head of the Unexpected queue */
+  struct MPIR_Request * unexpected_tail;  /**< \brief The Tail of the Unexpected queue */
 };
 extern struct MPIDI_Recvq_t MPIDI_Recvq;
 
@@ -154,14 +154,14 @@ MPIDI_Recvq_FU_r(int source, int tag, int context, MPI_Status * status)
  * \return     The matching UE request or the new posted request
  */
 #ifndef OUT_OF_ORDER_HANDLING
-static inline MPID_Request *
-MPIDI_Recvq_FDU_or_AEP(MPID_Request *newreq, int source, int tag, int context_id, int * foundp)
+static inline MPIR_Request *
+MPIDI_Recvq_FDU_or_AEP(MPIR_Request *newreq, int source, int tag, int context_id, int * foundp)
 #else
-static inline MPID_Request *
-MPIDI_Recvq_FDU_or_AEP(MPID_Request *newreq, int source, pami_task_t pami_source, int tag, int context_id, int * foundp)
+static inline MPIR_Request *
+MPIDI_Recvq_FDU_or_AEP(MPIR_Request *newreq, int source, pami_task_t pami_source, int tag, int context_id, int * foundp)
 #endif
 {
-  MPID_Request * rreq = NULL;
+  MPIR_Request * rreq = NULL;
   /* We have unexpected messages, so search unexpected queue */
 #ifdef QUEUE_BINARY_SEARCH_SUPPORT
   if(MPIDI_Process.queue_binary_search_support_on)
@@ -209,7 +209,7 @@ MPIDI_Recvq_FDU_or_AEP(MPID_Request *newreq, int source, pami_task_t pami_source
   TRACE_SET_REQ_VAL(rreq->mpid.envelope.msginfo.MPIseqno,-1);
   TRACE_SET_REQ_VAL(rreq->mpid.envelope.length,-1);
   TRACE_SET_REQ_VAL(rreq->mpid.envelope.data,(void *) 0);
-  rreq->kind = MPID_REQUEST_RECV;
+  rreq->kind = MPIR_REQUEST_KIND__RECV;
   MPIDI_Request_setMatch(rreq, tag, source, context_id);
 #ifdef QUEUE_BINARY_SEARCH_SUPPORT
   if(MPIDI_Process.queue_binary_search_support_on)
@@ -241,7 +241,7 @@ MPIDI_Token_cntr_t  *MPIDI_Token_cntr;
 typedef struct MPIDI_In_cntr {
   uint               n_OutOfOrderMsgs:16; /* the number of out-of-order messages received */
   uint               nMsgs;               /* the number of received messages */
-  MPID_Request       *OutOfOrderList;     /* link list of out-of-order messages */
+  MPIR_Request       *OutOfOrderList;     /* link list of out-of-order messages */
 } MPIDI_In_cntr_t;
 
 /**
@@ -268,15 +268,15 @@ MPIDI_Out_cntr_t *MPIDI_Out_cntr;
  * \return     The matching posted request or the new UE request
  */
 #ifndef OUT_OF_ORDER_HANDLING
-static inline MPID_Request *
+static inline MPIR_Request *
 MPIDI_Recvq_FDP(size_t source, size_t tag, size_t context_id)
 #else
-static inline MPID_Request *
+static inline MPIR_Request *
 MPIDI_Recvq_FDP(size_t source, pami_task_t pami_source, int tag, int context_id, int msg_seqno)
 #endif
 {
-  MPID_Request * rreq;
-  MPID_Request * prev_rreq = NULL;
+  MPIR_Request * rreq;
+  MPIR_Request * prev_rreq = NULL;
 #ifdef USE_STATISTICS
   unsigned search_length = 0;
 #endif
@@ -413,8 +413,8 @@ MPIDI_Recvq_FDP(size_t source, pami_task_t pami_source, int tag, int context_id,
         } else if (in_cntr->n_OutOfOrderMsgs > 0) {                         \
           in_cntr->OutOfOrderList=req->mpid.nextR;                          \
           /* remove req from out of order list */                           \
-          ((MPID_Request *)(req)->mpid.prevR)->mpid.nextR = (req)->mpid.nextR; \
-          ((MPID_Request *)(req)->mpid.nextR)->mpid.prevR = (req)->mpid.prevR; \
+          ((MPIR_Request *)(req)->mpid.prevR)->mpid.nextR = (req)->mpid.nextR; \
+          ((MPIR_Request *)(req)->mpid.nextR)->mpid.prevR = (req)->mpid.prevR; \
             (req)->mpid.nextR=NULL;                                         \
             (req)->mpid.prevR=NULL;                                         \
         }                                                                   \

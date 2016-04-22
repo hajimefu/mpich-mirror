@@ -20,7 +20,7 @@ typedef struct
     int sequence_number_offs;
     int comm_head_offs;
     
-    /* Fields in MPID_Comm */
+    /* Fields in MPIR_Comm */
     int comm_rsize_offs;
     int lrank_to_grank_offs;
     int comm_rank_offs;
@@ -29,7 +29,7 @@ typedef struct
     int comm_next_offs;
     int comm_name_offs;
     
-    /* Fields in MPID_Request (including structures within the request) */
+    /* Fields in MPIR_Request (including structures within the request) */
     int req_status_offs;
     int req_cc_offs;
     int req_dev_offs;

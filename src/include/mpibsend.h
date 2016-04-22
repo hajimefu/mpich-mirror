@@ -46,8 +46,8 @@ typedef enum {
     BSEND_INIT = 2
 } MPIR_Bsend_kind_t;
 
-struct MPID_Request;
-struct MPID_Comm;
+struct MPIR_Request;
+struct MPIR_Comm;
 
 /* BsendMsg is used to hold all of the message particulars in case a
    request is not currently available */
@@ -56,7 +56,7 @@ typedef struct MPIR_Bsend_msg {
     MPI_Aint     count;
     MPI_Datatype dtype;
     int          tag;
-    struct MPID_Comm    *comm_ptr;
+    struct MPIR_Comm    *comm_ptr;
     int          dest;
 } MPIR_Bsend_msg_t;
 
@@ -67,7 +67,7 @@ typedef struct MPIR_Bsend_data {
                                           including all headers */
     struct MPIR_Bsend_data *next, *prev;
     MPIR_Bsend_kind_t kind;
-    struct MPID_Request  *request;
+    struct MPIR_Request  *request;
     MPIR_Bsend_msg_t  msg;
     double            alignpad;        /* make sure that the struct
                                           shares double alignment */

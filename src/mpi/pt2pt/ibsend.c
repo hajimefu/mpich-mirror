@@ -22,7 +22,7 @@ int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 /* -- End Profiling Symbol Block */
 
 typedef struct {
-    MPID_Request *req;
+    MPIR_Request *req;
     int           cancelled;
 } ibsend_req_info;
 
@@ -59,7 +59,7 @@ PMPI_LOCAL int MPIR_Ibsend_cancel( void *extra, int complete )
     int mpi_errno = MPI_SUCCESS;
     ibsend_req_info *ibsend_info = (ibsend_req_info *)extra;
     MPI_Status status;
-    MPID_Request *req = ibsend_info->req;
+    MPIR_Request *req = ibsend_info->req;
     MPI_Request req_hdl = req->handle;
 
     /* FIXME: There should be no unreferenced args! */
@@ -93,10 +93,10 @@ PMPI_LOCAL int MPIR_Ibsend_cancel( void *extra, int complete )
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ibsend_impl(const void *buf, int count, MPI_Datatype datatype, int dest, int tag,
-                     MPID_Comm *comm_ptr, MPI_Request *request)
+                     MPIR_Comm *comm_ptr, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *request_ptr, *new_request_ptr;
+    MPIR_Request *request_ptr, *new_request_ptr;
     ibsend_req_info *ibinfo=0;
         
     /* We don't try tbsend in for MPI_Ibsend because we must create a
@@ -164,7 +164,7 @@ int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 	       MPI_Comm comm, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_IBSEND);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -184,7 +184,7 @@ int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 #   endif /* HAVE_ERROR_CHECKING */
     
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters if error checking is enabled */
 #   ifdef HAVE_ERROR_CHECKING
@@ -193,7 +193,7 @@ int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
         {
 	    MPIR_ERRTEST_COUNT(count,mpi_errno);
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno) goto fn_fail;
 	    /* If comm_ptr is not valid, it will be reset to null */
 	    if (comm_ptr) {
@@ -207,10 +207,10 @@ int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 	    /* Validate datatype object */
 	    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPID_Datatype *datatype_ptr = NULL;
+		MPIR_Datatype *datatype_ptr = NULL;
 
 		MPID_Datatype_get_ptr(datatype, datatype_ptr);
-		MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
 		MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;

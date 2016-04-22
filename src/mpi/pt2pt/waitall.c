@@ -7,9 +7,9 @@
 
 #include "mpiimpl.h"
 
-#if !defined(MPID_REQUEST_PTR_ARRAY_SIZE)
+#if !defined(MPIR_REQUEST_PTR_ARRAY_SIZE)
 /* use a larger default size of 64 in order to enhance SQMR performance */
-#define MPID_REQUEST_PTR_ARRAY_SIZE 64
+#define MPIR_REQUEST_PTR_ARRAY_SIZE 64
 #endif
 
 /* -- Begin Profiling Symbol Block for routine MPI_Waitall */
@@ -32,7 +32,7 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 
 
 /* The "fastpath" version of MPIR_Request_complete.  It only handles
- * MPID_REQUEST_SEND and MPID_REQUEST_RECV kinds, and it does not attempt to
+ * MPIR_REQUEST_KIND__SEND and MPIR_REQUEST_KIND__RECV kinds, and it does not attempt to
  * deal with status structures under the assumption that bleeding fast code will
  * pass either MPI_STATUS_IGNORE or MPI_STATUSES_IGNORE as appropriate.  This
  * routine (or some a variation of it) is an unfortunately necessary stunt to
@@ -42,13 +42,13 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 #define FUNCNAME request_complete_fastpath
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int request_complete_fastpath(MPI_Request *request, MPID_Request *request_ptr)
+static inline int request_complete_fastpath(MPI_Request *request, MPIR_Request *request_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(request_ptr->kind == MPID_REQUEST_SEND || request_ptr->kind == MPID_REQUEST_RECV);
+    MPIU_Assert(request_ptr->kind == MPIR_REQUEST_KIND__SEND || request_ptr->kind == MPIR_REQUEST_KIND__RECV);
 
-    if (request_ptr->kind == MPID_REQUEST_SEND) {
+    if (request_ptr->kind == MPIR_REQUEST_KIND__SEND) {
         /* FIXME: are Ibsend requests added to the send queue? */
         MPIR_SENDQ_FORGET(request_ptr);
     }
@@ -56,7 +56,7 @@ static inline int request_complete_fastpath(MPI_Request *request, MPID_Request *
     /* the completion path for SEND and RECV is the same at this time, modulo
      * the SENDQ hook above */
     mpi_errno = request_ptr->status.MPI_ERROR;
-    MPID_Request_release(request_ptr);
+    MPIR_Request_free(request_ptr);
     *request = MPI_REQUEST_NULL;
 
     /* avoid normal fn_exit/fn_fail jump pattern to reduce jumps and compiler confusion */
@@ -71,8 +71,8 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
                       MPI_Status array_of_statuses[])
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request * request_ptr_array[MPID_REQUEST_PTR_ARRAY_SIZE];
-    MPID_Request ** request_ptrs = request_ptr_array;
+    MPIR_Request * request_ptr_array[MPIR_REQUEST_PTR_ARRAY_SIZE];
+    MPIR_Request ** request_ptrs = request_ptr_array;
     MPI_Status * status_ptr;
     MPID_Progress_state progress_state;
     int i, j;
@@ -87,9 +87,9 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
     MPIU_CHKLMEM_DECL(1);
 
     /* Convert MPI request handles to a request object pointers */
-    if (count > MPID_REQUEST_PTR_ARRAY_SIZE)
+    if (count > MPIR_REQUEST_PTR_ARRAY_SIZE)
     {
-	MPIU_CHKLMEM_MALLOC(request_ptrs, MPID_Request **, count * sizeof(MPID_Request *), mpi_errno, "request pointers");
+	MPIU_CHKLMEM_MALLOC(request_ptrs, MPIR_Request **, count * sizeof(MPIR_Request *), mpi_errno, "request pointers");
     }
 
     n_greqs = 0;
@@ -98,27 +98,27 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
     {
 	if (array_of_requests[i] != MPI_REQUEST_NULL)
 	{
-	    MPID_Request_get_ptr(array_of_requests[i], request_ptrs[i]);
+	    MPIR_Request_get_ptr(array_of_requests[i], request_ptrs[i]);
 	    /* Validate object pointers if error checking is enabled */
 #           ifdef HAVE_ERROR_CHECKING
 	    {
 		MPID_BEGIN_ERROR_CHECKS;
 		{
-		    MPID_Request_valid_ptr( request_ptrs[i], mpi_errno );
+		    MPIR_Request_valid_ptr( request_ptrs[i], mpi_errno );
                     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-                    MPIR_ERR_CHKANDJUMP1((request_ptrs[i]->kind == MPID_REQUEST_MPROBE),
+                    MPIR_ERR_CHKANDJUMP1((request_ptrs[i]->kind == MPIR_REQUEST_KIND__MPROBE),
                                          mpi_errno, MPI_ERR_ARG, "**msgnotreq", "**msgnotreq %d", i);
 		}
 		MPID_END_ERROR_CHECKS;
 	    }
 #           endif
-            if (request_ptrs[i]->kind != MPID_REQUEST_RECV &&
-                request_ptrs[i]->kind != MPID_REQUEST_SEND)
+            if (request_ptrs[i]->kind != MPIR_REQUEST_KIND__RECV &&
+                request_ptrs[i]->kind != MPIR_REQUEST_KIND__SEND)
             {
                 optimize = FALSE;
             }
 
-            if (request_ptrs[i]->kind == MPID_UREQUEST)
+            if (request_ptrs[i]->kind == MPIR_REQUEST_KIND__GREQUEST)
                 ++n_greqs;
 
             /* If one of the requests is an anysource on a communicator that's
@@ -126,7 +126,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
              * instead to prevent getting stuck in the progress engine. */
             if (unlikely(MPIR_CVAR_ENABLE_FT &&
                         MPID_Request_is_anysource(request_ptrs[i]) &&
-                        !MPID_Request_is_complete(request_ptrs[i]) &&
+                        !MPIR_Request_is_complete(request_ptrs[i]) &&
                         !MPID_Comm_AS_enabled(request_ptrs[i]->comm))) {
                 disabled_anysource = TRUE;
             }
@@ -160,7 +160,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
     if (optimize) {
         MPID_Progress_start(&progress_state);
         for (i = 0; i < count; ++i) {
-            while (!MPID_Request_is_complete(request_ptrs[i])) {
+            while (!MPIR_Request_is_complete(request_ptrs[i])) {
                 mpi_errno = MPID_Progress_wait(&progress_state);
                 /* must check and handle the error, can't guard with HAVE_ERROR_CHECKING, but it's
                  * OK for the error case to be slower */
@@ -168,7 +168,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
                     /* --BEGIN ERROR HANDLING-- */
                     if (unlikely(MPIR_CVAR_ENABLE_FT &&
                                 MPID_Request_is_anysource(request_ptrs[i]) &&
-                                !MPID_Request_is_complete(request_ptrs[i]) &&
+                                !MPIR_Request_is_complete(request_ptrs[i]) &&
                                 !MPID_Comm_AS_enabled(request_ptrs[i]->comm))) {
                         MPIR_ERR_SET(mpi_errno, MPI_ERR_IN_STATUS, "**instatus");
                     }
@@ -209,10 +209,10 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
         }
         
         /* wait for ith request to complete */
-        while (!MPID_Request_is_complete(request_ptrs[i]))
+        while (!MPIR_Request_is_complete(request_ptrs[i]))
         {
             /* generalized requests should already be finished */
-            MPIU_Assert(request_ptrs[i]->kind != MPID_UREQUEST);
+            MPIU_Assert(request_ptrs[i]->kind != MPIR_REQUEST_KIND__GREQUEST);
             
             mpi_errno = MPID_Progress_wait(&progress_state);
             if (mpi_errno != MPI_SUCCESS) {
@@ -222,7 +222,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
                 /* --END ERROR HANDLING-- */
             } else if (unlikely(MPIR_CVAR_ENABLE_FT &&
                         MPID_Request_is_anysource(request_ptrs[i]) &&
-                        !MPID_Request_is_complete(request_ptrs[i]) &&
+                        !MPIR_Request_is_complete(request_ptrs[i]) &&
                         !MPID_Comm_AS_enabled(request_ptrs[i]->comm))) {
                 /* Check for pending failures */
                 MPID_Progress_end(&progress_state);
@@ -234,7 +234,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
             }
         }
 
-        if (MPID_Request_is_complete(request_ptrs[i])) {
+        if (MPIR_Request_is_complete(request_ptrs[i])) {
             /* complete the request and check the status */
             status_ptr = (ignoring_statuses) ? MPI_STATUS_IGNORE : &array_of_statuses[i];
             rc = MPIR_Request_complete(&array_of_requests[i], request_ptrs[i], status_ptr, &active_flag);
@@ -287,7 +287,7 @@ int MPIR_Waitall_impl(int count, MPI_Request array_of_requests[],
     MPID_Progress_end(&progress_state);
         
  fn_exit:
-     if (count > MPID_REQUEST_PTR_ARRAY_SIZE)
+     if (count > MPIR_REQUEST_PTR_ARRAY_SIZE)
     {
 	MPIU_CHKLMEM_FREEALL();
     }

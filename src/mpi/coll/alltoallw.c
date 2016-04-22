@@ -56,7 +56,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispls
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Alltoallw_intra(const void *sendbuf, const int sendcounts[], const int sdispls[],
                          const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[],
-                         const int rdispls[], const MPI_Datatype recvtypes[], MPID_Comm *comm_ptr,
+                         const int rdispls[], const MPI_Datatype recvtypes[], MPIR_Comm *comm_ptr,
                          MPIR_Errflag_t *errflag)
 {
     int        comm_size, i, j;
@@ -64,7 +64,7 @@ int MPIR_Alltoallw_intra(const void *sendbuf, const int sendcounts[], const int 
     int mpi_errno_ret = MPI_SUCCESS;
     MPI_Status status;
     MPI_Status *starray;
-    MPID_Request **reqarray;
+    MPIR_Request **reqarray;
     int dst, rank;
     int outstanding_requests;
     int ii, ss, bblock;
@@ -126,7 +126,7 @@ int MPIR_Alltoallw_intra(const void *sendbuf, const int sendcounts[], const int 
         if (bblock == 0) bblock = comm_size;
 
         MPIU_CHKLMEM_MALLOC(starray,  MPI_Status*,  2*bblock*sizeof(MPI_Status),  mpi_errno, "starray");
-        MPIU_CHKLMEM_MALLOC(reqarray, MPID_Request**, 2*bblock*sizeof(MPID_Request *), mpi_errno, "reqarray");
+        MPIU_CHKLMEM_MALLOC(reqarray, MPIR_Request**, 2*bblock*sizeof(MPIR_Request *), mpi_errno, "reqarray");
 
         /* post only bblock isends/irecvs at a time as suggested by Tony Ladd */
         for (ii=0; ii<comm_size; ii+=bblock) {
@@ -237,7 +237,7 @@ int MPIR_Alltoallw_intra(const void *sendbuf, const int sendcounts[], const int 
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Alltoallw_inter(const void *sendbuf, const int sendcounts[], const int sdispls[],
                          const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[],
-                         const int rdispls[], const MPI_Datatype recvtypes[], MPID_Comm *comm_ptr,
+                         const int rdispls[], const MPI_Datatype recvtypes[], MPIR_Comm *comm_ptr,
                          MPIR_Errflag_t *errflag)
 {
 /* Intercommunicator alltoallw. We use a pairwise exchange algorithm
@@ -322,11 +322,11 @@ int MPIR_Alltoallw_inter(const void *sendbuf, const int sendcounts[], const int 
 int MPIR_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[],
                    const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[],
                    const int rdispls[], const MPI_Datatype recvtypes[],
-                   MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                   MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
-    if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
         /* intracommunicator */
         mpi_errno = MPIR_Alltoallw_intra(sendbuf, sendcounts, sdispls,
                                          sendtypes, recvbuf, recvcounts,
@@ -353,7 +353,7 @@ int MPIR_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispl
 int MPIR_Alltoallw_impl(const void *sendbuf, const int sendcounts[], const int sdispls[],
                         const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[],
                         const int rdispls[], const MPI_Datatype recvtypes[],
-                        MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                        MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
@@ -427,7 +427,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
                   const MPI_Datatype recvtypes[], MPI_Comm comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_ALLTOALLW);
 
@@ -448,27 +448,27 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-	    MPID_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
+	    MPIR_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
             int i, comm_size;
             int check_send;
 
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-            check_send = (comm_ptr->comm_kind == MPID_INTRACOMM && sendbuf != MPI_IN_PLACE);
+            check_send = (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM && sendbuf != MPI_IN_PLACE);
 
-            if (comm_ptr->comm_kind == MPID_INTERCOMM && sendbuf == MPI_IN_PLACE) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM && sendbuf == MPI_IN_PLACE) {
                 MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**sendbuf_inplace");
             }
 
-            if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 comm_size = comm_ptr->local_size;
 
                 if (sendbuf != MPI_IN_PLACE && sendcounts == recvcounts && sendtypes == recvtypes)
@@ -484,7 +484,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
                     }
                     if ((sendcounts[i] > 0) && (HANDLE_GET_KIND(sendtypes[i]) != HANDLE_KIND_BUILTIN)) {
                         MPID_Datatype_get_ptr(sendtypes[i], sendtype_ptr);
-                        MPID_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -497,7 +497,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
                 }
                 if ((recvcounts[i] > 0) && (HANDLE_GET_KIND(recvtypes[i]) != HANDLE_KIND_BUILTIN)) {
                     MPID_Datatype_get_ptr(recvtypes[i], recvtype_ptr);
-                    MPID_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
+                    MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;

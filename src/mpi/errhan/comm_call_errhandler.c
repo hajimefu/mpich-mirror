@@ -56,7 +56,7 @@ int MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
 {
     int mpi_errno = MPI_SUCCESS;
     int in_cs = FALSE;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_CALL_ERRHANDLER);
     
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -75,7 +75,7 @@ int MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
 #   endif
     
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     MPID_THREAD_CS_ENTER(POBJ, MPIR_THREAD_POBJ_COMM_MUTEX(comm_ptr)); /* protect access to comm_ptr->errhandler */
     in_cs = TRUE;
@@ -87,7 +87,7 @@ int MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
         {
             /* Validate comm_ptr; if comm_ptr is not value, it will be reset
 	       to null */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
 	    if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
 	    if (comm_ptr->errhandler) {
@@ -125,20 +125,20 @@ int MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
 
     /* Process any user-defined error handling function */
     switch (comm_ptr->errhandler->language) {
-    case MPID_LANG_C:
+    case MPIR_LANG__C:
 	(*comm_ptr->errhandler->errfn.C_Comm_Handler_function)( 
 	    &comm_ptr->handle, &errorcode );
 	break;
 #ifdef HAVE_CXX_BINDING
-    case MPID_LANG_CXX:
+    case MPIR_LANG__CXX:
 	MPIR_Process.cxx_call_errfn( 0, &comm_ptr->handle, 
 				     &errorcode, 
      (void (*)(void))comm_ptr->errhandler->errfn.C_Comm_Handler_function );
 	break;
 #endif
 #ifdef HAVE_FORTRAN_BINDING
-    case MPID_LANG_FORTRAN90:
-    case MPID_LANG_FORTRAN:
+    case MPIR_LANG__FORTRAN90:
+    case MPIR_LANG__FORTRAN:
 	{
 	    /* If int and MPI_Fint aren't the same size, we need to 
 	       convert.  As this is not performance critical, we

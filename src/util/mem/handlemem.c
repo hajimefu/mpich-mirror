@@ -441,7 +441,7 @@ void MPIU_Handle_obj_free( MPIU_Object_alloc_t *objmem, void *object )
         /* Necessary to prevent annotations from being misinterpreted.  HB/HA arcs
          * will be drawn between a req object in across a free/alloc boundary
          * otherwise.  Specifically, stores to obj->next when obj is actually an
-         * MPID_Request falsely look like a race to DRD and Helgrind because of the
+         * MPIR_Request falsely look like a race to DRD and Helgrind because of the
          * other lockfree synchronization used with requests. */
         MPL_VG_ANNOTATE_NEW_MEMORY(obj, objmem->size);
     }
@@ -473,7 +473,7 @@ void *MPIU_Handle_get_ptr_indirect( int handle, MPIU_Object_alloc_t *objmem )
     index_num = HANDLE_BLOCK_INDEX(handle);
     /* If we could declare the blocks to a known size object, we
      could do something like 
-       return &( (MPID_Info**)*MPIU_Info_mem.indirect)[block_num][index_num];
+       return &( (MPIR_Info**)*MPIU_Info_mem.indirect)[block_num][index_num];
      since we cannot, we do the calculation by hand.
     */
     /* Get the pointer to the block of addresses.  This is an array of 
@@ -491,7 +491,7 @@ void *MPIU_Handle_get_ptr_indirect( int handle, MPIU_Object_alloc_t *objmem )
 /* returns the name of the handle kind for debugging/logging purposes */
 const char *MPIU_Handle_get_kind_str(int kind)
 {
-#define mpiu_name_case_(name_) case MPID_##name_: return (#name_)
+#define mpiu_name_case_(name_) case MPIR_##name_: return (#name_)
     switch (kind) {
         mpiu_name_case_(COMM);
         mpiu_name_case_(GROUP);

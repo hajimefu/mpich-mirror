@@ -73,7 +73,7 @@ MPIDI_RecvRzvDoneCB(pami_context_t  context,
                     void          * cookie,
                     pami_result_t   result)
 {
-  MPID_Request * rreq = (MPID_Request*)cookie;
+  MPIR_Request * rreq = (MPIR_Request*)cookie;
   MPID_assert(rreq != NULL);
 
   TRACE_ERR("RZV Done for req=%p addr=%p *addr[0]=%#016llx *addr[1]=%#016llx\n",
@@ -104,7 +104,7 @@ MPIDI_RecvRzvDoneCB(pami_context_t  context,
 #endif
 
   MPIDI_RecvDoneCB(context, rreq, PAMI_SUCCESS);
-  MPID_Request_release(rreq);
+  MPIR_Request_free(rreq);
 }
 
 /**
@@ -120,7 +120,7 @@ MPIDI_RecvRzvDoneCB_zerobyte(pami_context_t  context,
                              void          * cookie,
                              pami_result_t   result)
 {
-  MPID_Request * rreq = (MPID_Request*)cookie;
+  MPIR_Request * rreq = (MPIR_Request*)cookie;
   MPID_assert(rreq != NULL);
 
   /* Is it neccesary to save the original value of the 'type' field ?? */
@@ -135,7 +135,7 @@ MPIDI_RecvRzvDoneCB_zerobyte(pami_context_t  context,
   TRACE_SET_R_BIT(MPIDI_Request_getPeerRank_pami(rreq),(rreq->mpid.idx),fl.f.sync_com_in_HH);
   TRACE_SET_R_BIT(MPIDI_Request_getPeerRank_pami(rreq),(rreq->mpid.idx),fl.f.matchedInHH);
   TRACE_SET_R_VAL(MPIDI_Request_getPeerRank_pami(rreq),(rreq->mpid.idx),bufadd,rreq->mpid.userbuf);
-  MPID_Request_release(rreq);
+  MPIR_Request_free(rreq);
 }
 
 /**
@@ -147,7 +147,7 @@ MPIDI_RecvRzvDoneCB_zerobyte(pami_context_t  context,
  */
 void
 MPIDI_SyncAck_post(pami_context_t   context,
-                   MPID_Request   * req,
+                   MPIR_Request   * req,
                    unsigned         peer)
 {
   MPIDI_Request_setControl(req, MPIDI_CONTROL_SSEND_ACKNOWLEDGE);
@@ -174,7 +174,7 @@ pami_result_t
 MPIDI_SyncAck_handoff(pami_context_t   context,
                       void           * inputReq)
 {
-  MPID_Request *req = inputReq;
+  MPIR_Request *req = inputReq;
   MPIDI_Request_setControl(req, MPIDI_CONTROL_SSEND_ACKNOWLEDGE);
   MPIDI_MsgInfo * info = &req->mpid.envelope.msginfo;
   unsigned peer        = MPIDI_Request_getPeerRank_pami(req);
@@ -196,7 +196,7 @@ MPIDI_SyncAck_proc(pami_context_t        context,
                    unsigned              peer)
 {
   MPID_assert(info != NULL);
-  MPID_Request *req = MPIDI_Msginfo_getPeerRequest(info);
+  MPIR_Request *req = MPIDI_Msginfo_getPeerRequest(info);
   MPID_assert(req != NULL);
   MPIDI_Request_complete(req);
 }
@@ -210,7 +210,7 @@ MPIDI_SyncAck_proc(pami_context_t        context,
  */
 static inline void
 MPIDI_RzvAck_proc_req(pami_context_t   context,
-                  MPID_Request   * req)
+                  MPIR_Request   * req)
 {
 #ifdef USE_PAMI_RDMA
   pami_result_t rc;
@@ -244,7 +244,7 @@ MPIDI_RzvAck_proc(pami_context_t        context,
                   pami_task_t           peer)
 {
   MPID_assert(info != NULL);
-  MPID_Request *req = MPIDI_Msginfo_getPeerRequest(info);
+  MPIR_Request *req = MPIDI_Msginfo_getPeerRequest(info);
   MPID_assert(req != NULL);
   MPIDI_RzvAck_proc_req(context, req);
 }
@@ -263,7 +263,7 @@ MPIDI_CancelReq_proc(pami_context_t        context,
 {
   MPIDI_CONTROL   type;
   MPIDI_MsgInfo   ackinfo;
-  MPID_Request  * sreq;
+  MPIR_Request  * sreq;
 
   MPID_assert(info != NULL);
 
@@ -273,7 +273,7 @@ MPIDI_CancelReq_proc(pami_context_t        context,
                         info->MPIctxt);
   if(sreq)
     {
-      MPID_Request_release(sreq);
+      MPIR_Request_free(sreq);
       type = MPIDI_CONTROL_CANCEL_ACKNOWLEDGE;
     }
   else
@@ -307,7 +307,7 @@ MPIDI_CancelAck_proc(pami_context_t        context,
                      pami_task_t           peer)
 {
   MPID_assert(info != NULL);
-  MPID_Request *req = MPIDI_Msginfo_getPeerRequest(info);
+  MPIR_Request *req = MPIDI_Msginfo_getPeerRequest(info);
   MPID_assert(req != NULL);
 
   TRACE_ERR("Cancel result: my_request=%p  result=%s\n",

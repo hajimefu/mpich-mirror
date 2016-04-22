@@ -23,7 +23,7 @@ static void _mxm_send_completion_cb(void *context);
 static int _mxm_isend(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req,
                       int type, mxm_mq_h mxm_mq, int mxm_rank, int id, mxm_tag_t tag, int block);
 #if 0   /* Consider using this function in case non contiguous data */
-static int _mxm_process_sdtype(MPID_Request ** rreq_p, MPI_Datatype datatype,
+static int _mxm_process_sdtype(MPIR_Request ** rreq_p, MPI_Datatype datatype,
                                MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count);
 #endif
@@ -32,7 +32,7 @@ static int _mxm_process_sdtype(MPID_Request ** rreq_p, MPI_Datatype datatype,
 #define FUNCNAME MPID_nem_mxm_iSendContig
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_mxm_iSendContig(MPIDI_VC_t * vc, MPID_Request * sreq, void *hdr, intptr_t hdr_sz,
+int MPID_nem_mxm_iSendContig(MPIDI_VC_t * vc, MPIR_Request * sreq, void *hdr, intptr_t hdr_sz,
                              void *data, intptr_t data_sz)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -98,10 +98,10 @@ int MPID_nem_mxm_iSendContig(MPIDI_VC_t * vc, MPID_Request * sreq, void *hdr, in
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_nem_mxm_iStartContigMsg(MPIDI_VC_t * vc, void *hdr, intptr_t hdr_sz, void *data,
-                                 intptr_t data_sz, MPID_Request ** sreq_ptr)
+                                 intptr_t data_sz, MPIR_Request ** sreq_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = NULL;
+    MPIR_Request *sreq = NULL;
     MPID_nem_mxm_vc_area *vc_area = NULL;
     MPID_nem_mxm_req_area *req_area = NULL;
 
@@ -113,11 +113,11 @@ int MPID_nem_mxm_iStartContigMsg(MPIDI_VC_t * vc, void *hdr, intptr_t hdr_sz, vo
     MPIDI_DBG_Print_packet((MPIDI_CH3_Pkt_t *) hdr);
 
     /* create a request */
-    sreq = MPID_Request_create();
+    sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIU_Assert(sreq != NULL);
     MPIU_Object_set_ref(sreq, 2);
     MPIU_Memcpy(&(sreq->dev.pending_pkt), (char *) hdr, sizeof(MPIDI_CH3_Pkt_t));
-    sreq->kind = MPID_REQUEST_SEND;
+    sreq->kind = MPIR_REQUEST_KIND__SEND;
     sreq->dev.OnDataAvail = NULL;
     sreq->dev.tmpbuf = NULL;
 
@@ -162,7 +162,7 @@ int MPID_nem_mxm_iStartContigMsg(MPIDI_VC_t * vc, void *hdr, intptr_t hdr_sz, vo
 #define FUNCNAME MPID_nem_mxm_SendNoncontig
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_mxm_SendNoncontig(MPIDI_VC_t * vc, MPID_Request * sreq, void *hdr,
+int MPID_nem_mxm_SendNoncontig(MPIDI_VC_t * vc, MPIR_Request * sreq, void *hdr,
                                intptr_t hdr_sz)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -241,11 +241,11 @@ int MPID_nem_mxm_SendNoncontig(MPIDI_VC_t * vc, MPID_Request * sreq, void *hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Datatype datatype,
-                      int rank, int tag, MPID_Comm * comm, int context_offset,
-                      MPID_Request ** sreq_ptr)
+                      int rank, int tag, MPIR_Comm * comm, int context_offset,
+                      MPIR_Request ** sreq_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = NULL;
+    MPIR_Request *sreq = NULL;
     MPIDU_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
@@ -270,7 +270,7 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
         MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIDU_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
-    sreq->partner_request = NULL;
+    sreq->dev.partner_request = NULL;
     sreq->dev.OnDataAvail = NULL;
     sreq->dev.tmpbuf = NULL;
     sreq->ch.vc = vc;
@@ -344,11 +344,11 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Datatype datatype,
-                       int rank, int tag, MPID_Comm * comm, int context_offset,
-                       MPID_Request ** sreq_ptr)
+                       int rank, int tag, MPIR_Comm * comm, int context_offset,
+                       MPIR_Request ** sreq_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = NULL;
+    MPIR_Request *sreq = NULL;
     MPIDU_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
@@ -373,7 +373,7 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
         MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIDU_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
-    sreq->partner_request = NULL;
+    sreq->dev.partner_request = NULL;
     sreq->dev.OnDataAvail = NULL;
     sreq->dev.tmpbuf = NULL;
     sreq->ch.vc = vc;
@@ -447,11 +447,11 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Datatype datatype,
-                       int rank, int tag, MPID_Comm * comm, int context_offset,
-                       MPID_Request ** sreq_ptr)
+                       int rank, int tag, MPIR_Comm * comm, int context_offset,
+                       MPIR_Request ** sreq_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = NULL;
+    MPIR_Request *sreq = NULL;
     MPIDU_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
@@ -476,7 +476,7 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
         MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIDU_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
-    sreq->partner_request = NULL;
+    sreq->dev.partner_request = NULL;
     sreq->dev.OnDataAvail = NULL;
     sreq->dev.tmpbuf = NULL;
     sreq->ch.vc = vc;
@@ -550,11 +550,11 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Datatype datatype,
-                        int rank, int tag, MPID_Comm * comm, int context_offset,
-                        MPID_Request ** sreq_ptr)
+                        int rank, int tag, MPIR_Comm * comm, int context_offset,
+                        MPIR_Request ** sreq_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = NULL;
+    MPIR_Request *sreq = NULL;
     MPIDU_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
@@ -579,7 +579,7 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
         MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIDU_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
-    sreq->partner_request = NULL;
+    sreq->dev.partner_request = NULL;
     sreq->dev.OnDataAvail = NULL;
     sreq->dev.tmpbuf = NULL;
     sreq->ch.vc = vc;
@@ -648,7 +648,7 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
 }
 
 
-int _mxm_handle_sreq(MPID_Request * req)
+int _mxm_handle_sreq(MPIR_Request * req)
 {
     int complete = FALSE;
     MPID_nem_mxm_vc_area *vc_area = NULL;
@@ -682,7 +682,7 @@ int _mxm_handle_sreq(MPID_Request * req)
 
 static void _mxm_send_completion_cb(void *context)
 {
-    MPID_Request *req = (MPID_Request *) context;
+    MPIR_Request *req = (MPIR_Request *) context;
     MPID_nem_mxm_vc_area *vc_area = NULL;
     MPID_nem_mxm_req_area *req_area = NULL;
 
@@ -786,12 +786,12 @@ static int _mxm_isend(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req,
 }
 
 #if 0   /* Consider using this function in case non contiguous data */
-static int _mxm_process_sdtype(MPID_Request ** sreq_p, MPI_Datatype datatype,
+static int _mxm_process_sdtype(MPIR_Request ** sreq_p, MPI_Datatype datatype,
                                MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *sreq = *sreq_p;
+    MPIR_Request *sreq = *sreq_p;
     intptr_t last;
     MPL_IOV *iov;
     int n_iov = 0;

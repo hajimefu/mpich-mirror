@@ -23,8 +23,8 @@
 /*#define TRACE_ON */
 
 #include <mpidimpl.h>
-extern void MPIDI_Comm_coll_query(MPID_Comm *);
-extern void MPIDI_Comm_coll_envvars(MPID_Comm *);
+extern void MPIDI_Comm_coll_query(MPIR_Comm *);
+extern void MPIDI_Comm_coll_envvars(MPIR_Comm *);
 
 void geom_create_cb_done(void *ctxt, void *data, pami_result_t err)
 {
@@ -38,13 +38,13 @@ void geom_destroy_cb_done(void *ctxt, void *data, pami_result_t err)
    (*active)--;
 }
 
-int MPIDI_Comm_create (MPID_Comm *comm)
+int MPIDI_Comm_create (MPIR_Comm *comm)
 {
   MPIDI_Coll_comm_create(comm);
   return MPI_SUCCESS;
 }
 
-int MPIDI_Comm_destroy (MPID_Comm *comm)
+int MPIDI_Comm_destroy (MPIR_Comm *comm)
 {
   MPIDI_Coll_comm_destroy(comm);
   return MPI_SUCCESS;
@@ -58,12 +58,12 @@ pami_result_t MPIDI_Comm_create_from_pami_geom(pami_geometry_range_t  *task_slic
   int         mpi_errno = MPI_SUCCESS;
   int         num_tasks = 0;
   int        *ranks     = NULL;
-  MPID_Comm  *comm_ptr  = NULL,  *new_comm_ptr  = NULL;
-  MPID_Group *group_ptr = NULL,  *new_group_ptr = NULL;
+  MPIR_Comm  *comm_ptr  = NULL,  *new_comm_ptr  = NULL;
+  MPIR_Group *group_ptr = NULL,  *new_group_ptr = NULL;
   int i = 0, j = 0;
 
   /* Get comm_ptr for MPI_COMM_WORLD and get the group_ptr for it */
-  MPID_Comm_get_ptr( MPI_COMM_WORLD, comm_ptr );
+  MPIR_Comm_get_ptr( MPI_COMM_WORLD, comm_ptr );
   mpi_errno = MPIR_Comm_group_impl(comm_ptr, &group_ptr);
   if (mpi_errno) 
   {
@@ -125,7 +125,7 @@ pami_result_t MPIDI_Comm_create_from_pami_geom(pami_geometry_range_t  *task_slic
 pami_result_t MPIDI_Comm_destroy_external(void *comm_ext)
 {
   int mpi_errno = 0;
-  MPID_Comm* comm_ptr = (MPID_Comm*)comm_ext;
+  MPIR_Comm* comm_ptr = (MPIR_Comm*)comm_ext;
   mpi_errno = MPIR_Comm_free_impl(comm_ptr);
   if (mpi_errno)
   {
@@ -217,7 +217,7 @@ static pami_result_t geom_destroy_wrapper(pami_context_t context, void *cookie)
 
 
 
-void MPIDI_Coll_comm_create(MPID_Comm *comm)
+void MPIDI_Coll_comm_create(MPIR_Comm *comm)
 {
    volatile int geom_init = 1;
    int i;
@@ -227,10 +227,10 @@ void MPIDI_Coll_comm_create(MPID_Comm *comm)
   if (!MPIDI_Process.optimized.collectives)
     return;
 
-  if(comm->comm_kind != MPID_INTRACOMM) return;
+  if(comm->comm_kind != MPIR_COMM_KIND__INTRACOMM) return;
   /* Create a geometry */
 
-  comm->coll_fns = MPL_calloc0(1, MPID_Collops);
+  comm->coll_fns = MPL_calloc0(1, MPIR_Collops);
   MPID_assert(comm->coll_fns != NULL);
 
    if(comm->mpid.geometry != MPIDI_Process.world_geometry)
@@ -266,7 +266,7 @@ void MPIDI_Coll_comm_create(MPID_Comm *comm)
       size_t numconfigs = 0;
 #ifdef HAVE_PAMI_GEOMETRY_NONCONTIG
       config[0].name = PAMI_GEOMETRY_NONCONTIG;
-      if(MPIDI_Process.optimized.memory & MPID_OPT_LVL_NONCONTIG) 
+      if(MPIDI_Process.optimized.memory & MPIR_OPT_LVL_NONCONTIG)
          config[0].value.intval = 0; // Disable non-contig, pamid doesn't use pami for non-contig data collectives
       else
          config[0].value.intval = 1; // Enable non-contig even though pamid doesn't use pami for non-contig data collectives, 
@@ -288,7 +288,7 @@ void MPIDI_Coll_comm_create(MPID_Comm *comm)
       }
 #endif
 
-      if((MPIDI_Process.optimized.memory  & MPID_OPT_LVL_IRREG) && (comm->local_size & (comm->local_size-1)))
+      if((MPIDI_Process.optimized.memory  & MPIR_OPT_LVL_IRREG) && (comm->local_size & (comm->local_size-1)))
       {
          /* Don't create irregular geometries.  Fallback to MPICH only collectives */
          geom_init = 0;
@@ -363,7 +363,7 @@ void MPIDI_Coll_comm_create(MPID_Comm *comm)
   TRACE_ERR("MPIDI_Coll_comm_create exit\n");
 }
 
-void MPIDI_Coll_comm_destroy(MPID_Comm *comm)
+void MPIDI_Coll_comm_destroy(MPIR_Comm *comm)
 {
   TRACE_ERR("MPIDI_Coll_comm_destroy enter\n");
   int i;
@@ -372,7 +372,7 @@ void MPIDI_Coll_comm_destroy(MPID_Comm *comm)
   if (!MPIDI_Process.optimized.collectives)
     return;
 
-  if(comm->comm_kind != MPID_INTRACOMM)
+  if(comm->comm_kind != MPIR_COMM_KIND__INTRACOMM)
     return;
 
   /* It's possible (MPIR_Setup_intercomm_localcomm) to have an intracomm

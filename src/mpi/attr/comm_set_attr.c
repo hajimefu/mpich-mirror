@@ -30,12 +30,12 @@ int MPI_Comm_set_attr(MPI_Comm comm, int comm_keyval, void *attribute_val) __att
 #define FUNCNAME MPIR_Comm_set_attr_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_set_attr_impl(MPID_Comm *comm_ptr, int comm_keyval, void *attribute_val, 
+int MPIR_Comm_set_attr_impl(MPIR_Comm *comm_ptr, int comm_keyval, void *attribute_val,
                             MPIR_AttrType attrType)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Keyval *keyval_ptr = NULL;
-    MPID_Attribute *p;
+    MPIR_Keyval *keyval_ptr = NULL;
+    MPIR_Attribute *p;
 
     MPIR_ERR_CHKANDJUMP(comm_keyval == MPI_KEYVAL_INVALID, mpi_errno, MPI_ERR_KEYVAL, "**keyvalinvalid");
 
@@ -44,7 +44,7 @@ int MPIR_Comm_set_attr_impl(MPID_Comm *comm_ptr, int comm_keyval, void *attribut
        a simple linear list algorithm because few applications use more than a 
        handful of attributes */
 
-    MPID_Keyval_get_ptr( comm_keyval, keyval_ptr );
+    MPIR_Keyval_get_ptr( comm_keyval, keyval_ptr );
     MPIU_Assert(keyval_ptr != NULL);
 
     /* printf( "Setting attr val to %x\n", attribute_val ); */
@@ -65,7 +65,7 @@ int MPIR_Comm_set_attr_impl(MPID_Comm *comm_ptr, int comm_keyval, void *attribut
 	       dual casts are a sign that this is faulty. This will 
 	       need to be fixed in the type/win set_attr routines as 
 	       well. */
-	    p->value    = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	    p->value    = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	    /* printf( "Updating attr at %x\n", &p->value ); */
 	    /* Does not change the reference count on the keyval */
 	    break;
@@ -74,14 +74,14 @@ int MPIR_Comm_set_attr_impl(MPID_Comm *comm_ptr, int comm_keyval, void *attribut
     }
     /* CHANGE FOR MPI 2.2: If not found, add at the beginning */
     if (!p) {
-	MPID_Attribute *new_p = MPID_Attr_alloc();
+	MPIR_Attribute *new_p = MPID_Attr_alloc();
 	MPIR_ERR_CHKANDJUMP(!new_p,mpi_errno,MPI_ERR_OTHER,"**nomem");
 	/* Did not find in list.  Add at end */
 	new_p->keyval	     = keyval_ptr;
 	new_p->attrType      = attrType;
 	new_p->pre_sentinal  = 0;
 	/* FIXME: See the comment above on this dual cast. */
-	new_p->value	     = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	new_p->value	     = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	new_p->post_sentinal = 0;
 	new_p->next	     = comm_ptr->attributes;
 	MPIR_Keyval_add_ref( keyval_ptr );
@@ -110,7 +110,7 @@ int MPIR_CommSetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
 		      MPIR_AttrType attrType )
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_SET_ATTR);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -124,7 +124,7 @@ int MPIR_CommSetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_COMM(comm, mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPID_COMM, "communicator", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPIR_COMM, "communicator", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(comm_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -132,21 +132,21 @@ int MPIR_CommSetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-            MPID_Keyval *keyval_ptr = NULL;
+            MPIR_Keyval *keyval_ptr = NULL;
 
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
 	    /* If comm_ptr is not valid, it will be reset to null */
 	    /* Validate keyval_ptr */
-            MPID_Keyval_get_ptr( comm_keyval, keyval_ptr );
-	    MPID_Keyval_valid_ptr( keyval_ptr, mpi_errno );
+            MPIR_Keyval_get_ptr( comm_keyval, keyval_ptr );
+	    MPIR_Keyval_valid_ptr( keyval_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
 	}
         MPID_END_ERROR_CHECKS;
@@ -219,7 +219,7 @@ corresponding keyval was created) will be called.
 int MPI_Comm_set_attr(MPI_Comm comm, int comm_keyval, void *attribute_val)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_SET_ATTR);
 
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -231,7 +231,7 @@ int MPI_Comm_set_attr(MPI_Comm comm, int comm_keyval, void *attribute_val)
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_COMM(comm, mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPID_COMM, "communicator", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPIR_COMM, "communicator", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(comm_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -239,21 +239,21 @@ int MPI_Comm_set_attr(MPI_Comm comm, int comm_keyval, void *attribute_val)
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-            MPID_Keyval *keyval_ptr = NULL;
+            MPIR_Keyval *keyval_ptr = NULL;
 
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
 	    /* If comm_ptr is not valid, it will be reset to null */
 	    /* Validate keyval_ptr */
-            MPID_Keyval_get_ptr( comm_keyval, keyval_ptr );
-	    MPID_Keyval_valid_ptr( keyval_ptr, mpi_errno );
+            MPIR_Keyval_get_ptr( comm_keyval, keyval_ptr );
+	    MPIR_Keyval_valid_ptr( keyval_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
 	}
         MPID_END_ERROR_CHECKS;

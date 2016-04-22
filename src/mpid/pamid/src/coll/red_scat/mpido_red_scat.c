@@ -29,7 +29,7 @@ int MPIDO_Reduce_scatter(const void *sendbuf,
                  int *recvcounts, 
                  MPI_Datatype datatype,
                  MPI_Op op,
-                 MPID_Comm *comm_ptr, 
+                 MPIR_Comm *comm_ptr,
                  int *mpierrno)
 
 {
@@ -109,7 +109,7 @@ int MPIDO_Reduce_scatter_block(const void *sendbuf,
                  int recvcount, 
                  MPI_Datatype datatype,
                  MPI_Op op,
-                 MPID_Comm *comm_ptr, 
+                 MPIR_Comm *comm_ptr,
                  int *mpierrno)
 
 {
@@ -159,7 +159,7 @@ int MPIDO_Reduce_scatter_block(const void *sendbuf,
          rcbuf = recvbuf;
 
        int cuda_res;
-       if(comm_ptr->comm_kind == MPID_INTRACOMM)
+       if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
          cuda_res =  MPIR_Reduce_scatter_block_intra(scbuf, rcbuf, recvcount, datatype, op, comm_ptr, mpierrno);
        else 
          cuda_res =  MPIR_Reduce_scatter_block_inter(scbuf, rcbuf, recvcount, datatype, op, comm_ptr, mpierrno);
@@ -175,7 +175,7 @@ int MPIDO_Reduce_scatter_block(const void *sendbuf,
     }
     else
 #endif
-       if(comm_ptr->comm_kind == MPID_INTRACOMM)
+       if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
          return MPIR_Reduce_scatter_block_intra(sendbuf, recvbuf, recvcount, datatype, op, comm_ptr, mpierrno);
        else 
          return MPIR_Reduce_scatter_block_inter(sendbuf, recvbuf, recvcount, datatype, op, comm_ptr, mpierrno);

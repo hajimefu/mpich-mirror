@@ -52,9 +52,9 @@ int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
 {
     static const char FCNAME[] = "MPI_Type_delete_attr";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Datatype *type_ptr = NULL;
-    MPID_Attribute *p, **old_p;
-    MPID_Keyval *keyval_ptr = 0;
+    MPIR_Datatype *type_ptr = NULL;
+    MPIR_Attribute *p, **old_p;
+    MPIR_Keyval *keyval_ptr = 0;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_TYPE_DELETE_ATTR);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -70,7 +70,7 @@ int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_DATATYPE(datatype, "datatype", mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(type_keyval, MPID_DATATYPE, "datatype", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(type_keyval, MPIR_DATATYPE, "datatype", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(type_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -79,7 +79,7 @@ int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
 
     /* Validate parameters and objects (post conversion) */
     MPID_Datatype_get_ptr( datatype, type_ptr );
-    MPID_Keyval_get_ptr( type_keyval, keyval_ptr );
+    MPIR_Keyval_get_ptr( type_keyval, keyval_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -87,7 +87,7 @@ int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate type_ptr */
-            MPID_Datatype_valid_ptr( type_ptr, mpi_errno );
+            MPIR_Datatype_valid_ptr( type_ptr, mpi_errno );
 	    /* If type_ptr is not valid, it will be reset to null */
 	    /* Validate keyval_ptr */
             if (mpi_errno) goto fn_fail;
@@ -132,7 +132,7 @@ int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
 	    MPIR_Keyval_release_ref( p->keyval, &in_use);
 	    if (!in_use)
 	    {
-		MPIU_Handle_obj_free( &MPID_Keyval_mem, p->keyval );
+		MPIU_Handle_obj_free( &MPIR_Keyval_mem, p->keyval );
 	    }
 	    MPID_Attr_free(p);
 	}

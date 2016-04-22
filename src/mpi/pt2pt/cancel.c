@@ -30,30 +30,30 @@ int MPI_Cancel(MPI_Request *request) __attribute__((weak,alias("PMPI_Cancel")));
 #define FUNCNAME MPIR_Cancel_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Cancel_impl(MPID_Request *request_ptr)
+int MPIR_Cancel_impl(MPIR_Request *request_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
         
     switch (request_ptr->kind)
     {
-	case MPID_REQUEST_SEND:
+	case MPIR_REQUEST_KIND__SEND:
 	{
 	    mpi_errno = MPID_Cancel_send(request_ptr);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 	    break;
 	}
 
-	case MPID_REQUEST_RECV:
+	case MPIR_REQUEST_KIND__RECV:
 	{
 	    mpi_errno = MPID_Cancel_recv(request_ptr);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 	    break;
 	}
 
-	case MPID_PREQUEST_SEND:
+	case MPIR_REQUEST_KIND__PREQUEST_SEND:
 	{
-	    if (request_ptr->partner_request != NULL) {
-		if (request_ptr->partner_request->kind != MPID_UREQUEST) {
+	    if (request_ptr->u.persist.real_request != NULL) {
+		if (request_ptr->u.persist.real_request->kind != MPIR_REQUEST_KIND__GREQUEST) {
                     /* jratt@us.ibm.com: I don't know about the bsend
                      * comment below, but the CC stuff on the next
                      * line is *really* needed for persistent Bsend
@@ -68,16 +68,16 @@ int MPIR_Cancel_impl(MPID_Request *request_ptr)
                      * causing an MPI_Wait on the parent to block
                      * until the child is canceled or completed.
                      */
-		    request_ptr->cc_ptr = request_ptr->partner_request->cc_ptr;
-		    mpi_errno = MPID_Cancel_send(request_ptr->partner_request);
+		    request_ptr->cc_ptr = request_ptr->u.persist.real_request->cc_ptr;
+		    mpi_errno = MPID_Cancel_send(request_ptr->u.persist.real_request);
                     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 		} else {
 		    /* This is needed for persistent Bsend requests */
                     /* FIXME why do we directly access the partner request's
                      * cc field?  shouldn't our cc_ptr be set to the address
                      * of the partner req's cc field? */
-                    mpi_errno = MPIR_Grequest_cancel(request_ptr->partner_request,
-                                                     MPIR_cc_is_complete(&request_ptr->partner_request->cc));
+                    mpi_errno = MPIR_Grequest_cancel(request_ptr->u.persist.real_request,
+                                                     MPIR_cc_is_complete(&request_ptr->u.persist.real_request->cc));
                     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 		}
 	    } else {
@@ -86,10 +86,10 @@ int MPIR_Cancel_impl(MPID_Request *request_ptr)
 	    break;
 	}
 
-	case MPID_PREQUEST_RECV:
+	case MPIR_REQUEST_KIND__PREQUEST_RECV:
 	{
-	    if (request_ptr->partner_request != NULL) {
-		mpi_errno = MPID_Cancel_recv(request_ptr->partner_request);
+	    if (request_ptr->u.persist.real_request != NULL) {
+		mpi_errno = MPID_Cancel_recv(request_ptr->u.persist.real_request);
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 	    } else {
 		MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_REQUEST,"**requestpersistactive");
@@ -97,7 +97,7 @@ int MPIR_Cancel_impl(MPID_Request *request_ptr)
 	    break;
 	}
 
-	case MPID_UREQUEST:
+	case MPIR_REQUEST_KIND__GREQUEST:
 	{
             mpi_errno = MPIR_Grequest_cancel(request_ptr, MPIR_cc_is_complete(&request_ptr->cc));
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -159,7 +159,7 @@ messages).
 int MPI_Cancel(MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request * request_ptr;
+    MPIR_Request * request_ptr;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_CANCEL);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -168,7 +168,7 @@ int MPI_Cancel(MPI_Request *request)
     MPID_MPI_PT2PT_FUNC_ENTER(MPID_STATE_MPI_CANCEL);
     
     /* Convert MPI object handles to object pointers */
-    MPID_Request_get_ptr( *request, request_ptr );
+    MPIR_Request_get_ptr( *request, request_ptr );
     
     /* Validate parameters if error checking is enabled */
 #   ifdef HAVE_ERROR_CHECKING
@@ -176,7 +176,7 @@ int MPI_Cancel(MPI_Request *request)
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    /* Validate request_ptr */
-            MPID_Request_valid_ptr( request_ptr, mpi_errno );
+            MPIR_Request_valid_ptr( request_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;

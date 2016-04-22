@@ -21,7 +21,7 @@
 #define FUNCNAME MPID_nem_llc_probe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_llc_probe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm, int context_offset,
+int MPID_nem_llc_probe(MPIDI_VC_t * vc, int source, int tag, MPIR_Comm * comm, int context_offset,
                        MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -42,7 +42,7 @@ int MPID_nem_llc_probe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm, i
 #define FUNCNAME MPID_nem_llc_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_llc_iprobe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm, int context_offset,
+int MPID_nem_llc_iprobe(MPIDI_VC_t * vc, int source, int tag, MPIR_Comm * comm, int context_offset,
                         int *flag, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS, llc_errno;
@@ -112,8 +112,8 @@ int MPID_nem_llc_iprobe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm, 
 #define FUNCNAME MPID_nem_llc_improbe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_nem_llc_improbe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm, int context_offset,
-                         int *flag, MPID_Request ** message, MPI_Status * status)
+int MPID_nem_llc_improbe(MPIDI_VC_t * vc, int source, int tag, MPIR_Comm * comm, int context_offset,
+                         int *flag, MPIR_Request ** message, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
     int rank;
@@ -153,13 +153,13 @@ int MPID_nem_llc_improbe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm,
 
     msg = LLC_mprobe(LLC_COMM_MPICH, rank, _tag, &mask, &probe);
     if (msg) {
-        MPID_Request *req;
+        MPIR_Request *req;
 
         *flag = 1;
 
-        req = MPID_Request_create();
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
         MPIU_Object_set_ref(req, 2);
-        req->kind = MPID_REQUEST_MPROBE;
+        req->kind = MPIR_REQUEST_KIND__MPROBE;
         req->comm = comm;
         MPIR_Comm_add_ref(comm);
         req->ch.vc = vc;
@@ -211,7 +211,7 @@ int MPID_nem_llc_improbe(MPIDI_VC_t * vc, int source, int tag, MPID_Comm * comm,
         /* Wait until the reception of data is completed */
         do {
             mpi_errno = MPID_nem_llc_poll(0);
-        } while (!MPID_Request_is_complete(req));
+        } while (!MPIR_Request_is_complete(req));
 
 //        MPID_Request_complete(req); // This operation is done in llc_poll.
 

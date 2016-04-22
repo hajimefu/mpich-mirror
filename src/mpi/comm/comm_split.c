@@ -127,10 +127,10 @@ static void MPIU_Sort_inttable( sorttype *keytable, int size )
 #define FUNCNAME MPIR_Comm_split_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **newcomm_ptr)
+int MPIR_Comm_split_impl(MPIR_Comm *comm_ptr, int color, int key, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *local_comm_ptr;
+    MPIR_Comm *local_comm_ptr;
     splittype *table, *remotetable=0;
     sorttype *keytable, *remotekeytable=0;
     int rank, size, remote_size, i, new_size, new_remote_size,
@@ -153,7 +153,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
 
     /* Get the communicator to use in collectives on the local group of 
        processes */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 	if (!comm_ptr->local_comm) {
 	    MPIR_Setup_intercomm_localcomm( comm_ptr );
 	}
@@ -191,7 +191,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
     /* If we're an intercomm, we need to do the same thing for the remote
        table, as we need to know the size of the remote group of the
        same color before deciding to create the communicator */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 	splittype mypair;
 	/* For the remote group, the situation is more complicated.
 	   We need to find the size of our "partner" group in the
@@ -253,7 +253,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
     MPIU_Assert(new_context_id != 0);
 
     /* In the intercomm case, we need to exchange the context ids */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 	if (comm_ptr->rank == 0) {
 	    mpi_errno = MPIC_Sendrecv( &new_context_id, 1, MPIU_CONTEXT_ID_T_DATATYPE, 0, 0,
 				       &remote_context_id, 1, MPIU_CONTEXT_ID_T_DATATYPE, 
@@ -301,7 +301,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
 	   process in the input communicator */
 	MPIU_Sort_inttable( keytable, new_size );
 
-	if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+	if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 	    MPIU_CHKLMEM_MALLOC(remotekeytable,sorttype*,
 				new_remote_size*sizeof(sorttype),
 				mpi_errno,"remote keytable");
@@ -316,7 +316,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
 	    MPIU_Sort_inttable( remotekeytable, new_remote_size );
 
             MPIR_Comm_map_irregular(*newcomm_ptr, comm_ptr, NULL,
-                                    new_size, MPIR_COMM_MAP_DIR_L2L,
+                                    new_size, MPIR_COMM_MAP_DIR__L2L,
                                     &mapper);
 
             for (i = 0; i < new_size; i++) {
@@ -342,7 +342,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
 
             MPIR_Comm_map_irregular(*newcomm_ptr, comm_ptr, NULL,
                                     new_remote_size,
-                                    MPIR_COMM_MAP_DIR_R2R, &mapper);
+                                    MPIR_COMM_MAP_DIR__R2R, &mapper);
 
             for (i = 0; i < new_remote_size; i++)
                 mapper->src_mapping[i] = remotekeytable[i].color;
@@ -359,7 +359,7 @@ int MPIR_Comm_split_impl(MPID_Comm *comm_ptr, int color, int key, MPID_Comm **ne
 	    (*newcomm_ptr)->remote_size    = new_size;
 
             MPIR_Comm_map_irregular(*newcomm_ptr, comm_ptr, NULL,
-                                    new_size, MPIR_COMM_MAP_DIR_L2L,
+                                    new_size, MPIR_COMM_MAP_DIR__L2L,
                                     &mapper);
 
             for (i = 0; i < new_size; i++) {
@@ -436,7 +436,7 @@ Algorithm:
 int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL, *newcomm_ptr;
+    MPIR_Comm *comm_ptr = NULL, *newcomm_ptr;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_SPLIT);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -457,7 +457,7 @@ int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 #   endif /* HAVE_ERROR_CHECKING */
     
     /* Get handles to MPI objects. */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
     
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -465,7 +465,7 @@ int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
 	    /* If comm_ptr is not valid, it will be reset to null */
             if (mpi_errno) goto fn_fail;
         }

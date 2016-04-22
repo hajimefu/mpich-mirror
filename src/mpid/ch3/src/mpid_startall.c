@@ -22,7 +22,7 @@
 /* This macro initializes all of the fields in a persistent request */
 #define MPIDI_Request_create_psreq(sreq_, mpi_errno_, FAIL_)		\
 {									\
-    (sreq_) = MPID_Request_create();				\
+    (sreq_) = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);                  \
     if ((sreq_) == NULL)						\
     {									\
 	MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"send request allocation failed");\
@@ -32,7 +32,7 @@
 									\
     MPIU_Object_set_ref((sreq_), 1);					\
     MPIR_cc_set(&(sreq_)->cc, 0);                                       \
-    (sreq_)->kind = MPID_PREQUEST_SEND;					\
+    (sreq_)->kind = MPIR_REQUEST_KIND__PREQUEST_SEND;					\
     (sreq_)->comm = comm;						\
     MPIR_Comm_add_ref(comm);						\
     (sreq_)->dev.match.parts.rank = rank;				\
@@ -41,7 +41,7 @@
     (sreq_)->dev.user_buf = (void *) buf;				\
     (sreq_)->dev.user_count = count;					\
     (sreq_)->dev.datatype = datatype;					\
-    (sreq_)->partner_request = NULL;					\
+    (sreq_)->u.persist.real_request = NULL;                             \
 }
 
 	
@@ -52,7 +52,7 @@
 #define FUNCNAME MPID_Startall
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Startall(int count, MPID_Request * requests[])
+int MPID_Startall(int count, MPIR_Request * requests[])
 {
     int i;
     int rc;
@@ -63,7 +63,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 
     for (i = 0; i < count; i++)
     {
-	MPID_Request * const preq = requests[i];
+	MPIR_Request * const preq = requests[i];
 
 	/* FIXME: The odd 7th arg (match.context_id - comm->context_id) 
 	   is probably to get the context offset.  Do we really need the
@@ -74,7 +74,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	    {
 		rc = MPID_Irecv(preq->dev.user_buf, preq->dev.user_count, preq->dev.datatype, preq->dev.match.parts.rank,
 		    preq->dev.match.parts.tag, preq->comm, preq->dev.match.parts.context_id - preq->comm->recvcontext_id,
-		    &preq->partner_request);
+		    &preq->u.persist.real_request);
 		break;
 	    }
 	    
@@ -82,7 +82,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	    {
 		rc = MPID_Isend(preq->dev.user_buf, preq->dev.user_count, preq->dev.datatype, preq->dev.match.parts.rank,
 		    preq->dev.match.parts.tag, preq->comm, preq->dev.match.parts.context_id - preq->comm->context_id,
-		    &preq->partner_request);
+		    &preq->u.persist.real_request);
 		break;
 	    }
 		
@@ -90,7 +90,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	    {
 		rc = MPID_Irsend(preq->dev.user_buf, preq->dev.user_count, preq->dev.datatype, preq->dev.match.parts.rank,
 		    preq->dev.match.parts.tag, preq->comm, preq->dev.match.parts.context_id - preq->comm->context_id,
-		    &preq->partner_request);
+		    &preq->u.persist.real_request);
 		break;
 	    }
 		
@@ -98,7 +98,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	    {
 		rc = MPID_Issend(preq->dev.user_buf, preq->dev.user_count, preq->dev.datatype, preq->dev.match.parts.rank,
 		    preq->dev.match.parts.tag, preq->comm, preq->dev.match.parts.context_id - preq->comm->context_id,
-		    &preq->partner_request);
+		    &preq->u.persist.real_request);
 		break;
 	    }
 
@@ -112,7 +112,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
                                       &sreq_handle);
                 if (rc == MPI_SUCCESS)
                 {
-                    MPID_Request_get_ptr(sreq_handle, preq->partner_request);
+                    MPIR_Request_get_ptr(sreq_handle, preq->u.persist.real_request);
                 }
 		break;
 	    }
@@ -129,7 +129,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	if (rc == MPI_SUCCESS)
 	{
 	    preq->status.MPI_ERROR = MPI_SUCCESS;
-	    preq->cc_ptr = &preq->partner_request->cc;
+	    preq->cc_ptr = &preq->u.persist.real_request->cc;
 	}
 	/* --BEGIN ERROR HANDLING-- */
 	else
@@ -139,7 +139,7 @@ int MPID_Startall(int count, MPID_Request * requests[])
 	       the error code in the persistent request.  The wait and test
 	       routines will look at the error code in the persistent
 	       request if a partner request is not present. */
-	    preq->partner_request = NULL;
+	    preq->u.persist.real_request = NULL;
 	    preq->status.MPI_ERROR = rc;
 	    preq->cc_ptr = &preq->cc;
             MPIR_cc_set(&preq->cc, 0);
@@ -162,10 +162,10 @@ int MPID_Startall(int count, MPID_Request * requests[])
 #define FUNCNAME MPID_Send_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Send_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		   MPID_Request ** request)
+int MPID_Send_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		   MPIR_Request ** request)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_SEND_INIT);
 
@@ -192,10 +192,10 @@ int MPID_Send_init(const void * buf, int count, MPI_Datatype datatype, int rank,
 #define FUNCNAME MPID_Ssend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Ssend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		    MPID_Request ** request)
+int MPID_Ssend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		    MPIR_Request ** request)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_SSEND_INIT);
 
@@ -222,10 +222,10 @@ int MPID_Ssend_init(const void * buf, int count, MPI_Datatype datatype, int rank
 #define FUNCNAME MPID_Rsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Rsend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		    MPID_Request ** request)
+int MPID_Rsend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		    MPIR_Request ** request)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_RSEND_INIT);
 
@@ -252,10 +252,10 @@ int MPID_Rsend_init(const void * buf, int count, MPI_Datatype datatype, int rank
 #define FUNCNAME MPID_Bsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Bsend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		    MPID_Request ** request)
+int MPID_Bsend_init(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		    MPIR_Request ** request)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_BSEND_INIT);
 
@@ -290,16 +290,16 @@ int MPID_Bsend_init(const void * buf, int count, MPI_Datatype datatype, int rank
 #define FUNCNAME MPID_Recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Recv_init(void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		   MPID_Request ** request)
+int MPID_Recv_init(void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		   MPIR_Request ** request)
 {
-    MPID_Request * rreq;
+    MPIR_Request * rreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_RECV_INIT);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_RECV_INIT);
     
-    rreq = MPID_Request_create();
+    rreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     if (rreq == NULL)
     {
 	/* --BEGIN ERROR HANDLING-- */
@@ -309,7 +309,7 @@ int MPID_Recv_init(void * buf, int count, MPI_Datatype datatype, int rank, int t
     }
     
     MPIU_Object_set_ref(rreq, 1);
-    rreq->kind = MPID_PREQUEST_RECV;
+    rreq->kind = MPIR_REQUEST_KIND__PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_cc_set(&rreq->cc, 0);
     MPIR_Comm_add_ref(comm);
@@ -319,7 +319,7 @@ int MPID_Recv_init(void * buf, int count, MPI_Datatype datatype, int rank, int t
     rreq->dev.user_buf = (void *) buf;
     rreq->dev.user_count = count;
     rreq->dev.datatype = datatype;
-    rreq->partner_request = NULL;
+    rreq->u.persist.real_request = NULL;
     MPIDI_Request_set_type(rreq, MPIDI_REQUEST_TYPE_RECV);
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
     {

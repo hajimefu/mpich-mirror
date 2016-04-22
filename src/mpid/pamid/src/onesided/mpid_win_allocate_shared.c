@@ -40,7 +40,7 @@ extern int mpidi_dynamic_tasking;
 #define ALIGN_BOUNDARY 128     /* Align data structures to cache line */
 #define PAD_SIZE(s) (ALIGN_BOUNDARY - (sizeof(s) & (ALIGN_BOUNDARY-1)))
 
-int CheckRankOnNode(MPID_Comm  * comm_ptr,int *onNode ) {
+int CheckRankOnNode(MPIR_Comm  * comm_ptr,int *onNode ) {
     int comm_size, i;
     int mpi_errno = PAMI_SUCCESS;
 
@@ -63,7 +63,7 @@ int CheckRankOnNode(MPID_Comm  * comm_ptr,int *onNode ) {
      return mpi_errno;
 }
 
-int CheckSpaceType(MPID_Win **win_ptr, MPID_Info *info,int *noncontig) {
+int CheckSpaceType(MPIR_Win **win_ptr, MPIR_Info *info,int *noncontig) {
     int mpi_errno=MPI_SUCCESS;
   /* Check if we are allowed to allocate space non-contiguously */
     if (info != NULL) {
@@ -155,7 +155,7 @@ int GetPageSize(void *addr, ulong *pageSize)
 }
 
 int
-MPID_getSharedSegment_mmap(MPID_Win * win)
+MPID_getSharedSegment_mmap(MPIR_Win * win)
 {
   int rank, rc, fd;
   int mpi_errno = MPI_SUCCESS;
@@ -202,7 +202,7 @@ fn_fail:
 }
 
 int
-MPID_getSharedSegment_sysv(MPID_Win * win)
+MPID_getSharedSegment_sysv(MPIR_Win * win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -301,8 +301,8 @@ fn_fail:
 int
 MPID_getSharedSegment(MPI_Aint     size,
                       int          disp_unit,
-                      MPID_Comm  * comm_ptr,
-                      MPID_Win   **win_ptr,
+                      MPIR_Comm  * comm_ptr,
+                      MPIR_Win   **win_ptr,
                       MPI_Aint   * pSize,
                       int        * noncontig)
 {
@@ -310,7 +310,7 @@ MPID_getSharedSegment(MPI_Aint     size,
     int i, comm_size, rank;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPI_Aint pageSize,pageSize2, len,new_size;
-    MPID_Win  *win;
+    MPIR_Win  *win;
     int    padSize;
     void   *base_pp;
 
@@ -439,7 +439,7 @@ fn_fail:
 /**
  * \brief MPI-PAMI glue for MPI_Win_allocate_shared function
  *
- * Create a window object. Allocates a MPID_Win object and initializes it,
+ * Create a window object. Allocates a MPIR_Win object and initializes it,
  * then allocates the collective info array, initalizes our entry, and
  * performs an Allgather to distribute/collect the rest of the array entries.
  * On each process, it allocates memory of at least size bytes that is shared
@@ -478,15 +478,15 @@ fn_fail:
 int
 MPID_Win_allocate_shared(MPI_Aint     size,   
                          int          disp_unit,
-                         MPID_Info  * info,
-                         MPID_Comm  * comm_ptr,
+                         MPIR_Info  * info,
+                         MPIR_Comm  * comm_ptr,
                          void *base_ptr,
-                         MPID_Win  ** win_ptr)
+                         MPIR_Win  ** win_ptr)
 {
   int mpi_errno  = MPI_SUCCESS;
   MPIR_Errflag_t errflag = MPIR_ERR_NONE;
   int onNode     = 0;
-  MPID_Win    *win = NULL;
+  MPIR_Win    *win = NULL;
   int rank, prev_size;
 
   MPIDI_Win_info  *winfo;

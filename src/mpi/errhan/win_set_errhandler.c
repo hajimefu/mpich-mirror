@@ -51,9 +51,9 @@ int MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
     static const char FCNAME[] = "MPI_Win_set_errhandler";
 #endif
     int mpi_errno = MPI_SUCCESS;
-    MPID_Win *win_ptr = NULL;
+    MPIR_Win *win_ptr = NULL;
     int  in_use;
-    MPID_Errhandler *errhan_ptr = NULL;
+    MPIR_Errhandler *errhan_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_WIN_SET_ERRHANDLER);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -73,8 +73,8 @@ int MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
 #   endif
     
     /* Convert MPI object handles to object pointers */
-    MPID_Win_get_ptr( win, win_ptr );
-    MPID_Errhandler_get_ptr( errhandler, errhan_ptr );
+    MPIR_Win_get_ptr( win, win_ptr );
+    MPIR_Errhandler_get_ptr( errhandler, errhan_ptr );
     
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -82,14 +82,14 @@ int MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate win_ptr */
-            MPID_Win_valid_ptr( win_ptr, mpi_errno );
+            MPIR_Win_valid_ptr( win_ptr, mpi_errno );
 	    /* If win_ptr is not value, it will be reset to null */
 
 	    if (HANDLE_GET_KIND(errhandler) != HANDLE_KIND_BUILTIN) {
-		MPID_Errhandler_valid_ptr( errhan_ptr,mpi_errno );
+		MPIR_Errhandler_valid_ptr( errhan_ptr,mpi_errno );
 		/* Also check for a valid errhandler kind */
 		if (!mpi_errno) {
-		    if (errhan_ptr->kind != MPID_WIN) {
+		    if (errhan_ptr->kind != MPIR_WIN) {
 			mpi_errno = MPIR_Err_create_code(
 			    MPI_SUCCESS, MPIR_ERR_RECOVERABLE, FCNAME,
 			    __LINE__, MPI_ERR_ARG, "**errhandnotwin", NULL );
@@ -109,7 +109,7 @@ int MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
     if (win_ptr->errhandler != NULL) {
         MPIR_Errhandler_release_ref(win_ptr->errhandler,&in_use);
         if (!in_use) {
-            MPID_Errhandler_free( win_ptr->errhandler );
+            MPIR_Errhandler_free( win_ptr->errhandler );
         }
     }
 

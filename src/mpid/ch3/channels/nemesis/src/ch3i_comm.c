@@ -11,8 +11,8 @@
 
 #define NULL_CONTEXT_ID -1
 
-static int barrier (MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag);
-static int alloc_barrier_vars (MPID_Comm *comm, MPID_nem_barrier_vars_t **vars);
+static int barrier (MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag);
+static int alloc_barrier_vars (MPIR_Comm *comm, MPID_nem_barrier_vars_t **vars);
 
 UT_array *coll_fns_array = NULL;
 
@@ -20,7 +20,7 @@ UT_array *coll_fns_array = NULL;
 #define FUNCNAME MPIDI_CH3I_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH3I_comm_create(MPID_Comm *comm, void *param)
+int MPIDI_CH3I_comm_create(MPIR_Comm *comm, void *param)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_CHKPMEM_DECL(1);
@@ -33,8 +33,8 @@ int MPIDI_CH3I_comm_create(MPID_Comm *comm, void *param)
 #endif
     
     /* set up intranode barrier iff this is an intranode communicator */
-    if (comm->hierarchy_kind == MPID_HIERARCHY_NODE) {
-        MPID_Collops *cf, **cf_p;
+    if (comm->hierarchy_kind == MPIR_COMM_HIERARCHY_KIND__NODE) {
+        MPIR_Collops *cf, **cf_p;
         comm->dev.ch.barrier_vars = NULL;
 
         /* We can't use a static coll_fns override table for our collectives
@@ -49,7 +49,7 @@ int MPIDI_CH3I_comm_create(MPID_Comm *comm, void *param)
            currently have a use case for it.
         */
         cf_p = NULL;
-        while ( (cf_p = (MPID_Collops **)utarray_next(coll_fns_array, cf_p)) ) {
+        while ( (cf_p = (MPIR_Collops **)utarray_next(coll_fns_array, cf_p)) ) {
             /* we can reuse a coll_fns table if the prev_coll_fns pointer is
                the same as the coll_fns of this communicator */
             if ((*cf_p)->prev_coll_fns == comm->coll_fns) {
@@ -60,7 +60,7 @@ int MPIDI_CH3I_comm_create(MPID_Comm *comm, void *param)
         }
 
         /* allocate and init new coll_fns table */
-        MPIU_CHKPMEM_MALLOC(cf, MPID_Collops *, sizeof(*cf), mpi_errno, "cf");
+        MPIU_CHKPMEM_MALLOC(cf, MPIR_Collops *, sizeof(*cf), mpi_errno, "cf");
         *cf = *comm->coll_fns;
         cf->ref_count = 1;
         cf->Barrier = barrier;
@@ -86,7 +86,7 @@ int MPIDI_CH3I_comm_create(MPID_Comm *comm, void *param)
 #define FUNCNAME MPIDI_CH3I_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH3I_comm_destroy(MPID_Comm *comm, void *param)
+int MPIDI_CH3I_comm_destroy(MPIR_Comm *comm, void *param)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3I_COMM_DESTROY);
@@ -96,8 +96,8 @@ int MPIDI_CH3I_comm_destroy(MPID_Comm *comm, void *param)
     goto fn_exit;
 #endif
     
-    if (comm->hierarchy_kind == MPID_HIERARCHY_NODE) {
-        MPID_Collops *cf = comm->coll_fns;
+    if (comm->hierarchy_kind == MPIR_COMM_HIERARCHY_KIND__NODE) {
+        MPIR_Collops *cf = comm->coll_fns;
 
         /* replace previous coll_fns table */
         comm->coll_fns = cf->prev_coll_fns;
@@ -124,7 +124,7 @@ int MPIDI_CH3I_comm_destroy(MPID_Comm *comm, void *param)
 #define FUNCNAME alloc_barrier_vars
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int alloc_barrier_vars (MPID_Comm *comm, MPID_nem_barrier_vars_t **vars)
+static int alloc_barrier_vars (MPIR_Comm *comm, MPID_nem_barrier_vars_t **vars)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
@@ -161,14 +161,14 @@ static int alloc_barrier_vars (MPID_Comm *comm, MPID_nem_barrier_vars_t **vars)
 #define FUNCNAME barrier
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int barrier(MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+static int barrier(MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
     MPID_nem_barrier_vars_t *barrier_vars;
     int prev;
     int sense;
     
-    MPIU_Assert(comm_ptr->hierarchy_kind == MPID_HIERARCHY_NODE);
+    MPIU_Assert(comm_ptr->hierarchy_kind == MPIR_COMM_HIERARCHY_KIND__NODE);
     
     /* Trivial barriers return immediately */
     if (comm_ptr->local_size == 1)

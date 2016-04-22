@@ -19,22 +19,22 @@
 
 /* Preallocated comm objects */
 /* initialized in initthread.c */
-MPID_Comm MPID_Comm_builtin[MPID_COMM_N_BUILTIN] = { {0} };
-MPID_Comm MPID_Comm_direct[MPID_COMM_PREALLOC] = { {0} };
+MPIR_Comm MPIR_Comm_builtin[MPIR_COMM_N_BUILTIN] = { {0} };
+MPIR_Comm MPIR_Comm_direct[MPID_COMM_PREALLOC] = { {0} };
 
-MPIU_Object_alloc_t MPID_Comm_mem = {
+MPIU_Object_alloc_t MPIR_Comm_mem = {
     0,
     0,
     0,
     0,
-    MPID_COMM,
-    sizeof(MPID_Comm),
-    MPID_Comm_direct,
+    MPIR_COMM,
+    sizeof(MPIR_Comm),
+    MPIR_Comm_direct,
     MPID_COMM_PREALLOC
 };
 
 /* Communicator creation functions */
-struct MPID_CommOps *MPID_Comm_fns = NULL;
+struct MPIR_Commops *MPIR_Comm_fns = NULL;
 struct MPIR_Comm_hint_fn_elt {
     char name[MPI_MAX_INFO_KEY];
     MPIR_Comm_hint_fn_t fn;
@@ -68,7 +68,7 @@ static struct MPIR_Comm_hint_fn_elt *MPID_hint_fns = NULL;
  * to it.
  *
  * !!! The resulting struct is _not_ ready for communication !!! */
-int MPIR_Comm_init(MPID_Comm * comm_p)
+int MPIR_Comm_init(MPIR_Comm * comm_p)
 {
     int thr_err,mpi_errno = MPI_SUCCESS;
     MPIU_Object_set_ref(comm_p, 1);
@@ -89,7 +89,7 @@ int MPIR_Comm_init(MPID_Comm * comm_p)
     comm_p->name[0] = '\0';
     comm_p->info = NULL;
 
-    comm_p->hierarchy_kind = MPID_HIERARCHY_FLAT;
+    comm_p->hierarchy_kind = MPIR_COMM_HIERARCHY_KIND__FLAT;
     comm_p->node_comm = NULL;
     comm_p->node_roots_comm = NULL;
     comm_p->intranode_table = NULL;
@@ -122,15 +122,15 @@ int MPIR_Comm_init(MPID_Comm * comm_p)
 #define FUNCNAME MPIR_Comm_create
 #undef FCNAME
 #define FCNAME "MPIR_Comm_create"
-int MPIR_Comm_create(MPID_Comm ** newcomm_ptr)
+int MPIR_Comm_create(MPIR_Comm ** newcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *newptr;
+    MPIR_Comm *newptr;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_CREATE);
 
     MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_CREATE);
 
-    newptr = (MPID_Comm *) MPIU_Handle_obj_alloc(&MPID_Comm_mem);
+    newptr = (MPIR_Comm *) MPIU_Handle_obj_alloc(&MPIR_Comm_mem);
     MPIR_ERR_CHKANDJUMP(!newptr, mpi_errno, MPI_ERR_OTHER, "**nomem");
 
     *newcomm_ptr = newptr;
@@ -157,15 +157,15 @@ int MPIR_Comm_create(MPID_Comm ** newcomm_ptr)
 #define FUNCNAME MPIR_Setup_intercomm_localcomm
 #undef FCNAME
 #define FCNAME "MPIR_Setup_intercomm_localcomm"
-int MPIR_Setup_intercomm_localcomm(MPID_Comm * intercomm_ptr)
+int MPIR_Setup_intercomm_localcomm(MPIR_Comm * intercomm_ptr)
 {
-    MPID_Comm *localcomm_ptr;
+    MPIR_Comm *localcomm_ptr;
     int mpi_errno = MPI_SUCCESS;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_SETUP_INTERCOMM_LOCALCOMM);
 
     MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_SETUP_INTERCOMM_LOCALCOMM);
 
-    localcomm_ptr = (MPID_Comm *) MPIU_Handle_obj_alloc(&MPID_Comm_mem);
+    localcomm_ptr = (MPIR_Comm *) MPIU_Handle_obj_alloc(&MPIR_Comm_mem);
     MPIR_ERR_CHKANDJUMP(!localcomm_ptr, mpi_errno, MPI_ERR_OTHER, "**nomem");
 
     /* get sensible default values for most fields (usually zeros) */
@@ -175,7 +175,7 @@ int MPIR_Setup_intercomm_localcomm(MPID_Comm * intercomm_ptr)
 
     /* use the parent intercomm's recv ctx as the basis for our ctx */
     localcomm_ptr->recvcontext_id =
-        MPID_CONTEXT_SET_FIELD(IS_LOCALCOMM, intercomm_ptr->recvcontext_id, 1);
+        MPIR_CONTEXT_SET_FIELD(IS_LOCALCOMM, intercomm_ptr->recvcontext_id, 1);
     localcomm_ptr->context_id = localcomm_ptr->recvcontext_id;
 
     MPL_DBG_MSG_FMT(MPIR_DBG_COMM, TYPICAL,
@@ -185,14 +185,14 @@ int MPIR_Setup_intercomm_localcomm(MPID_Comm * intercomm_ptr)
                       localcomm_ptr->recvcontext_id));
 
     /* Save the kind of the communicator */
-    localcomm_ptr->comm_kind = MPID_INTRACOMM;
+    localcomm_ptr->comm_kind = MPIR_COMM_KIND__INTRACOMM;
 
     /* Set the sizes and ranks */
     localcomm_ptr->remote_size = intercomm_ptr->local_size;
     localcomm_ptr->local_size = intercomm_ptr->local_size;
     localcomm_ptr->rank = intercomm_ptr->rank;
 
-    MPIR_Comm_map_dup(localcomm_ptr, intercomm_ptr, MPIR_COMM_MAP_DIR_L2L);
+    MPIR_Comm_map_dup(localcomm_ptr, intercomm_ptr, MPIR_COMM_MAP_DIR__L2L);
 
     /* TODO More advanced version: if the group is available, dup it by
      * increasing the reference count instead of recreating it later */
@@ -215,10 +215,10 @@ int MPIR_Setup_intercomm_localcomm(MPID_Comm * intercomm_ptr)
 /* holds default collop "vtables" for _intracomms_, where
  * default[hierarchy_kind] is the pointer to the collop struct for that
  * hierarchy kind */
-static struct MPID_Collops *default_collops[MPID_HIERARCHY_SIZE] = { NULL };
+static struct MPIR_Collops *default_collops[MPIR_COMM_HIERARCHY_KIND__SIZE] = { NULL };
 
 /* default for intercomms */
-static struct MPID_Collops *ic_default_collops = NULL;
+static struct MPIR_Collops *ic_default_collops = NULL;
 
 extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_COLLOPS_MUTEX;
 
@@ -229,7 +229,7 @@ extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_COLLOPS_MUTEX;
 static int cleanup_default_collops(void *unused)
 {
     int i;
-    for (i = 0; i < MPID_HIERARCHY_SIZE; ++i) {
+    for (i = 0; i < MPIR_COMM_HIERARCHY_KIND__SIZE; ++i) {
         if (default_collops[i]) {
             MPIU_Assert(default_collops[i]->ref_count >= 1);
             if (--default_collops[i]->ref_count == 0)
@@ -253,12 +253,12 @@ static int init_default_collops(void)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
-    struct MPID_Collops *ops = NULL;
-    MPIU_CHKPMEM_DECL(MPID_HIERARCHY_SIZE + 1);
+    struct MPIR_Collops *ops = NULL;
+    MPIU_CHKPMEM_DECL(MPIR_COMM_HIERARCHY_KIND__SIZE + 1);
 
     /* first initialize the intracomms */
-    for (i = 0; i < MPID_HIERARCHY_SIZE; ++i) {
-        MPIU_CHKPMEM_CALLOC(ops, struct MPID_Collops *, sizeof(struct MPID_Collops), mpi_errno,
+    for (i = 0; i < MPIR_COMM_HIERARCHY_KIND__SIZE; ++i) {
+        MPIU_CHKPMEM_CALLOC(ops, struct MPIR_Collops *, sizeof(struct MPIR_Collops), mpi_errno,
                             "default intracomm collops");
         ops->ref_count = 1;     /* force existence until finalize time */
 
@@ -293,17 +293,17 @@ static int init_default_collops(void)
 
         /* override defaults, such as for SMP */
         switch (i) {
-        case MPID_HIERARCHY_FLAT:
+        case MPIR_COMM_HIERARCHY_KIND__FLAT:
             break;
-        case MPID_HIERARCHY_PARENT:
+        case MPIR_COMM_HIERARCHY_KIND__PARENT:
             ops->Ibcast_sched = &MPIR_Ibcast_SMP;
             ops->Iscan_sched = &MPIR_Iscan_SMP;
             ops->Iallreduce_sched = &MPIR_Iallreduce_SMP;
             ops->Ireduce_sched = &MPIR_Ireduce_SMP;
             break;
-        case MPID_HIERARCHY_NODE:
+        case MPIR_COMM_HIERARCHY_KIND__NODE:
             break;
-        case MPID_HIERARCHY_NODE_ROOTS:
+        case MPIR_COMM_HIERARCHY_KIND__NODE_ROOTS:
             break;
 
             /* --BEGIN ERROR HANDLING-- */
@@ -321,7 +321,7 @@ static int init_default_collops(void)
 
     /* now the intercomm table */
     {
-        MPIU_CHKPMEM_CALLOC(ops, struct MPID_Collops *, sizeof(struct MPID_Collops), mpi_errno,
+        MPIU_CHKPMEM_CALLOC(ops, struct MPIR_Collops *, sizeof(struct MPIR_Collops), mpi_errno,
                             "default intercomm collops");
         ops->ref_count = 1;     /* force existence until finalize time */
 
@@ -376,7 +376,7 @@ static int init_default_collops(void)
 #define FUNCNAME set_collops
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int set_collops(MPID_Comm * comm)
+static int set_collops(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     static int initialized = FALSE;
@@ -394,7 +394,7 @@ static int set_collops(MPID_Comm * comm)
         initialized = TRUE;
     }
 
-    if (comm->comm_kind == MPID_INTRACOMM) {
+    if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
         /* FIXME MT what protects access to this structure and ic_default_collops? */
         comm->coll_fns = default_collops[comm->hierarchy_kind];
     }
@@ -416,20 +416,20 @@ static int set_collops(MPID_Comm * comm)
 #define FUNCNAME MPIR_Comm_map_irregular
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_map_irregular(MPID_Comm * newcomm, MPID_Comm * src_comm,
+int MPIR_Comm_map_irregular(MPIR_Comm * newcomm, MPIR_Comm * src_comm,
                             int *src_mapping, int src_mapping_size,
                             MPIR_Comm_map_dir_t dir, MPIR_Comm_map_t ** map)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm_map_t *mapper;
     MPIU_CHKPMEM_DECL(3);
-    MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_MAP_IRREGULAR);
+    MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_MAP_TYPE__IRREGULAR);
 
-    MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_MAP_IRREGULAR);
+    MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_MAP_TYPE__IRREGULAR);
 
     MPIU_CHKPMEM_MALLOC(mapper, MPIR_Comm_map_t *, sizeof(MPIR_Comm_map_t), mpi_errno, "mapper");
 
-    mapper->type = MPIR_COMM_MAP_IRREGULAR;
+    mapper->type = MPIR_COMM_MAP_TYPE__IRREGULAR;
     mapper->src_comm = src_comm;
     mapper->dir = dir;
     mapper->src_mapping_size = src_mapping_size;
@@ -453,7 +453,7 @@ int MPIR_Comm_map_irregular(MPID_Comm * newcomm, MPID_Comm * src_comm,
 
   fn_exit:
     MPIU_CHKPMEM_COMMIT();
-    MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_MAP_IRREGULAR);
+    MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_MAP_TYPE__IRREGULAR);
     return mpi_errno;
   fn_fail:
     MPIU_CHKPMEM_REAP();
@@ -464,18 +464,18 @@ int MPIR_Comm_map_irregular(MPID_Comm * newcomm, MPID_Comm * src_comm,
 #define FUNCNAME MPIR_Comm_map_dup
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_map_dup(MPID_Comm * newcomm, MPID_Comm * src_comm, MPIR_Comm_map_dir_t dir)
+int MPIR_Comm_map_dup(MPIR_Comm * newcomm, MPIR_Comm * src_comm, MPIR_Comm_map_dir_t dir)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm_map_t *mapper;
     MPIU_CHKPMEM_DECL(1);
-    MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_MAP_DUP);
+    MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_MAP_TYPE__DUP);
 
-    MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_MAP_DUP);
+    MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_MAP_TYPE__DUP);
 
     MPIU_CHKPMEM_MALLOC(mapper, MPIR_Comm_map_t *, sizeof(MPIR_Comm_map_t), mpi_errno, "mapper");
 
-    mapper->type = MPIR_COMM_MAP_DUP;
+    mapper->type = MPIR_COMM_MAP_TYPE__DUP;
     mapper->src_comm = src_comm;
     mapper->dir = dir;
 
@@ -485,7 +485,7 @@ int MPIR_Comm_map_dup(MPID_Comm * newcomm, MPID_Comm * src_comm, MPIR_Comm_map_d
 
   fn_exit:
     MPIU_CHKPMEM_COMMIT();
-    MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_MAP_DUP);
+    MPID_MPI_FUNC_EXIT(MPID_STATE_MPIR_COMM_MAP_TYPE__DUP);
     return mpi_errno;
   fn_fail:
     MPIU_CHKPMEM_REAP();
@@ -497,7 +497,7 @@ int MPIR_Comm_map_dup(MPID_Comm * newcomm, MPID_Comm * src_comm, MPIR_Comm_map_d
 #define FUNCNAME MPIR_Comm_map_free
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_map_free(MPID_Comm * comm)
+int MPIR_Comm_map_free(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm_map_t *mapper, *tmp;
@@ -507,7 +507,7 @@ int MPIR_Comm_map_free(MPID_Comm * comm)
 
     for (mapper = comm->mapper_head; mapper;) {
         tmp = mapper->next;
-        if (mapper->type == MPIR_COMM_MAP_IRREGULAR && mapper->free_mapping)
+        if (mapper->type == MPIR_COMM_MAP_TYPE__IRREGULAR && mapper->free_mapping)
             MPL_free(mapper->src_mapping);
         MPL_free(mapper);
         mapper = tmp;
@@ -527,7 +527,7 @@ int MPIR_Comm_map_free(MPID_Comm * comm)
 #define FUNCNAME MPIR_Comm_commit
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_commit(MPID_Comm * comm)
+int MPIR_Comm_commit(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     int num_local = -1, num_external = -1;
@@ -554,7 +554,7 @@ int MPIR_Comm_commit(MPID_Comm * comm)
 
     MPIR_Comm_map_free(comm);
 
-    if (comm->comm_kind == MPID_INTRACOMM) {
+    if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
 
         mpi_errno = MPIU_Find_local_and_external(comm,
                                                  &num_local, &local_rank, &local_procs,
@@ -597,11 +597,11 @@ int MPIR_Comm_commit(MPID_Comm * comm)
             if (mpi_errno)
                 MPIR_ERR_POP(mpi_errno);
 
-            comm->node_comm->context_id = comm->context_id + MPID_CONTEXT_INTRANODE_OFFSET;
+            comm->node_comm->context_id = comm->context_id + MPIR_CONTEXT_INTRANODE_OFFSET;
             comm->node_comm->recvcontext_id = comm->node_comm->context_id;
             comm->node_comm->rank = local_rank;
-            comm->node_comm->comm_kind = MPID_INTRACOMM;
-            comm->node_comm->hierarchy_kind = MPID_HIERARCHY_NODE;
+            comm->node_comm->comm_kind = MPIR_COMM_KIND__INTRACOMM;
+            comm->node_comm->hierarchy_kind = MPIR_COMM_HIERARCHY_KIND__NODE;
             comm->node_comm->local_comm = NULL;
             MPL_DBG_MSG_D(MPIR_DBG_COMM, VERBOSE, "Create node_comm=%p\n", comm->node_comm);
 
@@ -609,7 +609,7 @@ int MPIR_Comm_commit(MPID_Comm * comm)
             comm->node_comm->remote_size = num_local;
 
             MPIR_Comm_map_irregular(comm->node_comm, comm, local_procs,
-                                    num_local, MPIR_COMM_MAP_DIR_L2L, NULL);
+                                    num_local, MPIR_COMM_MAP_DIR__L2L, NULL);
 
             mpi_errno = set_collops(comm->node_comm);
             if (mpi_errno)
@@ -631,18 +631,18 @@ int MPIR_Comm_commit(MPID_Comm * comm)
             if (mpi_errno)
                 MPIR_ERR_POP(mpi_errno);
 
-            comm->node_roots_comm->context_id = comm->context_id + MPID_CONTEXT_INTERNODE_OFFSET;
+            comm->node_roots_comm->context_id = comm->context_id + MPIR_CONTEXT_INTERNODE_OFFSET;
             comm->node_roots_comm->recvcontext_id = comm->node_roots_comm->context_id;
             comm->node_roots_comm->rank = external_rank;
-            comm->node_roots_comm->comm_kind = MPID_INTRACOMM;
-            comm->node_roots_comm->hierarchy_kind = MPID_HIERARCHY_NODE_ROOTS;
+            comm->node_roots_comm->comm_kind = MPIR_COMM_KIND__INTRACOMM;
+            comm->node_roots_comm->hierarchy_kind = MPIR_COMM_HIERARCHY_KIND__NODE_ROOTS;
             comm->node_roots_comm->local_comm = NULL;
 
             comm->node_roots_comm->local_size = num_external;
             comm->node_roots_comm->remote_size = num_external;
 
             MPIR_Comm_map_irregular(comm->node_roots_comm, comm,
-                                    external_procs, num_external, MPIR_COMM_MAP_DIR_L2L, NULL);
+                                    external_procs, num_external, MPIR_COMM_MAP_DIR__L2L, NULL);
 
             mpi_errno = set_collops(comm->node_roots_comm);
             if (mpi_errno)
@@ -657,7 +657,7 @@ int MPIR_Comm_commit(MPID_Comm * comm)
             MPIR_Comm_map_free(comm->node_roots_comm);
         }
 
-        comm->hierarchy_kind = MPID_HIERARCHY_PARENT;
+        comm->hierarchy_kind = MPIR_COMM_HIERARCHY_KIND__PARENT;
     }
 
   fn_exit:
@@ -675,15 +675,15 @@ int MPIR_Comm_commit(MPID_Comm * comm)
 /* Returns true if the given communicator is aware of node topology information,
    false otherwise.  Such information could be used to implement more efficient
    collective communication, for example. */
-int MPIR_Comm_is_node_aware(MPID_Comm * comm)
+int MPIR_Comm_is_node_aware(MPIR_Comm * comm)
 {
-    return (comm->hierarchy_kind == MPID_HIERARCHY_PARENT);
+    return (comm->hierarchy_kind == MPIR_COMM_HIERARCHY_KIND__PARENT);
 }
 
 /* Returns true if the communicator is node-aware and processes in all the nodes
    are consecutive. For example, if node 0 contains "0, 1, 2, 3", node 1
    contains "4, 5, 6", and node 2 contains "7", we shall return true. */
-int MPIR_Comm_is_node_consecutive(MPID_Comm * comm)
+int MPIR_Comm_is_node_consecutive(MPIR_Comm * comm)
 {
     int i = 0, curr_nodeidx = 0;
     int *internode_table = comm->internode_table;
@@ -717,11 +717,11 @@ int MPIR_Comm_is_node_consecutive(MPID_Comm * comm)
 #define FUNCNAME MPIR_Comm_copy
 #undef FCNAME
 #define FCNAME "MPIR_Comm_copy"
-int MPIR_Comm_copy(MPID_Comm * comm_ptr, int size, MPID_Comm ** outcomm_ptr)
+int MPIR_Comm_copy(MPIR_Comm * comm_ptr, int size, MPIR_Comm ** outcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Context_id_t new_context_id, new_recvcontext_id;
-    MPID_Comm *newcomm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
     MPIR_Comm_map_t *map;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_COPY);
 
@@ -732,7 +732,7 @@ int MPIR_Comm_copy(MPID_Comm * comm_ptr, int size, MPID_Comm ** outcomm_ptr)
     /* If there is a context id cache in oldcomm, use it here.  Otherwise,
      * use the appropriate algorithm to get a new context id.  Be careful
      * of intercomms here */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         mpi_errno = MPIR_Get_intercomm_contextid(comm_ptr, &new_context_id, &new_recvcontext_id);
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
@@ -774,18 +774,18 @@ int MPIR_Comm_copy(MPID_Comm * comm_ptr, int size, MPID_Comm ** outcomm_ptr)
      * test that matches the test on rank above. */
     if (size == comm_ptr->local_size) {
         /* Duplicate the network address mapping */
-        if (comm_ptr->comm_kind == MPID_INTRACOMM)
-            MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_L2L);
+        if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
+            MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__L2L);
         else
-            MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_R2R);
+            MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__R2R);
     }
     else {
         int i;
 
-        if (comm_ptr->comm_kind == MPID_INTRACOMM)
-            MPIR_Comm_map_irregular(newcomm_ptr, comm_ptr, NULL, size, MPIR_COMM_MAP_DIR_L2L, &map);
+        if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
+            MPIR_Comm_map_irregular(newcomm_ptr, comm_ptr, NULL, size, MPIR_COMM_MAP_DIR__L2L, &map);
         else
-            MPIR_Comm_map_irregular(newcomm_ptr, comm_ptr, NULL, size, MPIR_COMM_MAP_DIR_R2R, &map);
+            MPIR_Comm_map_irregular(newcomm_ptr, comm_ptr, NULL, size, MPIR_COMM_MAP_DIR__R2R, &map);
         for (i = 0; i < size; i++) {
             /* For rank i in the new communicator, find the corresponding
              * rank in the input communicator */
@@ -794,13 +794,13 @@ int MPIR_Comm_copy(MPID_Comm * comm_ptr, int size, MPID_Comm ** outcomm_ptr)
     }
 
     /* If it is an intercomm, duplicate the local network address references */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
-        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_L2L);
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
+        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__L2L);
     }
 
     /* Set the sizes and ranks */
     newcomm_ptr->rank = comm_ptr->rank;
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         newcomm_ptr->local_size = comm_ptr->local_size;
         newcomm_ptr->remote_size = comm_ptr->remote_size;
         newcomm_ptr->is_low_group = comm_ptr->is_low_group;
@@ -855,10 +855,10 @@ int MPIR_Comm_copy(MPID_Comm * comm_ptr, int size, MPID_Comm ** outcomm_ptr)
 #define FUNCNAME MPIR_Comm_copy_data
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_copy_data(MPID_Comm * comm_ptr, MPID_Comm ** outcomm_ptr)
+int MPIR_Comm_copy_data(MPIR_Comm * comm_ptr, MPIR_Comm ** outcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *newcomm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_COPY_DATA);
 
     MPID_MPI_FUNC_ENTER(MPID_STATE_MPIR_COMM_COPY_DATA);
@@ -875,14 +875,14 @@ int MPIR_Comm_copy_data(MPID_Comm * comm_ptr, MPID_Comm ** outcomm_ptr)
     newcomm_ptr->comm_kind = comm_ptr->comm_kind;
     newcomm_ptr->local_comm = 0;
 
-    if (comm_ptr->comm_kind == MPID_INTRACOMM)
-        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_L2L);
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
+        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__L2L);
     else
-        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_R2R);
+        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__R2R);
 
     /* If it is an intercomm, duplicate the network address mapping */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
-        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR_L2L);
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
+        MPIR_Comm_map_dup(newcomm_ptr, comm_ptr, MPIR_COMM_MAP_DIR__L2L);
     }
 
     /* Set the sizes and ranks */
@@ -911,7 +911,7 @@ int MPIR_Comm_copy_data(MPID_Comm * comm_ptr, MPID_Comm ** outcomm_ptr)
 }
 
 /* Common body between MPIR_Comm_release and MPIR_comm_release_always.  This
- * helper function frees the actual MPID_Comm structure and any associated
+ * helper function frees the actual MPIR_Comm structure and any associated
  * storage.  It also releases any references to other objects.
  * This function should only be called when the communicator's reference count
  * has dropped to 0.
@@ -922,7 +922,7 @@ int MPIR_Comm_copy_data(MPID_Comm * comm_ptr, MPID_Comm ** outcomm_ptr)
 #define FUNCNAME MPIR_Comm_delete_internal
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
+int MPIR_Comm_delete_internal(MPIR_Comm * comm_ptr)
 {
     int in_use,thr_err;
     int mpi_errno = MPI_SUCCESS;
@@ -978,7 +978,7 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
 
         MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_COLLOPS_MUTEX);
 
-        if (comm_ptr->comm_kind == MPID_INTERCOMM && comm_ptr->local_comm)
+        if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM && comm_ptr->local_comm)
             MPIR_Comm_release(comm_ptr->local_comm);
 
         /* Free the local and remote groups, if they exist */
@@ -1016,7 +1016,7 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
             int errhInuse;
             MPIR_Errhandler_release_ref(comm_ptr->errhandler, &errhInuse);
             if (!errhInuse) {
-                MPIU_Handle_obj_free(&MPID_Errhandler_mem, comm_ptr->errhandler);
+                MPIU_Handle_obj_free(&MPIR_Errhandler_mem, comm_ptr->errhandler);
             }
         }
 
@@ -1029,7 +1029,7 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
         /* Check for predefined communicators - these should not
          * be freed */
         if (!(HANDLE_GET_KIND(comm_ptr->handle) == HANDLE_KIND_BUILTIN))
-            MPIU_Handle_obj_free(&MPID_Comm_mem, comm_ptr);
+            MPIU_Handle_obj_free(&MPIR_Comm_mem, comm_ptr);
     }
     else {
         /* If the user attribute free function returns an error,
@@ -1052,7 +1052,7 @@ int MPIR_Comm_delete_internal(MPID_Comm * comm_ptr)
 #define FUNCNAME MPIR_Comm_release_always
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_release_always(MPID_Comm * comm_ptr)
+int MPIR_Comm_release_always(MPIR_Comm * comm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     int in_use;
@@ -1082,10 +1082,10 @@ int MPIR_Comm_release_always(MPID_Comm * comm_ptr)
 #define FUNCNAME MPIR_Comm_apply_hints
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_apply_hints(MPID_Comm * comm_ptr, MPID_Info * info_ptr)
+int MPIR_Comm_apply_hints(MPIR_Comm * comm_ptr, MPIR_Info * info_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Info *hint = NULL;
+    MPIR_Info *hint = NULL;
     char hint_name[MPI_MAX_INFO_KEY] = { 0 };
     struct MPIR_Comm_hint_fn_elt *hint_fn = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_APPLY_HINTS);

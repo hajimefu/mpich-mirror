@@ -10,8 +10,8 @@
 #if !defined(MPICH_MPIDPRE_H_INCLUDED)
 #define MPICH_MPIDPRE_H_INCLUDED
 
-/* Tell the compiler that we're going to declare struct MPID_Request later */
-struct MPID_Request;
+/* Tell the compiler that we're going to declare struct MPIR_Request later */
+struct MPIR_Request;
 
 #if defined(HAVE_SYS_TYPES_H)
 #include <sys/types.h>
@@ -32,7 +32,7 @@ struct MPID_Request;
 
 union MPIDI_CH3_Pkt;
 struct MPIDI_VC;
-struct MPID_Request;
+struct MPIR_Request;
 
 /* PktHandler function:
    vc  (INPUT) -- vc on which the packet was received
@@ -46,7 +46,7 @@ struct MPID_Request;
    (This decl needs to come before mpidi_ch3_pre.h)
 */
 typedef int MPIDI_CH3_PktHandler_Fcn(struct MPIDI_VC *vc, union MPIDI_CH3_Pkt *pkt,
-				     intptr_t *buflen, struct MPID_Request **req );
+				     intptr_t *buflen, struct MPIR_Request **req );
 
 /* Include definitions from the channel which must exist before items in this 
    file (mpidpre.h) or the file it includes (mpiimpl.h) can be defined. */
@@ -131,7 +131,7 @@ typedef union {
  * MPIDI_CH3_CA_COMPLETE - The last operation for this request has completed.
  * The completion counter should be decremented.  If
  * it has reached zero, then the request should be released by calling 
- * MPID_Request_release().
+ * MPIR_Request_free().
  *
  * MPIDI_CH3_CA_UNPACK_UEBUF_AND_COMPLETE - This is a special case of the 
  * MPIDI_CH3_CA_COMPLETE.  The data for an unexpected
@@ -188,8 +188,8 @@ typedef struct MPIDI_CH3I_comm
     struct MPIDI_VCRT *vcrt;          /* virtual connecton reference table */
     struct MPIDI_VCRT *local_vcrt;    /* local virtual connecton reference table */
 
-    struct MPID_Comm *next; /* next pointer for list of communicators */
-    struct MPID_Comm *prev; /* prev pointer for list of communicators */
+    struct MPIR_Comm *next; /* next pointer for list of communicators */
+    struct MPIR_Comm *prev; /* prev pointer for list of communicators */
     MPIDI_CH3I_CH_comm_t ch;
 }
 MPIDI_CH3I_comm_t;
@@ -347,12 +347,12 @@ typedef struct MPIDI_Win_basic_info {
                              incomplete sync requests (used in          \
                              Win_fence and PSCW). */                    \
     int active; /* specify if this window is active or not */           \
-    struct MPID_Win *prev;                                              \
-    struct MPID_Win *next;                                              \
+    struct MPIR_Win *prev;                                              \
+    struct MPIR_Win *next;                                              \
     int outstanding_acks; /* keep track of # of outstanding ACKs window \
                              wide. */                                   \
 
-extern struct MPID_Win *MPIDI_RMA_Win_active_list_head, *MPIDI_RMA_Win_inactive_list_head;
+extern struct MPIR_Win *MPIDI_RMA_Win_active_list_head, *MPIDI_RMA_Win_inactive_list_head;
 
 extern int MPIDI_CH3I_RMA_Active_req_cnt;
 extern int MPIDI_CH3I_RMA_Progress_hook_id;
@@ -398,7 +398,7 @@ typedef struct MPIDI_Request {
        For example, when an operation described by an iov has 
        completed.  This replaces the MPIDI_CA_t (completion action)
        field used through MPICH 1.0.4. */
-    int (*OnDataAvail)( struct MPIDI_VC *, struct MPID_Request *, int * );
+    int (*OnDataAvail)( struct MPIDI_VC *, struct MPIR_Request *, int * );
     /* OnFinal is used in the following case:
        OnDataAvail is set to a function, and that function has processed
        all of the data.  At that point, the OnDataAvail function can
@@ -407,7 +407,7 @@ typedef struct MPIDI_Request {
        as a get-response) when processing of the non-contiguous data 
        completes. This value need not be initialized unless OnDataAvail
        is set to a non-null value (and then only in certain cases) */
-    int (*OnFinal)( struct MPIDI_VC *, struct MPID_Request *, int * );
+    int (*OnFinal)( struct MPIDI_VC *, struct MPIR_Request *, int * );
 
     /* tmpbuf and tmpbuf_sz describe temporary storage used for things like 
        unexpected eager messages and packing/unpacking
@@ -464,21 +464,26 @@ typedef struct MPIDI_Request {
        Question: do we want to make this a link instead of reserving 
        a fixed spot in the request? */
     MPIDI_CH3_Pkt_t pending_pkt;
-    struct MPID_Request * next;
+
+    /* partner send request when a receive request is created by the
+     * sender (only used for self send) */
+    struct MPIR_Request * partner_request;
+
+    struct MPIR_Request * next;
 } MPIDI_Request;
-#define MPID_REQUEST_DECL MPIDI_Request dev;
+#define MPIR_REQUEST_DECL MPIDI_Request dev;
 
 #if defined(MPIDI_CH3_REQUEST_DECL)
 #define MPID_DEV_REQUEST_DECL			\
-MPID_REQUEST_DECL				\
+MPIR_REQUEST_DECL				\
 MPIDI_CH3_REQUEST_DECL
 #else
 #define MPID_DEV_REQUEST_DECL			\
-MPID_REQUEST_DECL
+MPIR_REQUEST_DECL
 #endif
 
 #ifdef MPIDI_CH3_REQUEST_KIND_DECL
-#define MPID_DEV_REQUEST_KIND_DECL MPIDI_CH3_REQUEST_KIND_DECL
+#define MPID_REQUEST_KIND_DECL MPIDI_CH3_REQUEST_KIND_DECL
 #endif
 
 #endif
@@ -489,13 +494,13 @@ MPID_REQUEST_DECL
 /* FIXME: The progress routines will be made into ch3-common definitions, not
    channel specific.  Channels that need more will need to piggy back or 
    otherwise override */
-#ifndef MPID_PROGRESS_STATE_DECL
+typedef struct {
 #if defined(MPIDI_CH3_PROGRESS_STATE_DECL)
-#   define MPID_PROGRESS_STATE_DECL MPIDI_CH3_PROGRESS_STATE_DECL
+    MPIDI_CH3_PROGRESS_STATE_DECL
 #else
-#   define MPID_PROGRESS_STATE_DECL int foo;
+    int foo;
 #endif
-#endif
+} MPID_Progress_state;
 
 #define MPID_DEV_GPID_DECL int gpid[2];
 

@@ -7,8 +7,8 @@
 
 #include "mpiimpl.h"
 
-#if !defined(MPID_REQUEST_PTR_ARRAY_SIZE)
-#define MPID_REQUEST_PTR_ARRAY_SIZE 16
+#if !defined(MPIR_REQUEST_PTR_ARRAY_SIZE)
+#define MPIR_REQUEST_PTR_ARRAY_SIZE 16
 #endif
 
 /* -- Begin Profiling Symbol Block for routine MPI_Testsome */
@@ -70,8 +70,8 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount,
 		 int array_of_indices[], MPI_Status array_of_statuses[])
 {
     static const char FCNAME[] = "MPI_Testsome";
-    MPID_Request * request_ptr_array[MPID_REQUEST_PTR_ARRAY_SIZE];
-    MPID_Request ** request_ptrs = request_ptr_array;
+    MPIR_Request * request_ptr_array[MPIR_REQUEST_PTR_ARRAY_SIZE];
+    MPIR_Request ** request_ptrs = request_ptr_array;
     MPI_Status * status_ptr;
     int i;
     int n_active;
@@ -115,9 +115,9 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount,
     *outcount = 0;
     
     /* Convert MPI request handles to a request object pointers */
-    if (incount > MPID_REQUEST_PTR_ARRAY_SIZE)
+    if (incount > MPIR_REQUEST_PTR_ARRAY_SIZE)
     {
-	MPIU_CHKLMEM_MALLOC_ORJUMP(request_ptrs, MPID_Request **, incount * sizeof(MPID_Request *), mpi_errno, "request pointers");
+	MPIU_CHKLMEM_MALLOC_ORJUMP(request_ptrs, MPIR_Request **, incount * sizeof(MPIR_Request *), mpi_errno, "request pointers");
     }
 
     n_inactive = 0;
@@ -125,13 +125,13 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount,
     {
 	if (array_of_requests[i] != MPI_REQUEST_NULL)
 	{
-	    MPID_Request_get_ptr(array_of_requests[i], request_ptrs[i]);
+	    MPIR_Request_get_ptr(array_of_requests[i], request_ptrs[i]);
 	    /* Validate object pointers if error checking is enabled */
 #           ifdef HAVE_ERROR_CHECKING
 	    {
 		MPID_BEGIN_ERROR_CHECKS;
 		{
-		    MPID_Request_valid_ptr( request_ptrs[i], mpi_errno );
+		    MPIR_Request_valid_ptr( request_ptrs[i], mpi_errno );
 		    if (mpi_errno) goto fn_fail;
 		}
 		MPID_END_ERROR_CHECKS;
@@ -162,17 +162,17 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount,
     for (i = 0; i < incount; i++)
     {
 	if (request_ptrs[i] != NULL && 
-            request_ptrs[i]->kind == MPID_UREQUEST &&
-            request_ptrs[i]->greq_fns->poll_fn != NULL)
+            request_ptrs[i]->kind == MPIR_REQUEST_KIND__GREQUEST &&
+            request_ptrs[i]->u.ureq.greq_fns->poll_fn != NULL)
 	{
-            mpi_errno = (request_ptrs[i]->greq_fns->poll_fn)(request_ptrs[i]->greq_fns->grequest_extra_state,
+            mpi_errno = (request_ptrs[i]->u.ureq.greq_fns->poll_fn)(request_ptrs[i]->u.ureq.greq_fns->grequest_extra_state,
                                                              array_of_statuses);
 	    if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 	}
         status_ptr = (array_of_statuses != MPI_STATUSES_IGNORE) ? &array_of_statuses[n_active] : MPI_STATUS_IGNORE;
         if (request_ptrs[i] != NULL)
         {
-            if (MPID_Request_is_complete(request_ptrs[i]))
+            if (MPIR_Request_is_complete(request_ptrs[i]))
             {
                 rc = MPIR_Request_complete(&array_of_requests[i], request_ptrs[i], status_ptr, &active_flag);
                 if (active_flag)
@@ -238,7 +238,7 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount,
     /* ... end of body of routine ... */
     
   fn_exit:
-    if (incount > MPID_REQUEST_PTR_ARRAY_SIZE)
+    if (incount > MPIR_REQUEST_PTR_ARRAY_SIZE)
     {
 	MPIU_CHKLMEM_FREEALL();
     }

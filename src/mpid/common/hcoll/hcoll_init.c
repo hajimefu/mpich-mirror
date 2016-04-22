@@ -139,7 +139,7 @@ int hcoll_initialize(void)
 #define FUNCNAME hcoll_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
+int hcoll_comm_create(MPIR_Comm * comm_ptr, void *param)
 {
     int mpi_errno;
     int num_ranks;
@@ -161,7 +161,7 @@ int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
         goto fn_exit;
     }
     num_ranks = comm_ptr->local_size;
-    if ((MPID_INTRACOMM != comm_ptr->comm_kind) || (2 > num_ranks)) {
+    if ((MPIR_COMM_KIND__INTRACOMM != comm_ptr->comm_kind) || (2 > num_ranks)) {
         comm_ptr->hcoll_priv.is_hcoll_init = 0;
         goto fn_exit;
     }
@@ -181,11 +181,11 @@ int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
         MPIR_ERR_POP(mpi_errno);
     }
     comm_ptr->hcoll_priv.hcoll_origin_coll_fns = comm_ptr->coll_fns;
-    comm_ptr->coll_fns = (MPID_Collops *) MPL_malloc(sizeof(MPID_Collops));
-    memset(comm_ptr->coll_fns, 0, sizeof(MPID_Collops));
+    comm_ptr->coll_fns = (MPIR_Collops *) MPL_malloc(sizeof(MPIR_Collops));
+    memset(comm_ptr->coll_fns, 0, sizeof(MPIR_Collops));
     if (comm_ptr->hcoll_priv.hcoll_origin_coll_fns != 0) {
         memcpy(comm_ptr->coll_fns, comm_ptr->hcoll_priv.hcoll_origin_coll_fns,
-               sizeof(MPID_Collops));
+               sizeof(MPIR_Collops));
     }
     INSTALL_COLL_WRAPPER(barrier, Barrier);
     INSTALL_COLL_WRAPPER(bcast, Bcast);
@@ -207,7 +207,7 @@ int hcoll_comm_create(MPID_Comm * comm_ptr, void *param)
 #define FUNCNAME hcoll_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int hcoll_comm_destroy(MPID_Comm * comm_ptr, void *param)
+int hcoll_comm_destroy(MPIR_Comm * comm_ptr, void *param)
 {
     int mpi_errno;
     int context_destroyed;

@@ -25,25 +25,25 @@ int MPI_Op_create(MPI_User_function *user_fn, int commute, MPI_Op *op) __attribu
 #undef MPI_Op_create
 #define MPI_Op_create PMPI_Op_create
 
-#ifndef MPID_OP_PREALLOC 
-#define MPID_OP_PREALLOC 16
+#ifndef MPIR_OP_PREALLOC
+#define MPIR_OP_PREALLOC 16
 #endif
 
 /* Preallocated op objects */
-MPID_Op MPID_Op_builtin[MPID_OP_N_BUILTIN] = { {0} };
-MPID_Op MPID_Op_direct[MPID_OP_PREALLOC] = { {0} };
-MPIU_Object_alloc_t MPID_Op_mem = { 0, 0, 0, 0, MPID_OP, 
-					    sizeof(MPID_Op), 
-					    MPID_Op_direct,
-					    MPID_OP_PREALLOC, };
+MPIR_Op MPIR_Op_builtin[MPIR_OP_N_BUILTIN] = { {0} };
+MPIR_Op MPIR_Op_direct[MPIR_OP_PREALLOC] = { {0} };
+MPIU_Object_alloc_t MPIR_Op_mem = { 0, 0, 0, 0, MPIR_OP,
+					    sizeof(MPIR_Op),
+					    MPIR_Op_direct,
+					    MPIR_OP_PREALLOC, };
 
 #ifdef HAVE_CXX_BINDING
 void MPIR_Op_set_cxx( MPI_Op op, void (*opcall)(void) )
 {
-    MPID_Op *op_ptr;
+    MPIR_Op *op_ptr;
     
-    MPID_Op_get_ptr( op, op_ptr );
-    op_ptr->language		= MPID_LANG_CXX;
+    MPIR_Op_get_ptr( op, op_ptr );
+    op_ptr->language		= MPIR_LANG__CXX;
     MPIR_Process.cxx_call_op_fn	= (void (*)(const void *, void *, int,
 				    MPI_Datatype, MPI_User_function *))opcall;
 }
@@ -55,10 +55,10 @@ void MPIR_Op_set_cxx( MPI_Op op, void (*opcall)(void) )
    versions must be distinquished. */
 void MPIR_Op_set_fc( MPI_Op op )
 {
-    MPID_Op *op_ptr;
+    MPIR_Op *op_ptr;
     
-    MPID_Op_get_ptr( op, op_ptr );
-    op_ptr->language = MPID_LANG_FORTRAN;
+    MPIR_Op_get_ptr( op, op_ptr );
+    op_ptr->language = MPIR_LANG__FORTRAN;
 }
 #endif
 
@@ -102,7 +102,7 @@ Output Parameters:
 int MPI_Op_create(MPI_User_function *user_fn, int commute, MPI_Op *op)
 {
     static const char FCNAME[] = "MPI_Op_create";
-    MPID_Op *op_ptr;
+    MPIR_Op *op_ptr;
     int mpi_errno = MPI_SUCCESS;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_OP_CREATE);
 
@@ -113,7 +113,7 @@ int MPI_Op_create(MPI_User_function *user_fn, int commute, MPI_Op *op)
 
     /* ... body of routine ...  */
     
-    op_ptr = (MPID_Op *)MPIU_Handle_obj_alloc( &MPID_Op_mem );
+    op_ptr = (MPIR_Op *)MPIU_Handle_obj_alloc( &MPIR_Op_mem );
     /* --BEGIN ERROR HANDLING-- */
     if (!op_ptr)
     {
@@ -123,8 +123,8 @@ int MPI_Op_create(MPI_User_function *user_fn, int commute, MPI_Op *op)
     }
     /* --END ERROR HANDLING-- */
 
-    op_ptr->language = MPID_LANG_C;
-    op_ptr->kind     = commute ? MPID_OP_USER : MPID_OP_USER_NONCOMMUTE;
+    op_ptr->language = MPIR_LANG__C;
+    op_ptr->kind     = commute ? MPIR_OP_KIND__USER : MPIR_OP_KIND__USER_NONCOMMUTE;
     op_ptr->function.c_function = (void (*)(const void *, void *, 
 				   const int *, const MPI_Datatype *))user_fn;
     MPIU_Object_set_ref(op_ptr,1);

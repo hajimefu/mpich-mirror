@@ -55,7 +55,7 @@ Input Parameters:
 int MPI_Win_call_errhandler(MPI_Win win, int errorcode)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Win *win_ptr = NULL;
+    MPIR_Win *win_ptr = NULL;
     int in_cs = FALSE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_WIN_CALL_ERRHANDLER);
 
@@ -75,7 +75,7 @@ int MPI_Win_call_errhandler(MPI_Win win, int errorcode)
 #   endif
     
     /* Convert MPI object handles to object pointers */
-    MPID_Win_get_ptr( win, win_ptr );
+    MPIR_Win_get_ptr( win, win_ptr );
     
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -83,7 +83,7 @@ int MPI_Win_call_errhandler(MPI_Win win, int errorcode)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate win_ptr */
-            MPID_Win_valid_ptr( win_ptr, mpi_errno );
+            MPIR_Win_valid_ptr( win_ptr, mpi_errno );
 	    /* If win_ptr is not valid, it will be reset to null */
             if (mpi_errno) goto fn_fail;
         }
@@ -118,20 +118,20 @@ int MPI_Win_call_errhandler(MPI_Win win, int errorcode)
     }
 #endif
     switch (win_ptr->errhandler->language) {
-    case MPID_LANG_C:
+    case MPIR_LANG__C:
 	(*win_ptr->errhandler->errfn.C_Win_Handler_function)( 
 	    &win_ptr->handle, &errorcode );
 	break;
 #ifdef HAVE_CXX_BINDING
-    case MPID_LANG_CXX:
+    case MPIR_LANG__CXX:
 	MPIR_Process.cxx_call_errfn( 2, &win_ptr->handle, 
 				     &errorcode, 
      (void (*)(void))win_ptr->errhandler->errfn.C_Win_Handler_function );
 	break;
 #endif
 #ifdef HAVE_FORTRAN_BINDING
-    case MPID_LANG_FORTRAN90:
-    case MPID_LANG_FORTRAN:
+    case MPIR_LANG__FORTRAN90:
+    case MPIR_LANG__FORTRAN:
 	{
 	    /* If int and MPI_Fint aren't the same size, we need to 
 	       convert.  As this is not performance critical, we

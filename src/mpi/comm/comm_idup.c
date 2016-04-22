@@ -30,10 +30,10 @@ int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request) __attr
 #define FUNCNAME MPIR_Comm_idup_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_idup_impl(MPID_Comm *comm_ptr, MPID_Comm **newcommp, MPID_Request **reqp)
+int MPIR_Comm_idup_impl(MPIR_Comm *comm_ptr, MPIR_Comm **newcommp, MPIR_Request **reqp)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Attribute *new_attributes = 0;
+    MPIR_Attribute *new_attributes = 0;
 
     /* Copy attributes, executing the attribute copy functions */
     /* This accesses the attribute dup function through the perprocess
@@ -55,7 +55,7 @@ int MPIR_Comm_idup_impl(MPID_Comm *comm_ptr, MPID_Comm **newcommp, MPID_Request 
 
     /* We now have a mostly-valid new communicator, so begin the process of
      * allocating a context ID to use for actual communication */
-    if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+    if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         mpi_errno = MPIR_Get_intercomm_contextid_nonblock(comm_ptr, *newcommp, reqp);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
@@ -95,9 +95,9 @@ Output Parameters:
 int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
-    MPID_Comm *newcomm_ptr = NULL;
-    MPID_Request *dreq = NULL;
+    MPIR_Comm *comm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
+    MPIR_Request *dreq = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_IDUP);
 
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -116,14 +116,14 @@ int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS
         {
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             MPIR_ERRTEST_ARGNULL(request, "request", mpi_errno);
             /* TODO more checks may be appropriate (counts, in_place, buffer aliasing, etc) */

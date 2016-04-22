@@ -41,10 +41,10 @@
 
 
 #if (MPIU_HANDLE_ALLOCATION_METHOD == MPIU_HANDLE_ALLOCATION_THREAD_LOCAL) && defined(__BGQ__)
-struct MPID_Request;
+struct MPIR_Request;
 typedef struct
 {
-  struct MPID_Request  * head;
+  struct MPIR_Request  * head;
   size_t                 count;
 } MPIDI_RequestHandle_t;
 #endif
@@ -125,7 +125,7 @@ typedef struct
     unsigned subcomms;          /**< Enable hardware optimized subcomm's */
     unsigned select_colls;      /**< Enable collective selection */
     unsigned auto_select_colls; /**< Enable automatic collective selection */
-    unsigned memory;            /**< Enable memory optimized subcomm's - See MPID_OPT_LVL_xxxx */
+    unsigned memory;            /**< Enable memory optimized subcomm's - See MPIR_OPT_LVL_xxxx */
     unsigned num_requests;      /**< Number of requests between flow control barriers */
   }
   optimized;
@@ -268,10 +268,10 @@ typedef struct
   size_t           length;
 } MPIDI_MsgEnvelope;
 
-/** \brief This defines the portion of MPID_Request that is specific to the Device */
+/** \brief This defines the portion of MPIR_Request that is specific to the Device */
 struct MPIDI_Request
 {
-  struct MPID_Request  *next;         /**< Link to next req. in queue */
+  struct MPIR_Request  *next;         /**< Link to next req. in queue */
   struct MPIDU_Datatype*datatype_ptr; /**< Info about the datatype    */
   pami_work_t           post_request; /**<                            */
 
@@ -292,10 +292,10 @@ struct MPIDI_Request
   MPIDI_CA              ca;           /**< Completion action          */
   pami_memregion_t      memregion;    /**< Rendezvous recv memregion  */
 #ifdef OUT_OF_ORDER_HANDLING
-  struct MPID_Request  *prev;         /**< Link to prev req. in queue */
+  struct MPIR_Request  *prev;         /**< Link to prev req. in queue */
   void                 *nextR;        /** < pointer to next recv for the out-of-order list, the out-of-order list is a list per source */
   void                 *prevR;        /** < pointer to prev recv for the out-of-order list, the out-of-order list is a list per source */
-  struct MPID_Request  *oo_peer;      /** < pointer to the matched post recv request to complete in the out-of-order case */
+  struct MPIR_Request  *oo_peer;      /** < pointer to the matched post recv request to complete in the out-of-order case */
 #endif
 #ifdef RDMA_FAILOVER
   uint32_t             memregion_used:16;
@@ -310,7 +310,7 @@ struct MPIDI_Request
 };
 
 typedef void* fast_query_t;
-/** \brief This defines the portion of MPID_Comm that is specific to the Device */
+/** \brief This defines the portion of MPIR_Comm that is specific to the Device */
 struct MPIDI_Comm
 {
   pami_geometry_t geometry; /**< Geometry component for collectives      */
@@ -379,12 +379,12 @@ typedef struct
 } MPIDI_Post_coll_t;
 
 
-/** \brief Forward declaration of the MPID_Comm structure */
-struct MPID_Comm;
-/** \brief Forward declaration of the MPID_Win structure */
-struct MPID_Win;
-/** \brief Forward declaration of the MPID_Group structure */
-struct MPID_Group;
+/** \brief Forward declaration of the MPIR_Comm structure */
+struct MPIR_Comm;
+/** \brief Forward declaration of the MPIR_Win structure */
+struct MPIR_Win;
+/** \brief Forward declaration of the MPIR_Group structure */
+struct MPIR_Group;
 
 typedef enum
   {
@@ -445,7 +445,7 @@ typedef struct workQ_t {
 typedef struct MPIDI_Win_info
 {
   void             * base_addr;     /**< Node's exposure window base address                  */
-  struct MPID_Win  * win;
+  struct MPIR_Win  * win;
   uint32_t           disp_unit;     /**< Node's exposure window displacement units            */
   pami_memregion_t   memregion;     /**< Memory region descriptor for each node               */
   uint32_t           memregion_used;
@@ -477,7 +477,7 @@ typedef struct MPIDI_Win_shm_t
 } MPIDI_Win_shm_t;
 
 /**
- * \brief Structure of PAMI extensions to MPID_Win structure
+ * \brief Structure of PAMI extensions to MPIR_Win structure
  */
 struct MPIDI_Win
 {
@@ -504,7 +504,7 @@ struct MPIDI_Win
 
     struct MPIDI_Win_sync_pscw
     {
-      struct MPID_Group * group;
+      struct MPIR_Group * group;
       volatile unsigned   count;
     } sc, pw;
     struct MPIDI_Win_sync_lock
@@ -523,7 +523,7 @@ struct MPIDI_Win
     } lock;
   } sync;
   int request_based;          /* flag for request based rma */
-  struct MPID_Request *rreq;  /* anchor of MPID_Request for request based rma */
+  struct MPIR_Request *rreq;  /* anchor of MPIR_Request for request based rma */
 };
 
 /**

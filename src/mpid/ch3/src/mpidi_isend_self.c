@@ -16,12 +16,12 @@
 #define FUNCNAME MPIDI_Isend_self
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-		     int type, MPID_Request ** request)
+int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+		     int type, MPIR_Request ** request)
 {
     MPIDI_Message_match match;
-    MPID_Request * sreq;
-    MPID_Request * rreq;
+    MPIR_Request * sreq;
+    MPIR_Request * rreq;
     MPIDI_VC_t * vc;
 #if defined(MPID_USE_SEQUENCE_NUMBERS)
     MPID_Seqnum_t seqnum;
@@ -49,8 +49,8 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
          * progress engine reference and the second to release the
          * user reference since the user will never have a chance to
          * release their reference. */
-        MPID_Request_release(sreq);
-        MPID_Request_release(sreq);
+        MPIR_Request_free(sreq);
+        MPIR_Request_free(sreq);
 	sreq = NULL;
         MPIR_ERR_SET1(mpi_errno, MPI_ERR_OTHER, "**nomem", 
 		      "**nomemuereq %d", MPIDI_CH3U_Recvq_count_unexp());
@@ -66,8 +66,8 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
          * progress engine reference and the second to release the
          * user reference since the user will never have a chance to
          * release their reference. */
-        MPID_Request_release(sreq);
-        MPID_Request_release(sreq);
+        MPIR_Request_free(sreq);
+        MPIR_Request_free(sreq);
         sreq = NULL;
         goto fn_exit;
     }
@@ -118,7 +118,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
 		MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
 		MPIDU_Datatype_add_ref(sreq->dev.datatype_ptr);
 	    }
-	    rreq->partner_request = sreq;
+	    rreq->dev.partner_request = sreq;
 	    rreq->dev.sender_req_id = sreq->handle;
 	    MPIDU_Datatype_get_size_macro(datatype, dt_sz);
 	    MPIR_STATUS_SET_COUNT(rreq->status, count * dt_sz);
@@ -132,7 +132,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
 							  "**rsendnomatch", "**rsendnomatch %d %d", rank, tag);
 	    rreq->status.MPI_ERROR = sreq->status.MPI_ERROR;
 	    
-	    rreq->partner_request = NULL;
+	    rreq->dev.partner_request = NULL;
 	    rreq->dev.sender_req_id = MPI_REQUEST_NULL;
 	    MPIR_STATUS_SET_COUNT(rreq->status, 0);
 	    

@@ -75,9 +75,9 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 {
     static const char FCNAME[] = "MPI_Sendrecv";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
-    MPID_Request * sreq;
-    MPID_Request * rreq;
+    MPIR_Comm *comm_ptr = NULL;
+    MPIR_Request * sreq;
+    MPIR_Request * rreq;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_SENDRECV);
     
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -97,14 +97,14 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 #   endif /* HAVE_ERROR_CHECKING */
     
     /* Convert handles to MPI objects. */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
     
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    /* Validate communicator */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno) goto fn_fail;
 	    
 	    /* Validate count */
@@ -131,20 +131,20 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	    /* Validate datatype objects */
 	    if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPID_Datatype *datatype_ptr = NULL;
+		MPIR_Datatype *datatype_ptr = NULL;
 
 		MPID_Datatype_get_ptr(sendtype, datatype_ptr);
-		MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
 		MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
 	    }
 	    if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPID_Datatype *datatype_ptr = NULL;
+		MPIR_Datatype *datatype_ptr = NULL;
 
 		MPID_Datatype_get_ptr(recvtype, datatype_ptr);
-		MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
 		MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
@@ -160,26 +160,26 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
     /* ... body of routine ...  */
     
-    mpi_errno = MPID_Irecv(recvbuf, recvcount, recvtype, source, recvtag, comm_ptr, MPID_CONTEXT_INTRA_PT2PT, &rreq);
+    mpi_errno = MPID_Irecv(recvbuf, recvcount, recvtype, source, recvtag, comm_ptr, MPIR_CONTEXT_INTRA_PT2PT, &rreq);
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     /* FIXME - Performance for small messages might be better if MPID_Send() were used here instead of MPID_Isend() */
-    mpi_errno = MPID_Isend(sendbuf, sendcount, sendtype, dest, sendtag, comm_ptr, MPID_CONTEXT_INTRA_PT2PT, &sreq);
+    mpi_errno = MPID_Isend(sendbuf, sendcount, sendtype, dest, sendtag, comm_ptr, MPIR_CONTEXT_INTRA_PT2PT, &sreq);
     if (mpi_errno != MPI_SUCCESS)
     {
 	/* --BEGIN ERROR HANDLING-- */
 	/* FIXME: should we cancel the pending (possibly completed) receive request or wait for it to complete? */
-	MPID_Request_release(rreq);
+	MPIR_Request_free(rreq);
 	goto fn_fail;
 	/* --END ERROR HANDLING-- */
     }
 
-    if (!MPID_Request_is_complete(sreq) || !MPID_Request_is_complete(rreq))
+    if (!MPIR_Request_is_complete(sreq) || !MPIR_Request_is_complete(rreq))
     {
 	MPID_Progress_state progress_state;
 	
 	MPID_Progress_start(&progress_state);
-        while (!MPID_Request_is_complete(sreq) || !MPID_Request_is_complete(rreq))
+        while (!MPIR_Request_is_complete(sreq) || !MPIR_Request_is_complete(rreq))
 	{
 	    mpi_errno = MPID_Progress_wait(&progress_state);
 	    if (mpi_errno != MPI_SUCCESS)
@@ -191,7 +191,7 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	    }
 
             if (unlikely(MPIR_CVAR_ENABLE_FT &&
-                        !MPID_Request_is_complete(rreq) &&
+                        !MPIR_Request_is_complete(rreq) &&
                         MPID_Request_is_anysource(rreq) &&
                         !MPID_Comm_AS_enabled(rreq->comm))) {
                 /* --BEGIN ERROR HANDLING-- */
@@ -199,7 +199,7 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 MPIR_STATUS_SET_CANCEL_BIT(rreq->status, FALSE);
                 MPIR_ERR_SET(rreq->status.MPI_ERROR, MPIX_ERR_PROC_FAILED, "**proc_failed");
                 mpi_errno = rreq->status.MPI_ERROR;
-                if (!MPID_Request_is_complete(sreq)) {
+                if (!MPIR_Request_is_complete(sreq)) {
                     MPID_Cancel_send(sreq);
                     MPIR_STATUS_SET_CANCEL_BIT(sreq->status, FALSE);
                 }
@@ -212,13 +212,13 @@ int MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
     mpi_errno = rreq->status.MPI_ERROR;
     MPIR_Request_extract_status(rreq, status);
-    MPID_Request_release(rreq);
+    MPIR_Request_free(rreq);
     
     if (mpi_errno == MPI_SUCCESS)
     {
 	mpi_errno = sreq->status.MPI_ERROR;
     }
-    MPID_Request_release(sreq);
+    MPIR_Request_free(sreq);
 
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
     

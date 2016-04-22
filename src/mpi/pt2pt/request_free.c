@@ -67,7 +67,7 @@ int MPI_Request_free(MPI_Request *request)
 {
     static const char FCNAME[] = "MPI_Request_free";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *request_ptr = NULL;
+    MPIR_Request *request_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_REQUEST_FREE);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -88,7 +88,7 @@ int MPI_Request_free(MPI_Request *request)
 #   endif /* HAVE_ERROR_CHECKING */
     
     /* Convert MPI object handles to object pointers */
-    MPID_Request_get_ptr( *request, request_ptr );
+    MPIR_Request_get_ptr( *request, request_ptr );
 
     /* Validate object pointers if error checking is enabled */
 #   ifdef HAVE_ERROR_CHECKING
@@ -96,7 +96,7 @@ int MPI_Request_free(MPI_Request *request)
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    /* Validate request_ptr */
-            MPID_Request_valid_ptr( request_ptr, mpi_errno );
+            MPIR_Request_valid_ptr( request_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;
@@ -109,46 +109,46 @@ int MPI_Request_free(MPI_Request *request)
     
     switch (request_ptr->kind)
     {
-	case MPID_REQUEST_SEND:
+	case MPIR_REQUEST_KIND__SEND:
 	{
 	    MPIR_SENDQ_FORGET(request_ptr);
 	    break;
 	}
-	case MPID_REQUEST_RECV:
+	case MPIR_REQUEST_KIND__RECV:
 	{
 	    break;
 	}
 	
-	case MPID_PREQUEST_SEND:
+	case MPIR_REQUEST_KIND__PREQUEST_SEND:
 	{
 	    /* If this is an active persistent request, we must also 
 	       release the partner request. */
-	    if (request_ptr->partner_request != NULL)
+	    if (request_ptr->u.persist.real_request != NULL)
 	    {
-		if (request_ptr->partner_request->kind == MPID_UREQUEST)
+		if (request_ptr->u.persist.real_request->kind == MPIR_REQUEST_KIND__GREQUEST)
 		{
 		    /* This is needed for persistent Bsend requests */
 		    mpi_errno = MPIR_Grequest_free(
-			request_ptr->partner_request);
+			request_ptr->u.persist.real_request);
 		}
-		MPID_Request_release(request_ptr->partner_request);
+		MPIR_Request_free(request_ptr->u.persist.real_request);
 	    }
 	    break;
 	}
 
 	    
-	case MPID_PREQUEST_RECV:
+	case MPIR_REQUEST_KIND__PREQUEST_RECV:
 	{
 	    /* If this is an active persistent request, we must also 
 	       release the partner request. */
-	    if (request_ptr->partner_request != NULL)
+	    if (request_ptr->u.persist.real_request != NULL)
 	    {
-		MPID_Request_release(request_ptr->partner_request);
+		MPIR_Request_free(request_ptr->u.persist.real_request);
 	    }
 	    break;
 	}
 	
-	case MPID_UREQUEST:
+	case MPIR_REQUEST_KIND__GREQUEST:
 	{
 	    mpi_errno = MPIR_Grequest_free(request_ptr);
 	    break;
@@ -165,7 +165,7 @@ int MPI_Request_free(MPI_Request *request)
 	/* --END ERROR HANDLING-- */
     }
 
-    MPID_Request_release(request_ptr);
+    MPIR_Request_free(request_ptr);
     *request = MPI_REQUEST_NULL;
 
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;

@@ -18,7 +18,7 @@
 static volatile int MPIDI_Outstanding_close_ops = 0;
 int MPIDI_Failed_vc_count = 0;
 
-MPID_Group *MPIDI_Failed_procs_group = NULL;
+MPIR_Group *MPIDI_Failed_procs_group = NULL;
 int MPIDI_last_known_failed = MPI_PROC_NULL;
 char *MPIDI_failed_procs_string = NULL;
 
@@ -216,7 +216,7 @@ int MPIDI_CH3U_VC_SendClose( MPIDI_VC_t *vc, int rank )
 {
     MPIDI_CH3_Pkt_t upkt;
     MPIDI_CH3_Pkt_close_t * close_pkt = &upkt.close;
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3U_VC_SENDCLOSE);
 
@@ -258,7 +258,7 @@ int MPIDI_CH3U_VC_SendClose( MPIDI_VC_t *vc, int rank )
     if (sreq != NULL) {
 	/* There is still another reference being held by the channel.  It
 	   will not be released until the pkt is actually sent. */
-	MPID_Request_release(sreq);
+	MPIR_Request_free(sreq);
     }
 
  fn_exit:
@@ -277,7 +277,7 @@ int MPIDI_CH3U_VC_SendClose( MPIDI_VC_t *vc, int rank )
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIDI_CH3_PktHandler_Close( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt, 
-				intptr_t *buflen, MPID_Request **rreqp )
+				intptr_t *buflen, MPIR_Request **rreqp )
 {
     MPIDI_CH3_Pkt_close_t * close_pkt = &pkt->close;
     int mpi_errno = MPI_SUCCESS;
@@ -286,7 +286,7 @@ int MPIDI_CH3_PktHandler_Close( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt,
     {
 	MPIDI_CH3_Pkt_t upkt;
 	MPIDI_CH3_Pkt_close_t * resp_pkt = &upkt.close;
-	MPID_Request * resp_sreq;
+	MPIR_Request * resp_sreq;
 	
 	MPIDI_Pkt_init(resp_pkt, MPIDI_CH3_PKT_CLOSE);
 	resp_pkt->ack = TRUE;
@@ -300,7 +300,7 @@ int MPIDI_CH3_PktHandler_Close( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt,
 	{
 	    /* There is still another reference being held by the channel.  It
 	       will not be released until the pkt is actually sent. */
-	    MPID_Request_release(resp_sreq);
+	    MPIR_Request_free(resp_sreq);
 	}
     }
     
@@ -398,7 +398,7 @@ int MPIDI_CH3U_VC_WaitForClose( void )
 #define FUNCNAME terminate_failed_VCs
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int terminate_failed_VCs(MPID_Group *new_failed_group)
+static int terminate_failed_VCs(MPIR_Group *new_failed_group)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
@@ -435,7 +435,7 @@ static int terminate_failed_VCs(MPID_Group *new_failed_group)
 /* There are three possible input values for `last_rank:
  *
  * < -1 = All failures regardless of acknowledgement
- * -1 (MPI_PROC_NULL) = No failures have been acknowledged yet (return MPID_Group_empty)
+ * -1 (MPI_PROC_NULL) = No failures have been acknowledged yet (return MPIR_Group_empty)
  * >= 0 = The last failure acknowledged. All failures returned will have
  *        been acknowledged previously.
  */
@@ -443,12 +443,12 @@ static int terminate_failed_VCs(MPID_Group *new_failed_group)
 #define FUNCNAME MPIDI_CH3U_Get_failed_group
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH3U_Get_failed_group(int last_rank, MPID_Group **failed_group)
+int MPIDI_CH3U_Get_failed_group(int last_rank, MPIR_Group **failed_group)
 {
     char *c;
     int i, mpi_errno = MPI_SUCCESS, rank;
     UT_array *failed_procs = NULL;
-    MPID_Group *world_group;
+    MPIR_Group *world_group;
     MPIDI_STATE_DECL(MPID_STATE_GET_FAILED_GROUP);
 
     MPIDI_FUNC_ENTER(MPID_STATE_GET_FAILED_GROUP);
@@ -457,13 +457,13 @@ int MPIDI_CH3U_Get_failed_group(int last_rank, MPID_Group **failed_group)
 
     if (-1 == last_rank) {
         MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER, VERBOSE, "No failure acknowledged");
-        *failed_group = MPID_Group_empty;
+        *failed_group = MPIR_Group_empty;
         goto fn_exit;
     }
 
     if (*MPIDI_failed_procs_string == '\0') {
         MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER, VERBOSE, "Found no failed ranks");
-        *failed_group = MPID_Group_empty;
+        *failed_group = MPIR_Group_empty;
         goto fn_exit;
     }
 
@@ -517,7 +517,7 @@ int MPIDI_CH3U_Check_for_failed_procs(void)
     int pmi_errno;
     int len;
     char *kvsname;
-    MPID_Group *prev_failed_group, *new_failed_group;
+    MPIR_Group *prev_failed_group, *new_failed_group;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3U_CHECK_FOR_FAILED_PROCS);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3U_CHECK_FOR_FAILED_PROCS);
@@ -543,7 +543,7 @@ int MPIDI_CH3U_Check_for_failed_procs(void)
 
     if (*MPIDI_failed_procs_string == '\0') {
         /* there are no failed processes */
-        MPIDI_Failed_procs_group = MPID_Group_empty;
+        MPIDI_Failed_procs_group = MPIR_Group_empty;
         goto fn_exit;
     }
 
@@ -559,7 +559,7 @@ int MPIDI_CH3U_Check_for_failed_procs(void)
     mpi_errno = MPIR_Group_difference_impl(MPIDI_Failed_procs_group, prev_failed_group, &new_failed_group);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    if (new_failed_group != MPID_Group_empty) {
+    if (new_failed_group != MPIR_Group_empty) {
         mpi_errno = MPIDI_CH3I_Comm_handle_failed_procs(new_failed_group);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -571,7 +571,7 @@ int MPIDI_CH3U_Check_for_failed_procs(void)
     }
 
     /* free prev group */
-    if (prev_failed_group != MPID_Group_empty) {
+    if (prev_failed_group != MPIR_Group_empty) {
         mpi_errno = MPIR_Group_release(prev_failed_group);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }

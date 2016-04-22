@@ -55,13 +55,13 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                   MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                  int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                  int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int rank, comm_size, mpi_errno = MPI_SUCCESS;
     int mpi_errno_ret = MPI_SUCCESS;
     MPI_Aint extent;
     int      i, reqs;
-    MPID_Request **reqarray;
+    MPIR_Request **reqarray;
     MPI_Status *starray;
     MPIU_CHKLMEM_DECL(2);
 
@@ -71,9 +71,9 @@ int MPIR_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
     MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     /* If I'm the root, then scatter */
-    if (((comm_ptr->comm_kind == MPID_INTRACOMM) && (root == rank)) ||
-        ((comm_ptr->comm_kind == MPID_INTERCOMM) && (root == MPI_ROOT))) {
-        if (comm_ptr->comm_kind == MPID_INTRACOMM)
+    if (((comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) && (root == rank)) ||
+        ((comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) && (root == MPI_ROOT))) {
+        if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
             comm_size = comm_ptr->local_size;
         else
             comm_size = comm_ptr->remote_size;
@@ -87,13 +87,13 @@ int MPIR_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
          * this? */
         MPIU_Ensure_Aint_fits_in_pointer(MPIU_VOID_PTR_CAST_TO_MPI_AINT sendbuf + extent);
 
-        MPIU_CHKLMEM_MALLOC(reqarray, MPID_Request **, comm_size * sizeof(MPID_Request *), mpi_errno, "reqarray");
+        MPIU_CHKLMEM_MALLOC(reqarray, MPIR_Request **, comm_size * sizeof(MPIR_Request *), mpi_errno, "reqarray");
         MPIU_CHKLMEM_MALLOC(starray, MPI_Status *, comm_size * sizeof(MPI_Status), mpi_errno, "starray");
 
         reqs = 0;
         for (i = 0; i < comm_size; i++) {
             if (sendcounts[i]) {
-                if ((comm_ptr->comm_kind == MPID_INTRACOMM) && (i == rank)) {
+                if ((comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) && (i == rank)) {
                     if (recvbuf != MPI_IN_PLACE) {
                         mpi_errno = MPIR_Localcopy(((char *)sendbuf+displs[rank]*extent), 
                                                    sendcounts[rank], sendtype,
@@ -166,7 +166,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Scatterv_impl(const void *sendbuf, const int *sendcounts, const int *displs,
                        MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                       int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                       int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
         
@@ -233,7 +233,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                  int root, MPI_Comm comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_SCATTERV);
 
@@ -254,20 +254,20 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-	    MPID_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
+	    MPIR_Datatype *sendtype_ptr=NULL, *recvtype_ptr=NULL;
             int i, comm_size, rank;
 	    
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-            if (comm_ptr->comm_kind == MPID_INTRACOMM) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
 		MPIR_ERRTEST_INTRA_ROOT(comm_ptr, root, mpi_errno);
                 rank = comm_ptr->rank;
                 comm_size = comm_ptr->local_size;
@@ -279,7 +279,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                     }
                     if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
-                        MPID_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -311,7 +311,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                     MPIR_ERRTEST_DATATYPE(recvtype, "recvtype", mpi_errno);
                     if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
-                        MPID_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -320,7 +320,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                 }
             }
 
-            if (comm_ptr->comm_kind == MPID_INTERCOMM) {
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 		MPIR_ERRTEST_INTER_ROOT(comm_ptr, root, mpi_errno);
                 if (root == MPI_ROOT) {
                     comm_size = comm_ptr->remote_size;
@@ -330,7 +330,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                     }
                     if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
-                        MPID_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -348,7 +348,7 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                     MPIR_ERRTEST_DATATYPE(recvtype, "recvtype", mpi_errno);
                     if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
-                        MPID_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
+                        MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;

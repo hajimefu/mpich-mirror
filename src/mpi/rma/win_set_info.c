@@ -67,8 +67,8 @@ int MPI_Win_set_info(MPI_Win win, MPI_Info info)
 {
     static const char FCNAME[] = "MPI_Win_set_info";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Win *win_ptr = NULL;
-    MPID_Info *info_ptr = NULL;
+    MPIR_Win *win_ptr = NULL;
+    MPIR_Info *info_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_WIN_SET_INFO);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -88,8 +88,8 @@ int MPI_Win_set_info(MPI_Win win, MPI_Info info)
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Win_get_ptr( win, win_ptr );
-    MPID_Info_get_ptr( info, info_ptr );
+    MPIR_Win_get_ptr( win, win_ptr );
+    MPIR_Info_get_ptr( info, info_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -97,10 +97,10 @@ int MPI_Win_set_info(MPI_Win win, MPI_Info info)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate pointers */
-            MPID_Win_valid_ptr( win_ptr, mpi_errno );
+            MPIR_Win_valid_ptr( win_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
 
-            MPID_Info_valid_ptr( info_ptr, mpi_errno );
+            MPIR_Info_valid_ptr( info_ptr, mpi_errno );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;

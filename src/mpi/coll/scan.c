@@ -75,7 +75,7 @@ static int MPIR_Scan_generic (
     int count,
     MPI_Datatype datatype,
     MPI_Op op,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
     MPI_Status status;
@@ -85,7 +85,7 @@ static int MPIR_Scan_generic (
     int mask, dst, is_commutative; 
     MPI_Aint true_extent, true_lb, extent;
     void *partial_scan, *tmp_buf;
-    MPID_Op *op_ptr;
+    MPIR_Op *op_ptr;
     MPIU_CHKLMEM_DECL(2);
     
     if (count == 0) return MPI_SUCCESS;
@@ -111,8 +111,8 @@ static int MPIR_Scan_generic (
         is_commutative = 1;
     }
     else {
-        MPID_Op_get_ptr(op, op_ptr);
-        if (op_ptr->kind == MPID_OP_USER_NONCOMMUTE)
+        MPIR_Op_get_ptr(op, op_ptr);
+        if (op_ptr->kind == MPIR_OP_KIND__USER_NONCOMMUTE)
             is_commutative = 0;
         else
             is_commutative = 1;
@@ -241,7 +241,7 @@ int MPIR_Scan(
     int count,
     MPI_Datatype datatype,
     MPI_Op op,
-    MPID_Comm *comm_ptr,
+    MPIR_Comm *comm_ptr,
     MPIR_Errflag_t *errflag )
 {
     int mpi_errno = MPI_SUCCESS;
@@ -438,7 +438,7 @@ int MPIR_Scan(
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Scan_impl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                   MPI_Op op, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                   MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -500,7 +500,7 @@ int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatyp
 	     MPI_Op op, MPI_Comm comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_SCAN);
 
@@ -521,17 +521,17 @@ int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatyp
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-	    MPID_Datatype *datatype_ptr = NULL;
-            MPID_Op *op_ptr = NULL;
+	    MPIR_Datatype *datatype_ptr = NULL;
+            MPIR_Op *op_ptr = NULL;
 	    
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
             MPIR_ERRTEST_COMM_INTRA(comm_ptr, mpi_errno);
@@ -541,7 +541,7 @@ int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatyp
 	    
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                 MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                MPID_Datatype_valid_ptr( datatype_ptr, mpi_errno );
+                MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -553,8 +553,8 @@ int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatyp
             MPIR_ERRTEST_USERBUFFER(recvbuf,count,datatype,mpi_errno);
 
             if (HANDLE_GET_KIND(op) != HANDLE_KIND_BUILTIN) {
-                MPID_Op_get_ptr(op, op_ptr);
-                MPID_Op_valid_ptr( op_ptr, mpi_errno );
+                MPIR_Op_get_ptr(op, op_ptr);
+                MPIR_Op_valid_ptr( op_ptr, mpi_errno );
             }
             if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN) {
                 mpi_errno = 

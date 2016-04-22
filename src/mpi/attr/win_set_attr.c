@@ -33,9 +33,9 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
 {
     static const char FCNAME[] = "MPI_Win_set_attr";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Win *win_ptr = NULL;
-    MPID_Keyval *keyval_ptr = NULL;
-    MPID_Attribute *p, **old_p;
+    MPIR_Win *win_ptr = NULL;
+    MPIR_Keyval *keyval_ptr = NULL;
+    MPIR_Attribute *p, **old_p;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_WIN_SET_ATTR);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -51,7 +51,7 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_WIN(win, mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(win_keyval, MPID_WIN, "window", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(win_keyval, MPIR_WIN, "window", mpi_errno);
 	    MPIR_ERRTEST_KEYVAL_PERM(win_keyval, mpi_errno);
         }
         MPID_END_ERROR_CHECKS;
@@ -59,8 +59,8 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Win_get_ptr( win, win_ptr );
-    MPID_Keyval_get_ptr( win_keyval, keyval_ptr );
+    MPIR_Win_get_ptr( win, win_ptr );
+    MPIR_Keyval_get_ptr( win_keyval, keyval_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -68,10 +68,10 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate win_ptr */
-            MPID_Win_valid_ptr( win_ptr, mpi_errno );
+            MPIR_Win_valid_ptr( win_ptr, mpi_errno );
 	    /* If win_ptr is not valid, it will be reset to null */
 	    /* Validate keyval */
-	    MPID_Keyval_valid_ptr( keyval_ptr, mpi_errno );
+	    MPIR_Keyval_valid_ptr( keyval_ptr, mpi_errno );
             if (mpi_errno) goto fn_fail;
 	}
         MPID_END_ERROR_CHECKS;
@@ -100,19 +100,19 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
 		goto fn_fail;
 	    }
 	    /* --END ERROR HANDLING-- */
-	    p->value    = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	    p->value    = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	    p->attrType = attrType;
 	    /* Does not change the reference count on the keyval */
 	    break;
 	}
 	else if (p->keyval->handle > keyval_ptr->handle) {
-	    MPID_Attribute *new_p = MPID_Attr_alloc();
+	    MPIR_Attribute *new_p = MPID_Attr_alloc();
 	    MPIR_ERR_CHKANDJUMP1(!new_p,mpi_errno,MPI_ERR_OTHER,
-				 "**nomem", "**nomem %s", "MPID_Attribute" );
+				 "**nomem", "**nomem %s", "MPIR_Attribute" );
 	    new_p->keyval	 = keyval_ptr;
 	    new_p->attrType      = attrType;
 	    new_p->pre_sentinal	 = 0;
-	    new_p->value	 = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	    new_p->value	 = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	    new_p->post_sentinal = 0;
 	    new_p->next		 = p->next;
 	    MPIR_Keyval_add_ref( keyval_ptr );
@@ -124,14 +124,14 @@ int MPIR_WinSetAttr( MPI_Win win, int win_keyval, void *attribute_val,
     }
     if (!p)
     {
-	MPID_Attribute *new_p = MPID_Attr_alloc();
+	MPIR_Attribute *new_p = MPID_Attr_alloc();
 	MPIR_ERR_CHKANDJUMP1(!new_p,mpi_errno,MPI_ERR_OTHER,
-			     "**nomem", "**nomem %s", "MPID_Attribute" );
+			     "**nomem", "**nomem %s", "MPIR_Attribute" );
 	/* Did not find in list.  Add at end */
 	new_p->attrType      = attrType;
 	new_p->keyval	     = keyval_ptr;
 	new_p->pre_sentinal  = 0;
-	new_p->value	     = (MPID_AttrVal_t)(intptr_t)attribute_val;
+	new_p->value	     = (MPIR_AttrVal_t)(intptr_t)attribute_val;
 	new_p->post_sentinal = 0;
 	new_p->next	     = 0;
 	MPIR_Keyval_add_ref( keyval_ptr );

@@ -142,7 +142,7 @@ typedef enum
 typedef struct
 {
   MPIDI_Win_msgtype_t type;
-  MPID_Win *win;
+  MPIR_Win *win;
   int      rank;          /* MPI rank */
   void     *flagAddr;
   union
@@ -173,7 +173,7 @@ typedef struct MPIDI_WinLock_info
 {
   unsigned            peer;
   int                 lock_type;
-  struct MPID_Win   * win;
+  struct MPIR_Win   * win;
   void                *flagAddr;
   volatile unsigned   done;
   pami_work_t         work;
@@ -201,7 +201,7 @@ typedef struct
   void         * addr;
   void         * result_addr;  /* anchor the result buffer address*/
   void         * req;
-  MPID_Win     * win;
+  MPIR_Win     * win;
   MPI_Datatype   type;
   MPI_Op         op;
   pami_endpoint_t origin_endpoint;    /* needed for returning the result */
@@ -213,7 +213,7 @@ typedef struct
 {
   void         * addr;
   void         * req;
-  MPID_Win     * win;
+  MPIR_Win     * win;
   MPI_Datatype   type;
   MPI_Op         op;
   int            count;
@@ -229,7 +229,7 @@ typedef struct
 /** \todo make sure that the extra fields are removed */
 typedef struct MPIDI_Win_request
 {
-  MPID_Win               *win;
+  MPIR_Win               *win;
   MPIDI_Win_requesttype_t type;
   pami_endpoint_t         dest;
   size_t                  offset;
@@ -286,7 +286,7 @@ typedef struct MPIDI_Win_request
   pami_type_t        pami_datatype;  
  
   int request_based;            /* flag for request based rma */
-  MPID_Request *req_handle;     /* anchor of MPID_Request struc for request based rma*/
+  MPIR_Request *req_handle;     /* anchor of MPIR_Request struc for request based rma*/
 } MPIDI_Win_request;
 
 MPIDI_Win_request  zero_req;    /* used for init. request structure to 0 */
@@ -304,7 +304,7 @@ void
 MPIDI_WinCtrlSend(pami_context_t       context,
                   MPIDI_Win_control_t *control,
                   int                  rank,
-                  MPID_Win            *win);
+                  MPIR_Win            *win);
 
 void
 MPIDI_WinLockReq_proc(pami_context_t              context,
@@ -349,22 +349,22 @@ MPIDI_WinAccumCB(pami_context_t    context,
 int
 MPIDI_Win_init( MPI_Aint length,
                 int disp_unit,
-                MPID_Win  **win_ptr,
-                MPID_Info  *info,
-                MPID_Comm *comm_ptr,
+                MPIR_Win  **win_ptr,
+                MPIR_Info  *info,
+                MPIR_Comm *comm_ptr,
                 int create_flavor,
                 int model);
 int
 MPIDI_Win_allgather(MPI_Aint size,
-                    MPID_Win **win_ptr);
+                    MPIR_Win **win_ptr);
 
 void
 MPIDI_WinLockAdvance(pami_context_t   context,
-                     MPID_Win         * win);
+                     MPIR_Win         * win);
 void
 MPIDI_WinLockAck_post(pami_context_t   context,
                       unsigned         peer,
-                      MPID_Win         *win);
+                      MPIR_Win         *win);
 
 void
 MPIDI_WinLockReq_proc(pami_context_t              context,
@@ -379,11 +379,11 @@ MPIDI_Datatype_is_pami_rmw_supported(MPI_Datatype datatype,
 
 int
 MPIDI_valid_group_rank(int lpid,
-                       MPID_Group *grp);
+                       MPIR_Group *grp);
 void
 MPIDI_WinLockAllAck_post(pami_context_t   context,
                          unsigned         peer,
-                         MPID_Win       * win);
+                         MPIR_Win       * win);
 
 
 #endif

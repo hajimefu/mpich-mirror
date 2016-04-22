@@ -335,8 +335,8 @@ static struct
 #define FUNCNAME split_type
 #undef FCNAME
 #define FCNAME MPIU_QUOTE(FUNCNAME)
-static int split_type(MPID_Comm * comm_ptr, int stype, int key,
-                      MPID_Info *info_ptr, MPID_Comm ** newcomm_ptr)
+static int split_type(MPIR_Comm * comm_ptr, int stype, int key,
+                      MPIR_Info *info_ptr, MPIR_Comm ** newcomm_ptr)
 {
     MPID_Node_id_t id;
     int nid;
@@ -358,7 +358,7 @@ static int split_type(MPID_Comm * comm_ptr, int stype, int key,
     /* --END ERROR HANDLING-- */
 }
 
-static MPID_CommOps comm_fns = {
+static MPIR_Commops comm_fns = {
     split_type
 };
 
@@ -392,7 +392,7 @@ MPIDI_PAMI_client_init(int* rank, int* size, int* mpidi_dynamic_tasking, char **
 
 #ifdef HAVE_PAMI_CLIENT_NONCONTIG
   config[0].name = PAMI_CLIENT_NONCONTIG;
-  if(MPIDI_Process.optimized.memory & MPID_OPT_LVL_NONCONTIG) 
+  if(MPIDI_Process.optimized.memory & MPIR_OPT_LVL_NONCONTIG)
     config[0].value.intval = 0; // Disable non-contig, pamid doesn't use pami for non-contig data collectives so save memory
   else
     config[0].value.intval = 1; // Enable non-contig even though pamid doesn't use pami for non-contig data collectives, 
@@ -1112,7 +1112,7 @@ MPIDI_VCRT_init(int rank, int size, char *world_tasks, MPIDI_PG_t *pg)
 #endif
 {
   int i, rc;
-  MPID_Comm * comm;
+  MPIR_Comm * comm;
 #ifdef DYNAMIC_TASKING
   int p, mpi_errno=0;
   char *world_tasks_save,*cp;
@@ -1231,7 +1231,7 @@ int MPID_Init(int * argc,
   int pg_rank=-1;
   int pg_size;
   int appnum,mpi_errno;
-  MPID_Comm * comm;
+  MPIR_Comm * comm;
   int i,j;
   pami_configuration_t config;
   int world_size;
@@ -1240,7 +1240,7 @@ int MPID_Init(int * argc,
   pami_result_t rc;
 
   /* Override split_type */
-  MPID_Comm_fns = &comm_fns;
+  MPIR_Comm_fns = &comm_fns;
 
   /* ------------------------------------------------------------------------------- */
   /*  Initialize the pami client to get the process rank; needed for env var output. */

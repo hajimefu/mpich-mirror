@@ -24,7 +24,7 @@
 
 typedef struct
 {
-  MPID_Win          * win;
+  MPIR_Win          * win;
 
   volatile unsigned   done;
   pami_work_t         work;
@@ -37,7 +37,7 @@ MPIDI_WinPost_post(pami_context_t   context,
 {
   MPIDI_WinPSCW_info * info = (MPIDI_WinPSCW_info*)_info;
   unsigned peer, index, pid,i;
-  MPID_Group *group = info->win->mpid.sync.pw.group;
+  MPIR_Group *group = info->win->mpid.sync.pw.group;
   MPID_assert(group != NULL);
   MPIDI_Win_control_t msg = {
     .type = MPIDI_WIN_MSGTYPE_POST,
@@ -74,7 +74,7 @@ MPIDI_WinComplete_post(pami_context_t   context,
 {
   MPIDI_WinPSCW_info * info = (MPIDI_WinPSCW_info*)_info;
   unsigned peer, index,pid,i;
-  MPID_Group *group = info->win->mpid.sync.sc.group;
+  MPIR_Group *group = info->win->mpid.sync.sc.group;
   MPID_assert(group != NULL);
   MPIDI_Win_control_t msg = {
     .type = MPIDI_WIN_MSGTYPE_COMPLETE,
@@ -106,9 +106,9 @@ MPIDI_WinComplete_proc(pami_context_t              context,
 
 
 int
-MPID_Win_start(MPID_Group *group,
+MPID_Win_start(MPIR_Group *group,
                int         assert,
-               MPID_Win   *win)
+               MPIR_Win   *win)
 {
   int mpi_errno = MPI_SUCCESS;
   static char FCNAME[] = "MPID_Win_start";
@@ -138,7 +138,7 @@ fn_fail:
 
 
 int
-MPID_Win_complete(MPID_Win *win)
+MPID_Win_complete(MPIR_Win *win)
 {
   int mpi_errno = MPI_SUCCESS;
   static char FCNAME[] = "MPID_Win_complete";
@@ -174,9 +174,9 @@ MPID_Win_complete(MPID_Win *win)
 
 
 int
-MPID_Win_post(MPID_Group *group,
+MPID_Win_post(MPIR_Group *group,
               int         assert,
-              MPID_Win   *win)
+              MPIR_Win   *win)
 {
   int mpi_errno = MPI_SUCCESS;
   static char FCNAME[] = "MPID_Win_post";
@@ -207,7 +207,7 @@ fn_fail:
 
 
 int
-MPID_Win_wait(MPID_Win *win)
+MPID_Win_wait(MPIR_Win *win)
 {
   int mpi_errno = MPI_SUCCESS;
   static char FCNAME[] = "MPID_Win_wait";
@@ -218,7 +218,7 @@ MPID_Win_wait(MPID_Win *win)
                         return mpi_errno, "**rmasync");
   }
 
-  MPID_Group *group = sync->pw.group;
+  MPIR_Group *group = sync->pw.group;
   MPID_PROGRESS_WAIT_WHILE(group->size != sync->sc.count);
   sync->sc.count = 0;
   sync->pw.group = NULL;
@@ -235,7 +235,7 @@ MPID_Win_wait(MPID_Win *win)
 
 
 int
-MPID_Win_test(MPID_Win *win,
+MPID_Win_test(MPIR_Win *win,
               int      *flag)
 {
   int mpi_errno = MPI_SUCCESS;
@@ -247,7 +247,7 @@ MPID_Win_test(MPID_Win *win,
                         return mpi_errno, "**rmasync");
   }
 
-  MPID_Group *group = sync->pw.group;
+  MPIR_Group *group = sync->pw.group;
   if (group->size == sync->sc.count)
     {
       sync->sc.count = 0;

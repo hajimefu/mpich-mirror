@@ -10,14 +10,14 @@
 /* These are pointers to the static variables in src/mpid/ch3/src/ch3u_recvq.c
    that contains the *addresses* of the posted and unexpected queue head 
    pointers */
-extern MPID_Request ** const MPID_Recvq_posted_head_ptr, 
+extern MPIR_Request ** const MPID_Recvq_posted_head_ptr,
     ** const MPID_Recvq_unexpected_head_ptr;
 
 #include "mpi_interface.h"
 
 /* This is from dbginit.c; it is not exported to other files */
 typedef struct MPIR_Sendq {
-    MPID_Request *sreq;
+    MPIR_Request *sreq;
     int tag, rank, context_id;
     struct MPIR_Sendq *next;
 } MPIR_Sendq;
@@ -25,7 +25,7 @@ extern MPIR_Sendq *MPIR_Sendq_head;
 /* This is from dbginit.c; it is not exported to other files */
 typedef struct MPIR_Comm_list {
     int sequence_number;   /* Used to detect changes in the list */
-    MPID_Comm *head;       /* Head of the list */
+    MPIR_Comm *head;       /* Head of the list */
 } MPIR_Comm_list;
 
 extern MPIR_Comm_list MPIR_All_communicators;
@@ -42,11 +42,11 @@ extern MPIR_Comm_list MPIR_All_communicators;
    These routines (more precisely, the field_offset routine) need to 
    known the layout of the internal data structures */
 enum { TYPE_UNKNOWN = 0, 
-       TYPE_MPID_COMM = 1, 
+       TYPE_MPIR_COMM = 1,
        TYPE_MPIR_COMM_LIST = 2, 
        TYPE_MPIDI_REQUEST = 3, 
        TYPE_MPIDI_MESSAGE_MATCH = 4,
-       TYPE_MPID_REQUEST = 5, 
+       TYPE_MPIR_REQUEST = 5,
        TYPE_MPIR_SENDQ = 6,
        TYPE_MPIDI_MESSAGE_MATCH_PARTS = 7,
 } KnownTypes;
@@ -55,10 +55,10 @@ enum { TYPE_UNKNOWN = 0,
    recent type, so a static current type will not work.  Instead, we
    have an example of each type, and return that value. */
 
-static int knownTypesArray[] = { TYPE_UNKNOWN, TYPE_MPID_COMM, 
-				 TYPE_MPIR_COMM_LIST, TYPE_MPIDI_REQUEST, 
-				 TYPE_MPIDI_MESSAGE_MATCH, TYPE_MPID_REQUEST, 
-				 TYPE_MPIR_SENDQ, 
+static int knownTypesArray[] = { TYPE_UNKNOWN, TYPE_MPIR_COMM,
+				 TYPE_MPIR_COMM_LIST, TYPE_MPIDI_REQUEST,
+				 TYPE_MPIDI_MESSAGE_MATCH, TYPE_MPIR_REQUEST,
+				 TYPE_MPIR_SENDQ,
 				 TYPE_MPIDI_MESSAGE_MATCH_PARTS };
 
 mqs_type * dbgrI_find_type(mqs_image *image, char *name, 
@@ -67,7 +67,7 @@ mqs_type * dbgrI_find_type(mqs_image *image, char *name,
     int curType = TYPE_UNKNOWN;
 
     if (strcmp(name,"MPID_Comm") == 0) {
-	curType = TYPE_MPID_COMM;
+	curType = TYPE_MPIR_COMM;
     }
     else if (strcmp( name, "MPIR_Comm_list" ) == 0) {
 	curType = TYPE_MPIR_COMM_LIST;
@@ -81,8 +81,8 @@ mqs_type * dbgrI_find_type(mqs_image *image, char *name,
     else if (strcmp( name, "MPIDI_Message_match_parts_t" ) == 0) {
 	curType = TYPE_MPIDI_MESSAGE_MATCH_PARTS;
     }
-    else if (strcmp( name, "MPID_Request" ) == 0) {
-	curType = TYPE_MPID_REQUEST;
+    else if (strcmp( name, "MPIR_Request" ) == 0) {
+	curType = TYPE_MPIR_REQUEST;
     }
     else if (strcmp( name, "MPIR_Sendq" ) == 0) {
 	curType = TYPE_MPIR_SENDQ;
@@ -104,7 +104,7 @@ int dbgrI_field_offset(mqs_type *type, char *name)
     switch (curType) {
     case TYPE_MPID_COMM:
 	{
-	    MPID_Comm c;
+	    MPIR_Comm c;
 	    if (strcmp( name, "name" ) == 0) {
 		off = ((char*)&(c.name[0]) - (char*)&c.handle);
 	    }
@@ -192,9 +192,9 @@ int dbgrI_field_offset(mqs_type *type, char *name)
 	    }
 	}
 	break;
-    case TYPE_MPID_REQUEST:
+    case TYPE_MPIR_REQUEST:
 	{
-	    MPID_Request c;
+	    MPIR_Request c;
 	    if (strcmp( name, "dev" ) == 0) {
 		off = ((char *)&c.dev - (char *)&c);
 	    }

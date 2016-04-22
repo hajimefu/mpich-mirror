@@ -37,7 +37,7 @@ int MPI_Ireduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_rec_hlv(const void *sendbuf, void *recvbuf, const int recvcounts[],
                                  MPI_Datatype datatype, MPI_Op op,
-                                 MPID_Comm *comm_ptr, MPID_Sched_t s)
+                                 MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int rank, comm_size, i;
@@ -263,7 +263,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_pairwise(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                                  MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                  MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                   MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -402,7 +402,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_rec_dbl(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                                 MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                 MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                  MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -664,7 +664,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int MPIR_Ireduce_scatter_noncomm(const void *sendbuf, void *recvbuf,
                                         const int recvcounts[], MPI_Datatype datatype, MPI_Op op,
-                                        MPID_Comm *comm_ptr, MPID_Sched_t s)
+                                        MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int comm_size = comm_ptr->local_size;
@@ -837,7 +837,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_intra(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                               MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                               MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -900,7 +900,7 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_inter(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                               MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                               MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                MPID_Sched_t s)
 {
     /* Intercommunicator Reduce_scatter.
@@ -913,7 +913,7 @@ int MPIR_Ireduce_scatter_inter(const void *sendbuf, void *recvbuf, const int rec
     MPI_Aint true_extent, true_lb = 0, extent;
     void *tmp_buf = NULL;
     int *disps = NULL;
-    MPID_Comm *newcomm_ptr = NULL;
+    MPIR_Comm *newcomm_ptr = NULL;
     MPIR_SCHED_CHKPMEM_DECL(2);
 
     rank = comm_ptr->rank;
@@ -1008,11 +1008,11 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIR_Ireduce_scatter_impl(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                              MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                              MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                               MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *reqp = NULL;
+    MPIR_Request *reqp = NULL;
     int tag = -1;
     MPID_Sched_t s = MPID_SCHED_NULL;
 
@@ -1071,7 +1071,7 @@ int MPI_Ireduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_IREDUCE_SCATTER);
     i = 0;
 
@@ -1094,30 +1094,30 @@ int MPI_Ireduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS
         {
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
             MPIR_ERRTEST_ARGNULL(recvcounts,"recvcounts", mpi_errno);
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype *datatype_ptr = NULL;
+                MPIR_Datatype *datatype_ptr = NULL;
                 MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+                MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             }
 
             if (HANDLE_GET_KIND(op) != HANDLE_KIND_BUILTIN) {
-                MPID_Op *op_ptr = NULL;
-                MPID_Op_get_ptr(op, op_ptr);
-                MPID_Op_valid_ptr(op_ptr, mpi_errno);
+                MPIR_Op *op_ptr = NULL;
+                MPIR_Op_get_ptr(op, op_ptr);
+                MPIR_Op_valid_ptr(op_ptr, mpi_errno);
             }
             else if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN) {
                 mpi_errno = ( * MPIR_OP_HDL_TO_DTYPE_FN(op) )(datatype);
@@ -1128,7 +1128,7 @@ int MPI_Ireduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts
 
             while (i < comm_ptr->remote_size && recvcounts[i] == 0) ++i;
 
-            if (comm_ptr->comm_kind == MPID_INTRACOMM && sendbuf != MPI_IN_PLACE && i < comm_ptr->remote_size)
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM && sendbuf != MPI_IN_PLACE && i < comm_ptr->remote_size)
                 MPIR_ERRTEST_ALIAS_COLL(sendbuf, recvbuf, mpi_errno)
             /* TODO more checks may be appropriate (counts, in_place, etc) */
         }

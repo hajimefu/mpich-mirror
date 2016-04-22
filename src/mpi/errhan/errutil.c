@@ -70,7 +70,7 @@ cvars:
  * This file contains several groups of routines user for error handling
  * and reporting.  
  *
- * The first group provides memory for the MPID_Errhandler objects 
+ * The first group provides memory for the MPIR_Errhandler objects
  * and the routines to free and manipulate them
  *
  * The second group provides routines to call the appropriate error handler,
@@ -130,7 +130,7 @@ static int checkForUserErrcode( int );
 
 
 /* ------------------------------------------------------------------------- */
-/* Provide the MPID_Errhandler space and the routines to free and set them
+/* Provide the MPIR_Errhandler space and the routines to free and set them
    from C++ and Fortran */
 /* ------------------------------------------------------------------------- */
 /*
@@ -138,31 +138,31 @@ static int checkForUserErrcode( int );
  * in MPICH
  */
 
-#ifndef MPID_ERRHANDLER_PREALLOC 
-#define MPID_ERRHANDLER_PREALLOC 8
+#ifndef MPIR_ERRHANDLER_PREALLOC
+#define MPIR_ERRHANDLER_PREALLOC 8
 #endif
 
 /* Preallocated errorhandler objects */
-MPID_Errhandler MPID_Errhandler_builtin[3] = { {0} };
-MPID_Errhandler MPID_Errhandler_direct[MPID_ERRHANDLER_PREALLOC] = 
+MPIR_Errhandler MPIR_Errhandler_builtin[3] = { {0} };
+MPIR_Errhandler MPIR_Errhandler_direct[MPIR_ERRHANDLER_PREALLOC] =
     { {0} };
-MPIU_Object_alloc_t MPID_Errhandler_mem = { 0, 0, 0, 0, MPID_ERRHANDLER, 
-					    sizeof(MPID_Errhandler), 
-					    MPID_Errhandler_direct,
-					    MPID_ERRHANDLER_PREALLOC, };
+MPIU_Object_alloc_t MPIR_Errhandler_mem = { 0, 0, 0, 0, MPIR_ERRHANDLER,
+					    sizeof(MPIR_Errhandler),
+					    MPIR_Errhandler_direct,
+					    MPIR_ERRHANDLER_PREALLOC, };
 
-void MPID_Errhandler_free(MPID_Errhandler *errhan_ptr)
+void MPIR_Errhandler_free(MPIR_Errhandler *errhan_ptr)
 {
-    MPIU_Handle_obj_free(&MPID_Errhandler_mem, errhan_ptr);
+    MPIU_Handle_obj_free(&MPIR_Errhandler_mem, errhan_ptr);
 }
 
 void MPIR_Err_init( void )
 {
     /* these are "stub" objects, so the other fields (which are statically
      * initialized to zero) don't really matter */
-    MPID_Errhandler_builtin[0].handle = MPI_ERRORS_ARE_FATAL;
-    MPID_Errhandler_builtin[1].handle = MPI_ERRORS_RETURN;
-    MPID_Errhandler_builtin[2].handle = MPIR_ERRORS_THROW_EXCEPTIONS;
+    MPIR_Errhandler_builtin[0].handle = MPI_ERRORS_ARE_FATAL;
+    MPIR_Errhandler_builtin[1].handle = MPI_ERRORS_RETURN;
+    MPIR_Errhandler_builtin[2].handle = MPIR_ERRORS_THROW_EXCEPTIONS;
 
 #   if MPICH_ERROR_MSG_LEVEL >= MPICH_ERROR_MSG_ALL
     MPIR_Err_stack_init();
@@ -178,10 +178,10 @@ void MPIR_Err_init( void )
  defined in the C++ binding. */
 void MPIR_Errhandler_set_cxx( MPI_Errhandler errhand, void (*errcall)(void) )
 {
-    MPID_Errhandler *errhand_ptr;
+    MPIR_Errhandler *errhand_ptr;
     
-    MPID_Errhandler_get_ptr( errhand, errhand_ptr );
-    errhand_ptr->language		= MPID_LANG_CXX;
+    MPIR_Errhandler_get_ptr( errhand, errhand_ptr );
+    errhand_ptr->language		= MPIR_LANG__CXX;
     MPIR_Process.cxx_call_errfn	= (void (*)( int, int *, int *, 
 					    void (*)(void) ))errcall;
 }
@@ -190,10 +190,10 @@ void MPIR_Errhandler_set_cxx( MPI_Errhandler errhand, void (*errcall)(void) )
 #if defined(HAVE_FORTRAN_BINDING) && !defined(HAVE_FINT_IS_INT)
 void MPIR_Errhandler_set_fc( MPI_Errhandler errhand )
 {
-    MPID_Errhandler *errhand_ptr;
+    MPIR_Errhandler *errhand_ptr;
     
-    MPID_Errhandler_get_ptr( errhand, errhand_ptr );
-    errhand_ptr->language = MPID_LANG_FORTRAN;
+    MPIR_Errhandler_get_ptr( errhand, errhand_ptr );
+    errhand_ptr->language = MPIR_LANG__FORTRAN;
 }
 
 #endif
@@ -210,10 +210,10 @@ void MPIR_Errhandler_set_fc( MPI_Errhandler errhand )
 /* --BEGIN ERROR HANDLING-- */
 void MPIR_Err_preOrPostInit( void )
 {
-    if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_PRE_INIT) {
+    if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_MPI_STATE__PRE_INIT) {
 	MPL_error_printf("Attempting to use an MPI routine before initializing MPICH\n");
     }
-    else if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_POST_FINALIZED) {
+    else if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_MPI_STATE__POST_FINALIZED) {
 	MPL_error_printf("Attempting to use an MPI routine after finalizing MPICH\n");
     }
     else {
@@ -234,17 +234,17 @@ int MPIR_Err_is_fatal(int errcode)
  * report an error.  It is legitimate to pass NULL for comm_ptr in order to get
  * the default (MPI_COMM_WORLD) error handling.
  */
-int MPIR_Err_return_comm( MPID_Comm  *comm_ptr, const char fcname[], 
+int MPIR_Err_return_comm( MPIR_Comm  *comm_ptr, const char fcname[],
 			  int errcode )
 {
     const int error_class = ERROR_GET_CLASS(errcode);
-    MPID_Errhandler *errhandler = NULL;
+    MPIR_Errhandler *errhandler = NULL;
 
     checkValidErrcode( error_class, fcname, &errcode );
 
     /* --BEGIN ERROR HANDLING-- */
-    if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_PRE_INIT ||
-        OPA_load_int(&MPIR_Process.mpich_state) == MPICH_POST_FINALIZED)
+    if (OPA_load_int(&MPIR_Process.mpich_state) == MPICH_MPI_STATE__PRE_INIT ||
+        OPA_load_int(&MPIR_Process.mpich_state) == MPICH_MPI_STATE__POST_FINALIZED)
     {
         /* for whatever reason, we aren't initialized (perhaps error 
 	   during MPI_Init) */
@@ -306,12 +306,12 @@ int MPIR_Err_return_comm( MPID_Comm  *comm_ptr, const char fcname[],
 	   because MPICH-1 expected that */
 	switch (comm_ptr->errhandler->language)
 	{
-	case MPID_LANG_C:
+	case MPIR_LANG__C:
 	    (*comm_ptr->errhandler->errfn.C_Comm_Handler_function)( 
 		&comm_ptr->handle, &errcode, 0 );
 	    break;
 #ifdef HAVE_CXX_BINDING
-	case MPID_LANG_CXX:
+	case MPIR_LANG__CXX:
 	    (*MPIR_Process.cxx_call_errfn)( 0, &comm_ptr->handle, &errcode, 
 		    (void (*)(void))*comm_ptr->errhandler->errfn.C_Comm_Handler_function );
 	    /* The C++ code throws an exception if the error handler 
@@ -321,8 +321,8 @@ int MPIR_Err_return_comm( MPID_Comm  *comm_ptr, const char fcname[],
 	    break;
 #endif /* CXX_BINDING */
 #ifdef HAVE_FORTRAN_BINDING
-	case MPID_LANG_FORTRAN90:
-	case MPID_LANG_FORTRAN:
+	case MPIR_LANG__FORTRAN90:
+	case MPIR_LANG__FORTRAN:
 	{
 	    /* If int and MPI_Fint aren't the same size, we need to 
 	       convert.  As this is not performance critical, we
@@ -345,7 +345,7 @@ int MPIR_Err_return_comm( MPID_Comm  *comm_ptr, const char fcname[],
 /* 
  * MPI routines that detect errors on window objects use this to report errors
  */
-int MPIR_Err_return_win( MPID_Win  *win_ptr, const char fcname[], int errcode )
+int MPIR_Err_return_win( MPIR_Win  *win_ptr, const char fcname[], int errcode )
 {
     const int error_class = ERROR_GET_CLASS(errcode);
 
@@ -384,12 +384,12 @@ int MPIR_Err_return_win( MPID_Win  *win_ptr, const char fcname[], int errcode )
 	   because MPICH-1 expected that */
 	switch (win_ptr->errhandler->language)
 	{
-	    case MPID_LANG_C:
+	    case MPIR_LANG__C:
 		(*win_ptr->errhandler->errfn.C_Win_Handler_function)( 
 		    &win_ptr->handle, &errcode, 0 );
 		break;
 #ifdef HAVE_CXX_BINDING
-	    case MPID_LANG_CXX:
+	    case MPIR_LANG__CXX:
 	    (*MPIR_Process.cxx_call_errfn)( 2, &win_ptr->handle, &errcode, 
 		    (void (*)(void))*win_ptr->errhandler->errfn.C_Win_Handler_function );
 	    /* The C++ code throws an exception if the error handler 
@@ -399,8 +399,8 @@ int MPIR_Err_return_win( MPID_Win  *win_ptr, const char fcname[], int errcode )
 	    break;
 #endif /* CXX_BINDING */
 #ifdef HAVE_FORTRAN_BINDING
-	    case MPID_LANG_FORTRAN90:
-	    case MPID_LANG_FORTRAN:
+	    case MPIR_LANG__FORTRAN90:
+	    case MPIR_LANG__FORTRAN:
 		{
 		    /* If int and MPI_Fint aren't the same size, we need to 
 		       convert.  As this is not performance critical, we
@@ -431,7 +431,7 @@ static void CombineSpecificCodes( int, int, int );
 static const char *get_class_msg( int );
 
 /* --BEGIN ERROR HANDLING-- */
-void MPIR_Handle_fatal_error( MPID_Comm *comm_ptr,
+void MPIR_Handle_fatal_error( MPIR_Comm *comm_ptr,
 			      const char fcname[], int errcode )
 {
     /* Define length of the the maximum error message line (or string with 
@@ -1453,7 +1453,7 @@ static const char * GetDTypeString(MPI_Datatype d)
     int num_integers, num_addresses, num_datatypes, combiner = 0;
     char *str;
 
-    if (HANDLE_GET_MPI_KIND(d) != MPID_DATATYPE ||      \
+    if (HANDLE_GET_MPI_KIND(d) != MPIR_DATATYPE ||      \
 	(HANDLE_GET_KIND(d) == HANDLE_KIND_INVALID &&   \
 	d != MPI_DATATYPE_NULL))
         return "INVALID DATATYPE";

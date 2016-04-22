@@ -12,7 +12,7 @@
 #define FUNCNAME MPIDI_CH3_Win_shared_query
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH3_SHM_Win_shared_query(MPID_Win * win_ptr, int target_rank, MPI_Aint * size,
+int MPIDI_CH3_SHM_Win_shared_query(MPIR_Win * win_ptr, int target_rank, MPI_Aint * size,
                                    int *disp_unit, void *baseptr)
 {
     int comm_size;
@@ -75,7 +75,7 @@ int MPIDI_CH3_SHM_Win_shared_query(MPID_Win * win_ptr, int target_rank, MPI_Aint
 #define FUNCNAME MPIDI_CH3_SHM_Win_free
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH3_SHM_Win_free(MPID_Win ** win_ptr)
+int MPIDI_CH3_SHM_Win_free(MPIR_Win ** win_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3_SHM_WIN_FREE);
@@ -113,7 +113,7 @@ int MPIDI_CH3_SHM_Win_free(MPID_Win ** win_ptr)
     if (((*win_ptr)->create_flavor == MPI_WIN_FLAVOR_SHARED ||
          (*win_ptr)->create_flavor == MPI_WIN_FLAVOR_ALLOCATE) &&
         (*win_ptr)->shm_mutex && (*win_ptr)->shm_segment_len > 0) {
-        MPID_Comm *node_comm_ptr = NULL;
+        MPIR_Comm *node_comm_ptr = NULL;
 
         /* When allocating shared memory region segment, we need comm of processes
          * that are on the same node as this process (node_comm).

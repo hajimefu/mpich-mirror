@@ -41,7 +41,7 @@ int MPIR_CommGetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
 {
     static const char FCNAME[] = "MPIR_CommGetAttr";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     static PreDefined_attrs attr_copy;    /* Used to provide a copy of the
 					     predefined attributes */
     MPID_MPI_STATE_DECL(MPID_STATE_MPIR_COMM_GET_ATTR);
@@ -56,7 +56,7 @@ int MPIR_CommGetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
         MPID_BEGIN_ERROR_CHECKS;
         {
 	    MPIR_ERRTEST_COMM(comm, mpi_errno);
-	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPID_COMM, "communicator", mpi_errno);
+	    MPIR_ERRTEST_KEYVAL(comm_keyval, MPIR_COMM, "communicator", mpi_errno);
 #           ifdef NEEDS_POINTER_ALIGNMENT_ADJUST
             /* A common user error is to pass the address of a 4-byte
 	       int when the address of a pointer (or an address-sized int)
@@ -73,7 +73,7 @@ int MPIR_CommGetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -81,7 +81,7 @@ int MPIR_CommGetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
 	    /* If comm_ptr is not valid, it will be reset to null */
 	    MPIR_ERRTEST_ARGNULL(attribute_val, "attr_val", mpi_errno);
 	    MPIR_ERRTEST_ARGNULL(flag, "flag", mpi_errno);
@@ -231,7 +231,7 @@ int MPIR_CommGetAttr( MPI_Comm comm, int comm_keyval, void *attribute_val,
 	}
     }
     else {
-	MPID_Attribute *p = comm_ptr->attributes;
+	MPIR_Attribute *p = comm_ptr->attributes;
 
 	/*   */
 	*flag = 0;

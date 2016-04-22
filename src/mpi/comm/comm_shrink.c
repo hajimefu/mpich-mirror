@@ -47,10 +47,10 @@ int MPIX_Comm_shrink(MPI_Comm comm, MPI_Comm *newcomm) __attribute__((weak,alias
 #define FCNAME MPL_QUOTE(FUNCNAME)
 /* comm shrink impl; assumes that standard error checking has already taken
  * place in the calling function */
-int MPIR_Comm_shrink(MPID_Comm *comm_ptr, MPID_Comm **newcomm_ptr)
+int MPIR_Comm_shrink(MPIR_Comm *comm_ptr, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Group *global_failed, *comm_grp, *new_group_ptr;
+    MPIR_Group *global_failed, *comm_grp, *new_group_ptr;
     int attempts = 0;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
 
@@ -69,7 +69,7 @@ int MPIR_Comm_shrink(MPID_Comm *comm_ptr, MPID_Comm **newcomm_ptr)
 
         mpi_errno = MPIR_Group_difference_impl(comm_grp, global_failed, &new_group_ptr);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-        if (MPID_Group_empty != global_failed) MPIR_Group_release(global_failed);
+        if (MPIR_Group_empty != global_failed) MPIR_Group_release(global_failed);
 
         mpi_errno = MPIR_Comm_create_group(comm_ptr, new_group_ptr, MPIR_SHRINK_TAG, newcomm_ptr);
         if (*newcomm_ptr == NULL) {
@@ -135,7 +135,7 @@ Output Parameters:
 int MPIX_Comm_shrink(MPI_Comm comm, MPI_Comm *newcomm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL, *newcomm_ptr;
+    MPIR_Comm *comm_ptr = NULL, *newcomm_ptr;
     MPID_MPI_STATE_DECL(MPID_STATE_MPIX_COMM_SHRINK);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -152,19 +152,19 @@ int MPIX_Comm_shrink(MPI_Comm comm, MPI_Comm *newcomm)
         }
         MPID_END_ERROR_CHECKS;
 
-        MPID_Comm_get_ptr( comm, comm_ptr );
+        MPIR_Comm_get_ptr( comm, comm_ptr );
 
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
             if (mpi_errno) goto fn_fail;
         }
         MPID_END_ERROR_CHECKS;
     }
 #else
     {
-        MPID_Comm_get_ptr( comm, comm_ptr );
+        MPIR_Comm_get_ptr( comm, comm_ptr );
     }
 #endif
 

@@ -82,7 +82,7 @@ int MPI_Init_thread(int *argc, char ***argv, int required, int *provided) __attr
 /* Any internal routines can go here.  Make them static if possible */
 
 /* Global variables can be initialized here */
-MPICH_PerProcess_t MPIR_Process = { OPA_INT_T_INITIALIZER(MPICH_PRE_INIT) };
+MPICH_PerProcess_t MPIR_Process = { OPA_INT_T_INITIALIZER(MPICH_MPI_STATE__PRE_INIT) };
      /* all other fields in MPIR_Process are irrelevant */
 MPIR_Thread_info_t MPIR_ThreadInfo = { 0 };
 
@@ -309,6 +309,7 @@ MPL_dbg_class MPIR_DBG_COMM;
 MPL_dbg_class MPIR_DBG_BSEND;
 MPL_dbg_class MPIR_DBG_ERRHAND;
 MPL_dbg_class MPIR_DBG_OTHER;
+MPL_dbg_class MPIR_DBG_REQUEST;
 
 /* these classes might need to move out later */
 MPL_dbg_class MPIR_DBG_ASSERT;
@@ -326,7 +327,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     int has_env;
     int thread_provided;
     int exit_init_cs_on_failure = 0;
-    MPID_Info *info_ptr;
+    MPIR_Info *info_ptr;
 
     /* For any code in the device that wants to check for runtime 
        decisions on the value of isThreaded, set a provisional
@@ -423,33 +424,33 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
        (partially) initialize predefined communicators.  comm_parent is
        intially NULL and will be allocated by the device if the process group
        was started using one of the MPI_Comm_spawn functions. */
-    MPIR_Process.comm_world		    = MPID_Comm_builtin + 0;
+    MPIR_Process.comm_world		    = MPIR_Comm_builtin + 0;
     MPIR_Comm_init(MPIR_Process.comm_world);
     MPIR_Process.comm_world->handle	    = MPI_COMM_WORLD;
-    MPIR_Process.comm_world->context_id	    = 0 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.comm_world->recvcontext_id = 0 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.comm_world->comm_kind	    = MPID_INTRACOMM;
+    MPIR_Process.comm_world->context_id	    = 0 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.comm_world->recvcontext_id = 0 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.comm_world->comm_kind	    = MPIR_COMM_KIND__INTRACOMM;
     /* This initialization of the comm name could be done only when 
        comm_get_name is called */
     MPL_strncpy(MPIR_Process.comm_world->name, "MPI_COMM_WORLD",
 		 MPI_MAX_OBJECT_NAME);
 
-    MPIR_Process.comm_self		    = MPID_Comm_builtin + 1;
+    MPIR_Process.comm_self		    = MPIR_Comm_builtin + 1;
     MPIR_Comm_init(MPIR_Process.comm_self);
     MPIR_Process.comm_self->handle	    = MPI_COMM_SELF;
-    MPIR_Process.comm_self->context_id	    = 1 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.comm_self->recvcontext_id  = 1 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.comm_self->comm_kind	    = MPID_INTRACOMM;
+    MPIR_Process.comm_self->context_id	    = 1 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.comm_self->recvcontext_id  = 1 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.comm_self->comm_kind	    = MPIR_COMM_KIND__INTRACOMM;
     MPL_strncpy(MPIR_Process.comm_self->name, "MPI_COMM_SELF",
 		 MPI_MAX_OBJECT_NAME);
 
 #ifdef MPID_NEEDS_ICOMM_WORLD
-    MPIR_Process.icomm_world		    = MPID_Comm_builtin + 2;
+    MPIR_Process.icomm_world		    = MPIR_Comm_builtin + 2;
     MPIR_Comm_init(MPIR_Process.icomm_world);
     MPIR_Process.icomm_world->handle	    = MPIR_ICOMM_WORLD;
-    MPIR_Process.icomm_world->context_id    = 2 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.icomm_world->recvcontext_id= 2 << MPID_CONTEXT_PREFIX_SHIFT;
-    MPIR_Process.icomm_world->comm_kind	    = MPID_INTRACOMM;
+    MPIR_Process.icomm_world->context_id    = 2 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.icomm_world->recvcontext_id= 2 << MPIR_CONTEXT_PREFIX_SHIFT;
+    MPIR_Process.icomm_world->comm_kind	    = MPIR_COMM_KIND__INTRACOMM;
     MPL_strncpy(MPIR_Process.icomm_world->name, "MPI_ICOMM_WORLD",
 		 MPI_MAX_OBJECT_NAME);
 
@@ -488,7 +489,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
 
     /* define MPI as initialized so that we can use MPI functions within 
        MPID_Init if necessary */
-    OPA_store_int(&MPIR_Process.mpich_state, MPICH_IN_INIT);
+    OPA_store_int(&MPIR_Process.mpich_state, MPICH_MPI_STATE__IN_INIT);
 
     /* We can't acquire any critical sections until this point.  Any
      * earlier the basic data structures haven't been initialized */
@@ -498,7 +499,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     /* create MPI_INFO_NULL object */
     /* FIXME: Currently this info object is empty, we need to add data to this
        as defined by the standard. */
-    info_ptr = MPID_Info_builtin + 1;
+    info_ptr = MPIR_Info_builtin + 1;
     info_ptr->handle = MPI_INFO_ENV;
     MPIU_Object_set_ref(info_ptr, 1);
     info_ptr->next  = NULL;
@@ -565,6 +566,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     MPIR_DBG_BSEND = MPL_dbg_class_alloc("BSEND", "bsend");
     MPIR_DBG_ERRHAND = MPL_dbg_class_alloc("ERRHAND", "errhand");
     MPIR_DBG_OTHER = MPL_dbg_class_alloc("OTHER", "other");
+    MPIR_DBG_REQUEST = MPL_dbg_class_alloc("REQUEST", "request");
 
     MPIR_DBG_ASSERT = MPL_dbg_class_alloc("ASSERT", "assert");
     MPIR_DBG_STRING = MPL_dbg_class_alloc("STRING", "string");
@@ -597,13 +599,13 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     /* Make fields of MPIR_Process global visible and set mpich_state
        atomically so that MPI_Initialized() etc. are thread safe */
     OPA_write_barrier();
-    OPA_store_int(&MPIR_Process.mpich_state, MPICH_POST_INIT);
+    OPA_store_int(&MPIR_Process.mpich_state, MPICH_MPI_STATE__POST_INIT);
     return mpi_errno;
 
 fn_fail:
     /* --BEGIN ERROR HANDLING-- */
     /* signal to error handling routines that core services are unavailable */
-    OPA_store_int(&MPIR_Process.mpich_state, MPICH_PRE_INIT);
+    OPA_store_int(&MPIR_Process.mpich_state, MPICH_MPI_STATE__PRE_INIT);
 
     if (exit_init_cs_on_failure) {
         MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -675,7 +677,7 @@ int MPI_Init_thread( int *argc, char ***argv, int required, int *provided )
     {
         MPID_BEGIN_ERROR_CHECKS;
         {
-            if (OPA_load_int(&MPIR_Process.mpich_state) != MPICH_PRE_INIT) {
+            if (OPA_load_int(&MPIR_Process.mpich_state) != MPICH_MPI_STATE__PRE_INIT) {
                 mpi_errno = MPIR_Err_create_code( MPI_SUCCESS, MPIR_ERR_RECOVERABLE, "MPI_Init_thread", __LINE__, MPI_ERR_OTHER,
 						  "**inittwice", 0 );
 	    }

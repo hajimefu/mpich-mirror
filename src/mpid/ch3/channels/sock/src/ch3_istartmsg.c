@@ -10,21 +10,21 @@
 #define FUNCNAME create_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static MPID_Request * create_request(void * hdr, intptr_t hdr_sz,
+static MPIR_Request * create_request(void * hdr, intptr_t hdr_sz,
 				     MPIU_Size_t nb)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     MPIDI_STATE_DECL(MPID_STATE_CREATE_REQUEST);
 
     MPIDI_FUNC_ENTER(MPID_STATE_CREATE_REQUEST);
 
-    sreq = MPID_Request_create();
+    sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     /* --BEGIN ERROR HANDLING-- */
     if (sreq == NULL)
 	return NULL;
     /* --END ERROR HANDLING-- */
     MPIU_Object_set_ref(sreq, 2);
-    sreq->kind = MPID_REQUEST_SEND;
+    sreq->kind = MPIR_REQUEST_KIND__SEND;
     MPIU_Assert(hdr_sz == sizeof(MPIDI_CH3_Pkt_t));
     sreq->dev.pending_pkt = *(MPIDI_CH3_Pkt_t *) hdr;
     sreq->dev.iov[0].MPL_IOV_BUF = 
@@ -50,9 +50,9 @@ static MPID_Request * create_request(void * hdr, intptr_t hdr_sz,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
-			MPID_Request ** sreq_ptr)
+			MPIR_Request ** sreq_ptr)
 {
-    MPID_Request * sreq = NULL;
+    MPIR_Request * sreq = NULL;
     MPIDI_CH3I_VC *vcch = &vc->ch;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3_ISTARTMSG);
@@ -126,11 +126,11 @@ int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
 	    {
 		MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL,TYPICAL,
 			       "ERROR - MPIDU_Sock_write failed, rc=%d", rc);
-		sreq = MPID_Request_create();
+		sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
 		if (!sreq) {
 		    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**nomem");
 		}
-		sreq->kind = MPID_REQUEST_SEND;
+		sreq->kind = MPIR_REQUEST_KIND__SEND;
 		MPIR_cc_set(&(sreq->cc), 0);
 		sreq->status.MPI_ERROR = MPIR_Err_create_code( rc,
 			       MPIR_ERR_RECOVERABLE, FCNAME, __LINE__, 
@@ -194,11 +194,11 @@ int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
     {
 	/* Connection failed, so allocate a request and return an error. */
 	MPL_DBG_VCUSE(vc,"ERROR - connection failed");
-	sreq = MPID_Request_create();
+	sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
 	if (!sreq) {
 	    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**nomem");
 	}
-	sreq->kind = MPID_REQUEST_SEND;
+	sreq->kind = MPIR_REQUEST_KIND__SEND;
 	MPIR_cc_set(&sreq->cc, 0);
 	
 	sreq->status.MPI_ERROR = MPIR_Err_create_code( MPI_SUCCESS,

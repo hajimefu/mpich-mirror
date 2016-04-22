@@ -29,7 +29,7 @@ int MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler) __attribut
 #define FUNCNAME MPIR_Comm_set_errhandler_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-void MPIR_Comm_set_errhandler_impl(MPID_Comm *comm_ptr, MPID_Errhandler *errhandler_ptr)
+void MPIR_Comm_set_errhandler_impl(MPIR_Comm *comm_ptr, MPIR_Errhandler *errhandler_ptr)
 {
     int in_use;
 
@@ -41,7 +41,7 @@ void MPIR_Comm_set_errhandler_impl(MPID_Comm *comm_ptr, MPID_Errhandler *errhand
     if (comm_ptr->errhandler != NULL) {
         MPIR_Errhandler_release_ref(comm_ptr->errhandler, &in_use);
         if (!in_use) {
-            MPID_Errhandler_free( comm_ptr->errhandler );
+            MPIR_Errhandler_free( comm_ptr->errhandler );
         }
     }
 
@@ -80,8 +80,8 @@ Input Parameters:
 int MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
-    MPID_Errhandler *errhan_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
+    MPIR_Errhandler *errhan_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_SET_ERRHANDLER);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -101,8 +101,8 @@ int MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler)
 #   endif
     
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
-    MPID_Errhandler_get_ptr( errhandler, errhan_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Errhandler_get_ptr( errhandler, errhan_ptr );
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
@@ -110,10 +110,10 @@ int MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler)
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr; if comm_ptr is not valid, it will be reset to null */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, TRUE );
 
 	    if (HANDLE_GET_KIND(errhandler) != HANDLE_KIND_BUILTIN) {
-		MPID_Errhandler_valid_ptr( errhan_ptr, mpi_errno );
+		MPIR_Errhandler_valid_ptr( errhan_ptr, mpi_errno );
 	    }
 	    MPIR_ERRTEST_ERRHANDLER(errhandler, mpi_errno);
         }

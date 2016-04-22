@@ -334,7 +334,7 @@ void MPIR_DebuggerSetAborting( const char *msg )
    be included in the request.  Saving the context_id also simplifies
    matching these entries with a communicator */
 typedef struct MPIR_Sendq {
-    MPID_Request *sreq;
+    MPIR_Request *sreq;
     int tag, rank, context_id;
     struct MPIR_Sendq *next;
     struct MPIR_Sendq *prev;
@@ -348,9 +348,10 @@ static MPIR_Sendq *pool = 0;
 /* This routine is used to establish a queue of send requests to allow the
    debugger easier access to the active requests.  Some devices may be able
    to provide this information without requiring this separate queue. */
-void MPIR_Sendq_remember( MPID_Request *req, 
+void MPIR_Sendq_remember( MPIR_Request *req,
 			  int rank, int tag, int context_id )
 {
+#if defined HAVE_DEBUGGER_SUPPORT
     MPIR_Sendq *p;
 
     MPID_THREAD_CS_ENTER(POBJ, req->pobj_mutex);
@@ -362,7 +363,7 @@ void MPIR_Sendq_remember( MPID_Request *req,
 	p = (MPIR_Sendq *)MPL_malloc( sizeof(MPIR_Sendq) );
 	if (!p) {
 	    /* Just ignore it */
-            req->dbg_next = NULL;
+            req->u.send.dbg_next = NULL;
             goto fn_exit;
 	}
     }
@@ -374,17 +375,19 @@ void MPIR_Sendq_remember( MPID_Request *req,
     p->prev       = NULL;
     MPIR_Sendq_head = p;
     if (p->next) p->next->prev = p;
-    req->dbg_next = p;
+    req->u.send.dbg_next = p;
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ, req->pobj_mutex);
+#endif  /* HAVE_DEBUGGER_SUPPORT */
 }
 
-void MPIR_Sendq_forget( MPID_Request *req )
+void MPIR_Sendq_forget( MPIR_Request *req )
 {
+#if defined HAVE_DEBUGGER_SUPPORT
     MPIR_Sendq *p, *prev;
 
     MPID_THREAD_CS_ENTER(POBJ, req->pobj_mutex);
-    p    = req->dbg_next;
+    p    = req->u.send.dbg_next;
     if (!p) {
         /* Just ignore it */
         MPID_THREAD_CS_EXIT(POBJ, req->pobj_mutex);
@@ -398,6 +401,7 @@ void MPIR_Sendq_forget( MPID_Request *req )
     p->next = pool;
     pool    = p;
     MPID_THREAD_CS_EXIT(POBJ, req->pobj_mutex);
+#endif  /* HAVE_DEBUGGER_SUPPORT */
 }
 
 static int SendqFreePool( void *d )
@@ -445,12 +449,12 @@ static void SendqInit( void )
    debugger message queue interface */
 typedef struct MPIR_Comm_list {
     int sequence_number;   /* Used to detect changes in the list */
-    MPID_Comm *head;       /* Head of the list */
+    MPIR_Comm *head;       /* Head of the list */
 } MPIR_Comm_list;
 
 MPIR_Comm_list MPIR_All_communicators = { 0, 0 };
 
-void MPIR_CommL_remember( MPID_Comm *comm_ptr )
+void MPIR_CommL_remember( MPIR_Comm *comm_ptr )
 {   
     MPL_DBG_MSG_P(MPIR_DBG_COMM,VERBOSE,
 		   "Adding communicator %p to remember list",comm_ptr);
@@ -470,9 +474,9 @@ void MPIR_CommL_remember( MPID_Comm *comm_ptr )
     MPID_THREAD_CS_EXIT(POBJ, MPIR_THREAD_POBJ_COMM_MUTEX(comm_ptr));
 }
 
-void MPIR_CommL_forget( MPID_Comm *comm_ptr )
+void MPIR_CommL_forget( MPIR_Comm *comm_ptr )
 {
-    MPID_Comm *p, *prev;
+    MPIR_Comm *p, *prev;
 
     MPL_DBG_MSG_P(MPIR_DBG_COMM,VERBOSE,
 		   "Forgetting communicator %p from remember list",comm_ptr);

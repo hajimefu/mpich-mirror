@@ -31,7 +31,7 @@ MPIDI_Fetch_data_op(const void   * origin_addr,
                     int            target_count,
                     MPI_Datatype   target_datatype,
                     MPI_Op         op,
-                    MPID_Win      *win)
+                    MPIR_Win      *win)
 {
         static char FCNAME[] = "MPIDI_Fetch_data_op";
         int shm_locked=0;
@@ -175,7 +175,7 @@ MPIDI_Win_GetAccDoneCB(pami_context_t  context,
 
   if (req->origin.completed == req->target.dt.num_contig + 1)
     {
-      MPID_Request * req_handle = req->req_handle;
+      MPIR_Request * req_handle = req->req_handle;
 
       if (req->buffer_free) {
           MPL_free(req->buffer);
@@ -199,7 +199,7 @@ MPIDI_Win_GetAccDoneCB(pami_context_t  context,
        * portion of the request structure after decrementing the completion
        * counter.
        *
-       * See MPID_Request_release_inline()
+       * See MPID_Request_free_inline()
        */
       if(req_handle)
           MPIR_cc_set(req_handle->cc_ptr, 0);
@@ -351,7 +351,7 @@ MPID_Get_accumulate(const void   * origin_addr,
 		    int            target_count, 
 		    MPI_Datatype   target_datatype, 
 		    MPI_Op         op, 
-		    MPID_Win      *win)
+                    MPIR_Win      *win)
 {
   int mpi_errno = MPI_SUCCESS;
 

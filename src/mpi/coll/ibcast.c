@@ -38,7 +38,7 @@ struct MPIR_Ibcast_status{
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 
-static int sched_test_length(MPID_Comm * comm, int tag, void *state)
+static int sched_test_length(MPIR_Comm * comm, int tag, void *state)
 {
     int mpi_errno = MPI_SUCCESS;
     int recv_size;
@@ -58,7 +58,7 @@ static int sched_test_length(MPID_Comm * comm, int tag, void *state)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 
-static int sched_test_curr_length(MPID_Comm * comm, int tag, void *state)
+static int sched_test_curr_length(MPIR_Comm * comm, int tag, void *state)
 {
     int mpi_errno = MPI_SUCCESS;
     struct  MPIR_Ibcast_status *status = (struct MPIR_Ibcast_status*) state;
@@ -76,7 +76,7 @@ static int sched_test_curr_length(MPID_Comm * comm, int tag, void *state)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 
-static int sched_add_length(MPID_Comm * comm, int tag, void *state)
+static int sched_add_length(MPIR_Comm * comm, int tag, void *state)
 {
     int mpi_errno = MPI_SUCCESS;
     int recv_size;
@@ -98,7 +98,7 @@ static int sched_add_length(MPID_Comm * comm, int tag, void *state)
 #define FUNCNAME MPIR_Ibcast_binomial
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_binomial(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_binomial(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int mask;
@@ -264,7 +264,7 @@ fn_fail:
 #define FUNCNAME MPIR_Iscatter_for_bcast
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iscatter_for_bcast(void *tmp_buf, int root, MPID_Comm *comm_ptr, int nbytes, MPID_Sched_t s)
+int MPIR_Iscatter_for_bcast(void *tmp_buf, int root, MPIR_Comm *comm_ptr, int nbytes, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int rank, comm_size, src, dst;
@@ -386,7 +386,7 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_scatter_rec_dbl_allgather
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int rank, comm_size, dst;
@@ -395,7 +395,7 @@ int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype 
     int type_size, j, k, i, tmp_mask, is_contig, is_homogeneous ATTRIBUTE((unused));
     int relative_dst, dst_tree_root, my_tree_root, send_offset;
     int recv_offset, tree_root, nprocs_completed, offset;
-    MPID_Datatype *dtp;
+    MPIR_Datatype *dtp;
     MPI_Aint true_extent, true_lb;
     void *tmp_buf;
     struct MPIR_Ibcast_status *status;
@@ -641,7 +641,7 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_scatter_ring_allgather
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int comm_size, rank;
@@ -650,7 +650,7 @@ int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype dat
     int i, j, jnext, left, right;
     MPI_Aint true_extent, true_lb;
     void *tmp_buf = NULL;
-    MPID_Datatype *dtp = NULL;
+    MPIR_Datatype *dtp = NULL;
 
     struct MPIR_Ibcast_status *status;
     MPIR_SCHED_CHKPMEM_DECL(4);
@@ -764,7 +764,7 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_SMP
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_SMP(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_SMP(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int is_homogeneous;
@@ -861,13 +861,13 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_intra
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_intra(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_intra(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int comm_size, is_homogeneous ATTRIBUTE((unused));
     MPI_Aint type_size, nbytes;
 
-    MPIU_Assert(comm_ptr->comm_kind == MPID_INTRACOMM);
+    MPIU_Assert(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM);
 
     is_homogeneous = 1;
 #ifdef MPID_HAS_HETERO
@@ -912,11 +912,11 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_inter
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_inter(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Ibcast_inter(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(comm_ptr->comm_kind == MPID_INTERCOMM);
+    MPIU_Assert(comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
     /* Intercommunicator broadcast.
      * Root sends to rank 0 in remote group. Remote group does local
@@ -963,10 +963,10 @@ fn_fail:
 #define FUNCNAME MPIR_Ibcast_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Ibcast_impl(void *buffer, int count, MPI_Datatype datatype, int root, MPID_Comm *comm_ptr, MPI_Request *request)
+int MPIR_Ibcast_impl(void *buffer, int count, MPI_Datatype datatype, int root, MPIR_Comm *comm_ptr, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *reqp = NULL;
+    MPIR_Request *reqp = NULL;
     int tag = -1;
     MPID_Sched_t s = MPID_SCHED_NULL;
 
@@ -1023,7 +1023,7 @@ Output Parameters:
 int MPI_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_IBCAST);
 
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -1045,20 +1045,20 @@ int MPI_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Com
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS
         {
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype *datatype_ptr = NULL;
+                MPIR_Datatype *datatype_ptr = NULL;
                 MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+                MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;

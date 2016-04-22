@@ -11,11 +11,11 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
-                MPID_Request *message, MPID_Request **rreqp)
+                MPIR_Request *message, MPIR_Request **rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq;
-    MPID_Comm *comm;
+    MPIR_Request *rreq;
+    MPIR_Comm *comm;
     MPIDI_VC_t *vc = NULL;
 
     /* message==NULL is equivalent to MPI_MESSAGE_NO_PROC being passed at the
@@ -28,10 +28,10 @@ int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
     }
 
     MPIU_Assert(message != NULL);
-    MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
+    MPIU_Assert(message->kind == MPIR_REQUEST_KIND__MPROBE);
 
     /* promote the request object to be a "real" recv request */
-    message->kind = MPID_REQUEST_RECV;
+    message->kind = MPIR_REQUEST_KIND__RECV;
 
     *rreqp = rreq = message;
 
@@ -74,7 +74,7 @@ int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
         MPIDI_Request_decr_pending(rreq);
         MPIDI_Request_check_pending(rreq, &recv_pending);
 
-        if (MPID_Request_is_complete(rreq)) {
+        if (MPIR_Request_is_complete(rreq)) {
             /* is it ever possible to have (cc==0 && recv_pending>0) ? */
             MPIU_Assert(!recv_pending);
 
@@ -128,7 +128,7 @@ int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
 #ifdef HAVE_ERROR_CHECKING
         int msg_type = MPIDI_Request_get_msg_type(rreq);
 #endif
-        MPID_Request_release(rreq);
+        MPIR_Request_free(rreq);
         rreq = NULL;
         MPIR_ERR_SETANDJUMP1(mpi_errno,MPI_ERR_INTERN, "**ch3|badmsgtype",
                              "**ch3|badmsgtype %d", msg_type);

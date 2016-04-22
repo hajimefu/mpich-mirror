@@ -34,7 +34,7 @@ int MPI_Iallreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype d
 #define FUNCNAME MPIR_Iallreduce_naive
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_naive(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_naive(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int rank;
@@ -66,7 +66,7 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_redscat_allgather
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_redscat_allgather(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_redscat_allgather(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int comm_size, rank, newrank, pof2, rem;
@@ -291,7 +291,7 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_rec_dbl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_rec_dbl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_rec_dbl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int pof2, rem, comm_size, is_commutative, rank;
@@ -434,12 +434,12 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_intra
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_intra(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_intra(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int comm_size, is_homogeneous, pof2, type_size;
 
-    MPIU_Assert(comm_ptr->comm_kind == MPID_INTRACOMM);
+    MPIU_Assert(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM);
 
     is_homogeneous = TRUE;
 #ifdef MPID_HAS_HETERO
@@ -495,7 +495,7 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_inter
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_inter(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_inter(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
 /* Intercommunicator Allreduce.
    We first do an intercommunicator reduce to rank 0 on left group,
@@ -507,9 +507,9 @@ int MPIR_Iallreduce_inter(const void *sendbuf, void *recvbuf, int count, MPI_Dat
 */
     int mpi_errno = MPI_SUCCESS;
     int rank, root;
-    MPID_Comm *lcomm_ptr = NULL;
+    MPIR_Comm *lcomm_ptr = NULL;
 
-    MPIU_Assert(comm_ptr->comm_kind == MPID_INTERCOMM);
+    MPIU_Assert(comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
     rank = comm_ptr->rank;
 
@@ -568,12 +568,12 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_SMP
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_SMP(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPID_Sched_t s)
+int MPIR_Iallreduce_SMP(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPID_Sched_t s)
 {
     int mpi_errno = MPI_SUCCESS;
     int is_commutative;
-    MPID_Comm *nc;
-    MPID_Comm *nrc;
+    MPIR_Comm *nc;
+    MPIR_Comm *nrc;
 
     if (!MPIR_CVAR_ENABLE_SMP_COLLECTIVES || !MPIR_CVAR_ENABLE_SMP_ALLREDUCE)
         MPID_Abort(comm_ptr, MPI_ERR_OTHER, 1, "SMP collectives are disabled!");
@@ -646,10 +646,10 @@ fn_fail:
 #define FUNCNAME MPIR_Iallreduce_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Iallreduce_impl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr, MPI_Request *request)
+int MPIR_Iallreduce_impl(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr, MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *reqp = NULL;
+    MPIR_Request *reqp = NULL;
     int tag = -1;
     MPID_Sched_t s = MPID_SCHED_NULL;
 
@@ -708,7 +708,7 @@ int MPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
                    MPI_Request *request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_IALLREDUCE);
 
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
@@ -731,34 +731,34 @@ int MPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 #   endif /* HAVE_ERROR_CHECKING */
 
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING
     {
         MPID_BEGIN_ERROR_CHECKS
         {
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype *datatype_ptr = NULL;
+                MPIR_Datatype *datatype_ptr = NULL;
                 MPID_Datatype_get_ptr(datatype, datatype_ptr);
-                MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+                MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             }
 
             if (HANDLE_GET_KIND(op) != HANDLE_KIND_BUILTIN) {
-                MPID_Op *op_ptr = NULL;
-                MPID_Op_get_ptr(op, op_ptr);
-                MPID_Op_valid_ptr(op_ptr, mpi_errno);
+                MPIR_Op *op_ptr = NULL;
+                MPIR_Op_get_ptr(op, op_ptr);
+                MPIR_Op_valid_ptr(op_ptr, mpi_errno);
             }
             else if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN) {
                 mpi_errno = ( * MPIR_OP_HDL_TO_DTYPE_FN(op) )(datatype);
             }
             if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-            if (comm_ptr->comm_kind == MPID_INTERCOMM)
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM)
                 MPIR_ERRTEST_SENDBUF_INPLACE(sendbuf, count, mpi_errno);
 
             if (sendbuf != MPI_IN_PLACE)
@@ -766,7 +766,7 @@ int MPI_Iallreduce(const void *sendbuf, void *recvbuf, int count,
 
             MPIR_ERRTEST_ARGNULL(request,"request", mpi_errno);
 
-            if (comm_ptr->comm_kind == MPID_INTRACOMM && count != 0 && sendbuf != MPI_IN_PLACE)
+            if (comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM && count != 0 && sendbuf != MPI_IN_PLACE)
                 MPIR_ERRTEST_ALIAS_COLL(sendbuf, recvbuf, mpi_errno);
 
             /* TODO more checks may be appropriate (counts, in_place, buffer aliasing, etc) */

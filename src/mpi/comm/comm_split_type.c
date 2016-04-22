@@ -30,8 +30,8 @@ int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info, M
 #define FUNCNAME MPIR_Comm_split_type_impl
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIR_Comm_split_type_impl(MPID_Comm * comm_ptr, int split_type, int key,
-                              MPID_Info * info_ptr, MPID_Comm ** newcomm_ptr)
+int MPIR_Comm_split_type_impl(MPIR_Comm * comm_ptr, int split_type, int key,
+                              MPIR_Info * info_ptr, MPIR_Comm ** newcomm_ptr)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -55,11 +55,11 @@ int MPIR_Comm_split_type_impl(MPID_Comm * comm_ptr, int split_type, int key,
 	if (flag) {
 #ifdef HAVE_ROMIO
 	    MPI_Comm dummycomm;
-	    MPID_Comm * dummycomm_ptr;
+	    MPIR_Comm * dummycomm_ptr;
 
 	    mpi_errno = MPIR_Comm_split_filesystem(comm_ptr->handle, key,
                                                    hintval, &dummycomm);
-	    MPID_Comm_get_ptr(dummycomm, dummycomm_ptr);
+	    MPIR_Comm_get_ptr(dummycomm, dummycomm_ptr);
 	    *newcomm_ptr = dummycomm_ptr;
 
 	    goto fn_exit;
@@ -77,7 +77,7 @@ int MPIR_Comm_split_type_impl(MPID_Comm * comm_ptr, int split_type, int key,
 	split_type = MPI_UNDEFINED;
     }
 
-    if (MPID_Comm_fns == NULL || MPID_Comm_fns->split_type == NULL) {
+    if (MPIR_Comm_fns == NULL || MPIR_Comm_fns->split_type == NULL) {
         int color = (split_type == MPI_COMM_TYPE_SHARED) ? comm_ptr->rank : MPI_UNDEFINED;
 
         /* The default implementation is to either pass MPI_UNDEFINED
@@ -87,7 +87,7 @@ int MPIR_Comm_split_type_impl(MPID_Comm * comm_ptr, int split_type, int key,
     }
     else {
         mpi_errno =
-            MPID_Comm_fns->split_type(comm_ptr, split_type, key, info_ptr, newcomm_ptr);
+            MPIR_Comm_fns->split_type(comm_ptr, split_type, key, info_ptr, newcomm_ptr);
     }
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
@@ -135,8 +135,8 @@ int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info,
                         MPI_Comm * newcomm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL, *newcomm_ptr;
-    MPID_Info *info_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL, *newcomm_ptr;
+    MPIR_Info *info_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_COMM_SPLIT_TYPE);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -157,8 +157,8 @@ int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info,
 #endif /* HAVE_ERROR_CHECKING */
 
     /* Get handles to MPI objects. */
-    MPID_Comm_get_ptr(comm, comm_ptr);
-    MPID_Info_get_ptr(info, info_ptr);
+    MPIR_Comm_get_ptr(comm, comm_ptr);
+    MPIR_Info_get_ptr(info, info_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #ifdef HAVE_ERROR_CHECKING
@@ -166,7 +166,7 @@ int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info,
         MPID_BEGIN_ERROR_CHECKS;
         {
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             /* If comm_ptr is not valid, it will be reset to null */
             if (mpi_errno)
                 goto fn_fail;

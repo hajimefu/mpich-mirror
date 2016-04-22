@@ -6,12 +6,12 @@
 
 #include "mpidimpl.h"
 
-int MPID_Improbe(int source, int tag, MPID_Comm *comm, int context_offset,
-                 int *flag, MPID_Request **message, MPI_Status *status)
+int MPID_Improbe(int source, int tag, MPIR_Comm *comm, int context_offset,
+                 int *flag, MPIR_Request **message, MPI_Status *status)
 {
     const int context = comm->recvcontext_id + context_offset;
     int foundp = FALSE;
-    MPID_Request * rreq = NULL;
+    MPIR_Request * rreq = NULL;
 
     if (source == MPI_PROC_NULL)
       {
@@ -38,7 +38,7 @@ int MPID_Improbe(int source, int tag, MPID_Comm *comm, int context_offset,
       MPID_Progress_poke();
     }
     else {
-      rreq->kind = MPID_REQUEST_MPROBE;
+      rreq->kind = MPIR_REQUEST_KIND__MPROBE;
       MPIR_Request_extract_status(rreq, status);
     }
 

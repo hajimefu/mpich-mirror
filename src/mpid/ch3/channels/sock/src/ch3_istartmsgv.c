@@ -10,22 +10,22 @@
 #define FUNCNAME create_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static MPID_Request * create_request(MPL_IOV * iov, int iov_count, 
+static MPIR_Request * create_request(MPL_IOV * iov, int iov_count,
 				     int iov_offset, MPIU_Size_t nb)
 {
-    MPID_Request * sreq;
+    MPIR_Request * sreq;
     int i;
     MPIDI_STATE_DECL(MPID_STATE_CREATE_REQUEST);
 
     MPIDI_FUNC_ENTER(MPID_STATE_CREATE_REQUEST);
     
-    sreq = MPID_Request_create();
+    sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     /* --BEGIN ERROR HANDLING-- */
     if (sreq == NULL)
 	return NULL;
     /* --END ERROR HANDLING-- */
     MPIU_Object_set_ref(sreq, 2);
-    sreq->kind = MPID_REQUEST_SEND;
+    sreq->kind = MPIR_REQUEST_KIND__SEND;
     
     for (i = 0; i < iov_count; i++)
     {
@@ -57,7 +57,7 @@ static MPID_Request * create_request(MPL_IOV * iov, int iov_count,
  * the request.
  */
 
-/* XXX - What do we do if MPID_Request_create() returns NULL???  
+/* XXX - What do we do if MPIR_Request_create returns NULL???
    If MPIDI_CH3_iStartMsgv() returns NULL, the calling code
    assumes the request completely successfully, but the reality is that we 
    couldn't allocate the memory for a request.  This
@@ -74,9 +74,9 @@ static MPID_Request * create_request(MPL_IOV * iov, int iov_count,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 int MPIDI_CH3_iStartMsgv(MPIDI_VC_t * vc, MPL_IOV * iov, int n_iov, 
-			 MPID_Request ** sreq_ptr)
+			 MPIR_Request ** sreq_ptr)
 {
-    MPID_Request * sreq = NULL;
+    MPIR_Request * sreq = NULL;
     MPIDI_CH3I_VC *vcch = &vc->ch;
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3_ISTARTMSGV);
@@ -158,11 +158,11 @@ int MPIDI_CH3_iStartMsgv(MPIDI_VC_t * vc, MPL_IOV * iov, int n_iov,
 	    {
 		MPL_DBG_MSG_D(MPIDI_CH3_DBG_CHANNEL,TYPICAL,
 			       "ERROR - MPIDU_Sock_writev failed, rc=%d", rc);
-		sreq = MPID_Request_create();
+		sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
 		if (sreq == NULL) {
 		    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**nomem");
 		}
-		sreq->kind = MPID_REQUEST_SEND;
+		sreq->kind = MPIR_REQUEST_KIND__SEND;
         MPIR_cc_set(&(sreq->cc), 0);
 		sreq->status.MPI_ERROR = MPIR_Err_create_code( rc,
 			       MPIR_ERR_RECOVERABLE, FCNAME, __LINE__, 
@@ -226,11 +226,11 @@ int MPIDI_CH3_iStartMsgv(MPIDI_VC_t * vc, MPL_IOV * iov, int n_iov,
     {
 	/* Connection failed, so allocate a request and return an error. */
 	MPL_DBG_VCUSE(vc,"ERROR - connection failed");
-	sreq = MPID_Request_create();
+	sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
 	if (sreq == NULL) {
 	    MPIR_ERR_SETANDJUMP(mpi_errno,MPI_ERR_OTHER,"**nomem");
 	}
-	sreq->kind = MPID_REQUEST_SEND;
+	sreq->kind = MPIR_REQUEST_KIND__SEND;
     MPIR_cc_set(&(sreq->cc), 0);
 	sreq->status.MPI_ERROR = MPIR_Err_create_code( MPI_SUCCESS,
 		       MPIR_ERR_RECOVERABLE, FCNAME, __LINE__, 

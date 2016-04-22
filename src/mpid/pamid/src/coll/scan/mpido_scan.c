@@ -31,12 +31,12 @@ static void scan_cb_done(void *ctxt, void *clientdata, pami_result_t err)
 }
 int MPIDO_Doscan(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno, int exflag);
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno, int exflag);
 
 
 int MPIDO_Scan(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno)
 {
    return MPIDO_Doscan(sendbuf, recvbuf, count, datatype,
                 op, comm_ptr, mpierrno, 0);
@@ -44,13 +44,13 @@ int MPIDO_Scan(const void *sendbuf, void *recvbuf,
 
 int MPIDO_Iscan(const void *sendbuf, void *recvbuf,
                 int count, MPI_Datatype datatype,
-                MPI_Op op, MPID_Comm * comm_ptr, MPID_Request **request)
+                MPI_Op op, MPIR_Comm * comm_ptr, MPIR_Request **request)
 {
    /*if (unlikely((data_size == 0) || (user_selected_type == MPID_COLL_USE_MPICH)))*/
    {
       /*
        * If the mpich mpir non-blocking collectives are enabled, return without
-       * first constructing the MPID_Request. This signals to the
+       * first constructing the MPIR_Request. This signals to the
        * MPIR_Iscan_impl() function to invoke the mpich nbc
        * implementation of MPI_Iscan().
        */
@@ -70,11 +70,11 @@ int MPIDO_Iscan(const void *sendbuf, void *recvbuf,
 
       /*
        * The blocking scan has completed - create and complete a
-       * MPID_Request object so the MPIR_Iscan_impl() function
+       * MPIR_Request object so the MPIR_Iscan_impl() function
        * does not perform an additional iscan.
        */
-      MPID_Request * mpid_request = MPID_Request_create_inline();
-      mpid_request->kind = MPID_COLL_REQUEST;
+      MPIR_Request * mpid_request = MPID_Request_create_inline();
+      mpid_request->kind = MPIR_REQUEST_KIND__COLL;
       *request = mpid_request;
       MPIDI_Request_complete_norelease_inline(mpid_request);
 
@@ -86,7 +86,7 @@ int MPIDO_Iscan(const void *sendbuf, void *recvbuf,
    
 int MPIDO_Exscan(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno)
 {
    return MPIDO_Doscan(sendbuf, recvbuf, count, datatype,
                 op, comm_ptr, mpierrno, 1);
@@ -94,7 +94,7 @@ int MPIDO_Exscan(const void *sendbuf, void *recvbuf,
 
 int MPIDO_Doscan(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno, int exflag)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno, int exflag)
 {
 #ifndef HAVE_PAMI_IN_PLACE
   if (sendbuf == MPI_IN_PLACE)
@@ -311,7 +311,7 @@ int MPIDO_Doscan(const void *sendbuf, void *recvbuf,
 
 int MPIDO_Doscan_simple(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno, int exflag)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno, int exflag)
 {
 #ifndef HAVE_PAMI_IN_PLACE
   if (sendbuf == MPI_IN_PLACE)
@@ -404,7 +404,7 @@ int MPIDO_Doscan_simple(const void *sendbuf, void *recvbuf,
 
 int MPIDO_Exscan_simple(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno)
 {
    return MPIDO_Doscan_simple(sendbuf, recvbuf, count, datatype,
                 op, comm_ptr, mpierrno, 1);
@@ -412,7 +412,7 @@ int MPIDO_Exscan_simple(const void *sendbuf, void *recvbuf,
 
 int MPIDO_Scan_simple(const void *sendbuf, void *recvbuf, 
                int count, MPI_Datatype datatype,
-               MPI_Op op, MPID_Comm * comm_ptr, int *mpierrno)
+               MPI_Op op, MPIR_Comm * comm_ptr, int *mpierrno)
 {
    return MPIDO_Doscan_simple(sendbuf, recvbuf, count, datatype,
                 op, comm_ptr, mpierrno, 0);
@@ -423,7 +423,7 @@ MPIDO_CSWrapper_scan(pami_xfer_t *scan,
                      void        *comm)
 {
    int mpierrno = 0;
-   MPID_Comm   *comm_ptr = (MPID_Comm*)comm;
+   MPIR_Comm   *comm_ptr = (MPIR_Comm*)comm;
    MPI_Datatype type;
    MPI_Op op;
    void *sbuf;

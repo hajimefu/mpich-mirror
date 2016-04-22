@@ -19,14 +19,14 @@
 #define FUNCNAME MPID_Rsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPID_Rsend(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPID_Comm * comm, int context_offset,
-	       MPID_Request ** request)
+int MPID_Rsend(const void * buf, int count, MPI_Datatype datatype, int rank, int tag, MPIR_Comm * comm, int context_offset,
+	       MPIR_Request ** request)
 {
     intptr_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPIDU_Datatype* dt_ptr;
-    MPID_Request * sreq = NULL;
+    MPIR_Request * sreq = NULL;
     MPIDI_VC_t * vc;
 #if defined(MPID_USE_SEQUENCE_NUMBERS)
     MPID_Seqnum_t seqnum;
@@ -47,7 +47,7 @@ int MPID_Rsend(const void * buf, int count, MPI_Datatype datatype, int rank, int
         MPIR_ERR_SETANDJUMP(mpi_errno,MPIX_ERR_REVOKED,"**revoked");
     }
     
-    if (rank == comm->rank && comm->comm_kind != MPID_INTERCOMM)
+    if (rank == comm->rank && comm->comm_kind != MPIR_COMM_KIND__INTERCOMM)
     {
 	mpi_errno = MPIDI_Isend_self(buf, count, datatype, rank, tag, comm, context_offset, MPIDI_REQUEST_TYPE_RSEND, &sreq);
 	goto fn_exit;

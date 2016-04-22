@@ -91,8 +91,8 @@ int MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
 {
     static const char FCNAME[] = "MPI_Bsend";
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *comm_ptr = NULL;
-    MPID_Request *request_ptr = NULL;
+    MPIR_Comm *comm_ptr = NULL;
+    MPIR_Request *request_ptr = NULL;
     MPID_MPI_STATE_DECL(MPID_STATE_MPI_BSEND);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -112,7 +112,7 @@ int MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
 #   endif /* HAVE_ERROR_CHECKING */
     
     /* Convert MPI object handles to object pointers */
-    MPID_Comm_get_ptr( comm, comm_ptr );
+    MPIR_Comm_get_ptr( comm, comm_ptr );
 
     /* Validate object pointers if error checking is enabled */
 #   ifdef HAVE_ERROR_CHECKING
@@ -121,7 +121,7 @@ int MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
         {
 	    MPIR_ERRTEST_COUNT(count,mpi_errno);
             /* Validate comm_ptr */
-            MPID_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
+            MPIR_Comm_valid_ptr( comm_ptr, mpi_errno, FALSE );
             if (mpi_errno) goto fn_fail;
 	    /* If comm_ptr is not valid, it will be reset to null */
 	    if (comm_ptr) {
@@ -134,10 +134,10 @@ int MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
 	    /* Validate datatype object */
 	    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPID_Datatype *datatype_ptr = NULL;
+		MPIR_Datatype *datatype_ptr = NULL;
 
 		MPID_Datatype_get_ptr(datatype, datatype_ptr);
-		MPID_Datatype_valid_ptr(datatype_ptr, mpi_errno);
+		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;
 		MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
 		if (mpi_errno) goto fn_fail;

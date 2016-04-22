@@ -45,7 +45,7 @@ typedef struct {
 
 
 extern transactionID_struct *_transactionID_list;
-void MPIDI_get_allremote_leaders(int *tid_arr, MPID_Comm *comm_ptr);
+void MPIDI_get_allremote_leaders(int *tid_arr, MPIR_Comm *comm_ptr);
 
 void MPIDI_send_AM_to_remote_leader_on_disconnect(int taskid, long long comm_cntr, int whichAM)
 {
@@ -196,7 +196,7 @@ static void _qsort_dyntask(int t[],int left,int right)
 .N Errors
 .N MPI_SUCCESS
 @*/
-int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
+int MPID_Comm_disconnect(MPIR_Comm *comm_ptr)
 {
     int rc, i,j, k, ref_count,mpi_errno=0, probe_flag=0;
     pami_task_t *local_list;
@@ -206,19 +206,19 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
     int total_leaders=0, gsize;
     pami_task_t *leader_tids;
     int expected_firstAM=0, expected_secondAM=0, expected_lastAM=0;
-    MPID_Comm *commworld_ptr;
-    MPID_Group *group_ptr = NULL,  *new_group_ptr = NULL;
+    MPIR_Comm *commworld_ptr;
+    MPIR_Group *group_ptr = NULL,  *new_group_ptr = NULL;
     MPID_VCR *glist;
-    MPID_Comm *lcomm;
+    MPIR_Comm *lcomm;
     int *ranks;
     int local_tasks=0, localtasks_in_remglist=0;
     int jobIdSize=64;
     char jobId[jobIdSize];
     int MY_TASKID = PAMIX_Client_query(MPIDI_Client, PAMI_CLIENT_TASK_ID  ).value.intval;
 
-    /*if( (comm_ptr->comm_kind == MPID_INTERCOMM) && (comm_ptr->mpid.world_ids != NULL)) { */
+    /*if( (comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) && (comm_ptr->mpid.world_ids != NULL)) { */
     if(comm_ptr->mpid.world_ids != NULL) {
-	rc = MPID_Iprobe(comm_ptr->rank, MPI_ANY_TAG, comm_ptr, MPID_CONTEXT_INTER_PT2PT, &probe_flag, &status);
+        rc = MPID_Iprobe(comm_ptr->rank, MPI_ANY_TAG, comm_ptr, MPIR_CONTEXT_INTER_PT2PT, &probe_flag, &status);
         if(rc || probe_flag) {
           TRACE_ERR("PENDING_PTP");
 	  exit(1);
@@ -226,7 +226,7 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
 
 	/* make commSubWorld */
 	{
-	  /*           MPID_Comm_get_ptr( MPI_COMM_WORLD, commworld_ptr ); */
+          /*           MPIR_Comm_get_ptr( MPI_COMM_WORLD, commworld_ptr ); */
 	  commworld_ptr = MPIR_Process.comm_world;
 	  mpi_errno = MPIR_Comm_group_impl(commworld_ptr, &group_ptr);
 	  if (mpi_errno)
@@ -250,7 +250,7 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
 	   * the GROUPREMLIST, so these tasks will have to be use in addition
 	   * to the tasks in GROUPLIST to construct lcomm
 	   **/
-	  if(comm_ptr->comm_kind == MPID_INTERCOMM) {
+          if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
 	    for(i=0;i<comm_ptr->remote_size;i++) {
 	      for(j=0;j<gsize;j++) {
 		if(comm_ptr->vcr[i]->taskid == glist[j]->taskid) {
@@ -271,7 +271,7 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
 		ranks[k++] = j;
 	    }
 	  }
-	  if((comm_ptr->comm_kind == MPID_INTERCOMM) && localtasks_in_remglist) {
+          if((comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) && localtasks_in_remglist) {
 	    for(i=0;i<comm_ptr->remote_size;i++) {
 	      for(j=0;j<gsize;j++) {
 		if(comm_ptr->vcr[i]->taskid == glist[j]->taskid)
@@ -310,11 +310,11 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
 
 	  /* fill in all the fields of lcomm. */
 	  if(localtasks_in_remglist==0) {
-	    lcomm->context_id     = MPID_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->recvcontext_id, 1);
+            lcomm->context_id     = MPIR_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->recvcontext_id, 1);
 	    lcomm->recvcontext_id = lcomm->context_id;
 	  } else {
-	    lcomm->context_id     = MPID_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->recvcontext_id, 1);
-	    lcomm->recvcontext_id = MPID_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->context_id, 1);
+            lcomm->context_id     = MPIR_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->recvcontext_id, 1);
+            lcomm->recvcontext_id = MPIR_CONTEXT_SET_FIELD(DYNAMIC_PROC, comm_ptr->context_id, 1);
 	  }
 	  TRACE_ERR("lcomm->context_id =%d\n", lcomm->context_id);
 
@@ -326,7 +326,7 @@ int MPID_Comm_disconnect(MPID_Comm *comm_ptr)
 	  /* FIXME - we probably need a unique context_id. */
 
 	  /* Fill in new intercomm */
-	  lcomm->comm_kind    = MPID_INTRACOMM;
+          lcomm->comm_kind    = MPIR_COMM_KIND__INTRACOMM;
 	  lcomm->remote_size = lcomm->local_size = local_tasks;
 
 	  /* Set up VC reference table */
@@ -462,7 +462,7 @@ int MPIDI_Decrement_ref_count(int wid) {
   return ref_count;
 }
 
-void MPIDI_get_allremote_leaders(int *tid_arr, MPID_Comm *comm_ptr)
+void MPIDI_get_allremote_leaders(int *tid_arr, MPIR_Comm *comm_ptr)
 {
   conn_info  *tmp_node;
   int        i,j,k,arr_len,gsize, found=0;
@@ -477,7 +477,7 @@ void MPIDI_get_allremote_leaders(int *tid_arr, MPID_Comm *comm_ptr)
     if(tmp_node==NULL) {TRACE_ERR("_conn_info_list is NULL\n");}
     while(tmp_node != NULL) {
       if(tmp_node->rem_world_id == comm_ptr->mpid.world_ids[i]) {
-        if(comm_ptr->comm_kind == MPID_INTRACOMM) {
+        if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
           glist = comm_ptr->local_vcr;
           gsize = comm_ptr->local_size;
         }
@@ -505,7 +505,7 @@ void MPIDI_get_allremote_leaders(int *tid_arr, MPID_Comm *comm_ptr)
 	 * of world-x in my GROUPLIST and then see which of the two leaders is the
 	 * smallest one. The smallest one is the one in which I am interested.
 	 **/
-        if(comm_ptr->comm_kind == MPID_INTERCOMM) {
+        if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
           found=0;
           glist = comm_ptr->local_vcr;
           gsize = comm_ptr->local_size;
