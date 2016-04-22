@@ -144,14 +144,14 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 #define MPIDI_Request_init_sreq(sreq_)	\
 {								\
-    (sreq_)->kind = MPID_REQUEST_SEND;	  \
+    (sreq_)->kind = MPIR_REQUEST_KIND__SEND;	  \
     (sreq_)->comm = comm;		          \
-    (sreq_)->partner_request   = NULL;    \
+    (sreq_)->u.persist.real_request   = NULL;    \
     MPIR_Comm_add_ref(comm);		\
     MPIR_cc_set(&sreq_->cc, 1);     \
     req->cc_ptr = &req->cc;         \
     MPIU_Object_set_ref(req, 2);    \
-    req->greq_fns = NULL;       \
+    req->u.ureq.greq_fns = NULL;       \
     MPIR_STATUS_SET_COUNT(req->status, 0);\
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE); \
     req->status.MPI_SOURCE = MPI_UNDEFINED;\
@@ -162,15 +162,15 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 #define MPIDI_Request_init_rreq(rreq_)	\
 {								\
-    (rreq_)->kind = MPID_REQUEST_RECV;	    \
-    (rreq_)->partner_request   = NULL;      \
+    (rreq_)->kind = MPIR_REQUEST_KIND__RECV;	    \
+    (rreq_)->u.persist.real_request   = NULL;      \
     MPIR_cc_set(&rreq_->cc, 1);             \
     rreq_->cc_ptr = &rreq_->cc;             \
     MPIU_Object_set_ref((rreq_), 2);        \
-    (rreq_)->greq_fns = NULL;               \
+    (rreq_)->u.ureq.greq_fns = NULL;               \
     MPIR_STATUS_SET_COUNT(rreq_->status, 0);\
     (rreq_)->status.MPI_ERROR = MPI_SUCCESS;\
-    (rreq_)->errflag = MPIR_ERR_NONE;\
+    (rreq_)->u.nbc.errflag = MPIR_ERR_NONE;\
 }
 
 int MPIDI_CH4_NMI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr);

@@ -18,9 +18,9 @@
 #define FUNCNAME MPIDI_CH4I_am_request_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPID_Request *MPIDI_CH4I_am_request_create()
+static inline MPIR_Request *MPIDI_CH4I_am_request_create()
 {
-    MPID_Request *req;
+    MPIR_Request *req;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
@@ -43,9 +43,9 @@ static inline MPID_Request *MPIDI_CH4I_am_request_create()
 #define FUNCNAME MPIDI_CH4I_am_win_request_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPID_Request *MPIDI_CH4I_am_win_request_create()
+static inline MPIR_Request *MPIDI_CH4I_am_win_request_create()
 {
-    MPID_Request *req;
+    MPIR_Request *req;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
@@ -67,7 +67,7 @@ static inline MPID_Request *MPIDI_CH4I_am_win_request_create()
 #define FUNCNAME MPIDI_CH4I_am_request_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
+__CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPIR_Request *req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
@@ -85,7 +85,7 @@ __CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPID_Request *req)
  * the upper layer will have a chance to arbitrate who wins the race between
  * the netmod and the shmod. This will cancel the request of the other side and
  * take care of copying any relevant data. */
-static inline int MPIDI_CH4R_anysource_matched(MPID_Request *rreq, int caller, int *continue_matching)
+static inline int MPIDI_CH4R_anysource_matched(MPIR_Request *rreq, int caller, int *continue_matching)
 {
     int mpi_errno = MPI_SUCCESS;
 

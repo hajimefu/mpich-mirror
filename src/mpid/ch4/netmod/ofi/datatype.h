@@ -18,7 +18,7 @@
   in ofi_pre.h
 */
 
-static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPID_Datatype *datatype_p)
+static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p)
 {
     return;
 }
@@ -28,7 +28,7 @@ static inline void MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p)
     return;
 }
 
-static inline void MPIDI_CH4_NM_datatype_dup_hook(MPID_Datatype *datatype_p)
+static inline void MPIDI_CH4_NM_datatype_dup_hook(MPIR_Datatype *datatype_p)
 {
     return;
 }

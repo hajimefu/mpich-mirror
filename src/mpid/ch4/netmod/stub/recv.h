@@ -18,9 +18,9 @@ static inline int MPIDI_CH4_NM_recv(void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm * comm,
+                                    MPIR_Comm * comm,
                                     int context_offset,
-                                    MPI_Status * status, MPID_Request ** request)
+                                    MPI_Status * status, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -32,8 +32,8 @@ static inline int MPIDI_CH4_NM_recv_init(void *buf,
                                          MPI_Datatype datatype,
                                          int rank,
                                          int tag,
-                                         MPID_Comm * comm,
-                                         int context_offset, MPID_Request ** request)
+                                         MPIR_Comm * comm,
+                                         int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -42,7 +42,7 @@ static inline int MPIDI_CH4_NM_recv_init(void *buf,
 static inline int MPIDI_CH4_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
-                                      MPID_Request * message, MPID_Request ** rreqp)
+                                      MPIR_Request * message, MPIR_Request ** rreqp)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -53,14 +53,14 @@ static inline int MPIDI_CH4_NM_irecv(void *buf,
                                      MPI_Datatype datatype,
                                      int rank,
                                      int tag,
-                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                     MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
     return err;
 }
 
-static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
+static inline int MPIDI_CH4_NM_cancel_recv(MPIR_Request * rreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

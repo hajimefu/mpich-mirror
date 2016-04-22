@@ -15,13 +15,13 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
         size_t data_sz,
         int rank,
         int tag,
-        MPID_Comm * comm,
-        int context_offset, MPID_Request ** request)
+        MPIR_Comm * comm,
+        int context_offset, MPIR_Request ** request)
 {
 
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
@@ -46,7 +46,7 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     }
-    (req)->kind = MPID_REQUEST_RECV;
+    (req)->kind = MPIR_REQUEST_KIND__RECV;
 fn_exit:
     *request = req;
     return mpi_errno;
@@ -57,13 +57,13 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
         size_t count,
         int rank,
         int tag,
-        MPID_Comm * comm,
-        int context_offset, MPID_Request ** request, MPID_Datatype* datatype)
+        MPIR_Comm * comm,
+        int context_offset, MPIR_Request ** request, MPIR_Datatype* datatype)
 {
 
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
@@ -88,7 +88,7 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     }
-    (req)->kind = MPID_REQUEST_RECV;
+    (req)->kind = MPIR_REQUEST_KIND__RECV;
 fn_exit:
     *request = req;
     return mpi_errno;
@@ -100,19 +100,19 @@ static inline int do_irecv(void *buf,
                            int count,
                            MPI_Datatype datatype,
                            int rank,
-                           int tag, MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                           int tag, MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno = MPI_SUCCESS;
     size_t data_sz;
     int dt_contig;
-    MPID_Request *req;
+    MPIR_Request *req;
     MPI_Aint dt_true_lb;
 
-    MPID_Datatype *dt_ptr;
+    MPIR_Datatype *dt_ptr;
 
     if (unlikely(rank == MPI_PROC_NULL)) {
         req = MPIDI_CH4_NMI_UCX_Request_create();
-        req->kind = MPID_REQUEST_RECV;
+        req->kind = MPIR_REQUEST_KIND__RECV;
         req->status.MPI_ERROR = MPI_SUCCESS;
         req->status.MPI_SOURCE = rank;
         req->status.MPI_TAG = tag;
@@ -140,9 +140,9 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm * comm,
+                                    MPIR_Comm * comm,
                                     int context_offset,
-                                    MPI_Status * status, MPID_Request ** request)
+                                    MPI_Status * status, MPIR_Request ** request)
 {
 
   return do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
@@ -153,8 +153,8 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void *buf,
                                          MPI_Datatype datatype,
                                          int rank,
                                          int tag,
-                                         MPID_Comm * comm,
-                                         int context_offset, MPID_Request ** request)
+                                         MPIR_Comm * comm,
+                                         int context_offset, MPIR_Request ** request)
 {
     return MPIDI_CH4U_recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
@@ -162,7 +162,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void *buf,
 __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
-                                      MPID_Request * message, MPID_Request ** rreqp)
+                                      MPIR_Request * message, MPIR_Request ** rreqp)
 {
     return MPIDI_CH4U_imrecv(buf, count, datatype, message, rreqp);
 }
@@ -171,7 +171,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
                                      MPI_Datatype datatype,
                                      int rank,
                                      int tag,
-                                     MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                     MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
 
 
@@ -180,7 +180,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
 
 }
 
-static inline int MPIDI_CH4_NM_cancel_recv(MPID_Request * rreq)
+static inline int MPIDI_CH4_NM_cancel_recv(MPIR_Request * rreq)
 {
     return MPIDI_CH4U_cancel_recv(rreq);
 }

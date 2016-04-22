@@ -21,11 +21,11 @@ MPIDI_CH4_Global_t MPIDI_CH4_Global;
 #define MPID_REQUEST_PREALLOC 16
 #endif
 
-MPID_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0} };
+MPIR_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0} };
 MPIU_Object_alloc_t MPIDI_Request_mem = {
     0, 0, 0, 0,
-    MPID_REQUEST,
-    sizeof(MPID_Request),
+    MPIR_REQUEST,
+    sizeof(MPIR_Request),
     MPIDI_Request_direct,
     MPID_REQUEST_PREALLOC
 };
@@ -48,7 +48,7 @@ pthread_mutex_t MPIDI_Mutex_lock[MPIDI_NUM_LOCKS];
 #ifdef MPID_Abort
 #define MPID_TMP MPID_Abort
 #undef MPID_Abort
-int MPID_Abort(MPID_Comm * comm, int mpi_errno, int exit_code, const char *error_msg)
+int MPID_Abort(MPIR_Comm * comm, int mpi_errno, int exit_code, const char *error_msg)
 {
     return MPIDI_Abort(comm, mpi_errno, exit_code, error_msg);
 }
@@ -60,14 +60,14 @@ int MPID_Abort(MPID_Comm * comm, int mpi_errno, int exit_code, const char *error
 static void init_comm()__attribute__((constructor));
 static void init_comm()
 {
-  MPID_Comm_fns             = &MPIDI_CH4_Global.MPID_Comm_fns_store;
-  MPID_Comm_fns->split_type =  MPIDI_Comm_split_type;
+  MPIR_Comm_fns             = &MPIDI_CH4_Global.MPIR_Comm_fns_store;
+  MPIR_Comm_fns->split_type =  MPIDI_Comm_split_type;
 }
 
 
 
-/* These aliases are used because we call MPID_Request_get_ptr   */
-/* in some internal routines MPID_Request_get_ptr is a macro     */
+/* These aliases are used because we call MPIR_Request_get_ptr   */
+/* in some internal routines MPIR_Request_get_ptr is a macro     */
 /* that #defines to MPID_ instead of MPIDI_.  We have the option */
 /* to copy the macros for a different namespace, but aliasing    */
 /* is probably the safer option to avoid missing symbols         */
@@ -79,7 +79,20 @@ static void init_comm()
 #undef MPID_Request_direct
 #endif
 extern MPIU_Object_alloc_t MPID_Request_mem __attribute__((alias("MPIDI_Request_mem")));
-extern MPID_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((alias("MPIDI_Request_direct")));
+extern MPIR_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((alias("MPIDI_Request_direct")));
 
 
 MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
+
+void MPID_Request_init(MPIR_Request *req)
+{
+    MPIDI_CH4U_REQUEST(req, req) = NULL;
+#ifdef MPIDI_BUILD_CH4_SHM
+    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
+#endif
+}
+
+void MPID_Request_finalize(MPIR_Request *req)
+{
+    return;
+}

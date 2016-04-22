@@ -18,7 +18,7 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Probe(int source,
-                               int tag, MPID_Comm * comm, int context_offset, MPI_Status * status)
+                               int tag, MPIR_Comm * comm, int context_offset, MPI_Status * status)
 {
     int mpi_errno, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4_PROBE);
@@ -67,8 +67,8 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Mprobe(int source,
                                 int tag,
-                                MPID_Comm * comm,
-                                int context_offset, MPID_Request ** message, MPI_Status * status)
+                                MPIR_Comm * comm,
+                                int context_offset, MPIR_Request ** message, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);
@@ -125,9 +125,9 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Improbe(int source,
                                  int tag,
-                                 MPID_Comm * comm,
+                                 MPIR_Comm * comm,
                                  int context_offset,
-                                 int *flag, MPID_Request ** message, MPI_Status * status)
+                                 int *flag, MPIR_Request ** message, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IMPROBE);
@@ -170,7 +170,7 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Iprobe(int source,
                                 int tag,
-                                MPID_Comm * comm,
+                                MPIR_Comm * comm,
                                 int context_offset, int *flag, MPI_Status * status)
 {
 

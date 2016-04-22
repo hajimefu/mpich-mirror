@@ -13,73 +13,73 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_CH4_SHM_win_set_info(MPID_Win * win, MPID_Info * info)
+static inline int MPIDI_CH4_SHM_win_set_info(MPIR_Win * win, MPIR_Info * info)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 
-static inline int MPIDI_CH4_SHM_win_start(MPID_Group * group, int assert, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_start(MPIR_Group * group, int assert, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 
-static inline int MPIDI_CH4_SHM_win_complete(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_complete(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_post(MPID_Group * group, int assert, MPID_Win * win)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-
-static inline int MPIDI_CH4_SHM_win_wait(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_post(MPIR_Group * group, int assert, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 
-static inline int MPIDI_CH4_SHM_win_test(MPID_Win * win, int *flag)
-{
-    MPIU_Assert(0);
-    return MPI_SUCCESS;
-}
-
-static inline int MPIDI_CH4_SHM_win_lock(int lock_type, int rank, int assert, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_wait(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 
-static inline int MPIDI_CH4_SHM_win_unlock(int rank, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_test(MPIR_Win * win, int *flag)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_get_info(MPID_Win * win, MPID_Info ** info_p_p)
+static inline int MPIDI_CH4_SHM_win_lock(int lock_type, int rank, int assert, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 
-static inline int MPIDI_CH4_SHM_win_free(MPID_Win ** win_ptr)
+static inline int MPIDI_CH4_SHM_win_unlock(int rank, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_fence(int assert, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_get_info(MPIR_Win * win, MPIR_Info ** info_p_p)
+{
+    MPIU_Assert(0);
+    return MPI_SUCCESS;
+}
+
+
+static inline int MPIDI_CH4_SHM_win_free(MPIR_Win ** win_ptr)
+{
+    MPIU_Assert(0);
+    return MPI_SUCCESS;
+}
+
+static inline int MPIDI_CH4_SHM_win_fence(int assert, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -88,13 +88,13 @@ static inline int MPIDI_CH4_SHM_win_fence(int assert, MPID_Win * win)
 static inline int MPIDI_CH4_SHM_win_create(void *base,
                                        MPI_Aint length,
                                        int disp_unit,
-                                       MPID_Info * info, MPID_Comm * comm_ptr, MPID_Win ** win_ptr)
+                                       MPIR_Info * info, MPIR_Comm * comm_ptr, MPIR_Win ** win_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_attach(MPID_Win * win, void *base, MPI_Aint size)
+static inline int MPIDI_CH4_SHM_win_attach(MPIR_Win * win, void *base, MPI_Aint size)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -102,21 +102,21 @@ static inline int MPIDI_CH4_SHM_win_attach(MPID_Win * win, void *base, MPI_Aint 
 
 static inline int MPIDI_CH4_SHM_win_allocate_shared(MPI_Aint size,
                                                 int disp_unit,
-                                                MPID_Info * info_ptr,
-                                                MPID_Comm * comm_ptr,
-                                                void **base_ptr, MPID_Win ** win_ptr)
+                                                MPIR_Info * info_ptr,
+                                                MPIR_Comm * comm_ptr,
+                                                void **base_ptr, MPIR_Win ** win_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_detach(MPID_Win * win, const void *base)
+static inline int MPIDI_CH4_SHM_win_detach(MPIR_Win * win, const void *base)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_shared_query(MPID_Win * win,
+static inline int MPIDI_CH4_SHM_win_shared_query(MPIR_Win * win,
                                              int rank,
                                              MPI_Aint * size, int *disp_unit, void *baseptr)
 {
@@ -126,56 +126,56 @@ static inline int MPIDI_CH4_SHM_win_shared_query(MPID_Win * win,
 
 static inline int MPIDI_CH4_SHM_win_allocate(MPI_Aint size,
                                          int disp_unit,
-                                         MPID_Info * info,
-                                         MPID_Comm * comm, void *baseptr, MPID_Win ** win)
+                                         MPIR_Info * info,
+                                         MPIR_Comm * comm, void *baseptr, MPIR_Win ** win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_flush(int rank, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_flush(int rank, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_flush_local_all(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_flush_local_all(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_unlock_all(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_unlock_all(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_create_dynamic(MPID_Info * info, MPID_Comm * comm, MPID_Win ** win)
+static inline int MPIDI_CH4_SHM_win_create_dynamic(MPIR_Info * info, MPIR_Comm * comm, MPIR_Win ** win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_flush_local(int rank, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_flush_local(int rank, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_sync(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_sync(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_flush_all(MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_flush_all(MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_win_lock_all(int assert, MPID_Win * win)
+static inline int MPIDI_CH4_SHM_win_lock_all(int assert, MPIR_Win * win)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

@@ -33,12 +33,12 @@ static inline void dup_vept(struct MPIDI_VEPT *src_vept,
     /* try to find the simple case where the new comm is a simple
      * duplicate of the previous comm.  in that case, we simply add a
      * reference to the previous VCRT instead of recreating it. */
-    if (mapper->type == MPIR_COMM_MAP_DUP && src_comm_size == vept_size) {
+    if (mapper->type == MPIR_COMM_MAP_TYPE__DUP && src_comm_size == vept_size) {
         *dest_vept = src_vept;
         MPIU_Object_add_ref(src_vept);
         goto fn_exit;
     }
-    else if (mapper->type == MPIR_COMM_MAP_IRREGULAR && mapper->src_mapping_size == vept_size) {
+    else if (mapper->type == MPIR_COMM_MAP_TYPE__IRREGULAR && mapper->src_mapping_size == vept_size) {
         /* if the mapping array is exactly the same as the original
          * comm's VC list, there is no need to create a new VCRT.
          * instead simply point to the original comm's VCRT and bump
@@ -62,7 +62,7 @@ static inline void dup_vept(struct MPIDI_VEPT *src_vept,
     if (!vept_offset)
         MPIDI_CH4_NMI_UCX_VEPT_Create(vept_size, dest_vept);
 
-    if (mapper->type == MPIR_COMM_MAP_DUP) {
+    if (mapper->type == MPIR_COMM_MAP_TYPE__DUP) {
         for (i = 0; i < src_comm_size; i++)
             dup_vep(src_vept->vep_table[i], &((*dest_vept)->vep_table[i + vept_offset]));
     }
@@ -79,9 +79,9 @@ static inline void dup_vept(struct MPIDI_VEPT *src_vept,
 
 static inline int map_size(MPIR_Comm_map_t map)
 {
-    if (map.type == MPIR_COMM_MAP_IRREGULAR)
+    if (map.type == MPIR_COMM_MAP_TYPE__IRREGULAR)
         return map.src_mapping_size;
-    else if (map.dir == MPIR_COMM_MAP_DIR_L2L || map.dir == MPIR_COMM_MAP_DIR_L2R)
+    else if (map.dir == MPIR_COMM_MAP_DIR__L2L || map.dir == MPIR_COMM_MAP_DIR__L2R)
         return map.src_comm->local_size;
     else
         return map.src_comm->remote_size;
@@ -92,11 +92,11 @@ static inline int map_size(MPIR_Comm_map_t map)
 #define FUNCNAME alloc_tables
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int alloc_tables(MPID_Comm * comm)
+static inline int alloc_tables(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm_map_t *mapper;
-    MPID_Comm *src_comm;
+    MPIR_Comm *src_comm;
     int vept_size, vept_offset;
 
 
@@ -105,20 +105,20 @@ static inline int alloc_tables(MPID_Comm * comm)
 
     /* do some sanity checks */
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
-        if (mapper->src_comm->comm_kind == MPID_INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
-                        mapper->dir == MPIR_COMM_MAP_DIR_L2R);
+        if (mapper->src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
+            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
+                        mapper->dir == MPIR_COMM_MAP_DIR__L2R);
 
-        if (comm->comm_kind == MPID_INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR_L2L ||
-                        mapper->dir == MPIR_COMM_MAP_DIR_R2L);
+        if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
+            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
+                        mapper->dir == MPIR_COMM_MAP_DIR__R2L);
     }
 
    /* First, handle all the mappers that contribute to the local part
      * of the comm */
     vept_size = 0;
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2R || mapper->dir == MPIR_COMM_MAP_DIR_R2R)
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2R || mapper->dir == MPIR_COMM_MAP_DIR__R2R)
             continue;
 
         vept_size += map_size(*mapper);
@@ -127,18 +127,18 @@ static inline int alloc_tables(MPID_Comm * comm)
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
         src_comm = mapper->src_comm;
 
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2R || mapper->dir == MPIR_COMM_MAP_DIR_R2R)
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2R || mapper->dir == MPIR_COMM_MAP_DIR__R2R)
             continue;
 
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2L) {
-            if (src_comm->comm_kind == MPID_INTRACOMM && comm->comm_kind == MPID_INTRACOMM) {
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2L) {
+            if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             }
-            else if (src_comm->comm_kind == MPID_INTRACOMM && comm->comm_kind == MPID_INTERCOMM)
+            else if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTERCOMM)
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
-            else if (src_comm->comm_kind == MPID_INTERCOMM && comm->comm_kind == MPID_INTRACOMM) {
+            else if (src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             }
@@ -146,10 +146,10 @@ static inline int alloc_tables(MPID_Comm * comm)
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
         }
-        else {  /* mapper->dir == MPIR_COMM_MAP_DIR_R2L */
-            MPIU_Assert(src_comm->comm_kind == MPID_INTERCOMM);
+        else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2L */
+            MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
-            if (comm->comm_kind == MPID_INTRACOMM) {
+            if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->remote_size, vept_size, vept_offset);
             }
@@ -165,7 +165,7 @@ static inline int alloc_tables(MPID_Comm * comm)
      * of the comm (only valid for intercomms) */
     vept_size = 0;
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2L || mapper->dir == MPIR_COMM_MAP_DIR_R2L)
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2L || mapper->dir == MPIR_COMM_MAP_DIR__R2L)
             continue;
 
         vept_size += map_size(*mapper);
@@ -174,21 +174,21 @@ static inline int alloc_tables(MPID_Comm * comm)
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
         src_comm = mapper->src_comm;
 
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2L || mapper->dir == MPIR_COMM_MAP_DIR_R2L)
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2L || mapper->dir == MPIR_COMM_MAP_DIR__R2L)
             continue;
 
-        MPIU_Assert(comm->comm_kind == MPID_INTERCOMM);
+        MPIU_Assert(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
-        if (mapper->dir == MPIR_COMM_MAP_DIR_L2R) {
-            if (src_comm->comm_kind == MPID_INTRACOMM)
+        if (mapper->dir == MPIR_COMM_MAP_DIR__L2R) {
+            if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             else
                 dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
         }
-        else {  /* mapper->dir == MPIR_COMM_MAP_DIR_R2R */
-            MPIU_Assert(src_comm->comm_kind == MPID_INTERCOMM);
+        else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2R */
+            MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
             dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
                      mapper->src_comm->remote_size, vept_size, vept_offset);
         }
@@ -196,7 +196,7 @@ static inline int alloc_tables(MPID_Comm * comm)
         vept_offset += map_size(*mapper);
     }
 
-    if (comm->comm_kind == MPID_INTERCOMM) {
+    if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         /* setup the vept for the local_comm in the intercomm */
         if (comm->local_comm) {
             MPIDI_CH4_NMI_UCX_COMM(comm->local_comm).vept = MPIDI_CH4_NMI_UCX_COMM(comm).local_vept;
@@ -213,7 +213,7 @@ static inline int alloc_tables(MPID_Comm * comm)
 #define FUNCNAME MPIDI_CH4_NM_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_create(MPIR_Comm * comm)
 {
 
     alloc_tables(comm);
@@ -228,7 +228,7 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 #define FUNCNAME MPIDI_CH4_NM_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     int in_use;
@@ -238,7 +238,7 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
     if(in_use == 0)
         MPL_free(MPIDI_CH4_NMI_UCX_COMM(comm).vept);
 
-    if (comm->comm_kind == MPID_INTERCOMM) {
+    if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         MPIU_Object_release_ref(MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, &in_use);
        if(in_use == 0)
           MPL_free(MPIDI_CH4_NMI_UCX_COMM(comm).local_vept);

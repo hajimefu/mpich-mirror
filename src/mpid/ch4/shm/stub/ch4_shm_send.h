@@ -18,7 +18,7 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
                                  MPI_Datatype datatype,
                                  int rank,
                                  int tag,
-                                 MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                 MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -33,7 +33,7 @@ static inline int MPIDI_CH4_SHM_irsend(const void *buf,
                                    MPI_Datatype datatype,
                                    int rank,
                                    int tag,
-                                   MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                   MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -44,7 +44,7 @@ static inline int MPIDI_CH4_SHM_ssend(const void *buf,
                                   MPI_Datatype datatype,
                                   int rank,
                                   int tag,
-                                  MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                  MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -52,7 +52,7 @@ static inline int MPIDI_CH4_SHM_ssend(const void *buf,
     return err;
 }
 
-static inline int MPIDI_CH4_SHM_startall(int count, MPID_Request * requests[])
+static inline int MPIDI_CH4_SHM_startall(int count, MPIR_Request * requests[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -63,7 +63,7 @@ static inline int MPIDI_CH4_SHM_send_init(const void *buf,
                                       MPI_Datatype datatype,
                                       int rank,
                                       int tag,
-                                      MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                      MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -74,8 +74,8 @@ static inline int MPIDI_CH4_SHM_ssend_init(const void *buf,
                                        MPI_Datatype datatype,
                                        int rank,
                                        int tag,
-                                       MPID_Comm * comm,
-                                       int context_offset, MPID_Request ** request)
+                                       MPIR_Comm * comm,
+                                       int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -86,8 +86,8 @@ static inline int MPIDI_CH4_SHM_bsend_init(const void *buf,
                                        MPI_Datatype datatype,
                                        int rank,
                                        int tag,
-                                       MPID_Comm * comm,
-                                       int context_offset, MPID_Request ** request)
+                                       MPIR_Comm * comm,
+                                       int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -98,8 +98,8 @@ static inline int MPIDI_CH4_SHM_rsend_init(const void *buf,
                                        MPI_Datatype datatype,
                                        int rank,
                                        int tag,
-                                       MPID_Comm * comm,
-                                       int context_offset, MPID_Request ** request)
+                                       MPIR_Comm * comm,
+                                       int context_offset, MPIR_Request ** request)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -112,7 +112,7 @@ static inline int MPIDI_CH4_SHM_isend(const void *buf,
                                   MPI_Datatype datatype,
                                   int rank,
                                   int tag,
-                                  MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                  MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -124,14 +124,14 @@ static inline int MPIDI_CH4_SHM_issend(const void *buf,
                                    MPI_Datatype datatype,
                                    int rank,
                                    int tag,
-                                   MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                   MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
     MPIU_Assert(0);
     return err;
 }
 
-static inline int MPIDI_CH4_SHM_cancel_send(MPID_Request * sreq)
+static inline int MPIDI_CH4_SHM_cancel_send(MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

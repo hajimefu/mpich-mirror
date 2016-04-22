@@ -219,7 +219,7 @@ typedef struct MPIDI_CH4U_acc_ack_msg_t {
 } MPIDI_CH4U_acc_ack_msg_t;
 
 typedef struct MPIDI_CH4U_comm_req_list_t {
-    MPID_Comm             *comm[2][4];
+    MPIR_Comm             *comm[2][4];
     MPIDI_CH4U_rreq_t *uelist[2][4];
 } MPIDI_CH4U_comm_req_list_t;
 
@@ -239,8 +239,8 @@ typedef struct MPIU_buf_t {
 } MPIU_buf_t;
 
 typedef struct MPIDI_CH4_Global_t {
-    MPID_Request *request_test;
-    MPID_Comm *comm_test;
+    MPIR_Request *request_test;
+    MPIR_Comm *comm_test;
     int pname_set;
     int pname_len;
     char pname[MPI_MAX_PROCESSOR_NAME];
@@ -251,10 +251,10 @@ typedef struct MPIDI_CH4_Global_t {
 #endif
     MPIDI_CH4U_comm_req_list_t *comm_req_lists;
     OPA_int_t active_progress_hooks;
-    MPID_CommOps         MPID_Comm_fns_store;
+    MPIR_Commops         MPIR_Comm_fns_store;
     progress_hook_slot_t progress_hooks[MAX_PROGRESS_HOOKS];
     MPID_Thread_mutex_t  m[2];
-    MPID_Win *win_hash;
+    MPIR_Win *win_hash;
     int jobid;
 #ifndef MPIDI_CH4U_USE_PER_COMM_QUEUE
     MPIDI_CH4U_rreq_t *posted_list;

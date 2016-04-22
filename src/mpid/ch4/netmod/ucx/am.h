@@ -33,7 +33,7 @@ fn_fail:
 }
 
 
-static inline void MPIDI_CH4_NMI_UCX_am_request_complete(MPID_Request *req)
+static inline void MPIDI_CH4_NMI_UCX_am_request_complete(MPIR_Request *req)
 {
     int count;
     MPIR_cc_decr(req->cc_ptr, &count);
@@ -49,7 +49,7 @@ static inline void MPIDI_CH4_NMI_UCX_send_am_callback(void *request, ucs_status_
     MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
 
     if(ucp_request->req){
-        MPID_Request *req = ucp_request->req;
+        MPIR_Request *req = ucp_request->req;
         int handler_id = req->dev.ch4.ch4u.netmod_am.ucx.handler_id;
 
         if (req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
@@ -91,11 +91,11 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
-                                           MPID_Comm    *comm,
+                                           MPIR_Comm    *comm,
                                            int           handler_id,
                                            const void   *am_hdr,
                                            size_t        am_hdr_sz,
-                                           MPID_Request *sreq,
+                                           MPIR_Request *sreq,
                                            void         *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, c;
@@ -164,14 +164,14 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_send_am(int rank,
-                                       MPID_Comm * comm,
+                                       MPIR_Comm * comm,
                                        int handler_id,
                                        const void *am_hdr,
                                        size_t am_hdr_sz,
                                        const void *data,
                                        MPI_Count count,
                                        MPI_Datatype datatype,
-                                       MPID_Request * sreq, void *netmod_context)
+                                       MPIR_Request * sreq, void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
@@ -180,7 +180,7 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
     char *send_buf;
     size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
+    MPIR_Datatype  *dt_ptr;
     int             dt_contig;
     MPIDI_CH4_NMI_UCX_am_header_t ucx_hdr;
 
@@ -248,11 +248,11 @@ static inline int MPIDI_CH4_NM_send_am(int rank,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
-                                        MPID_Comm * comm,
+                                        MPIR_Comm * comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
                                         size_t iov_len,
-                                        MPID_Request * sreq, void *netmod_context)
+                                        MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -263,14 +263,14 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_send_amv(int rank,
-                                        MPID_Comm * comm,
+                                        MPIR_Comm * comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
                                         size_t iov_len,
                                         const void *data,
                                         MPI_Count count,
                                         MPI_Datatype datatype,
-                                        MPID_Request * sreq, void *netmod_context)
+                                        MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -284,7 +284,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
                                                  int src_rank,
                                                  int handler_id,
                                                  const void *am_hdr,
-                                                 size_t am_hdr_sz, MPID_Request * sreq)
+                                                 size_t am_hdr_sz, MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -300,7 +300,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz,
                                              const void *data, MPI_Count count,
-                                             MPI_Datatype datatype, MPID_Request * sreq)
+                                             MPI_Datatype datatype, MPIR_Request * sreq)
 {
     int mpi_errno = MPI_SUCCESS, c;
     MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
@@ -309,10 +309,10 @@ static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
     char *send_buf;
     size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
+    MPIR_Datatype  *dt_ptr;
     int             dt_contig;
     MPIDI_CH4_NMI_UCX_am_header_t ucx_hdr;
-    MPID_Comm *use_comm;
+    MPIR_Comm *use_comm;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
@@ -380,7 +380,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
                                               struct iovec *am_hdr,
                                               size_t iov_len,
                                               const void *data, MPI_Count count,
-                                              MPI_Datatype datatype, MPID_Request * sreq)
+                                              MPI_Datatype datatype, MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -393,7 +393,7 @@ static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 }
 
 static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
-                                             MPID_Comm * comm,
+                                             MPIR_Comm * comm,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz, void *netmod_context)
@@ -454,7 +454,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     uint64_t ucx_tag;
     char *send_buf;
     MPIDI_CH4_NMI_UCX_am_header_t ucx_hdr;
-    MPID_Comm *use_comm;
+    MPIR_Comm *use_comm;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);

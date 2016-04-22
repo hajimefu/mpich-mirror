@@ -19,17 +19,17 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_iprobe(int source,
                                               int tag,
-                                              MPID_Comm *comm,
+                                              MPIR_Comm *comm,
                                               int context_offset,
                                               int *flag,
                                               MPI_Status *status,
-                                              MPID_Request **message,
+                                              MPIR_Request **message,
                                               uint64_t peek_flags)
 {
     int mpi_errno = MPI_SUCCESS;
     fi_addr_t remote_proc;
     uint64_t match_bits, mask_bits;
-    MPID_Request r, *rreq;      /* don't need to init request, output only */
+    MPIR_Request r, *rreq;      /* don't need to init request, output only */
     struct fi_msg_tagged msg;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
@@ -105,7 +105,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_probe(int source,
                                      int tag,
-                                     MPID_Comm *comm, int context_offset, MPI_Status *status)
+                                     MPIR_Comm *comm, int context_offset, MPI_Status *status)
 {
     int mpi_errno = MPI_SUCCESS, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
@@ -133,9 +133,9 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
-                                       MPID_Comm *comm,
+                                       MPIR_Comm *comm,
                                        int context_offset,
-                                       int *flag, MPID_Request **message, MPI_Status *status)
+                                       int *flag, MPIR_Request **message, MPI_Status *status)
 {
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
@@ -144,7 +144,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
                                                 flag, status, message, FI_CLAIM | FI_COMPLETION);
 
     if(*flag && *message) {
-        (*message)->kind = MPID_REQUEST_MPROBE;
+        (*message)->kind = MPIR_REQUEST_KIND__MPROBE;
         (*message)->comm = comm;
         MPIU_Object_add_ref(comm);
     }
@@ -159,7 +159,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
-                                      MPID_Comm *comm,
+                                      MPIR_Comm *comm,
                                       int context_offset, int *flag, MPI_Status *status)
 {
     int mpi_errno;

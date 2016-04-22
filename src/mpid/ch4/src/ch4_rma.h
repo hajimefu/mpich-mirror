@@ -22,7 +22,7 @@ __CH4_INLINE__ int MPIDI_Put(const void *origin_addr,
                              MPI_Datatype origin_datatype,
                              int target_rank,
                              MPI_Aint target_disp,
-                             int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                             int target_count, MPI_Datatype target_datatype, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_PUT);
@@ -48,7 +48,7 @@ __CH4_INLINE__ int MPIDI_Get(void *origin_addr,
                              MPI_Datatype origin_datatype,
                              int target_rank,
                              MPI_Aint target_disp,
-                             int target_count, MPI_Datatype target_datatype, MPID_Win * win)
+                             int target_count, MPI_Datatype target_datatype, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET);
@@ -75,7 +75,7 @@ __CH4_INLINE__ int MPIDI_Accumulate(const void *origin_addr,
                                     int target_rank,
                                     MPI_Aint target_disp,
                                     int target_count,
-                                    MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
+                                    MPI_Datatype target_datatype, MPI_Op op, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_ACCUMULATE);
@@ -101,7 +101,7 @@ __CH4_INLINE__ int MPIDI_Compare_and_swap(const void *origin_addr,
                                           const void *compare_addr,
                                           void *result_addr,
                                           MPI_Datatype datatype,
-                                          int target_rank, MPI_Aint target_disp, MPID_Win * win)
+                                          int target_rank, MPI_Aint target_disp, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMPARE_AND_SWAP);
@@ -129,7 +129,7 @@ __CH4_INLINE__ int MPIDI_Raccumulate(const void *origin_addr,
                                      MPI_Aint target_disp,
                                      int target_count,
                                      MPI_Datatype target_datatype,
-                                     MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                     MPI_Op op, MPIR_Win * win, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RACCUMULATE);
@@ -161,7 +161,7 @@ __CH4_INLINE__ int MPIDI_Rget_accumulate(const void *origin_addr,
                                          MPI_Aint target_disp,
                                          int target_count,
                                          MPI_Datatype target_datatype,
-                                         MPI_Op op, MPID_Win * win, MPID_Request ** request)
+                                         MPI_Op op, MPIR_Win * win, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RGET_ACCUMULATE);
@@ -188,7 +188,7 @@ __CH4_INLINE__ int MPIDI_Fetch_and_op(const void *origin_addr,
                                       void *result_addr,
                                       MPI_Datatype datatype,
                                       int target_rank,
-                                      MPI_Aint target_disp, MPI_Op op, MPID_Win * win)
+                                      MPI_Aint target_disp, MPI_Op op, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FETCH_AND_OP);
@@ -216,7 +216,7 @@ __CH4_INLINE__ int MPIDI_Rget(void *origin_addr,
                               int target_rank,
                               MPI_Aint target_disp,
                               int target_count,
-                              MPI_Datatype target_datatype, MPID_Win * win, MPID_Request ** request)
+                              MPI_Datatype target_datatype, MPIR_Win * win, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RGET);
@@ -244,7 +244,7 @@ __CH4_INLINE__ int MPIDI_Rput(const void *origin_addr,
                               int target_rank,
                               MPI_Aint target_disp,
                               int target_count,
-                              MPI_Datatype target_datatype, MPID_Win * win, MPID_Request ** request)
+                              MPI_Datatype target_datatype, MPIR_Win * win, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RPUT);
@@ -275,7 +275,7 @@ __CH4_INLINE__ int MPIDI_Get_accumulate(const void *origin_addr,
                                         int target_rank,
                                         MPI_Aint target_disp,
                                         int target_count,
-                                        MPI_Datatype target_datatype, MPI_Op op, MPID_Win * win)
+                                        MPI_Datatype target_datatype, MPI_Op op, MPIR_Win * win)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET_ACCUMULATE);

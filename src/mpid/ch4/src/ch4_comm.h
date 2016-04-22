@@ -13,50 +13,50 @@
 
 #include "ch4_impl.h"
 
-__CH4_INLINE__ int MPIDI_Comm_AS_enabled(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_Comm_AS_enabled(MPIR_Comm * comm)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_reenable_anysource(MPID_Comm * comm, MPID_Group ** failed_group_ptr)
+__CH4_INLINE__ int MPIDI_Comm_reenable_anysource(MPIR_Comm * comm, MPIR_Group ** failed_group_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_remote_group_failed(MPID_Comm * comm, MPID_Group ** failed_group_ptr)
+__CH4_INLINE__ int MPIDI_Comm_remote_group_failed(MPIR_Comm * comm, MPIR_Group ** failed_group_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_group_failed(MPID_Comm * comm_ptr, MPID_Group ** failed_group_ptr)
+__CH4_INLINE__ int MPIDI_Comm_group_failed(MPIR_Comm * comm_ptr, MPIR_Group ** failed_group_ptr)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_failure_ack(MPID_Comm * comm_ptr)
+__CH4_INLINE__ int MPIDI_Comm_failure_ack(MPIR_Comm * comm_ptr)
 {
     MPIU_Assert(0);
     return 0;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_failure_get_acked(MPID_Comm * comm_ptr,
-                                                MPID_Group ** failed_group_ptr)
+__CH4_INLINE__ int MPIDI_Comm_failure_get_acked(MPIR_Comm * comm_ptr,
+                                                MPIR_Group ** failed_group_ptr)
 {
     MPIU_Assert(0);
     return 0;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_revoke(MPID_Comm * comm_ptr, int is_remote)
+__CH4_INLINE__ int MPIDI_Comm_revoke(MPIR_Comm * comm_ptr, int is_remote)
 {
     MPIU_Assert(0);
     return 0;
 }
 
-__CH4_INLINE__ int MPIDI_Comm_get_all_failed_procs(MPID_Comm * comm_ptr, MPID_Group ** failed_group,
+__CH4_INLINE__ int MPIDI_Comm_get_all_failed_procs(MPIR_Comm * comm_ptr, MPIR_Group ** failed_group,
                                                    int tag)
 {
     MPIU_Assert(0);
@@ -67,11 +67,11 @@ __CH4_INLINE__ int MPIDI_Comm_get_all_failed_procs(MPID_Comm * comm_ptr, MPID_Gr
 #define FUNCNAME MPIDI_Comm_split_type
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_split_type(MPID_Comm  *comm_ptr,
+__CH4_INLINE__ int MPIDI_Comm_split_type(MPIR_Comm  *comm_ptr,
                                          int         split_type,
                                          int         key,
-                                         MPID_Info  *info_ptr,
-                                         MPID_Comm **newcomm_ptr)
+                                         MPIR_Info  *info_ptr,
+                                         MPIR_Comm **newcomm_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     int            idx;
@@ -95,7 +95,7 @@ __CH4_INLINE__ int MPIDI_Comm_split_type(MPID_Comm  *comm_ptr,
 #define FUNCNAME MPIDI_Comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_Comm_create(MPIR_Comm * comm)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
@@ -119,7 +119,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPID_Comm * comm)
 
         /* For now, we'll only deal with locality for intracommunicators. For
          * intercommunicators, we'll just set all locality to remote. */
-        if (comm->comm_kind == MPID_INTRACOMM) {
+        if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
             for (i = 0; i < comm->remote_size; i++) {
                 MPIDI_Comm_get_lpid(comm, i, &lpid, TRUE);
                 is_local = MPIDI_CH4_rank_is_local(lpid, MPIR_Process.comm_world);
@@ -150,7 +150,7 @@ fn_exit:
 #define FUNCNAME MPIDI_Comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_destroy(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);

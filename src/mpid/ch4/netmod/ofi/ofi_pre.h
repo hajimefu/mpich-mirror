@@ -44,8 +44,8 @@
 
 /* Typedefs */
 
-struct MPID_Comm;
-struct MPID_Request;
+struct MPIR_Comm;
+struct MPIR_Request;
 
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
 typedef struct MPIDI_CH4_NMI_OFI_VCR {
@@ -131,7 +131,7 @@ typedef struct {
     void                          *pack_buffer;
     void                          *rreq_ptr;
     void                          *am_hdr;
-    int (*cmpl_handler_fn)(struct MPID_Request *req);
+    int (*cmpl_handler_fn)(struct MPIR_Request *req);
     uint16_t                      am_hdr_sz;
     uint8_t                       pad[6];
     MPIDI_CH4_NMI_OFI_Am_header_t msg_hdr;
@@ -154,7 +154,7 @@ typedef struct {
     struct fi_context    context;  /* fixed field, do not move */
     int                  event_id; /* fixed field, do not move */
     int                  util_id;
-    struct MPID_Comm    *util_comm;
+    struct MPIR_Comm    *util_comm;
     MPI_Datatype         datatype;
     MPIDI_CH4_NMI_OFI_Noncontig_t *noncontig;
     /* persistent send fields */

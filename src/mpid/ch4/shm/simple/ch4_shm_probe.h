@@ -16,12 +16,12 @@
 
 static inline int MPIDI_CH4_SHM_improbe(int source,
                                         int tag,
-                                        MPID_Comm *comm,
+                                        MPIR_Comm *comm,
                                         int context_offset,
-                                        int *flag, MPID_Request **message, MPI_Status *status)
+                                        int *flag, MPIR_Request **message, MPI_Status *status)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *req, *matched_req = NULL;
+    MPIR_Request *req, *matched_req = NULL;
     int count = 0;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IMPROBE);
@@ -50,7 +50,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
 
     if(*message) {
         MPIDI_CH4_SHMI_SIMPLE_Request_queue_t mqueue = {NULL,NULL};
-        MPID_Request *prev_req = NULL, *next_req = NULL;
+        MPIR_Request *prev_req = NULL, *next_req = NULL;
         req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
 
         while(req) {
@@ -73,7 +73,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
         }
 
         *flag = 1;
-        matched_req->kind = MPID_REQUEST_MPROBE;
+        matched_req->kind = MPIR_REQUEST_KIND__MPROBE;
         matched_req->comm = comm;
         MPIR_Comm_add_ref(comm);
         status->MPI_TAG = matched_req->status.MPI_TAG;
@@ -92,11 +92,11 @@ fn_exit:
 
 static inline int MPIDI_CH4_SHM_iprobe(int source,
                                        int tag,
-                                       MPID_Comm *comm,
+                                       MPIR_Comm *comm,
                                        int context_offset, int *flag, MPI_Status *status)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *req, *matched_req = NULL;
+    MPIR_Request *req, *matched_req = NULL;
     int count = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_IPROBE);

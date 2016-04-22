@@ -31,18 +31,18 @@ static inline int MPIDI_CH4U_get_context(uint64_t match_bits)
 static inline int MPIDI_CH4U_get_context_index(uint64_t context_id)
 {
     int raw_prefix, idx, bitpos, gen_id;
-    raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX, context_id);
+    raw_prefix = MPIR_CONTEXT_READ_FIELD(PREFIX, context_id);
     idx = raw_prefix / MPIR_CONTEXT_INT_BITS;
     bitpos = raw_prefix % MPIR_CONTEXT_INT_BITS;
     gen_id = (idx * MPIR_CONTEXT_INT_BITS) + (31 - bitpos);
     return gen_id;
 }
 
-static inline MPID_Comm *MPIDI_CH4U_context_id_to_comm(uint64_t context_id)
+static inline MPIR_Comm *MPIDI_CH4U_context_id_to_comm(uint64_t context_id)
 {
     int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
-    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
-    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    int subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
     MPIU_Assert(subcomm_type <= 3);
     MPIU_Assert(is_localcomm <= 2);
     return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
@@ -51,14 +51,14 @@ static inline MPID_Comm *MPIDI_CH4U_context_id_to_comm(uint64_t context_id)
 static inline MPIDI_CH4U_rreq_t **MPIDI_CH4U_context_id_to_uelist(uint64_t context_id)
 {
     int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
-    int subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, context_id);
-    int is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
+    int subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, context_id);
+    int is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
     MPIU_Assert(subcomm_type <= 3);
     MPIU_Assert(is_localcomm <= 2);
     return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
 }
 
-static inline uint64_t MPIDI_CH4U_generate_win_id(MPID_Comm *comm_ptr)
+static inline uint64_t MPIDI_CH4U_generate_win_id(MPIR_Comm *comm_ptr)
 {
     /* context id lower bits, window instance upper bits */
     return 1 + (((uint64_t)comm_ptr->context_id) |
@@ -71,7 +71,7 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_id_to_context(uint64_t win_id)
     return (win_id - 1) & 0xffffffff;
 }
 
-static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPID_Win *win)
+static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
 {
     return MPIDI_CH4U_win_id_to_context(MPIDI_CH4U_WIN(win, win_id));
 }
@@ -80,28 +80,28 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPID_Win *win)
 #define FUNCNAME MPIDI_CH4I_alloc_and_init_req
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPID_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
+static inline MPIR_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
 {
-    MPID_Request *req;
+    MPIR_Request *req;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
 
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIDI_CH4U_REQUEST(req, req) = NULL;
     MPIR_cc_set(&req->cc, 1);
     MPIU_Object_set_ref(req, refcount);
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
     req->cc_ptr            = &req->cc;
-    req->greq_fns          = NULL;
+    req->u.ureq.greq_fns          = NULL;
     req->status.MPI_SOURCE = MPI_UNDEFINED;
     req->status.MPI_TAG    = MPI_UNDEFINED;
     req->status.MPI_ERROR  = MPI_SUCCESS;
     req->comm              = NULL;
-    req->errflag           = MPIR_ERR_NONE;
+    req->u.nbc.errflag     = MPIR_ERR_NONE;
     MPIR_REQUEST_CLEAR_DBG(req);
 #ifdef MPIDI_BUILD_CH4_SHM
     MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
@@ -114,12 +114,12 @@ static inline MPID_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
 #define FUNCNAME MPIDI_CH4I_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4I_request_release(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_CH4I_request_release(MPIR_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
     int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIU_Object_release_ref(req, &count);
     MPIU_Assert(count >= 0);
 
@@ -129,8 +129,8 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPID_Request * req)
         if (req->comm)
             MPIR_Comm_release(req->comm);
 
-        if (req->greq_fns)
-            MPL_free(req->greq_fns);
+        if (req->u.ureq.greq_fns)
+            MPL_free(req->u.ureq.greq_fns);
 
         MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
     }
@@ -142,12 +142,12 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPID_Request * req)
 #define FUNCNAME MPIDI_CH4U_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_request_release(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_CH4U_request_release(MPIR_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
 
-    if (req->kind == MPID_PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
+    if (req->kind == MPIR_REQUEST_KIND__PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
         MPIDI_CH4I_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
     }
     MPIDI_CH4I_request_release(req);
@@ -158,7 +158,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_release(MPID_Request * req)
 #define FUNCNAME MPIDI_CH4U_request_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
+__CH4_INLINE__ void MPIDI_CH4U_request_complete(MPIR_Request *req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
@@ -172,7 +172,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\
 	    HANDLE_GET_KIND((datatype_)) != HANDLE_KIND_BUILTIN)	\
 	{								\
-	    MPID_Datatype *dtp_ = NULL;					\
+	    MPIR_Datatype *dtp_ = NULL;					\
 	    MPID_Datatype_get_ptr((datatype_), dtp_);			\
 	    MPID_Datatype_add_ref(dtp_);				\
 	}								\
@@ -185,7 +185,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
 	if ((datatype_) != MPI_DATATYPE_NULL &&				\
 	    HANDLE_GET_KIND((datatype_)) != HANDLE_KIND_BUILTIN)	\
 	{								\
-	    MPID_Datatype *dtp_ = NULL;					\
+	    MPIR_Datatype *dtp_ = NULL;					\
 	    MPID_Datatype_get_ptr((datatype_), dtp_);			\
 	    MPID_Datatype_release(dtp_);				\
 	}								\
@@ -248,7 +248,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
        }							\
       else							\
       {								\
-       MPID_Datatype *_dt_ptr;					\
+       MPIR_Datatype *_dt_ptr;					\
        MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
        (_dt_contig_out) = (_dt_ptr) ? (_dt_ptr)->is_contig : 1; \
       }                                                         \
@@ -266,7 +266,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
       }                                                                 \
       else								\
       {                                                                 \
-	  MPID_Datatype *_dt_ptr;					\
+	  MPIR_Datatype *_dt_ptr;					\
 	  MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
           if (_dt_ptr)                                                  \
           {                                                             \
@@ -291,7 +291,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
         }                                                               \
         else                                                            \
         {                                                               \
-            MPID_Datatype *_dt_ptr;                                     \
+            MPIR_Datatype *_dt_ptr;                                     \
             MPID_Datatype_get_ptr((_datatype), (_dt_ptr));              \
             (_data_sz_out)   = (_dt_ptr) ? (size_t)(_count) *   \
                 (_dt_ptr)->size : 0;                                    \
@@ -312,7 +312,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
 	}								\
 	else								\
 	{								\
-	    MPID_Datatype *_dt_ptr;					\
+	    MPIR_Datatype *_dt_ptr;					\
 	    MPID_Datatype_get_ptr((_datatype), (_dt_ptr));		\
             if (_dt_ptr)                                                \
             {                                                           \
@@ -336,7 +336,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPID_Request *req)
     if ((rreq_) != NULL) {                                              \
       MPIU_Object_set_ref((rreq_), 1);                                  \
       MPIR_cc_set(&(rreq_)->cc, 0);                                     \
-      (rreq_)->kind = MPID_REQUEST_RECV;                                \
+      (rreq_)->kind = MPIR_REQUEST_KIND__RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
     }                                                                   \
     else {                                                              \
@@ -392,9 +392,9 @@ static inline uint64_t MPIDI_CH4U_init_recvtag(uint64_t * mask_bits,
 #define FUNCNAME MPIDI_CH4I_valid_group_rank
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4I_valid_group_rank(MPID_Comm  *comm,
+static inline int MPIDI_CH4I_valid_group_rank(MPIR_Comm  *comm,
                                               int         rank,
-                                              MPID_Group *grp)
+                                              MPIR_Group *grp)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4I_VALID_GROUP_RANK);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_VALID_GROUP_RANK);
@@ -596,7 +596,7 @@ do {                                                                  \
   Return zero to let the target side calculate the actual address
   (only offset from window base is given to the target in this case)
 */
-static inline uintptr_t MPIDI_CH4I_win_base_at_origin(const MPID_Win *win, int target_rank)
+static inline uintptr_t MPIDI_CH4I_win_base_at_origin(const MPIR_Win *win, int target_rank)
 {
     /* TODO: In future we may want to calculate the full virtual address
        in the target at the origin side. It can be done by looking at
@@ -609,7 +609,7 @@ static inline uintptr_t MPIDI_CH4I_win_base_at_origin(const MPID_Win *win, int t
   If MPIDI_CH4I_win_base_at_origin calculates the full virtual address
   this function must return zero
 */
-static inline uintptr_t MPIDI_CH4I_win_base_at_target(const MPID_Win *win)
+static inline uintptr_t MPIDI_CH4I_win_base_at_target(const MPIR_Win *win)
 {
     return (uintptr_t) win->base;
 }

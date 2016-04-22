@@ -241,7 +241,7 @@ typedef struct {
     char               pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context  context;          /* fixed field, do not move */
     int                event_id;         /* fixed field, do not move */
-    MPID_Request      *signal_req;
+    MPIR_Request      *signal_req;
 } MPIDI_CH4_NMI_OFI_Ssendack_request_t;
 
 typedef struct {
@@ -382,7 +382,7 @@ typedef struct {
     int16_t       type;
     int16_t       seqno;
     int           origin_rank;
-    MPID_Request *ackreq;
+    MPIR_Request *ackreq;
     char         *send_buf;
     size_t        msgsize;
     int           comm_id;
@@ -419,7 +419,7 @@ typedef struct {
 } MPIDI_CH4_NMI_OFI_Iovec_state_t;
 
 typedef struct {
-    MPID_Datatype  *pointer;
+    MPIR_Datatype  *pointer;
     MPI_Datatype    type;
     int             count;
     int             contig;
@@ -481,7 +481,7 @@ typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context  context;          /* fixed field, do not move */
     int                event_id;         /* fixed field, do not move */
-    MPID_Request      *parent;           /* Parent request           */
+    MPIR_Request      *parent;           /* Parent request           */
 } MPIDI_CH4_NMI_OFI_Chunk_request;
 
 typedef struct {
@@ -489,11 +489,11 @@ typedef struct {
     struct fi_context                 context;          /* fixed field, do not move */
     int                               event_id;         /* fixed field, do not move */
     int (*done_fn)(struct fi_cq_tagged_entry *wc,
-                   MPID_Request              *req);
+                   MPIR_Request              *req);
     MPIDI_CH4_NMI_OFI_Send_control_t  remote_info;
     size_t                            cur_offset;
-    MPID_Comm                        *comm_ptr;
-    MPID_Request                     *localreq;
+    MPIR_Comm                        *comm_ptr;
+    MPIR_Request                     *localreq;
     struct fi_cq_tagged_entry         wc;
 } MPIDI_CH4_NMI_OFI_Huge_chunk_t;
 
@@ -512,7 +512,7 @@ typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
 extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;
 extern MPIDI_CH4_NMI_OFI_Global_t       MPIDI_Global;
 extern MPIU_Object_alloc_t              MPIDI_Request_mem;
-extern MPID_Request                     MPIDI_Request_direct[];
+extern MPIR_Request                     MPIDI_Request_direct[];
 extern int                              MPIR_Datatype_init_names(void);
 
 EXTERN_C_END

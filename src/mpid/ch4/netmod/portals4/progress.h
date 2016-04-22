@@ -16,7 +16,7 @@
 static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
-    MPID_Request *rreq = NULL;
+    MPIR_Request *rreq = NULL;
     void *p_data;
     void *in_data;
     size_t data_sz, in_data_sz;
@@ -97,7 +97,7 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
         case PTL_EVENT_ACK:
             {
                 int count;
-                MPID_Request *sreq = (MPID_Request *)e.user_ptr;
+                MPIR_Request *sreq = (MPIR_Request *)e.user_ptr;
                 int handler_id = sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id;
 
                 MPIR_cc_decr(sreq->cc_ptr, &count);

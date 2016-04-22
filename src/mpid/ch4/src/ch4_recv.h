@@ -22,8 +22,8 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
                               MPI_Datatype datatype,
                               int rank,
                               int tag,
-                              MPID_Comm * comm,
-                              int context_offset, MPI_Status * status, MPID_Request ** request)
+                              MPIR_Comm * comm,
+                              int context_offset, MPI_Status * status, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RECV);
@@ -98,9 +98,9 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
                                    MPI_Datatype datatype,
                                    int rank,
                                    int tag,
-                                   MPID_Comm * comm,
+                                   MPIR_Comm * comm,
                                    int context_offset,
-                                   MPID_Request ** request)
+                                   MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RECV_INIT);
@@ -161,7 +161,7 @@ fn_fail:
 __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
                                int count,
                                MPI_Datatype datatype,
-                               MPID_Request * message,
+                               MPIR_Request * message,
                                MPI_Status * status)
 {
     int mpi_errno;
@@ -170,7 +170,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
 
     MPI_Request   req_handle;
     int           active_flag;
-    MPID_Request *rreq = NULL;
+    MPIR_Request *rreq = NULL;
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_CH4_NM_imrecv(buf, count, datatype, message, &rreq);
@@ -216,7 +216,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
-    while (!MPID_Request_is_complete(rreq)) {
+    while (!MPIR_Request_is_complete(rreq)) {
         MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
         MPIDI_CH4_SHM_progress(0);
@@ -241,7 +241,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
 __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
                                 int count,
                                 MPI_Datatype datatype,
-                                MPID_Request * message, MPID_Request ** rreqp)
+                                MPIR_Request * message, MPIR_Request ** rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IMRECV);
@@ -249,7 +249,7 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
 
     if (message == NULL)
     {
-        MPID_Request *rreq;
+        MPIR_Request *rreq;
         MPIDI_Request_create_null_rreq(rreq, mpi_errno, goto fn_fail);
         *rreqp = rreq;
         goto fn_exit;
@@ -289,7 +289,7 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
                                MPI_Datatype datatype,
                                int rank,
                                int tag,
-                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IRECV);
@@ -347,7 +347,7 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
 #define FUNCNAME MPIDI_Cancel_Recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Cancel_recv(MPID_Request * rreq)
+__CH4_INLINE__ int MPIDI_Cancel_recv(MPIR_Request * rreq)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_CANCEL_RECV);

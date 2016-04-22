@@ -13,7 +13,7 @@
 
 #include "impl.h"
 
-static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm * comm)
 {
     int ret;
     MPIDI_STATE_DECL(MPIDI_NETMOD_RANK_IS_LOCAL);

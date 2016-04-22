@@ -19,7 +19,7 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_control_win(MPIDI_CH4_NMI_OFI_Win_control_t *control,
                                                    int                  rank,
-                                                   MPID_Win            *win,
+                                                   MPIR_Win            *win,
                                                    int                  use_comm,
                                                    int                  use_lock)
 {
@@ -51,8 +51,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_control_send(MPIDI_CH4_NMI_OFI_Send_contr
                                                     char                 *send_buf,
                                                     size_t                msgsize,
                                                     int                   rank,
-                                                    MPID_Comm            *comm_ptr,
-                                                    MPID_Request         *ackreq,
+                                                    MPIR_Comm            *comm_ptr,
+                                                    MPIR_Request         *ackreq,
                                                     int                   need_lock)
 {
     int mpi_errno = MPI_SUCCESS;

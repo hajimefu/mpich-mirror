@@ -22,7 +22,7 @@ __CH4_INLINE__ int MPIDI_Send(const void *buf,
                               MPI_Datatype datatype,
                               int rank,
                               int tag,
-                              MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                              MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_SEND);
@@ -57,7 +57,7 @@ __CH4_INLINE__ int MPIDI_Isend(const void *buf,
                                MPI_Datatype datatype,
                                int rank,
                                int tag,
-                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_ISEND);
@@ -94,7 +94,7 @@ __CH4_INLINE__ int MPIDI_Rsend(const void *buf,
                                MPI_Datatype datatype,
                                int rank,
                                int tag,
-                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RSEND);
@@ -130,7 +130,7 @@ __CH4_INLINE__ int MPIDI_Irsend(const void *buf,
                                 MPI_Datatype datatype,
                                 int rank,
                                 int tag,
-                                MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_IRSEND);
@@ -165,7 +165,7 @@ __CH4_INLINE__ int MPIDI_Ssend(const void *buf,
                                MPI_Datatype datatype,
                                int rank,
                                int tag,
-                               MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                               MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_SSEND);
@@ -200,7 +200,7 @@ __CH4_INLINE__ int MPIDI_Issend(const void *buf,
                                 MPI_Datatype datatype,
                                 int rank,
                                 int tag,
-                                MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_ISSEND);
@@ -231,7 +231,7 @@ __CH4_INLINE__ int MPIDI_Issend(const void *buf,
 #define FUNCNAME MPIDI_Startall
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Startall(int count, MPID_Request * requests[])
+__CH4_INLINE__ int MPIDI_Startall(int count, MPIR_Request * requests[])
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_STARTALL);
@@ -247,10 +247,10 @@ __CH4_INLINE__ int MPIDI_Startall(int count, MPID_Request * requests[])
             mpi_errno = MPIDI_CH4_SHM_startall(1, &requests[i]);
             if (mpi_errno == MPI_SUCCESS) {
                 mpi_errno = MPIDI_CH4_NM_startall(1, &MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i]));
-                MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i]->partner_request) =
-                    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i])->partner_request;
-                MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i])->partner_request) =
-                    requests[i]->partner_request;
+                MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i]->u.persist.real_request) =
+                    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i])->u.persist.real_request;
+                MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(requests[i])->u.persist.real_request) =
+                    requests[i]->u.persist.real_request;
             }
         }
         else if(MPIDI_CH4I_REQUEST(requests[i], is_local))
@@ -278,7 +278,7 @@ __CH4_INLINE__ int MPIDI_Send_init(const void *buf,
                                    MPI_Datatype datatype,
                                    int rank,
                                    int tag,
-                                   MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                   MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_SEND_INIT);
@@ -316,7 +316,7 @@ __CH4_INLINE__ int MPIDI_Ssend_init(const void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                    MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_SSEND_INIT);
@@ -356,7 +356,7 @@ __CH4_INLINE__ int MPIDI_Bsend_init(const void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                    MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_BSEND_INIT);
@@ -396,7 +396,7 @@ __CH4_INLINE__ int MPIDI_Rsend_init(const void *buf,
                                     MPI_Datatype datatype,
                                     int rank,
                                     int tag,
-                                    MPID_Comm * comm, int context_offset, MPID_Request ** request)
+                                    MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RSEND_INIT);
@@ -432,7 +432,7 @@ __CH4_INLINE__ int MPIDI_Rsend_init(const void *buf,
 #define FUNCNAME MPIDI_Cancel_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Cancel_send(MPID_Request * sreq)
+__CH4_INLINE__ int MPIDI_Cancel_send(MPIR_Request * sreq)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_CANCEL_SEND);

@@ -58,8 +58,8 @@ struct MPIDI_CH4_SHMI_SIMPLE_Vcrt_t {
 /* general send/recv queue types, macros and objects    */
 /* ---------------------------------------------------- */
 typedef struct {
-    MPID_Request *head;
-    MPID_Request *tail;
+    MPIR_Request *head;
+    MPIR_Request *tail;
 } MPIDI_CH4_SHMI_SIMPLE_Request_queue_t;
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_COMPLETE(req_)    \
@@ -82,7 +82,7 @@ typedef struct {
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE(req_p,prev_req,queue) \
 { \
-    MPID_Request *next = MPIDI_CH4_SHMI_SIMPLE_REQUEST(*(req_p))->next; \
+    MPIR_Request *next = MPIDI_CH4_SHMI_SIMPLE_REQUEST(*(req_p))->next; \
     if ((queue).head == *(req_p)) \
         (queue).head = next; \
     else \
@@ -94,7 +94,7 @@ typedef struct {
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(req_p,prev_req,queue,err) \
 { \
-    MPID_Request *next = MPIDI_CH4_SHMI_SIMPLE_REQUEST(*(req_p))->next; \
+    MPIR_Request *next = MPIDI_CH4_SHMI_SIMPLE_REQUEST(*(req_p))->next; \
     if ((queue).head == *(req_p)) \
         (queue).head = next; \
     else \
@@ -109,15 +109,15 @@ typedef struct {
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_SREQ(sreq_)	\
 {								\
     MPIDI_CH4_SHMI_SIMPLE_REQUEST_ALLOC_AND_INIT(sreq_,2);      \
-    (sreq_)->kind = MPID_REQUEST_SEND;				\
-    (sreq_)->partner_request   = NULL;                          \
+    (sreq_)->kind = MPIR_REQUEST_KIND__SEND;				\
+    (sreq_)->u.persist.real_request   = NULL;                          \
 }
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_RREQ(rreq_)	\
 {								\
     MPIDI_CH4_SHMI_SIMPLE_REQUEST_ALLOC_AND_INIT(rreq_,2);      \
-    (rreq_)->kind = MPID_REQUEST_RECV;				\
-    (rreq_)->partner_request   = NULL;                          \
+    (rreq_)->kind = MPIR_REQUEST_KIND__RECV;				\
+    (rreq_)->u.persist.real_request   = NULL;                          \
 }
 
 /* ---------------------------------------------------- */
@@ -147,15 +147,15 @@ typedef struct {
  */
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_ALLOC_AND_INIT(req,count)     \
   do {                                                              \
-    (req) = (MPID_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);      \
+    (req) = (MPIR_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);      \
     if (req == NULL)                                                       \
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
-                == MPID_REQUEST);                       \
+                == MPIR_REQUEST);                       \
     MPIR_cc_set(&req->cc, 1);                           \
     req->cc_ptr = &req->cc;                             \
     MPIU_Object_set_ref(req, count);                    \
-    req->greq_fns          = NULL;                      \
+    req->u.ureq.greq_fns          = NULL;                      \
     MPIR_STATUS_SET_COUNT(req->status, 0);              \
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);     \
     req->status.MPI_SOURCE    = MPI_UNDEFINED;          \

@@ -19,12 +19,12 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 extern MPIU_Object_alloc_t MPIDI_Request_mem;
-static inline void MPIDI_CH4_NM_am_request_init(MPID_Request *req)
+static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 {
     req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer = NULL;
 }
 
-static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
+static inline void MPIDI_CH4_NM_am_request_finalize(MPIR_Request *req)
 {
     if ((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
         MPL_free((req)->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
@@ -34,7 +34,7 @@ static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
 
 
 #if 0
-static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
+static inline void MPIDI_CH4_NM_request_release(MPIR_Request * req)
 {
     int count;
 
@@ -42,7 +42,7 @@ static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH4_NM_REQUEST_RELEASE);
 
 
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIU_Object_release_ref(req, &count);
     printf("release request %d %d\n", count,MPIDI_CH4_NMI_UCX_REQ(req).is_ucx_req);
     MPIU_Assert(count >= 0);
@@ -52,8 +52,8 @@ static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
             MPIR_Comm_release(req->comm);
             req->comm = NULL;
         }
-        if (req->greq_fns)
-            MPL_free(req->greq_fns);
+        if (req->u.ureq.greq_fns)
+            MPL_free(req->u.ureq.greq_fns);
         if(!MPIDI_CH4_NMI_UCX_REQ(req).is_ucx_req)
              MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
         else{
@@ -71,24 +71,24 @@ static inline void MPIDI_CH4_NM_request_release(MPID_Request * req)
 #define FUNCNAME MPIDI_netmod_request_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_netmod_request_init(MPID_Request* req)
+static inline void MPIDI_netmod_request_init(MPIR_Request* req)
 {
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_INIT);
 
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, 2);
-    req->greq_fns = NULL;
+    req->u.ureq.greq_fns = NULL;
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
     req->status.MPI_SOURCE = MPI_UNDEFINED;
     req->status.MPI_TAG = MPI_UNDEFINED;
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
-    req->errflag = MPIR_ERR_NONE;
+    req->u.nbc.errflag = MPIR_ERR_NONE;
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMODE_REQUEST_INIT);
 
@@ -97,29 +97,29 @@ static inline void MPIDI_netmod_request_init(MPID_Request* req)
 #define FUNCNAME MPIDI_CH4_NM_request_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPID_Request* MPIDI_CH4_NMI_UCX_Request_create()
+static inline MPIR_Request* MPIDI_CH4_NMI_UCX_Request_create()
 {
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_CREATE);
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
 
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, 2);
-    req->greq_fns = NULL;
+    req->u.ureq.greq_fns = NULL;
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
     req->status.MPI_SOURCE = MPI_UNDEFINED;
     req->status.MPI_TAG = MPI_UNDEFINED;
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->comm = NULL;
-    req->errflag = MPIR_ERR_NONE;
+    req->u.nbc.errflag = MPIR_ERR_NONE;
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMODE_REQUEST_CREATE);
     return req;
@@ -128,47 +128,47 @@ static inline MPID_Request* MPIDI_CH4_NMI_UCX_Request_create()
 #define FUNCNAME MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPID_Request *MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
+static inline MPIR_Request *MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
 {
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
 
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIR_cc_set(&req->cc, 0);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, 1);
-    req->greq_fns = NULL;
+    req->u.ureq.greq_fns = NULL;
     req->status.MPI_ERROR = MPI_SUCCESS;
-    req->kind = MPID_REQUEST_SEND;
+    req->kind = MPIR_REQUEST_KIND__SEND;
     req->comm = NULL;
-    req->errflag = MPIR_ERR_NONE;
+    req->u.nbc.errflag = MPIR_ERR_NONE;
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
     return req;
 }
-static inline MPID_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
+static inline MPIR_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
 {
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
 
-    req->kind = MPID_REQUEST_RECV;
-    req->partner_request   = NULL;
+    req->kind = MPIR_REQUEST_KIND__RECV;
+    req->u.persist.real_request   = NULL;
     MPIR_cc_set(&req->cc, 0);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, 1);
-    req->greq_fns = NULL;
+    req->u.ureq.greq_fns = NULL;
     MPIR_STATUS_SET_COUNT(req->status, 0);
     req->status.MPI_ERROR = MPI_SUCCESS;
-    req->errflag = MPIR_ERR_NONE;
-    req->kind = MPID_REQUEST_RECV;
+    req->u.nbc.errflag = MPIR_ERR_NONE;
+    req->kind = MPIR_REQUEST_KIND__RECV;
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
     return req;
@@ -187,7 +187,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_send_callback(void *request, ucs_sta
     int mpi_errno;
 
     MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
-    MPID_Request *req = NULL;
+    MPIR_Request *req = NULL;
     if(ucp_request->req){
         req = ucp_request->req;
         MPIR_cc_decr(req->cc_ptr, &c);
@@ -214,7 +214,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_sta
     int count;
     int mpi_errno;
     MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
-    MPID_Request *rreq = NULL;
+    MPIR_Request *rreq = NULL;
     if(!ucp_request->req) {
         rreq = MPIDI_CH4_NM_UCX_Alloc_recv_request_done();
         rreq->status.MPI_SOURCE = MPIDI_CH4_NMI_UCX_get_source(info->sender_tag);

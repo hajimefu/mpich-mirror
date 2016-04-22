@@ -140,9 +140,9 @@ fn_exit:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
-                                                MPID_Comm  *comm,
+                                                MPIR_Comm  *comm,
                                                 void      **base,
-                                                MPID_Win   *win)
+                                                MPIR_Win   *win)
 {
     int mpi_errno = MPI_SUCCESS;
     unsigned  test, result;

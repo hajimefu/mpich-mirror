@@ -14,31 +14,31 @@
 #include "ch4_impl.h"
 #include "ch4r_buf.h"
 
-__CH4_INLINE__ int MPIDI_Request_is_anysource(MPID_Request * req)
+__CH4_INLINE__ int MPIDI_Request_is_anysource(MPIR_Request * req)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ int MPIDI_Request_is_pending_failure(MPID_Request * req)
+__CH4_INLINE__ int MPIDI_Request_is_pending_failure(MPIR_Request * req)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-__CH4_INLINE__ void MPIDI_Request_set_completed(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_Request_set_completed(MPIR_Request * req)
 {
     MPIR_cc_set(&req->cc, 0);
     return;
 }
 
-__CH4_INLINE__ void MPIDI_Request_add_ref(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_Request_add_ref(MPIR_Request * req)
 {
     MPIR_Request_add_ref(req);
     return;
 }
 
-__CH4_INLINE__ void MPIDI_Request_release_ref(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_Request_release_ref(MPIR_Request * req)
 {
     int inuse;
     MPIR_Request_release_ref(req, &inuse);
@@ -80,7 +80,7 @@ __CH4_INLINE__ void MPIDI_Request_release_ref(MPID_Request * req)
 #define FUNCNAME MPIDI_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
+__CH4_INLINE__ void MPIDI_Request_release(MPIR_Request * req)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_RELEASE);
@@ -94,7 +94,7 @@ __CH4_INLINE__ void MPIDI_Request_release(MPID_Request * req)
 #define FUNCNAME MPIDI_request_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Request_complete(MPID_Request * req)
+__CH4_INLINE__ int MPIDI_Request_complete(MPIR_Request * req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
@@ -106,9 +106,9 @@ __CH4_INLINE__ int MPIDI_Request_complete(MPID_Request * req)
 #define FUNCNAME MPIDI_request_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPID_Request *MPIDI_Request_create(void)
+__CH4_INLINE__ MPIR_Request *MPIDI_Request_create(void)
 {
-    MPID_Request *req;
+    MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQEUST_CREATE);
 

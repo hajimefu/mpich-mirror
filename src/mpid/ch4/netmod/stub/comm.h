@@ -17,7 +17,7 @@
 #define FUNCNAME MPIDI_CH4_NM_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_create(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -28,7 +28,7 @@ static inline int MPIDI_CH4_NM_comm_create(MPID_Comm * comm)
 #define FUNCNAME MPIDI_CH4_NM_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_destroy(MPID_Comm * comm)
+static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);

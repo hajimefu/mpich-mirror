@@ -13,7 +13,7 @@
 
 #include "ch4_impl.h"
 
-static inline int MPIDI_mpi_to_pmi_keyvals(MPID_Info     *info_ptr,
+static inline int MPIDI_mpi_to_pmi_keyvals(MPIR_Info     *info_ptr,
                                            PMI_keyval_t **kv_ptr,
                                            int           *nkeys_ptr)
 {
@@ -75,10 +75,10 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
                                              char       *commands[],
                                              char      **argvs[],
                                              const int   maxprocs[],
-                                             MPID_Info  *info_ptrs[],
+                                             MPIR_Info  *info_ptrs[],
                                              int         root,
-                                             MPID_Comm  *comm_ptr,
-                                             MPID_Comm **intercomm,
+                                             MPIR_Comm  *comm_ptr,
+                                             MPIR_Comm **intercomm,
                                              int         errcodes[])
 {
     char           port_name[MPI_MAX_PORT_NAME];
@@ -210,8 +210,8 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
-                                      MPID_Info *info,
-                                      int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
+                                      MPIR_Info *info,
+                                      int root, MPIR_Comm *comm, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CONNECT);
@@ -233,7 +233,7 @@ fn_fail:
 #define FUNCNAME MPIDI_Comm_disconnect
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_disconnect(MPID_Comm *comm_ptr)
+__CH4_INLINE__ int MPIDI_Comm_disconnect(MPIR_Comm *comm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DISCONNECT);
@@ -255,7 +255,7 @@ fn_fail:
 #define FUNCNAME MPIDI_Open_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Open_port(MPID_Info *info_ptr, char *port_name)
+__CH4_INLINE__ int MPIDI_Open_port(MPIR_Info *info_ptr, char *port_name)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OPEN_PORT);
@@ -300,8 +300,8 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_Comm_accept(const char *port_name,
-                                     MPID_Info *info,
-                                     int root, MPID_Comm *comm, MPID_Comm **newcomm_ptr)
+                                     MPIR_Info *info,
+                                     int root, MPIR_Comm *comm, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_ACCEPT);

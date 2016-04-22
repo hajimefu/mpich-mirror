@@ -25,20 +25,20 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
                                                  MPI_Datatype   datatype,
                                                  int            rank,
                                                  int            tag,
-                                                 MPID_Comm     *comm,
+                                                 MPIR_Comm     *comm,
                                                  int            context_offset,
-                                                 MPID_Request **request,
+                                                 MPIR_Request **request,
                                                  int            mode,
                                                  uint64_t       flags)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq = NULL;
+    MPIR_Request *rreq = NULL;
     uint64_t match_bits, mask_bits;
     MPIU_Context_id_t context_id = comm->recvcontext_id + context_offset;
     size_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
+    MPIR_Datatype *dt_ptr;
     struct fi_msg_tagged msg;
     char *recv_buf;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_IRECV);
@@ -49,11 +49,11 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
     else if(mode == MPIDI_CH4_NMI_OFI_USE_EXISTING)
         rreq = *request;
 
-    rreq->kind = MPID_REQUEST_RECV;
+    rreq->kind = MPIR_REQUEST_KIND__RECV;
     *request = rreq;
 
     if(unlikely(rank == MPI_PROC_NULL)) {
-        rreq->kind = MPID_REQUEST_RECV;
+        rreq->kind = MPIR_REQUEST_KIND__RECV;
         rreq->status.MPI_ERROR = MPI_SUCCESS;
         rreq->status.MPI_SOURCE = rank;
         rreq->status.MPI_TAG = tag;
@@ -129,9 +129,9 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
                                         MPI_Datatype datatype,
                                         int rank,
                                         int tag,
-                                        MPID_Comm *comm,
+                                        MPIR_Comm *comm,
                                         int context_offset,
-                                        MPI_Status *status, MPID_Request **request)
+                                        MPI_Status *status, MPIR_Request **request)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV);
@@ -151,18 +151,18 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
                                              MPI_Datatype   datatype,
                                              int            rank,
                                              int            tag,
-                                             MPID_Comm     *comm,
+                                             MPIR_Comm     *comm,
                                              int            context_offset,
-                                             MPID_Request **request)
+                                             MPIR_Request **request)
 {
-    MPID_Request *rreq;
+    MPIR_Request *rreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_INIT);
 
     MPIDI_CH4_NMI_OFI_REQUEST_CREATE((rreq));
 
     *request = rreq;
-    rreq->kind = MPID_PREQUEST_RECV;
+    rreq->kind = MPIR_REQUEST_KIND__PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
 
@@ -173,14 +173,14 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util.persist.tag)   = tag;
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_comm)          = comm;
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id)            = comm->context_id + context_offset;
-    rreq->partner_request             = NULL;
+    rreq->u.persist.real_request             = NULL;
 
     MPIDI_CH4U_request_complete(rreq);
 
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, util.persist.type) = MPIDI_PTYPE_RECV;
 
     if(HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPID_Datatype *dt_ptr;
+        MPIR_Datatype *dt_ptr;
         MPID_Datatype_get_ptr(datatype, dt_ptr);
         MPID_Datatype_add_ref(dt_ptr);
     }
@@ -196,10 +196,10 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
 __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
                                           int count,
                                           MPI_Datatype datatype,
-                                          MPID_Request *message, MPID_Request **rreqp)
+                                          MPIR_Request *message, MPIR_Request **rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq;
+    MPIR_Request *rreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IMRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
@@ -210,7 +210,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
     }
 
     MPIU_Assert(message != NULL);
-    MPIU_Assert(message->kind == MPID_REQUEST_MPROBE);
+    MPIU_Assert(message->kind == MPIR_REQUEST_KIND__MPROBE);
 
     *rreqp = rreq = message;
 
@@ -234,7 +234,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
                                          MPI_Datatype datatype,
                                          int rank,
                                          int tag,
-                                         MPID_Comm *comm, int context_offset, MPID_Request **request)
+                                         MPIR_Comm *comm, int context_offset, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRECV);
@@ -249,7 +249,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
 #define FUNCNAME MPIDI_CH4_NM_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPID_Request *rreq)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPIR_Request *rreq)
 {
 
     int mpi_errno = MPI_SUCCESS;

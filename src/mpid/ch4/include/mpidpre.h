@@ -30,7 +30,7 @@ typedef struct {
 #define MPID_DEV_DATATYPE_DECL   MPIDI_Devdt_t   dev;
 #include "mpid_datatype_fallback.h"
 
-#define MPID_PROGRESS_STATE_DECL
+typedef int MPID_Progress_state;
 #define HAVE_GPID_ROUTINES
 
 #define __ALWAYS_INLINE__ __attribute__((always_inline)) static inline
@@ -38,9 +38,9 @@ typedef struct {
 #define CH4_COMPILE_TIME_ASSERT(expr_)                                  \
   do { switch(0) { case 0: case (expr_): default: break; } } while (0)
 
-/* Forward declaration of MPID_Win so that we can refer to it in this file */
-struct MPID_Win;
-typedef struct MPID_Win MPID_Win;
+/* Forward declaration of MPIR_Win so that we can refer to it in this file */
+struct MPIR_Win;
+typedef struct MPIR_Win MPIR_Win;
 
 typedef enum {
     MPIDI_PTYPE_RECV,
@@ -88,7 +88,7 @@ typedef struct MPIDI_CH4U_rreq_t {
 } MPIDI_CH4U_rreq_t;
 
 typedef struct MPIDI_CH4U_put_req_t {
-    MPID_Win *win_ptr;
+    MPIR_Win *win_ptr;
     uint64_t preq_ptr;
     void *dt_iov;
     void *origin_addr;
@@ -98,7 +98,7 @@ typedef struct MPIDI_CH4U_put_req_t {
 } MPIDI_CH4U_put_req_t;
 
 typedef struct MPIDI_CH4U_get_req_t {
-    MPID_Win *win_ptr;
+    MPIR_Win *win_ptr;
     uint64_t greq_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
@@ -108,7 +108,7 @@ typedef struct MPIDI_CH4U_get_req_t {
 } MPIDI_CH4U_get_req_t;
 
 typedef struct MPIDI_CH4U_cswap_req_t {
-    MPID_Win *win_ptr;
+    MPIR_Win *win_ptr;
     uint64_t creq_ptr;
     uint64_t addr;
     MPI_Datatype datatype;
@@ -117,7 +117,7 @@ typedef struct MPIDI_CH4U_cswap_req_t {
 } MPIDI_CH4U_cswap_req_t;
 
 typedef struct MPIDI_CH4U_acc_req_t {
-    MPID_Win *win_ptr;
+    MPIR_Win *win_ptr;
     uint64_t req_ptr;
     MPI_Datatype origin_datatype;
     MPI_Datatype target_datatype;
@@ -177,7 +177,7 @@ typedef struct {
      * referenced. This must be present all of the time to avoid lots of extra
      * ifdefs in the code. */
 #ifdef MPIDI_BUILD_CH4_SHM
-    struct MPID_Request *anysource_partner_request;
+    struct MPIR_Request *anysource_partner_request;
 #endif
 
     union {
@@ -194,8 +194,8 @@ typedef struct {
         }shm;
     }ch4;
 } MPIDI_Devreq_t;
-#define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPID_Request, dev.ch4.netmod)
-#define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPID_Request, dev.ch4.netmod_am)
+#define MPIDI_REQUEST_HDR_SIZE              offsetof(struct MPIR_Request, dev.ch4.netmod)
+#define MPIDI_REQUEST_CH4U_HDR_SIZE         offsetof(struct MPIR_Request, dev.ch4.netmod_am)
 #define MPIDI_CH4I_REQUEST(req,field)       (((req)->dev).field)
 #define MPIDI_CH4U_REQUEST(req,field)       (((req)->dev.ch4.ch4u).field)
 
@@ -243,7 +243,7 @@ struct MPIDI_CH4U_win_queue {
 typedef struct MPIDI_CH4U_win_lock_info {
     unsigned peer;
     int lock_type;
-    struct MPID_Win *win;
+    struct MPIR_Win *win;
     volatile unsigned done;
 } MPIDI_CH4U_win_lock_info;
 
@@ -260,7 +260,7 @@ typedef struct MPIDI_CH4U_win_sync_lock {
 } MPIDI_CH4U_win_sync_lock;
 
 typedef struct MPIDI_CH4U_win_sync_pscw {
-    struct MPID_Group *group;
+    struct MPIR_Group *group;
     volatile unsigned count;
 } MPIDI_CH4U_win_sync_pscw;
 

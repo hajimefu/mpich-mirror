@@ -30,13 +30,13 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_irecv(void *buf,
                                                  MPI_Datatype datatype,
                                                  int rank,
                                                  int tag,
-                                                 MPID_Comm *comm, int context_offset, MPID_Request **request)
+                                                 MPIR_Comm *comm, int context_offset, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS, dt_contig;
     size_t data_sz;
     MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
-    MPID_Request *rreq = NULL;
+    MPIR_Datatype *dt_ptr;
+    MPIR_Request *rreq = NULL;
     MPIDI_STATE_DECL(MPID_STATE_SHM_DO_IRECV);
 
     MPIDI_FUNC_ENTER(MPID_STATE_SHM_DO_IRECV);
@@ -93,8 +93,8 @@ static inline int MPIDI_CH4_SHM_recv(void *buf,
                                      MPI_Datatype datatype,
                                      int rank,
                                      int tag,
-                                     MPID_Comm *comm,
-                                     int context_offset, MPI_Status *status, MPID_Request **request)
+                                     MPIR_Comm *comm,
+                                     int context_offset, MPI_Status *status, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS, dt_contig __attribute__((__unused__));
     size_t data_sz __attribute__((__unused__));
@@ -117,10 +117,10 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
                                           MPI_Datatype datatype,
                                           int rank,
                                           int tag,
-                                          MPID_Comm *comm, int context_offset, MPID_Request **request)
+                                          MPIR_Comm *comm, int context_offset, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Request *rreq = NULL;
+    MPIR_Request *rreq = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_RECV_INIT);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_RECV_INIT);
@@ -128,7 +128,7 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
     MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_RREQ(rreq);
     MPIU_Object_set_ref(rreq, 1);
     MPIR_cc_set(&rreq->cc, 0);
-    rreq->kind = MPID_PREQUEST_RECV;
+    rreq->kind = MPIR_REQUEST_KIND__PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
     MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_SET(MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq), rank, tag, comm->context_id + context_offset);
@@ -145,14 +145,14 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
 static inline int MPIDI_CH4_SHM_imrecv(void *buf,
                                        int count,
                                        MPI_Datatype datatype,
-                                       MPID_Request *message, MPID_Request **rreqp)
+                                       MPIR_Request *message, MPIR_Request **rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
     int dt_contig;
     size_t data_sz;
     MPI_Aint dt_true_lb;
-    MPID_Datatype *dt_ptr;
-    MPID_Request *rreq = NULL, *sreq = NULL;
+    MPIR_Datatype *dt_ptr;
+    MPIR_Request *rreq = NULL, *sreq = NULL;
     int rank, tag, context_id;
 
     MPIDI_STATE_DECL(MPIDI_SHM_IMRECV);
@@ -193,7 +193,7 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
     if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(message)->pending) {
         /* Sync send - we must send ACK */
         int srank = message->status.MPI_SOURCE;
-        MPID_Request *req_ack = NULL;
+        MPIR_Request *req_ack = NULL;
         MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_SREQ(req_ack);
         MPIU_Object_set_ref(req_ack, 1);
         req_ack->comm = message->comm;
@@ -213,7 +213,7 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
     }
 
     for(sreq = message; sreq;) {
-        MPID_Request *next_req = NULL;
+        MPIR_Request *next_req = NULL;
         char *send_buffer = MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf;
         char *recv_buffer = (char *) MPIDI_CH4_SHMI_SIMPLE_REQUEST(rreq)->user_buf;
 
@@ -281,7 +281,7 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
                                       MPI_Datatype datatype,
                                       int rank,
                                       int tag,
-                                      MPID_Comm *comm, int context_offset, MPID_Request **request)
+                                      MPIR_Comm *comm, int context_offset, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPIDI_SHM_IRECV);
@@ -296,11 +296,11 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(MPIDI_CH4_SHM_cancel_recv)
-static inline int MPIDI_CH4_SHM_cancel_recv(MPID_Request *rreq)
+static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request *rreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    MPID_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
-    MPID_Request *prev_req = NULL;
+    MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
+    MPIR_Request *prev_req = NULL;
 
     while(req) {
 

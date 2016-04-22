@@ -21,7 +21,7 @@
 #define FUNCNAME MPIDI_CH4U_init_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_init_comm(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type,is_localcomm;
     MPIDI_CH4U_rreq_t **uelist;
@@ -42,8 +42,8 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPID_Comm * comm)
         goto fn_exit;
 
     comm_idx     = MPIDI_CH4U_get_context_index(comm->recvcontext_id);
-    subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
-    is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
+    subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
+    is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
     MPIU_Assert(subcomm_type <= 3);
     MPIU_Assert(is_localcomm <= 1);
@@ -73,15 +73,15 @@ fn_exit:
 #define FUNCNAME MPIDI_CH4U_destroy_comm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type, is_localcomm;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_DESTROY_COMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DESTROY_COMM);
 
     comm_idx     = MPIDI_CH4U_get_context_index(comm->recvcontext_id);
-    subcomm_type = MPID_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
-    is_localcomm = MPID_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
+    subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
+    is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
     MPIU_Assert(subcomm_type <=3);
     MPIU_Assert(is_localcomm <= 1);
@@ -103,7 +103,7 @@ __CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPID_Comm * comm)
 #define FUNCNAME MPIDI_CH4U_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4U_init(MPID_Comm * comm_world, MPID_Comm * comm_self,
+__CH4_INLINE__ int MPIDI_CH4U_init(MPIR_Comm * comm_world, MPIR_Comm * comm_self,
                                    int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -274,7 +274,7 @@ __CH4_INLINE__ void MPIDI_CH4U_finalize()
 #define FUNCNAME MPIDI_CH4U_alloc_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPID_Info * info_ptr)
+__CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPIR_Info * info_ptr)
 {
     MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);

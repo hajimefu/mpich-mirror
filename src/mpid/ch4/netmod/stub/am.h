@@ -22,50 +22,50 @@ static inline int MPIDI_CH4_NM_reg_hdr_handler(int handler_id,
 }
 
 static inline int MPIDI_CH4_NM_send_am_hdr(int rank,
-                                           MPID_Comm * comm,
+                                           MPIR_Comm * comm,
                                            int handler_id,
                                            const void *am_hdr,
                                            size_t am_hdr_sz,
-                                           MPID_Request * sreq, void *netmod_context)
+                                           MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_send_am(int rank,
-                                       MPID_Comm * comm,
+                                       MPIR_Comm * comm,
                                        int handler_id,
                                        const void *am_hdr,
                                        size_t am_hdr_sz,
                                        const void *data,
                                        MPI_Count count,
                                        MPI_Datatype datatype,
-                                       MPID_Request * sreq, void *netmod_context)
+                                       MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_send_amv(int rank,
-                                        MPID_Comm * comm,
+                                        MPIR_Comm * comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
                                         size_t iov_len,
                                         const void *data,
                                         MPI_Count count,
                                         MPI_Datatype datatype,
-                                        MPID_Request * sreq, void *netmod_context)
+                                        MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
-                                        MPID_Comm * comm,
+                                        MPIR_Comm * comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
                                         size_t iov_len,
-                                        MPID_Request * sreq, void *netmod_context)
+                                        MPIR_Request * sreq, void *netmod_context)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -74,7 +74,7 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
 static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank,
                                                  int handler_id,
                                                  const void *am_hdr,
-                                                 size_t am_hdr_sz, MPID_Request * sreq)
+                                                 size_t am_hdr_sz, MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -86,7 +86,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id, int s
                                              size_t am_hdr_sz,
                                              const void *data,
                                              MPI_Count count,
-                                             MPI_Datatype datatype, MPID_Request * sreq)
+                                             MPI_Datatype datatype, MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -98,7 +98,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id, int 
                                               size_t iov_len,
                                               const void *data,
                                               MPI_Count count,
-                                              MPI_Datatype datatype, MPID_Request * sreq)
+                                              MPI_Datatype datatype, MPIR_Request * sreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -111,7 +111,7 @@ static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 }
 
 static inline int MPIDI_CH4_NM_inject_am_hdr(int rank,
-                                             MPID_Comm * comm,
+                                             MPIR_Comm * comm,
                                              int handler_id,
                                              const void *am_hdr,
                                              size_t am_hdr_sz, void *netmod_context)

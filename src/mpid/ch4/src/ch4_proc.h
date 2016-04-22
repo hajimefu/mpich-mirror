@@ -17,7 +17,7 @@
 #define FUNCNAME MPIDI_CH4_rank_is_local
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPID_Comm * comm)
+__CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm)
 {
     int ret;
     MPIDI_STATE_DECL(MPIDI_STATE_CH4_RANK_IS_LOCAL);

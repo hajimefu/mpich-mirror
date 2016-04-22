@@ -27,8 +27,8 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Progress_recv(int blocking, int *complet
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     /* try to match with unexpected */
-    MPID_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
-    MPID_Request *prev_sreq = NULL;
+    MPIR_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
+    MPIR_Request *prev_sreq = NULL;
 unexpected_l:
 
     if(sreq != NULL) {
@@ -45,12 +45,12 @@ unexpected_l:
     goto fn_exit;
 match_l: {
         /* traverse posted receive queue */
-        MPID_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
-        MPID_Request *prev_req = NULL;
+        MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
+        MPIR_Request *prev_req = NULL;
         int continue_matching = 1;
         char *send_buffer = in_cell ? (char *) cell->pkt.mpich.p.payload : (char *) MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->user_buf;
         int type = in_cell ? cell->pkt.mpich.type : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->type;
-        MPID_Request *pending = in_cell ? cell->pending : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->pending;
+        MPIR_Request *pending = in_cell ? cell->pending : MPIDI_CH4_SHMI_SIMPLE_REQUEST(sreq)->pending;
 
         if(type == MPIDI_CH4_SHMI_SIMPLE_TYPEACK) {
             /* ACK message doesn't have a matching receive! */
@@ -95,7 +95,7 @@ match_l: {
                 if(pending) {
                     /* we must send ACK */
                     int srank = in_cell ? cell->rank : sreq->status.MPI_SOURCE;
-                    MPID_Request *req_ack = NULL;
+                    MPIR_Request *req_ack = NULL;
                     MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_SREQ(req_ack);
                     MPIU_Object_set_ref(req_ack, 1);
                     req_ack->comm = req->comm;
@@ -172,7 +172,7 @@ match_l: {
         /* unexpected message, no posted matching req */
         if(in_cell) {
             /* free the cell, move to unexpected queue */
-            MPID_Request *rreq;
+            MPIR_Request *rreq;
             MPIDI_CH4_SHMI_SIMPLE_REQUEST_CREATE_RREQ(rreq);
             MPIU_Object_set_ref(rreq, 1);
             /* set status */
@@ -241,8 +241,8 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Progress_send(int blocking, int *complet
     int mpi_errno = MPI_SUCCESS;
     int dest;
     MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t cell = NULL;
-    MPID_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Sendq.head;
-    MPID_Request *prev_sreq = NULL;
+    MPIR_Request *sreq = MPIDI_CH4_SHMI_SIMPLE_Sendq.head;
+    MPIR_Request *prev_sreq = NULL;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
 

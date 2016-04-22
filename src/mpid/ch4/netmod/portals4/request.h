@@ -13,13 +13,13 @@
 
 #include "impl.h"
 
-static inline void MPIDI_CH4_NM_am_request_init(MPID_Request *req)
+static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 {
     req->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = NULL;
     req->dev.ch4.ch4u.netmod_am.portals4.md = PTL_INVALID_HANDLE;
 }
 
-static inline void MPIDI_CH4_NM_am_request_finalize(MPID_Request *req)
+static inline void MPIDI_CH4_NM_am_request_finalize(MPIR_Request *req)
 {
     if ((req)->dev.ch4.ch4u.netmod_am.portals4.pack_buffer) {
         MPL_free((req)->dev.ch4.ch4u.netmod_am.portals4.pack_buffer);

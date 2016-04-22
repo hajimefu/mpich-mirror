@@ -16,9 +16,9 @@
 
 static inline int MPIDI_CH4_SHM_improbe(int source,
                                     int tag,
-                                    MPID_Comm * comm,
+                                    MPIR_Comm * comm,
                                     int context_offset,
-                                    int *flag, MPID_Request ** message, MPI_Status * status)
+                                    int *flag, MPIR_Request ** message, MPI_Status * status)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
@@ -26,7 +26,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
 
 static inline int MPIDI_CH4_SHM_iprobe(int source,
                                    int tag,
-                                   MPID_Comm * comm,
+                                   MPIR_Comm * comm,
                                    int context_offset, int *flag, MPI_Status * status)
 {
     MPIU_Assert(0);

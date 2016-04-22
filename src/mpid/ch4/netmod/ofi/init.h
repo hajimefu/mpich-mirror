@@ -42,8 +42,8 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
                                                  int         size,
                                                  int         appnum,
                                                  int        *tag_ub,
-                                                 MPID_Comm  *comm_world,
-                                                 MPID_Comm  *comm_self,
+                                                 MPIR_Comm  *comm_world,
+                                                 MPIR_Comm  *comm_self,
                                                  int         spawned,
                                                  int         num_contexts,
                                                  void      **netmod_contexts,
@@ -67,22 +67,22 @@ static inline int MPIDI_CH4_NMI_OFI_Init_generic(int         rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
 
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Chunk_request,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Huge_chunk_t,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Am_repost_request_t,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Ssendack_request_t,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Dynamic_process_request_t,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.netmod) ==
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_CH4_NMI_OFI_Win_request_t,context));
-    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPID_Request, dev.ch4.ch4u.netmod_am.ofi.context) ==
-                            offsetof(struct MPID_Request, dev.ch4.netmod.ofi.context));
+    CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.ch4u.netmod_am.ofi.context) ==
+                            offsetof(struct MPIR_Request, dev.ch4.netmod.ofi.context));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_CH4_NMI_OFI_request_t));
-    CH4_COMPILE_TIME_ASSERT(sizeof(MPID_Request)>=sizeof(MPIDI_CH4_NMI_OFI_Win_request_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIR_Request)>=sizeof(MPIDI_CH4_NMI_OFI_Win_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_CH4_NMI_OFI_Gpid_t));
 
 
@@ -488,8 +488,8 @@ static inline int MPIDI_CH4_NM_init(int         rank,
                                     int         size,
                                     int         appnum,
                                     int        *tag_ub,
-                                    MPID_Comm  *comm_world,
-                                    MPID_Comm  *comm_self,
+                                    MPIR_Comm  *comm_world,
+                                    MPIR_Comm  *comm_self,
                                     int         spawned,
                                     int         num_contexts,
                                     void      **netmod_contexts)
@@ -516,7 +516,7 @@ static inline int MPIDI_CH4_NMI_OFI_Finalize_generic(int do_scalable_ep,
     int i = 0;
     int barrier[2] = { 0 };
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-    MPID_Comm *comm;
+    MPIR_Comm *comm;
 
     /* Progress until we drain all inflight RMA send long buffers */
     while(OPA_load_int(&MPIDI_Global.am_inflight_rma_send_mrs) > 0)
@@ -596,7 +596,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
                                               MPIDI_CH4_NMI_OFI_ENABLE_AM);
 }
 
-static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPID_Info *info_ptr)
+static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPIR_Info *info_ptr)
 {
 
     void *ap;
@@ -612,10 +612,10 @@ static inline int MPIDI_CH4_NM_free_mem(void *ptr)
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm *comm_ptr,
+static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm *comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-    if(comm_ptr->comm_kind == MPID_INTRACOMM)
+    if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
         *lpid_ptr = MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm_ptr, idx);
     else if(is_remote)
         *lpid_ptr = MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm_ptr, idx);
@@ -625,7 +625,7 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPID_Comm *comm_ptr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_gpid_get(MPID_Comm *comm_ptr, int rank, MPIR_Gpid *gpid)
+static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm *comm_ptr, int rank, MPIR_Gpid *gpid)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(rank < comm_ptr->local_size);
@@ -640,19 +640,19 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
+static inline int MPIDI_CH4_NM_get_node_id(MPIR_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     *id_p = MPIDI_Global.node_map[MPIDI_CH4_NMI_OFI_COMM_TO_INDEX(comm, rank)];
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
+static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm *comm, MPID_Node_id_t *max_id_p)
 {
     *max_id_p = MPIDI_Global.max_node_id;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_getallincomm(MPID_Comm *comm_ptr,
+static inline int MPIDI_CH4_NM_getallincomm(MPIR_Comm *comm_ptr,
                                             int local_size, MPIR_Gpid local_gpids[], int *singlePG)
 {
     int i;
@@ -721,7 +721,7 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int 
     return MPIDI_CH4_NM_gpid_tolpidarray_generic(size,gpid,lpid,MPIDI_CH4_NMI_OFI_ENABLE_AV_TABLE);
 }
 
-static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPID_Comm *newcomm_ptr,
+static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPIR_Comm *newcomm_ptr,
                                                            int size, const int lpids[])
 {
     int i;

@@ -50,16 +50,16 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
         } while (_ret == -FI_EAGAIN);                                   \
     } while (0)
 
-static inline MPID_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int count)
+static inline MPIR_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int count)
 {
-    MPID_Request *req;
-    req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    MPIR_Request *req;
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
     MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPID_REQUEST);
+    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIR_cc_set(&req->cc, 1);
     req->cc_ptr = &req->cc;
     MPIU_Object_set_ref(req, count);
-    req->greq_fns = NULL;
+    req->u.ureq.greq_fns = NULL;
     MPIR_STATUS_SET_COUNT(req->status, 0);
     MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
     req->status.MPI_SOURCE = MPI_UNDEFINED;
@@ -75,7 +75,7 @@ static inline MPID_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int coun
 #define FUNCNAME MPIDI_CH4_NMI_OFI_Am_clear_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPID_Request *sreq)
+static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPIR_Request *sreq)
 {
     MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
@@ -102,7 +102,7 @@ static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPID_Request *sreq)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
                                                     size_t am_hdr_sz,
-                                                    MPID_Request *sreq)
+                                                    MPIR_Request *sreq)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
@@ -143,7 +143,7 @@ static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Repost_buffer(void         *buf,
-                                                  MPID_Request *req)
+                                                  MPIR_Request *req)
 {
     int           mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Am_repost_request_t *am = (MPIDI_CH4_NMI_OFI_Am_repost_request_t *)req;
@@ -217,11 +217,11 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                         rank,
-                                                      MPID_Comm                  *comm,
+                                                      MPIR_Comm                  *comm,
                                                       int                         handler_id,
                                                       const void                 *am_hdr,
                                                       size_t                      am_hdr_sz,
-                                                      MPID_Request               *sreq,
+                                                      MPIR_Request               *sreq,
                                                       int                         is_reply)
 {
     struct iovec iov[2];
@@ -273,13 +273,13 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
-                                                 MPID_Comm    *comm,
+                                                 MPIR_Comm    *comm,
                                                  int           handler_id,
                                                  const void   *am_hdr,
                                                  size_t        am_hdr_sz,
                                                  const void   *data,
                                                  size_t        data_sz,
-                                                 MPID_Request *sreq,
+                                                 MPIR_Request *sreq,
                                                  int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS, c;
@@ -363,13 +363,13 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
-                                                  MPID_Comm    *comm,
+                                                  MPIR_Comm    *comm,
                                                   int           handler_id,
                                                   const void   *am_hdr,
                                                   size_t        am_hdr_sz,
                                                   const void   *data,
                                                   MPI_Count     count,
-                                                  MPID_Request *sreq,
+                                                  MPIR_Request *sreq,
                                                   int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS, c;
@@ -417,21 +417,21 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
-                                               MPID_Comm    *comm,
+                                               MPIR_Comm    *comm,
                                                int           handler_id,
                                                const void   *am_hdr,
                                                size_t        am_hdr_sz,
                                                const void   *buf,
                                                size_t        count,
                                                MPI_Datatype  datatype,
-                                               MPID_Request *sreq,
+                                               MPIR_Request *sreq,
                                                int           is_reply)
 {
     int             dt_contig, mpi_errno = MPI_SUCCESS;
     char           *send_buf;
     size_t  data_sz;
     MPI_Aint        dt_true_lb, last;
-    MPID_Datatype  *dt_ptr;
+    MPIR_Datatype  *dt_ptr;
     int             need_lock = !is_reply;
     size_t          threshold;
 
@@ -481,7 +481,7 @@ fn_fail:
 }
 
 static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
-                                              MPID_Comm    *comm,
+                                              MPIR_Comm    *comm,
                                               int           handler_id,
                                               const void   *am_hdr,
                                               size_t        am_hdr_sz,
@@ -525,7 +525,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
                           MPIDI_CH4_NMI_OFI_To_phys(rank, MPIDI_CH4_NMI_OFI_API_MSG);
 
     if (unlikely(am_hdr_sz + sizeof(msg_hdr) > MPIDI_Global.max_buffered_send)) {
-        MPID_Request *sreq;
+        MPIR_Request *sreq;
         char *ibuf;
 
         sreq = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);
@@ -556,7 +556,7 @@ fn_fail:
 }
 
 
-static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPID_Request *req)
+static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPIR_Request *req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);

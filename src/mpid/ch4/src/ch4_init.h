@@ -426,7 +426,7 @@ __CH4_INLINE__ int MPIDI_Get_processor_name(char *name, int namelen, int *result
 #define FUNCNAME MPIDI_Abort
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Abort(MPID_Comm *comm,
+__CH4_INLINE__ int MPIDI_Abort(MPIR_Comm *comm,
                                int        mpi_errno,
                                int        exit_code,
                                const char *error_msg)
@@ -472,7 +472,7 @@ __CH4_INLINE__ int MPIDI_Abort(MPID_Comm *comm,
 #define FUNCNAME MPIDI_Alloc_mem
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void *MPIDI_Alloc_mem(size_t size, MPID_Info * info_ptr)
+__CH4_INLINE__ void *MPIDI_Alloc_mem(size_t size, MPIR_Info * info_ptr)
 {
     void *p;
     MPIDI_STATE_DECL(MPID_STATE_CH4_ALLOC_MEM);
@@ -510,7 +510,7 @@ __CH4_INLINE__ int MPIDI_Free_mem(void *ptr)
 #define FUNCNAME MPIDI_Comm_get_lpid
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Comm_get_lpid(MPID_Comm * comm_ptr,
+__CH4_INLINE__ int MPIDI_Comm_get_lpid(MPIR_Comm * comm_ptr,
                                        int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     int mpi_errno;
@@ -534,7 +534,7 @@ __CH4_INLINE__ int MPIDI_Comm_get_lpid(MPID_Comm * comm_ptr,
 #define FUNCNAME MPIDI_GPID_Get
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_GPID_Get(MPID_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
+__CH4_INLINE__ int MPIDI_GPID_Get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GPID_GET);
@@ -556,7 +556,7 @@ __CH4_INLINE__ int MPIDI_GPID_Get(MPID_Comm * comm_ptr, int rank, MPIR_Gpid * gp
 #define FUNCNAME MPIDI_Get_node_id
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t * id_p)
+__CH4_INLINE__ int MPIDI_Get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET_NODE_ID);
@@ -578,7 +578,7 @@ __CH4_INLINE__ int MPIDI_Get_node_id(MPID_Comm * comm, int rank, MPID_Node_id_t 
 #define FUNCNAME MPIDI_Get_max_node_id
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_id_p)
+__CH4_INLINE__ int MPIDI_Get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET_MAX_NODE_ID);
@@ -600,7 +600,7 @@ __CH4_INLINE__ int MPIDI_Get_max_node_id(MPID_Comm * comm, MPID_Node_id_t * max_
 #define FUNCNAME MPIDI_GetAllInComm
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPID_Comm * comm_ptr,
+__CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
                                            int local_size, MPIR_Gpid local_gpids[], int *singlePG)
 {
     int mpi_errno;
@@ -645,7 +645,7 @@ __CH4_INLINE__ int MPIDI_GPID_ToLpidArray(int size, MPIR_Gpid gpid[], int lpid[]
 #define FUNCNAME MPIDI_Create_intercomm_from_lpids
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ int MPIDI_Create_intercomm_from_lpids(MPID_Comm * newcomm_ptr,
+__CH4_INLINE__ int MPIDI_Create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
                                                      int size, const int lpids[])
 {
     int mpi_errno;

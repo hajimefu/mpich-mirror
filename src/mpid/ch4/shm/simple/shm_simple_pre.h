@@ -14,12 +14,12 @@
 
 #include <mpi.h>
 
-struct MPID_Request;
+struct MPIR_Request;
 struct MPIDU_Segment;
 
 typedef struct {
-    struct MPID_Request *next;
-    struct MPID_Request *pending;
+    struct MPIR_Request *next;
+    struct MPIR_Request *pending;
     int                  dest;
     int                  rank;
     int                  tag;

@@ -19,14 +19,14 @@
 #define FUNCNAME MPIDI_CH4_NMI_OFI_Win_allgather
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
+static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPIR_Win        *win,
                                                   void            *base,
                                                   int              disp_unit)
 {
     int             i,same_disp,mpi_errno = MPI_SUCCESS;
     uint32_t        first;
     MPIR_Errflag_t  errflag      = MPIR_ERR_NONE;
-    MPID_Comm      *comm_ptr     = win->comm_ptr;
+    MPIR_Comm      *comm_ptr     = win->comm_ptr;
     int raw_prefix,idx,bitpos;
     unsigned gen_id;
     uint32_t *disp_units;
@@ -35,7 +35,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_allgather(MPID_Win        *win,
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
 
     /* Calculate a canonical context id */
-    raw_prefix = MPID_CONTEXT_READ_FIELD(PREFIX,comm_ptr->context_id);
+    raw_prefix = MPIR_CONTEXT_READ_FIELD(PREFIX,comm_ptr->context_id);
     idx        = raw_prefix / MPIR_CONTEXT_INT_BITS;
     bitpos     = raw_prefix % MPIR_CONTEXT_INT_BITS;
     gen_id     = (idx*MPIR_CONTEXT_INT_BITS) + (31-bitpos);
@@ -109,15 +109,15 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_OFI_Win_init(MPI_Aint     length,
                                              int          disp_unit,
-                                             MPID_Win   **win_ptr,
-                                             MPID_Info   *info,
-                                             MPID_Comm   *comm_ptr,
+                                             MPIR_Win   **win_ptr,
+                                             MPIR_Info   *info,
+                                             MPIR_Comm   *comm_ptr,
                                              int          create_flavor,
                                              int          model)
 {
     int       mpi_errno = MPI_SUCCESS;
     uint64_t  window_instance;
-    MPID_Win *win;
+    MPIR_Win *win;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
 
@@ -150,7 +150,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NMI_Win_progress_fence
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
+static inline int MPIDI_CH4_NMI_Win_progress_fence(MPIR_Win *win)
 {
     int      mpi_errno = MPI_SUCCESS;
     int      itercount = 0;
@@ -197,7 +197,7 @@ static inline int MPIDI_CH4_NMI_Win_progress_fence(MPID_Win *win)
 
     while(r)  {
         MPIDI_CH4_NMI_OFI_Win_request_t *next = r->next;
-        MPIDI_CH4_NMI_OFI_Rma_done_event(NULL,(MPID_Request *)r);
+        MPIDI_CH4_NMI_OFI_Rma_done_event(NULL,(MPIR_Request *)r);
         r = next;
     }
 
@@ -214,7 +214,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_set_info
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_set_info(MPID_Win *win, MPID_Info *info)
+static inline int MPIDI_CH4_NM_win_set_info(MPIR_Win *win, MPIR_Info *info)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
@@ -235,7 +235,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_start
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_start(MPID_Group *group, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_start(MPIR_Group *group, int assert, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -269,7 +269,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_complete(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -280,7 +280,7 @@ static inline int MPIDI_CH4_NM_win_complete(MPID_Win *win)
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_Win_progress_fence(win));
 
-    MPID_Group *group;
+    MPIR_Group *group;
     group = MPIDI_CH4U_WIN(win, sync).sc.group;
     MPIU_Assert(group != NULL);
     MPIDI_CH4_NMI_OFI_Win_control_t msg;
@@ -313,7 +313,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_post
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_post(MPID_Group *group, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_post(MPIR_Group *group, int assert, MPIR_Win *win)
 {
     int peer, index, mpi_errno = MPI_SUCCESS;
     MPIDI_CH4_NMI_OFI_Win_control_t msg;
@@ -355,7 +355,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_wait
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_wait(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_wait(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -364,7 +364,7 @@ static inline int MPIDI_CH4_NM_win_wait(MPID_Win *win)
 
     MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
-    MPID_Group *group;
+    MPIR_Group *group;
     group = MPIDI_CH4U_WIN(win, sync).pw.group;
 
     MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(group->size != (int)MPIDI_CH4U_WIN(win, sync).sc.count);
@@ -387,7 +387,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_test
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_test(MPID_Win *win, int *flag)
+static inline int MPIDI_CH4_NM_win_test(MPIR_Win *win, int *flag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -396,7 +396,7 @@ static inline int MPIDI_CH4_NM_win_test(MPID_Win *win, int *flag)
 
     MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
-    MPID_Group *group;
+    MPIR_Group *group;
     group = MPIDI_CH4U_WIN(win, sync).pw.group;
 
     if(group->size == (int)MPIDI_CH4U_WIN(win, sync).sc.count) {
@@ -421,7 +421,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_lock
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -460,7 +460,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_unlock
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_unlock(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_unlock(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
@@ -497,7 +497,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_get_info
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_get_info(MPID_Win *win, MPID_Info **info_p_p)
+static inline int MPIDI_CH4_NM_win_get_info(MPIR_Win *win, MPIR_Info **info_p_p)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
@@ -519,11 +519,11 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_free
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_free(MPID_Win **win_ptr)
+static inline int MPIDI_CH4_NM_win_free(MPIR_Win **win_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
-    MPID_Win      *win       = *win_ptr;
+    MPIR_Win      *win       = *win_ptr;
     uint32_t       window_instance;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FREE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FREE);
@@ -557,7 +557,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_fence
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_fence(int massert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_fence(int massert, MPIR_Win *win)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
@@ -598,13 +598,13 @@ fn_fail:
 static inline int MPIDI_CH4_NM_win_create(void       *base,
                                           MPI_Aint    length,
                                           int         disp_unit,
-                                          MPID_Info  *info,
-                                          MPID_Comm  *comm_ptr,
-                                          MPID_Win  **win_ptr)
+                                          MPIR_Info  *info,
+                                          MPIR_Comm  *comm_ptr,
+                                          MPIR_Win  **win_ptr)
 {
     int             mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
-    MPID_Win       *win;
+    MPIR_Win       *win;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE);
@@ -641,7 +641,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_attach
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_attach(MPID_Win *win, void *base, MPI_Aint size)
+static inline int MPIDI_CH4_NM_win_attach(MPIR_Win *win, void *base, MPI_Aint size)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
@@ -662,15 +662,15 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                                    int         disp_unit,
-                                                   MPID_Info  *info_ptr,
-                                                   MPID_Comm  *comm_ptr,
+                                                   MPIR_Info  *info_ptr,
+                                                   MPIR_Comm  *comm_ptr,
                                                    void      **base_ptr,
-                                                   MPID_Win  **win_ptr)
+                                                   MPIR_Win  **win_ptr)
 {
     int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP      = NULL;
-    MPID_Win       *win        = NULL;
+    MPIR_Win       *win        = NULL;
     ssize_t         total_size = 0LL;
     MPI_Aint        size_out = 0;
     char            shm_key[64];
@@ -830,7 +830,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_detach
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_detach(MPID_Win *win, const void *base)
+static inline int MPIDI_CH4_NM_win_detach(MPIR_Win *win, const void *base)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_DETACH);
@@ -848,7 +848,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_shared_query
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_shared_query(MPID_Win *win,
+static inline int MPIDI_CH4_NM_win_shared_query(MPIR_Win *win,
                                                 int       rank,
                                                 MPI_Aint *size,
                                                 int      *disp_unit,
@@ -888,15 +888,15 @@ static inline int MPIDI_CH4_NM_win_shared_query(MPID_Win *win,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint     size,
                                             int          disp_unit,
-                                            MPID_Info   *info,
-                                            MPID_Comm   *comm,
+                                            MPIR_Info   *info,
+                                            MPIR_Comm   *comm,
                                             void        *baseptr,
-                                            MPID_Win   **win_ptr)
+                                            MPIR_Win   **win_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP;
-    MPID_Win       *win;
+    MPIR_Win       *win;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
@@ -933,7 +933,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_flush
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_flush(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
@@ -954,7 +954,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_flush_local_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_flush_local_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_local_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
@@ -974,7 +974,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_unlock_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_unlock_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
@@ -1022,14 +1022,14 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_create_dynamic
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info *info,
-                                                  MPID_Comm *comm,
-                                                  MPID_Win **win_ptr)
+static inline int MPIDI_CH4_NM_win_create_dynamic(MPIR_Info *info,
+                                                  MPIR_Comm *comm,
+                                                  MPIR_Win **win_ptr)
 {
     int             mpi_errno = MPI_SUCCESS;
     int             rc        = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
-    MPID_Win       *win;
+    MPIR_Win       *win;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
 
@@ -1062,7 +1062,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_flush_local
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
@@ -1084,7 +1084,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_sync
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_sync(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_sync(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SYNC);
@@ -1105,7 +1105,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_flush_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_flush_all(MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_flush_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
@@ -1125,7 +1125,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_win_lock_all
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPID_Win *win)
+static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_win_lock_info *lockQ;

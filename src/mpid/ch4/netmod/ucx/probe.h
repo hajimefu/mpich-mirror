@@ -14,7 +14,7 @@
 
 static inline int ucx_do_iprobe(int source,
                                  int tag,
-                                  MPID_Comm * comm, int context_offset, int *flag,  MPI_Status * status)
+                                  MPIR_Comm * comm, int context_offset, int *flag,  MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
@@ -44,7 +44,7 @@ fn_exit:
 
 static inline int MPIDI_netmod_probe(int source,
                                      int tag,
-                                     MPID_Comm * comm, int context_offset, MPI_Status * status)
+                                     MPIR_Comm * comm, int context_offset, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
     int flag = 0;
@@ -66,9 +66,9 @@ fn_fail:
 
 static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
-                                       MPID_Comm * comm,
+                                       MPIR_Comm * comm,
                                        int context_offset,
-                                       int *flag, MPID_Request ** message, MPI_Status * status)
+                                       int *flag, MPIR_Request ** message, MPI_Status * status)
 {
 
 
@@ -77,7 +77,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
     int count;
     ucp_tag_recv_info_t info;
     ucp_tag_message_h  message_handler;
-    MPID_Request *req;
+    MPIR_Request *req;
 
     tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, source);
     ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
@@ -89,7 +89,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
         goto fn_exit;
     }
     *flag = 1;
-     req = (MPID_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
      MPIU_Assert(req);
      MPIDI_CH4_NMI_UCX_REQ(req).message_handler = message_handler;
 
@@ -98,7 +98,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
      status->MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info.sender_tag);
      count = info.length;
      MPIR_STATUS_SET_COUNT(*status, count);
-     req->kind = MPID_REQUEST_MPROBE;
+     req->kind = MPIR_REQUEST_KIND__MPROBE;
 fn_exit:
     *message = req;
     return mpi_errno;
@@ -109,7 +109,7 @@ fn_fail:
 
 static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
-                                      MPID_Comm * comm,
+                                      MPIR_Comm * comm,
                                       int context_offset, int *flag, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;

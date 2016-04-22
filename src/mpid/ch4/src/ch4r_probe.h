@@ -19,12 +19,12 @@
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_iprobe(int source,
                                      int tag,
-                                     MPID_Comm * comm,
+                                     MPIR_Comm * comm,
                                      int context_offset, int *flag, MPI_Status * status)
 {
     int mpi_errno=MPI_SUCCESS;
-    MPID_Comm *root_comm;
-    MPID_Request *unexp_req;
+    MPIR_Comm *root_comm;
+    MPIR_Request *unexp_req;
     uint64_t match_bits, mask_bits;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4U_IPROBE);
@@ -73,7 +73,7 @@ fn_exit:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_probe(int source,
                                     int tag,
-                                    MPID_Comm * comm, int context_offset, MPI_Status * status)
+                                    MPIR_Comm * comm, int context_offset, MPI_Status * status)
 {
     int mpi_errno, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4U_PROBE);
@@ -97,13 +97,13 @@ __CH4_INLINE__ int MPIDI_CH4U_probe(int source,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_improbe(int source,
                                       int tag,
-                                      MPID_Comm * comm,
+                                      MPIR_Comm * comm,
                                       int context_offset,
-                                      int *flag, MPID_Request ** message, MPI_Status * status)
+                                      int *flag, MPIR_Request ** message, MPI_Status * status)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPID_Comm *root_comm;
-    MPID_Request *unexp_req;
+    MPIR_Comm *root_comm;
+    MPIR_Request *unexp_req;
     uint64_t match_bits, mask_bits;
 
     MPIDI_STATE_DECL(MPID_STATE_CH4U_IMPROBE);
@@ -127,7 +127,7 @@ __CH4_INLINE__ int MPIDI_CH4U_improbe(int source,
         *flag = 1;
         *message = unexp_req;
 
-        (*message)->kind = MPID_REQUEST_MPROBE;
+        (*message)->kind = MPIR_REQUEST_KIND__MPROBE;
         (*message)->comm = comm;
         /* Notes on refcounting comm:
            We intentionally do nothing here because what we are supposed to do here
@@ -162,9 +162,9 @@ fn_exit:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ int MPIDI_CH4U_mprobe(int source,
                                      int tag,
-                                     MPID_Comm * comm,
+                                     MPIR_Comm * comm,
                                      int context_offset,
-                                     MPID_Request ** message, MPI_Status * status)
+                                     MPIR_Request ** message, MPI_Status * status)
 {
     int mpi_errno, flag = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4_MPROBE);

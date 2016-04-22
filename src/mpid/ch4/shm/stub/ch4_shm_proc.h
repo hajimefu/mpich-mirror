@@ -13,7 +13,7 @@
 
 #include "ch4_shm_impl.h"
 
-static inline int MPIDI_CH4_SHM_rank_is_local(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4_SHM_rank_is_local(int rank, MPIR_Comm * comm)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

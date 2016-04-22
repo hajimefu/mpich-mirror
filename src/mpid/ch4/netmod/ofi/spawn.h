@@ -101,26 +101,26 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_create_intercomm(const char      *po
                                                              char            *addr_table,
                                                              MPID_Node_id_t  *node_table,
                                                              int              entries,
-                                                             MPID_Comm       *comm_ptr,
-                                                             MPID_Comm      **newcomm,
+                                                             MPIR_Comm       *comm_ptr,
+                                                             MPIR_Comm      **newcomm,
                                                              int              is_low_group,
                                                              char            *api)
 {
     int        start,i,context_id_offset,mpi_errno = MPI_SUCCESS;
-    MPID_Comm *tmp_comm_ptr = NULL;
+    MPIR_Comm *tmp_comm_ptr = NULL;
     fi_addr_t *addr = NULL;
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_Get_tag_from_port(port_name,&context_id_offset));
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Comm_create(&tmp_comm_ptr));
 
-    tmp_comm_ptr->context_id     = MPID_CONTEXT_SET_FIELD(DYNAMIC_PROC,
+    tmp_comm_ptr->context_id     = MPIR_CONTEXT_SET_FIELD(DYNAMIC_PROC,
                                                           context_id_offset,
                                                           1);
     tmp_comm_ptr->recvcontext_id       = tmp_comm_ptr->context_id;
     tmp_comm_ptr->remote_size          = entries;
     tmp_comm_ptr->local_size           = comm_ptr->local_size;
     tmp_comm_ptr->rank                 = comm_ptr->rank;
-    tmp_comm_ptr->comm_kind            = MPID_INTERCOMM;
+    tmp_comm_ptr->comm_kind            = MPIR_COMM_KIND__INTERCOMM;
     tmp_comm_ptr->local_comm           = comm_ptr;
     tmp_comm_ptr->is_low_group         = is_low_group;
     MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).local_vcrt = MPIDI_CH4_NMI_OFI_COMM(comm_ptr).vcrt;
@@ -169,7 +169,7 @@ fn_fail:
 }
 
 static inline int MPIDI_CH4_NMI_OFI_Dynproc_bcast(int              root,
-                                                  MPID_Comm       *comm_ptr,
+                                                  MPIR_Comm       *comm_ptr,
                                                   int             *out_root,
                                                   ssize_t         *out_table_size,
                                                   char           **out_addr_table,
@@ -209,7 +209,7 @@ static inline int MPIDI_CH4_NMI_OFI_Dynproc_exchange_map(int              root,
                                                          int              port_id,
                                                          fi_addr_t       *conn,
                                                          char            *conname,
-                                                         MPID_Comm       *comm_ptr,
+                                                         MPIR_Comm       *comm_ptr,
                                                          ssize_t         *out_table_size,
                                                          int             *out_root,
                                                          char           **out_addr_table,
@@ -351,10 +351,10 @@ fn_fail:
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_comm_connect(const char *port_name,
-                                            MPID_Info  *info,
+                                            MPIR_Info  *info,
                                             int         root,
-                                            MPID_Comm  *comm_ptr,
-                                            MPID_Comm **newcomm)
+                                            MPIR_Comm  *comm_ptr,
+                                            MPIR_Comm **newcomm)
 {
     int                entries,mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
@@ -415,7 +415,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_comm_disconnect
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_disconnect(MPID_Comm *comm_ptr)
+static inline int MPIDI_CH4_NM_comm_disconnect(MPIR_Comm *comm_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
@@ -437,7 +437,7 @@ fn_fail:
 #define FUNCNAME MPIDI_CH4_NM_comm_open_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_open_port(MPID_Info *info_ptr, char *port_name)
+static inline int MPIDI_CH4_NM_open_port(MPIR_Info *info_ptr, char *port_name)
 {
     int mpi_errno     = MPI_SUCCESS;
     int str_errno     = MPL_STR_SUCCESS;
@@ -483,10 +483,10 @@ static inline int MPIDI_CH4_NM_close_port(const char *port_name)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
-                                           MPID_Info  *info,
+                                           MPIR_Info  *info,
                                            int         root,
-                                           MPID_Comm  *comm_ptr,
-                                           MPID_Comm **newcomm)
+                                           MPIR_Comm  *comm_ptr,
+                                           MPIR_Comm **newcomm)
 {
     int             entries,mpi_errno = MPI_SUCCESS;
     char           *child_addr_table    = NULL;

@@ -18,7 +18,7 @@
 #define FUNCNAME MPIDI_CH4_SHM_barrier
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_SHM_barrier(MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+static inline int MPIDI_CH4_SHM_barrier(MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -32,7 +32,7 @@ static inline int MPIDI_CH4_SHM_barrier(MPID_Comm *comm_ptr, MPIR_Errflag_t *err
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_bcast(void *buffer, int count, MPI_Datatype datatype,
-                                         int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                         int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -46,7 +46,7 @@ static inline int MPIDI_CH4_SHM_bcast(void *buffer, int count, MPI_Datatype data
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                                             MPI_Op op, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                             MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -61,7 +61,7 @@ static inline int MPIDI_CH4_SHM_allreduce(const void *sendbuf, void *recvbuf, in
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                              void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                             MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                             MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -76,7 +76,7 @@ static inline int MPIDI_CH4_SHM_allgather(const void *sendbuf, int sendcount, MP
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                               void *recvbuf, const int *recvcounts, const int *displs,
-                                              MPI_Datatype recvtype, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                              MPI_Datatype recvtype, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -91,7 +91,7 @@ static inline int MPIDI_CH4_SHM_allgatherv(const void *sendbuf, int sendcount, M
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                           void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                          int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                          int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -106,7 +106,7 @@ static inline int MPIDI_CH4_SHM_gather(const void *sendbuf, int sendcount, MPI_D
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                            void *recvbuf, const int *recvcounts, const int *displs,
-                                           MPI_Datatype recvtype, int root, MPID_Comm *comm_ptr,
+                                           MPI_Datatype recvtype, int root, MPIR_Comm *comm_ptr,
                                            MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -122,7 +122,7 @@ static inline int MPIDI_CH4_SHM_gatherv(const void *sendbuf, int sendcount, MPI_
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                            void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                           int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                           int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -138,7 +138,7 @@ static inline int MPIDI_CH4_SHM_scatter(const void *sendbuf, int sendcount, MPI_
 static inline int MPIDI_CH4_SHM_scatterv(const void *sendbuf, const int *sendcounts,
                                             const int *displs, MPI_Datatype sendtype,
                                             void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                            int root, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                            int root, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -153,7 +153,7 @@ static inline int MPIDI_CH4_SHM_scatterv(const void *sendbuf, const int *sendcou
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_alltoall(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                             void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                            MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                            MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -170,7 +170,7 @@ static inline int MPIDI_CH4_SHM_alltoallv(const void *sendbuf, const int *sendco
                                              const int *sdispls, MPI_Datatype sendtype,
                                              void *recvbuf, const int *recvcounts,
                                              const int *rdispls, MPI_Datatype recvtype,
-                                             MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                             MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -186,7 +186,7 @@ static inline int MPIDI_CH4_SHM_alltoallw(const void *sendbuf, const int sendcou
                                          const int sdispls[], const MPI_Datatype sendtypes[],
                                          void *recvbuf, const int recvcounts[],
                                          const int rdispls[], const MPI_Datatype recvtypes[],
-                                         MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                         MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -199,7 +199,7 @@ static inline int MPIDI_CH4_SHM_alltoallw(const void *sendbuf, const int sendcou
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_reduce(const void *sendbuf, void *recvbuf, int count,
                                           MPI_Datatype datatype, MPI_Op op, int root,
-                                          MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                          MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -214,7 +214,7 @@ static inline int MPIDI_CH4_SHM_reduce(const void *sendbuf, void *recvbuf, int c
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_reduce_scatter(const void *sendbuf, void *recvbuf,
                                               const int recvcounts[], MPI_Datatype datatype,
-                                              MPI_Op op, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                              MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -227,7 +227,7 @@ static inline int MPIDI_CH4_SHM_reduce_scatter(const void *sendbuf, void *recvbu
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_reduce_scatter_block(const void *sendbuf, void *recvbuf,
                                                     int recvcount, MPI_Datatype datatype,
-                                                    MPI_Op op, MPID_Comm *comm_ptr, MPIR_Errflag_t *errflag)
+                                                    MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -239,7 +239,7 @@ static inline int MPIDI_CH4_SHM_reduce_scatter_block(const void *sendbuf, void *
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_scan(const void *sendbuf, void *recvbuf, int count,
-                                        MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                        MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                         MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -254,7 +254,7 @@ static inline int MPIDI_CH4_SHM_scan(const void *sendbuf, void *recvbuf, int cou
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_exscan(const void *sendbuf, void *recvbuf, int count,
-                                          MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                          MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                           MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -270,7 +270,7 @@ static inline int MPIDI_CH4_SHM_exscan(const void *sendbuf, void *recvbuf, int c
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_neighbor_allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                    void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                                   MPID_Comm *comm_ptr, MPIR_Errflag_t * errflag)
+                                                   MPIR_Comm *comm_ptr, MPIR_Errflag_t * errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -285,7 +285,7 @@ static inline int MPIDI_CH4_SHM_neighbor_allgather(const void *sendbuf, int send
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_neighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                     void *recvbuf, const int recvcounts[], const int displs[],
-                                                    MPI_Datatype recvtype, MPID_Comm *comm_ptr,MPIR_Errflag_t * errflag)
+                                                    MPI_Datatype recvtype, MPIR_Comm *comm_ptr,MPIR_Errflag_t * errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -300,7 +300,7 @@ static inline int MPIDI_CH4_SHM_neighbor_allgatherv(const void *sendbuf, int sen
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_neighbor_alltoall(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                      void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                                  MPID_Comm *comm_ptr,MPIR_Errflag_t * errflag)
+                                                  MPIR_Comm *comm_ptr,MPIR_Errflag_t * errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -315,7 +315,7 @@ static inline int MPIDI_CH4_SHM_neighbor_alltoall(const void *sendbuf, int sendc
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_neighbor_alltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[],
                                                    MPI_Datatype sendtype, void *recvbuf, const int recvcounts[],
-                                                   const int rdispls[], MPI_Datatype recvtype, MPID_Comm *comm_ptr,
+                                                   const int rdispls[], MPI_Datatype recvtype, MPIR_Comm *comm_ptr,
                                                    MPIR_Errflag_t * errflag)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -333,7 +333,7 @@ static inline int MPIDI_CH4_SHM_neighbor_alltoallw(const void *sendbuf, const in
                                                       const MPI_Aint sdispls[], const MPI_Datatype sendtypes[],
                                                       void *recvbuf, const int recvcounts[],
                                                       const MPI_Aint rdispls[], const MPI_Datatype recvtypes[],
-                                                   MPID_Comm *comm_ptr,MPIR_Errflag_t * errflag)
+                                                   MPIR_Comm *comm_ptr,MPIR_Errflag_t * errflag)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -348,7 +348,7 @@ static inline int MPIDI_CH4_SHM_neighbor_alltoallw(const void *sendbuf, const in
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ineighbor_allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                       void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                                      MPID_Comm *comm_ptr, MPI_Request * req)
+                                                      MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -363,7 +363,7 @@ static inline int MPIDI_CH4_SHM_ineighbor_allgather(const void *sendbuf, int sen
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ineighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                        void *recvbuf, const int recvcounts[], const int displs[],
-                                                       MPI_Datatype recvtype, MPID_Comm *comm_ptr, MPI_Request * req)
+                                                       MPI_Datatype recvtype, MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -379,7 +379,7 @@ static inline int MPIDI_CH4_SHM_ineighbor_allgatherv(const void *sendbuf, int se
 static inline int MPIDI_CH4_SHM_ineighbor_alltoall(const void *sendbuf, int sendcount,
                                                       MPI_Datatype sendtype, void *recvbuf,
                                                       int recvcount, MPI_Datatype recvtype,
-                                                      MPID_Comm *comm_ptr, MPI_Request * req)
+                                                      MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -394,7 +394,7 @@ static inline int MPIDI_CH4_SHM_ineighbor_alltoall(const void *sendbuf, int send
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ineighbor_alltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[],
                                                       MPI_Datatype sendtype, void *recvbuf, const int recvcounts[],
-                                                      const int rdispls[], MPI_Datatype recvtype, MPID_Comm *comm_ptr,
+                                                      const int rdispls[], MPI_Datatype recvtype, MPIR_Comm *comm_ptr,
                                                       MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -412,7 +412,7 @@ static inline int MPIDI_CH4_SHM_ineighbor_alltoallw(const void *sendbuf, const i
                                                        const MPI_Aint sdispls[], const MPI_Datatype sendtypes[],
                                                        void *recvbuf, const int recvcounts[],
                                                        const MPI_Aint rdispls[], const MPI_Datatype recvtypes[],
-                                                       MPID_Comm *comm_ptr, MPI_Request * req)
+                                                       MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -425,7 +425,7 @@ static inline int MPIDI_CH4_SHM_ineighbor_alltoallw(const void *sendbuf, const i
 #define FUNCNAME MPIDI_CH4_SHM_ibarrier
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_SHM_ibarrier(MPID_Comm *comm_ptr, MPI_Request * req)
+static inline int MPIDI_CH4_SHM_ibarrier(MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -439,7 +439,7 @@ static inline int MPIDI_CH4_SHM_ibarrier(MPID_Comm *comm_ptr, MPI_Request * req)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ibcast(void *buffer, int count, MPI_Datatype datatype,
-                                          int root, MPID_Comm *comm_ptr, MPI_Request * req)
+                                          int root, MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -454,7 +454,7 @@ static inline int MPIDI_CH4_SHM_ibcast(void *buffer, int count, MPI_Datatype dat
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_iallgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                               void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                              MPID_Comm *comm_ptr, MPI_Request * req)
+                                              MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -469,7 +469,7 @@ static inline int MPIDI_CH4_SHM_iallgather(const void *sendbuf, int sendcount, M
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_iallgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                                void *recvbuf, const int *recvcounts, const int *displs,
-                                               MPI_Datatype recvtype, MPID_Comm *comm_ptr, MPI_Request * req)
+                                               MPI_Datatype recvtype, MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -484,7 +484,7 @@ static inline int MPIDI_CH4_SHM_iallgatherv(const void *sendbuf, int sendcount, 
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ialltoall(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                              void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                             MPID_Comm *comm_ptr, MPI_Request * req)
+                                             MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -501,7 +501,7 @@ static inline int MPIDI_CH4_SHM_ialltoallv(const void *sendbuf, const int *sendc
                                               const int *sdispls, MPI_Datatype sendtype,
                                               void *recvbuf, const int *recvcounts,
                                               const int *rdispls, MPI_Datatype recvtype,
-                                              MPID_Comm *comm_ptr, MPI_Request * req)
+                                              MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -518,7 +518,7 @@ static inline int MPIDI_CH4_SHM_ialltoallw(const void *sendbuf, const int *sendc
                                               const int *sdispls, const MPI_Datatype sendtypes[],
                                               void *recvbuf, const int *recvcounts,
                                               const int *rdispls, const MPI_Datatype recvtypes[],
-                                              MPID_Comm *comm_ptr, MPI_Request * req)
+                                              MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -530,7 +530,7 @@ static inline int MPIDI_CH4_SHM_ialltoallw(const void *sendbuf, const int *sendc
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_iexscan(const void *sendbuf, void *recvbuf, int count,
-                                           MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                           MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                            MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -546,7 +546,7 @@ static inline int MPIDI_CH4_SHM_iexscan(const void *sendbuf, void *recvbuf, int 
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_igather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                            void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                                           int root, MPID_Comm *comm_ptr, MPI_Request * req)
+                                           int root, MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -561,7 +561,7 @@ static inline int MPIDI_CH4_SHM_igather(const void *sendbuf, int sendcount, MPI_
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_igatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                                             void *recvbuf, const int *recvcounts, const int *displs,
-                                            MPI_Datatype recvtype, int root, MPID_Comm *comm_ptr,
+                                            MPI_Datatype recvtype, int root, MPIR_Comm *comm_ptr,
                                             MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -577,7 +577,7 @@ static inline int MPIDI_CH4_SHM_igatherv(const void *sendbuf, int sendcount, MPI
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ireduce_scatter_block(const void *sendbuf, void *recvbuf,
                                                          int recvcount, MPI_Datatype datatype,
-                                                         MPI_Op op, MPID_Comm *comm_ptr,
+                                                         MPI_Op op, MPIR_Comm *comm_ptr,
                                                          MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -593,7 +593,7 @@ static inline int MPIDI_CH4_SHM_ireduce_scatter_block(const void *sendbuf, void 
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ireduce_scatter(const void *sendbuf, void *recvbuf,
                                                    const int recvcounts[], MPI_Datatype datatype,
-                                                   MPI_Op op, MPID_Comm *comm_ptr, MPI_Request * req)
+                                                   MPI_Op op, MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -608,7 +608,7 @@ static inline int MPIDI_CH4_SHM_ireduce_scatter(const void *sendbuf, void *recvb
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_ireduce(const void *sendbuf, void *recvbuf, int count,
                                            MPI_Datatype datatype, MPI_Op op, int root,
-                                           MPID_Comm *comm_ptr, MPI_Request * req)
+                                           MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -623,7 +623,7 @@ static inline int MPIDI_CH4_SHM_ireduce(const void *sendbuf, void *recvbuf, int 
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_iallreduce(const void *sendbuf, void *recvbuf, int count,
                                            MPI_Datatype datatype, MPI_Op op,
-                                           MPID_Comm *comm_ptr, MPI_Request * req)
+                                           MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -637,7 +637,7 @@ static inline int MPIDI_CH4_SHM_iallreduce(const void *sendbuf, void *recvbuf, i
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_SHM_iscan(const void *sendbuf, void *recvbuf, int count,
-                                         MPI_Datatype datatype, MPI_Op op, MPID_Comm *comm_ptr,
+                                         MPI_Datatype datatype, MPI_Op op, MPIR_Comm *comm_ptr,
                                          MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -654,7 +654,7 @@ static inline int MPIDI_CH4_SHM_iscan(const void *sendbuf, void *recvbuf, int co
 static inline int MPIDI_CH4_SHM_iscatter(const void * sendbuf, int sendcount,
                                         MPI_Datatype sendtype, void * recvbuf,
                                         int recvcount, MPI_Datatype recvtype,
-                                        int root, MPID_Comm *comm, MPI_Request * request)
+                                        int root, MPIR_Comm *comm, MPI_Request * request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);
@@ -669,7 +669,7 @@ static inline int MPIDI_CH4_SHM_iscatterv(const void * sendbuf, const int * send
                                          const int * displs, MPI_Datatype sendtype,
                                          void * recvbuf, int recvcount,
                                          MPI_Datatype recvtype, int root,
-                                         MPID_Comm *comm, MPI_Request * request)
+                                         MPIR_Comm *comm, MPI_Request * request)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIU_Assert(0);

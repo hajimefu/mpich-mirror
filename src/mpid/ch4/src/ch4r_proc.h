@@ -13,7 +13,7 @@
 
 #include "ch4_types.h"
 
-static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4U_rank_is_local(int rank, MPIR_Comm * comm)
 {
     int ret;
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
@@ -37,7 +37,7 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPID_Comm * comm)
 }
 
 
-static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPID_Comm * comm)
+static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPIR_Comm * comm)
 {
     int ret;
     MPIDI_STATE_DECL(MPIDI_CH4U_STATE_IS_LOCAL);
@@ -67,7 +67,7 @@ static inline int MPIDI_CH4U_cmpfunc (const void * a, const void * b)
 }
 
 static inline int MPIDI_CH4U_build_nodemap(int             myrank,
-                                           MPID_Comm      *comm,
+                                           MPIR_Comm      *comm,
                                            int             sz,
                                            MPID_Node_id_t *out_nodemap,
                                            MPID_Node_id_t *sz_out)
@@ -117,7 +117,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4U_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id_t *id_p)
+static inline int MPIDI_CH4U_get_node_id(MPIR_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     int mpi_errno = MPI_SUCCESS;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
@@ -130,7 +130,7 @@ static inline int MPIDI_CH4U_get_node_id(MPID_Comm *comm, int rank, MPID_Node_id
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4U_get_max_node_id(MPID_Comm *comm, MPID_Node_id_t *max_id_p)
+static inline int MPIDI_CH4U_get_max_node_id(MPIR_Comm *comm, MPID_Node_id_t *max_id_p)
 {
     int mpi_errno = MPI_SUCCESS;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
