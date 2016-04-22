@@ -92,18 +92,25 @@ static inline void *MPIDI_CH4R_generate_random_addr(size_t size)
      * but it's not fatal since we bail after a fixed number of iterations
      */
 #define MPIDI_CH4I_MAP_POINTER ((random_unsigned&((0x00006FFFFFFFFFFF&(~(page_sz-1)))|0x0000600000000000)))
+    uintptr_t       map_pointer;
+#ifdef USE_SYM_HEAP
     char            random_state[256];
     size_t          page_sz;
     uint64_t        random_unsigned;
     size_t          mapsize     = MPIDI_CH4R_get_mapsize(size, &page_sz);
-    uintptr_t       map_pointer;
     struct timeval  ts;
     int             iter = 100;
     int32_t         rh, rl;
     struct random_data rbuf;
+#endif
 
     MPIDI_STATE_DECL(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
+
+#ifndef USE_SYM_HEAP
+    map_pointer = -1ULL;
+    goto fn_exit;
+#else
 
     /* rbuf must be zero-cleared otherwise it results in SIGSEGV in glibc
        (http://stackoverflow.com/questions/4167034/c-initstate-r-crashing) */
@@ -130,6 +137,8 @@ static inline void *MPIDI_CH4R_generate_random_addr(size_t size)
         }
     }
 
+#endif
+
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
     return (void *)map_pointer;
@@ -145,15 +154,21 @@ static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
                                                 MPID_Win   *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    unsigned  test, result;
     int       iter=100;
-    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     void     *baseP;
-    size_t    page_sz;
     size_t    mapsize;
+#ifdef USE_SYM_HEAP
+    unsigned  test, result;
+    MPIR_Errflag_t errflag = MPIR_ERR_NONE;
+    size_t    page_sz;
+#endif
 
     MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+
+#ifndef USE_SYM_HEAP
+    iter = 0;
+#else
 
     mapsize = MPIDI_CH4R_get_mapsize(size, &page_sz);
 
@@ -230,9 +245,10 @@ static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
         }
     } else
         baseP = NULL;
+#endif
 
     if(iter == 0) {
-        fprintf(stderr, "WARNING: Win_allocate:  Unable to allocate symmetric heap\n");
+        MPL_DBG_MSG(MPIDI_CH4_DBG_GENERAL, VERBOSE, "WARNING: Win_allocate:  Unable to allocate symmetric heap\n");
         baseP = MPL_malloc(size);
         MPIR_ERR_CHKANDJUMP((baseP == NULL), mpi_errno,
                             MPI_ERR_BUFFER, "**bufnull");
