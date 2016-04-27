@@ -32,7 +32,7 @@
 #define MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS     48
 #define MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS  24
 #define MPIDI_CH4_NMI_OFI_AM_RANK_BITS        32
-#define MPIDI_CH4_NMI_OFI_AM_MSG_HEADER_SIZE (sizeof(MPIDI_CH4_NMI_OFI_Am_header_t))
+#define MPIDI_CH4_NMI_OFI_AM_MSG_HEADER_SIZE (sizeof(MPIDI_CH4_NMI_OFI_am_header_t))
 
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
 #define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS      256
@@ -96,13 +96,13 @@ typedef struct {
     uint64_t sreq_ptr;
     uint64_t am_hdr_src;
     uint64_t rma_key;
-} MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t;
+} MPIDI_CH4_NMI_OFI_lmt_msg_payload_t;
 
 typedef struct {
     uint64_t sreq_ptr;
-} MPIDI_CH4_NMI_OFI_Ack_msg_payload_t;
+} MPIDI_CH4_NMI_OFI_ack_msg_payload_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Am_header_t {
+typedef struct MPIDI_CH4_NMI_OFI_am_header_t {
 uint64_t handler_id  :
     MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
 uint64_t am_type     :
@@ -112,20 +112,20 @@ uint64_t am_hdr_sz   :
 uint64_t data_sz     :
     MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
     uint64_t payload[0];
-} MPIDI_CH4_NMI_OFI_Am_header_t;
+} MPIDI_CH4_NMI_OFI_am_header_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_Am_header_t       hdr;
-    MPIDI_CH4_NMI_OFI_Ack_msg_payload_t pyld;
-} MPIDI_CH4_NMI_OFI_Ack_msg_t;
+    MPIDI_CH4_NMI_OFI_am_header_t       hdr;
+    MPIDI_CH4_NMI_OFI_ack_msg_payload_t pyld;
+} MPIDI_CH4_NMI_OFI_ack_msg_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_Am_header_t       hdr;
-    MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t pyld;
-} MPIDI_CH4_NMI_OFI_Lmt_msg_t;
+    MPIDI_CH4_NMI_OFI_am_header_t       hdr;
+    MPIDI_CH4_NMI_OFI_lmt_msg_payload_t pyld;
+} MPIDI_CH4_NMI_OFI_lmt_msg_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t  lmt_info;
+    MPIDI_CH4_NMI_OFI_lmt_msg_payload_t  lmt_info;
     uint64_t                             lmt_cntr;
     struct fid_mr                        *lmt_mr;
     void                          *pack_buffer;
@@ -134,21 +134,21 @@ typedef struct {
     int (*cmpl_handler_fn)(struct MPIR_Request *req);
     uint16_t                      am_hdr_sz;
     uint8_t                       pad[6];
-    MPIDI_CH4_NMI_OFI_Am_header_t msg_hdr;
+    MPIDI_CH4_NMI_OFI_am_header_t msg_hdr;
     uint8_t                       am_hdr_buf[MPIDI_CH4_NMI_OFI_MAX_AM_HDR_SIZE];
-} MPIDI_CH4_NMI_OFI_Am_request_header_t;
+} MPIDI_CH4_NMI_OFI_am_request_header_t;
 
 typedef struct {
     struct fi_context                      context;  /* fixed field, do not move */
     int                                    event_id; /* fixed field, do not move */
-    MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
+    MPIDI_CH4_NMI_OFI_am_request_header_t *req_hdr;
 } MPIDI_CH4_NMI_OFI_am_request_t;
 
 
-typedef struct MPIDI_CH4_NMI_OFI_Noncontig_t{
+typedef struct MPIDI_CH4_NMI_OFI_noncontig_t{
     struct MPIDU_Segment segment;
     char                 pack_buffer[0];
-}MPIDI_CH4_NMI_OFI_Noncontig_t;
+}MPIDI_CH4_NMI_OFI_noncontig_t;
 
 typedef struct {
     struct fi_context    context;  /* fixed field, do not move */
@@ -156,7 +156,7 @@ typedef struct {
     int                  util_id;
     struct MPIR_Comm    *util_comm;
     MPI_Datatype         datatype;
-    MPIDI_CH4_NMI_OFI_Noncontig_t *noncontig;
+    MPIDI_CH4_NMI_OFI_noncontig_t *noncontig;
     /* persistent send fields */
     union {
         struct {
@@ -175,13 +175,13 @@ typedef struct {
     int index;
 } MPIDI_CH4_NMI_OFI_dt_t;
 
-struct MPIDI_CH4_NMI_OFI_Win_request;
+struct MPIDI_CH4_NMI_OFI_win_request;
 
 typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
     uint64_t                           win_id;
-    struct MPIDI_CH4_NMI_OFI_Win_request   *syncQ;
+    struct MPIDI_CH4_NMI_OFI_win_request   *syncQ;
     uint32_t *disp_units;
 } MPIDI_CH4_NMI_OFI_win_t;
 

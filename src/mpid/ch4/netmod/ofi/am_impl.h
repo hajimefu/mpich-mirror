@@ -13,7 +13,7 @@
 
 #include "impl.h"
 
-static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
+static inline int MPIDI_CH4_NMI_OFI_progress_do_queue(void *netmod_context);
 
 /*
   Per-object lock for OFI
@@ -43,14 +43,14 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
                                    FCNAME,                              \
                                    fi_strerror(-_ret));                 \
             if (LOCK) MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX); \
-            mpi_errno = MPIDI_CH4_NMI_OFI_Progress_do_queue(NULL);      \
+            mpi_errno = MPIDI_CH4_NMI_OFI_progress_do_queue(NULL);      \
             if (LOCK) MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX); \
             if(mpi_errno != MPI_SUCCESS)                                \
                 MPIR_ERR_POP(mpi_errno);                                \
         } while (_ret == -FI_EAGAIN);                                   \
     } while (0)
 
-static inline MPIR_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int count)
+static inline MPIR_Request *MPIDI_CH4_NMI_OFI_am_request_alloc_and_init(int count)
 {
     MPIR_Request *req;
     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
@@ -72,12 +72,12 @@ static inline MPIR_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int coun
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Am_clear_request
+#define FUNCNAME MPIDI_CH4_NMI_OFI_am_clear_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPIR_Request *sreq)
+static inline void MPIDI_CH4_NMI_OFI_am_clear_request(MPIR_Request *sreq)
 {
-    MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
+    MPIDI_CH4_NMI_OFI_am_request_header_t *req_hdr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_CLEAR_REQ);
 
@@ -97,20 +97,20 @@ static inline void MPIDI_CH4_NMI_OFI_Am_clear_request(MPIR_Request *sreq)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Am_init_request
+#define FUNCNAME MPIDI_CH4_NMI_OFI_am_init_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
+static inline int MPIDI_CH4_NMI_OFI_am_init_request(const void *am_hdr,
                                                     size_t am_hdr_sz,
                                                     MPIR_Request *sreq)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_CH4_NMI_OFI_Am_request_header_t *req_hdr;
+    MPIDI_CH4_NMI_OFI_am_request_header_t *req_hdr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_AM_OFI_INIT_REQ);
 
     if(MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) == NULL) {
-        req_hdr = (MPIDI_CH4_NMI_OFI_Am_request_header_t *)
+        req_hdr = (MPIDI_CH4_NMI_OFI_am_request_header_t *)
                   MPIDI_CH4R_get_buf(MPIDI_Global.am_buf_pool);
         MPIU_Assert(req_hdr);
         MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) = req_hdr;
@@ -139,14 +139,14 @@ static inline int MPIDI_CH4_NMI_OFI_Am_init_request(const void *am_hdr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Repost_buffer
+#define FUNCNAME MPIDI_CH4_NMI_OFI_repost_buffer
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Repost_buffer(void         *buf,
+static inline int MPIDI_CH4_NMI_OFI_repost_buffer(void         *buf,
                                                   MPIR_Request *req)
 {
     int           mpi_errno = MPI_SUCCESS;
-    MPIDI_CH4_NMI_OFI_Am_repost_request_t *am = (MPIDI_CH4_NMI_OFI_Am_repost_request_t *)req;
+    MPIDI_CH4_NMI_OFI_am_repost_request_t *am = (MPIDI_CH4_NMI_OFI_am_repost_request_t *)req;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REPOST_BUFFER);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REPOST_BUFFER);
@@ -162,10 +162,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Progress_do_queue
+#define FUNCNAME MPIDI_CH4_NMI_OFI_progress_do_queue
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context)
+static inline int MPIDI_CH4_NMI_OFI_progress_do_queue(void *netmod_context)
 {
     int mpi_errno = MPI_SUCCESS, ret;
     struct fi_cq_tagged_entry cq_entry;
@@ -181,14 +181,14 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context)
         goto fn_exit;
 
     if(ret < 0) {
-        mpi_errno = MPIDI_CH4_NMI_OFI_Handle_cq_error_util(ret);
+        mpi_errno = MPIDI_CH4_NMI_OFI_handle_cq_error_util(ret);
         goto fn_fail;
     }
 
     if(((MPIDI_Global.cq_buff_head + 1) %
         MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED == MPIDI_Global.cq_buff_tail) ||
        !slist_empty(&MPIDI_Global.cq_buff_list)) {
-        MPIDI_CH4_NMI_OFI_Cq_list_t *list_entry = (MPIDI_CH4_NMI_OFI_Cq_list_t *) MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Cq_list_t));
+        MPIDI_CH4_NMI_OFI_cq_list_t *list_entry = (MPIDI_CH4_NMI_OFI_cq_list_t *) MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_cq_list_t));
         MPIU_Assert(list_entry);
         list_entry->cq_entry = cq_entry;
         slist_insert_tail(&list_entry->entry, &MPIDI_Global.cq_buff_list);
@@ -199,8 +199,8 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context)
 
     if((cq_entry.flags & FI_RECV) &&
        (cq_entry.flags & FI_MULTI_RECV)) {
-        mpi_errno = MPIDI_CH4_NMI_OFI_Repost_buffer(cq_entry.op_context,
-                                                    MPIDI_CH4_NMI_OFI_Context_to_request(cq_entry.op_context));
+        mpi_errno = MPIDI_CH4_NMI_OFI_repost_buffer(cq_entry.op_context,
+                                                    MPIDI_CH4_NMI_OFI_context_to_request(cq_entry.op_context));
 
         if(mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
@@ -213,10 +213,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Do_send_am_header
+#define FUNCNAME MPIDI_CH4_NMI_OFI_do_send_am_header
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                         rank,
+static inline int MPIDI_CH4_NMI_OFI_do_send_am_header(int                         rank,
                                                       MPIR_Comm                  *comm,
                                                       int                         handler_id,
                                                       const void                 *am_hdr,
@@ -225,7 +225,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
                                                       int                         is_reply)
 {
     struct iovec iov[2];
-    MPIDI_CH4_NMI_OFI_Am_header_t *msg_hdr;
+    MPIDI_CH4_NMI_OFI_am_header_t *msg_hdr;
     int mpi_errno = MPI_SUCCESS, c;
     int need_lock = !is_reply;
 
@@ -233,7 +233,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
 
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) = NULL;
-    mpi_errno = MPIDI_CH4_NMI_OFI_Am_init_request(am_hdr, am_hdr_sz, sreq);
+    mpi_errno = MPIDI_CH4_NMI_OFI_am_init_request(am_hdr, am_hdr_sz, sreq);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -259,7 +259,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am_header(int                       
     iov[1].iov_len = am_hdr_sz;
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendv(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), iov, NULL, 2,
-                                             MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
+                                             MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
                                              &MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, context)), need_lock, sendv);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_SEND_AM_HDR);
@@ -269,10 +269,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Send_am_long
+#define FUNCNAME MPIDI_CH4_NMI_OFI_send_am_long
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
+static inline int MPIDI_CH4_NMI_OFI_send_am_long(int           rank,
                                                  MPIR_Comm    *comm,
                                                  int           handler_id,
                                                  const void   *am_hdr,
@@ -283,8 +283,8 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
                                                  int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS, c;
-    MPIDI_CH4_NMI_OFI_Am_header_t       *msg_hdr;
-    MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t *lmt_info;
+    MPIDI_CH4_NMI_OFI_am_header_t       *msg_hdr;
+    MPIDI_CH4_NMI_OFI_lmt_msg_payload_t *lmt_info;
     struct iovec              iov[3];
     uint64_t                  index;
 
@@ -310,7 +310,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
     lmt_info->sreq_ptr = (uint64_t) sreq;
     /* Always allocates RMA ID from COMM_WORLD as the actual associated communicator
        is not available here */
-    index = MPIDI_CH4_NMI_OFI_Index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(MPIR_Process.comm_world).rma_id_allocator);
+    index = MPIDI_CH4_NMI_OFI_index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(MPIR_Process.comm_world).rma_id_allocator);
     MPIU_Assert((int)index < MPIDI_Global.max_huge_rmas);
     lmt_info->rma_key = index << MPIDI_Global.huge_rma_shift;
 
@@ -349,7 +349,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_long(int           rank,
     iov[2].iov_len = sizeof(*lmt_info);
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendv(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), iov, NULL, 3,
-                                             MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
+                                             MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
                                              &MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, context)), need_lock, sendv);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_LONG);
@@ -359,10 +359,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Send_am_short
+#define FUNCNAME MPIDI_CH4_NMI_OFI_send_am_short
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
+static inline int MPIDI_CH4_NMI_OFI_send_am_short(int           rank,
                                                   MPIR_Comm    *comm,
                                                   int           handler_id,
                                                   const void   *am_hdr,
@@ -373,7 +373,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
                                                   int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS, c;
-    MPIDI_CH4_NMI_OFI_Am_header_t *msg_hdr;
+    MPIDI_CH4_NMI_OFI_am_header_t *msg_hdr;
     struct iovec iov[3];
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
@@ -403,7 +403,7 @@ static inline int MPIDI_CH4_NMI_OFI_Send_am_short(int           rank,
     MPIR_cc_incr(sreq->cc_ptr, &c);
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_AM_SEND;
     MPIDI_CH4_NMI_OFI_CALL_RETRY_AM(fi_sendv(MPIDI_CH4_NMI_OFI_EP_TX_MSG(0), iov, NULL, 3,
-                                             MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
+                                             MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
                                              &MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, context)), need_lock, sendv);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_AM_SHORT);
@@ -413,10 +413,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Do_send_am
+#define FUNCNAME MPIDI_CH4_NMI_OFI_do_send_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
+static inline int MPIDI_CH4_NMI_OFI_do_send_am(int           rank,
                                                MPIR_Comm    *comm,
                                                int           handler_id,
                                                const void   *am_hdr,
@@ -439,7 +439,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
 
     MPIDI_CH4_NMI_OFI_AMREQUEST(sreq, req_hdr) = NULL;
-    mpi_errno = MPIDI_CH4_NMI_OFI_Am_init_request(am_hdr, am_hdr_sz, sreq);
+    mpi_errno = MPIDI_CH4_NMI_OFI_am_init_request(am_hdr, am_hdr_sz, sreq);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -467,11 +467,11 @@ static inline int MPIDI_CH4_NMI_OFI_Do_send_am(int           rank,
 
     /* We don't want to do the long send if CH4R is doing eager send.
        This looks somewhat ad-hoc, should be addressed in the upcoming AM API change. */
-    threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t));
-    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)) <= threshold) ?
-                MPIDI_CH4_NMI_OFI_Send_am_short(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+    threshold = MPL_MAX(MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_CH4_NMI_OFI_am_header_t));
+    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_CH4_NMI_OFI_am_header_t)) <= threshold) ?
+                MPIDI_CH4_NMI_OFI_send_am_short(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                 am_hdr_sz, send_buf, data_sz, sreq, need_lock) :
-                MPIDI_CH4_NMI_OFI_Send_am_long(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+                MPIDI_CH4_NMI_OFI_send_am_long(rank, comm, handler_id, MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(sreq, am_hdr),
                                                am_hdr_sz, send_buf, data_sz, sreq, need_lock);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_DO_SEND_AM);
@@ -480,7 +480,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
+static inline int MPIDI_CH4_NMI_OFI_do_inject(int           rank,
                                               MPIR_Comm    *comm,
                                               int           handler_id,
                                               const void   *am_hdr,
@@ -491,7 +491,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
                                               int           need_lock)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_CH4_NMI_OFI_Am_header_t msg_hdr;
+    MPIDI_CH4_NMI_OFI_am_header_t msg_hdr;
     struct fi_msg msg;
     struct iovec msg_iov[2];
     uint64_t send_flag = FI_INJECT;
@@ -521,14 +521,14 @@ static inline int MPIDI_CH4_NMI_OFI_Do_inject(int           rank,
     msg.iov_count       = 2;
     msg.context         = NULL;
     msg.addr            = use_comm_table ?
-                          MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_MSG):
-                          MPIDI_CH4_NMI_OFI_To_phys(rank, MPIDI_CH4_NMI_OFI_API_MSG);
+                          MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_MSG):
+                          MPIDI_CH4_NMI_OFI_to_phys(rank, MPIDI_CH4_NMI_OFI_API_MSG);
 
     if (unlikely(am_hdr_sz + sizeof(msg_hdr) > MPIDI_Global.max_buffered_send)) {
         MPIR_Request *sreq;
         char *ibuf;
 
-        sreq = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);
+        sreq = MPIDI_CH4_NMI_OFI_request_alloc_and_init(1);
         MPIU_Assert(sreq);
         ibuf = (char *) MPL_malloc(am_hdr_sz + sizeof(msg_hdr));
         MPIU_Assert(ibuf);
@@ -556,7 +556,7 @@ fn_fail:
 }
 
 
-static inline void MPIDI_CH4_NMI_OFI_Am_request_complete(MPIR_Request *req)
+static inline void MPIDI_CH4_NMI_OFI_am_request_complete(MPIR_Request *req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);

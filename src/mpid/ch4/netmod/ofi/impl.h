@@ -56,29 +56,29 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 /*
  * Helper routines and macros for request completion
  */
-#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req)             \
+#define MPIDI_CH4_NMI_OFI_ssendack_request_t_tls_alloc(req)             \
     do {                                                                \
-        (req) = (MPIDI_CH4_NMI_OFI_Ssendack_request_t*)                 \
+        (req) = (MPIDI_CH4_NMI_OFI_ssendack_request_t*)                 \
             MPIU_Handle_obj_alloc(&MPIR_Request_mem);                  \
         if (req == NULL)                                                \
             MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1,                      \
                        "Cannot allocate Ssendack Request");             \
     } while (0)
 
-#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_free(req) \
+#define MPIDI_CH4_NMI_OFI_ssendack_request_t_tls_free(req) \
   MPIU_Handle_obj_free(&MPIR_Request_mem, (req))
 
-#define MPIDI_CH4_NMI_OFI_Ssendack_request_t_alloc_and_init(req)        \
+#define MPIDI_CH4_NMI_OFI_ssendack_request_t_alloc_and_init(req)        \
     do {                                                                \
-        MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);            \
+        MPIDI_CH4_NMI_OFI_ssendack_request_t_tls_alloc(req);            \
         MPIU_Assert(req != NULL);                                       \
         MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                    \
                     == MPID_SSENDACK_REQUEST);                          \
     } while (0)
 
-#define MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
+#define MPIDI_CH4_NMI_OFI_request_create_null_rreq(rreq_, mpi_errno_, FAIL_) \
   do {                                                                  \
-    (rreq_) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(1);                          \
+    (rreq_) = MPIDI_CH4_NMI_OFI_request_alloc_and_init(1);                          \
     if ((rreq_) != NULL) {                                              \
       MPIR_cc_set(&(rreq_)->cc, 0);                                     \
       (rreq_)->kind = MPIR_REQUEST_KIND__RECV;                                \
@@ -236,29 +236,29 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 
 #define MPIDI_CH4_NMI_OFI_REQUEST_CREATE(req)                 \
     do {                                                      \
-        (req) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init(2);  \
+        (req) = MPIDI_CH4_NMI_OFI_request_alloc_and_init(2);  \
     } while (0)
 
 #define MPIDI_CH4_NMI_OFI_SEND_REQUEST_CREATE_LW(req)                   \
     do {                                                                \
-        (req) = MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(1);    \
+        (req) = MPIDI_CH4_NMI_OFI_request_alloc_and_init_send_lw(1);    \
     } while (0)
 
 #define MPIDI_CH4_NMI_OFI_SSEND_ACKREQUEST_CREATE(req)            \
     do {                                                          \
-        MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req);      \
+        MPIDI_CH4_NMI_OFI_ssendack_request_t_tls_alloc(req);      \
     } while (0)
 
 #define WINFO(w,rank) MPIDI_CH4U_WINFO(w,rank)
 
-static inline void *MPIDI_CH4_NMI_OFI_Winfo_base(MPIR_Win *w, int rank)
+static inline void *MPIDI_CH4_NMI_OFI_winfo_base(MPIR_Win *w, int rank)
 {
     return NULL;
 }
 
 #define MPIDI_CH4_NMI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
-static inline uint64_t MPIDI_CH4_NMI_OFI_Winfo_mr_key(MPIR_Win *w, int rank)
+static inline uint64_t MPIDI_CH4_NMI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
 {
     return MPIDI_CH4_NMI_OFI_WIN(w).mr_key;
 }
@@ -268,7 +268,7 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Winfo_mr_key(MPIR_Win *w, int rank)
 /* Common Utility functions used by the
  * C and C++ components
  */
-__ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int count)
+__ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_request_alloc_and_init(int count)
 {
     MPIR_Request *req;
     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
@@ -297,7 +297,7 @@ __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int cou
     return req;
 }
 
-__ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(int count)
+__ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_request_alloc_and_init_send_lw(int count)
 {
     MPIR_Request *req;
     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
@@ -316,27 +316,27 @@ __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw
     return req;
 }
 
-__ALWAYS_INLINE__ MPIDI_CH4_NMI_OFI_Win_request_t *MPIDI_CH4_NMI_OFI_Win_request_alloc_and_init(int count,int extra)
+__ALWAYS_INLINE__ MPIDI_CH4_NMI_OFI_win_request_t *MPIDI_CH4_NMI_OFI_win_request_alloc_and_init(int count,int extra)
 {
-    MPIDI_CH4_NMI_OFI_Win_request_t *req;
-    req = (MPIDI_CH4_NMI_OFI_Win_request_t*)MPIU_Handle_obj_alloc(&MPIR_Request_mem);
+    MPIDI_CH4_NMI_OFI_win_request_t *req;
+    req = (MPIDI_CH4_NMI_OFI_win_request_t*)MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIU_Object_set_ref(req, count);
     memset((char*)req+MPIDI_REQUEST_HDR_SIZE, 0,
-           sizeof(MPIDI_CH4_NMI_OFI_Win_request_t)-
+           sizeof(MPIDI_CH4_NMI_OFI_win_request_t)-
            MPIDI_REQUEST_HDR_SIZE);
-    req->noncontig = (MPIDI_CH4_NMI_OFI_Win_noncontig_t*)MPL_calloc(1,(extra)+sizeof(*(req->noncontig)));
+    req->noncontig = (MPIDI_CH4_NMI_OFI_win_noncontig_t*)MPL_calloc(1,(extra)+sizeof(*(req->noncontig)));
     return req;
 }
 
-__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_Win_datatype_unmap(MPIDI_CH4_NMI_OFI_Win_datatype_t *dt)
+__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_win_datatype_unmap(MPIDI_CH4_NMI_OFI_win_datatype_t *dt)
 {
     if(dt->map != &dt->__map)
         MPL_free(dt->map);
 }
 
-__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_Win_request_complete(MPIDI_CH4_NMI_OFI_Win_request_t *req)
+__ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_win_request_complete(MPIDI_CH4_NMI_OFI_win_request_t *req)
 {
     int count;
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
@@ -344,15 +344,15 @@ __ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_Win_request_complete(MPIDI_CH4_NMI_OFI_
     MPIU_Assert(count >= 0);
     if (count == 0)
     {
-        MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->target_dt);
-        MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->origin_dt);
-        MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->result_dt);
+        MPIDI_CH4_NMI_OFI_win_datatype_unmap(&req->noncontig->target_dt);
+        MPIDI_CH4_NMI_OFI_win_datatype_unmap(&req->noncontig->origin_dt);
+        MPIDI_CH4_NMI_OFI_win_datatype_unmap(&req->noncontig->result_dt);
         MPL_free(req->noncontig);
         MPIU_Handle_obj_free(&MPIR_Request_mem, (req));
     }
 }
 
-static inline fi_addr_t MPIDI_CH4_NMI_OFI_Comm_to_phys(MPIR_Comm *comm, int rank, int ep_family)
+static inline fi_addr_t MPIDI_CH4_NMI_OFI_comm_to_phys(MPIR_Comm *comm, int rank, int ep_family)
 {
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
     int ep_num = MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm, rank);
@@ -364,7 +364,7 @@ static inline fi_addr_t MPIDI_CH4_NMI_OFI_Comm_to_phys(MPIR_Comm *comm, int rank
 #endif
 }
 
-static inline fi_addr_t MPIDI_CH4_NMI_OFI_To_phys(int rank, int ep_family)
+static inline fi_addr_t MPIDI_CH4_NMI_OFI_to_phys(int rank, int ep_family)
 {
 #ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
     int ep_num = 0;
@@ -376,12 +376,12 @@ static inline fi_addr_t MPIDI_CH4_NMI_OFI_To_phys(int rank, int ep_family)
 #endif
 }
 
-static inline bool MPIDI_CH4_NMI_OFI_Is_tag_sync(uint64_t match_bits)
+static inline bool MPIDI_CH4_NMI_OFI_is_tag_sync(uint64_t match_bits)
 {
     return (0 != (MPIDI_CH4_NMI_OFI_SYNC_SEND & match_bits));
 }
 
-static inline uint64_t MPIDI_CH4_NMI_OFI_Init_sendtag(MPIU_Context_id_t contextid,
+static inline uint64_t MPIDI_CH4_NMI_OFI_init_sendtag(MPIU_Context_id_t contextid,
                                                       int               source,
                                                       int               tag,
                                                       uint64_t          type)
@@ -396,7 +396,7 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Init_sendtag(MPIU_Context_id_t contexti
 }
 
 /* receive posting */
-static inline uint64_t MPIDI_CH4_NMI_OFI_Init_recvtag(uint64_t          *mask_bits,
+static inline uint64_t MPIDI_CH4_NMI_OFI_init_recvtag(uint64_t          *mask_bits,
                                                       MPIU_Context_id_t  contextid,
                                                       int                source,
                                                       int                tag)
@@ -422,40 +422,40 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Init_recvtag(uint64_t          *mask_bi
     return match_bits;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Init_get_tag(uint64_t match_bits)
+static inline int MPIDI_CH4_NMI_OFI_init_get_tag(uint64_t match_bits)
 {
     return ((int)(match_bits & MPIDI_CH4_NMI_OFI_TAG_MASK));
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Init_get_source(uint64_t match_bits)
+static inline int MPIDI_CH4_NMI_OFI_init_get_source(uint64_t match_bits)
 {
     return ((int)((match_bits & MPIDI_CH4_NMI_OFI_SOURCE_MASK) >> MPIDI_CH4_NMI_OFI_TAG_SHIFT));
 }
 
-static inline MPIR_Request *MPIDI_CH4_NMI_OFI_Context_to_request(void *context)
+static inline MPIR_Request *MPIDI_CH4_NMI_OFI_context_to_request(void *context)
 {
     char *base = (char *) context;
     return (MPIR_Request *) container_of(base, MPIR_Request, dev.ch4.netmod);
 }
 
 /* Utility functions */
-extern int   MPIDI_CH4_NMI_OFI_Handle_cq_error_util(ssize_t ret);
-extern int   MPIDI_CH4_NMI_OFI_Control_handler(void *am_hdr,
+extern int   MPIDI_CH4_NMI_OFI_handle_cq_error_util(ssize_t ret);
+extern int   MPIDI_CH4_NMI_OFI_control_handler(void *am_hdr,
                                                void **data,size_t *data_sz,int *is_contig,
                                                MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                                                MPIR_Request **req);
 extern int   MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr);
 extern int   MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt);
-extern void  MPIDI_CH4_NMI_OFI_Map_create(void **map);
-extern void  MPIDI_CH4_NMI_OFI_Map_destroy(void *map);
-extern void  MPIDI_CH4_NMI_OFI_Map_set(void *_map, uint64_t id, void *val);
-extern void  MPIDI_CH4_NMI_OFI_Map_erase(void *_map, uint64_t id);
-extern void *MPIDI_CH4_NMI_OFI_Map_lookup(void *_map, uint64_t id);
-extern int   MPIDI_CH4_NMI_OFI_Control_dispatch(void *buf);
-extern void  MPIDI_CH4_NMI_OFI_Index_datatypes();
-extern void  MPIDI_CH4_NMI_OFI_Index_allocator_create(void **_indexmap, int start);
-extern int   MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *_indexmap);
-extern void  MPIDI_CH4_NMI_OFI_Index_allocator_free(void *_indexmap, int index);
-extern void  MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *_indexmap);
+extern void  MPIDI_CH4_NMI_OFI_map_create(void **map);
+extern void  MPIDI_CH4_NMI_OFI_map_destroy(void *map);
+extern void  MPIDI_CH4_NMI_OFI_map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_CH4_NMI_OFI_map_erase(void *_map, uint64_t id);
+extern void *MPIDI_CH4_NMI_OFI_map_lookup(void *_map, uint64_t id);
+extern int   MPIDI_CH4_NMI_OFI_control_dispatch(void *buf);
+extern void  MPIDI_CH4_NMI_OFI_index_datatypes();
+extern void  MPIDI_CH4_NMI_OFI_index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_CH4_NMI_OFI_index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_CH4_NMI_OFI_index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_CH4_NMI_OFI_index_allocator_destroy(void *_indexmap);
 
 #endif

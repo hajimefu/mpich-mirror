@@ -17,10 +17,10 @@
 #define MPIDI_CH4_NMI_OFI_USE_EXISTING 1
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Do_irecv
+#define FUNCNAME MPIDI_CH4_NMI_OFI_do_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
+__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_do_irecv(void          *buf,
                                                  int            count,
                                                  MPI_Datatype   datatype,
                                                  int            rank,
@@ -61,7 +61,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
         goto fn_exit;
     }
 
-    match_bits = MPIDI_CH4_NMI_OFI_Init_recvtag(&mask_bits, context_id, rank, tag);
+    match_bits = MPIDI_CH4_NMI_OFI_init_recvtag(&mask_bits, context_id, rank, tag);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_CH4_NMI_OFI_REQUEST(rreq, datatype) = datatype;
@@ -70,7 +70,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
     recv_buf = (char *) buf + dt_true_lb;
 
     if(!dt_contig) {
-        MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig) = (MPIDI_CH4_NMI_OFI_Noncontig_t*) MPL_malloc(data_sz+sizeof(MPID_Segment));
+        MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig) = (MPIDI_CH4_NMI_OFI_noncontig_t*) MPL_malloc(data_sz+sizeof(MPID_Segment));
         MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Recv Pack Buffer alloc");
         recv_buf = MPIDI_CH4_NMI_OFI_REQUEST(rreq, noncontig->pack_buffer);
@@ -93,7 +93,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Do_irecv(void          *buf,
                                               recv_buf,
                                               data_sz,
                                               NULL,
-                                              (MPI_ANY_SOURCE == rank) ? FI_ADDR_UNSPEC : MPIDI_CH4_NMI_OFI_Comm_to_phys(comm, rank,
+                                              (MPI_ANY_SOURCE == rank) ? FI_ADDR_UNSPEC : MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank,
                                                       MPIDI_CH4_NMI_OFI_API_TAG),
                                               match_bits, mask_bits, (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(rreq, context))), trecv);
     else {
@@ -136,7 +136,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_irecv(buf, count, datatype, rank, tag, comm,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_irecv(buf, count, datatype, rank, tag, comm,
                                            context_offset, request, MPIDI_CH4_NMI_OFI_ON_HEAP, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV);
     return mpi_errno;
@@ -204,7 +204,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
     if(message == NULL) {
-        MPIDI_CH4_NMI_OFI_Request_create_null_rreq(rreq, mpi_errno, fn_fail);
+        MPIDI_CH4_NMI_OFI_request_create_null_rreq(rreq, mpi_errno, fn_fail);
         *rreqp = rreq;
         goto fn_exit;
     }
@@ -214,7 +214,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
 
     *rreqp = rreq = message;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_irecv(buf, count, datatype, message->status.MPI_SOURCE,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_irecv(buf, count, datatype, message->status.MPI_SOURCE,
                                            message->status.MPI_TAG, rreq->comm, 0,
                                            &rreq, MPIDI_CH4_NMI_OFI_USE_EXISTING, FI_CLAIM | FI_COMPLETION);
 
@@ -239,7 +239,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRECV);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IRECV);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_irecv(buf, count, datatype, rank, tag, comm,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_irecv(buf, count, datatype, rank, tag, comm,
                                            context_offset, request, MPIDI_CH4_NMI_OFI_ON_HEAP, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_IRECV);
     return mpi_errno;

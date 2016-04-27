@@ -135,8 +135,8 @@
 #define MPIDI_CH4_NMI_OFI_THREAD_SPAWN_MUTEX    MPIDI_Global.mutexes[3].m
 
 /* Field accessor macros */
-#define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_Gpid_t*)(req)->dev.pad)
-#define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_Offset_checker_t,  pad)
+#define MPIDI_CH4_NMI_OFI_GPID(req)                ((MPIDI_CH4_NMI_OFI_gpid_t*)(req)->dev.pad)
+#define MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE       offsetof(MPIDI_CH4_NMI_OFI_offset_checker_t,  pad)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST(req,field)     ((req)->dev.ch4.ch4u.netmod_am.ofi.field)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR(req,field) ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr->field)
 #define MPIDI_CH4_NMI_OFI_AMREQUEST_HDR_PTR(req)   ((req)->dev.ch4.ch4u.netmod_am.ofi.req_hdr)
@@ -222,26 +222,26 @@ enum {
 
 typedef struct {
     fi_addr_t dest;
-} MPIDI_CH4_NMI_OFI_Addr_entry_t;
+} MPIDI_CH4_NMI_OFI_addr_entry_t;
 
 typedef struct {
     int                            size;
-    MPIDI_CH4_NMI_OFI_Addr_entry_t table[0];/**< Array of physical addresses */
-} MPIDI_CH4_NMI_OFI_Addr_table_t;
+    MPIDI_CH4_NMI_OFI_addr_entry_t table[0];/**< Array of physical addresses */
+} MPIDI_CH4_NMI_OFI_addr_table_t;
 
 typedef struct {
     char              pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context context;          /* fixed field, do not move */
     int               event_id;         /* fixed field, do not move */
     int               index;
-} MPIDI_CH4_NMI_OFI_Am_repost_request_t;
+} MPIDI_CH4_NMI_OFI_am_repost_request_t;
 
 typedef struct {
     char               pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context  context;          /* fixed field, do not move */
     int                event_id;         /* fixed field, do not move */
     MPIR_Request      *signal_req;
-} MPIDI_CH4_NMI_OFI_Ssendack_request_t;
+} MPIDI_CH4_NMI_OFI_ssendack_request_t;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
@@ -251,7 +251,7 @@ typedef struct {
     uint32_t          tag;
     uint32_t          source;
     uint64_t          msglen;
-} MPIDI_CH4_NMI_OFI_Dynamic_process_request_t;
+} MPIDI_CH4_NMI_OFI_dynamic_process_request_t;
 
 typedef struct {
     uint8_t  op;
@@ -263,7 +263,7 @@ typedef struct {
     uint64_t max_atomic_count;
     uint64_t max_compare_atomic_count;
     uint64_t max_fetch_atomic_count;
-} MPIDI_CH4_NMI_OFI_Atomic_valid_t;
+} MPIDI_CH4_NMI_OFI_atomic_valid_t;
 
 typedef struct {
     struct fid_ep *tx_tag;
@@ -279,22 +279,22 @@ typedef struct {
     struct fid_ep *rx_ctr;
 
     int ctx_offset;
-} MPIDI_CH4_NMI_OFI_Context_t;
+} MPIDI_CH4_NMI_OFI_context_t;
 
 typedef union {
     MPID_Thread_mutex_t m;
     char                cacheline[MPIDI_CH4_NMI_OFI_CACHELINE_SIZE];
-} MPIDI_CH4_NMI_OFI_Cacheline_mutex_t __attribute__((aligned(MPIDI_CH4_NMI_OFI_CACHELINE_SIZE)));
+} MPIDI_CH4_NMI_OFI_cacheline_mutex_t __attribute__((aligned(MPIDI_CH4_NMI_OFI_CACHELINE_SIZE)));
 
 typedef struct {
     struct fi_cq_tagged_entry  cq_entry;
     fi_addr_t                  source;
     struct slist_entry         entry;
-} MPIDI_CH4_NMI_OFI_Cq_list_t;
+} MPIDI_CH4_NMI_OFI_cq_list_t;
 
 typedef struct  {
     struct fi_cq_tagged_entry cq_entry;
-} MPIDI_CH4_NMI_OFI_Cq_buff_entry_t;
+} MPIDI_CH4_NMI_OFI_cq_buff_entry_t;
 
 /* Global state data */
 #define MPIDI_KVSAPPSTRLEN 1024
@@ -325,19 +325,19 @@ typedef struct {
     MPID_Node_id_t  max_node_id;
 
     /* Mutexex and endpoints */
-    MPIDI_CH4_NMI_OFI_Cacheline_mutex_t mutexes[4];
-    MPIDI_CH4_NMI_OFI_Context_t         ctx[MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS];
+    MPIDI_CH4_NMI_OFI_cacheline_mutex_t mutexes[4];
+    MPIDI_CH4_NMI_OFI_context_t         ctx[MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS];
 
     /* Window/RMA Globals */
     void                             *win_map;
     uint64_t                          cntr;
-    MPIDI_CH4_NMI_OFI_Atomic_valid_t  win_op_table[MPIDI_CH4_NMI_OFI_DT_SIZES][MPIDI_CH4_NMI_OFI_OP_SIZES];
+    MPIDI_CH4_NMI_OFI_atomic_valid_t  win_op_table[MPIDI_CH4_NMI_OFI_DT_SIZES][MPIDI_CH4_NMI_OFI_OP_SIZES];
 
     /* Active Message Globals */
     struct iovec                           am_iov[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
     struct fi_msg                          am_msg[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
     void                                  *am_bufs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
-    MPIDI_CH4_NMI_OFI_Am_repost_request_t  am_reqs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
+    MPIDI_CH4_NMI_OFI_am_repost_request_t  am_reqs[MPIDI_CH4_NMI_OFI_NUM_AM_BUFFERS];
     MPIDI_CH4_NM_am_target_handler_fn      am_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     MPIDI_CH4_NM_am_origin_handler_fn      am_send_cmpl_handlers[MPIDI_CH4_NMI_OFI_MAX_AM_HANDLERS_TOTAL];
     MPIU_buf_pool_t                       *am_buf_pool;
@@ -345,7 +345,7 @@ typedef struct {
     OPA_int_t                              am_inflight_rma_send_mrs;
 
     /* Completion queue buffering */
-    MPIDI_CH4_NMI_OFI_Cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];
+    MPIDI_CH4_NMI_OFI_cq_buff_entry_t cq_buffered[MPIDI_CH4_NMI_OFI_NUM_CQ_BUFFERED];
     struct slist                      cq_buff_list;
     int                               cq_buff_head;
     int                               cq_buff_tail;
@@ -359,16 +359,16 @@ typedef struct {
     char   kvsname[MPIDI_KVSAPPSTRLEN];
     char   pname[MPI_MAX_PROCESSOR_NAME];
     int    port_name_tag_mask[MPIR_MAX_CONTEXT_MASK];
-} MPIDI_CH4_NMI_OFI_Global_t;
+} MPIDI_CH4_NMI_OFI_global_t;
 
 typedef struct {
     char           addr[62];
     MPID_Node_id_t node;
-} MPIDI_CH4_NMI_OFI_Gpid_t;
+} MPIDI_CH4_NMI_OFI_gpid_t;
 
 typedef struct {
     uint32_t index;
-} MPIDI_CH4_NMI_OFI_Datatype_t;
+} MPIDI_CH4_NMI_OFI_datatype_t;
 /* These control structures have to be the same size */
 typedef struct {
     int16_t  type;
@@ -376,7 +376,7 @@ typedef struct {
     int      origin_rank;
     uint64_t win_id;
     int      dummy[8];
-} MPIDI_CH4_NMI_OFI_Win_control_t;
+} MPIDI_CH4_NMI_OFI_win_control_t;
 
 typedef struct {
     int16_t       type;
@@ -388,12 +388,12 @@ typedef struct {
     int           comm_id;
     int           endpoint_id;
     int           rma_key;
-} MPIDI_CH4_NMI_OFI_Send_control_t;
+} MPIDI_CH4_NMI_OFI_send_control_t;
 
 typedef struct {
     MPIU_OBJECT_HEADER;
     void *pad;
-} MPIDI_CH4_NMI_OFI_Offset_checker_t;
+} MPIDI_CH4_NMI_OFI_offset_checker_t;
 
 typedef struct {
     uintptr_t  target_base_addr;
@@ -416,7 +416,7 @@ typedef struct {
     uintptr_t  result_size;
     size_t     buf_limit;
     size_t     buf_limit_left;
-} MPIDI_CH4_NMI_OFI_Iovec_state_t;
+} MPIDI_CH4_NMI_OFI_iovec_state_t;
 
 typedef struct {
     MPIR_Datatype  *pointer;
@@ -428,7 +428,7 @@ typedef struct {
     int             num_contig;
     DLOOP_VECTOR   *map;
     DLOOP_VECTOR    __map;
-} MPIDI_CH4_NMI_OFI_Win_datatype_t;
+} MPIDI_CH4_NMI_OFI_win_datatype_t;
 
 typedef struct {
     char                      pad[MPIDI_REQUEST_HDR_SIZE];
@@ -457,32 +457,32 @@ typedef struct {
         } get_accumulate;
     } iov;
     char iov_store[0]; /* Flexible array, do not move */
-} MPIDI_CH4_NMI_OFI_Iovec_array_t;
+} MPIDI_CH4_NMI_OFI_iovec_array_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_Iovec_state_t  iovs;
-    MPIDI_CH4_NMI_OFI_Win_datatype_t origin_dt;
-    MPIDI_CH4_NMI_OFI_Win_datatype_t target_dt;
-    MPIDI_CH4_NMI_OFI_Win_datatype_t result_dt;
-    MPIDI_CH4_NMI_OFI_Iovec_array_t  buf; /* Do not move me, flexible array */
-} MPIDI_CH4_NMI_OFI_Win_noncontig_t;
+    MPIDI_CH4_NMI_OFI_iovec_state_t  iovs;
+    MPIDI_CH4_NMI_OFI_win_datatype_t origin_dt;
+    MPIDI_CH4_NMI_OFI_win_datatype_t target_dt;
+    MPIDI_CH4_NMI_OFI_win_datatype_t result_dt;
+    MPIDI_CH4_NMI_OFI_iovec_array_t  buf; /* Do not move me, flexible array */
+} MPIDI_CH4_NMI_OFI_win_noncontig_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Win_request {
+typedef struct MPIDI_CH4_NMI_OFI_win_request {
     MPIU_OBJECT_HEADER;
     char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_CH4_NMI_OFI_OBJECT_HEADER_SIZE];
     struct fi_context                     context;          /* fixed field, do not move */
     int                                   event_id;         /* fixed field, do not move */
-    struct MPIDI_CH4_NMI_OFI_Win_request *next;
+    struct MPIDI_CH4_NMI_OFI_win_request *next;
     int                                   target_rank;
-    MPIDI_CH4_NMI_OFI_Win_noncontig_t    *noncontig;
-} MPIDI_CH4_NMI_OFI_Win_request_t;
+    MPIDI_CH4_NMI_OFI_win_noncontig_t    *noncontig;
+} MPIDI_CH4_NMI_OFI_win_request_t;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
     struct fi_context  context;          /* fixed field, do not move */
     int                event_id;         /* fixed field, do not move */
     MPIR_Request      *parent;           /* Parent request           */
-} MPIDI_CH4_NMI_OFI_Chunk_request;
+} MPIDI_CH4_NMI_OFI_chunk_request;
 
 typedef struct {
     char pad[MPIDI_REQUEST_HDR_SIZE];
@@ -490,27 +490,27 @@ typedef struct {
     int                               event_id;         /* fixed field, do not move */
     int (*done_fn)(struct fi_cq_tagged_entry *wc,
                    MPIR_Request              *req);
-    MPIDI_CH4_NMI_OFI_Send_control_t  remote_info;
+    MPIDI_CH4_NMI_OFI_send_control_t  remote_info;
     size_t                            cur_offset;
     MPIR_Comm                        *comm_ptr;
     MPIR_Request                     *localreq;
     struct fi_cq_tagged_entry         wc;
-} MPIDI_CH4_NMI_OFI_Huge_chunk_t;
+} MPIDI_CH4_NMI_OFI_huge_chunk_t;
 
 typedef struct {
     uint16_t  seqno;
     void     *chunk_q;
-} MPIDI_CH4_NMI_OFI_Huge_recv_t;
+} MPIDI_CH4_NMI_OFI_huge_recv_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
+typedef struct MPIDI_CH4_NMI_OFI_huge_counter_t {
     uint16_t       counter;
     uint16_t       outstanding;
     struct fid_mr *mr;
-} MPIDI_CH4_NMI_OFI_Huge_counter_t;
+} MPIDI_CH4_NMI_OFI_huge_counter_t;
 
 /* Externs */
-extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;
-extern MPIDI_CH4_NMI_OFI_Global_t       MPIDI_Global;
+extern MPIDI_CH4_NMI_OFI_addr_table_t  *MPIDI_Addr_table;
+extern MPIDI_CH4_NMI_OFI_global_t       MPIDI_Global;
 extern int                              MPIR_Datatype_init_names(void);
 
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

@@ -14,16 +14,16 @@
 #include "events.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Handle_cq_error_util
+#define FUNCNAME MPIDI_CH4_NMI_OFI_handle_cq_error_util
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int   MPIDI_CH4_NMI_OFI_Handle_cq_error_util(ssize_t ret)
+int   MPIDI_CH4_NMI_OFI_handle_cq_error_util(ssize_t ret)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Handle_cq_error(ret);
+    mpi_errno = MPIDI_CH4_NMI_OFI_handle_cq_error(ret);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
     return mpi_errno;
@@ -84,40 +84,40 @@ typedef struct {
     uint64_t            key;
     void               *value;
     MPL_UT_hash_handle  hh;         /* makes this structure hashable */
-} MPIDI_CH4_NMI_OFI_Map_entry_t;
+} MPIDI_CH4_NMI_OFI_map_entry_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_Map_t {
-    MPIDI_CH4_NMI_OFI_Map_entry_t * head;
+typedef struct MPIDI_CH4_NMI_OFI_map_t {
+    MPIDI_CH4_NMI_OFI_map_entry_t * head;
 
-} MPIDI_CH4_NMI_OFI_Map_t;
+} MPIDI_CH4_NMI_OFI_map_t;
 
-void MPIDI_CH4_NMI_OFI_Map_create(void **out_map)
+void MPIDI_CH4_NMI_OFI_map_create(void **out_map)
 {
-    MPIDI_CH4_NMI_OFI_Map_t *map;
-    map = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Map_t));
+    MPIDI_CH4_NMI_OFI_map_t *map;
+    map = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_map_t));
     MPIU_Assert(map != NULL);
     map->head = NULL;
     *out_map  = map;
 }
 
-void MPIDI_CH4_NMI_OFI_Map_destroy(void *in_map)
+void MPIDI_CH4_NMI_OFI_map_destroy(void *in_map)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    MPIDI_CH4_NMI_OFI_Map_t *map = in_map;
+    MPIDI_CH4_NMI_OFI_map_t *map = in_map;
     MPL_HASH_CLEAR(hh, map->head);
     MPL_free(map);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Map_set(void     *in_map,
+void MPIDI_CH4_NMI_OFI_map_set(void     *in_map,
                                uint64_t  id,
                                void     *val)
 {
-    MPIDI_CH4_NMI_OFI_Map_t       *map;
-    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
+    MPIDI_CH4_NMI_OFI_map_t       *map;
+    MPIDI_CH4_NMI_OFI_map_entry_t *map_entry;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
-    map_entry       = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Map_entry_t));
+    map             = (MPIDI_CH4_NMI_OFI_map_t*)in_map;
+    map_entry       = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_map_entry_t));
     MPIU_Assert(map_entry != NULL);
     map_entry->key   = id;
     map_entry->value = val;
@@ -125,13 +125,13 @@ void MPIDI_CH4_NMI_OFI_Map_set(void     *in_map,
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Map_erase(void     *in_map,
+void MPIDI_CH4_NMI_OFI_map_erase(void     *in_map,
                                  uint64_t  id)
 {
-    MPIDI_CH4_NMI_OFI_Map_t       *map;
-    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
+    MPIDI_CH4_NMI_OFI_map_t       *map;
+    MPIDI_CH4_NMI_OFI_map_entry_t *map_entry;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
+    map             = (MPIDI_CH4_NMI_OFI_map_t*)in_map;
     MPL_HASH_FIND(hh,map->head,&id,sizeof(uint64_t),map_entry);
     MPIU_Assert(map_entry != NULL);
     MPL_HASH_DELETE(hh, map->head, map_entry);
@@ -139,15 +139,15 @@ void MPIDI_CH4_NMI_OFI_Map_erase(void     *in_map,
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void *MPIDI_CH4_NMI_OFI_Map_lookup(void     *in_map,
+void *MPIDI_CH4_NMI_OFI_map_lookup(void     *in_map,
                                    uint64_t  id)
 {
     void                          *rc;
-    MPIDI_CH4_NMI_OFI_Map_t       *map;
-    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
+    MPIDI_CH4_NMI_OFI_map_t       *map;
+    MPIDI_CH4_NMI_OFI_map_entry_t *map_entry;
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
+    map             = (MPIDI_CH4_NMI_OFI_map_t*)in_map;
     MPL_HASH_FIND(hh,map->head,&id,sizeof(uint64_t),map_entry);
     if(map_entry == NULL)
         rc = MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND;
@@ -157,20 +157,20 @@ void *MPIDI_CH4_NMI_OFI_Map_lookup(void     *in_map,
     return rc;
 }
 
-typedef struct MPIDI_CH4_NMI_OFI_Index_allocator_t
+typedef struct MPIDI_CH4_NMI_OFI_index_allocator_t
 {
     int       chunk_size;
     int       num_ints;
     int       start;
     int       last_free_index;
     uint64_t *bitmask;
-}MPIDI_CH4_NMI_OFI_Index_allocator_t;
+}MPIDI_CH4_NMI_OFI_index_allocator_t;
 
-void MPIDI_CH4_NMI_OFI_Index_allocator_create(void **indexmap, int start)
+void MPIDI_CH4_NMI_OFI_index_allocator_create(void **indexmap, int start)
 {
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator;
+    MPIDI_CH4_NMI_OFI_index_allocator_t *allocator;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    allocator                  = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Index_allocator_t));
+    allocator                  = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_index_allocator_t));
     allocator->chunk_size      = 128;
     allocator->num_ints        = allocator->chunk_size;
     allocator->start           = start;
@@ -187,10 +187,10 @@ void MPIDI_CH4_NMI_OFI_Index_allocator_create(void **indexmap, int start)
         val >>= shift##ULL;                               \
         nval += shift;                                    \
     }
-int MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *indexmap)
+int MPIDI_CH4_NMI_OFI_index_allocator_alloc(void *indexmap)
 {
     int i;
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator = indexmap;
+    MPIDI_CH4_NMI_OFI_index_allocator_t *allocator = indexmap;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     for (i = allocator->last_free_index; i < allocator->num_ints; i++) {
         if (allocator->bitmask[i]) {
@@ -219,10 +219,10 @@ int MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *indexmap)
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     return -1;
 }
-void MPIDI_CH4_NMI_OFI_Index_allocator_free(void *indexmap, int index)
+void MPIDI_CH4_NMI_OFI_index_allocator_free(void *indexmap, int index)
 {
     int int_index, bitpos, numbits;
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator = indexmap;
+    MPIDI_CH4_NMI_OFI_index_allocator_t *allocator = indexmap;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     numbits   = sizeof(uint64_t)*8;
     int_index = (index+1-allocator->start)/numbits;
@@ -233,18 +233,18 @@ void MPIDI_CH4_NMI_OFI_Index_allocator_free(void *indexmap, int index)
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *indexmap)
+void MPIDI_CH4_NMI_OFI_index_allocator_destroy(void *indexmap)
 {
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator;
+    MPIDI_CH4_NMI_OFI_index_allocator_t *allocator;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    allocator = (MPIDI_CH4_NMI_OFI_Index_allocator_t *) indexmap;
+    allocator = (MPIDI_CH4_NMI_OFI_index_allocator_t *) indexmap;
     MPL_free(allocator->bitmask);
     MPL_free(allocator);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
 static inline int
-MPIDI_CH4_NMI_OFI_Win_lock_advance(MPIR_Win *win)
+MPIDI_CH4_NMI_OFI_win_lock_advance(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
     struct MPIDI_CH4U_win_sync_lock *slock = &MPIDI_CH4U_WIN(win, sync).lock;
@@ -269,24 +269,24 @@ MPIDI_CH4_NMI_OFI_Win_lock_advance(MPIR_Win *win)
         slock->local.type = lock->type;
 
         if(lock->mtype == MPIDI_CH4_NMI_OFI_REQUEST_LOCK) {
-            MPIDI_CH4_NMI_OFI_Win_control_t info;
+            MPIDI_CH4_NMI_OFI_win_control_t info;
             info.type   = MPIDI_CH4_NMI_OFI_CTRL_LOCKACK;
-            mpi_errno   = MPIDI_CH4_NMI_OFI_Do_control_win(&info,lock->rank,win,1,0);
+            mpi_errno   = MPIDI_CH4_NMI_OFI_do_control_win(&info,lock->rank,win,1,0);
 
             if(mpi_errno != MPI_SUCCESS)
                 MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                     goto fn_fail, "**rmasync");
 
         } else if(lock->mtype == MPIDI_CH4_NMI_OFI_REQUEST_LOCKALL) {
-            MPIDI_CH4_NMI_OFI_Win_control_t info;
+            MPIDI_CH4_NMI_OFI_win_control_t info;
             info.type = MPIDI_CH4_NMI_OFI_CTRL_LOCKALLACK;
-            mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&info,lock->rank,win,1,0);
+            mpi_errno = MPIDI_CH4_NMI_OFI_do_control_win(&info,lock->rank,win,1,0);
         } else
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                                 goto fn_fail, "**rmasync");
 
         MPL_free(lock);
-        mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+        mpi_errno = MPIDI_CH4_NMI_OFI_win_lock_advance(win);
 
         if(mpi_errno != MPI_SUCCESS)
             MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -299,7 +299,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OFI_Win_control_t  *info,
+static inline int MPIDI_CH4_NMI_OFI_win_lock_request_proc(const MPIDI_CH4_NMI_OFI_win_control_t  *info,
                                                            MPIR_Win                   *win,
                                                            unsigned                    peer)
 {
@@ -324,7 +324,7 @@ static inline int MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OF
 
     q->tail = lock;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_win_lock_advance(win);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
@@ -335,7 +335,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline void MPIDI_CH4_NMI_OFI_win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_win_control_t *info,
                                                        MPIR_Win                   *win,
                                                        unsigned                    peer)
 {
@@ -346,21 +346,21 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_W
 }
 
 
-static inline int MPIDI_CH4_NMI_OFI_Win_unlock_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline int MPIDI_CH4_NMI_OFI_win_unlock_proc(const MPIDI_CH4_NMI_OFI_win_control_t *info,
                                                      MPIR_Win                   *win,
                                                      unsigned                    peer)
 {
     int mpi_errno;
     --MPIDI_CH4U_WIN(win, sync).lock.local.count;
     MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_win_lock_advance(win);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
 
-    MPIDI_CH4_NMI_OFI_Win_control_t new_info;
+    MPIDI_CH4_NMI_OFI_win_control_t new_info;
     new_info.type = MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK;
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&new_info,peer,win,1,0);
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_control_win(&new_info,peer,win,1,0);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
                             goto fn_fail, "**rmasync");
@@ -370,14 +370,14 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Win_complete_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline void MPIDI_CH4_NMI_OFI_win_complete_proc(const MPIDI_CH4_NMI_OFI_win_control_t *info,
                                                        MPIR_Win                   *win,
                                                        unsigned                    peer)
 {
     ++MPIDI_CH4U_WIN(win, sync).sc.count;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Win_post_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline void MPIDI_CH4_NMI_OFI_win_post_proc(const MPIDI_CH4_NMI_OFI_win_control_t *info,
                                                    MPIR_Win                   *win,
                                                    unsigned                    peer)
 {
@@ -385,7 +385,7 @@ static inline void MPIDI_CH4_NMI_OFI_Win_post_proc(const MPIDI_CH4_NMI_OFI_Win_c
 }
 
 
-static inline void MPIDI_CH4_NMI_OFI_Win_unlock_done_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline void MPIDI_CH4_NMI_OFI_win_unlock_done_proc(const MPIDI_CH4_NMI_OFI_win_control_t *info,
                                                           MPIR_Win                   *win,
                                                           unsigned                    peer)
 {
@@ -399,57 +399,57 @@ static inline void MPIDI_CH4_NMI_OFI_Win_unlock_done_proc(const MPIDI_CH4_NMI_OF
 
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Get_huge_cleanup(MPIDI_CH4_NMI_OFI_Send_control_t *info)
+static inline void MPIDI_CH4_NMI_OFI_get_huge_cleanup(MPIDI_CH4_NMI_OFI_send_control_t *info)
 {
-    MPIDI_CH4_NMI_OFI_Huge_recv_t  *recv;
+    MPIDI_CH4_NMI_OFI_huge_recv_t  *recv;
     MPIR_Comm          *comm_ptr;
     uint64_t            mapid;
     /* Look up the communicator */
     mapid    = ((uint64_t)info->endpoint_id<<32) | info->comm_id;
     comm_ptr = MPIDI_CH4U_context_id_to_comm(mapid);
     /* Look up the per destination receive queue object */
-    recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
+    recv = (MPIDI_CH4_NMI_OFI_huge_recv_t *)MPIDI_CH4_NMI_OFI_map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);
-    MPIDI_CH4_NMI_OFI_Map_destroy(recv->chunk_q);
-    MPIDI_CH4_NMI_OFI_Map_erase(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,info->origin_rank);
+    MPIDI_CH4_NMI_OFI_map_destroy(recv->chunk_q);
+    MPIDI_CH4_NMI_OFI_map_erase(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,info->origin_rank);
     MPL_free(recv);
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Get_huge(MPIDI_CH4_NMI_OFI_Send_control_t *info)
+static inline void MPIDI_CH4_NMI_OFI_get_huge(MPIDI_CH4_NMI_OFI_send_control_t *info)
 {
-    MPIDI_CH4_NMI_OFI_Huge_recv_t  *recv;
-    MPIDI_CH4_NMI_OFI_Huge_chunk_t *hc;
+    MPIDI_CH4_NMI_OFI_huge_recv_t  *recv;
+    MPIDI_CH4_NMI_OFI_huge_chunk_t *hc;
     MPIR_Comm          *comm_ptr;
     /* Look up the communicator */
     comm_ptr = MPIDI_CH4U_context_id_to_comm(info->comm_id);
     /* Look up the per destination receive queue object */
-    recv = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
+    recv = (MPIDI_CH4_NMI_OFI_huge_recv_t *)MPIDI_CH4_NMI_OFI_map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);
 
     if(recv == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        recv        = (MPIDI_CH4_NMI_OFI_Huge_recv_t *)MPL_malloc(sizeof(*recv));
+        recv        = (MPIDI_CH4_NMI_OFI_huge_recv_t *)MPL_malloc(sizeof(*recv));
         recv->seqno = 0;
-        MPIDI_CH4_NMI_OFI_Map_create(&recv->chunk_q);
-        MPIDI_CH4_NMI_OFI_Map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
+        MPIDI_CH4_NMI_OFI_map_create(&recv->chunk_q);
+        MPIDI_CH4_NMI_OFI_map_set(MPIDI_CH4_NMI_OFI_COMM(comm_ptr).huge_recv_counters,
                                   info->origin_rank, recv);
     }
 
-    hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *)MPIDI_CH4_NMI_OFI_Map_lookup(recv->chunk_q,info->seqno);
+    hc = (MPIDI_CH4_NMI_OFI_huge_chunk_t *)MPIDI_CH4_NMI_OFI_map_lookup(recv->chunk_q,info->seqno);
 
     if(hc == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-        hc = (MPIDI_CH4_NMI_OFI_Huge_chunk_t *)MPL_malloc(sizeof(*hc));
+        hc = (MPIDI_CH4_NMI_OFI_huge_chunk_t *)MPL_malloc(sizeof(*hc));
         memset(hc,0, sizeof(*hc));
         hc->event_id = MPIDI_CH4_NMI_OFI_EVENT_GET_HUGE;
-        MPIDI_CH4_NMI_OFI_Map_set(recv->chunk_q,info->seqno,hc);
+        MPIDI_CH4_NMI_OFI_map_set(recv->chunk_q,info->seqno,hc);
     }
 
     hc->cur_offset     = MPIDI_Global.max_send;
     hc->remote_info    = *info;
     hc->comm_ptr       = comm_ptr;
-    MPIDI_CH4_NMI_OFI_Get_huge_event(NULL, (MPIR_Request *)hc);
+    MPIDI_CH4_NMI_OFI_get_huge_event(NULL, (MPIR_Request *)hc);
 }
 
-int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
+int MPIDI_CH4_NMI_OFI_control_handler(void      *am_hdr,
                                       void     **data,
                                       size_t    *data_sz,
                                       int       *is_contig,
@@ -459,28 +459,28 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
     int                  senderrank;
     int                  mpi_errno  = MPI_SUCCESS;
     void                *buf        = am_hdr;
-    MPIDI_CH4_NMI_OFI_Win_control_t *control    = (MPIDI_CH4_NMI_OFI_Win_control_t *)buf;
+    MPIDI_CH4_NMI_OFI_win_control_t *control    = (MPIDI_CH4_NMI_OFI_win_control_t *)buf;
     *req                            = NULL;
     *cmpl_handler_fn                = NULL;
 
     switch(control->type) {
         case MPIDI_CH4_NMI_OFI_CTRL_HUGEACK: {
-            MPIDI_CH4_NMI_OFI_Send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_Send_control_t *)buf;
-            MPIDI_CH4_NMI_OFI_Dispatch_function(NULL,ctrlsend->ackreq,0);
+            MPIDI_CH4_NMI_OFI_send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_send_control_t *)buf;
+            MPIDI_CH4_NMI_OFI_dispatch_function(NULL,ctrlsend->ackreq,0);
             goto fn_exit;
         }
         break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_HUGE: {
-            MPIDI_CH4_NMI_OFI_Send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_Send_control_t *)buf;
-            MPIDI_CH4_NMI_OFI_Get_huge(ctrlsend);
+            MPIDI_CH4_NMI_OFI_send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_send_control_t *)buf;
+            MPIDI_CH4_NMI_OFI_get_huge(ctrlsend);
             goto fn_exit;
         }
         break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_HUGE_CLEANUP: {
-            MPIDI_CH4_NMI_OFI_Send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_Send_control_t *)buf;
-            MPIDI_CH4_NMI_OFI_Get_huge_cleanup(ctrlsend);
+            MPIDI_CH4_NMI_OFI_send_control_t *ctrlsend = (MPIDI_CH4_NMI_OFI_send_control_t *)buf;
+            MPIDI_CH4_NMI_OFI_get_huge_cleanup(ctrlsend);
             goto fn_exit;
         }
         break;
@@ -488,36 +488,36 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
 
     MPIR_Win *win;
     senderrank = control->origin_rank;
-    win        = (MPIR_Win *)MPIDI_CH4_NMI_OFI_Map_lookup(MPIDI_Global.win_map,control->win_id);
+    win        = (MPIR_Win *)MPIDI_CH4_NMI_OFI_map_lookup(MPIDI_Global.win_map,control->win_id);
     MPIU_Assert(win != MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND);
 
     switch(control->type) {
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKREQ:
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKALLREQ:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_request_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_win_lock_request_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKACK:
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKALLACK:
-            MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(control, win, senderrank);
+            MPIDI_CH4_NMI_OFI_win_lock_ack_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCK:
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALL:
-            mpi_errno = MPIDI_CH4_NMI_OFI_Win_unlock_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_win_unlock_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK:
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALLACK:
-            MPIDI_CH4_NMI_OFI_Win_unlock_done_proc(control, win, senderrank);
+            MPIDI_CH4_NMI_OFI_win_unlock_done_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_COMPLETE:
-            MPIDI_CH4_NMI_OFI_Win_complete_proc(control, win, senderrank);
+            MPIDI_CH4_NMI_OFI_win_complete_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_POST:
-            MPIDI_CH4_NMI_OFI_Win_post_proc(control, win, senderrank);
+            MPIDI_CH4_NMI_OFI_win_post_proc(control, win, senderrank);
             break;
 
         default:
@@ -792,7 +792,7 @@ static inline void add_index(MPI_Datatype  datatype,
     (*index)++;
 }
 
-void MPIDI_CH4_NMI_OFI_Index_datatypes()
+void MPIDI_CH4_NMI_OFI_index_datatypes()
 {
     int            index=0;
 

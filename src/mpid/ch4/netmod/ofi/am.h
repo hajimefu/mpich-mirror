@@ -14,7 +14,7 @@
 #include "am_impl.h"
 #include "am_events.h"
 
-static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
+static inline int MPIDI_CH4_NMI_OFI_progress_do_queue(void *netmod_context);
 
 static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 {
@@ -23,7 +23,7 @@ static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 
 static inline void MPIDI_CH4_NM_am_request_finalize(MPIR_Request *req)
 {
-    MPIDI_CH4_NMI_OFI_Am_clear_request(req);
+    MPIDI_CH4_NMI_OFI_am_clear_request(req);
 }
 
 #undef FUNCNAME
@@ -68,7 +68,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_send_am_header(rank,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_send_am_header(rank,
                                                     comm,
                                                     handler_id,
                                                     am_hdr,
@@ -98,7 +98,7 @@ static inline int MPIDI_CH4_NM_send_am(int           rank,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_send_am(rank, comm, handler_id,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_send_am(rank, comm, handler_id,
                                              am_hdr, am_hdr_sz, data, count,
                                              datatype, sreq,FALSE);
 
@@ -225,7 +225,7 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR_REPLY);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_send_am_header(src_rank,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_send_am_header(src_rank,
                                                     MPIDI_CH4U_context_id_to_comm(context_id),
                                                     handler_id,
                                                     am_hdr,
@@ -253,7 +253,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_REPLY);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_send_am(src_rank,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_send_am(src_rank,
                                              MPIDI_CH4U_context_id_to_comm(context_id),
                                              handler_id,
                                              am_hdr,
@@ -321,8 +321,8 @@ static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
 {
     /* Maximum size that fits in short send */
     size_t max_shortsend = MPIDI_CH4_NMI_OFI_DEFAULT_SHORT_SEND_SIZE -
-                           (sizeof(MPIDI_CH4_NMI_OFI_Am_header_t) + sizeof(MPIDI_CH4_NMI_OFI_Lmt_msg_payload_t));
-    /* Maximum payload size representable by MPIDI_CH4_NMI_OFI_Am_header_t::am_hdr_sz field */
+                           (sizeof(MPIDI_CH4_NMI_OFI_am_header_t) + sizeof(MPIDI_CH4_NMI_OFI_lmt_msg_payload_t));
+    /* Maximum payload size representable by MPIDI_CH4_NMI_OFI_am_header_t::am_hdr_sz field */
     size_t max_representable = (1 << MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS) - 1;
 
     return MPL_MIN(max_shortsend, max_representable);
@@ -338,7 +338,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr(int         rank,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR);
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(rank, comm,
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_inject(rank, comm,
                                             handler_id, am_hdr, am_hdr_sz,
                                             netmod_context, FALSE, TRUE, TRUE);
 
@@ -362,7 +362,7 @@ static inline int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR_REPLY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INJECT_AM_HDR_REPLY);
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_Do_inject(src_rank, MPIDI_CH4U_context_id_to_comm(context_id),
+    mpi_errno = MPIDI_CH4_NMI_OFI_do_inject(src_rank, MPIDI_CH4U_context_id_to_comm(context_id),
                                             handler_id, am_hdr,
                                             am_hdr_sz, NULL, TRUE, TRUE, FALSE);
 
@@ -377,9 +377,9 @@ fn_fail:
 
 static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
 {
-    if (unlikely(MPIDI_Global.max_buffered_send < sizeof(MPIDI_CH4_NMI_OFI_Am_header_t)))
+    if (unlikely(MPIDI_Global.max_buffered_send < sizeof(MPIDI_CH4_NMI_OFI_am_header_t)))
         return 0;
-    return MPIDI_Global.max_buffered_send - sizeof(MPIDI_CH4_NMI_OFI_Am_header_t);
+    return MPIDI_Global.max_buffered_send - sizeof(MPIDI_CH4_NMI_OFI_am_header_t);
 }
 
 #endif /* NETMOD_OFI_AM_H_INCLUDED */

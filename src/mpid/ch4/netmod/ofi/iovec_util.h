@@ -83,7 +83,7 @@
     (*var2## _iovs_nout)++;                                             \
     ((struct iovec*)(&var2## _iov[var2## _idx]))->iov_base = (void *)var2## _addr; \
     ((struct iovec*)(&var2## _iov[var2## _idx]))->iov_len  = len;            \
-    MPIDI_CH4_NMI_OFI_Next_iovec_state(iov_state,&origin_addr, &target_addr, &len); \
+    MPIDI_CH4_NMI_OFI_next_iovec_state(iov_state,&origin_addr, &target_addr, &len); \
   } while (0)
 
 #define MPIDI_CH4_NMI_OFI_UPDATE_IOV_STATE2(var1,var2,var3)                               \
@@ -99,11 +99,11 @@
     (*var3## _iovs_nout)++;                                             \
     ((struct iovec*)(&var3## _iov[var3## _idx]))->iov_base = (void *)var3## _addr; \
     ((struct iovec*)(&var3## _iov[var3## _idx]))->iov_len  = len;            \
-    MPIDI_CH4_NMI_OFI_Next_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr,&len); \
+    MPIDI_CH4_NMI_OFI_next_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr,&len); \
   } while (0)
 
 static inline
-int MPIDI_CH4_NMI_OFI_Init_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_init_iovec_state(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                        uintptr_t                        origin,
                                        uintptr_t                        target,
                                        size_t                           origin_count,
@@ -125,7 +125,7 @@ int MPIDI_CH4_NMI_OFI_Init_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_stat
 }
 
 static inline
-int MPIDI_CH4_NMI_OFI_Init_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_init_iovec_state2(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                         uintptr_t                        origin,
                                         uintptr_t                        result,
                                         uintptr_t                        target,
@@ -153,7 +153,7 @@ int MPIDI_CH4_NMI_OFI_Init_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_sta
 
 
 static inline
-int MPIDI_CH4_NMI_OFI_Peek_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_peek_iovec_state(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                        uintptr_t                       *next_origin_addr,
                                        uintptr_t                       *next_target_addr,
                                        size_t                          *buf_len)
@@ -172,7 +172,7 @@ int MPIDI_CH4_NMI_OFI_Peek_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_stat
 }
 
 static inline
-int MPIDI_CH4_NMI_OFI_Peek_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_peek_iovec_state2(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                         uintptr_t                       *next_origin_addr,
                                         uintptr_t                       *next_result_addr,
                                         uintptr_t                       *next_target_addr,
@@ -195,7 +195,7 @@ int MPIDI_CH4_NMI_OFI_Peek_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_sta
 
 
 static inline
-int MPIDI_CH4_NMI_OFI_Next_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_next_iovec_state(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                        uintptr_t                       *origin_addr_next,
                                        uintptr_t                       *target_addr_next,
                                        size_t                          *buf_len)
@@ -215,7 +215,7 @@ int MPIDI_CH4_NMI_OFI_Next_iovec_state(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_stat
 }
 
 static inline
-int MPIDI_CH4_NMI_OFI_Next_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_next_iovec_state2(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                         uintptr_t                       *origin_addr_next,
                                         uintptr_t                       *result_addr_next,
                                         uintptr_t                       *target_addr_next,
@@ -238,7 +238,7 @@ int MPIDI_CH4_NMI_OFI_Next_iovec_state2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_sta
 }
 
 static inline
-int MPIDI_CH4_NMI_OFI_Merge_iov_list(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_merge_iov_list(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                      struct iovec                    *origin_iov,
                                      size_t                           origin_max_iovs,
                                      struct fi_rma_iov               *target_iov,
@@ -255,14 +255,14 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
     CH4_COMPILE_TIME_ASSERT(offsetof(struct iovec,iov_base)==offsetof(struct fi_rma_iov,addr));
     CH4_COMPILE_TIME_ASSERT(offsetof(struct iovec,iov_len)==offsetof(struct fi_rma_iov,len));
 
-    rc = MPIDI_CH4_NMI_OFI_Next_iovec_state(iov_state,&origin_last_addr, &target_last_addr, &last_len);
+    rc = MPIDI_CH4_NMI_OFI_next_iovec_state(iov_state,&origin_last_addr, &target_last_addr, &last_len);
     assert(rc!=MPIDI_CH4_NMI_OFI_IOV_ERROR);
     MPIDI_CH4_NMI_OFI_INIT_IOV(target);
     MPIDI_CH4_NMI_OFI_INIT_IOV(origin);
     iov_state->buf_limit_left-=last_len;
 
     while(rc > 0) {
-        rc = MPIDI_CH4_NMI_OFI_Peek_iovec_state(iov_state,&origin_addr, &target_addr, &len);
+        rc = MPIDI_CH4_NMI_OFI_peek_iovec_state(iov_state,&origin_addr, &target_addr, &len);
         assert(rc!=MPIDI_CH4_NMI_OFI_IOV_ERROR);
 
         if(rc==MPIDI_CH4_NMI_OFI_IOV_DONE) {
@@ -282,7 +282,7 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
 
             MPIDI_CH4_NMI_OFI_UPDATE_IOV(target);
             MPIDI_CH4_NMI_OFI_UPDATE_IOV(origin);
-            MPIDI_CH4_NMI_OFI_Next_iovec_state(iov_state,&origin_addr, &target_addr, &len);
+            MPIDI_CH4_NMI_OFI_next_iovec_state(iov_state,&origin_addr, &target_addr, &len);
         }
 
         origin_last_addr=origin_addr;
@@ -303,7 +303,7 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
 }
 
 static inline
-int MPIDI_CH4_NMI_OFI_Merge_iov_list2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state,
+int MPIDI_CH4_NMI_OFI_merge_iov_list2(MPIDI_CH4_NMI_OFI_iovec_state_t *iov_state,
                                       struct iovec                    *origin_iov,
                                       size_t                           origin_max_iovs,
                                       struct iovec                    *result_iov,
@@ -320,7 +320,7 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state
     int       origin_idx=0, result_idx=0, target_idx=0;
     size_t    len,last_len=0;
 
-    rc = MPIDI_CH4_NMI_OFI_Next_iovec_state2(iov_state,&origin_last_addr,&result_last_addr,&target_last_addr, &last_len);
+    rc = MPIDI_CH4_NMI_OFI_next_iovec_state2(iov_state,&origin_last_addr,&result_last_addr,&target_last_addr, &last_len);
     assert(rc!=MPIDI_CH4_NMI_OFI_IOV_ERROR);
     MPIDI_CH4_NMI_OFI_INIT_IOV(target);
     MPIDI_CH4_NMI_OFI_INIT_IOV(origin);
@@ -328,7 +328,7 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state
     iov_state->buf_limit_left -= last_len;
 
     while(rc > 0) {
-        rc = MPIDI_CH4_NMI_OFI_Peek_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr, &len);
+        rc = MPIDI_CH4_NMI_OFI_peek_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr, &len);
         assert(rc!=MPIDI_CH4_NMI_OFI_IOV_ERROR);
 
         if(rc==MPIDI_CH4_NMI_OFI_IOV_DONE) {
@@ -352,7 +352,7 @@ int MPIDI_CH4_NMI_OFI_Merge_iov_list2(MPIDI_CH4_NMI_OFI_Iovec_state_t *iov_state
             MPIDI_CH4_NMI_OFI_UPDATE_IOV(target);
             MPIDI_CH4_NMI_OFI_UPDATE_IOV(origin);
             MPIDI_CH4_NMI_OFI_UPDATE_IOV(result);
-            MPIDI_CH4_NMI_OFI_Next_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr, &len);
+            MPIDI_CH4_NMI_OFI_next_iovec_state2(iov_state,&origin_addr, &result_addr, &target_addr, &len);
         }
 
         origin_last_addr=origin_addr;
