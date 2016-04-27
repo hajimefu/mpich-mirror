@@ -165,6 +165,10 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIDI_STATE_DECL(MPID_STATE_CH4_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_INIT);
 
+#ifdef MPL_USE_DBG_LOGGING
+    MPIDI_CH4_DBG_GENERAL = MPL_dbg_class_alloc("CH4", "ch4");
+#endif
+
     MPIDI_choose_netmod();
     pmi_errno = PMI_Init(&has_parent);
 

@@ -279,7 +279,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_Allocate_win_request_get_accumulate(int 
 
     req->noncontig->buf.iov.get_accumulate.originv = (struct fi_ioc *)&req->noncontig->buf.iov_store[0];
     req->noncontig->buf.iov.get_accumulate.targetv = (struct fi_rma_ioc *)&req->noncontig->buf.iov_store[o_size*MPIDI_Global.iov_limit];
-    req->noncontig->buf.iov.get_accumulate.resultv = (struct fi_ioc *)&req->noncontig->buf.iov_store[(o_size+t_size)*MPIDI_Global.iov_limit];
+    req->noncontig->buf.iov.get_accumulate.resultv = (struct fi_ioc *)&req->noncontig->buf.iov_store[o_size*MPIDI_Global.iov_limit+t_size*MPIDI_Global.rma_iov_limit];
     MPIDI_CH4_NMI_OFI_INIT_SIGNAL_REQUEST(sigreq, flags, ep);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(origin_count,origin_datatype,&req->noncontig->origin_dt);
     MPIDI_CH4_NMI_OFI_Win_datatype_basic(target_count,target_datatype,&req->noncontig->target_dt);
@@ -359,7 +359,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_put(const void    *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv   = req->noncontig->buf.iov.put_get.originv;
         targetv   = req->noncontig->buf.iov.put_get.targetv;
-        omax=tmax = MPIDI_Global.iov_limit;
+        omax = MPIDI_Global.iov_limit;
+        tmax = MPIDI_Global.rma_iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,originv,
                                               omax,targetv,tmax,&oout,&tout);
 
@@ -510,7 +511,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get(void          *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.put_get.originv;
         targetv=req->noncontig->buf.iov.put_get.targetv;
-        omax=tmax=MPIDI_Global.iov_limit;
+        omax=MPIDI_Global.iov_limit;
+        tmax=MPIDI_Global.rma_iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,originv,
                                               omax,targetv,tmax,&oout,&tout);
 
@@ -884,7 +886,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_accumulate(const void    *origin_addr,
     while(rc==MPIDI_CH4_NMI_OFI_IOV_EAGAIN) {
         originv=req->noncontig->buf.iov.accumulate.originv;
         targetv=req->noncontig->buf.iov.accumulate.targetv;
-        omax=tmax=MPIDI_Global.iov_limit;
+        omax=MPIDI_Global.iov_limit;
+        tmax=MPIDI_Global.rma_iov_limit;
         rc = MPIDI_CH4_NMI_OFI_Merge_iov_list(&req->noncontig->iovs,(struct iovec *)originv,omax,
                                               (struct fi_rma_iov *)targetv,tmax,&oout,&tout);
 
@@ -1066,7 +1069,8 @@ static inline int MPIDI_CH4_NMI_OFI_Do_get_accumulate(const void    *origin_addr
         originv        = req->noncontig->buf.iov.get_accumulate.originv;
         targetv        = req->noncontig->buf.iov.get_accumulate.targetv;
         resultv        = req->noncontig->buf.iov.get_accumulate.resultv;
-        omax=rmax=tmax = MPIDI_Global.iov_limit;
+        omax=rmax = MPIDI_Global.iov_limit;
+        tmax = MPIDI_Global.rma_iov_limit;
 
         if(op != MPI_NO_OP)
             rc = MPIDI_CH4_NMI_OFI_Merge_iov_list2(&req->noncontig->iovs,(struct iovec *)originv,

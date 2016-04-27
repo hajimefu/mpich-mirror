@@ -538,6 +538,7 @@ static inline int MPIDI_CH4_NM_win_free(MPIR_Win **win_ptr)
 
     MPIDI_CH4_NMI_OFI_Index_allocator_free(MPIDI_CH4_NMI_OFI_COMM(win->comm_ptr).win_id_allocator,
                                            window_instance);
+    MPIDI_CH4_NMI_OFI_Map_erase(MPIDI_Global.win_map,MPIDI_CH4_NMI_OFI_WIN(win).win_id);
     MPIDI_CH4_NMI_OFI_CALL(fi_close(& MPIDI_CH4_NMI_OFI_WIN(win).mr->fid), mr_unreg);
      if(MPIDI_CH4_NMI_OFI_WIN(win).disp_units){
         MPL_free( MPIDI_CH4_NMI_OFI_WIN(win).disp_units);

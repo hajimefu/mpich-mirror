@@ -35,8 +35,18 @@ typedef struct MPIDI_CH4_NMI_UCX_am_header_t {
     uint64_t payload[0];
 } MPIDI_CH4_NMI_UCX_am_header_t;
 
+typedef struct MPIDI_CH4_NMI_UCX_win_info{
+    ucp_rkey_h rkey;
+    uint64_t addr;
+    uint32_t disp;
+} __attribute__ ((packed)) MPIDI_CH4_NMI_UCX_win_info_t ;
+
+
 typedef struct {
-    int dummy;
+    MPIDI_CH4_NMI_UCX_win_info_t *info_table;
+    ucp_mem_h mem_h;
+    int need_local_flush;
 } MPIDI_CH4_NMI_UCX_win_t;
+
 
 #endif /* UCX_PRE_H_INCLUDED */

@@ -9,19 +9,9 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#define __STDC_LIMIT_MACROS
-#define __STDC_FORMAT_MACROS
-#include <map>
-#include <queue>
-#include <new>
-#include <algorithm>
-#include <functional>
-#include <vector>
 #include <mpidimpl.h>
 #include "impl.h"
 #include "events.h"
-
-EXTERN_C_BEGIN
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NMI_OFI_Handle_cq_error_util
@@ -90,111 +80,166 @@ int MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt)
     return MPI_SUCCESS;
 }
 
-typedef std::map<uint64_t,void *>  uint64_map;
-void MPIDI_CH4_NMI_OFI_Map_create(void **_map)
+typedef struct {
+    uint64_t            key;
+    void               *value;
+    MPL_UT_hash_handle  hh;         /* makes this structure hashable */
+} MPIDI_CH4_NMI_OFI_Map_entry_t;
+
+typedef struct MPIDI_CH4_NMI_OFI_Map_t {
+    MPIDI_CH4_NMI_OFI_Map_entry_t * head;
+
+} MPIDI_CH4_NMI_OFI_Map_t;
+
+void MPIDI_CH4_NMI_OFI_Map_create(void **out_map)
+{
+    MPIDI_CH4_NMI_OFI_Map_t *map;
+    map = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Map_t));
+    MPIU_Assert(map != NULL);
+    map->head = NULL;
+    *out_map  = map;
+}
+
+void MPIDI_CH4_NMI_OFI_Map_destroy(void *in_map)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    *_map = (void *)MPL_malloc(sizeof(uint64_map));
-    new(*_map) uint64_map();
+    MPIDI_CH4_NMI_OFI_Map_t *map = in_map;
+    MPL_HASH_CLEAR(hh, map->head);
+    MPL_free(map);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Map_destroy(void *_map)
-{
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    uint64_map *m = (uint64_map *)_map;
-    m->~uint64_map();
-    MPL_free(_map);
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-}
-
-void MPIDI_CH4_NMI_OFI_Map_set(void     *_map,
+void MPIDI_CH4_NMI_OFI_Map_set(void     *in_map,
                                uint64_t  id,
                                void     *val)
 {
+    MPIDI_CH4_NMI_OFI_Map_t       *map;
+    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    uint64_map *m = (uint64_map *)_map;
-    (*m)[id] = val;
+    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
+    map_entry       = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Map_entry_t));
+    MPIU_Assert(map_entry != NULL);
+    map_entry->key   = id;
+    map_entry->value = val;
+    MPL_HASH_ADD(hh,map->head,key,sizeof(uint64_t),map_entry);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Map_erase(void     *_map,
+void MPIDI_CH4_NMI_OFI_Map_erase(void     *in_map,
                                  uint64_t  id)
 {
+    MPIDI_CH4_NMI_OFI_Map_t       *map;
+    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    uint64_map *m = (uint64_map *)_map;
-    m->erase(id);
+    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
+    MPL_HASH_FIND(hh,map->head,&id,sizeof(uint64_t),map_entry);
+    MPIU_Assert(map_entry != NULL);
+    MPL_HASH_DELETE(hh, map->head, map_entry);
+    MPL_free(map_entry);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void *MPIDI_CH4_NMI_OFI_Map_lookup(void     *_map,
+void *MPIDI_CH4_NMI_OFI_Map_lookup(void     *in_map,
                                    uint64_t  id)
 {
-    uint64_map *m = (uint64_map *)_map;
-    void       *rc;
+    void                          *rc;
+    MPIDI_CH4_NMI_OFI_Map_t       *map;
+    MPIDI_CH4_NMI_OFI_Map_entry_t *map_entry;
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-
-    if(m->find(id) == m->end())
+    map             = (MPIDI_CH4_NMI_OFI_Map_t*)in_map;
+    MPL_HASH_FIND(hh,map->head,&id,sizeof(uint64_t),map_entry);
+    if(map_entry == NULL)
         rc = MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND;
     else
-        rc = (*m)[id];
-
+        rc = map_entry->value;
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
     return rc;
 }
 
-
-typedef struct {
-    int              high;
-    std::vector<int> free_pool;
-} MPIDI_CH4_NMI_OFI_Index_allocator_t;
-
-void MPIDI_CH4_NMI_OFI_Index_allocator_create(void **_indexmap, int start)
+typedef struct MPIDI_CH4_NMI_OFI_Index_allocator_t
 {
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc;
+    int       chunk_size;
+    int       num_ints;
+    int       start;
+    int       last_free_index;
+    uint64_t *bitmask;
+}MPIDI_CH4_NMI_OFI_Index_allocator_t;
+
+void MPIDI_CH4_NMI_OFI_Index_allocator_create(void **indexmap, int start)
+{
+    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    *_indexmap  = (void *)MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Index_allocator_t));
-    alloc       = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)(*_indexmap);
-    alloc->high = start;
-    new(&alloc->free_pool)std::vector<int>();
+    allocator                  = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_Index_allocator_t));
+    allocator->chunk_size      = 128;
+    allocator->num_ints        = allocator->chunk_size;
+    allocator->start           = start;
+    allocator->last_free_index = 0;
+    allocator->bitmask         = MPL_malloc(sizeof(uint64_t) * allocator->num_ints);
+    memset(allocator->bitmask, 0xFF, sizeof(uint64_t) * allocator->num_ints);
+    assert(allocator != NULL);
+    *indexmap          = allocator;
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-int MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *_indexmap)
-{
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)_indexmap;
-    int back;
-    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-
-    if(alloc->free_pool.empty()) {
-        int alloc_high=alloc->high++;
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-        return alloc_high;
+#define MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,shift,mask) \
+    if ((val & mask) == 0) {                              \
+        val >>= shift##ULL;                               \
+        nval += shift;                                    \
     }
-
-    std::pop_heap(alloc->free_pool.begin(), alloc->free_pool.end(), std::greater<int>());
-    back = alloc->free_pool.back();
-    alloc->free_pool.pop_back();
-    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    return back;
-
-}
-void MPIDI_CH4_NMI_OFI_Index_allocator_free(void *_indexmap, int index)
+int MPIDI_CH4_NMI_OFI_Index_allocator_alloc(void *indexmap)
 {
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)_indexmap;
+    int i;
+    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator = indexmap;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    alloc->free_pool.push_back(index);
-    std::push_heap(alloc->free_pool.begin(), alloc->free_pool.end(), std::greater<int>());
+    for (i = allocator->last_free_index; i < allocator->num_ints; i++) {
+        if (allocator->bitmask[i]) {
+            register uint64_t val, nval;
+            val = allocator->bitmask[i];
+            nval = 2;
+            MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,32,0xFFFFFFFFULL);
+            MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,16,0xFFFFULL);
+            MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,8,0xFFULL);
+            MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,4,0xFULL);
+            MPIDI_CH4_NMI_OFI_INDEX_CALC(val,nval,2,0x3ULL);
+            nval -= val & 0x1ULL;
+            allocator->bitmask[i] &= ~(0x1ULL<<(nval-1));
+            allocator->last_free_index = i;
+            MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
+            return i*sizeof(uint64_t)*8 + (nval-1) + allocator->start;
+        }
+        if(i == allocator->num_ints-1) {
+            allocator->num_ints+=allocator->chunk_size;
+            allocator->bitmask = MPL_realloc(allocator->bitmask,
+                                             sizeof(uint64_t) * allocator->num_ints);
+            memset(&allocator->bitmask[i+1], 0xFF,
+                   sizeof(uint64_t) * allocator->chunk_size);
+        }
+    }
+    MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
+    return -1;
+}
+void MPIDI_CH4_NMI_OFI_Index_allocator_free(void *indexmap, int index)
+{
+    int int_index, bitpos, numbits;
+    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator = indexmap;
+    MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
+    numbits   = sizeof(uint64_t)*8;
+    int_index = (index+1-allocator->start)/numbits;
+    bitpos    = (index-allocator->start)%numbits;
+
+    allocator->last_free_index = MPL_MIN(int_index, allocator->last_free_index);
+    allocator->bitmask[int_index] |= (0x1ULL<<bitpos);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
-void MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *_indexmap)
+void MPIDI_CH4_NMI_OFI_Index_allocator_destroy(void *indexmap)
 {
-    MPIDI_CH4_NMI_OFI_Index_allocator_t *alloc = (MPIDI_CH4_NMI_OFI_Index_allocator_t *)_indexmap;
+    MPIDI_CH4_NMI_OFI_Index_allocator_t *allocator;
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
-    alloc->free_pool.~vector();
-    MPL_free(_indexmap);
+    allocator = (MPIDI_CH4_NMI_OFI_Index_allocator_t *) indexmap;
+    MPL_free(allocator->bitmask);
+    MPL_free(allocator);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_UTIL_MUTEX);
 }
 
@@ -254,10 +299,11 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline void MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OFI_Win_control_t  *info,
+static inline int MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_OFI_Win_control_t  *info,
                                                            MPIR_Win                   *win,
                                                            unsigned                    peer)
 {
+    int mpi_errno;
     struct MPIDI_CH4U_win_lock *lock =
         (struct MPIDI_CH4U_win_lock *)MPL_calloc(1, sizeof(struct MPIDI_CH4U_win_lock));
 
@@ -278,8 +324,15 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_request_proc(const MPIDI_CH4_NMI_O
 
     q->tail = lock;
 
-    MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
 
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
@@ -293,17 +346,28 @@ static inline void MPIDI_CH4_NMI_OFI_Win_lock_ack_proc(const MPIDI_CH4_NMI_OFI_W
 }
 
 
-static inline void MPIDI_CH4_NMI_OFI_Win_unlock_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
+static inline int MPIDI_CH4_NMI_OFI_Win_unlock_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
                                                      MPIR_Win                   *win,
                                                      unsigned                    peer)
 {
+    int mpi_errno;
     --MPIDI_CH4U_WIN(win, sync).lock.local.count;
     MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
-    MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_advance(win);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
 
     MPIDI_CH4_NMI_OFI_Win_control_t new_info;
     new_info.type = MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK;
-    MPIDI_CH4_NMI_OFI_Do_control_win(&new_info,peer,win,1,0);
+    mpi_errno = MPIDI_CH4_NMI_OFI_Do_control_win(&new_info,peer,win,1,0);
+    if(mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
+                            goto fn_fail, "**rmasync");
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline void MPIDI_CH4_NMI_OFI_Win_complete_proc(const MPIDI_CH4_NMI_OFI_Win_control_t *info,
@@ -430,7 +494,7 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
     switch(control->type) {
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKREQ:
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKALLREQ:
-            MPIDI_CH4_NMI_OFI_Win_lock_request_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Win_lock_request_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_LOCKACK:
@@ -440,7 +504,7 @@ int MPIDI_CH4_NMI_OFI_Control_handler(void      *am_hdr,
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCK:
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKALL:
-            MPIDI_CH4_NMI_OFI_Win_unlock_proc(control, win, senderrank);
+            mpi_errno = MPIDI_CH4_NMI_OFI_Win_unlock_proc(control, win, senderrank);
             break;
 
         case MPIDI_CH4_NMI_OFI_CTRL_UNLOCKACK:
@@ -503,10 +567,10 @@ fn_exit:
 
 #undef FCNAME
 #define FCNAME DECL_FUNC(mpi_to_ofi)
-static inline int mpi_to_ofi(MPI_Datatype  dt,
-                             fi_datatype  *fi_dt,
-                             MPI_Op        op,
-                             fi_op        *fi_op)
+static inline int mpi_to_ofi(MPI_Datatype       dt,
+                             enum fi_datatype  *fi_dt,
+                             MPI_Op             op,
+                             enum fi_op        *fi_op)
 {
     *fi_dt = FI_DATATYPE_LAST;
     *fi_op = FI_ATOMIC_OP_LAST;
@@ -811,4 +875,3 @@ void MPIDI_CH4_NMI_OFI_Index_datatypes()
     create_dt_map();
 }
 
-EXTERN_C_END

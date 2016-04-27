@@ -44,12 +44,11 @@ static inline int MPIDI_CH4_NM_init(int rank,
     MPIDI_STATE_DECL(MPID_STATE_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_INIT);
 
-   // MPID_Thread_mutex_create(&MPIDI_THREAD_WORKER_MUTEX, &thr_err);
-    ucx_status = ucp_config_read("MPI", NULL, &config);
+    ucx_status = ucp_config_read(NULL, NULL, &config);
     MPIDI_CH4_NMI_UCX_CHK_STATUS(ucx_status, read_config);
 
     /* For now use only the tag feature */
-    features = UCP_FEATURE_TAG;
+    features = UCP_FEATURE_TAG | UCP_FEATURE_RMA;
     ucp_params.features = features;
     ucp_params.request_size = sizeof(MPIDI_CH4_NMI_UCX_ucp_request_t);
     ucp_params.request_init = MPIDI_CH4_NMI_UCX_Request_init_callback;
@@ -210,7 +209,14 @@ static inline int MPIDI_CH4_NM_finalize(void)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
+   if(comm_ptr->comm_kind == MPID_INTRACOMM)
+        *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
+    else if(is_remote)
+        *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
+    else
+        *lpid_ptr = 0;
     return MPI_SUCCESS;
+
 }
 
 static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)

@@ -22,7 +22,6 @@
 #include "mpidch4r.h"
 #include "fi_list.h"
 
-EXTERN_C_BEGIN
 #define __SHORT_FILE__                          \
     (strrchr(__FILE__,'/')                      \
      ? strrchr(__FILE__,'/')+1                  \
@@ -321,6 +320,7 @@ typedef struct {
     int             huge_rma_shift;
     int             context_shift;
     size_t          iov_limit;
+    size_t          rma_iov_limit;
     MPID_Node_id_t *node_map;
     MPID_Node_id_t  max_node_id;
 
@@ -513,5 +513,4 @@ extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;
 extern MPIDI_CH4_NMI_OFI_Global_t       MPIDI_Global;
 extern int                              MPIR_Datatype_init_names(void);
 
-EXTERN_C_END
 #endif /* NETMOD_OFI_IMPL_H_INCLUDED */

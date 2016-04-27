@@ -15,11 +15,17 @@
 #include "ch4_impl.h"
 
 #include <ucs/type/status.h>
+#if !defined (MPIDI_CH4_EXCLUSIVE_SHM) && !defined(MPIDI_BUILD_CH4_SHM)
+#define MPIDI_CH4_NMI_UCX_SHM 1
+#endif
 
 #define MPIDI_CH4_NMI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
 #define MPIDI_CH4_NMI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)
 #define COMM_TO_INDEX(comm,rank) MPIDI_CH4_NMI_UCX_COMM(comm).vept->vep_table[rank].addr_idx
 #define MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm,rank)    MPIDI_CH4_NMI_UCX_eps[COMM_TO_INDEX(comm,rank)]
+
+#define MPIDI_CH4_NMI_UCX_WIN(win) ((win)->dev.netmod.ucx)
+#define MPIDI_CH4_NMI_UCX_WIN_INFO(win, rank) MPIDI_CH4_NMI_UCX_WIN(win).info_table[rank]
 
 static inline uint64_t MPIDI_CH4_NMI_UCX_init_tag(MPIU_Context_id_t contextid, int source, uint64_t tag)
 {
@@ -80,7 +86,7 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 #define MPIDI_CH4_NMI_UCX_CHK_STATUS(STATUS,STR)                \
   do {								\
-    MPIDI_CH4_NMI_UCX_ERR(STATUS!=UCS_OK,			\
+    MPIDI_CH4_NMI_UCX_ERR((STATUS!=UCS_OK && STATUS!=UCS_INPROGRESS),\
 			  mpi_errno,				\
 			  MPI_ERR_OTHER,			\
 			  "**ch4_ucx_nm_"#STR,                  \
