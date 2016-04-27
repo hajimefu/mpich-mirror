@@ -205,7 +205,18 @@ static inline int MPIDI_CH4_NM_win_lock(int lock_type, int rank, int assert, MPI
 
 static inline int MPIDI_CH4_NM_win_unlock(int rank, MPID_Win * win)
 {
-    return MPIDI_CH4R_win_unlock(rank, win);
+
+    int mpi_errno = MPI_SUCCESS;
+    ucs_status_t ucp_status;
+    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(win->comm_ptr, rank);
+    /* make sure all operations are completed  */
+    ucp_status = ucp_ep_flush(ep);
+    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    mpi_errno = MPIDI_CH4R_win_unlock(rank, win);
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 static inline int MPIDI_CH4_NM_win_get_info(MPID_Win * win, MPID_Info ** info_p_p)
@@ -410,8 +421,19 @@ fn_fail:
 
 static inline int MPIDI_CH4_NM_win_unlock_all(MPID_Win * win)
 {
-    return MPIDI_CH4R_win_unlock_all(win);
+    int mpi_errno = MPI_SUCCESS;
+    ucs_status_t ucp_status;
+
+    /*first we have to make sure that all operations are completed*/
+   ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
+   MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+   mpi_errno = MPIDI_CH4R_win_unlock_all(win);
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
+
 
 static inline int MPIDI_CH4_NM_win_create_dynamic(MPID_Info * info,
                                                   MPID_Comm * comm, MPID_Win ** win)
