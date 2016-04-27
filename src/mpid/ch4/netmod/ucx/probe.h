@@ -89,7 +89,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
         goto fn_exit;
     }
     *flag = 1;
-     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
      MPIU_Assert(req);
      MPIDI_CH4_NMI_UCX_REQ(req).message_handler = message_handler;
 

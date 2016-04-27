@@ -17,19 +17,6 @@
 
 MPIDI_CH4_Global_t MPIDI_CH4_Global;
 
-#ifndef MPID_REQUEST_PREALLOC
-#define MPID_REQUEST_PREALLOC 16
-#endif
-
-MPIR_Request MPIDI_Request_direct[MPID_REQUEST_PREALLOC] = { {0} };
-MPIU_Object_alloc_t MPIDI_Request_mem = {
-    0, 0, 0, 0,
-    MPIR_REQUEST,
-    sizeof(MPIR_Request),
-    MPIDI_Request_direct,
-    MPID_REQUEST_PREALLOC
-};
-
 MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_func;
 MPIDI_CH4_NM_native_funcs_t *MPIDI_CH4_NM_native_func;
 
@@ -63,24 +50,6 @@ static void init_comm()
   MPIR_Comm_fns             = &MPIDI_CH4_Global.MPIR_Comm_fns_store;
   MPIR_Comm_fns->split_type =  MPIDI_Comm_split_type;
 }
-
-
-
-/* These aliases are used because we call MPIR_Request_get_ptr   */
-/* in some internal routines MPIR_Request_get_ptr is a macro     */
-/* that #defines to MPID_ instead of MPIDI_.  We have the option */
-/* to copy the macros for a different namespace, but aliasing    */
-/* is probably the safer option to avoid missing symbols         */
-#ifdef MPID_Request_mem
-#undef MPID_Request_mem
-#endif
-
-#ifdef MPID_Request_direct
-#undef MPID_Request_direct
-#endif
-extern MPIU_Object_alloc_t MPID_Request_mem __attribute__((alias("MPIDI_Request_mem")));
-extern MPIR_Request        MPID_Request_direct[MPID_REQUEST_PREALLOC] __attribute__((alias("MPIDI_Request_direct")));
-
 
 MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 

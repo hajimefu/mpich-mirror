@@ -59,14 +59,14 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_alloc(req)             \
     do {                                                                \
         (req) = (MPIDI_CH4_NMI_OFI_Ssendack_request_t*)                 \
-            MPIU_Handle_obj_alloc(&MPIDI_Request_mem);                  \
+            MPIU_Handle_obj_alloc(&MPIR_Request_mem);                  \
         if (req == NULL)                                                \
             MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1,                      \
                        "Cannot allocate Ssendack Request");             \
     } while (0)
 
 #define MPIDI_CH4_NMI_OFI_Ssendack_request_t_tls_free(req) \
-  MPIU_Handle_obj_free(&MPIDI_Request_mem, (req))
+  MPIU_Handle_obj_free(&MPIR_Request_mem, (req))
 
 #define MPIDI_CH4_NMI_OFI_Ssendack_request_t_alloc_and_init(req)        \
     do {                                                                \
@@ -271,7 +271,7 @@ static inline uint64_t MPIDI_CH4_NMI_OFI_Winfo_mr_key(MPIR_Win *w, int rank)
 __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int count)
 {
     MPIR_Request *req;
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
 
     if(req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
@@ -300,7 +300,7 @@ __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init(int cou
 __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw(int count)
 {
     MPIR_Request *req;
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIDI_CH4U_REQUEST(req, req) = NULL;
@@ -319,7 +319,7 @@ __ALWAYS_INLINE__ MPIR_Request *MPIDI_CH4_NMI_OFI_Request_alloc_and_init_send_lw
 __ALWAYS_INLINE__ MPIDI_CH4_NMI_OFI_Win_request_t *MPIDI_CH4_NMI_OFI_Win_request_alloc_and_init(int count,int extra)
 {
     MPIDI_CH4_NMI_OFI_Win_request_t *req;
-    req = (MPIDI_CH4_NMI_OFI_Win_request_t*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIDI_CH4_NMI_OFI_Win_request_t*)MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIU_Object_set_ref(req, count);
@@ -348,7 +348,7 @@ __ALWAYS_INLINE__ void MPIDI_CH4_NMI_OFI_Win_request_complete(MPIDI_CH4_NMI_OFI_
         MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->origin_dt);
         MPIDI_CH4_NMI_OFI_Win_datatype_unmap(&req->noncontig->result_dt);
         MPL_free(req->noncontig);
-        MPIU_Handle_obj_free(&MPIDI_Request_mem, (req));
+        MPIU_Handle_obj_free(&MPIR_Request_mem, (req));
     }
 }
 

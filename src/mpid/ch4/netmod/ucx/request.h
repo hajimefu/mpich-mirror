@@ -18,7 +18,6 @@
 #define FUNCNAME MPIDI_CH4_NM_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-extern MPIU_Object_alloc_t MPIDI_Request_mem;
 static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 {
     req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer = NULL;
@@ -55,7 +54,7 @@ static inline void MPIDI_CH4_NM_request_release(MPIR_Request * req)
         if (req->u.ureq.greq_fns)
             MPL_free(req->u.ureq.greq_fns);
         if(!MPIDI_CH4_NMI_UCX_REQ(req).is_ucx_req)
-             MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+             MPIU_Handle_obj_free(&MPIR_Request_mem, req);
         else{
             MPIDI_CH4_NMI_UCX_REQ(req).is_call_done = 0;
             MPIDI_CH4_NMI_UCX_REQ(req).in_nb = 1;
@@ -102,7 +101,7 @@ static inline MPIR_Request* MPIDI_CH4_NMI_UCX_Request_create()
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_CREATE);
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
@@ -134,7 +133,7 @@ static inline MPIR_Request *MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
 
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
     MPIU_Assert(req != NULL);
@@ -155,7 +154,7 @@ static inline MPIR_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     if (req == NULL)
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request");
 

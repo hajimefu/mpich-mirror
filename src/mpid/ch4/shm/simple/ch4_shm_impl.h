@@ -147,7 +147,7 @@ typedef struct {
  */
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_ALLOC_AND_INIT(req,count)     \
   do {                                                              \
-    (req) = (MPIR_Request*)MPIU_Handle_obj_alloc(&MPIDI_Request_mem);      \
+    (req) = (MPIR_Request*)MPIU_Handle_obj_alloc(&MPIR_Request_mem);      \
     if (req == NULL)                                                       \
         MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \

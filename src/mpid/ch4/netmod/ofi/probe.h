@@ -74,7 +74,7 @@ static inline int MPIDI_CH4_NMI_OFI_Do_iprobe(int source,
         case  MPIDI_CH4_NMI_OFI_PEEK_NOT_FOUND:
             *flag = 0;
 
-            if(message) MPIU_Handle_obj_free(&MPIDI_Request_mem, rreq);
+            if(message) MPIU_Handle_obj_free(&MPIR_Request_mem, rreq);
 
             goto fn_exit;
             break;

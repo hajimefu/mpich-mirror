@@ -53,7 +53,7 @@ static inline int MPIDI_CH4_NMI_OFI_Progress_do_queue(void *netmod_context);
 static inline MPIR_Request *MPIDI_CH4_NMI_OFI_Am_request_alloc_and_init(int count)
 {
     MPIR_Request *req;
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIR_cc_set(&req->cc, 1);

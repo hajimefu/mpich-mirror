@@ -511,8 +511,6 @@ typedef struct MPIDI_CH4_NMI_OFI_Huge_counter_t {
 /* Externs */
 extern MPIDI_CH4_NMI_OFI_Addr_table_t  *MPIDI_Addr_table;
 extern MPIDI_CH4_NMI_OFI_Global_t       MPIDI_Global;
-extern MPIU_Object_alloc_t              MPIDI_Request_mem;
-extern MPIR_Request                     MPIDI_Request_direct[];
 extern int                              MPIR_Datatype_init_names(void);
 
 EXTERN_C_END

@@ -87,7 +87,7 @@ static inline MPIR_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
     MPIDI_STATE_DECL(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
 
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIDI_Request_mem);
+    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
     MPIU_Assert(req != NULL);
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIDI_CH4U_REQUEST(req, req) = NULL;
@@ -132,7 +132,7 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPIR_Request * req)
         if (req->u.ureq.greq_fns)
             MPL_free(req->u.ureq.greq_fns);
 
-        MPIU_Handle_obj_free(&MPIDI_Request_mem, req);
+        MPIU_Handle_obj_free(&MPIR_Request_mem, req);
     }
     MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_RELEASE);
     return;

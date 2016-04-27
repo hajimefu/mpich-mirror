@@ -335,8 +335,6 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 #define MPID_GPID_ToLpidArray            MPIDI_GPID_ToLpidArray
 #define MPID_Create_intercomm_from_lpids MPIDI_Create_intercomm_from_lpids
 /* Variables */
-#define MPID_Request_direct              MPIDI_Request_direct
-#define MPID_Request_mem                 MPIDI_Request_mem
 #define MPID_Comm_create                 MPIDI_Comm_create
 #define MPID_Comm_destroy                MPIDI_Comm_destroy
 #define MPID_Barrier                     MPIDI_Barrier
@@ -385,8 +383,6 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 #define MPID_Iscatterv                   MPIDI_Iscatterv
 
 #define MPIDI_MAX_NETMOD_STRING_LEN 64
-extern MPIR_Request MPIDI_Request_direct[];
-extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern int MPIDI_num_netmods;
 #if defined(MPL_USE_DBG_LOGGING)
 extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;

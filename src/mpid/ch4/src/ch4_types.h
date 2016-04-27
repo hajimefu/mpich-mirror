@@ -267,7 +267,6 @@ typedef struct MPIDI_CH4_Global_t {
     MPIU_buf_pool_t *buf_pool;
 } MPIDI_CH4_Global_t;
 extern MPIDI_CH4_Global_t MPIDI_CH4_Global;
-extern MPIU_Object_alloc_t MPIDI_Request_mem;
 extern MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 #define MPIDI_CH4I_THREAD_PROGRESS_MUTEX  MPIDI_CH4_Global.m[0]
 #define MPIDI_CH4I_THREAD_PROGRESS_HOOK_MUTEX  MPIDI_CH4_Global.m[1]
