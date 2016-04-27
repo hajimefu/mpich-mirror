@@ -355,14 +355,14 @@ static inline int MPIDI_CH4_NMI_OFI_init_generic(int         rank,
     /* ---------------------------------- */
     /* Initialize MPI_COMM_SELF and VCRT  */
     /* ---------------------------------- */
-    MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_VCRT_Create(comm_self->remote_size, &MPIDI_CH4_NMI_OFI_COMM(comm_self).vcrt));
+    MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_vcrt_create(comm_self->remote_size, &MPIDI_CH4_NMI_OFI_COMM(comm_self).vcrt));
     MPIDI_CH4_NMI_OFI_COMM(comm_self).vcrt->vcr_table[0].addr_idx = rank;
     MPIDI_CH4_NMI_OFI_COMM(comm_self).vcrt->vcr_table[0].is_local = 1;
 
     /* ---------------------------------- */
     /* Initialize MPI_COMM_WORLD and VCRT */
     /* ---------------------------------- */
-    MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_VCRT_Create(comm_world->remote_size, &MPIDI_CH4_NMI_OFI_COMM(comm_world).vcrt));
+    MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_vcrt_create(comm_world->remote_size, &MPIDI_CH4_NMI_OFI_COMM(comm_world).vcrt));
 
     /* ---------------------------------- */
     /* Initialize Active Message          */
@@ -726,7 +726,7 @@ static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPIR_Comm *newcomm_pt
                                                            int size, const int lpids[])
 {
     int i;
-    MPIDI_CH4_NMI_OFI_VCRT_Create(size, &MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt);
+    MPIDI_CH4_NMI_OFI_vcrt_create(size, &MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt);
 
     for(i = 0; i < size; i++) {
         MPIDI_CH4_NMI_OFI_COMM(newcomm_ptr).vcrt->vcr_table[i].addr_idx = lpids[i];

@@ -125,7 +125,7 @@ static inline int MPIDI_CH4_NMI_OFI_dynproc_create_intercomm(const char      *po
     tmp_comm_ptr->is_low_group         = is_low_group;
     MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).local_vcrt = MPIDI_CH4_NMI_OFI_COMM(comm_ptr).vcrt;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_VCRT_Create(tmp_comm_ptr->remote_size,
+    mpi_errno = MPIDI_CH4_NMI_OFI_vcrt_create(tmp_comm_ptr->remote_size,
                                               &MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).vcrt);
     start = MPIDI_Addr_table->size;
     MPIDI_Global.node_map = (MPID_Node_id_t *)MPL_realloc(MPIDI_Global.node_map,
@@ -154,7 +154,7 @@ static inline int MPIDI_CH4_NMI_OFI_dynproc_create_intercomm(const char      *po
 
     MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIR_Comm_dup_impl(tmp_comm_ptr, newcomm));
 
-    /*    MPIDI_CH4_NMI_OFI_VCRT_Release(MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).vcrt);
+    /*    MPIDI_CH4_NMI_OFI_vcrt_release(MPIDI_CH4_NMI_OFI_COMM(tmp_comm_ptr).vcrt);
         MPIU_Handle_obj_free(&MPID_Comm_mem, tmp_comm_ptr);  this is done in comm_release */
     tmp_comm_ptr->local_comm = NULL; /* avoid freeing local comm with comm_release */
     MPIR_Comm_release(tmp_comm_ptr);

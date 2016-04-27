@@ -30,10 +30,10 @@ int   MPIDI_CH4_NMI_OFI_handle_cq_error_util(ssize_t ret)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_VCRT_Create
+#define FUNCNAME MPIDI_CH4_NMI_OFI_vcrt_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr)
+int MPIDI_CH4_NMI_OFI_vcrt_create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr)
 {
     struct MPIDI_CH4_NMI_OFI_VCRT *vcrt;
     int i,mpi_errno;
@@ -63,10 +63,10 @@ int MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_VCRT_Release
+#define FUNCNAME MPIDI_CH4_NMI_OFI_vcrt_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt)
+int MPIDI_CH4_NMI_OFI_vcrt_release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt)
 {
     int count;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_VCRT_RELEASE);

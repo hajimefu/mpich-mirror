@@ -68,7 +68,7 @@ static inline void MPIDI_CH4_NMI_OFI_dup_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *src
      * VCRT */
 
     if(!vcrt_offset)
-        MPIDI_CH4_NMI_OFI_VCRT_Create(vcrt_size, dest_vcrt);
+        MPIDI_CH4_NMI_OFI_vcrt_create(vcrt_size, dest_vcrt);
 
     if(mapper->type == MPIR_COMM_MAP_TYPE__DUP) {
         for(i = 0; i < src_comm_size; i++)
@@ -255,12 +255,12 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm *comm)
     MPIDI_CH4_NMI_OFI_index_allocator_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).win_id_allocator);
     MPIDI_CH4_NMI_OFI_index_allocator_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator);
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_VCRT_Release(MPIDI_CH4_NMI_OFI_COMM(comm).vcrt);
+    mpi_errno = MPIDI_CH4_NMI_OFI_vcrt_release(MPIDI_CH4_NMI_OFI_COMM(comm).vcrt);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
-        mpi_errno = MPIDI_CH4_NMI_OFI_VCRT_Release(MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt);
+        mpi_errno = MPIDI_CH4_NMI_OFI_vcrt_release(MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt);
 
         if(mpi_errno)
             MPIR_ERR_POP(mpi_errno);

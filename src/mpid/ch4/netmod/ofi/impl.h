@@ -444,8 +444,8 @@ extern int   MPIDI_CH4_NMI_OFI_control_handler(void *am_hdr,
                                                void **data,size_t *data_sz,int *is_contig,
                                                MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
                                                MPIR_Request **req);
-extern int   MPIDI_CH4_NMI_OFI_VCRT_Create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr);
-extern int   MPIDI_CH4_NMI_OFI_VCRT_Release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt);
+extern int   MPIDI_CH4_NMI_OFI_vcrt_create(int size, struct MPIDI_CH4_NMI_OFI_VCRT **vcrt_ptr);
+extern int   MPIDI_CH4_NMI_OFI_vcrt_release(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt);
 extern void  MPIDI_CH4_NMI_OFI_map_create(void **map);
 extern void  MPIDI_CH4_NMI_OFI_map_destroy(void *map);
 extern void  MPIDI_CH4_NMI_OFI_map_set(void *_map, uint64_t id, void *val);
