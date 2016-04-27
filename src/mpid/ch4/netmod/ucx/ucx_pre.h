@@ -45,6 +45,7 @@ typedef struct MPIDI_CH4_NMI_UCX_win_info{
 typedef struct {
     MPIDI_CH4_NMI_UCX_win_info_t *info_table;
     ucp_mem_h mem_h;
+    int need_local_flush;
 } MPIDI_CH4_NMI_UCX_win_t;
 
 

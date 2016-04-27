@@ -31,7 +31,10 @@ static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
     offset = target_disp * win_info->disp;
 
     status = ucp_put_nbi(ep, origin_addr, size, base+offset, win_info->rkey);
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+ /*   if(status == UCS_INPROGRESS)
+        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 1;
+    else*/
+      MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
 
  fn_exit:
     return mpi_errno;
@@ -63,7 +66,10 @@ static inline int MPIDI_CH4_NMI_UCX_contig_get(void *origin_addr,
     offset = target_disp * win_info->disp;
 
     status = ucp_get_nbi(ep, origin_addr, size, base+offset, win_info->rkey);
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+/*    if(status == UCS_INPROGRESS)
+        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 1;
+    else*/
+     MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
 
  fn_exit:
     return mpi_errno;

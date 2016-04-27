@@ -112,7 +112,7 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPID_Win *win, size_t length,
         MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).disp = share_data[i].disp;
         MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).addr = share_data[i].addr;
     }
-
+  MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
   fn_exit:
     /* buffer release */
     if (rkey_buffer)
@@ -395,9 +395,12 @@ static inline int MPIDI_CH4_NM_win_flush_local_all(MPID_Win * win)
        MPIR_ERR_POP(mpi_errno);
     /* currently, UCP does not support local flush, so we have to call
        a global flush. This is not good for performance - but OK for now*/
-    ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
+    if(MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush == 1){
+        ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
+        MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
+    }
 
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
 
 fn_exit:
     return mpi_errno;
@@ -427,9 +430,12 @@ static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPID_Win * win)
        MPIR_ERR_POP(mpi_errno);
     /* currently, UCP does not support local flush, so we have to call
        a global flush. This is not good for performance - but OK for now*/ 
-    ucp_status = ucp_ep_flush(ep);
 
-  MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    if(MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush == 1){
+        ucp_status = ucp_ep_flush(ep);
+        MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
+    }
 
 fn_exit:
     return mpi_errno;
