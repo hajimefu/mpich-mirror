@@ -12,9 +12,9 @@
 #include <mpidimpl.h>
 #include "ch4_shm_impl.h"
 
-MPIDI_CH4_SHMI_SIMPLE_Request_queue_t  MPIDI_CH4_SHMI_SIMPLE_Sendq = { NULL, NULL };
-MPIDI_CH4_SHMI_SIMPLE_Request_queue_t  MPIDI_CH4_SHMI_SIMPLE_Recvq_posted = { NULL, NULL };
-MPIDI_CH4_SHMI_SIMPLE_Request_queue_t  MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected = { NULL, NULL };
-MPIDI_CH4_SHMI_SIMPLE_Mem_region_t     MPIDI_CH4_SHMI_SIMPLE_mem_region = {{0}};
-char                                  *MPIDI_CH4_SHMI_SIMPLE_Asym_base_addr = 0;
+MPIDI_CH4_SHMI_SIMPLE_request_queue_t  MPIDI_CH4_SHMI_SIMPLE_sendq = { NULL, NULL };
+MPIDI_CH4_SHMI_SIMPLE_request_queue_t  MPIDI_CH4_SHMI_SIMPLE_recvq_posted = { NULL, NULL };
+MPIDI_CH4_SHMI_SIMPLE_request_queue_t  MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected = { NULL, NULL };
+MPIDI_CH4_SHMI_SIMPLE_mem_region_t     MPIDI_CH4_SHMI_SIMPLE_mem_region = {{0}};
+char                                  *MPIDI_CH4_SHMI_SIMPLE_asym_base_addr = 0;
 MPID_Thread_mutex_t                    MPID_shm_mutex;

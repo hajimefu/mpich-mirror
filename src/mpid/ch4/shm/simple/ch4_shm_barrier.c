@@ -17,10 +17,10 @@
 /* ------------------------------------------------------- */
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init
+#define FUNCNAME MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_t *barrier_region)
+int MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_barrier_vars_t *barrier_region)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;

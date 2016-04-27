@@ -46,7 +46,7 @@
 #define MPIDI_CH4_SHMI_SIMPLE_CELL_DLEN(cell)   ((cell)->pkt.mpich.datalen)
 #define MPIDI_CH4_SHMI_SIMPLE_CELL_SEQN(cell)   ((cell)->pkt.mpich.seqno)
 
-#define MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN sizeof(MPIDI_CH4_SHMI_SIMPLE_Pkt_header_t)
+#define MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN sizeof(MPIDI_CH4_SHMI_SIMPLE_pkt_header_t)
 #define MPIDI_CH4_SHMI_SIMPLE_DATA_LEN (MPIDI_CH4_SHMI_SIMPLE_CELL_PAYLOAD_LEN - MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN)
 
 #define MPIDI_CH4_SHMI_SIMPLE_PKT_HEADER_FIELDS          \
@@ -56,22 +56,22 @@
     unsigned short seqno;                   \
     unsigned short type;        /* currently used only with checkpointing */
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Pkt_header {
+typedef struct MPIDI_CH4_SHMI_SIMPLE_pkt_header {
     MPIDI_CH4_SHMI_SIMPLE_PKT_HEADER_FIELDS;
-} MPIDI_CH4_SHMI_SIMPLE_Pkt_header_t;
+} MPIDI_CH4_SHMI_SIMPLE_pkt_header_t;
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Pkt_mpich {
+typedef struct MPIDI_CH4_SHMI_SIMPLE_pkt_mpich {
     MPIDI_CH4_SHMI_SIMPLE_PKT_HEADER_FIELDS;
     union {
         char payload[MPIDI_CH4_SHMI_SIMPLE_DATA_LEN];
         double dummy;           /* align paylod to double */
     } p;
-} MPIDI_CH4_SHMI_SIMPLE_Pkt_mpich_t;
+} MPIDI_CH4_SHMI_SIMPLE_pkt_mpich_t;
 
 typedef union {
-    MPIDI_CH4_SHMI_SIMPLE_Pkt_header_t header;
-    MPIDI_CH4_SHMI_SIMPLE_Pkt_mpich_t mpich;
-} MPIDI_CH4_SHMI_SIMPLE_Pkt_t;
+    MPIDI_CH4_SHMI_SIMPLE_pkt_header_t header;
+    MPIDI_CH4_SHMI_SIMPLE_pkt_mpich_t mpich;
+} MPIDI_CH4_SHMI_SIMPLE_pkt_t;
 
 /* Nemesis cells which are to be used in shared memory need to use
  * "relative pointers" because the absolute pointers to a cell from
@@ -82,20 +82,20 @@ typedef union {
  * convert between relative and absolute pointers. */
 
 /* This should always be exactly the size of a pointer */
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr {
+typedef struct MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr {
     OPA_ptr_t p;
-} MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t;
+} MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t;
 
-/* MPIDI_CH4_SHMI_SIMPLE_Cell and MPIDI_CH4_SHMI_SIMPLE_Abs_cell must be kept in sync so that we
- * can cast between them.  MPIDI_CH4_SHMI_SIMPLE_Abs_cell should only be used when
+/* MPIDI_CH4_SHMI_SIMPLE_cell and MPIDI_CH4_SHMI_SIMPLE_abs_cell must be kept in sync so that we
+ * can cast between them.  MPIDI_CH4_SHMI_SIMPLE_abs_cell should only be used when
  * a cell is enqueued on a queue local to a single process (e.g., a
  * queue in a network module) where relative pointers are not
  * needed. */
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Cell {
-    MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t next;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_cell {
+    MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t next;
 #if (MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN > SIZEOF_OPA_PTR_T)
-    char padding[MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - sizeof(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t)];
+    char padding[MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - sizeof(MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t)];
 #endif
     int my_rank;
     int rank;
@@ -105,24 +105,24 @@ typedef struct MPIDI_CH4_SHMI_SIMPLE_Cell {
 #if MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN != 0
     char padding[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN - 4 * sizeof(int) - sizeof(MPIR_Request *)]; /* should be 64-16-16-16-8 = 8 */
 #endif
-    volatile MPIDI_CH4_SHMI_SIMPLE_Pkt_t pkt;
-} MPIDI_CH4_SHMI_SIMPLE_Cell_t;
-typedef MPIDI_CH4_SHMI_SIMPLE_Cell_t *MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t;
+    volatile MPIDI_CH4_SHMI_SIMPLE_pkt_t pkt;
+} MPIDI_CH4_SHMI_SIMPLE_cell_t;
+typedef MPIDI_CH4_SHMI_SIMPLE_cell_t *MPIDI_CH4_SHMI_SIMPLE_cell_ptr_t;
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Abs_cell {
-    struct MPIDI_CH4_SHMI_SIMPLE_Abs_cell *next;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_abs_cell {
+    struct MPIDI_CH4_SHMI_SIMPLE_abs_cell *next;
 #if (MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN > SIZEOF_VOID_P)
-    char padding[MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - sizeof(struct MPIDI_CH4_SHMI_SIMPLE_Abs_cell *)];
+    char padding[MPIDI_CH4_SHMI_SIMPLE_CELL_HEAD_LEN - sizeof(struct MPIDI_CH4_SHMI_SIMPLE_abs_cell *)];
 #endif
-    volatile MPIDI_CH4_SHMI_SIMPLE_Pkt_t pkt;
-} MPIDI_CH4_SHMI_SIMPLE_Abs_cell_t;
-typedef MPIDI_CH4_SHMI_SIMPLE_Abs_cell_t *MPIDI_CH4_SHMI_SIMPLE_Abs_cell_ptr_t;
+    volatile MPIDI_CH4_SHMI_SIMPLE_pkt_t pkt;
+} MPIDI_CH4_SHMI_SIMPLE_abs_cell_t;
+typedef MPIDI_CH4_SHMI_SIMPLE_abs_cell_t *MPIDI_CH4_SHMI_SIMPLE_abs_cell_ptr_t;
 
 #define MPIDI_CH4_SHMI_SIMPLE_CELL_TO_PACKET(cellp) (&(cellp)->pkt)
 #define MPIDI_CH4_SHMI_SIMPLE_PACKET_TO_CELL(packetp) \
-    ((MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t) ((char*)(packetp) - (char *)MPIDI_CH4_SHMI_SIMPLE_CELL_TO_PACKET((MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t)0)))
-#define MPIDI_CH4_SHMI_SIMPLE_MIN_PACKET_LEN (sizeof (MPIDI_CH4_SHMI_SIMPLE_Pkt_header_t))
-#define MPIDI_CH4_SHMI_SIMPLE_MAX_PACKET_LEN (sizeof (MPIDI_CH4_SHMI_SIMPLE_Pkt_t))
+    ((MPIDI_CH4_SHMI_SIMPLE_cell_ptr_t) ((char*)(packetp) - (char *)MPIDI_CH4_SHMI_SIMPLE_CELL_TO_PACKET((MPIDI_CH4_SHMI_SIMPLE_cell_ptr_t)0)))
+#define MPIDI_CH4_SHMI_SIMPLE_MIN_PACKET_LEN (sizeof (MPIDI_CH4_SHMI_SIMPLE_pkt_header_t))
+#define MPIDI_CH4_SHMI_SIMPLE_MAX_PACKET_LEN (sizeof (MPIDI_CH4_SHMI_SIMPLE_pkt_t))
 #define MPIDI_CH4_SHMI_SIMPLE_PACKET_LEN(pkt) ((pkt)->mpich.datalen + MPIDI_CH4_SHMI_SIMPLE_MPICH_HEAD_LEN)
 
 #define MPIDI_CH4_SHMI_SIMPLE_OPT_LOAD     16
@@ -134,23 +134,23 @@ typedef MPIDI_CH4_SHMI_SIMPLE_Abs_cell_t *MPIDI_CH4_SHMI_SIMPLE_Abs_cell_ptr_t;
 
 #define MPIDI_CH4_SHMI_SIMPLE_PACKET_PAYLOAD(pkt) ((pkt)->mpich.payload)
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Queue {
-    MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t head;
-    MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t tail;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_queue {
+    MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t head;
+    MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t tail;
 #if (MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN > (2 * SIZEOF_OPA_PTR_T))
-    char padding1[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - 2 * sizeof(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t)];
+    char padding1[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - 2 * sizeof(MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t)];
 #endif
-    MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t my_head;
+    MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t my_head;
 #if (MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN > SIZEOF_OPA_PTR_T)
-    char padding2[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - sizeof(MPIDI_CH4_SHMI_SIMPLE_Cell_rel_ptr_t)];
+    char padding2[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - sizeof(MPIDI_CH4_SHMI_SIMPLE_cell_rel_ptr_t)];
 #endif
 #if !defined(MPIDI_CH4_SHMI_SIMPLE_USE_LOCK_FREE_QUEUES)
     /* see FIXME in mpid_nem_queue.h */
-#define MPIDI_CH4_SHMI_SIMPLE_Queue_mutex_t MPID_Thread_mutex_t
-    MPIDI_CH4_SHMI_SIMPLE_Queue_mutex_t lock;
+#define MPIDI_CH4_SHMI_SIMPLE_queue_mutex_t MPID_Thread_mutex_t
+    MPIDI_CH4_SHMI_SIMPLE_queue_mutex_t lock;
     char padding3[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN - sizeof(MPID_Thread_mutex_t)];
 #endif
-} MPIDI_CH4_SHMI_SIMPLE_Queue_t, *MPIDI_CH4_SHMI_SIMPLE_Queue_ptr_t;
+} MPIDI_CH4_SHMI_SIMPLE_queue_t, *MPIDI_CH4_SHMI_SIMPLE_queue_ptr_t;
 
 /* Fast Boxes*/
 typedef union {
@@ -158,27 +158,27 @@ typedef union {
 #if MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN != 0
     char padding[MPIDI_CH4_SHMI_SIMPLE_CACHE_LINE_LEN];
 #endif
-} MPIDI_CH4_SHMI_SIMPLE_Opt_volint_t;
+} MPIDI_CH4_SHMI_SIMPLE_opt_volint_t;
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Fbox_common {
-    MPIDI_CH4_SHMI_SIMPLE_Opt_volint_t flag;
-} MPIDI_CH4_SHMI_SIMPLE_Fbox_common_t, *MPIDI_CH4_SHMI_SIMPLE_Fbox_common_ptr_t;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_fbox_common {
+    MPIDI_CH4_SHMI_SIMPLE_opt_volint_t flag;
+} MPIDI_CH4_SHMI_SIMPLE_fbox_common_t, *MPIDI_CH4_SHMI_SIMPLE_fbox_common_ptr_t;
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Fbox_mpich {
-    MPIDI_CH4_SHMI_SIMPLE_Opt_volint_t flag;
-    MPIDI_CH4_SHMI_SIMPLE_Cell_t cell;
-} MPIDI_CH4_SHMI_SIMPLE_Fbox_mpich_t;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_fbox_mpich {
+    MPIDI_CH4_SHMI_SIMPLE_opt_volint_t flag;
+    MPIDI_CH4_SHMI_SIMPLE_cell_t cell;
+} MPIDI_CH4_SHMI_SIMPLE_fbox_mpich_t;
 
 #define MPIDI_CH4_SHMI_SIMPLE_FBOX_DATALEN MPIDI_CH4_SHMI_SIMPLE_DATA_LEN
 
 typedef union {
-    MPIDI_CH4_SHMI_SIMPLE_Fbox_common_t common;
-    MPIDI_CH4_SHMI_SIMPLE_Fbox_mpich_t mpich;
-} MPIDI_CH4_SHMI_SIMPLE_Fastbox_t;
+    MPIDI_CH4_SHMI_SIMPLE_fbox_common_t common;
+    MPIDI_CH4_SHMI_SIMPLE_fbox_mpich_t mpich;
+} MPIDI_CH4_SHMI_SIMPLE_fastbox_t;
 
-typedef struct MPIDI_CH4_SHMI_SIMPLE_Fbox_arrays {
-    MPIDI_CH4_SHMI_SIMPLE_Fastbox_t **in;
-    MPIDI_CH4_SHMI_SIMPLE_Fastbox_t **out;
-} MPIDI_CH4_SHMI_SIMPLE_Fbox_arrays_t;
+typedef struct MPIDI_CH4_SHMI_SIMPLE_fbox_arrays {
+    MPIDI_CH4_SHMI_SIMPLE_fastbox_t **in;
+    MPIDI_CH4_SHMI_SIMPLE_fastbox_t **out;
+} MPIDI_CH4_SHMI_SIMPLE_fbox_arrays_t;
 
 #endif /* ifndef CH4_SHM_DATATYPES_H */

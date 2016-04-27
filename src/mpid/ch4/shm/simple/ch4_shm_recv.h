@@ -17,15 +17,15 @@
 /* ---------------------------------------------------- */
 /* general queues                                       */
 /* ---------------------------------------------------- */
-extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_posted;
-extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected;
+extern MPIDI_CH4_SHMI_SIMPLE_request_queue_t MPIDI_CH4_SHMI_SIMPLE_recvq_posted;
+extern MPIDI_CH4_SHMI_SIMPLE_request_queue_t MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected;
 
 /* ---------------------------------------------------- */
-/* MPIDI_CH4_SHMI_SIMPLE_Do_irecv                                             */
+/* MPIDI_CH4_SHMI_SIMPLE_do_irecv                                             */
 /* ---------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_Do_irecv)
-static inline int MPIDI_CH4_SHMI_SIMPLE_Do_irecv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_do_irecv)
+static inline int MPIDI_CH4_SHMI_SIMPLE_do_irecv(void *buf,
                                                  int count,
                                                  MPI_Datatype datatype,
                                                  int rank,
@@ -72,7 +72,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_irecv(void *buf,
 
     dtype_add_ref_if_not_builtin(datatype);
     /* enqueue rreq */
-    MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(rreq, MPIDI_CH4_SHMI_SIMPLE_Recvq_posted);
+    MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(rreq, MPIDI_CH4_SHMI_SIMPLE_recvq_posted);
     MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                     (MPL_DBG_FDEST, "Enqueued from grank %d to %d (comm_kind %d) in recv %d,%d,%d\n",
                      MPIDI_CH4U_rank_to_lpid(rank, comm), MPIDI_CH4_SHMI_SIMPLE_mem_region.rank, comm->comm_kind,
@@ -104,7 +104,7 @@ static inline int MPIDI_CH4_SHM_recv(void *buf,
 
     /* create a request */
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPIDI_SHM_RECV);
     return mpi_errno;
@@ -209,7 +209,7 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
         MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->segment_ptr = NULL;
         MPIDI_CH4_SHMI_SIMPLE_REQUEST(req_ack)->pending = MPIDI_CH4_SHMI_SIMPLE_REQUEST(message)->pending;
         /* enqueue req_ack */
-        MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req_ack, MPIDI_CH4_SHMI_SIMPLE_Sendq);
+        MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req_ack, MPIDI_CH4_SHMI_SIMPLE_sendq);
     }
 
     for(sreq = message; sreq;) {
@@ -288,7 +288,7 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
 
     MPIDI_FUNC_ENTER(MPIDI_SHM_IRECV);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPIDI_SHM_IRECV);
     return mpi_errno;
@@ -299,7 +299,7 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
 static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request *rreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head;
+    MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_recvq_posted.head;
     MPIR_Request *prev_req = NULL;
 
     while(req) {
@@ -310,11 +310,11 @@ static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request *rreq)
             if(prev_req) {
                 MPIDI_CH4_SHMI_SIMPLE_REQUEST(prev_req)->next = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
             } else {
-                MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.head = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
+                MPIDI_CH4_SHMI_SIMPLE_recvq_posted.head = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
             }
 
-            if(req == MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.tail) {
-                MPIDI_CH4_SHMI_SIMPLE_Recvq_posted.tail = prev_req;
+            if(req == MPIDI_CH4_SHMI_SIMPLE_recvq_posted.tail) {
+                MPIDI_CH4_SHMI_SIMPLE_recvq_posted.tail = prev_req;
             }
 
             MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);

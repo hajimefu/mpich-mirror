@@ -21,14 +21,14 @@
 /* assumes value!=0 means the fbox is full.  Contains acquire barrier to
  * ensure that later operations that are dependent on this check don't
  * escape earlier than this check. */
-#define MPIDI_CH4_SHMI_SIMPLE_Fbox_is_full(pbox_) (OPA_load_acquire_int(&(pbox_)->flag.value))
+#define MPIDI_CH4_SHMI_SIMPLE_fbox_is_full(pbox_) (OPA_load_acquire_int(&(pbox_)->flag.value))
 
 /* ---------------------------------------------------- */
-/* MPIDI_CH4_SHMI_SIMPLE_Do_isend                                             */
+/* MPIDI_CH4_SHMI_SIMPLE_do_isend                                             */
 /* ---------------------------------------------------- */
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_Do_isend)
-static inline int MPIDI_CH4_SHMI_SIMPLE_Do_isend(const void *buf,
+#define FCNAME DECL_FUNC(MPIDI_CH4_SHMI_SIMPLE_do_isend)
+static inline int MPIDI_CH4_SHMI_SIMPLE_do_isend(const void *buf,
                                                  int count,
                                                  MPI_Datatype datatype,
                                                  int rank,
@@ -69,7 +69,7 @@ static inline int MPIDI_CH4_SHMI_SIMPLE_Do_isend(const void *buf,
 
     dtype_add_ref_if_not_builtin(datatype);
     /* enqueue sreq */
-    MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(sreq, MPIDI_CH4_SHMI_SIMPLE_Sendq);
+    MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(sreq, MPIDI_CH4_SHMI_SIMPLE_sendq);
     *request = sreq;
     MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                     (MPL_DBG_FDEST, "Enqueued to grank %d from %d (comm_kind %d) in recv %d,%d,%d\n",
@@ -108,15 +108,15 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
         int grank = MPIDI_CH4U_rank_to_lpid(rank, comm);
 
         /* Try freeQ */
-        if(!MPIDI_CH4_SHMI_SIMPLE_Queue_empty(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ)) {
-            MPIDI_CH4_SHMI_SIMPLE_Cell_ptr_t cell;
-            MPIDI_CH4_SHMI_SIMPLE_Queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ, &cell);
+        if(!MPIDI_CH4_SHMI_SIMPLE_queue_empty(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ)) {
+            MPIDI_CH4_SHMI_SIMPLE_cell_ptr_t cell;
+            MPIDI_CH4_SHMI_SIMPLE_queue_dequeue(MPIDI_CH4_SHMI_SIMPLE_mem_region.my_freeQ, &cell);
             MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_SET(cell, comm->rank, tag, comm->context_id + context_offset);
             cell->pkt.mpich.datalen = data_sz;
             cell->pkt.mpich.type = MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER;
             MPIU_Memcpy((void *) cell->pkt.mpich.p.payload, (char *)buf+dt_true_lb, data_sz);
             cell->pending = NULL;
-            MPIDI_CH4_SHMI_SIMPLE_Queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_mem_region.RecvQ[grank], cell);
+            MPIDI_CH4_SHMI_SIMPLE_queue_enqueue(MPIDI_CH4_SHMI_SIMPLE_mem_region.RecvQ[grank], cell);
             *request = NULL;
             MPL_DBG_MSG_FMT(MPIR_DBG_HANDLE, TYPICAL,
                             (MPL_DBG_FDEST, "Sent to grank %d from %d in send %d,%d,%d\n", grank, cell->my_rank, cell->rank, cell->tag,
@@ -127,7 +127,7 @@ static inline int MPIDI_CH4_SHM_send(const void *buf,
 
     /* Long message or */
     /* Failed to send immediately - create and return request */
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESTANDARD);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESTANDARD);
 
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
@@ -150,7 +150,7 @@ static inline int MPIDI_CH4_SHM_irsend(const void *buf,
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPEREADY);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPEREADY);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
     return mpi_errno;
@@ -170,7 +170,7 @@ static inline int MPIDI_CH4_SHM_ssend(const void *buf,
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_SSEND);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESYNC);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESYNC);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_SSEND);
     return mpi_errno;
@@ -191,7 +191,7 @@ static inline int MPIDI_CH4_SHM_startall(int count, MPIR_Request *requests[])
 
         if(preq->kind == MPIR_REQUEST_KIND__PREQUEST_SEND) {
             if(MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->type != MPIDI_CH4_SHMI_SIMPLE_TYPEBUFFERED) {
-                mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_buf, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_count,
+                mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_buf, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_count,
                                                            MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->datatype, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->dest, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->tag,
                                                            preq->comm, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->context_id - preq->comm->context_id,
                                                            &preq->u.persist.real_request, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->type);
@@ -205,7 +205,7 @@ static inline int MPIDI_CH4_SHM_startall(int count, MPIR_Request *requests[])
                     MPIR_Request_get_ptr(sreq_handle, preq->u.persist.real_request);
             }
         } else if(preq->kind == MPIR_REQUEST_KIND__PREQUEST_RECV) {
-            mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_irecv(MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_buf, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_count,
+            mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_irecv(MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_buf, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->user_count,
                                                        MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->datatype, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->rank, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->tag,
                                                        preq->comm, MPIDI_CH4_SHMI_SIMPLE_REQUEST(preq)->context_id - preq->comm->context_id,
                                                        &preq->u.persist.real_request);
@@ -373,7 +373,7 @@ static inline int MPIDI_CH4_SHM_isend(const void *buf,
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISEND);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESTANDARD);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESTANDARD);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISEND);
     return mpi_errno;
@@ -391,7 +391,7 @@ static inline int MPIDI_CH4_SHM_issend(const void *buf,
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_ISSEND);
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_Do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESYNC);
+    mpi_errno = MPIDI_CH4_SHMI_SIMPLE_do_isend(buf, count, datatype, rank, tag, comm, context_offset, request, MPIDI_CH4_SHMI_SIMPLE_TYPESYNC);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_ISSEND);
     return mpi_errno;
@@ -400,7 +400,7 @@ static inline int MPIDI_CH4_SHM_issend(const void *buf,
 static inline int MPIDI_CH4_SHM_cancel_send(MPIR_Request *sreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_SHMI_SIMPLE_SHM_MUTEX);
-    MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_Sendq.head;
+    MPIR_Request *req = MPIDI_CH4_SHMI_SIMPLE_sendq.head;
     MPIR_Request *prev_req = NULL;
     int mpi_errno = MPI_SUCCESS;
 
@@ -410,7 +410,7 @@ static inline int MPIDI_CH4_SHM_cancel_send(MPIR_Request *sreq)
             MPIR_STATUS_SET_CANCEL_BIT(sreq->status, TRUE);
             MPIR_STATUS_SET_COUNT(sreq->status, 0);
             MPIDI_CH4_SHMI_SIMPLE_REQUEST_COMPLETE(sreq);
-            MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_CH4_SHMI_SIMPLE_Sendq,mpi_errno);
+            MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE_AND_SET_ERROR(&sreq,prev_req,MPIDI_CH4_SHMI_SIMPLE_sendq,mpi_errno);
             break;
         }
 

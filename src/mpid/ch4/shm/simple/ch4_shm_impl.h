@@ -26,7 +26,7 @@
 /* ---------------------------------------------------- */
 #include "ch4_shm_datatypes.h"  /* MPID_nem datatypes like cell, fastbox defined here */
 #include "ch4_shm_defs.h"       /* MPID_nem objects like shared memory region defined here */
-#include "ch4_shm_queue.h"      /* MPIDI_CH4_SHMI_SIMPLE_Queue functions defined here */
+#include "ch4_shm_queue.h"      /* MPIDI_CH4_SHMI_SIMPLE_queue functions defined here */
 
 /* ---------------------------------------------------- */
 /* constants                                            */
@@ -47,12 +47,12 @@
 /* VCR Table Data */
 typedef struct {
     unsigned int pg_rank;
-} MPIDI_CH4_SHMI_SIMPLE_Vcr_t;
+} MPIDI_CH4_SHMI_SIMPLE_vcr_t;
 
-struct MPIDI_CH4_SHMI_SIMPLE_Vcrt_t {
+struct MPIDI_CH4_SHMI_SIMPLE_vcrt_t {
     MPIU_OBJECT_HEADER;
     unsigned                    size;         /**< Number of entries in the table */
-    MPIDI_CH4_SHMI_SIMPLE_Vcr_t vcr_table[0]; /**< Array of virtual connection references */
+    MPIDI_CH4_SHMI_SIMPLE_vcr_t vcr_table[0]; /**< Array of virtual connection references */
 };
 /* ---------------------------------------------------- */
 /* general send/recv queue types, macros and objects    */
@@ -60,7 +60,7 @@ struct MPIDI_CH4_SHMI_SIMPLE_Vcrt_t {
 typedef struct {
     MPIR_Request *head;
     MPIR_Request *tail;
-} MPIDI_CH4_SHMI_SIMPLE_Request_queue_t;
+} MPIDI_CH4_SHMI_SIMPLE_request_queue_t;
 
 #define MPIDI_CH4_SHMI_SIMPLE_REQUEST_COMPLETE(req_)    \
 { \
@@ -187,10 +187,10 @@ fn_fail:                      \
    : __FILE__                                   \
 )
 
-int MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_Barrier_vars_t *barrier_region);
-extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Sendq;
-extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected;
-extern MPIDI_CH4_SHMI_SIMPLE_Request_queue_t MPIDI_CH4_SHMI_SIMPLE_Recvq_posted;
+int MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_barrier_vars_t *barrier_region);
+extern MPIDI_CH4_SHMI_SIMPLE_request_queue_t MPIDI_CH4_SHMI_SIMPLE_sendq;
+extern MPIDI_CH4_SHMI_SIMPLE_request_queue_t MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected;
+extern MPIDI_CH4_SHMI_SIMPLE_request_queue_t MPIDI_CH4_SHMI_SIMPLE_recvq_posted;
 
 
 

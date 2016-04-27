@@ -36,7 +36,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
         goto fn_exit;
     }
 
-    for(req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head; req; req=MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
+    for(req = MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected.head; req; req=MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
         if(MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), source, tag, comm->recvcontext_id + context_offset)) {
             if(!matched_req)
                 matched_req = req;
@@ -49,9 +49,9 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
     }
 
     if(*message) {
-        MPIDI_CH4_SHMI_SIMPLE_Request_queue_t mqueue = {NULL,NULL};
+        MPIDI_CH4_SHMI_SIMPLE_request_queue_t mqueue = {NULL,NULL};
         MPIR_Request *prev_req = NULL, *next_req = NULL;
-        req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head;
+        req = MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected.head;
 
         while(req) {
             next_req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next;
@@ -61,7 +61,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
                     MPIU_Assert(req == matched_req);
 
                 count += MPIR_STATUS_GET_COUNT(req->status);
-                MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected);
+                MPIDI_CH4_SHMI_SIMPLE_REQUEST_DEQUEUE(&req, prev_req, MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected);
                 MPIDI_CH4_SHMI_SIMPLE_REQUEST_ENQUEUE(req, mqueue);
 
                 if(req && MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->type == MPIDI_CH4_SHMI_SIMPLE_TYPEEAGER)
@@ -108,7 +108,7 @@ static inline int MPIDI_CH4_SHM_iprobe(int source,
         goto fn_exit;
     }
 
-    for(req = MPIDI_CH4_SHMI_SIMPLE_Recvq_unexpected.head; req; req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
+    for(req = MPIDI_CH4_SHMI_SIMPLE_recvq_unexpected.head; req; req = MPIDI_CH4_SHMI_SIMPLE_REQUEST(req)->next) {
         if(MPIDI_CH4_SHMI_SIMPLE_ENVELOPE_MATCH(MPIDI_CH4_SHMI_SIMPLE_REQUEST(req), source, tag, comm->recvcontext_id + context_offset)) {
             count += MPIR_STATUS_GET_COUNT(req->status);
 
