@@ -17,7 +17,7 @@ struct _UCX_share {
 
 char ucx_dummy_buffer[4096];
 
-static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPID_Win *win, size_t length,
+static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
                                                    uint32_t disp_unit,  void **base_ptr) {
 
     MPIR_Errflag_t err = MPIR_ERR_NONE;
@@ -32,7 +32,7 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPID_Win *win, size_t length,
     size_t size = MPL_MAX(length, 4096);
     void *base;
 
-    MPID_Comm *comm_ptr     = win->comm_ptr;
+    MPIR_Comm *comm_ptr     = win->comm_ptr;
 
     ucp_context_h ucp_context = MPIDI_CH4_NMI_UCX_global.context;
 
@@ -134,14 +134,14 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPID_Win *win, size_t length,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_CH4_NMI_UCX_Win_init(MPI_Aint     length,
                                              int          disp_unit,
-                                             MPID_Win   **win_ptr,
-                                             MPID_Info   *info,
-                                             MPID_Comm   *comm_ptr,
+                                             MPIR_Win   **win_ptr,
+                                             MPIR_Info   *info,
+                                             MPIR_Comm   *comm_ptr,
                                              int          create_flavor,
                                              int          model)
 {
     int       mpi_errno = MPI_SUCCESS;
-    MPID_Win *win;
+    MPIR_Win *win;
     MPIDI_STATE_DECL(MPID_STATE_CH4_UCX_WIN_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_UCX_WIN_INIT);
 
@@ -230,7 +230,7 @@ static inline int MPIDI_CH4_NM_win_free(MPIR_Win ** win_ptr)
 
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
-    MPID_Win      *win       = *win_ptr;
+    MPIR_Win      *win       = *win_ptr;
     MPIDI_CH4U_EPOCH_FREE_CHECK(win,mpi_errno,return mpi_errno);
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
@@ -276,7 +276,7 @@ static inline int MPIDI_CH4_NM_win_create(void *base,
 
     int             mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
-    MPID_Win       *win;
+    MPIR_Win       *win;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_WIN_CREATE);
@@ -336,12 +336,12 @@ static inline int MPIDI_CH4_NM_win_shared_query(MPIR_Win * win,
 static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint length,
                                             int disp_unit,
                                             MPIR_Info * info,
-                                            MPIR_Comm * comm, void *baseptr, MPIR_Win ** win)
+                                            MPIR_Comm * comm_ptr, void *baseptr, MPIR_Win ** win_ptr)
 {
 
     int             mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
-    MPID_Win       *win;
+    MPIR_Win       *win;
     void *base = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);

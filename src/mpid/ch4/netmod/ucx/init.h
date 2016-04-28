@@ -209,7 +209,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-   if(comm_ptr->comm_kind == MPID_INTRACOMM)
+   if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
         *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);
     else if(is_remote)
         *lpid_ptr = COMM_TO_INDEX(comm_ptr, idx);

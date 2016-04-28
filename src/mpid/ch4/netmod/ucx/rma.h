@@ -15,7 +15,7 @@ static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
                                    size_t size,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   MPID_Win * win)
+                                   MPIR_Win * win)
 {
 
     MPIDI_CH4_NMI_UCX_win_info_t* win_info = &(MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank));
@@ -23,7 +23,7 @@ static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
     uint64_t base;
     int mpi_errno = MPI_SUCCESS;
     ucs_status_t status;
-    MPID_Comm *comm = win->comm_ptr;
+    MPIR_Comm *comm = win->comm_ptr;
     ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, target_rank);
 
     MPIDI_CH4U_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
@@ -49,7 +49,7 @@ static inline int MPIDI_CH4_NMI_UCX_contig_get(void *origin_addr,
                                    size_t size,
                                    int target_rank,
                                    MPI_Aint target_disp,
-                                   MPID_Win * win)
+                                   MPIR_Win * win)
 {
 
     MPIDI_CH4_NMI_UCX_win_info_t* win_info = &(MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank));
@@ -57,7 +57,7 @@ static inline int MPIDI_CH4_NMI_UCX_contig_get(void *origin_addr,
     uint64_t base;
     int mpi_errno = MPI_SUCCESS;
     ucs_status_t status;
-    MPID_Comm *comm = win->comm_ptr;
+    MPIR_Comm *comm = win->comm_ptr;
     ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, target_rank);
 
 
