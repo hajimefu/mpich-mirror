@@ -136,7 +136,7 @@ int MPIDU_Type_indexed(int count,
 	old_ub        = old_dtp->ub;
 	old_true_ub   = old_dtp->true_ub;
 	old_extent    = old_dtp->extent;
-	old_is_contig = old_dtp->is_contig;
+	old_is_contig = MPIR_Datatype_is_contig(old_dtp);
 
 	new_dtp->has_sticky_lb = old_dtp->has_sticky_lb;
 	new_dtp->has_sticky_ub = old_dtp->has_sticky_ub;

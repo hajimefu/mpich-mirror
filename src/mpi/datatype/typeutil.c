@@ -289,7 +289,7 @@ void MPIR_Datatype_iscontig(MPI_Datatype datatype, int *flag)
         *flag = 1;
     else  {
         MPID_Datatype_get_ptr(datatype, datatype_ptr);
-        *flag = datatype_ptr->is_contig;
+        *flag = MPIR_Datatype_is_contig(datatype_ptr);
     }
 }
 
