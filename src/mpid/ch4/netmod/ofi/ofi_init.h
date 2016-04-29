@@ -271,7 +271,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     cntr_attr.events = FI_CNTR_EVENTS_COMP;
     MPIDI_OFI_CALL(fi_cntr_open(MPIDI_Global.domain,     /* In:  Domain Object        */
                                         &cntr_attr,      /* In:  Configuration object */
-                                        &MPIDI_Global.rma_ctr,   /* Out: Counter Object       */
+                                        &MPIDI_Global.rma_cmpl_cntr,   /* Out: Counter Object       */
                                         NULL), openct);  /* Context: counter events   */
 
     /* ------------------------------------------------------------------------ */
@@ -305,7 +305,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_create_endpoint(prov_use,
                                                                      MPIDI_Global.domain,
                                                                      MPIDI_Global.p2p_cq,
-                                                                     MPIDI_Global.rma_ctr,
+                                                                     MPIDI_Global.rma_cmpl_cntr,
                                                                      MPIDI_Global.av,
                                                                      &MPIDI_Global.ep,
                                                                      0,
@@ -529,7 +529,7 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.ep->fid),        epclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.av->fid),        avclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.p2p_cq->fid),    cqclose);
-    MPIDI_OFI_CALL(fi_close(&MPIDI_Global.rma_ctr->fid),   cqclose);
+    MPIDI_OFI_CALL(fi_close(&MPIDI_Global.rma_cmpl_cntr->fid), cqclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.domain->fid),    domainclose);
 
     /* --------------------------------------- */

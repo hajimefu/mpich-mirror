@@ -334,7 +334,7 @@ typedef struct {
     struct fid_av     *av;
     struct fid_ep     *ep;
     struct fid_cq     *p2p_cq;
-    struct fid_cntr   *rma_ctr;
+    struct fid_cntr   *rma_cmpl_cntr;
 
     /* Queryable limits */
     uint64_t        max_buffered_send;
@@ -357,7 +357,7 @@ typedef struct {
 
     /* Window/RMA Globals */
     void                             *win_map;
-    uint64_t                          cntr;
+    uint64_t                          rma_issued_cntr;
     MPIDI_OFI_atomic_valid_t  win_op_table[MPIDI_OFI_DT_SIZES][MPIDI_OFI_OP_SIZES];
 
     /* Active Message Globals */

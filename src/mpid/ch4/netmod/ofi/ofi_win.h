@@ -162,8 +162,8 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
-    tcount    = MPIDI_Global.cntr;
-    donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+    tcount    = MPIDI_Global.rma_issued_cntr;
+    donecount = fi_cntr_read(MPIDI_Global.rma_cmpl_cntr);
 
     MPIR_Assert(donecount <= tcount);
 
@@ -172,11 +172,11 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
         MPIDI_OFI_PROGRESS();
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
-        donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
+        donecount = fi_cntr_read(MPIDI_Global.rma_cmpl_cntr);
         itercount++;
 
         if(itercount == 1000) {
-            ret=fi_cntr_wait(MPIDI_Global.rma_ctr,tcount,0);
+            ret=fi_cntr_wait(MPIDI_Global.rma_cmpl_cntr,tcount,0);
             MPIDI_OFI_ERR(ret < 0 && ret != -FI_ETIMEDOUT,
                                   mpi_errno,
                                   MPI_ERR_RMA_RANGE,
