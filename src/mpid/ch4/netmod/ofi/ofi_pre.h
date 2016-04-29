@@ -157,6 +157,12 @@ struct MPIDI_OFI_win_request;
 typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
+    struct fid_ep                     *ep_cntr; /* counter-based EP */
+    struct fid_ep                     *ep_cq;   /* completion-based EP */
+    uint64_t                          *issued_cntr;
+    uint64_t                           issued_cntr_v; /* main body of an issued counter,
+                                                         if we are to use per-window counter */
+    struct fid_cntr                   *cmpl_cntr;
     uint64_t                           win_id;
     struct MPIDI_OFI_win_request   *syncQ;
     uint32_t *disp_units;

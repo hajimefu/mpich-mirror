@@ -304,7 +304,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_get_huge_event(struct fi_cq_tagged_entry *wc,
         }
 
         remote_key = recv->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
-        MPIDI_OFI_CONDITIONAL_CNTR_INCR();
+        MPIDI_OFI_conditional_cntr_incr();
         MPIDI_OFI_CALL_RETRY(fi_read(MPIDI_OFI_EP_TX_RMA(0),                                           /* endpoint     */
                                                     (void *)((uintptr_t)recv->wc.buf + recv->cur_offset),       /* local buffer */
                                                     bytesToGet,                                             /* bytes        */

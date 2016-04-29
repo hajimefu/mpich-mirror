@@ -139,6 +139,12 @@ static inline int MPIDI_OFI_win_init(MPI_Aint     length,
     window_instance = MPIDI_OFI_index_allocator_alloc(MPIDI_OFI_COMM(win->comm_ptr).win_id_allocator);
     MPIDI_OFI_WIN(win).win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
     MPIDI_OFI_map_set(MPIDI_Global.win_map,MPIDI_OFI_WIN(win).win_id,win);
+
+    MPIDI_OFI_WIN(win).ep_cq    = MPIDI_OFI_EP_TX_RMA(0);
+    MPIDI_OFI_WIN(win).ep_cntr  = MPIDI_OFI_EP_TX_CTR(0);
+    MPIDI_OFI_WIN(win).cmpl_cntr = MPIDI_Global.rma_cmpl_cntr;
+    MPIDI_OFI_WIN(win).issued_cntr = &MPIDI_Global.rma_issued_cntr;
+
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
     return mpi_errno;
@@ -162,8 +168,8 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
-    tcount    = MPIDI_Global.rma_issued_cntr;
-    donecount = fi_cntr_read(MPIDI_Global.rma_cmpl_cntr);
+    tcount    = *MPIDI_OFI_WIN(win).issued_cntr;
+    donecount = fi_cntr_read(MPIDI_OFI_WIN(win).cmpl_cntr);
 
     MPIR_Assert(donecount <= tcount);
 
@@ -172,11 +178,11 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
         MPIDI_OFI_PROGRESS();
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
-        donecount = fi_cntr_read(MPIDI_Global.rma_cmpl_cntr);
+        donecount = fi_cntr_read(MPIDI_OFI_WIN(win).cmpl_cntr);
         itercount++;
 
         if(itercount == 1000) {
-            ret=fi_cntr_wait(MPIDI_Global.rma_cmpl_cntr,tcount,0);
+            ret=fi_cntr_wait(MPIDI_OFI_WIN(win).cmpl_cntr,tcount,0);
             MPIDI_OFI_ERR(ret < 0 && ret != -FI_ETIMEDOUT,
                                   mpi_errno,
                                   MPI_ERR_RMA_RANGE,

@@ -249,11 +249,15 @@ __ALWAYS_INLINE__ uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
 }
 
 #ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-#define MPIDI_OFI_CONDITIONAL_CNTR_INCR()
-#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.rma_issued_cntr++
+__ALWAYS_INLINE__ void MPIDI_OFI_win_conditional_cntr_incr(MPIR_Win *win){}
+__ALWAYS_INLINE__ void MPIDI_OFI_win_cntr_incr(MPIR_Win *win) { (*MPIDI_OFI_WIN(win).issued_cntr)++; }
+__ALWAYS_INLINE__ void MPIDI_OFI_conditional_cntr_incr(){}
+__ALWAYS_INLINE__ void MPIDI_OFI_cntr_incr() { MPIDI_Global.rma_issued_cntr++; }
 #else
-#define MPIDI_OFI_CONDITIONAL_CNTR_INCR() MPIDI_Global.rma_issued_cntr++
-#define MPIDI_OFI_CNTR_INCR() MPIDI_Global.rma_issued_cntr++
+__ALWAYS_INLINE__ void MPIDI_OFI_win_conditional_cntr_incr(MPIR_Win *win){ (*MPIDI_OFI_WIN(win).issued_cntr)++; }
+__ALWAYS_INLINE__ void MPIDI_OFI_win_cntr_incr(MPIR_Win *win) { (*MPIDI_OFI_WIN(win).issued_cntr)++; }
+__ALWAYS_INLINE__ void MPIDI_OFI_conditional_cntr_incr(){ MPIDI_Global.rma_issued_cntr++; }
+__ALWAYS_INLINE__ void MPIDI_OFI_cntr_incr() { MPIDI_Global.rma_issued_cntr++; }
 #endif
 
 /* Externs:  see util.c for definition */
