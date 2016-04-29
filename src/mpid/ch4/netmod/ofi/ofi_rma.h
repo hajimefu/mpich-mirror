@@ -27,9 +27,9 @@
         creq->event_id = MPIDI_OFI_EVENT_CHUNK_DONE;                    \
         creq->parent   = *sigreq;                                       \
         msg.context    = &creq->context;                                \
-        MPIDI_OFI_win_conditional_cntr_incr(win);                           \
+        MPIDI_OFI_win_conditional_cntr_incr(win);                       \
     }                                                                   \
-    else MPIDI_OFI_win_cntr_incr(win);                                      \
+    else MPIDI_OFI_win_cntr_incr(win);                                  \
     } while (0)
 
 #define MPIDI_OFI_INIT_SIGNAL_REQUEST(win,sigreq,flags,ep)              \
@@ -39,10 +39,10 @@
             MPIDI_OFI_REQUEST_CREATE((*(sigreq)), MPIR_REQUEST_KIND__RMA); \
             MPIR_cc_set((*(sigreq))->cc_ptr, 0);                        \
             *(flags)                    = FI_COMPLETION;                \
-            *(ep)                       = MPIDI_OFI_WIN(win).ep_cq;     \
+            *(ep)                       = MPIDI_OFI_WIN(win).ep;        \
         }                                                               \
         else {                                                          \
-            *(ep) = MPIDI_OFI_WIN(win).ep_cntr;                         \
+            *(ep) = MPIDI_OFI_WIN(win).ep_nocmpl;                       \
             *(flags)                    = 0ULL;                         \
         }                                                               \
     } while (0)
@@ -427,7 +427,7 @@ static inline int MPIDI_NM_put(const void   *origin_addr,
 
     if(origin_contig && target_contig && origin_bytes <= MPIDI_Global.max_buffered_write) {
         MPIDI_OFI_CALL_RETRY2(MPIDI_OFI_win_cntr_incr(win),
-                                      fi_inject_write(MPIDI_OFI_WIN(win).ep_cntr,(char *)origin_addr+origin_true_lb,
+                                      fi_inject_write(MPIDI_OFI_WIN(win).ep_nocmpl,(char *)origin_addr+origin_true_lb,
                                                       target_bytes,MPIDI_OFI_comm_to_phys(win->comm_ptr,target_rank,MPIDI_OFI_API_CTR),
                                                       (uint64_t)(char *)MPIDI_OFI_winfo_base(win,target_rank)+
                                                       target_disp*MPIDI_OFI_disp_unit(win,target_rank)+target_true_lb,
@@ -599,7 +599,7 @@ static inline int MPIDI_NM_get(void         *origin_addr,
         riov.len          = target_dt.size;
         riov.key          = MPIDI_OFI_winfo_mr_key(win,target_rank);
         MPIDI_OFI_CALL_RETRY2(MPIDI_OFI_win_cntr_incr(win),
-                                      fi_readmsg(MPIDI_OFI_WIN(win).ep_cntr, &msg, 0),
+                                      fi_readmsg(MPIDI_OFI_WIN(win).ep_nocmpl, &msg, 0),
                                       rdma_write);
     } else {
         mpi_errno = MPIDI_OFI_do_get(origin_addr,
@@ -748,7 +748,7 @@ static inline int MPIDI_NM_compare_and_swap(const void *origin_addr,
     msg.context       = NULL;
     msg.data          = 0;
     MPIDI_OFI_CALL_RETRY2(MPIDI_OFI_win_cntr_incr(win),
-                                  fi_compare_atomicmsg(MPIDI_OFI_WIN(win).ep_cntr,&msg,
+                                  fi_compare_atomicmsg(MPIDI_OFI_WIN(win).ep_nocmpl,&msg,
                                                        &comparev,NULL,1,
                                                        &resultv,NULL,1,0),
                                   atomicto);

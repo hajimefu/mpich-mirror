@@ -19,6 +19,8 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
                 mr-offset          - USE OFI memory region offset mode
                 direct-provider    - USE OFI FI_DIRECT to compile in a single OFI direct provider
                 no-tagged          - Do not use OFI fi_tagged interfaces.
+                no-data            - Disable immediate data field
+                no-stx-rma         - Disable per-window EP & counter for RMA
                 ],
                 [ofi_netmod_args=$withval],
                 [ofi_netmod_args=])
@@ -32,6 +34,7 @@ dnl Parse the device arguments
     do_av_table=false
     do_tagged=true
     do_data=true
+    do_stx_rma=true
     echo "Parsing Arguments for OFI Netmod"
     for arg in $args_array; do
     case ${arg} in
@@ -54,6 +57,10 @@ dnl Parse the device arguments
       no-data)
               do_data=false
               echo " ---> CH4::OFI Disable immediate data field : $arg"
+	      ;;
+      no-stx-rma)
+              do_stx_rma=false
+              echo " ---> CH4::OFI Disable per-window EP & counter for RMA : $arg"
     esac
     done
     IFS=$SAVE_IFS
@@ -81,6 +88,11 @@ dnl Parse the device arguments
     if [test "$do_data" = "true"]; then
        AC_DEFINE([USE_OFI_IMMEDIATE_DATA], [1], [Define to use immediate data field])
        AC_MSG_NOTICE([Enabling immediate data field])
+    fi
+
+    if [test "$do_stx_rma" = "true"]; then
+       AC_DEFINE([USE_OFI_STX_RMA], [1], [Define to use per-window EP & counter])
+       AC_MSG_NOTICE([Enabling per-window EP & counter])
     fi
 ])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI],[test "X$build_ch4_netmod_ofi" = "Xyes"])

@@ -71,6 +71,12 @@
 #define MPIDI_OFI_ENABLE_DATA 0
 #endif
 
+#ifdef USE_OFI_STX_RMA
+#define MPIDI_OFI_ENABLE_STX_RMA 1
+#else
+#define MPIDI_OFI_ENABLE_STX_RMA 0
+#endif
+
 #ifdef USE_OFI_IMMEDIATE_DATA
 /* match/ignore bit manipulation
  *
@@ -329,12 +335,14 @@ typedef struct  {
 typedef struct {
     /* OFI objects */
     int avtid;
+    struct fi_info    *prov_use;
     struct fid_domain *domain;
     struct fid_fabric *fabric;
     struct fid_av     *av;
     struct fid_ep     *ep;
     struct fid_cq     *p2p_cq;
     struct fid_cntr   *rma_cmpl_cntr;
+    struct fid_stx    *stx_ctx; /* shared TX context for RMA */
 
     /* Queryable limits */
     uint64_t        max_buffered_send;

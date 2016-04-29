@@ -179,6 +179,12 @@ __ALWAYS_INLINE__ MPIDII_av_entry_t* MPIDIU_comm_rank_to_av(MPIR_Comm *comm, int
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
+#define MPIDI_OFI_CALL_RETURN(FUNC, _ret)                               \
+        do {                                                            \
+            MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);       \
+            (_ret) = FUNC;                                              \
+            MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);        \
+        } while (0)
 
 #define MPIDI_OFI_PMI_CALL_POP(FUNC,STR)                    \
   do                                                          \

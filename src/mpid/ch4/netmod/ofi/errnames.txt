@@ -91,3 +91,7 @@
 **ofid_cntr_wait %s %d %s %s:OFI OFI Counter wait failed (%s:%d:%s:%s)
 **ofid_rma_init:OFI RMA Initialization failed
 **ofid_rma_init %s %d %s %s:OFI RMA Initialization failed (%s:%d:%s:%s)
+**ofid_stx_ctx:OFI fi_stx_context failed
+**ofid_stx_ctx %s %d %s %s:OFI fi_stx_context failed (%s:%d:%s:%s)
+**ofid_stx_ctx_close:OFI stx context close failed
+**ofid_stx_ctx_close %s %d %s %s:OFI stx context close failed (%s:%d:%s:%s)

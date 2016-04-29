@@ -104,22 +104,23 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_win_init
+#define FUNCNAME MPIDI_OFI_win_init_generic
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_OFI_win_init(MPI_Aint     length,
+static inline int MPIDI_OFI_win_init_generic(MPI_Aint     length,
                                              int          disp_unit,
                                              MPIR_Win   **win_ptr,
                                              MPIR_Info   *info,
                                              MPIR_Comm   *comm_ptr,
                                              int          create_flavor,
-                                             int          model)
+                                             int          model,
+                                             int          do_stx_rma)
 {
     int       mpi_errno = MPI_SUCCESS;
     uint64_t  window_instance;
     MPIR_Win *win;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
+    struct fi_info *finfo;
+    struct fi_cntr_attr cntr_attr;
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_OFI_win_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_OFI_datatype_t));
@@ -140,16 +141,102 @@ static inline int MPIDI_OFI_win_init(MPI_Aint     length,
     MPIDI_OFI_WIN(win).win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
     MPIDI_OFI_map_set(MPIDI_Global.win_map,MPIDI_OFI_WIN(win).win_id,win);
 
-    MPIDI_OFI_WIN(win).ep_cq    = MPIDI_OFI_EP_TX_RMA(0);
-    MPIDI_OFI_WIN(win).ep_cntr  = MPIDI_OFI_EP_TX_CTR(0);
-    MPIDI_OFI_WIN(win).cmpl_cntr = MPIDI_Global.rma_cmpl_cntr;
-    MPIDI_OFI_WIN(win).issued_cntr = &MPIDI_Global.rma_issued_cntr;
+    if (do_stx_rma && MPIDI_Global.stx_ctx != NULL) {
+        /* Activate per-window EP/counter */
+        int ret;
+
+        finfo = fi_dupinfo(MPIDI_Global.prov_use);
+        MPIR_Assert(finfo);
+        finfo->ep_attr->tx_ctx_cnt = FI_SHARED_CONTEXT; /* Request a shared context */
+        MPIDI_OFI_CALL_RETURN(fi_endpoint(MPIDI_Global.domain,
+                                          finfo,
+                                          &MPIDI_OFI_WIN(win).ep,
+                                          NULL), ret);
+        fi_freeinfo(finfo);
+        if (ret < 0) {
+            MPL_DBG_MSG(MPIDI_CH4_DBG_GENERAL, VERBOSE,
+                        "Failed to create per-window EP (with completion), "
+                        "falling back to global EP/counter scheme");
+            goto fallback_global;
+        }
+
+        memset(&cntr_attr, 0, sizeof(cntr_attr));
+        cntr_attr.events = FI_CNTR_EVENTS_COMP;
+        MPIDI_OFI_CALL(fi_cntr_open(MPIDI_Global.domain,           /* In:  Domain Object        */
+                                    &cntr_attr,                    /* In:  Configuration object */
+                                    &MPIDI_OFI_WIN(win).cmpl_cntr, /* Out: Counter Object       */
+                                    NULL), openct);                /* Context: counter events   */
+        MPIDI_OFI_WIN(win).issued_cntr = &MPIDI_OFI_WIN(win).issued_cntr_v;
+
+        MPIDI_OFI_CALL(fi_ep_bind(MPIDI_OFI_WIN(win).ep,
+                                  &MPIDI_Global.stx_ctx->fid, 0), bind);
+        MPIDI_OFI_CALL(fi_ep_bind(MPIDI_OFI_WIN(win).ep,
+                                  &MPIDI_Global.p2p_cq->fid, FI_TRANSMIT|FI_SELECTIVE_COMPLETION), bind);
+        MPIDI_OFI_CALL(fi_ep_bind(MPIDI_OFI_WIN(win).ep,
+                                  &MPIDI_OFI_WIN(win).cmpl_cntr->fid,
+                                  FI_READ | FI_WRITE), bind);
+        MPIDI_OFI_CALL(fi_ep_bind(MPIDI_OFI_WIN(win).ep,
+                                  &MPIDI_Global.av->fid, 0), bind);
+
+        MPIDI_OFI_CALL_RETURN(fi_ep_alias(MPIDI_OFI_WIN(win).ep, &MPIDI_OFI_WIN(win).ep_nocmpl,
+                                          FI_TRANSMIT), ret);
+        if (ret < 0) {
+            MPL_DBG_MSG(MPIDI_CH4_DBG_GENERAL, VERBOSE,
+                        "Failed to create an EP alias, "
+                        "falling back to global EP/counter scheme");
+            MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).ep->fid), epclose);
+            MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).cmpl_cntr->fid), epclose);
+            goto fallback_global;
+        }
+
+        MPIDI_OFI_CALL(fi_enable(MPIDI_OFI_WIN(win).ep), ep_enable);
+        MPIDI_OFI_CALL(fi_enable(MPIDI_OFI_WIN(win).ep_nocmpl), ep_enable);
+    }
+    else {
+    fallback_global:
+        /* Fallback for the traditional global EP/counter model */
+        MPIDI_OFI_WIN(win).ep          = MPIDI_OFI_EP_TX_RMA(0);
+        MPIDI_OFI_WIN(win).ep_nocmpl   = MPIDI_OFI_EP_TX_CTR(0);
+        MPIDI_OFI_WIN(win).cmpl_cntr   = MPIDI_Global.rma_cmpl_cntr;
+        MPIDI_OFI_WIN(win).issued_cntr = &MPIDI_Global.rma_issued_cntr;
+    }
 
 fn_exit:
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
+}
+
+#undef FUNCNAME
+#define FUNCNAME MPIDI_OFI_win_init
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
+static inline int MPIDI_OFI_win_init(MPI_Aint     length,
+                                     int          disp_unit,
+                                     MPIR_Win   **win_ptr,
+                                     MPIR_Info   *info,
+                                     MPIR_Comm   *comm_ptr,
+                                     int          create_flavor,
+                                     int          model)
+{
+    int mpi_errno;
+    int use_stx_rma = MPIDI_OFI_ENABLE_SCALABLE_ENDPOINTS ? 0 : MPIDI_OFI_ENABLE_STX_RMA;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
+
+    mpi_errno = MPIDI_OFI_win_init_generic(length,
+                                           disp_unit,
+                                           win_ptr,
+                                           info,
+                                           comm_ptr,
+                                           create_flavor,
+                                           model,
+                                           use_stx_rma);
+
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
+
+    return mpi_errno;
 }
 
 #undef FUNCNAME
@@ -545,9 +632,15 @@ static inline int MPIDI_NM_win_free(MPIR_Win **win_ptr)
     MPIDI_OFI_index_allocator_free(MPIDI_OFI_COMM(win->comm_ptr).win_id_allocator,
                                            window_instance);
     MPIDI_OFI_map_erase(MPIDI_Global.win_map,MPIDI_OFI_WIN(win).win_id);
-    MPIDI_OFI_CALL(fi_close(& MPIDI_OFI_WIN(win).mr->fid), mr_unreg);
-     if(MPIDI_OFI_WIN(win).disp_units){
-        MPL_free( MPIDI_OFI_WIN(win).disp_units);
+    if (MPIDI_OFI_WIN(win).ep_nocmpl != MPIDI_OFI_EP_TX_CTR(0))
+        MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).ep_nocmpl->fid), epclose);
+    if (MPIDI_OFI_WIN(win).ep != MPIDI_OFI_EP_TX_RMA(0))
+        MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).ep->fid), epclose);
+    if (MPIDI_OFI_WIN(win).cmpl_cntr != MPIDI_Global.rma_cmpl_cntr)
+        MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).cmpl_cntr->fid), cqclose);
+    MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).mr->fid), mr_unreg);
+    if(MPIDI_OFI_WIN(win).disp_units){
+        MPL_free(MPIDI_OFI_WIN(win).disp_units);
         MPIDI_OFI_WIN(win).disp_units = NULL;
     }
 

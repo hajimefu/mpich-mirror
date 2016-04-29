@@ -51,7 +51,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                                  int         do_scalable_ep,
                                                  int         do_am,
                                                  int         do_tagged,
-                                                 int         do_data)
+                                                 int         do_data,
+                                                 int         do_stx_rma)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen;
@@ -189,6 +190,9 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, hints, &prov), addrinfo);
     MPIDI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
 
+    MPIDI_Global.prov_use = fi_dupinfo(prov_use);
+    MPIR_Assert(MPIDI_Global.prov_use);
+
     /* ------------------------------------------------------------------------ */
     /* Set global attributes attributes based on the provider choice            */
     /* ------------------------------------------------------------------------ */
@@ -295,6 +299,25 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                       &av_attr,             /* In:  Configuration object  */
                                       &MPIDI_Global.av,     /* Out: AV Object             */
                                       NULL), avopen);       /* Context: AV events         */
+
+    /* ------------------------------------------------------------------------ */
+    /* Construct:  Shared TX Context for RMA                                    */
+    /* ------------------------------------------------------------------------ */
+    if (do_stx_rma) {
+        int ret;
+        struct fi_tx_attr tx_attr;
+        memset(&tx_attr, 0, sizeof(tx_attr));
+        MPIDI_OFI_CALL_RETURN(fi_stx_context(MPIDI_Global.domain,
+                                             &tx_attr,
+                                             &MPIDI_Global.stx_ctx,
+                                             NULL /* context */), ret);
+        if (ret < 0) {
+            MPL_DBG_MSG(MPIDI_CH4_DBG_GENERAL, VERBOSE,
+                        "Failed to create shared TX context for RMA, "
+                        "falling back to global EP/counter scheme");
+            MPIDI_Global.stx_ctx = NULL;
+        }
+    }
 
     /* ------------------------------------------------------------------------ */
     /* Create a transport level communication endpoint.  To use the endpoint,   */
@@ -484,7 +507,8 @@ static inline int MPIDI_NM_init(int         rank,
                                                MPIDI_OFI_ENABLE_SCALABLE_ENDPOINTS,
                                                MPIDI_OFI_ENABLE_AM,
                                                MPIDI_OFI_ENABLE_TAGGED,
-                                               MPIDI_OFI_ENABLE_DATA);
+                                               MPIDI_OFI_ENABLE_DATA,
+                                               MPIDI_OFI_ENABLE_STX_RMA);
     return mpi_errno;
 }
 
@@ -492,7 +516,8 @@ static inline int MPIDI_NM_init(int         rank,
 
 
 static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
-                                                     int do_am)
+                                             int do_am,
+                                             int do_stx_rma)
 {
     int thr_err=0,mpi_errno = MPI_SUCCESS;
     int i = 0;
@@ -526,11 +551,15 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
         MPIDI_OFI_CALL(fi_close((fid_t) MPIDI_OFI_EP_RX_CTR(0)), epclose);
     }
 
+    if (do_stx_rma && MPIDI_Global.stx_ctx != NULL)
+        MPIDI_OFI_CALL(fi_close(&MPIDI_Global.stx_ctx->fid),   stx_ctx_close);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.ep->fid),        epclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.av->fid),        avclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.p2p_cq->fid),    cqclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.rma_cmpl_cntr->fid), cqclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_Global.domain->fid),    domainclose);
+
+    fi_freeinfo(MPIDI_Global.prov_use);
 
     /* --------------------------------------- */
     /* Free comm world addr table              */
@@ -571,7 +600,8 @@ fn_fail:
 static inline int MPIDI_NM_finalize(void)
 {
     return MPIDI_OFI_finalize_generic(MPIDI_OFI_ENABLE_SCALABLE_ENDPOINTS,
-                                              MPIDI_OFI_ENABLE_AM);
+                                      MPIDI_OFI_ENABLE_AM,
+                                      MPIDI_OFI_ENABLE_STX_RMA);
 }
 
 static inline void *MPIDI_NM_alloc_mem(size_t size, MPIR_Info *info_ptr)
