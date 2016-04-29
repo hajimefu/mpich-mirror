@@ -15,18 +15,18 @@
 #include <mpibsend.h>
 #include <../mpi/pt2pt/bsendutil.h>
 
-#define MPIDI_CH4_NMI_OFI_SENDPARAMS const void *buf,int count,MPI_Datatype datatype, \
+#define MPIDI_OFI_SENDPARAMS const void *buf,int count,MPI_Datatype datatype, \
     int rank,int tag,MPIR_Comm *comm,                               \
     int context_offset,MPIR_Request **request
 
-#define MPIDI_CH4_NMI_OFI_SENDARGS buf,count,datatype,rank,tag, \
+#define MPIDI_OFI_SENDARGS buf,count,datatype,rank,tag, \
                  comm,context_offset,request
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_send_lightweight
+#define FUNCNAME MPIDI_OFI_send_lightweight
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_lightweight(const void     *buf,
+__ALWAYS_INLINE__ int MPIDI_OFI_send_lightweight(const void     *buf,
                                                          size_t  data_sz,
                                                          int             rank,
                                                          int             tag,
@@ -37,9 +37,9 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_lightweight(const void     *buf,
     uint64_t match_bits;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
-    match_bits = MPIDI_CH4_NMI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
-    MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_tinject(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), buf, data_sz,
-                                            MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
+    MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz,
+                                            MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
                                             match_bits), tinject);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT);
@@ -49,10 +49,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_send_lightweight_request
+#define FUNCNAME MPIDI_OFI_send_lightweight_request
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_lightweight_request(const void     *buf,
+__ALWAYS_INLINE__ int MPIDI_OFI_send_lightweight_request(const void     *buf,
                                                                  size_t  data_sz,
                                                                  int             rank,
                                                                  int             tag,
@@ -65,11 +65,11 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_lightweight_request(const void     
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
     MPIR_Request *r;
-    MPIDI_CH4_NMI_OFI_SEND_REQUEST_CREATE_LW(r);
+    MPIDI_OFI_SEND_REQUEST_CREATE_LW(r);
     *request = r;
-    match_bits = MPIDI_CH4_NMI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
-    MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_tinject(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), buf, data_sz,
-                                            MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, 0);
+    MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), buf, data_sz,
+                                            MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
                                             match_bits), tinject);
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_LIGHTWEIGHT_REQUEST);
@@ -79,10 +79,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_send_normal
+#define FUNCNAME MPIDI_OFI_send_normal
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS,
+__ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
                                                     int              dt_contig,
                                                     size_t   data_sz,
                                                     MPIR_Datatype   *dt_ptr,
@@ -98,29 +98,29 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_NORMAL);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_NORMAL);
 
-    MPIDI_CH4_NMI_OFI_REQUEST_CREATE(sreq);
+    MPIDI_OFI_REQUEST_CREATE(sreq);
     sreq->kind = MPIR_REQUEST_KIND__SEND;
     *request = sreq;
-    match_bits = MPIDI_CH4_NMI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, type);
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_SEND;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype) = datatype;
+    match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, type);
+    MPIDI_OFI_REQUEST(sreq, event_id) = MPIDI_OFI_EVENT_SEND;
+    MPIDI_OFI_REQUEST(sreq, datatype) = datatype;
     dtype_add_ref_if_not_builtin(datatype);
 
-    if(type == MPIDI_CH4_NMI_OFI_SYNC_SEND) {        /* Branch should compile out */
+    if(type == MPIDI_OFI_SYNC_SEND) {        /* Branch should compile out */
         int c = 1;
         uint64_t ssend_match, ssend_mask;
-        MPIDI_CH4_NMI_OFI_ssendack_request_t *ackreq;
-        MPIDI_CH4_NMI_OFI_SSEND_ACKREQUEST_CREATE(ackreq);
-        ackreq->event_id = MPIDI_CH4_NMI_OFI_EVENT_SSEND_ACK;
+        MPIDI_OFI_ssendack_request_t *ackreq;
+        MPIDI_OFI_SSEND_ACKREQUEST_CREATE(ackreq);
+        ackreq->event_id = MPIDI_OFI_EVENT_SSEND_ACK;
         ackreq->signal_req = sreq;
         MPIR_cc_incr(sreq->cc_ptr, &c);
-        ssend_match = MPIDI_CH4_NMI_OFI_init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
-        ssend_match |= MPIDI_CH4_NMI_OFI_SYNC_SEND_ACK;
-        MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_trecv(MPIDI_CH4_NMI_OFI_EP_RX_TAG(0),      /* endpoint    */
+        ssend_match = MPIDI_OFI_init_recvtag(&ssend_mask, comm->context_id + context_offset, rank, tag);
+        ssend_match |= MPIDI_OFI_SYNC_SEND_ACK;
+        MPIDI_OFI_CALL_RETRY(fi_trecv(MPIDI_OFI_EP_RX_TAG(0),      /* endpoint    */
                                               NULL,              /* recvbuf     */
                                               0,                 /* data sz     */
                                               NULL,              /* memregion descr  */
-                                              MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),  /* remote proc */
+                                              MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),  /* remote proc */
                                               ssend_match,       /* match bits  */
                                               0ULL,              /* mask bits   */
                                               (void *) &(ackreq->context)), trecvsync);
@@ -132,53 +132,53 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
         size_t segment_first;
         segment_first = 0;
         last = data_sz;
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig) = (MPIDI_CH4_NMI_OFI_noncontig_t *) MPL_malloc(data_sz+sizeof(MPID_Segment));
-        MPIR_ERR_CHKANDJUMP1(MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig) == NULL, mpi_errno,
+        MPIDI_OFI_REQUEST(sreq, noncontig) = (MPIDI_OFI_noncontig_t *) MPL_malloc(data_sz+sizeof(MPID_Segment));
+        MPIR_ERR_CHKANDJUMP1(MPIDI_OFI_REQUEST(sreq, noncontig) == NULL, mpi_errno,
                              MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send Pack buffer alloc");
-        MPID_Segment_init(buf, count, datatype, &MPIDI_CH4_NMI_OFI_REQUEST(sreq,noncontig->segment), 0);
-        MPID_Segment_pack(&MPIDI_CH4_NMI_OFI_REQUEST(sreq,noncontig->segment), segment_first, &last,
-                          MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig->pack_buffer));
-        send_buf = MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig->pack_buffer);
+        MPID_Segment_init(buf, count, datatype, &MPIDI_OFI_REQUEST(sreq,noncontig->segment), 0);
+        MPID_Segment_pack(&MPIDI_OFI_REQUEST(sreq,noncontig->segment), segment_first, &last,
+                          MPIDI_OFI_REQUEST(sreq, noncontig->pack_buffer));
+        send_buf = MPIDI_OFI_REQUEST(sreq, noncontig->pack_buffer);
     }
     else
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, noncontig) = NULL;
+        MPIDI_OFI_REQUEST(sreq, noncontig) = NULL;
 
     if(data_sz <= MPIDI_Global.max_buffered_send) {
-        MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_tinject(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), send_buf, data_sz,
-                                                MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG), match_bits), tinject);
-        MPIDI_CH4_NMI_OFI_send_event(NULL, sreq);
+        MPIDI_OFI_CALL_RETRY(fi_tinject(MPIDI_OFI_EP_TX_TAG(0), send_buf, data_sz,
+                                                MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG), match_bits), tinject);
+        MPIDI_OFI_send_event(NULL, sreq);
     } else if(data_sz <= MPIDI_Global.max_send)
-        MPIDI_CH4_NMI_OFI_CALL_RETRY(fi_tsend(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), send_buf,data_sz, NULL,
-                                              MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank, MPIDI_CH4_NMI_OFI_API_TAG),
-                                              match_bits, (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(sreq, context))),
+        MPIDI_OFI_CALL_RETRY(fi_tsend(MPIDI_OFI_EP_TX_TAG(0), send_buf,data_sz, NULL,
+                                              MPIDI_OFI_comm_to_phys(comm, rank, MPIDI_OFI_API_TAG),
+                                              match_bits, (void *) &(MPIDI_OFI_REQUEST(sreq, context))),
                                      tsend);
     else if(unlikely(1)) {
-        MPIDI_CH4_NMI_OFI_send_control_t ctrl;
+        MPIDI_OFI_send_control_t ctrl;
         int c;
         uint64_t rma_key;
-        MPIDI_CH4_NMI_OFI_huge_counter_t *cntr;
+        MPIDI_OFI_huge_counter_t *cntr;
         void *ptr;
         c = 1;
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_SEND_HUGE;
+        MPIDI_OFI_REQUEST(sreq, event_id) = MPIDI_OFI_EVENT_SEND_HUGE;
         MPIR_cc_incr(sreq->cc_ptr, &c);
-        ptr = MPIDI_CH4_NMI_OFI_map_lookup(MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters, rank);
+        ptr = MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm).huge_send_counters, rank);
 
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
+        MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
 
-        if(ptr == MPIDI_CH4_NMI_OFI_MAP_NOT_FOUND) {
-            ptr = MPL_malloc(sizeof(MPIDI_CH4_NMI_OFI_huge_counter_t));
-            cntr = (MPIDI_CH4_NMI_OFI_huge_counter_t *) ptr;
+        if(ptr == MPIDI_OFI_MAP_NOT_FOUND) {
+            ptr = MPL_malloc(sizeof(MPIDI_OFI_huge_counter_t));
+            cntr = (MPIDI_OFI_huge_counter_t *) ptr;
             cntr->outstanding = 0;
             cntr->counter = 0;
-            MPIDI_CH4_NMI_OFI_map_set(MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters, rank, ptr);
+            MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm).huge_send_counters, rank, ptr);
         }
 
-        cntr = (MPIDI_CH4_NMI_OFI_huge_counter_t *) ptr;
+        cntr = (MPIDI_OFI_huge_counter_t *) ptr;
 
-        ctrl.rma_key = MPIDI_CH4_NMI_OFI_index_allocator_alloc(MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator);
+        ctrl.rma_key = MPIDI_OFI_index_allocator_alloc(MPIDI_OFI_COMM(comm).rma_id_allocator);
         MPIU_Assert(ctrl.rma_key < MPIDI_Global.max_huge_rmas);
         rma_key  = ctrl.rma_key<<MPIDI_Global.huge_rma_shift;
-        MPIDI_CH4_NMI_OFI_CALL_NOLOCK(fi_mr_reg(MPIDI_Global.domain,     /* In:  Domain Object       */
+        MPIDI_OFI_CALL_NOLOCK(fi_mr_reg(MPIDI_Global.domain,     /* In:  Domain Object       */
                                                 send_buf,                /* In:  Lower memory address*/
                                                 data_sz,                 /* In:  Length              */
                                                 FI_REMOTE_READ,          /* In:  Expose MR for read  */
@@ -192,18 +192,18 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send_normal(MPIDI_CH4_NMI_OFI_SENDPARAMS
         cntr->counter++;
         MPIU_Assert(cntr->outstanding != USHRT_MAX);
         MPIU_Assert(cntr->counter != USHRT_MAX);
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_comm) = comm;
-        MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id)   = rank;
-        MPIDI_CH4_NMI_OFI_CALL_RETRY_NOLOCK(fi_tsend(MPIDI_CH4_NMI_OFI_EP_TX_TAG(0), send_buf,
+        MPIDI_OFI_REQUEST(sreq, util_comm) = comm;
+        MPIDI_OFI_REQUEST(sreq, util_id)   = rank;
+        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tsend(MPIDI_OFI_EP_TX_TAG(0), send_buf,
                                                      MPIDI_Global.max_send,
                                                      NULL,
-                                                     MPIDI_CH4_NMI_OFI_comm_to_phys(comm, rank,MPIDI_CH4_NMI_OFI_API_TAG),
-                                                     match_bits, (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(sreq, context))),
+                                                     MPIDI_OFI_comm_to_phys(comm, rank,MPIDI_OFI_API_TAG),
+                                                     match_bits, (void *) &(MPIDI_OFI_REQUEST(sreq, context))),
                                             tsend);
-        ctrl.type = MPIDI_CH4_NMI_OFI_CTRL_HUGE;
+        ctrl.type = MPIDI_OFI_CTRL_HUGE;
         ctrl.seqno = cntr->counter - 1;
-        MPIDI_CH4_NMI_OFI_MPI_CALL_POP(MPIDI_CH4_NMI_OFI_do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq, FALSE));
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4_NMI_OFI_THREAD_FI_MUTEX);
+        MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_do_control_send(&ctrl, send_buf, data_sz, rank, comm, sreq, FALSE));
+        MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
     }
 
 fn_exit:
@@ -214,10 +214,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_send
+#define FUNCNAME MPIDI_OFI_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDPARAMS, int noreq, uint64_t syncflag)
+__ALWAYS_INLINE__ int MPIDI_OFI_send(MPIDI_OFI_SENDPARAMS, int noreq, uint64_t syncflag)
 {
     int dt_contig, mpi_errno;
     size_t data_sz;
@@ -231,7 +231,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDPARAMS, int n
         mpi_errno = MPI_SUCCESS;
 
         if(!noreq) {
-            MPIDI_CH4_NMI_OFI_REQUEST_CREATE((*request));
+            MPIDI_OFI_REQUEST_CREATE((*request));
             (*request)->kind = MPIR_REQUEST_KIND__SEND;
             MPIDI_CH4U_request_complete((*request));
         }
@@ -243,14 +243,14 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDPARAMS, int n
 
     if(likely(!syncflag && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send)))
         if(noreq)
-            mpi_errno = MPIDI_CH4_NMI_OFI_send_lightweight((char *) buf + dt_true_lb, data_sz,
+            mpi_errno = MPIDI_OFI_send_lightweight((char *) buf + dt_true_lb, data_sz,
                                                            rank, tag, comm, context_offset);
         else
-            mpi_errno = MPIDI_CH4_NMI_OFI_send_lightweight_request((char *) buf + dt_true_lb, data_sz,
+            mpi_errno = MPIDI_OFI_send_lightweight_request((char *) buf + dt_true_lb, data_sz,
                                                                    rank, tag, comm, context_offset,
                                                                    request);
     else
-        mpi_errno = MPIDI_CH4_NMI_OFI_send_normal(buf, count, datatype, rank, tag, comm,
+        mpi_errno = MPIDI_OFI_send_normal(buf, count, datatype, rank, tag, comm,
                                                   context_offset, request, dt_contig,
                                                   data_sz, dt_ptr, dt_true_lb, syncflag);
 
@@ -260,28 +260,28 @@ fn_exit:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_persistent_send
+#define FUNCNAME MPIDI_OFI_persistent_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_OFI_persistent_send(MPIDI_OFI_SENDPARAMS)
 {
     MPIR_Request *sreq;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_PSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NM_PSEND);
 
-    MPIDI_CH4_NMI_OFI_REQUEST_CREATE(sreq);
+    MPIDI_OFI_REQUEST_CREATE(sreq);
     *request = sreq;
 
     MPIR_Comm_add_ref(comm);
     sreq->kind = MPIR_REQUEST_KIND__PREQUEST_SEND;
     sreq->comm = comm;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.persist.buf)   = (void *) buf;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.persist.count) = count;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, datatype)           = datatype;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.persist.rank)  = rank;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util.persist.tag)   = tag;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_comm)          = comm;
-    MPIDI_CH4_NMI_OFI_REQUEST(sreq, util_id)            = comm->context_id + context_offset;
+    MPIDI_OFI_REQUEST(sreq, util.persist.buf)   = (void *) buf;
+    MPIDI_OFI_REQUEST(sreq, util.persist.count) = count;
+    MPIDI_OFI_REQUEST(sreq, datatype)           = datatype;
+    MPIDI_OFI_REQUEST(sreq, util.persist.rank)  = rank;
+    MPIDI_OFI_REQUEST(sreq, util.persist.tag)   = tag;
+    MPIDI_OFI_REQUEST(sreq, util_comm)          = comm;
+    MPIDI_OFI_REQUEST(sreq, util_id)            = comm->context_id + context_offset;
     sreq->u.persist.real_request             = NULL;
     MPIDI_CH4U_request_complete(sreq);
 
@@ -298,13 +298,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDPA
 #define STARTALL_CASE(CASELABEL,FUNC,CONTEXTID) \
   case CASELABEL:                               \
   {                                             \
-    rc = FUNC(MPIDI_CH4_NMI_OFI_REQUEST(preq,util.persist.buf),              \
-              MPIDI_CH4_NMI_OFI_REQUEST(preq,util.persist.count),            \
-              MPIDI_CH4_NMI_OFI_REQUEST(preq,datatype),           \
-              MPIDI_CH4_NMI_OFI_REQUEST(preq,util.persist.rank),             \
-              MPIDI_CH4_NMI_OFI_REQUEST(preq,util.persist.tag),              \
+    rc = FUNC(MPIDI_OFI_REQUEST(preq,util.persist.buf),              \
+              MPIDI_OFI_REQUEST(preq,util.persist.count),            \
+              MPIDI_OFI_REQUEST(preq,datatype),           \
+              MPIDI_OFI_REQUEST(preq,util.persist.rank),             \
+              MPIDI_OFI_REQUEST(preq,util.persist.tag),              \
               preq->comm,                       \
-              MPIDI_CH4_NMI_OFI_REQUEST(preq,util_id) -           \
+              MPIDI_OFI_REQUEST(preq,util_id) -           \
               CONTEXTID,                        \
               &preq->u.persist.real_request);          \
     break;                                      \
@@ -314,12 +314,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDPA
 #define FUNCNAME MPIDI_CH4_NM_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_send(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_send(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 1, 0ULL);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 1, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND);
     return mpi_errno;
 }
@@ -328,12 +328,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_send(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_rsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_rsend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_rsend(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RSEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 1, 0ULL);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 1, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RSEND);
     return mpi_errno;
 }
@@ -343,12 +343,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_rsend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_irsend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_irsend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_irsend(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IRSEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 0, 0ULL);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 0, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_IRSEND);
     return mpi_errno;
 }
@@ -357,12 +357,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_irsend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_ssend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SSEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 0, MPIDI_CH4_NMI_OFI_SYNC_SEND);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 0, MPIDI_OFI_SYNC_SEND);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND);
     return mpi_errno;
 }
@@ -372,12 +372,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_isend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_isend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_isend(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_ISEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_ISEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 0, 0ULL);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 0, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_ISEND);
     return mpi_errno;
 }
@@ -386,12 +386,12 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_isend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_issend
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_issend(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_issend(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_ISSEND);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_ISSEND);
-    mpi_errno = MPIDI_CH4_NMI_OFI_send(MPIDI_CH4_NMI_OFI_SENDARGS, 0, MPIDI_CH4_NMI_OFI_SYNC_SEND);
+    mpi_errno = MPIDI_OFI_send(MPIDI_OFI_SENDARGS, 0, MPIDI_OFI_SYNC_SEND);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_ISSEND);
     return mpi_errno;
 }
@@ -410,7 +410,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPIR_Request *requests[])
     for(i = 0; i < count; i++) {
         MPIR_Request *const preq = requests[i];
 
-        switch(MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.type)) {
+        switch(MPIDI_OFI_REQUEST(preq, util.persist.type)) {
 #ifdef MPIDI_BUILD_CH4_SHM
                 STARTALL_CASE(MPIDI_PTYPE_RECV, MPIDI_CH4_NM_irecv, preq->comm->recvcontext_id);
 #else
@@ -426,11 +426,11 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPIR_Request *requests[])
 
             case MPIDI_PTYPE_BSEND: {
                 MPI_Request sreq_handle;
-                rc = MPIR_Ibsend_impl(MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.buf),
-                                      MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.count),
-                                      MPIDI_CH4_NMI_OFI_REQUEST(preq, datatype),
-                                      MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.rank),
-                                      MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.tag),
+                rc = MPIR_Ibsend_impl(MPIDI_OFI_REQUEST(preq, util.persist.buf),
+                                      MPIDI_OFI_REQUEST(preq, util.persist.count),
+                                      MPIDI_OFI_REQUEST(preq, datatype),
+                                      MPIDI_OFI_REQUEST(preq, util.persist.rank),
+                                      MPIDI_OFI_REQUEST(preq, util.persist.tag),
                                       preq->comm,
                                       &sreq_handle);
 
@@ -443,13 +443,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPIR_Request *requests[])
             default:
                 rc = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL, __FUNCTION__,
                                           __LINE__, MPI_ERR_INTERN, "**ch3|badreqtype",
-                                          "**ch3|badreqtype %d", MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.type));
+                                          "**ch3|badreqtype %d", MPIDI_OFI_REQUEST(preq, util.persist.type));
         }
 
         if(rc == MPI_SUCCESS) {
             preq->status.MPI_ERROR = MPI_SUCCESS;
 
-            if(MPIDI_CH4_NMI_OFI_REQUEST(preq, util.persist.type) == MPIDI_PTYPE_BSEND) {
+            if(MPIDI_OFI_REQUEST(preq, util.persist.type) == MPIDI_PTYPE_BSEND) {
                 preq->cc_ptr = &preq->cc;
                 MPIR_cc_set(&preq->cc, 0);
             } else
@@ -470,13 +470,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_startall(int count, MPIR_Request *requests[])
 #define FUNCNAME MPIDI_CH4_NM_send_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_send_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_send_init(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SEND_INIT);
-    mpi_errno = MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDARGS);
-    MPIDI_CH4_NMI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SEND;
+    mpi_errno = MPIDI_OFI_persistent_send(MPIDI_OFI_SENDARGS);
+    MPIDI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SEND_INIT);
     return mpi_errno;
 }
@@ -485,13 +485,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_send_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_ssend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend_init(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_SSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_SSEND_INIT);
-    mpi_errno = MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDARGS);
-    MPIDI_CH4_NMI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SSEND;
+    mpi_errno = MPIDI_OFI_persistent_send(MPIDI_OFI_SENDARGS);
+    MPIDI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SSEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_SSEND_INIT);
     return mpi_errno;
 }
@@ -500,13 +500,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_ssend_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_bsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_bsend_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_bsend_init(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_BSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_BSEND_INIT);
-    mpi_errno = MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDARGS);
-    MPIDI_CH4_NMI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_BSEND;
+    mpi_errno = MPIDI_OFI_persistent_send(MPIDI_OFI_SENDARGS);
+    MPIDI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_BSEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_BSEND_INIT);
     return mpi_errno;
 }
@@ -515,13 +515,13 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_bsend_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
 #define FUNCNAME MPIDI_CH4_NM_rsend_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_rsend_init(MPIDI_CH4_NMI_OFI_SENDPARAMS)
+__ALWAYS_INLINE__ int MPIDI_CH4_NM_rsend_init(MPIDI_OFI_SENDPARAMS)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RSEND_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RSEND_INIT);
-    mpi_errno = MPIDI_CH4_NMI_OFI_persistent_send(MPIDI_CH4_NMI_OFI_SENDARGS);
-    MPIDI_CH4_NMI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SEND;
+    mpi_errno = MPIDI_OFI_persistent_send(MPIDI_OFI_SENDARGS);
+    MPIDI_OFI_REQUEST((*request), util.persist.type) = MPIDI_PTYPE_SEND;
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RSEND_INIT);
     return mpi_errno;
 }

@@ -14,24 +14,24 @@
 #include "impl.h"
 #include "mpl_utlist.h"
 
-static inline int MPIDI_CH4_NMI_OFI_dup_vcr(MPIDI_CH4_NMI_OFI_VCR orig_vcr, MPIDI_CH4_NMI_OFI_VCR *new_vcr)
+static inline int MPIDI_OFI_dup_vcr(MPIDI_OFI_VCR orig_vcr, MPIDI_OFI_VCR *new_vcr)
 {
     *new_vcr = orig_vcr;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_addref_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *vcrt)
+static inline int MPIDI_OFI_addref_vcrt(struct MPIDI_OFI_VCRT *vcrt)
 {
     MPIU_Object_add_ref(vcrt);
     return MPI_SUCCESS;
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_dup_vcrt
+#define FUNCNAME MPIDI_OFI_dup_vcrt
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_CH4_NMI_OFI_dup_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *src_vcrt,
-                                              struct MPIDI_CH4_NMI_OFI_VCRT **dest_vcrt,
+static inline void MPIDI_OFI_dup_vcrt(struct MPIDI_OFI_VCRT *src_vcrt,
+                                              struct MPIDI_OFI_VCRT **dest_vcrt,
                                               MPIR_Comm_map_t *mapper,
                                               int src_comm_size, int vcrt_size, int vcrt_offset)
 {
@@ -44,7 +44,7 @@ static inline void MPIDI_CH4_NMI_OFI_dup_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *src
      * reference to the previous VCRT instead of recreating it. */
     if(mapper->type == MPIR_COMM_MAP_TYPE__DUP && src_comm_size == vcrt_size) {
         *dest_vcrt = src_vcrt;
-        MPIDI_CH4_NMI_OFI_addref_vcrt(src_vcrt);
+        MPIDI_OFI_addref_vcrt(src_vcrt);
         goto fn_exit;
     } else if(mapper->type == MPIR_COMM_MAP_TYPE__IRREGULAR && mapper->src_mapping_size == vcrt_size) {
         /* if the mapping array is exactly the same as the original
@@ -59,7 +59,7 @@ static inline void MPIDI_CH4_NMI_OFI_dup_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *src
 
         if(flag) {
             *dest_vcrt = src_vcrt;
-            MPIDI_CH4_NMI_OFI_addref_vcrt(src_vcrt);
+            MPIDI_OFI_addref_vcrt(src_vcrt);
             goto fn_exit;
         }
     }
@@ -68,14 +68,14 @@ static inline void MPIDI_CH4_NMI_OFI_dup_vcrt(struct MPIDI_CH4_NMI_OFI_VCRT *src
      * VCRT */
 
     if(!vcrt_offset)
-        MPIDI_CH4_NMI_OFI_vcrt_create(vcrt_size, dest_vcrt);
+        MPIDI_OFI_vcrt_create(vcrt_size, dest_vcrt);
 
     if(mapper->type == MPIR_COMM_MAP_TYPE__DUP) {
         for(i = 0; i < src_comm_size; i++)
-            MPIDI_CH4_NMI_OFI_dup_vcr(src_vcrt->vcr_table[i], &((*dest_vcrt)->vcr_table[i + vcrt_offset]));
+            MPIDI_OFI_dup_vcr(src_vcrt->vcr_table[i], &((*dest_vcrt)->vcr_table[i + vcrt_offset]));
     } else {
         for(i = 0; i < mapper->src_mapping_size; i++)
-            MPIDI_CH4_NMI_OFI_dup_vcr(src_vcrt->vcr_table[mapper->src_mapping[i]],
+            MPIDI_OFI_dup_vcr(src_vcrt->vcr_table[mapper->src_mapping[i]],
                                       &((*dest_vcrt)->vcr_table[i + vcrt_offset]));
     }
 
@@ -84,7 +84,7 @@ fn_exit:
     return;
 }
 
-static inline int MPIDI_CH4_NMI_OFI_map_size(MPIR_Comm_map_t map)
+static inline int MPIDI_OFI_map_size(MPIR_Comm_map_t map)
 {
     if(map.type == MPIR_COMM_MAP_TYPE__IRREGULAR)
         return map.src_mapping_size;
@@ -96,10 +96,10 @@ static inline int MPIDI_CH4_NMI_OFI_map_size(MPIR_Comm_map_t map)
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_alloc_tables
+#define FUNCNAME MPIDI_OFI_alloc_tables
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_alloc_tables(MPIR_Comm *comm)
+static inline int MPIDI_OFI_alloc_tables(MPIR_Comm *comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm_map_t *mapper;
@@ -128,7 +128,7 @@ static inline int MPIDI_CH4_NMI_OFI_alloc_tables(MPIR_Comm *comm)
         if(mapper->dir == MPIR_COMM_MAP_DIR__L2R || mapper->dir == MPIR_COMM_MAP_DIR__R2R)
             continue;
 
-        vcrt_size += MPIDI_CH4_NMI_OFI_map_size(*mapper);
+        vcrt_size += MPIDI_OFI_map_size(*mapper);
     }
     vcrt_offset = 0;
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
@@ -139,29 +139,29 @@ static inline int MPIDI_CH4_NMI_OFI_alloc_tables(MPIR_Comm *comm)
 
         if(mapper->dir == MPIR_COMM_MAP_DIR__L2L) {
             if(src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             } else if(src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTERCOMM)
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).local_vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             else if(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).local_vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).local_vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             } else
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).local_vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).local_vcrt, &MPIDI_OFI_COMM(comm).local_vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
         } else { /* mapper->dir == MPIR_COMM_MAP_DIR__R2L */
             MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
             if(comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                            mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
             } else
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).local_vcrt, mapper,
                                            mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
         }
 
-        vcrt_offset += MPIDI_CH4_NMI_OFI_map_size(*mapper);
+        vcrt_offset += MPIDI_OFI_map_size(*mapper);
     }
 
     /* Next, handle all the mappers that contribute to the remote part
@@ -171,7 +171,7 @@ static inline int MPIDI_CH4_NMI_OFI_alloc_tables(MPIR_Comm *comm)
         if(mapper->dir == MPIR_COMM_MAP_DIR__L2L || mapper->dir == MPIR_COMM_MAP_DIR__R2L)
             continue;
 
-        vcrt_size += MPIDI_CH4_NMI_OFI_map_size(*mapper);
+        vcrt_size += MPIDI_OFI_map_size(*mapper);
     }
     vcrt_offset = 0;
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
@@ -184,25 +184,25 @@ static inline int MPIDI_CH4_NMI_OFI_alloc_tables(MPIR_Comm *comm)
 
         if(mapper->dir == MPIR_COMM_MAP_DIR__L2R) {
             if(src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
             else
-                MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).local_vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+                MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).local_vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                            mapper->src_comm->local_size, vcrt_size, vcrt_offset);
         } else { /* mapper->dir == MPIR_COMM_MAP_DIR__R2R */
             MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
-            MPIDI_CH4_NMI_OFI_dup_vcrt(MPIDI_CH4_NMI_OFI_COMM(src_comm).vcrt, &MPIDI_CH4_NMI_OFI_COMM(comm).vcrt, mapper,
+            MPIDI_OFI_dup_vcrt(MPIDI_OFI_COMM(src_comm).vcrt, &MPIDI_OFI_COMM(comm).vcrt, mapper,
                                        mapper->src_comm->remote_size, vcrt_size, vcrt_offset);
         }
 
-        vcrt_offset += MPIDI_CH4_NMI_OFI_map_size(*mapper);
+        vcrt_offset += MPIDI_OFI_map_size(*mapper);
     }
 
     if(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         /* setup the vcrt for the local_comm in the intercomm */
         if(comm->local_comm) {
-            MPIDI_CH4_NMI_OFI_COMM(comm->local_comm).vcrt = MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt;
-            MPIDI_CH4_NMI_OFI_addref_vcrt(MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt);
+            MPIDI_OFI_COMM(comm->local_comm).vcrt = MPIDI_OFI_COMM(comm).local_vcrt;
+            MPIDI_OFI_addref_vcrt(MPIDI_OFI_COMM(comm).local_vcrt);
         }
     }
 
@@ -220,12 +220,12 @@ static inline int MPIDI_CH4_NM_comm_create(MPIR_Comm *comm)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CREATE);
-    MPIDI_CH4_NMI_OFI_alloc_tables(comm);
+    MPIDI_OFI_alloc_tables(comm);
 
-    MPIDI_CH4_NMI_OFI_map_create(&MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters);
-    MPIDI_CH4_NMI_OFI_map_create(&MPIDI_CH4_NMI_OFI_COMM(comm).huge_recv_counters);
-    MPIDI_CH4_NMI_OFI_index_allocator_create(&MPIDI_CH4_NMI_OFI_COMM(comm).win_id_allocator,0);
-    MPIDI_CH4_NMI_OFI_index_allocator_create(&MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator,1);
+    MPIDI_OFI_map_create(&MPIDI_OFI_COMM(comm).huge_send_counters);
+    MPIDI_OFI_map_create(&MPIDI_OFI_COMM(comm).huge_recv_counters);
+    MPIDI_OFI_index_allocator_create(&MPIDI_OFI_COMM(comm).win_id_allocator,0);
+    MPIDI_OFI_index_allocator_create(&MPIDI_OFI_COMM(comm).rma_id_allocator,1);
 
     MPIDI_CH4U_init_comm(comm);
 
@@ -250,17 +250,17 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm *comm)
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
 
     MPIDI_CH4U_destroy_comm(comm);
-    MPIDI_CH4_NMI_OFI_map_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).huge_send_counters);
-    MPIDI_CH4_NMI_OFI_map_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).huge_recv_counters);
-    MPIDI_CH4_NMI_OFI_index_allocator_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).win_id_allocator);
-    MPIDI_CH4_NMI_OFI_index_allocator_destroy(MPIDI_CH4_NMI_OFI_COMM(comm).rma_id_allocator);
+    MPIDI_OFI_map_destroy(MPIDI_OFI_COMM(comm).huge_send_counters);
+    MPIDI_OFI_map_destroy(MPIDI_OFI_COMM(comm).huge_recv_counters);
+    MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).win_id_allocator);
+    MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).rma_id_allocator);
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_vcrt_release(MPIDI_CH4_NMI_OFI_COMM(comm).vcrt);
+    mpi_errno = MPIDI_OFI_vcrt_release(MPIDI_OFI_COMM(comm).vcrt);
 
     if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
-        mpi_errno = MPIDI_CH4_NMI_OFI_vcrt_release(MPIDI_CH4_NMI_OFI_COMM(comm).local_vcrt);
+        mpi_errno = MPIDI_OFI_vcrt_release(MPIDI_OFI_COMM(comm).local_vcrt);
 
         if(mpi_errno)
             MPIR_ERR_POP(mpi_errno);

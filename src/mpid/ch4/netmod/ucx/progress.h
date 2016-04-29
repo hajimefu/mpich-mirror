@@ -12,7 +12,7 @@
 #include "impl.h"
 //#include "events.h"
 
-static inline int MPIDI_CH4_NMI_UCX_am_handler(void *msg, size_t msg_sz)
+static inline int MPIDI_UCX_am_handler(void *msg, size_t msg_sz)
 {
     int mpi_errno;
     MPIR_Request *rreq;
@@ -23,12 +23,12 @@ static inline int MPIDI_CH4_NMI_UCX_am_handler(void *msg, size_t msg_sz)
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
-    MPIDI_CH4_NMI_UCX_am_header_t *msg_hdr = (MPIDI_CH4_NMI_UCX_am_header_t *)msg;
+    MPIDI_UCX_am_header_t *msg_hdr = (MPIDI_UCX_am_header_t *)msg;
 
     p_data = in_data = (char *) msg_hdr->payload + (msg_sz - msg_hdr->data_sz - sizeof(*msg_hdr));
     in_data_sz = data_sz = msg_hdr->data_sz;
 
-    MPIDI_CH4_NMI_UCX_global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
+    MPIDI_UCX_global.am_handlers[msg_hdr->handler_id](msg_hdr->payload,
                                                               &p_data, &data_sz,
                                                               &is_contig,
                                                               &cmpl_handler_fn,
@@ -82,7 +82,7 @@ static inline int MPIDI_CH4_NMI_UCX_am_handler(void *msg, size_t msg_sz)
     return mpi_errno;
 }
 
-static inline void MPIDI_CH4_NMI_UCX_Handle_am_recv(void *request, ucs_status_t status,
+static inline void MPIDI_UCX_Handle_am_recv(void *request, ucs_status_t status,
                                                     ucp_tag_recv_info_t * info)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -93,11 +93,11 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_am_recv(void *request, ucs_status_t 
     }
 
     /* call the AM handler */
-    MPIDI_CH4_NMI_UCX_am_handler(MPIDI_CH4_NMI_UCX_global.am_bufs[am_recv_idx], info->length);
+    MPIDI_UCX_am_handler(MPIDI_UCX_global.am_bufs[am_recv_idx], info->length);
 
     /* update the idx */
     ++am_recv_idx;
-    if (am_recv_idx == MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS) {
+    if (am_recv_idx == MPIDI_UCX_NUM_AM_BUFFERS) {
         am_recv_idx = 0;
     }
 
@@ -116,26 +116,26 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     int mpi_errno = MPI_SUCCESS;
     static int am_repost_idx = 0;
 
-    ucp_worker_progress(MPIDI_CH4_NMI_UCX_global.worker);
+    ucp_worker_progress(MPIDI_UCX_global.worker);
 
-    while (ucp_request_is_completed(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx])) {
+    while (ucp_request_is_completed(MPIDI_UCX_global.ucp_am_requests[am_repost_idx])) {
         /* release the ucp request */
-        ucp_request_release(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx]);
+        ucp_request_release(MPIDI_UCX_global.ucp_am_requests[am_repost_idx]);
 
         /* repost the buffer */
-        MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx] =
-            (MPIDI_CH4_NMI_UCX_ucp_request_t*)ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
-                                                              MPIDI_CH4_NMI_UCX_global.am_bufs[am_repost_idx],
-                                                              MPIDI_CH4_NMI_UCX_MAX_AM_EAGER_SZ,
+        MPIDI_UCX_global.ucp_am_requests[am_repost_idx] =
+            (MPIDI_UCX_ucp_request_t*)ucp_tag_recv_nb(MPIDI_UCX_global.worker,
+                                                              MPIDI_UCX_global.am_bufs[am_repost_idx],
+                                                              MPIDI_UCX_MAX_AM_EAGER_SZ,
                                                               ucp_dt_make_contig(1),
-                                                              MPIDI_CH4_NMI_UCX_AM_TAG,
-                                                              ~MPIDI_CH4_NMI_UCX_AM_TAG,
-                                                              &MPIDI_CH4_NMI_UCX_Handle_am_recv);
-        MPIDI_CH4_UCX_REQUEST(MPIDI_CH4_NMI_UCX_global.ucp_am_requests[am_repost_idx], tag_recv_nb);
+                                                              MPIDI_UCX_AM_TAG,
+                                                              ~MPIDI_UCX_AM_TAG,
+                                                              &MPIDI_UCX_Handle_am_recv);
+        MPIDI_CH4_UCX_REQUEST(MPIDI_UCX_global.ucp_am_requests[am_repost_idx], tag_recv_nb);
 
         /* update the idx */
         ++am_repost_idx;
-        if (am_repost_idx == MPIDI_CH4_NMI_UCX_NUM_AM_BUFFERS) {
+        if (am_repost_idx == MPIDI_UCX_NUM_AM_BUFFERS) {
             am_repost_idx = 0;
         }
     }

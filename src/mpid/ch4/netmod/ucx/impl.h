@@ -16,25 +16,25 @@
 
 #include <ucs/type/status.h>
 #if !defined (MPIDI_CH4_EXCLUSIVE_SHM) && !defined(MPIDI_BUILD_CH4_SHM)
-#define MPIDI_CH4_NMI_UCX_SHM 1
+#define MPIDI_UCX_SHM 1
 #endif
 
-#define MPIDI_CH4_NMI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
-#define MPIDI_CH4_NMI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)
-#define COMM_TO_INDEX(comm,rank) MPIDI_CH4_NMI_UCX_COMM(comm).vept->vep_table[rank].addr_idx
-#define MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm,rank)    MPIDI_CH4_NMI_UCX_eps[COMM_TO_INDEX(comm,rank)]
+#define MPIDI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
+#define MPIDI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)
+#define COMM_TO_INDEX(comm,rank) MPIDI_UCX_COMM(comm).vept->vep_table[rank].addr_idx
+#define MPIDI_UCX_COMM_TO_EP(comm,rank)    MPIDI_UCX_eps[COMM_TO_INDEX(comm,rank)]
 
-#define MPIDI_CH4_NMI_UCX_WIN(win) ((win)->dev.netmod.ucx)
-#define MPIDI_CH4_NMI_UCX_WIN_INFO(win, rank) MPIDI_CH4_NMI_UCX_WIN(win).info_table[rank]
+#define MPIDI_UCX_WIN(win) ((win)->dev.netmod.ucx)
+#define MPIDI_UCX_WIN_INFO(win, rank) MPIDI_UCX_WIN(win).info_table[rank]
 
-static inline uint64_t MPIDI_CH4_NMI_UCX_init_tag(MPIU_Context_id_t contextid, int source, uint64_t tag)
+static inline uint64_t MPIDI_UCX_init_tag(MPIU_Context_id_t contextid, int source, uint64_t tag)
 {
     uint64_t ucp_tag = 0;
     ucp_tag = contextid;
-    ucp_tag = (ucp_tag << MPIDI_CH4_NMI_UCX_SOURCE_SHIFT);
+    ucp_tag = (ucp_tag << MPIDI_UCX_SOURCE_SHIFT);
     ucp_tag |= source;
-    ucp_tag = (ucp_tag << MPIDI_CH4_NMI_UCX_TAG_SHIFT);
-    ucp_tag |= (MPIDI_CH4_NMI_UCX_TAG_MASK & tag);
+    ucp_tag = (ucp_tag << MPIDI_UCX_TAG_SHIFT);
+    ucp_tag |= (MPIDI_UCX_TAG_MASK & tag);
     return ucp_tag;
 }
 
@@ -45,48 +45,48 @@ static inline uint64_t MPIDI_CH4_NMI_UCX_init_tag(MPIU_Context_id_t contextid, i
 #define MPIR_TAG_PROC_FAILURE_BIT (1 << 29)
 #endif
 
-static inline uint64_t MPIDI_CH4_NMI_UCX_tag_mask(int mpi_tag, int src)
+static inline uint64_t MPIDI_UCX_tag_mask(int mpi_tag, int src)
 {
     uint64_t tag_mask;
     tag_mask = ~(MPIR_TAG_PROC_FAILURE_BIT | MPIR_TAG_ERROR_BIT);
     if (mpi_tag == MPI_ANY_TAG)
-        tag_mask &= ~MPIDI_CH4_NMI_UCX_TAG_MASK;
+        tag_mask &= ~MPIDI_UCX_TAG_MASK;
 
     if (src == MPI_ANY_SOURCE)
-        tag_mask &= ~(MPIDI_CH4_NMI_UCX_SOURCE_MASK);
+        tag_mask &= ~(MPIDI_UCX_SOURCE_MASK);
 
     return tag_mask;
 }
 
-static inline uint64_t MPIDI_CH4_NMI_UCX_recv_tag(int mpi_tag, int src, MPIU_Context_id_t contextid)
+static inline uint64_t MPIDI_UCX_recv_tag(int mpi_tag, int src, MPIU_Context_id_t contextid)
 {
     uint64_t ucp_tag = contextid;
 
-    ucp_tag = (ucp_tag << MPIDI_CH4_NMI_UCX_SOURCE_SHIFT);
+    ucp_tag = (ucp_tag << MPIDI_UCX_SOURCE_SHIFT);
     if (src != MPI_ANY_SOURCE)
-        ucp_tag |= (src & UCS_MASK(MPIDI_CH4_NMI_UCX_CONTEXT_RANK_BITS));
-    ucp_tag = ucp_tag << MPIDI_CH4_NMI_UCX_TAG_SHIFT;
+        ucp_tag |= (src & UCS_MASK(MPIDI_UCX_CONTEXT_RANK_BITS));
+    ucp_tag = ucp_tag << MPIDI_UCX_TAG_SHIFT;
     if (mpi_tag != MPI_ANY_TAG)
-        ucp_tag |= (MPIDI_CH4_NMI_UCX_TAG_MASK & mpi_tag);
+        ucp_tag |= (MPIDI_UCX_TAG_MASK & mpi_tag);
     return ucp_tag;
 }
 
-static inline int MPIDI_CH4_NMI_UCX_get_tag(uint64_t match_bits)
+static inline int MPIDI_UCX_get_tag(uint64_t match_bits)
 {
-    return ((int) (match_bits & MPIDI_CH4_NMI_UCX_TAG_MASK));
+    return ((int) (match_bits & MPIDI_UCX_TAG_MASK));
 }
 
-static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
+static inline int MPIDI_UCX_get_source(uint64_t match_bits)
 {
-    return ((int) ((match_bits & MPIDI_CH4_NMI_UCX_SOURCE_MASK) >> MPIDI_CH4_NMI_UCX_TAG_SHIFT));
+    return ((int) ((match_bits & MPIDI_UCX_SOURCE_MASK) >> MPIDI_UCX_TAG_SHIFT));
 }
 
 
-#define MPIDI_CH4_NMI_UCX_ERR  MPIR_ERR_CHKANDJUMP4
+#define MPIDI_UCX_ERR  MPIR_ERR_CHKANDJUMP4
 
-#define MPIDI_CH4_NMI_UCX_CHK_STATUS(STATUS,STR)                \
+#define MPIDI_UCX_CHK_STATUS(STATUS,STR)                \
   do {								\
-    MPIDI_CH4_NMI_UCX_ERR((STATUS!=UCS_OK && STATUS!=UCS_INPROGRESS),\
+    MPIDI_UCX_ERR((STATUS!=UCS_OK && STATUS!=UCS_INPROGRESS),\
 			  mpi_errno,				\
 			  MPI_ERR_OTHER,			\
 			  "**ch4_ucx_nm_"#STR,                  \
@@ -99,10 +99,10 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 
 
-#define MPIDI_CH4_NMI_UCX_PMI_ERROR(_errno,STR)				\
+#define MPIDI_UCX_PMI_ERROR(_errno,STR)				\
   do									\
     {									\
-      MPIDI_CH4_NMI_UCX_ERR(_errno!=PMI_SUCCESS,			\
+      MPIDI_UCX_ERR(_errno!=PMI_SUCCESS,			\
 			    mpi_errno,					\
 			    MPI_ERR_OTHER,				\
 			    "**ch4_ucx_nm_pmi"#STR,			\
@@ -122,7 +122,7 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 #define MPIDI_CH4_UCX_STR_ERRCHK(_errno,STR)				\
   do									\
     {									\
-      MPIDI_CH4_NMI_UCX_ERR(_errno!=MPL_STR_SUCCESS,			\
+      MPIDI_UCX_ERR(_errno!=MPL_STR_SUCCESS,			\
 			    mpi_errno,					\
 			    MPI_ERR_OTHER,				\
 			    "**ch4_ucx_nm_"#STR,			\
@@ -137,7 +137,7 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
 
 #define MPIDI_CH4_UCX_REQUEST(_req, STR)				\
   do {									\
-    MPIDI_CH4_NMI_UCX_ERR(UCS_PTR_IS_ERR(_req),				\
+    MPIDI_UCX_ERR(UCS_PTR_IS_ERR(_req),				\
 			  mpi_errno,					\
 			  MPI_ERR_OTHER,				\
 			  "**ch4_ucx_nm_"#STR,				\
@@ -179,7 +179,7 @@ static inline int MPIDI_CH4_NMI_UCX_get_source(uint64_t match_bits)
     (rreq_)->u.nbc.errflag = MPIR_ERR_NONE;\
 }
 
-int MPIDI_CH4_NMI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr);
+int MPIDI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr);
 extern int MPIR_Datatype_init_names(void);
 
 #endif /* IMPL_H_INCLUDED */

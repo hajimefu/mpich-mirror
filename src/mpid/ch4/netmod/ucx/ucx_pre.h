@@ -18,35 +18,35 @@
 typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;
-} MPIDI_CH4_NMI_UCX_dt_t;
+} MPIDI_UCX_dt_t;
 
 typedef struct {
   ucp_tag_message_h  message_handler;
-} MPIDI_CH4_NMI_UCX_request_t;
+} MPIDI_UCX_request_t;
 
 typedef struct {
     int handler_id;
     char *pack_buffer;
-} MPIDI_CH4_NMI_UCX_am_request_t;
+} MPIDI_UCX_am_request_t;
 
-typedef struct MPIDI_CH4_NMI_UCX_am_header_t {
+typedef struct MPIDI_UCX_am_header_t {
     uint64_t handler_id;
     uint64_t data_sz;
     uint64_t payload[0];
-} MPIDI_CH4_NMI_UCX_am_header_t;
+} MPIDI_UCX_am_header_t;
 
-typedef struct MPIDI_CH4_NMI_UCX_win_info{
+typedef struct MPIDI_UCX_win_info{
     ucp_rkey_h rkey;
     uint64_t addr;
     uint32_t disp;
-} __attribute__ ((packed)) MPIDI_CH4_NMI_UCX_win_info_t ;
+} __attribute__ ((packed)) MPIDI_UCX_win_info_t ;
 
 
 typedef struct {
-    MPIDI_CH4_NMI_UCX_win_info_t *info_table;
+    MPIDI_UCX_win_info_t *info_table;
     ucp_mem_h mem_h;
     int need_local_flush;
-} MPIDI_CH4_NMI_UCX_win_t;
+} MPIDI_UCX_win_t;
 
 
 #endif /* UCX_PRE_H_INCLUDED */

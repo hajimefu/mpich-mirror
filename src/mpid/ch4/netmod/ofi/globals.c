@@ -10,5 +10,5 @@
  */
 #include <mpidimpl.h>
 #include "impl.h"
-MPIDI_CH4_NMI_OFI_global_t      MPIDI_Global     = { 0 };
-MPIDI_CH4_NMI_OFI_addr_table_t *MPIDI_Addr_table = NULL;
+MPIDI_OFI_global_t      MPIDI_Global     = { 0 };
+MPIDI_OFI_addr_table_t *MPIDI_Addr_table = NULL;

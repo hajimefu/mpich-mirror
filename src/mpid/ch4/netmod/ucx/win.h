@@ -17,7 +17,7 @@ struct _UCX_share {
 
 char ucx_dummy_buffer[4096];
 
-static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
+static inline int MPIDI_UCX_Win_allgather(MPIR_Win *win, size_t length,
                                                    uint32_t disp_unit,  void **base_ptr) {
 
     MPIR_Errflag_t err = MPIR_ERR_NONE;
@@ -34,26 +34,26 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
 
     MPIR_Comm *comm_ptr     = win->comm_ptr;
 
-    ucp_context_h ucp_context = MPIDI_CH4_NMI_UCX_global.context;
+    ucp_context_h ucp_context = MPIDI_UCX_global.context;
 
-    MPIDI_CH4_NMI_UCX_WIN(win).info_table =
-                MPL_malloc(sizeof(MPIDI_CH4_NMI_UCX_win_info_t) * comm_ptr->local_size);
+    MPIDI_UCX_WIN(win).info_table =
+                MPL_malloc(sizeof(MPIDI_UCX_win_info_t) * comm_ptr->local_size);
     if(length == 0)
         base = &ucx_dummy_buffer;
     else
         base = *base_ptr;
 
-    status = ucp_mem_map(MPIDI_CH4_NMI_UCX_global.context, &base, size, 0, &mem_h);
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+    status = ucp_mem_map(MPIDI_UCX_global.context, &base, size, 0, &mem_h);
+    MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
     if(length > 0)
         *base_ptr = base;
 
-    MPIDI_CH4_NMI_UCX_WIN(win).mem_h = mem_h;
+    MPIDI_UCX_WIN(win).mem_h = mem_h;
 
     /* pack the key */
     status = ucp_rkey_pack(ucp_context, mem_h,  (void**)&rkey_buffer, &rkey_size);
 
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+    MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
 
     rkey_sizes = (int *) MPL_malloc(sizeof(int) * comm_ptr->local_size);
     rkey_sizes[comm_ptr->rank] =(int) rkey_size;
@@ -86,16 +86,16 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
     then we need our fallback-solution */
 
     for (i = 0; i < comm_ptr->local_size; i++){
-        status = ucp_ep_rkey_unpack(MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm_ptr, i),
+        status = ucp_ep_rkey_unpack(MPIDI_UCX_COMM_TO_EP(comm_ptr, i),
                             &rkey_recv_buff[recv_disps[i]],
-                            &(MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).rkey));
-#ifdef MPIDI_CH4_NMI_UCX_SHM
+                            &(MPIDI_UCX_WIN_INFO(win, i).rkey));
+#ifdef MPIDI_UCX_SHM
         if(status == UCS_ERR_UNREACHABLE) {
-            MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).rkey= NULL;
+            MPIDI_UCX_WIN_INFO(win, i).rkey= NULL;
         }
         else
 #endif
-            MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+            MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
      }
     share_data = MPL_malloc(comm_ptr->local_size * sizeof(struct _UCX_share));
 
@@ -109,10 +109,10 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
         MPIR_ERR_POP(mpi_errno);
 
     for (i = 0; i < comm_ptr->local_size; i++) {
-        MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).disp = share_data[i].disp;
-        MPIDI_CH4_NMI_UCX_WIN_INFO(win, i).addr = share_data[i].addr;
+        MPIDI_UCX_WIN_INFO(win, i).disp = share_data[i].disp;
+        MPIDI_UCX_WIN_INFO(win, i).addr = share_data[i].addr;
     }
-  MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
+  MPIDI_UCX_WIN(win).need_local_flush = 0;
   fn_exit:
     /* buffer release */
     if (rkey_buffer)
@@ -129,10 +129,10 @@ static inline int MPIDI_CH4_NMI_UCX_Win_allgather(MPIR_Win *win, size_t length,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_UCX_Win_init
+#define FUNCNAME MPIDI_UCX_Win_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_UCX_Win_init(MPI_Aint     length,
+static inline int MPIDI_UCX_Win_init(MPI_Aint     length,
                                              int          disp_unit,
                                              MPIR_Win   **win_ptr,
                                              MPIR_Info   *info,
@@ -153,7 +153,7 @@ static inline int MPIDI_CH4_NMI_UCX_Win_init(MPI_Aint     length,
                         "**nomem");
     *win_ptr = win;
 
-    memset(&MPIDI_CH4_NMI_UCX_WIN(win), 0, sizeof(MPIDI_CH4_NMI_UCX_win_t));
+    memset(&MPIDI_UCX_WIN(win), 0, sizeof(MPIDI_UCX_win_t));
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_UCX_PROGRESS_WIN_INIT);
@@ -208,10 +208,10 @@ static inline int MPIDI_CH4_NM_win_unlock(int rank, MPIR_Win * win)
 
     int mpi_errno = MPI_SUCCESS;
     ucs_status_t ucp_status;
-    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(win->comm_ptr, rank);
+    ucp_ep_h ep = MPIDI_UCX_COMM_TO_EP(win->comm_ptr, rank);
     /* make sure all operations are completed  */
     ucp_status = ucp_ep_flush(ep);
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
     mpi_errno = MPIDI_CH4R_win_unlock(rank, win);
 fn_exit:
     return mpi_errno;
@@ -235,8 +235,8 @@ static inline int MPIDI_CH4_NM_win_free(MPIR_Win ** win_ptr)
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-    ucp_mem_unmap(MPIDI_CH4_NMI_UCX_global.context, MPIDI_CH4_NMI_UCX_WIN(win).mem_h);
-    MPL_free(MPIDI_CH4_NMI_UCX_WIN(win).info_table);
+    ucp_mem_unmap(MPIDI_UCX_global.context, MPIDI_UCX_WIN(win).mem_h);
+    MPL_free(MPIDI_UCX_WIN(win).info_table);
     if(win->create_flavor == MPI_WIN_FLAVOR_ALLOCATE)
         win->base = NULL;
     MPIDI_CH4R_win_finalize(win_ptr);
@@ -258,9 +258,9 @@ static inline int MPIDI_CH4_NM_win_fence(int assert, MPIR_Win * win)
         MPIR_ERR_POP(mpi_errno);
 
 /* make sure all local and remote operations are completed */
-    ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
+    ucp_status = ucp_worker_flush(MPIDI_UCX_global.worker);
 
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
 fn_exit:
     return mpi_errno;
 fn_fail:
@@ -281,13 +281,13 @@ static inline int MPIDI_CH4_NM_win_create(void *base,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_WIN_CREATE);
 
-    MPIDI_CH4_NMI_UCX_Win_init(length, disp_unit, win_ptr, info,
+    MPIDI_UCX_Win_init(length, disp_unit, win_ptr, info,
                                comm_ptr,MPI_WIN_FLAVOR_CREATE,
                                MPI_WIN_UNIFIED);
 
     win              = *win_ptr;
 
-    mpi_errno = MPIDI_CH4_NMI_UCX_Win_allgather(win, length, disp_unit,  &base);
+    mpi_errno = MPIDI_UCX_Win_allgather(win, length, disp_unit,  &base);
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     win->base        = base;
@@ -347,11 +347,11 @@ static inline int MPIDI_CH4_NM_win_allocate(MPI_Aint length,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_WIN_WIN_ALLOCATE);
 
-    MPIDI_CH4_NMI_UCX_Win_init(length, disp_unit, win_ptr, info,
+    MPIDI_UCX_Win_init(length, disp_unit, win_ptr, info,
                                comm_ptr,MPI_WIN_FLAVOR_ALLOCATE,
                                MPI_WIN_UNIFIED);
     win              = *win_ptr;
-    mpi_errno = MPIDI_CH4_NMI_UCX_Win_allgather(win, length, disp_unit,  &base);
+    mpi_errno = MPIDI_UCX_Win_allgather(win, length, disp_unit,  &base);
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
     win->base        = base;
 
@@ -379,7 +379,7 @@ static inline int MPIDI_CH4_NM_win_flush(int rank, MPIR_Win * win)
     int mpi_errno;
     ucs_status_t ucp_status;
 
-    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(win->comm_ptr, rank);
+    ucp_ep_h ep = MPIDI_UCX_COMM_TO_EP(win->comm_ptr, rank);
 
     mpi_errno =  MPIDI_CH4R_win_flush(rank, win);
     if (mpi_errno)
@@ -387,7 +387,7 @@ static inline int MPIDI_CH4_NM_win_flush(int rank, MPIR_Win * win)
 /* only flush the endpoint */
     ucp_status = ucp_ep_flush(ep);
 
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
 
 fn_exit:
     return mpi_errno;
@@ -406,10 +406,10 @@ static inline int MPIDI_CH4_NM_win_flush_local_all(MPIR_Win * win)
        MPIR_ERR_POP(mpi_errno);
     /* currently, UCP does not support local flush, so we have to call
        a global flush. This is not good for performance - but OK for now*/
-    if(MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush == 1){
-        ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
-        MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
-        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
+    if(MPIDI_UCX_WIN(win).need_local_flush == 1){
+        ucp_status = ucp_worker_flush(MPIDI_UCX_global.worker);
+        MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+        MPIDI_UCX_WIN(win).need_local_flush = 0;
     }
 
 
@@ -425,8 +425,8 @@ static inline int MPIDI_CH4_NM_win_unlock_all(MPIR_Win * win)
     ucs_status_t ucp_status;
 
     /*first we have to make sure that all operations are completed*/
-   ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
-   MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+   ucp_status = ucp_worker_flush(MPIDI_UCX_global.worker);
+   MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
    mpi_errno = MPIDI_CH4R_win_unlock_all(win);
 fn_exit:
     return mpi_errno;
@@ -446,16 +446,16 @@ static inline int MPIDI_CH4_NM_win_flush_local(int rank, MPIR_Win * win)
     ucs_status_t ucp_status;
     mpi_errno = MPIDI_CH4R_win_flush_local(rank, win);
 
-    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(win->comm_ptr, rank);
+    ucp_ep_h ep = MPIDI_UCX_COMM_TO_EP(win->comm_ptr, rank);
    if (mpi_errno)
        MPIR_ERR_POP(mpi_errno);
     /* currently, UCP does not support local flush, so we have to call
        a global flush. This is not good for performance - but OK for now*/ 
 
-    if(MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush == 1){
+    if(MPIDI_UCX_WIN(win).need_local_flush == 1){
         ucp_status = ucp_ep_flush(ep);
-        MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
-        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 0;
+        MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+        MPIDI_UCX_WIN(win).need_local_flush = 0;
     }
 
 fn_exit:
@@ -480,9 +480,9 @@ static inline int MPIDI_CH4_NM_win_flush_all(MPIR_Win * win)
     if (mpi_errno)
        MPIR_ERR_POP(mpi_errno);
 
-    ucp_status = ucp_worker_flush(MPIDI_CH4_NMI_UCX_global.worker);
+    ucp_status = ucp_worker_flush(MPIDI_UCX_global.worker);
 
-    MPIDI_CH4_NMI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
+    MPIDI_UCX_CHK_STATUS(ucp_status, ucp_worker_fence);
 
 fn_exit:
     return mpi_errno;

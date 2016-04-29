@@ -11,20 +11,20 @@
 
 #include "impl.h"
 
-static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
+static inline int MPIDI_UCX_contig_put(const void *origin_addr,
                                    size_t size,
                                    int target_rank,
                                    MPI_Aint target_disp,
                                    MPIR_Win * win)
 {
 
-    MPIDI_CH4_NMI_UCX_win_info_t* win_info = &(MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank));
+    MPIDI_UCX_win_info_t* win_info = &(MPIDI_UCX_WIN_INFO(win, target_rank));
     size_t offset;
     uint64_t base;
     int mpi_errno = MPI_SUCCESS;
     ucs_status_t status;
     MPIR_Comm *comm = win->comm_ptr;
-    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, target_rank);
+    ucp_ep_h ep = MPIDI_UCX_COMM_TO_EP(comm, target_rank);
 
     MPIDI_CH4U_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
     base = win_info->addr;
@@ -32,9 +32,9 @@ static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
 
     status = ucp_put_nbi(ep, origin_addr, size, base+offset, win_info->rkey);
  /*   if(status == UCS_INPROGRESS)
-        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 1;
+        MPIDI_UCX_WIN(win).need_local_flush = 1;
     else*/
-      MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+      MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
 
  fn_exit:
     return mpi_errno;
@@ -45,20 +45,20 @@ static inline int MPIDI_CH4_NMI_UCX_contig_put(const void *origin_addr,
 
 }
 
-static inline int MPIDI_CH4_NMI_UCX_contig_get(void *origin_addr,
+static inline int MPIDI_UCX_contig_get(void *origin_addr,
                                    size_t size,
                                    int target_rank,
                                    MPI_Aint target_disp,
                                    MPIR_Win * win)
 {
 
-    MPIDI_CH4_NMI_UCX_win_info_t* win_info = &(MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank));
+    MPIDI_UCX_win_info_t* win_info = &(MPIDI_UCX_WIN_INFO(win, target_rank));
     size_t offset;
     uint64_t base;
     int mpi_errno = MPI_SUCCESS;
     ucs_status_t status;
     MPIR_Comm *comm = win->comm_ptr;
-    ucp_ep_h ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, target_rank);
+    ucp_ep_h ep = MPIDI_UCX_COMM_TO_EP(comm, target_rank);
 
 
     MPIDI_CH4U_EPOCH_START_CHECK(win, mpi_errno, goto fn_fail);
@@ -67,9 +67,9 @@ static inline int MPIDI_CH4_NMI_UCX_contig_get(void *origin_addr,
 
     status = ucp_get_nbi(ep, origin_addr, size, base+offset, win_info->rkey);
 /*    if(status == UCS_INPROGRESS)
-        MPIDI_CH4_NMI_UCX_WIN(win).need_local_flush = 1;
+        MPIDI_UCX_WIN(win).need_local_flush = 1;
     else*/
-     MPIDI_CH4_NMI_UCX_CHK_STATUS(status, ucp_mem_map);
+     MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
 
  fn_exit:
     return mpi_errno;
@@ -105,8 +105,8 @@ static inline int MPIDI_CH4_NM_put(const void *origin_addr,
     if(unlikely((origin_bytes == 0) ||(target_rank == MPI_PROC_NULL)))
         goto fn_exit;
 
-#ifdef MPIDI_CH4_NMI_UCX_SHM
-    if(!target_contig || !origin_contig || MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank).rkey == NULL)
+#ifdef MPIDI_UCX_SHM
+    if(!target_contig || !origin_contig || MPIDI_UCX_WIN_INFO(win, target_rank).rkey == NULL)
 #else
     if(!target_contig ||  !origin_contig)
 #endif
@@ -128,7 +128,7 @@ static inline int MPIDI_CH4_NM_put(const void *origin_addr,
 
 
 
-       mpi_errno = MPIDI_CH4_NMI_UCX_contig_put(origin_addr, origin_bytes,
+       mpi_errno = MPIDI_UCX_contig_put(origin_addr, origin_bytes,
                                       target_rank, target_disp, win);
  fn_exit:
     return mpi_errno;
@@ -162,8 +162,8 @@ static inline int MPIDI_CH4_NM_get(void *origin_addr,
     MPIDI_Datatype_check_contig(target_datatype,target_contig);
 
 
-#ifdef MPIDI_CH4_NMI_UCX_SHM
-    if(!origin_contig || !target_contig ||  MPIDI_CH4_NMI_UCX_WIN_INFO(win, target_rank).rkey == NULL )
+#ifdef MPIDI_UCX_SHM
+    if(!origin_contig || !target_contig ||  MPIDI_UCX_WIN_INFO(win, target_rank).rkey == NULL )
 #else
     if(!target_contig || !origin_contig)
 #endif
@@ -183,7 +183,7 @@ static inline int MPIDI_CH4_NM_get(void *origin_addr,
     }
 
 
-    return  MPIDI_CH4_NMI_UCX_contig_get(origin_addr, origin_bytes,
+    return  MPIDI_UCX_contig_get(origin_addr, origin_bytes,
                                       target_rank, target_disp, win);
  fn_exit:
     return mpi_errno;

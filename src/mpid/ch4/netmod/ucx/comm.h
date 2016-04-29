@@ -60,7 +60,7 @@ static inline void dup_vept(struct MPIDI_VEPT *src_vept,
      * VCRT */
 
     if (!vept_offset)
-        MPIDI_CH4_NMI_UCX_VEPT_Create(vept_size, dest_vept);
+        MPIDI_UCX_VEPT_Create(vept_size, dest_vept);
 
     if (mapper->type == MPIR_COMM_MAP_TYPE__DUP) {
         for (i = 0; i < src_comm_size; i++)
@@ -132,29 +132,29 @@ static inline int alloc_tables(MPIR_Comm * comm)
 
         if (mapper->dir == MPIR_COMM_MAP_DIR__L2L) {
             if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             }
             else if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM && comm->comm_kind == MPIR_COMM_KIND__INTERCOMM)
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).local_vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             else if (src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM && comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).local_vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             }
             else
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).local_vept, &MPIDI_UCX_COMM(comm).local_vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2L */
             MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
             if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->remote_size, vept_size, vept_offset);
             }
             else
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).local_vept, mapper,
                          mapper->src_comm->remote_size, vept_size, vept_offset);
         }
 
@@ -181,15 +181,15 @@ static inline int alloc_tables(MPIR_Comm * comm)
 
         if (mapper->dir == MPIR_COMM_MAP_DIR__L2R) {
             if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
             else
-                dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).local_vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+                dup_vept(MPIDI_UCX_COMM(src_comm).local_vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                          mapper->src_comm->local_size, vept_size, vept_offset);
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2R */
             MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
-            dup_vept(MPIDI_CH4_NMI_UCX_COMM(src_comm).vept, &MPIDI_CH4_NMI_UCX_COMM(comm).vept, mapper,
+            dup_vept(MPIDI_UCX_COMM(src_comm).vept, &MPIDI_UCX_COMM(comm).vept, mapper,
                      mapper->src_comm->remote_size, vept_size, vept_offset);
         }
 
@@ -199,8 +199,8 @@ static inline int alloc_tables(MPIR_Comm * comm)
     if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         /* setup the vept for the local_comm in the intercomm */
         if (comm->local_comm) {
-            MPIDI_CH4_NMI_UCX_COMM(comm->local_comm).vept = MPIDI_CH4_NMI_UCX_COMM(comm).local_vept;
-            MPIU_Object_add_ref(MPIDI_CH4_NMI_UCX_COMM(comm).local_vept);
+            MPIDI_UCX_COMM(comm->local_comm).vept = MPIDI_UCX_COMM(comm).local_vept;
+            MPIU_Object_add_ref(MPIDI_UCX_COMM(comm).local_vept);
         }
     }
 
@@ -234,14 +234,14 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm * comm)
     int in_use;
 
     MPIDI_CH4U_destroy_comm(comm);
-    MPIU_Object_release_ref(MPIDI_CH4_NMI_UCX_COMM(comm).vept, &in_use);
+    MPIU_Object_release_ref(MPIDI_UCX_COMM(comm).vept, &in_use);
     if(in_use == 0)
-        MPL_free(MPIDI_CH4_NMI_UCX_COMM(comm).vept);
+        MPL_free(MPIDI_UCX_COMM(comm).vept);
 
     if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
-        MPIU_Object_release_ref(MPIDI_CH4_NMI_UCX_COMM(comm).local_vept, &in_use);
+        MPIU_Object_release_ref(MPIDI_UCX_COMM(comm).local_vept, &in_use);
        if(in_use == 0)
-          MPL_free(MPIDI_CH4_NMI_UCX_COMM(comm).local_vept);
+          MPL_free(MPIDI_UCX_COMM(comm).local_vept);
 
 
         }

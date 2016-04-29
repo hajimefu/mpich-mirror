@@ -14,10 +14,10 @@
 #include "impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_do_iprobe
+#define FUNCNAME MPIDI_OFI_do_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_do_iprobe(int source,
+static inline int MPIDI_OFI_do_iprobe(int source,
                                               int tag,
                                               MPIR_Comm *comm,
                                               int context_offset,
@@ -46,17 +46,17 @@ static inline int MPIDI_CH4_NMI_OFI_do_iprobe(int source,
     } else if(unlikely(MPI_ANY_SOURCE == source))
         remote_proc = FI_ADDR_UNSPEC;
     else
-        remote_proc = MPIDI_CH4_NMI_OFI_comm_to_phys(comm, source, MPIDI_CH4_NMI_OFI_API_TAG);
+        remote_proc = MPIDI_OFI_comm_to_phys(comm, source, MPIDI_OFI_API_TAG);
 
     if(message)
-        MPIDI_CH4_NMI_OFI_REQUEST_CREATE(rreq);
+        MPIDI_OFI_REQUEST_CREATE(rreq);
     else
         rreq = &r;
 
-    match_bits = MPIDI_CH4_NMI_OFI_init_recvtag(&mask_bits, comm->context_id + context_offset, source, tag);
+    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, comm->context_id + context_offset, source, tag);
 
-    MPIDI_CH4_NMI_OFI_REQUEST(rreq, event_id) = MPIDI_CH4_NMI_OFI_EVENT_PEEK;
-    MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id)  = MPIDI_CH4_NMI_OFI_PEEK_START;
+    MPIDI_OFI_REQUEST(rreq, event_id) = MPIDI_OFI_EVENT_PEEK;
+    MPIDI_OFI_REQUEST(rreq, util_id)  = MPIDI_OFI_PEEK_START;
 
     msg.msg_iov = NULL;
     msg.desc = NULL;
@@ -64,14 +64,14 @@ static inline int MPIDI_CH4_NMI_OFI_do_iprobe(int source,
     msg.addr = remote_proc;
     msg.tag = match_bits;
     msg.ignore = mask_bits;
-    msg.context = (void *) &(MPIDI_CH4_NMI_OFI_REQUEST(rreq, context));
+    msg.context = (void *) &(MPIDI_OFI_REQUEST(rreq, context));
     msg.data = 0;
 
-    MPIDI_CH4_NMI_OFI_CALL(fi_trecvmsg(MPIDI_CH4_NMI_OFI_EP_RX_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION), trecv);
-    MPIDI_CH4_NMI_OFI_PROGRESS_WHILE(MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id) == MPIDI_CH4_NMI_OFI_PEEK_START);
+    MPIDI_OFI_CALL(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0), &msg, peek_flags | FI_PEEK | FI_COMPLETION), trecv);
+    MPIDI_OFI_PROGRESS_WHILE(MPIDI_OFI_REQUEST(rreq, util_id) == MPIDI_OFI_PEEK_START);
 
-    switch(MPIDI_CH4_NMI_OFI_REQUEST(rreq, util_id)) {
-        case  MPIDI_CH4_NMI_OFI_PEEK_NOT_FOUND:
+    switch(MPIDI_OFI_REQUEST(rreq, util_id)) {
+        case  MPIDI_OFI_PEEK_NOT_FOUND:
             *flag = 0;
 
             if(message) MPIU_Handle_obj_free(&MPIR_Request_mem, rreq);
@@ -79,7 +79,7 @@ static inline int MPIDI_CH4_NMI_OFI_do_iprobe(int source,
             goto fn_exit;
             break;
 
-        case  MPIDI_CH4_NMI_OFI_PEEK_FOUND:
+        case  MPIDI_OFI_PEEK_FOUND:
             MPIR_Request_extract_status(rreq, status);
             *flag = 1;
 
@@ -117,7 +117,7 @@ static inline int MPIDI_CH4_NM_probe(int source,
         if(mpi_errno)
             MPIR_ERR_POP(mpi_errno);
 
-        MPIDI_CH4_NMI_OFI_PROGRESS();
+        MPIDI_OFI_PROGRESS();
     }
 
 fn_exit:
@@ -140,7 +140,7 @@ static inline int MPIDI_CH4_NM_improbe(int source,
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
     /* Set flags for mprobe peek, when ready */
-    int mpi_errno = MPIDI_CH4_NMI_OFI_do_iprobe(source, tag, comm, context_offset,
+    int mpi_errno = MPIDI_OFI_do_iprobe(source, tag, comm, context_offset,
                                                 flag, status, message, FI_CLAIM | FI_COMPLETION);
 
     if(*flag && *message) {
@@ -165,7 +165,7 @@ static inline int MPIDI_CH4_NM_iprobe(int source,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
-    mpi_errno = MPIDI_CH4_NMI_OFI_do_iprobe(source, tag, comm, context_offset, flag, status, NULL, 0ULL);
+    mpi_errno = MPIDI_OFI_do_iprobe(source, tag, comm, context_offset, flag, status, NULL, 0ULL);
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
     return mpi_errno;
 }

@@ -14,10 +14,10 @@
 #include "am_impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_do_control_win
+#define FUNCNAME MPIDI_OFI_do_control_win
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_do_control_win(MPIDI_CH4_NMI_OFI_win_control_t *control,
+static inline int MPIDI_OFI_do_control_win(MPIDI_OFI_win_control_t *control,
                                                    int                  rank,
                                                    MPIR_Win            *win,
                                                    int                  use_comm,
@@ -27,12 +27,12 @@ static inline int MPIDI_CH4_NMI_OFI_do_control_win(MPIDI_CH4_NMI_OFI_win_control
     MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_WIN);
 
-    control->win_id      = MPIDI_CH4_NMI_OFI_WIN(win).win_id;
+    control->win_id      = MPIDI_OFI_WIN(win).win_id;
     control->origin_rank = win->comm_ptr->rank;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_do_inject(rank,
+    mpi_errno = MPIDI_OFI_do_inject(rank,
                                             win->comm_ptr,
-                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+                                            MPIDI_OFI_INTERNAL_HANDLER_CONTROL,
                                             (void *)control,
                                             sizeof(*control),NULL,
                                             FALSE,
@@ -44,10 +44,10 @@ static inline int MPIDI_CH4_NMI_OFI_do_control_win(MPIDI_CH4_NMI_OFI_win_control
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_do_control_send
+#define FUNCNAME MPIDI_OFI_do_control_send
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NMI_OFI_do_control_send(MPIDI_CH4_NMI_OFI_send_control_t *control,
+static inline int MPIDI_OFI_do_control_send(MPIDI_OFI_send_control_t *control,
                                                     char                 *send_buf,
                                                     size_t                msgsize,
                                                     int                   rank,
@@ -63,11 +63,11 @@ static inline int MPIDI_CH4_NMI_OFI_do_control_send(MPIDI_CH4_NMI_OFI_send_contr
     control->send_buf    = send_buf;
     control->msgsize     = msgsize;
     control->comm_id     = comm_ptr->context_id;
-    control->endpoint_id = MPIDI_CH4_NMI_OFI_COMM_TO_EP(comm_ptr, comm_ptr->rank);
+    control->endpoint_id = MPIDI_OFI_COMM_TO_EP(comm_ptr, comm_ptr->rank);
     control->ackreq      = ackreq;
 
-    mpi_errno = MPIDI_CH4_NMI_OFI_do_inject(rank,comm_ptr,
-                                            MPIDI_CH4_NMI_OFI_INTERNAL_HANDLER_CONTROL,
+    mpi_errno = MPIDI_OFI_do_inject(rank,comm_ptr,
+                                            MPIDI_OFI_INTERNAL_HANDLER_CONTROL,
                                             (void *)control,
                                             sizeof(*control),NULL,
                                             FALSE,TRUE,need_lock);

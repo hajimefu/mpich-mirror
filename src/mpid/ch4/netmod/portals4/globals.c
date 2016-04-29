@@ -11,5 +11,5 @@
 #include "impl.h"
 #include "types.h"
 
-MPIDI_CH4_NMI_PTL_global_t     MPIDI_CH4_NMI_PTL_global = { 0 };
-MPIDI_CH4_NMI_PTL_addr_t      *MPIDI_CH4_NMI_PTL_addr_table = NULL;
+MPIDI_PTL_global_t     MPIDI_PTL_global = { 0 };
+MPIDI_PTL_addr_t      *MPIDI_PTL_addr_table = NULL;

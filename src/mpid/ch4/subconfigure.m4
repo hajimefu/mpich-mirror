@@ -91,37 +91,37 @@ for net in $ch4_netmods ; do
 
     net_upper=`echo ${net} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
     if test -z "$ch4_netmod_amrequest_decl" ; then
-        ch4_netmod_amrequest_decl="MPIDI_CH4_NMI_${net_upper}_am_request_t ${net};"
+        ch4_netmod_amrequest_decl="MPIDI_${net_upper}_am_request_t ${net};"
     else
         ch4_netmod_amrequest_decl="${ch4_netmod_amrequest_decl} \\
-MPIDI_CH4_NMI_${net_upper}_am_request_t ${net};"
+MPIDI_${net_upper}_am_request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_request_decl" ; then
-        ch4_netmod_request_decl="MPIDI_CH4_NMI_${net_upper}_request_t ${net};"
+        ch4_netmod_request_decl="MPIDI_${net_upper}_request_t ${net};"
     else
         ch4_netmod_request_decl="${ch4_netmod_request_decl} \\
-MPIDI_CH4_NMI_${net_upper}_request_t ${net};"
+MPIDI_${net_upper}_request_t ${net};"
     fi
 
     if test -z "$ch4_netmod_comm_decl" ; then
-        ch4_netmod_comm_decl="MPIDI_CH4_NMI_${net_upper}_comm_t ${net};"
+        ch4_netmod_comm_decl="MPIDI_${net_upper}_comm_t ${net};"
     else
         ch4_netmod_comm_decl="${ch4_netmod_comm_decl} \\
-MPIDI_CH4_NMI_${net_upper}_comm_t ${net};"
+MPIDI_${net_upper}_comm_t ${net};"
     fi
     if test -z "$ch4_netmod_dt_decl" ; then
-        ch4_netmod_dt_decl="MPIDI_CH4_NMI_${net_upper}_dt_t ${net};"
+        ch4_netmod_dt_decl="MPIDI_${net_upper}_dt_t ${net};"
     else
         ch4_netmod_dt_decl="${ch4_netmod_dt_decl} \\
-MPIDI_CH4_NMI_${net_upper}_dt_t ${net};"
+MPIDI_${net_upper}_dt_t ${net};"
     fi
 
     if test -z "$ch4_netmod_win_decl" ; then
-        ch4_netmod_win_decl="MPIDI_CH4_NMI_${net_upper}_win_t ${net};"
+        ch4_netmod_win_decl="MPIDI_${net_upper}_win_t ${net};"
     else
         ch4_netmod_win_decl="${ch4_netmod_win_decl} \\
-MPIDI_CH4_NMI_${net_upper}_win_t ${net};"
+MPIDI_${net_upper}_win_t ${net};"
     fi
 
 

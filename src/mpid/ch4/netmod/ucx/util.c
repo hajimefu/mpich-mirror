@@ -19,7 +19,7 @@
 #define FUNCNAME MPIDI_UCX_VCRT_Create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH4_NMI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr)
+int MPIDI_UCX_VEPT_Create(int size, struct MPIDI_VEPT **vept_ptr)
 {
     struct MPIDI_VEPT *vept;
     int i, mpi_errno;

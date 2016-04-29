@@ -14,22 +14,22 @@
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_am_request_t;
+} MPIDI_STUB_am_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_request_t;
+} MPIDI_STUB_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_comm_t;
+} MPIDI_STUB_comm_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_dt_t;
+} MPIDI_STUB_dt_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_win_t;
+} MPIDI_STUB_win_t;
 
 #endif

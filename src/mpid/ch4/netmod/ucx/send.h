@@ -25,23 +25,23 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *req;
-    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
+    MPIDI_UCX_ucp_request_t *ucp_request;
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
     MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
     MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
 
-    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
-    ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
+    ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
+    ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, data_sz, ucp_dt_make_contig(1),
-                                     ucx_tag, &MPIDI_CH4_NMI_UCX_Handle_send_callback);
+    ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, data_sz, ucp_dt_make_contig(1),
+                                     ucx_tag, &MPIDI_UCX_Handle_send_callback);
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
     if (ucp_request == NULL) {
-        req = MPIDI_CH4_NMI_UCX_Alloc_send_request_done();
+        req = MPIDI_UCX_Alloc_send_request_done();
         goto fn_exit;
    }
 
@@ -50,7 +50,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
        ucp_request->req = NULL;
        ucp_request_release(ucp_request);
    } else {
-       req = MPIDI_CH4_NMI_UCX_Request_create();
+       req = MPIDI_UCX_Request_create();
        (req)->kind = MPIR_REQUEST_KIND__SEND;
        ucp_request->req = req;
        ucp_request_release(ucp_request);
@@ -82,23 +82,23 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *req;
-    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
+    MPIDI_UCX_ucp_request_t *ucp_request;
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
     MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
     MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
 
-    ep = MPIDI_CH4_NMI_UCX_COMM_TO_EP(comm, rank);
-    ucx_tag = MPIDI_CH4_NMI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
+    ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
+    ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, count, datatype->dev.netmod.ucx.ucp_datatype,
-                                     ucx_tag, &MPIDI_CH4_NMI_UCX_Handle_send_callback);
+    ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, buf, count, datatype->dev.netmod.ucx.ucp_datatype,
+                                     ucx_tag, &MPIDI_UCX_Handle_send_callback);
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
     if (ucp_request == NULL) {
-        req = MPIDI_CH4_NMI_UCX_Alloc_send_request_done();
+        req = MPIDI_UCX_Alloc_send_request_done();
         goto fn_exit;
    }
 
@@ -108,7 +108,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
        ucp_request_release(ucp_request);
       }
     else{
-       req = MPIDI_CH4_NMI_UCX_Request_create();
+       req = MPIDI_UCX_Request_create();
        (req)->kind = MPIR_REQUEST_KIND__SEND;
        ucp_request->req = req;
        ucp_request_release(ucp_request);
@@ -150,7 +150,7 @@ static inline int ucx_send(const void *buf,
         mpi_errno = MPI_SUCCESS;
 
         if (have_request) {
-            *request = MPIDI_CH4_NMI_UCX_Request_create();
+            *request = MPIDI_UCX_Request_create();
             (*request)->kind = MPIR_REQUEST_KIND__SEND;
             MPIDI_CH4U_request_complete((*request));
         }

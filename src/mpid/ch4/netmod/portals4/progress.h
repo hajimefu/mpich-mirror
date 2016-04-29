@@ -13,7 +13,7 @@
 
 #include "impl.h"
 
-static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
+static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
 {
     int mpi_errno;
     MPIR_Request *rreq = NULL;
@@ -25,11 +25,11 @@ static inline int MPIDI_CH4_NMI_PTL_am_handler(ptl_event_t *e)
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
 
-    in_data_sz = data_sz = (e->hdr_data & MPIDI_CH4_NMI_PTL_MSG_SZ_MASK);
+    in_data_sz = data_sz = (e->hdr_data & MPIDI_PTL_MSG_SZ_MASK);
     in_data = p_data = (e->start + (e->mlength - data_sz));
     int handler_id = e->hdr_data >> 56;
 
-    MPIDI_CH4_NMI_PTL_global.am_handlers[handler_id](e->start,
+    MPIDI_PTL_global.am_handlers[handler_id](e->start,
                                                      &p_data, &data_sz,
                                                      &is_contig,
                                                      &cmpl_handler_fn,
@@ -88,11 +88,11 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     ptl_event_t e;
     unsigned int which;
 
-    while (PtlEQPoll(MPIDI_CH4_NMI_PTL_global.eqs, 2, 0, &e, &which) != PTL_EQ_EMPTY) {
+    while (PtlEQPoll(MPIDI_PTL_global.eqs, 2, 0, &e, &which) != PTL_EQ_EMPTY) {
         switch (e.type) {
         case PTL_EVENT_PUT:
             MPIU_Assert(e.ptl_list == PTL_OVERFLOW_LIST);
-            MPIDI_CH4_NMI_PTL_am_handler(&e);
+            MPIDI_PTL_am_handler(&e);
             break;
         case PTL_EVENT_ACK:
             {
@@ -107,14 +107,14 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
                     MPIDI_CH4U_request_release(sreq);
                     break;
                 }
-                MPIDI_CH4_NMI_PTL_global.send_cmpl_handlers[handler_id](sreq);
+                MPIDI_PTL_global.send_cmpl_handlers[handler_id](sreq);
             }
             break;
         case PTL_EVENT_AUTO_UNLINK:
-            MPIDI_CH4_NMI_PTL_global.overflow_me_handles[(size_t)e.user_ptr] = PTL_INVALID_HANDLE;
+            MPIDI_PTL_global.overflow_me_handles[(size_t)e.user_ptr] = PTL_INVALID_HANDLE;
             break;
         case PTL_EVENT_AUTO_FREE:
-            MPIDI_CH4_NMI_PTL_append_overflow((size_t)e.user_ptr);
+            MPIDI_PTL_append_overflow((size_t)e.user_ptr);
             break;
         case PTL_EVENT_SEND:
             break;

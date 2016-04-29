@@ -55,12 +55,12 @@ dnl Parse the device arguments
 
     if [test "$do_scalable_endpoints" = "true"]; then
        AC_MSG_NOTICE([Enabling OFI netmod scalable endpoints])
-       PAC_APPEND_FLAG([-DMPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS], [CPPFLAGS])
+       PAC_APPEND_FLAG([-DMPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS], [CPPFLAGS])
     fi
 
     if [test "$do_av_table" = "true"]; then
        AC_MSG_NOTICE([Enabling OFI netmod AV table])
-       PAC_APPEND_FLAG([-DMPIDI_CH4_NMI_OFI_CONFIG_USE_AV_TABLE], [CPPFLAGS])
+       PAC_APPEND_FLAG([-DMPIDI_OFI_CONFIG_USE_AV_TABLE], [CPPFLAGS])
     fi
 
     if [test "$do_direct_provider" = "true"]; then

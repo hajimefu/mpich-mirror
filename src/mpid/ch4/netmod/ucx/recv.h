@@ -22,21 +22,21 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
     MPIR_Request *req;
-    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
+    MPIDI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
-    tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
-    ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
+    tag_mask = MPIDI_UCX_tag_mask(tag, rank);
+    ucp_tag = MPIDI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
+    ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_UCX_global.worker,
                                                 buf, data_sz, ucp_dt_make_contig(1),
-                                                ucp_tag, tag_mask, &MPIDI_CH4_NMI_UCX_Handle_recv_callback);
+                                                ucp_tag, tag_mask, &MPIDI_UCX_Handle_recv_callback);
 
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
 
     if (ucp_request->req == NULL) {
-        req = MPIDI_CH4_NMI_UCX_Request_create();
+        req = MPIDI_UCX_Request_create();
         MPIDI_Request_init_rreq(req);
         ucp_request->req = req;
         ucp_request_release(ucp_request);
@@ -64,21 +64,21 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
     MPIR_Request *req;
-    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request;
+    MPIDI_UCX_ucp_request_t *ucp_request;
 //    MPID_THREAD_CS_ENTER(POBJ,MPIDI_THREAD_WORKER_MUTEX);
-    tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, rank);
-    ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
+    tag_mask = MPIDI_UCX_tag_mask(tag, rank);
+    ucp_tag = MPIDI_UCX_recv_tag(tag, rank, comm->recvcontext_id + context_offset);
 
-    ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_CH4_NMI_UCX_global.worker,
+    ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_recv_nb(MPIDI_UCX_global.worker,
                                                 buf, count, datatype->dev.netmod.ucx.ucp_datatype,
-                                                ucp_tag, tag_mask, &MPIDI_CH4_NMI_UCX_Handle_recv_callback);
+                                                ucp_tag, tag_mask, &MPIDI_UCX_Handle_recv_callback);
 
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
 
     if (ucp_request->req == NULL) {
-        req = MPIDI_CH4_NMI_UCX_Request_create();
+        req = MPIDI_UCX_Request_create();
         MPIDI_Request_init_rreq(req);
         ucp_request->req = req;
         ucp_request_release(ucp_request);
@@ -111,7 +111,7 @@ static inline int do_irecv(void *buf,
     MPIR_Datatype *dt_ptr;
 
     if (unlikely(rank == MPI_PROC_NULL)) {
-        req = MPIDI_CH4_NMI_UCX_Request_create();
+        req = MPIDI_UCX_Request_create();
         req->kind = MPIR_REQUEST_KIND__RECV;
         req->status.MPI_ERROR = MPI_SUCCESS;
         req->status.MPI_SOURCE = rank;

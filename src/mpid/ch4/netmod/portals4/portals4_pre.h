@@ -18,22 +18,22 @@ typedef struct {
     int handler_id;
     char *pack_buffer;
     ptl_handle_md_t md;
-} MPIDI_CH4_NMI_PORTALS4_am_request_t;
+} MPIDI_PORTALS4_am_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_PORTALS4_request_t;
+} MPIDI_PORTALS4_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_PORTALS4_comm_t;
+} MPIDI_PORTALS4_comm_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_PORTALS4_dt_t;
+} MPIDI_PORTALS4_dt_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_PORTALS4_win_t;
+} MPIDI_PORTALS4_win_t;
 
 #endif

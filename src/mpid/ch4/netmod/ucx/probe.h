@@ -21,10 +21,10 @@ static inline int ucx_do_iprobe(int source,
     int count;
     ucp_tag_recv_info_t info;
     ucp_tag_message_h  message_handler;
-    tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, source);
-    ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
+    tag_mask = MPIDI_UCX_tag_mask(tag, source);
+    ucp_tag = MPIDI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
 
-    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_global.worker, ucp_tag,
+    message_handler = ucp_tag_probe_nb(MPIDI_UCX_global.worker, ucp_tag,
                                         tag_mask, 0, &info);
     if(message_handler == NULL) {
         *flag = 0;
@@ -32,8 +32,8 @@ static inline int ucx_do_iprobe(int source,
     }
     *flag = 1;
      status->MPI_ERROR = MPI_SUCCESS;
-     status->MPI_SOURCE = MPIDI_CH4_NMI_UCX_get_source(info.sender_tag);
-     status->MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info.sender_tag);
+     status->MPI_SOURCE = MPIDI_UCX_get_source(info.sender_tag);
+     status->MPI_TAG = MPIDI_UCX_get_tag(info.sender_tag);
      count = info.length;
      MPIR_STATUS_SET_COUNT(*status, count);
 
@@ -79,10 +79,10 @@ static inline int MPIDI_CH4_NM_improbe(int source,
     ucp_tag_message_h  message_handler;
     MPIR_Request *req;
 
-    tag_mask = MPIDI_CH4_NMI_UCX_tag_mask(tag, source);
-    ucp_tag = MPIDI_CH4_NMI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
+    tag_mask = MPIDI_UCX_tag_mask(tag, source);
+    ucp_tag = MPIDI_UCX_recv_tag(tag, source, comm->recvcontext_id + context_offset);
 
-    message_handler = ucp_tag_probe_nb(MPIDI_CH4_NMI_UCX_global.worker, ucp_tag,
+    message_handler = ucp_tag_probe_nb(MPIDI_UCX_global.worker, ucp_tag,
                                         tag_mask, 1, &info);
     if(message_handler == NULL) {
         *flag = 0;
@@ -91,11 +91,11 @@ static inline int MPIDI_CH4_NM_improbe(int source,
     *flag = 1;
      req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
      MPIU_Assert(req);
-     MPIDI_CH4_NMI_UCX_REQ(req).message_handler = message_handler;
+     MPIDI_UCX_REQ(req).message_handler = message_handler;
 
 
-     status->MPI_SOURCE = MPIDI_CH4_NMI_UCX_get_source(info.sender_tag);
-     status->MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info.sender_tag);
+     status->MPI_SOURCE = MPIDI_UCX_get_source(info.sender_tag);
+     status->MPI_TAG = MPIDI_UCX_get_tag(info.sender_tag);
      count = info.length;
      MPIR_STATUS_SET_COUNT(*status, count);
      req->kind = MPIR_REQUEST_KIND__MPROBE;

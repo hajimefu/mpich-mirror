@@ -25,21 +25,21 @@
 
 /* Defines */
 
-#define MPIDI_CH4_NMI_OFI_MAX_AM_HDR_SIZE    128
-#define MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS   8
-#define MPIDI_CH4_NMI_OFI_AM_TYPE_BITS         8
-#define MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS       8
-#define MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS     48
-#define MPIDI_CH4_NMI_OFI_AM_CONTEXT_ID_BITS  24
-#define MPIDI_CH4_NMI_OFI_AM_RANK_BITS        32
-#define MPIDI_CH4_NMI_OFI_AM_MSG_HEADER_SIZE (sizeof(MPIDI_CH4_NMI_OFI_am_header_t))
+#define MPIDI_OFI_MAX_AM_HDR_SIZE    128
+#define MPIDI_OFI_AM_HANDLER_ID_BITS   8
+#define MPIDI_OFI_AM_TYPE_BITS         8
+#define MPIDI_OFI_AM_HDR_SZ_BITS       8
+#define MPIDI_OFI_AM_DATA_SZ_BITS     48
+#define MPIDI_OFI_AM_CONTEXT_ID_BITS  24
+#define MPIDI_OFI_AM_RANK_BITS        32
+#define MPIDI_OFI_AM_MSG_HEADER_SIZE (sizeof(MPIDI_OFI_am_header_t))
 
-#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS      256
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS   8
+#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+#define MPIDI_OFI_MAX_ENDPOINTS      256
+#define MPIDI_OFI_MAX_ENDPOINTS_BITS   8
 #else
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS        1
-#define MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS   0
+#define MPIDI_OFI_MAX_ENDPOINTS        1
+#define MPIDI_OFI_MAX_ENDPOINTS_BITS   0
 #endif
 
 /* Typedefs */
@@ -47,35 +47,35 @@
 struct MPIR_Comm;
 struct MPIR_Request;
 
-#ifdef MPIDI_CH4_NMI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
-typedef struct MPIDI_CH4_NMI_OFI_VCR {
+#ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
+typedef struct MPIDI_OFI_VCR {
     unsigned is_local : 1;
 unsigned ep_idx   :
-    MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS;
+    MPIDI_OFI_MAX_ENDPOINTS_BITS;
 unsigned addr_idx :
-    (31 - MPIDI_CH4_NMI_OFI_MAX_ENDPOINTS_BITS);
-} MPIDI_CH4_NMI_OFI_VCR;
+    (31 - MPIDI_OFI_MAX_ENDPOINTS_BITS);
+} MPIDI_OFI_VCR;
 #else
-typedef struct MPIDI_CH4_NMI_OFI_VCR {
+typedef struct MPIDI_OFI_VCR {
     unsigned is_local : 1;
     unsigned addr_idx : 31;
-} MPIDI_CH4_NMI_OFI_VCR;
+} MPIDI_OFI_VCR;
 #endif
 
-struct MPIDI_CH4_NMI_OFI_VCRT {
+struct MPIDI_OFI_VCRT {
     MPIU_OBJECT_HEADER;
     unsigned              size;                /**< Number of entries in the table */
-    MPIDI_CH4_NMI_OFI_VCR vcr_table[0];       /**< Array of virtual connection references */
+    MPIDI_OFI_VCR vcr_table[0];       /**< Array of virtual connection references */
 };
 
 typedef struct {
-    struct MPIDI_CH4_NMI_OFI_VCRT *vcrt;
-    struct MPIDI_CH4_NMI_OFI_VCRT *local_vcrt;
+    struct MPIDI_OFI_VCRT *vcrt;
+    struct MPIDI_OFI_VCRT *local_vcrt;
     void                          *huge_send_counters;
     void                          *huge_recv_counters;
     void                          *win_id_allocator;
     void                          *rma_id_allocator;
-} MPIDI_CH4_NMI_OFI_comm_t;
+} MPIDI_OFI_comm_t;
 enum {
     MPIDI_AMTYPE_SHORT_HDR = 0,
     MPIDI_AMTYPE_SHORT,
@@ -96,36 +96,36 @@ typedef struct {
     uint64_t sreq_ptr;
     uint64_t am_hdr_src;
     uint64_t rma_key;
-} MPIDI_CH4_NMI_OFI_lmt_msg_payload_t;
+} MPIDI_OFI_lmt_msg_payload_t;
 
 typedef struct {
     uint64_t sreq_ptr;
-} MPIDI_CH4_NMI_OFI_ack_msg_payload_t;
+} MPIDI_OFI_ack_msg_payload_t;
 
-typedef struct MPIDI_CH4_NMI_OFI_am_header_t {
+typedef struct MPIDI_OFI_am_header_t {
 uint64_t handler_id  :
-    MPIDI_CH4_NMI_OFI_AM_HANDLER_ID_BITS;
+    MPIDI_OFI_AM_HANDLER_ID_BITS;
 uint64_t am_type     :
-    MPIDI_CH4_NMI_OFI_AM_TYPE_BITS;
+    MPIDI_OFI_AM_TYPE_BITS;
 uint64_t am_hdr_sz   :
-    MPIDI_CH4_NMI_OFI_AM_HDR_SZ_BITS;
+    MPIDI_OFI_AM_HDR_SZ_BITS;
 uint64_t data_sz     :
-    MPIDI_CH4_NMI_OFI_AM_DATA_SZ_BITS;
+    MPIDI_OFI_AM_DATA_SZ_BITS;
     uint64_t payload[0];
-} MPIDI_CH4_NMI_OFI_am_header_t;
+} MPIDI_OFI_am_header_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_am_header_t       hdr;
-    MPIDI_CH4_NMI_OFI_ack_msg_payload_t pyld;
-} MPIDI_CH4_NMI_OFI_ack_msg_t;
+    MPIDI_OFI_am_header_t       hdr;
+    MPIDI_OFI_ack_msg_payload_t pyld;
+} MPIDI_OFI_ack_msg_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_am_header_t       hdr;
-    MPIDI_CH4_NMI_OFI_lmt_msg_payload_t pyld;
-} MPIDI_CH4_NMI_OFI_lmt_msg_t;
+    MPIDI_OFI_am_header_t       hdr;
+    MPIDI_OFI_lmt_msg_payload_t pyld;
+} MPIDI_OFI_lmt_msg_t;
 
 typedef struct {
-    MPIDI_CH4_NMI_OFI_lmt_msg_payload_t  lmt_info;
+    MPIDI_OFI_lmt_msg_payload_t  lmt_info;
     uint64_t                             lmt_cntr;
     struct fid_mr                        *lmt_mr;
     void                          *pack_buffer;
@@ -134,21 +134,21 @@ typedef struct {
     int (*cmpl_handler_fn)(struct MPIR_Request *req);
     uint16_t                      am_hdr_sz;
     uint8_t                       pad[6];
-    MPIDI_CH4_NMI_OFI_am_header_t msg_hdr;
-    uint8_t                       am_hdr_buf[MPIDI_CH4_NMI_OFI_MAX_AM_HDR_SIZE];
-} MPIDI_CH4_NMI_OFI_am_request_header_t;
+    MPIDI_OFI_am_header_t msg_hdr;
+    uint8_t                       am_hdr_buf[MPIDI_OFI_MAX_AM_HDR_SIZE];
+} MPIDI_OFI_am_request_header_t;
 
 typedef struct {
     struct fi_context                      context;  /* fixed field, do not move */
     int                                    event_id; /* fixed field, do not move */
-    MPIDI_CH4_NMI_OFI_am_request_header_t *req_hdr;
-} MPIDI_CH4_NMI_OFI_am_request_t;
+    MPIDI_OFI_am_request_header_t *req_hdr;
+} MPIDI_OFI_am_request_t;
 
 
-typedef struct MPIDI_CH4_NMI_OFI_noncontig_t{
+typedef struct MPIDI_OFI_noncontig_t{
     struct MPIDU_Segment segment;
     char                 pack_buffer[0];
-}MPIDI_CH4_NMI_OFI_noncontig_t;
+}MPIDI_OFI_noncontig_t;
 
 typedef struct {
     struct fi_context    context;  /* fixed field, do not move */
@@ -156,7 +156,7 @@ typedef struct {
     int                  util_id;
     struct MPIR_Comm    *util_comm;
     MPI_Datatype         datatype;
-    MPIDI_CH4_NMI_OFI_noncontig_t *noncontig;
+    MPIDI_OFI_noncontig_t *noncontig;
     /* persistent send fields */
     union {
         struct {
@@ -169,20 +169,20 @@ typedef struct {
         struct iovec iov;
         void *inject_buf; /* Internal buffer for inject emulation */
     } util;
-} MPIDI_CH4_NMI_OFI_request_t;
+} MPIDI_OFI_request_t;
 
 typedef struct {
     int index;
-} MPIDI_CH4_NMI_OFI_dt_t;
+} MPIDI_OFI_dt_t;
 
-struct MPIDI_CH4_NMI_OFI_win_request;
+struct MPIDI_OFI_win_request;
 
 typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
     uint64_t                           win_id;
-    struct MPIDI_CH4_NMI_OFI_win_request   *syncQ;
+    struct MPIDI_OFI_win_request   *syncQ;
     uint32_t *disp_units;
-} MPIDI_CH4_NMI_OFI_win_t;
+} MPIDI_OFI_win_t;
 
 #endif

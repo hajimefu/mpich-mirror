@@ -43,7 +43,7 @@ static inline void MPIDI_CH4_NM_request_release(MPIR_Request * req)
 
     MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
     MPIU_Object_release_ref(req, &count);
-    printf("release request %d %d\n", count,MPIDI_CH4_NMI_UCX_REQ(req).is_ucx_req);
+    printf("release request %d %d\n", count,MPIDI_UCX_REQ(req).is_ucx_req);
     MPIU_Assert(count >= 0);
     if (count == 0) {
         MPIU_Assert(MPID_cc_is_complete(&req->cc));
@@ -53,12 +53,12 @@ static inline void MPIDI_CH4_NM_request_release(MPIR_Request * req)
         }
         if (req->u.ureq.greq_fns)
             MPL_free(req->u.ureq.greq_fns);
-        if(!MPIDI_CH4_NMI_UCX_REQ(req).is_ucx_req)
+        if(!MPIDI_UCX_REQ(req).is_ucx_req)
              MPIU_Handle_obj_free(&MPIR_Request_mem, req);
         else{
-            MPIDI_CH4_NMI_UCX_REQ(req).is_call_done = 0;
-            MPIDI_CH4_NMI_UCX_REQ(req).in_nb = 1;
-            ucp_request_release(MPIDI_CH4_NMI_UCX_REQ(req).ucx_request);
+            MPIDI_UCX_REQ(req).is_call_done = 0;
+            MPIDI_UCX_REQ(req).in_nb = 1;
+            ucp_request_release(MPIDI_UCX_REQ(req).ucx_request);
         }
     }
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH4_NM_REQUEST_RELEASE);
@@ -96,7 +96,7 @@ static inline void MPIDI_netmod_request_init(MPIR_Request* req)
 #define FUNCNAME MPIDI_CH4_NM_request_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPIR_Request* MPIDI_CH4_NMI_UCX_Request_create()
+static inline MPIR_Request* MPIDI_UCX_Request_create()
 {
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_CREATE);
@@ -124,10 +124,10 @@ static inline MPIR_Request* MPIDI_CH4_NMI_UCX_Request_create()
     return req;
 }
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
+#define FUNCNAME MPIDI_UCX_Alloc_send_request_done()
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPIR_Request *MPIDI_CH4_NMI_UCX_Alloc_send_request_done()
+static inline MPIR_Request *MPIDI_UCX_Alloc_send_request_done()
 {
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_SEND_DONE);
@@ -172,20 +172,20 @@ static inline MPIR_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
     return req;
 }
-static inline void MPIDI_CH4_NMI_UCX_Request_init_callback(void *request)
+static inline void MPIDI_UCX_Request_init_callback(void *request)
 {
 
-    MPIDI_CH4_NMI_UCX_ucp_request_t *ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
+    MPIDI_UCX_ucp_request_t *ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     ucp_request->req = NULL;
 
 }
 
-static inline void MPIDI_CH4_NMI_UCX_Handle_send_callback(void *request, ucs_status_t status)
+static inline void MPIDI_UCX_Handle_send_callback(void *request, ucs_status_t status)
 {
     int c;
     int mpi_errno;
 
-    MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
+    MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     MPIR_Request *req = NULL;
     if(ucp_request->req){
         req = ucp_request->req;
@@ -198,7 +198,7 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_send_callback(void *request, ucs_sta
         ucp_request->req = NULL;
     }
     else {
-        req = MPIDI_CH4_NMI_UCX_Alloc_send_request_done();
+        req = MPIDI_UCX_Alloc_send_request_done();
         ucp_request->req = req;
     }
 fn_exit:
@@ -207,17 +207,17 @@ fn_fail:
     req->status.MPI_ERROR = mpi_errno;
 }
 
-static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_status_t status,
+static inline void MPIDI_UCX_Handle_recv_callback(void *request, ucs_status_t status,
                                                           ucp_tag_recv_info_t * info)
 {
     int count;
     int mpi_errno;
-    MPIDI_CH4_NMI_UCX_ucp_request_t* ucp_request = (MPIDI_CH4_NMI_UCX_ucp_request_t*) request;
+    MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     MPIR_Request *rreq = NULL;
     if(!ucp_request->req) {
         rreq = MPIDI_CH4_NM_UCX_Alloc_recv_request_done();
-        rreq->status.MPI_SOURCE = MPIDI_CH4_NMI_UCX_get_source(info->sender_tag);
-        rreq->status.MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info->sender_tag);
+        rreq->status.MPI_SOURCE = MPIDI_UCX_get_source(info->sender_tag);
+        rreq->status.MPI_TAG = MPIDI_UCX_get_tag(info->sender_tag);
         count = info->length;
         MPIR_STATUS_SET_COUNT(rreq->status, count);
         ucp_request->req = rreq;
@@ -225,8 +225,8 @@ static inline void MPIDI_CH4_NMI_UCX_Handle_recv_callback(void *request, ucs_sta
     else {
         rreq = ucp_request->req;
         rreq->status.MPI_ERROR = MPI_SUCCESS;
-        rreq->status.MPI_SOURCE = MPIDI_CH4_NMI_UCX_get_source(info->sender_tag);
-        rreq->status.MPI_TAG = MPIDI_CH4_NMI_UCX_get_tag(info->sender_tag);
+        rreq->status.MPI_SOURCE = MPIDI_UCX_get_source(info->sender_tag);
+        rreq->status.MPI_TAG = MPIDI_UCX_get_tag(info->sender_tag);
         count = info->length;
         MPIR_STATUS_SET_COUNT(rreq->status, count);
         MPIDI_CH4U_request_complete(rreq);
