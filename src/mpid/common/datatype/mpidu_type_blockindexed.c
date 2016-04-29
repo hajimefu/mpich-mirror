@@ -117,7 +117,7 @@ int MPIDU_Type_blockindexed(int count,
 	old_ub        = old_dtp->ub;
 	old_true_ub   = old_dtp->true_ub;
 	old_extent    = old_dtp->extent;
-	old_is_contig = old_dtp->is_contig;
+	old_is_contig = MPID_Datatype_is_contig(old_dtp);
 
 	new_dtp->size           = (MPI_Aint) count *
 	                          (MPI_Aint) blocklength *

@@ -414,7 +414,7 @@ int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype 
     }
     else {
         MPID_Datatype_get_ptr(datatype, dtp);
-        is_contig = dtp->is_contig;
+        is_contig = MPID_Datatype_is_contig(dtp);
     }
 
     MPIR_SCHED_CHKPMEM_MALLOC(status, struct MPIR_Ibcast_status*,
@@ -666,7 +666,7 @@ int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype dat
         is_contig = 1;
     else {
         MPID_Datatype_get_ptr(datatype, dtp);
-        is_contig = dtp->is_contig;
+        is_contig = MPID_Datatype_is_contig(dtp);
     }
 
     is_homogeneous = 1;

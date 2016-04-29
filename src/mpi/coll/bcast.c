@@ -153,7 +153,7 @@ static int MPIR_Bcast_binomial(
         is_contig = 1;
     else {
         MPID_Datatype_get_ptr(datatype, dtp); 
-        is_contig = dtp->is_contig;
+        is_contig = MPID_Datatype_is_contig(dtp);
     }
 
     is_homogeneous = 1;
@@ -506,7 +506,7 @@ static int MPIR_Bcast_scatter_doubling_allgather(
         is_contig = 1;
     else {
         MPID_Datatype_get_ptr(datatype, dtp); 
-        is_contig = dtp->is_contig;
+        is_contig = MPID_Datatype_is_contig(dtp);
     }
 
     is_homogeneous = 1;
@@ -812,7 +812,7 @@ static int MPIR_Bcast_scatter_ring_allgather(
         is_contig = 1;
     else {
         MPID_Datatype_get_ptr(datatype, dtp); 
-        is_contig = dtp->is_contig;
+        is_contig = MPID_Datatype_is_contig(dtp);
     }
 
     is_homogeneous = 1;

@@ -71,7 +71,7 @@ _dt_contig_out, _data_sz_out, _dt_ptr, _dt_true_lb)             \
   else                                                          \
     {                                                           \
         MPIDU_Datatype_get_ptr((_datatype), (_dt_ptr));          \
-        (_dt_contig_out) = (_dt_ptr)->is_contig;                \
+        (_dt_contig_out) = (_dt_ptr)MPID_Datatype_is_contig();                \
         (_dt_true_lb)    = (_dt_ptr)->true_lb;                  \
         (_data_sz_out)   = (_count) * (_dt_ptr)->size;          \
     }                                                           \
