@@ -16,8 +16,8 @@
 #include "ch4_impl.h"
 
 MPIDI_CH4_Global_t MPIDI_CH4_Global;
-MPIDI_CH4I_av_table_t **MPIDI_CH4I_av_table;
-MPIDI_CH4I_av_table_t *MPIDI_CH4I_av_table0;
+MPIDII_av_table_t **MPIDII_av_table;
+MPIDII_av_table_t *MPIDII_av_table0;
 
 MPIDI_CH4_NM_funcs_t *MPIDI_CH4_NM_func;
 MPIDI_CH4_NM_native_funcs_t *MPIDI_CH4_NM_native_func;

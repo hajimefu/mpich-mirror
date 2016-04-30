@@ -299,10 +299,10 @@ __CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4R_update_node_map
+#define FUNCNAME MPIDIU_update_node_map
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4R_update_node_map(int avtid, int size, MPID_Node_id_t node_map[])
+static inline int MPIDIU_update_node_map(int avtid, int size, MPID_Node_id_t node_map[])
 {
     int i;
     for (i = 0; i < size; i++) {

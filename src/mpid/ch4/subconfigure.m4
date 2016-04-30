@@ -124,16 +124,16 @@ MPIDI_${net_upper}_dt_t ${net};"
 MPIDI_${net_upper}_win_t ${net};"
     fi
     if test -z "$ch4_netmod_gpid_decl" ; then
-        ch4_netmod_gpid_decl="MPIDI_CH4_NMI_${net_upper}_gpid_t ${net};"
+        ch4_netmod_gpid_decl="MPIDI_${net_upper}_gpid_t ${net};"
     else
         ch4_netmod_gpid_decl="${ch4_netmod_gpid_decl} \\
-MPIDI_CH4_NMI_${net_upper}_gpid_t ${net};"
+MPIDI_${net_upper}_gpid_t ${net};"
     fi
     if test -z "$ch4_netmod_addr_decl" ; then
-        ch4_netmod_addr_decl="MPIDI_CH4_NMI_${net_upper}_addr_t ${net};"
+        ch4_netmod_addr_decl="MPIDI_${net_upper}_addr_t ${net};"
     else
         ch4_netmod_addr_decl="${ch4_netmod_addr_decl} \\
-MPIDI_CH4_NMI_${net_upper}_addr_t ${net};"
+MPIDI_${net_upper}_addr_t ${net};"
     fi
 
 

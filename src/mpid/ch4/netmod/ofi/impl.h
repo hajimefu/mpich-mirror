@@ -41,16 +41,16 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
 #endif /* __clang__ || __INTEL_COMPILER */
 
 #define MPIDI_OFI_COMM_TO_INDEX(comm,rank) \
-    MPIDIR_comm_rank_to_pid(comm, rank, NULL, NULL)
+    MPIDIU_comm_rank_to_pid(comm, rank, NULL, NULL)
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank) \
-    ((fi_addr_t)(int)MPIDI_OFI_AV(MPIDIR_comm_rank_to_av(comm, rank)).dest)
-#define MPIDI_OFI_TO_PHYS(rank)            ((fi_addr_t)rank)
+    ((fi_addr_t)(int)MPIDI_OFI_AV(MPIDIU_comm_rank_to_av(comm, rank)).dest)
+#define MPIDI_OFI_TO_PHYS(avtid, rank)            ((fi_addr_t)rank)
 #else
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank)                       \
-    MPIDI_OFI_AV(MPIDIR_comm_rank_to_av((comm), (rank))).dest
-#define MPIDI_OFI_TO_PHYS(rank)                                 \
-    MPIDI_OFI_AV(&MPIDIR_get_av((avtid), (lpid))).dest
+    MPIDI_OFI_AV(MPIDIU_comm_rank_to_av((comm), (rank))).dest
+#define MPIDI_OFI_TO_PHYS(avtid, lpid)                                 \
+    MPIDI_OFI_AV(&MPIDIU_get_av((avtid), (lpid))).dest
 #endif
 
 #define MPIDI_OFI_WIN(win)     ((win)->dev.netmod.ofi)

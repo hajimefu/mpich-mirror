@@ -116,8 +116,8 @@ MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm * c
     return MPIDI_CH4_NM_func->get_max_node_id( comm, max_id_p);
 };
 
-MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_getallincomm(MPIR_Comm * comm_ptr, int local_size, MPIR_Gpid local_gpid[], int * singlePG) {
-    return MPIDI_CH4_NM_func->getallincomm( comm_ptr, local_size, local_gpid, singlePG);
+MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_getallincomm(MPIR_Comm * comm_ptr, int local_size, MPIR_Gpid local_gpid[], int * singleAVT) {
+    return MPIDI_CH4_NM_func->getallincomm( comm_ptr, local_size, local_gpid, singleAVT);
 };
 
 MPIDI_CH4_NM_STATIC_INLINE_PREFIX int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[]) {

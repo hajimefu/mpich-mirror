@@ -34,10 +34,10 @@ typedef struct {
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_gpid_t;
+} MPIDI_STUB_gpid_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_NMI_STUB_addr_t;
+} MPIDI_STUB_addr_t;
 
 #endif

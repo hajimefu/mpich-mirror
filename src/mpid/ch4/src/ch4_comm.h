@@ -116,48 +116,44 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPIR_Comm * comm)
 
     /* comm_world and comm_self are already initialized */
     if (comm != MPIR_Process.comm_world && comm != MPIR_Process.comm_self) {
-        MPIDI_CH4I_comm_create_rank_map(comm);
+        MPIDII_comm_create_rank_map(comm);
         /* add ref to avts */
-        switch (MPIDI_CH4I_COMM(comm,map).mode) {
-            case MPIDI_CH4I_RANK_MAP_NONE:
+        switch (MPIDII_COMM(comm,map).mode) {
+            case MPIDII_RANK_MAP_NONE:
                 break;
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
-            case MPIDI_CH4I_RANK_MAP_MLUT:
-                max_n_avts = MPIDI_CH4R_get_max_n_avts();
+            case MPIDII_RANK_MAP_MLUT:
+                max_n_avts = MPIDIU_get_max_n_avts();
                 uniq_avtids = (int *) MPL_malloc(max_n_avts * sizeof(int));
                 memset(uniq_avtids, 0, max_n_avts);
-                for (i = 0; i < MPIDI_CH4I_COMM(comm,map).size; i++) {
-                    if (uniq_avtids[MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid] == 0) {
-                        uniq_avtids[MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid] = 1;
-                        MPIDI_CH4R_avt_add_ref(MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid);
+                for (i = 0; i < MPIDII_COMM(comm,map).size; i++) {
+                    if (uniq_avtids[MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid] == 0) {
+                        uniq_avtids[MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid] = 1;
+                        MPIDIU_avt_add_ref(MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid);
                     }
                 }
                 MPL_free(uniq_avtids);
                 break;
-#endif
             default:
-                MPIDI_CH4R_avt_add_ref(MPIDI_CH4I_COMM(comm,map).avtid);
+                MPIDIU_avt_add_ref(MPIDII_COMM(comm,map).avtid);
         }
 
-        switch (MPIDI_CH4I_COMM(comm,local_map).mode) {
-            case MPIDI_CH4I_RANK_MAP_NONE:
+        switch (MPIDII_COMM(comm,local_map).mode) {
+            case MPIDII_RANK_MAP_NONE:
                 break;
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
-            case MPIDI_CH4I_RANK_MAP_MLUT:
-                max_n_avts = MPIDI_CH4R_get_max_n_avts();
+            case MPIDII_RANK_MAP_MLUT:
+                max_n_avts = MPIDIU_get_max_n_avts();
                 uniq_avtids = (int *) MPL_malloc(max_n_avts * sizeof(int));
                 memset(uniq_avtids, 0, max_n_avts);
-                for (i = 0; i < MPIDI_CH4I_COMM(comm,local_map).size; i++) {
-                    if (uniq_avtids[MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] == 0) {
-                        uniq_avtids[MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] = 1;
-                        MPIDI_CH4R_avt_add_ref(MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid);
+                for (i = 0; i < MPIDII_COMM(comm,local_map).size; i++) {
+                    if (uniq_avtids[MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] == 0) {
+                        uniq_avtids[MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] = 1;
+                        MPIDIU_avt_add_ref(MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid);
                     }
                 }
                 MPL_free(uniq_avtids);
                 break;
-#endif
             default:
-                MPIDI_CH4R_avt_add_ref(MPIDI_CH4I_COMM(comm,local_map).avtid);
+                MPIDIU_avt_add_ref(MPIDII_COMM(comm,local_map).avtid);
         }
     }
 
@@ -180,46 +176,42 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DESTROY);
     /* release ref to avts */
-    switch (MPIDI_CH4I_COMM(comm,map).mode) {
-        case MPIDI_CH4I_RANK_MAP_NONE:
+    switch (MPIDII_COMM(comm,map).mode) {
+        case MPIDII_RANK_MAP_NONE:
             break;
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
-        case MPIDI_CH4I_RANK_MAP_MLUT:
-            max_n_avts = MPIDI_CH4R_get_max_n_avts();
+        case MPIDII_RANK_MAP_MLUT:
+            max_n_avts = MPIDIU_get_max_n_avts();
             uniq_avtids = (int *) MPL_malloc(max_n_avts * sizeof(int));
             memset(uniq_avtids, 0, max_n_avts);
-            for (i = 0; i < MPIDI_CH4I_COMM(comm,map).size; i++) {
-                if (uniq_avtids[MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid] == 0) {
-                    uniq_avtids[MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid] = 1;
-                    MPIDI_CH4R_avt_release_ref(MPIDI_CH4I_COMM(comm,map).irreg.mlut.gpid[i].avtid);
+            for (i = 0; i < MPIDII_COMM(comm,map).size; i++) {
+                if (uniq_avtids[MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid] == 0) {
+                    uniq_avtids[MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid] = 1;
+                    MPIDIU_avt_release_ref(MPIDII_COMM(comm,map).irreg.mlut.gpid[i].avtid);
                 }
             }
             MPL_free(uniq_avtids);
             break;
-#endif
         default:
-            MPIDI_CH4R_avt_release_ref(MPIDI_CH4I_COMM(comm,map).avtid);
+            MPIDIU_avt_release_ref(MPIDII_COMM(comm,map).avtid);
     }
 
-    switch (MPIDI_CH4I_COMM(comm,local_map).mode) {
-        case MPIDI_CH4I_RANK_MAP_NONE:
+    switch (MPIDII_COMM(comm,local_map).mode) {
+        case MPIDII_RANK_MAP_NONE:
             break;
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
-        case MPIDI_CH4I_RANK_MAP_MLUT:
-            max_n_avts = MPIDI_CH4R_get_max_n_avts();
+        case MPIDII_RANK_MAP_MLUT:
+            max_n_avts = MPIDIU_get_max_n_avts();
             uniq_avtids = (int *) MPL_malloc(max_n_avts * sizeof(int));
             memset(uniq_avtids, 0, max_n_avts);
-            for (i = 0; i < MPIDI_CH4I_COMM(comm,local_map).size; i++) {
-                if (uniq_avtids[MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] == 0) {
-                    uniq_avtids[MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] = 1;
-                    MPIDI_CH4R_avt_release_ref(MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.gpid[i].avtid);
+            for (i = 0; i < MPIDII_COMM(comm,local_map).size; i++) {
+                if (uniq_avtids[MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] == 0) {
+                    uniq_avtids[MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid] = 1;
+                    MPIDIU_avt_release_ref(MPIDII_COMM(comm,local_map).irreg.mlut.gpid[i].avtid);
                 }
             }
             MPL_free(uniq_avtids);
             break;
-#endif
         default:
-            MPIDI_CH4R_avt_release_ref(MPIDI_CH4I_COMM(comm,local_map).avtid);
+            MPIDIU_avt_release_ref(MPIDII_COMM(comm,local_map).avtid);
     }
 
     mpi_errno = MPIDI_CH4_NM_comm_destroy(comm);
@@ -233,22 +225,18 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
     }
 #endif
 
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_LUT
-    if (MPIDI_CH4I_COMM(comm,map).mode == MPIDI_CH4I_RANK_MAP_LUT) {
-        MPIDI_CH4R_release_lut(MPIDI_CH4I_COMM(comm,map).irreg.lut.t);
+    if (MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_LUT) {
+        MPIDIU_release_lut(MPIDII_COMM(comm,map).irreg.lut.t);
     }
-    if (MPIDI_CH4I_COMM(comm,local_map).mode == MPIDI_CH4I_RANK_MAP_LUT) {
-        MPIDI_CH4R_release_lut(MPIDI_CH4I_COMM(comm,local_map).irreg.lut.t);
+    if (MPIDII_COMM(comm,local_map).mode == MPIDII_RANK_MAP_LUT) {
+        MPIDIU_release_lut(MPIDII_COMM(comm,local_map).irreg.lut.t);
     }
-#endif
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
-    if (MPIDI_CH4I_COMM(comm,map).mode == MPIDI_CH4I_RANK_MAP_MLUT) {
-        MPIDI_CH4R_release_mlut(MPIDI_CH4I_COMM(comm,map).irreg.mlut.t);
+    if (MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_MLUT) {
+        MPIDIU_release_mlut(MPIDII_COMM(comm,map).irreg.mlut.t);
     }
-    if (MPIDI_CH4I_COMM(comm,local_map).mode == MPIDI_CH4I_RANK_MAP_MLUT) {
-        MPIDI_CH4R_release_mlut(MPIDI_CH4I_COMM(comm,local_map).irreg.mlut.t);
+    if (MPIDII_COMM(comm,local_map).mode == MPIDII_RANK_MAP_MLUT) {
+        MPIDIU_release_mlut(MPIDII_COMM(comm,local_map).irreg.mlut.t);
     }
-#endif
   fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);
     return mpi_errno;

@@ -294,56 +294,56 @@ typedef struct {
 #define MPIDI_CH4U_WIN(win,field)        (((win)->dev.ch4u).field)
 #define MPIDI_CH4U_WINFO(win,rank) (MPIDI_CH4U_win_info_t*) &(MPIDI_CH4U_WIN(win, info_table)[rank])
 
-typedef unsigned MPIDI_CH4I_locality_t;
+typedef unsigned MPIDII_locality_t;
 
 typedef struct MPIDI_CH4U_comm_t {
     MPIDI_CH4U_rreq_t *posted_list;
     MPIDI_CH4U_rreq_t *unexp_list;
     uint32_t   window_instance;
-#ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIDI_CH4I_locality_t *locality;
-#endif
+// #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
+    // MPIDII_locality_t *locality;
+// #endif
 } MPIDI_CH4U_comm_t;
 
-#define MPIDI_CH4I_CALC_STRIDE(rank, stride, blocksize, offset) \
+#define MPIDII_CALC_STRIDE(rank, stride, blocksize, offset) \
     ((rank) / (blocksize) * ((stride) - (blocksize)) + (rank) + (offset))
 
-#define MPIDI_CH4I_CALC_STRIDE_SIMPLE(rank, stride, offset) \
+#define MPIDII_CALC_STRIDE_SIMPLE(rank, stride, offset) \
     ((rank) * (stride) + (offset))
 
 typedef enum {
-    MPIDI_CH4I_RANK_MAP_DIRECT,
-    MPIDI_CH4I_RANK_MAP_DIRECT_INTRA,
-    MPIDI_CH4I_RANK_MAP_OFFSET,
-    MPIDI_CH4I_RANK_MAP_OFFSET_INTRA,
-    MPIDI_CH4I_RANK_MAP_STRIDE,
-    MPIDI_CH4I_RANK_MAP_STRIDE_INTRA,
-    MPIDI_CH4I_RANK_MAP_STRIDE_BLOCK,
-    MPIDI_CH4I_RANK_MAP_STRIDE_BLOCK_INTRA,
-    MPIDI_CH4I_RANK_MAP_LUT,
-    MPIDI_CH4I_RANK_MAP_LUT_INTRA,
-    MPIDI_CH4I_RANK_MAP_MLUT,
-    MPIDI_CH4I_RANK_MAP_NONE
-} MPIDI_CH4I_Rank_map_mode;
+    MPIDII_RANK_MAP_DIRECT,
+    MPIDII_RANK_MAP_DIRECT_INTRA,
+    MPIDII_RANK_MAP_OFFSET,
+    MPIDII_RANK_MAP_OFFSET_INTRA,
+    MPIDII_RANK_MAP_STRIDE,
+    MPIDII_RANK_MAP_STRIDE_INTRA,
+    MPIDII_RANK_MAP_STRIDE_BLOCK,
+    MPIDII_RANK_MAP_STRIDE_BLOCK_INTRA,
+    MPIDII_RANK_MAP_LUT,
+    MPIDII_RANK_MAP_LUT_INTRA,
+    MPIDII_RANK_MAP_MLUT,
+    MPIDII_RANK_MAP_NONE
+} MPIDII_rank_map_mode;
 
-typedef int MPIDI_CH4I_lpid_t;
+typedef int MPIDII_lpid_t;
 typedef struct {
     int avtid;
     int lpid;
-} MPIDI_CH4I_gpid_t;
+} MPIDII_gpid_t;
 
 typedef struct {
     MPIU_OBJECT_HEADER;
-    MPIDI_CH4I_lpid_t lpid[0];
-} MPIDI_CH4I_Rank_map_lut_t;
+    MPIDII_lpid_t lpid[0];
+} MPIDII_rank_map_lut_t;
 
 typedef struct {
     MPIU_OBJECT_HEADER;
-    MPIDI_CH4I_gpid_t gpid[0];
-} MPIDI_CH4I_Rank_map_mlut_t;
+    MPIDII_gpid_t gpid[0];
+} MPIDII_rank_map_mlut_t;
 
 typedef struct {
-    MPIDI_CH4I_Rank_map_mode mode;
+    MPIDII_rank_map_mode mode;
     int avtid;
     int size;
 
@@ -358,15 +358,15 @@ typedef struct {
 
     union {
         struct {
-            MPIDI_CH4I_Rank_map_lut_t *t;
-            MPIDI_CH4I_lpid_t *lpid;
+            MPIDII_rank_map_lut_t *t;
+            MPIDII_lpid_t *lpid;
         } lut;
         struct {
-            MPIDI_CH4I_Rank_map_mlut_t *t;
-            MPIDI_CH4I_gpid_t *gpid;
+            MPIDII_rank_map_mlut_t *t;
+            MPIDII_gpid_t *gpid;
         } mlut;
     } irreg;
-} MPIDI_CH4I_Rank_map_t;
+} MPIDII_rank_map_t;
 
 typedef struct MPIDI_Devcomm_t {
     struct {
@@ -382,12 +382,12 @@ typedef struct MPIDI_Devcomm_t {
             MPIDI_CH4_SHM_COMM_DECL
         }shm;
 
-        MPIDI_CH4I_Rank_map_t map;
-        MPIDI_CH4I_Rank_map_t local_map;
+        MPIDII_rank_map_t map;
+        MPIDII_rank_map_t local_map;
     }ch4;
 } MPIDI_Devcomm_t;
 #define MPIDI_CH4U_COMM(comm,field) ((comm)->dev.ch4.ch4u).field
-#define MPIDI_CH4I_COMM(comm,field) ((comm)->dev.ch4).field
+#define MPIDII_COMM(comm,field) ((comm)->dev.ch4).field
 
 
 #define MPID_USE_NODE_IDS
@@ -405,30 +405,30 @@ typedef struct {
 #define MPID_DEV_COMM_DECL       MPIDI_Devcomm_t dev;
 #define MPID_DEV_GPID_DECL       MPIDI_Devgpid_t dev;
 
-#define MPIDI_CH4I_GPID(gpid) (gpid)->dev
+#define MPIDII_GPID(gpid) (gpid)->dev
 
 typedef struct {
     union {
         MPIDI_CH4_NETMOD_ADDR_DECL
     } netmod;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIDI_CH4I_locality_t is_local;
+    MPIDII_locality_t is_local;
 #endif
-} MPIDI_CH4I_av_entry_t;
+} MPIDII_av_entry_t;
 
 typedef struct {
     MPIU_OBJECT_HEADER;
     int size;
-    MPIDI_CH4I_av_entry_t table[0];
-} MPIDI_CH4I_av_table_t;
+    MPIDII_av_entry_t table[0];
+} MPIDII_av_table_t;
 
-extern MPIDI_CH4I_av_table_t **MPIDI_CH4I_av_table;
-extern MPIDI_CH4I_av_table_t *MPIDI_CH4I_av_table0;
+extern MPIDII_av_table_t **MPIDII_av_table;
+extern MPIDII_av_table_t *MPIDII_av_table0;
 
-#define MPIDI_CH4R_get_av_table(avtid) (MPIDI_CH4I_av_table[(avtid)])
-#define MPIDI_CH4R_get_av(avtid, lpid) (MPIDI_CH4I_av_table[(avtid)]->table[(lpid)])
+#define MPIDIU_get_av_table(avtid) (MPIDII_av_table[(avtid)])
+#define MPIDIU_get_av(avtid, lpid) (MPIDII_av_table[(avtid)]->table[(lpid)])
 
-#define MPIDI_CH4R_get_node_map(avtid)   (MPIDI_CH4_Global.node_map[(avtid)])
+#define MPIDIU_get_node_map(avtid)   (MPIDI_CH4_Global.node_map[(avtid)])
 
 #define MPID_Progress_register_hook(fn_, id_) MPID_Progress_register(fn_, id_)
 #define MPID_Progress_deregister_hook(id_) MPID_Progress_deregister(id_)
@@ -451,17 +451,17 @@ extern MPIDI_CH4I_av_table_t *MPIDI_CH4I_av_table0;
 /* operation for (avtid, lpid) to/from "lpid64" */
 /* hard code limit on number of live comm worlds. This should be fixed by future
  * LUPID patch */
-#define MPIDI_CH4R_AVTID_BITS                    (8)
-#define MPIDI_CH4R_LPID_BITS                     (24)
-#define MPIDI_CH4R_LPID_MASK                     (0x00FFFFFF)
-#define MPIDI_CH4R_AVTID_MASK                    (0xFF000000)
-#define MPIDI_CH4R_NEW_AVT_MARK                  (0x80000000)
-#define MPIDI_CH4R_LPID_CREATE(avtid, lpid)      ((avtid << MPIDI_CH4R_LPID_BITS) | lpid)
-#define MPIDI_CH4R_LPID_GET_AVTID(lpid)          ((((lpid) & MPIDI_CH4R_AVTID_MASK) >> MPIDI_CH4R_LPID_BITS))
-#define MPIDI_CH4R_LPID_GET_LPID(lpid)           (((lpid) & MPIDI_CH4R_LPID_MASK))
-#define MPIDI_CH4R_LPID_SET_NEW_AVT_MARK(lpid)   ((lpid) | MPIDI_CH4R_NEW_AVT_MARK)
-#define MPIDI_CH4R_LPID_CLEAR_NEW_AVT_MARK(lpid) ((lpid) & (~MPIDI_CH4R_NEW_AVT_MARK))
-#define MPIDI_CH4R_LPID_IS_NEW_AVT(lpid)         ((lpid) & MPIDI_CH4R_NEW_AVT_MARK)
+#define MPIDIU_AVTID_BITS                    (8)
+#define MPIDIU_LPID_BITS                     (24)
+#define MPIDIU_LPID_MASK                     (0x00FFFFFF)
+#define MPIDIU_AVTID_MASK                    (0xFF000000)
+#define MPIDIU_NEW_AVT_MARK                  (0x80000000)
+#define MPIDIU_LPID_CREATE(avtid, lpid)      ((avtid << MPIDIR_LPID_BITS) | lpid)
+#define MPIDIU_LPID_GET_AVTID(lpid)          ((((lpid) & MPIDIR_AVTID_MASK) >> MPIDIR_LPID_BITS))
+#define MPIDIU_LPID_GET_LPID(lpid)           (((lpid) & MPIDIR_LPID_MASK))
+#define MPIDIU_LPID_SET_NEW_AVT_MARK(lpid)   ((lpid) | MPIDIR_NEW_AVT_MARK)
+#define MPIDIU_LPID_CLEAR_NEW_AVT_MARK(lpid) ((lpid) & (~MPIDIR_NEW_AVT_MARK))
+#define MPIDIU_LPID_IS_NEW_AVT(lpid)         ((lpid) & MPIDIR_NEW_AVT_MARK)
 
 
 #include "mpidu_pre.h"

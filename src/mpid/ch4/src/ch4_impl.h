@@ -412,7 +412,7 @@ static inline int MPIDI_CH4I_valid_group_rank(MPIR_Comm  *comm,
 
     MPIDI_CH4_NM_comm_get_lpid(comm, rank, &lpid, FALSE);
 
-    for(z = 0; z < size && (int)lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
+    for(z = 0; z < size && lpid != grp->lrank_to_lpid[z].lpid; ++z) {}
 
     ret = (z < size);
 

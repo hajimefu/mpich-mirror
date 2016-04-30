@@ -50,10 +50,10 @@ typedef struct {
 
 typedef struct {
     char addr[128];
-} MPIDI_CH4_NMI_UCX_gpid_t;
+} MPIDI_UCX_gpid_t;
 
 typedef struct {
     ucp_ep_h dest;
-} MPIDI_CH4_NMI_UCX_addr_t;
+} MPIDI_UCX_addr_t;
 
 #endif /* UCX_PRE_H_INCLUDED */

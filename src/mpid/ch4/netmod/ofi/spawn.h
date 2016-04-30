@@ -154,8 +154,8 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
 
     int avtid;
     avtid = 0;
-    max_n_avts = MPIDIR_get_max_n_avts();
-    MPIDIR_new_avt(entries, &avtid);
+    max_n_avts = MPIDIU_get_max_n_avts();
+    MPIDIU_new_avt(entries, &avtid);
 
     fi_addr_t *mapped_table;
     mapped_table = (fi_addr_t*) MPL_malloc(entries * sizeof(fi_addr_t));
@@ -163,11 +163,11 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
     MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, addr_table, entries,
                                         mapped_table, 0ULL, NULL), avmap);
     for (i = 0; i < entries; i++) {
-        MPIDI_OFI_AV(&MPIDIR_get_av(avtid, i)).dest = mapped_table[i];
+        MPIDI_OFI_AV(&MPIDIU_get_av(avtid, i)).dest = mapped_table[i];
     }
     MPL_free(mapped_table);
 
-    MPIDIR_update_node_map(avtid, entries, node_table);
+    MPIDIU_update_node_map(avtid, entries, node_table);
 
     /* set mapping for remote group */
     MPIDII_COMM(tmp_comm_ptr,map).mode = MPIDII_RANK_MAP_DIRECT;
@@ -331,7 +331,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         }
 
         for(i=0; i<comm_ptr->local_size; i++)
-            MPIDIU_get_node_id(comm_ptr, i, &my_node_table[i]);
+            MPIDI_CH4U_get_node_id(comm_ptr, i, &my_node_table[i]);
 
         /* fi_av_map here is not quite right for some providers */
         /* we need to get this connection from the sockname     */

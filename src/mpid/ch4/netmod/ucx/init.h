@@ -69,7 +69,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     str_errno = MPL_str_add_binary_arg(&val, (int *) &maxlen, "UCX", (char *) MPIDI_UCX_global.if_address,
                             (int) MPIDI_UCX_global.addrname_len);
 
-    MPIDI_CH4_UCX_STR_ERRCHK(str_errno, buscard_len);
+    /* MPIDI_CH4_UCX_STR_ERRCHK(str_errno, buscard_len); */
     pmi_errno = PMI_KVS_Get_my_name(MPIDI_UCX_global.kvsname, MPIDI_UCX_KVSAPPSTRLEN);
 
     val = valS;
@@ -92,10 +92,10 @@ static inline int MPIDI_CH4_NM_init(int rank,
         MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_commit);
         str_errno = MPL_str_get_binary_arg(valS, "UCX", &table[i * MPIDI_UCX_global.addrname_len],
                                 (int) MPIDI_UCX_global.addrname_len, (int *) &maxlen);
-        MPIDI_UCX_STR_ERRCHK(str_errno, buscard_len);
+        /* MPIDI_UCX_STR_ERRCHK(str_errno, buscard_len); */
         ucx_status = ucp_ep_create(MPIDI_UCX_global.worker,
                                 (ucp_address_t *) & table[i * MPIDI_UCX_global.addrname_len],
-                                &MPIDI_UCX_AV(&MPIDIR_get_av(0, i)).dest);
+                                &MPIDI_UCX_AV(&MPIDIU_get_av(0, i)).dest);
         MPIDI_UCX_CHK_STATUS(ucx_status, ep_create);
     }
 
@@ -137,7 +137,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS, thr_err, pmi_errno;
     int i, max_n_avts;
-    max_n_avts = MPIDI_CH4R_get_max_n_avts();
+    max_n_avts = MPIDIU_get_max_n_avts();
 
     MPIDI_CH4U_finalize();
 
@@ -171,14 +171,14 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
 {
     int avtid = 0, lpid;
    if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
-        MPIDI_CH4R_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
+        MPIDIU_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
     } else if (is_remote) {
-        MPIDI_CH4R_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
+        MPIDIU_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
     } else {
-        MPIDI_CH4R_comm_rank_to_pid_local(comm_ptr, idx, &lpid, &avtid);
+        MPIDIU_comm_rank_to_pid_local(comm_ptr, idx, &lpid, &avtid);
     }
 
-    *lpid_ptr = MPIDI_CH4R_LPID_CREATE(avtid, lpid);
+    *lpid_ptr = MPIDIU_LPID_CREATE(avtid, lpid);
     return MPI_SUCCESS;
 
 }
@@ -188,13 +188,13 @@ static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpi
     int mpi_errno = MPI_SUCCESS;
     int avtid = 0, lpid;
     size_t sz;
-    MPIDI_CH4R_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
+    MPIDIU_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
     MPIU_Assert(rank < comm_ptr->local_size);
-    sz = sizeof(MPIDI_CH4_NMI_UCX_GPID(gpid).addr);
-    memset(MPIDI_CH4_NMI_UCX_GPID(gpid).addr, 0, sz);
-    memcpy(MPIDI_CH4_NMI_UCX_GPID(gpid).addr,
-           &MPIDI_CH4_NMI_UCX_global.pmi_addr_table[lpid * MPIDI_CH4_NMI_UCX_global.addrname_len], sz);
-    MPIU_Assert(sz <= sizeof(MPIDI_CH4_NMI_UCX_GPID(gpid).addr));
+    sz = sizeof(MPIDI_UCX_GPID(gpid).addr);
+    memset(MPIDI_UCX_GPID(gpid).addr, 0, sz);
+    memcpy(MPIDI_UCX_GPID(gpid).addr,
+           &MPIDI_UCX_global.pmi_addr_table[lpid * MPIDI_UCX_global.addrname_len], sz);
+    MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(gpid).addr));
   fn_exit:
     return mpi_errno;
   fn_fail:
@@ -203,13 +203,13 @@ static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpi
 
 static inline int MPIDI_CH4_NM_get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
-    MPIDIU_get_node_id(comm, rank, id_p);
+    MPIDI_CH4U_get_node_id(comm, rank, id_p);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
 {
-    MPIDIU_get_max_node_id(comm, max_id_p);
+    MPIDI_CH4U_get_max_node_id(comm, max_id_p);
     return MPI_SUCCESS;
 }
 
@@ -234,7 +234,7 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int 
     size_t sz;
     int max_n_avts;
     new_avt_procs = (int *) MPL_malloc(size * sizeof(int));
-    max_n_avts = MPIDIR_get_max_n_avts();
+    max_n_avts = MPIDIU_get_max_n_avts();
 
     for(i = 0; i < size; i++) {
         int j, k;
@@ -242,14 +242,14 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int 
         int found = 0;
 
         for (k = 0; k < max_n_avts; k++) {
-            if (MPIDIR_get_av_table(k) == NULL) { continue; }
-            for(j = 0; j < MPIDIR_get_av_table(k)->size; j++) {
+            if (MPIDIU_get_av_table(k) == NULL) { continue; }
+            for(j = 0; j < MPIDIU_get_av_table(k)->size; j++) {
                 sz = sizeof(MPIDI_UCX_GPID(&gpid[i]).addr);
                 MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(&gpid[i]).addr));
 
                 if(!memcmp(&MPIDI_UCX_global.pmi_addr_table[j * MPIDI_UCX_global.addrname_len],
                            MPIDI_UCX_GPID(&gpid[i]).addr, sz)) {
-                    lpid[i] = MPIDIR_LPID_CREATE(k, j);
+                    lpid[i] = MPIDIU_LPID_CREATE(k, j);
                     found = 1;
                     break;
                 }

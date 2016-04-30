@@ -25,7 +25,7 @@ static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm *comm)
         ret = 0;
         goto fn_exit;
     }
-    ret = MPIDI_OFI_AV(MPIDIR_comm_rank_to_av(comm, rank)).is_local;
+    ret = MPIDI_OFI_AV(MPIDIU_comm_rank_to_av(comm, rank)).is_local;
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " is_local=%d, rank=%d",
              ret, rank));
