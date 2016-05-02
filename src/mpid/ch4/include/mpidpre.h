@@ -456,12 +456,12 @@ extern MPIDII_av_table_t *MPIDII_av_table0;
 #define MPIDIU_LPID_MASK                     (0x00FFFFFF)
 #define MPIDIU_AVTID_MASK                    (0xFF000000)
 #define MPIDIU_NEW_AVT_MARK                  (0x80000000)
-#define MPIDIU_LPID_CREATE(avtid, lpid)      ((avtid << MPIDIR_LPID_BITS) | lpid)
-#define MPIDIU_LPID_GET_AVTID(lpid)          ((((lpid) & MPIDIR_AVTID_MASK) >> MPIDIR_LPID_BITS))
-#define MPIDIU_LPID_GET_LPID(lpid)           (((lpid) & MPIDIR_LPID_MASK))
-#define MPIDIU_LPID_SET_NEW_AVT_MARK(lpid)   ((lpid) | MPIDIR_NEW_AVT_MARK)
-#define MPIDIU_LPID_CLEAR_NEW_AVT_MARK(lpid) ((lpid) & (~MPIDIR_NEW_AVT_MARK))
-#define MPIDIU_LPID_IS_NEW_AVT(lpid)         ((lpid) & MPIDIR_NEW_AVT_MARK)
+#define MPIDIU_LPID_CREATE(avtid, lpid)      ((avtid << MPIDIU_LPID_BITS) | lpid)
+#define MPIDIU_LPID_GET_AVTID(lpid)          ((((lpid) & MPIDIU_AVTID_MASK) >> MPIDIU_LPID_BITS))
+#define MPIDIU_LPID_GET_LPID(lpid)           (((lpid) & MPIDIU_LPID_MASK))
+#define MPIDIU_LPID_SET_NEW_AVT_MARK(lpid)   ((lpid) | MPIDIU_NEW_AVT_MARK)
+#define MPIDIU_LPID_CLEAR_NEW_AVT_MARK(lpid) ((lpid) & (~MPIDIU_NEW_AVT_MARK))
+#define MPIDIU_LPID_IS_NEW_AVT(lpid)         ((lpid) & MPIDIU_NEW_AVT_MARK)
 
 
 #include "mpidu_pre.h"

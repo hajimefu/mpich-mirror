@@ -428,7 +428,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                comm_world->local_size, 0);
     for(i=0; i<comm_world->local_size; i++)
         MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).is_local =
-            (MPIDIU_get_node_map(0)[i] == MPIDIR_get_node_map(0)[comm_world->rank])?1:0;
+            (MPIDIU_get_node_map(0)[i] == MPIDIU_get_node_map(0)[comm_world->rank])?1:0;
 #endif
 
     /* -------------------------------- */
