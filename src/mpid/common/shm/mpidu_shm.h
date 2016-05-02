@@ -1,3 +1,9 @@
+/* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil ; -*- */
+/* vim: set ft=c.mpich : */
+/*
+ *  (C) 2016 by Argonne National Laboratory.
+ *      See COPYRIGHT in top-level directory.
+ */
 
 #ifndef MPIDU_SHM_H
 #define MPIDU_SHM_H
@@ -15,7 +21,7 @@ typedef struct MPIDU_shm_seg
 {
     size_t segment_len;
     /* Handle to shm seg */
-    MPIU_SHMW_Hnd_t hnd;
+    MPL_shm_hnd_t hnd;
     /* Pointers */
     char *base_addr;
     /* Misc */
@@ -40,4 +46,3 @@ int MPIDU_shm_barrier_init(MPIDU_shm_barrier_t *barrier_region,
 int MPIDU_shm_barrier(MPIDU_shm_barrier_t *barrier, int num_local);
 
 #endif /* MPIDU_SHM_H */
-/* vim: ft=c */
