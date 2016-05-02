@@ -547,7 +547,7 @@ __CH4_INLINE__ int MPIDI_Free_mem(void *ptr)
 __CH4_INLINE__ int MPIDI_Comm_get_lpid(MPIR_Comm * comm_ptr,
                                        int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-    int mpi_errno;
+    int mpi_errno = MPI_SUCCESS;
     int avtid = 0, lpid;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_GET_LPID);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_GET_LPID);
@@ -562,12 +562,8 @@ __CH4_INLINE__ int MPIDI_Comm_get_lpid(MPIR_Comm * comm_ptr,
 
     *lpid_ptr = MPIDIU_LPID_CREATE(avtid, lpid);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_GET_LPID);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
-
 }
 
 #undef FUNCNAME
@@ -577,7 +573,6 @@ __CH4_INLINE__ int MPIDI_Comm_get_lpid(MPIR_Comm * comm_ptr,
 __CH4_INLINE__ int MPIDI_GPID_Get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     int mpi_errno = MPI_SUCCESS;
-    int avtid = 0, lpid;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GPID_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GPID_GET);
 
@@ -607,11 +602,8 @@ __CH4_INLINE__ int MPIDI_Get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t 
 
     MPIDI_CH4U_get_node_id(comm, rank, id_p);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_GET_NODE_ID);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -626,11 +618,8 @@ __CH4_INLINE__ int MPIDI_Get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_
 
     MPIDI_CH4U_get_max_node_id(comm, max_id_p);
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_GET_MAX_NODE_ID);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -640,7 +629,7 @@ __CH4_INLINE__ int MPIDI_Get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_
 __CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
                                            int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
-    int mpi_errno = MPI_SUCCESS, i;
+    int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GETALLINCOMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GETALLINCOMM);
 
@@ -655,11 +644,8 @@ __CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
         *singleAVT = TRUE;
     }
 
-  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_GETALLINCOMM);
     return mpi_errno;
-  fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -669,7 +655,6 @@ __CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
 __CH4_INLINE__ int MPIDI_GPID_ToLpidArray(int size, MPIR_Gpid gpid[], int lpid[])
 {
     int mpi_errno = MPI_SUCCESS, i;
-    int avtid = 0, flag = 1;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GPID_TOLPIDARRAY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GPID_TOLPIDARRAY);
 

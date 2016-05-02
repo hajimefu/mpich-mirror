@@ -57,11 +57,8 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm *comm)
     MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).win_id_allocator);
     MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).rma_id_allocator);
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 

@@ -453,9 +453,9 @@ extern MPIDII_av_table_t *MPIDII_av_table0;
  * LUPID patch */
 #define MPIDIU_AVTID_BITS                    (8)
 #define MPIDIU_LPID_BITS                     (24)
-#define MPIDIU_LPID_MASK                     (0x00FFFFFF)
-#define MPIDIU_AVTID_MASK                    (0xFF000000)
-#define MPIDIU_NEW_AVT_MARK                  (0x80000000)
+#define MPIDIU_LPID_MASK                     (0x00FFFFFFU)
+#define MPIDIU_AVTID_MASK                    (0xFF000000U)
+#define MPIDIU_NEW_AVT_MARK                  (0x80000000U)
 #define MPIDIU_LPID_CREATE(avtid, lpid)      ((avtid << MPIDIU_LPID_BITS) | lpid)
 #define MPIDIU_LPID_GET_AVTID(lpid)          ((((lpid) & MPIDIU_AVTID_MASK) >> MPIDIU_LPID_BITS))
 #define MPIDIU_LPID_GET_LPID(lpid)           (((lpid) & MPIDIU_LPID_MASK))

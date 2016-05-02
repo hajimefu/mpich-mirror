@@ -308,6 +308,7 @@ static inline int MPIDIU_update_node_map(int avtid, int size, MPID_Node_id_t nod
     for (i = 0; i < size; i++) {
         MPIDI_CH4_Global.node_map[avtid][i] = node_map[i];
     }
+    return MPI_SUCCESS;
 }
 
 #endif /* CH4R_INIT_H_INCLUDED */

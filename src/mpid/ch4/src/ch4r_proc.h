@@ -67,6 +67,9 @@ static inline int MPIDIU_comm_rank_to_pid(MPIR_Comm *comm, int rank,
             *index = MPIDII_COMM(comm,map).irreg.mlut.gpid[rank].lpid;
             *avtid = MPIDII_COMM(comm,map).irreg.mlut.gpid[rank].avtid;
             break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " rank=%d, index=%d", rank, *index));
@@ -117,6 +120,9 @@ static inline MPIDII_av_entry_t* MPIDIU_comm_rank_to_av(MPIR_Comm *comm, int ran
         case MPIDII_RANK_MAP_MLUT:
             return &MPIDII_av_table[MPIDII_COMM(comm,map).irreg.mlut.gpid[rank].avtid]
                     ->table[MPIDII_COMM(comm,map).irreg.mlut.gpid[rank].lpid];
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            return NULL;
     }
     return NULL;
 }
@@ -157,6 +163,9 @@ static inline int MPIDIU_comm_rank_to_pid_local(MPIR_Comm *comm, int rank,
             *index = MPIDII_COMM(comm,local_map).irreg.mlut.gpid[rank].lpid;
             *avtid = MPIDII_COMM(comm,local_map).irreg.mlut.gpid[rank].avtid;
             break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " rank: rank=%d, index=%d", rank, *index));
@@ -170,7 +179,6 @@ static inline int MPIDI_CH4U_rank_is_local(int rank, MPIR_Comm * comm)
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_RANK_IS_LOCAL);
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    int avtid = 0, lpid;
     if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
         ret = 0;
         goto fn_exit;
@@ -257,7 +265,7 @@ static inline int MPIDIU_get_avt_size(int avtid)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDIU_alloc_globals_for_avtid(int avtid)
 {
-    int i, max_n_avts;
+    int max_n_avts;
     MPIDI_STATE_DECL(MPID_STATER_ALLOC_GLOBALS_FOR_AVTID);
     MPIDI_FUNC_ENTER(MPID_STATER_ALLOC_GLOBALS_FOR_AVTID);
     max_n_avts = MPIDIU_get_max_n_avts();
@@ -277,7 +285,6 @@ static inline int MPIDIU_alloc_globals_for_avtid(int avtid)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDIU_free_globals_for_avtid(int avtid)
 {
-    int i;
     MPIDI_STATE_DECL(MPID_STATER_FREE_GLOBALS_FOR_AVTID);
     MPIDI_FUNC_ENTER(MPID_STATER_FREE_GLOBALS_FOR_AVTID);
     MPL_free(MPIDI_CH4_Global.node_map[avtid]);

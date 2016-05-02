@@ -107,10 +107,8 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
                                                              int              is_low_group,
                                                              char            *api)
 {
-    int        start,i,context_id_offset,mpi_errno = MPI_SUCCESS;
-    int max_n_avts;
+    int        i,context_id_offset,mpi_errno = MPI_SUCCESS;
     MPIR_Comm *tmp_comm_ptr = NULL;
-    fi_addr_t *addr = NULL;
 
     MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_get_tag_from_port(port_name,&context_id_offset));
     MPIDI_OFI_MPI_CALL_POP(MPIR_Comm_create(&tmp_comm_ptr));
@@ -150,11 +148,17 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.gpid = MPIDII_COMM(comm_ptr,map).irreg.mlut.gpid;
             MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.mlut.t);
             break;
+        case MPIDII_RANK_MAP_DIRECT_INTRA:
+        case MPIDII_RANK_MAP_OFFSET_INTRA:
+        case MPIDII_RANK_MAP_STRIDE_INTRA:
+        case MPIDII_RANK_MAP_STRIDE_BLOCK_INTRA:
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
 
     int avtid;
     avtid = 0;
-    max_n_avts = MPIDIU_get_max_n_avts();
     MPIDIU_new_avt(entries, &avtid);
 
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE

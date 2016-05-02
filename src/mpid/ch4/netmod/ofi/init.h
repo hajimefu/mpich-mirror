@@ -63,7 +63,6 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     char valS[MPIDI_KVSAPPSTRLEN], *val;
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
-    int max_n_avts;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
@@ -502,7 +501,6 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     int barrier[2] = { 0 };
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
     MPIR_Comm *comm;
-    int max_n_avts;
 
     /* Progress until we drain all inflight RMA send long buffers */
     while(OPA_load_int(&MPIDI_Global.am_inflight_rma_send_mrs) > 0)

@@ -29,9 +29,10 @@ static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm *comm)
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " is_local=%d, rank=%d",
              ret, rank));
+#else
+    ret = MPIDI_CH4U_rank_is_local(rank, comm);
 #endif
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;
 }

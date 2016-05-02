@@ -62,12 +62,8 @@ static inline int MPIDIU_release_lut(MPIDII_rank_map_lut_t *lut)
         MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
                 (MPL_DBG_FDEST, "free lut %p", lut));
     }
-
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_RELEASE_LUT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -124,11 +120,8 @@ static inline int MPIDIU_release_mlut(MPIDII_rank_map_mlut_t *mlut)
                 (MPL_DBG_FDEST, "free mlut %p", mlut));
     }
 
-fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_RELEASE_MLUT);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -273,6 +266,10 @@ static inline int MPIDII_src_comm_to_lut(MPIDII_rank_map_t *src,
                 dest->irreg.lut.lpid[i+mapper_offset] = src->irreg.lut.lpid[i];
             }
             break;
+        case MPIDII_RANK_MAP_MLUT:
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
@@ -363,6 +360,9 @@ static inline int MPIDII_src_comm_to_mlut(MPIDII_rank_map_t *src,
                 dest->irreg.mlut.gpid[i+mapper_offset].avtid =
                     src->irreg.mlut.gpid[i].avtid;
             }
+            break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
             break;
     }
 
@@ -551,6 +551,9 @@ static inline void MPIDII_direct_of_src_rmap(MPIDII_rank_map_t *src,
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src mlut"));
             break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
 }
@@ -622,6 +625,9 @@ static inline void MPIDII_offset_of_src_rmap(MPIDII_rank_map_t *src,
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src mlut"));
             break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
 }
@@ -635,7 +641,6 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
                                              MPIR_Comm_map_t *mapper,
                                              int stride, int blocksize, int offset)
 {
-    int i;
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
     dest->avtid = src->avtid;
@@ -721,6 +726,9 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
         case MPIDII_RANK_MAP_MLUT:
             MPIDII_src_mlut_to_mlut(src, dest, mapper, mapper->src_mapping_size, 0);
             break;
+        case MPIDII_RANK_MAP_NONE:
+            MPIU_Assert(0);
+            break;
     }
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
 }
@@ -783,8 +791,7 @@ fn_fail:
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDII_check_convert_lut_to_regular(MPIDII_rank_map_t *src)
 {
-    int mpi_errno = MPI_SUCCESS, i;
-    int flag = 1;
+    int mpi_errno = MPI_SUCCESS;
     int mode_detected, offset, blocksize, stride;
     MPIDII_rank_map_lut_t *lut = NULL;
 
@@ -855,12 +862,9 @@ static inline int MPIDII_check_convert_lut_to_regular(MPIDII_rank_map_t *src)
                     (MPL_DBG_FDEST, "\toffset: %d", src->reg.stride.stride));
             break;
     }
-
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -873,8 +877,6 @@ static inline int MPIDII_set_map(MPIDII_rank_map_t *src_rmap,
                                  int src_comm_size, int total_mapper_size, int mapper_offset)
 {
     int mpi_errno = MPI_SUCCESS;
-    int flag, i;
-    int offset, stride;
     MPIDII_rank_map_mode src_mode;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_SET_MAP);
@@ -964,7 +966,6 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
     MPIR_Comm_map_t *mapper;
     MPIR_Comm *src_comm;
     int total_mapper_size, mapper_offset;
-    MPIDII_rank_map_mode src_mode;
 
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
