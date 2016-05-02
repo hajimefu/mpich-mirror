@@ -157,15 +157,20 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
     max_n_avts = MPIDIU_get_max_n_avts();
     MPIDIU_new_avt(entries, &avtid);
 
+#ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE
+    MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, addr_table, entries,
+                                NULL, 0ULL, NULL), avmap);
+#else
     fi_addr_t *mapped_table;
     mapped_table = (fi_addr_t*) MPL_malloc(entries * sizeof(fi_addr_t));
 
     MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, addr_table, entries,
-                                        mapped_table, 0ULL, NULL), avmap);
+                                mapped_table, 0ULL, NULL), avmap);
     for (i = 0; i < entries; i++) {
         MPIDI_OFI_AV(&MPIDIU_get_av(avtid, i)).dest = mapped_table[i];
     }
     MPL_free(mapped_table);
+#endif
 
     MPIDIU_update_node_map(avtid, entries, node_table);
 

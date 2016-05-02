@@ -347,17 +347,11 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     /* Table is constructed.  Map it    */
     /* -------------------------------- */
     MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, table, size, mapped_table, 0ULL, NULL), avmap);
-    if (mapped_table != NULL) {
-        /* AV_MAP */
+    if (!do_av_table) { /* AV_MAP */
         for (i = 0; i < size; i++) {
             MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).dest = mapped_table[i];
         }
         MPL_free(mapped_table);
-    } else {
-        /* AV_TABLE logical addressing */
-        for (i = 0; i < size; i++) {
-            MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).dest = i;
-        }
     }
 
     /* -------------------------------- */
@@ -701,7 +695,6 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
                 MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_OFI_GPID(&gpid[new_avt_procs[i]]).addr,
                                                     1, NULL, 0ULL, NULL), avmap);
                 /* FIXME: get logical address */
-                /* MPIDI_NM_OFI_AV(&MPIDIU_get_av(avtid, i)).dest = i; */
             } else {
                 MPIDI_OFI_CALL(fi_av_insert(MPIDI_Global.av, &MPIDI_OFI_GPID(&gpid[new_avt_procs[i]]).addr,
                                                     1, (fi_addr_t *)&MPIDI_OFI_AV(&MPIDIU_get_av(avtid, i)).dest, 0ULL, NULL), avmap);

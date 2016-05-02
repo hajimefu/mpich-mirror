@@ -44,7 +44,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     MPIDIU_comm_rank_to_pid(comm, rank, NULL, NULL)
 #ifdef MPIDI_OFI_CONFIG_USE_AV_TABLE
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank) \
-    ((fi_addr_t)(int)MPIDI_OFI_AV(MPIDIU_comm_rank_to_av(comm, rank)).dest)
+    ((fi_addr_t)MPIDI_OFI_COMM_TO_INDEX(comm,rank))
 #define MPIDI_OFI_TO_PHYS(avtid, rank)            ((fi_addr_t)rank)
 #else
 #define MPIDI_OFI_COMM_TO_PHYS(comm,rank)                       \
