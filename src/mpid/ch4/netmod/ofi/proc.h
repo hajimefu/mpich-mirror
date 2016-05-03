@@ -20,18 +20,7 @@ static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm *comm)
     MPIDI_STATE_DECL(MPIDI_NETMOD_RANK_IS_LOCAL);
     MPIDI_FUNC_ENTER(MPIDI_NETMOD_RANK_IS_LOCAL);
 
-#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
-    if (comm->comm_kind == MPIR_COMM_KIND__INTERCOMM) {
-        ret = 0;
-        goto fn_exit;
-    }
-    ret = MPIDI_OFI_AV(MPIDIU_comm_rank_to_av(comm, rank)).is_local;
-    MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
-            (MPL_DBG_FDEST, " is_local=%d, rank=%d",
-             ret, rank));
-#else
     ret = MPIDI_CH4U_rank_is_local(rank, comm);
-#endif
 
     MPIDI_FUNC_EXIT(MPIDI_NETMOD_RANK_IS_LOCAL);
     return ret;

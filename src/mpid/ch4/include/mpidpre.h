@@ -300,9 +300,6 @@ typedef struct MPIDI_CH4U_comm_t {
     MPIDI_CH4U_rreq_t *posted_list;
     MPIDI_CH4U_rreq_t *unexp_list;
     uint32_t   window_instance;
-// #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
-    // MPIDII_locality_t *locality;
-// #endif
 } MPIDI_CH4U_comm_t;
 
 #define MPIDII_CALC_STRIDE(rank, stride, blocksize, offset) \

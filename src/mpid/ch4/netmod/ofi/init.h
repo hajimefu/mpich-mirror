@@ -416,14 +416,6 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     MPIR_Datatype_init_names();
     MPIDI_OFI_index_datatypes();
 
-#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
-    MPIDIU_build_nodemap_avtid(comm_world->rank, comm_world,
-                               comm_world->local_size, 0);
-    for(i=0; i<comm_world->local_size; i++)
-        MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).is_local =
-            (MPIDIU_get_node_map(0)[i] == MPIDIU_get_node_map(0)[comm_world->rank])?1:0;
-#endif
-
     /* -------------------------------- */
     /* Initialize Dynamic Tasking       */
     /* -------------------------------- */
@@ -700,11 +692,6 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
             /* highest bit is marked as 1 to indicate this is a new process */
             lpid[i] = MPIDIU_LPID_CREATE(avtid, i);
             MPIDIU_LPID_SET_NEW_AVT_MARK(lpid[i]);
-#ifndef MPIDI_BUILD_CH4_LOCALITY_INFO
-            if (avtid != 0) {
-                MPIDI_OFI_AV(&MPIDIU_get_av(avtid, i)).is_local = 0;
-            }
-#endif
         }
     }
 
