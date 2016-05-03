@@ -204,7 +204,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 /* Include netmod prototypes */
 #include <netmod.h>
 #ifdef MPIDI_BUILD_CH4_SHM
-#include "ch4_shm.h"
+#include "shm.h"
 #endif
 
 /* Declare request functions here so netmods can refer to
@@ -216,7 +216,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 /* circular dependencies                   */
 #include <netmod_impl.h>
 #ifdef MPIDI_BUILD_CH4_SHM
-#include "ch4_shm_impl.h"
+#include "shm_impl.h"
 #endif
 
 #include "ch4_init.h"

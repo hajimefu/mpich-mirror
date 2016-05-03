@@ -281,7 +281,7 @@ for shm in $ch4_shm ; do
     fi
 
     if test -z "$ch4_shm_pre_include" ; then
-        ch4_shm_pre_include="#include \"shm_${shm}_pre.h\""
+        ch4_shm_pre_include="#include \"${shm}_pre.h\""
     else
         ch4_shm_pre_include="${ch4_shm_pre_include}
 #include \"shm_${shm}_pre.h\""
