@@ -10,7 +10,6 @@
 #define UCX_PRE_H_INCLUDED
 
 #include <ucp/api/ucp.h>
-#include "ucx_pre_common.h"
 
 #define HAVE_MPIDI_CH4_NM_datatype_commit_hook
 #define HAVE_MPIDI_CH4_NM_datatype_destroy_hook
@@ -55,5 +54,9 @@ typedef struct {
 typedef struct {
     ucp_ep_h dest;
 } MPIDI_UCX_addr_t;
+
+typedef struct {
+    int dummy;
+} MPIDI_UCX_comm_t;
 
 #endif /* UCX_PRE_H_INCLUDED */
