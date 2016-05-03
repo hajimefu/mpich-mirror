@@ -10,7 +10,7 @@
 #define IMPL_H_INCLUDED
 
 #include <mpidimpl.h>
-#include "ucx_types.h"
+#include "types.h"
 #include "mpidch4r.h"
 #include "ch4_impl.h"
 

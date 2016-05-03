@@ -10,7 +10,7 @@
 #define SEND_H_INCLUDED
 #include <ucp/api/ucp.h>
 #include "impl.h"
-#include "ucx_types.h"
+#include "types.h"
 
 #undef FUNCNAME
 #define FUNCNAME ucx_send_continous

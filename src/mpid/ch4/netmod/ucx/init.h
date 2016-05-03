@@ -11,7 +11,7 @@
 
 #include "impl.h"
 #include "mpich_cvars.h"
-#include "ucx_types.h"
+#include "types.h"
 #include "pmi.h"
 #include <ucp/api/ucp.h>
 #undef FUNCNAME

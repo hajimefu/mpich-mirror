@@ -10,7 +10,7 @@
 #define DATATYPE_H_INCLUDED
 
 #include "impl.h"
-#include "ucx_types.h"
+#include "types.h"
 #include <ucp/api/ucp.h>
 struct MPIDI_UCX_pack_state{
 
