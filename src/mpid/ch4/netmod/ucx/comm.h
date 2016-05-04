@@ -21,13 +21,11 @@ static inline int MPIDI_CH4_NM_comm_create(MPIR_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_COMM_CREATE);
 
-    MPIDI_CH4U_init_comm(comm);
+    mpi_errno = MPIDI_CH4U_init_comm(comm);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_COMM_CREATE);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #undef FUNCNAME
@@ -40,13 +38,11 @@ static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_DESTROY);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_COMM_DESTROY);
 
-    MPIDI_CH4U_destroy_comm(comm);
+    mpi_errno = MPIDI_CH4U_destroy_comm(comm);
 
 fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_COMM_DESTROY);
     return mpi_errno;
-fn_fail:
-    goto fn_exit;
 }
 
 #endif /* COMM_H_INCLUDED */

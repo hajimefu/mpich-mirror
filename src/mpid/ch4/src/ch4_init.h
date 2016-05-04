@@ -635,12 +635,9 @@ __CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
 
     mpi_errno = MPIDI_CH4_NM_getallincomm(comm_ptr, local_size, local_gpids, singleAVT);
 
-#ifdef MPIDI_BUILD_CH4_MAP_MODE_MLUT
     if (MPIDII_COMM(comm_ptr,map).mode == MPIDII_RANK_MAP_MLUT) {
         *singleAVT = FALSE;
-    } else
-#endif
-    {
+    } else {
         *singleAVT = TRUE;
     }
 

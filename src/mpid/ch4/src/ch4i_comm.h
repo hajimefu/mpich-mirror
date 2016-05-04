@@ -26,18 +26,17 @@ static inline int MPIDII_alloc_lut(MPIDII_rank_map_lut_t **lut, int size)
     if (new_lut == NULL) {
         *lut = NULL;
         MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**nomem");
-        goto fn_fail;
     }
 
     MPIU_Object_set_ref(new_lut, 1);
     *lut = new_lut;
 
-fn_exit:
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
             (MPL_DBG_FDEST, "alloc lut %p, size %ld, refcount=%d",
              new_lut,
              size * sizeof(MPIDII_lpid_t),
              MPIU_Object_get_ref(new_lut)));
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_ALLOC_LUT);
     return mpi_errno;
 fn_fail:
@@ -83,18 +82,17 @@ static inline int MPIDII_alloc_mlut(MPIDII_rank_map_mlut_t **mlut, int size)
     if (new_mlut == NULL) {
         *mlut = NULL;
         MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**nomem");
-        goto fn_fail;
     }
 
     MPIU_Object_set_ref(new_mlut, 1);
     *mlut = new_mlut;
 
-fn_exit:
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
             (MPL_DBG_FDEST, "alloc mlut %p, size %ld, refcount=%d",
              new_mlut,
              size * sizeof(MPIDII_gpid_t),
              MPIU_Object_get_ref(new_mlut)));
+fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_ALLOC_MLUT);
     return mpi_errno;
 fn_fail:
