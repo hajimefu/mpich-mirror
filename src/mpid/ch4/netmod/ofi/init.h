@@ -697,6 +697,7 @@ static inline int MPIDI_CH4_NM_gpid_tolpidarray_generic(int       size,
 
 
 fn_exit:
+    MPL_free(new_avt_procs);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
