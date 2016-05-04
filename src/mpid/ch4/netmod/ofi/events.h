@@ -752,7 +752,7 @@ static inline int MPIDI_OFI_handle_cq_entries(struct fi_cq_tagged_entry *wc,
                                                       ssize_t            num,
                                                       int                buffered)
 {
-    int i, mpi_errno;
+    int i, mpi_errno = MPI_SUCCESS;
     MPIR_Request *req;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_CQ_ENTRIES);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_CQ_ENTRIES);

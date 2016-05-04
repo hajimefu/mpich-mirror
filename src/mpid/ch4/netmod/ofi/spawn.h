@@ -128,17 +128,22 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
     MPIDII_COMM(tmp_comm_ptr,local_map).avtid = MPIDII_COMM(comm_ptr,map).avtid;
     switch (MPIDII_COMM(comm_ptr,map).mode) {
         case MPIDII_RANK_MAP_DIRECT:
+        case MPIDII_RANK_MAP_DIRECT_INTRA:
             break;
         case MPIDII_RANK_MAP_OFFSET:
+        case MPIDII_RANK_MAP_OFFSET_INTRA:
             MPIDII_COMM(tmp_comm_ptr,local_map).reg.offset = MPIDII_COMM(comm_ptr,map).reg.offset;
             break;
         case MPIDII_RANK_MAP_STRIDE:
+        case MPIDII_RANK_MAP_STRIDE_INTRA:
         case MPIDII_RANK_MAP_STRIDE_BLOCK:
+        case MPIDII_RANK_MAP_STRIDE_BLOCK_INTRA:
             MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.stride = MPIDII_COMM(comm_ptr,map).reg.stride.stride;
             MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.blocksize = MPIDII_COMM(comm_ptr,map).reg.stride.blocksize;
             MPIDII_COMM(tmp_comm_ptr,local_map).reg.stride.offset = MPIDII_COMM(comm_ptr,map).reg.stride.offset;
             break;
         case MPIDII_RANK_MAP_LUT:
+        case MPIDII_RANK_MAP_LUT_INTRA:
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.t = MPIDII_COMM(comm_ptr,map).irreg.lut.t;
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.lpid = MPIDII_COMM(comm_ptr,map).irreg.lut.lpid;
             MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.lut.t);
@@ -148,10 +153,6 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.gpid = MPIDII_COMM(comm_ptr,map).irreg.mlut.gpid;
             MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.mlut.t);
             break;
-        case MPIDII_RANK_MAP_DIRECT_INTRA:
-        case MPIDII_RANK_MAP_OFFSET_INTRA:
-        case MPIDII_RANK_MAP_STRIDE_INTRA:
-        case MPIDII_RANK_MAP_STRIDE_BLOCK_INTRA:
         case MPIDII_RANK_MAP_NONE:
             MPIU_Assert(0);
             break;

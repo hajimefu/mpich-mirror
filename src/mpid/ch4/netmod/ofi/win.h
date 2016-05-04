@@ -668,7 +668,7 @@ static inline int MPIDI_CH4_NM_win_allocate_shared(MPI_Aint    size,
                                                    void      **base_ptr,
                                                    MPIR_Win  **win_ptr)
 {
-    int            i=0, fd,rc,first=0,mpi_errno = MPI_SUCCESS;
+    int            i=0, fd = 0,rc,first=0,mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     void           *baseP      = NULL;
     MPIR_Win       *win        = NULL;

@@ -169,7 +169,7 @@ static inline int MPIDI_CH4_NM_finalize(void)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
    if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
         MPIDIU_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
     } else if (is_remote) {
@@ -186,7 +186,7 @@ static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
 static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     int mpi_errno = MPI_SUCCESS;
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
     size_t sz;
     MPIDIU_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
     MPIU_Assert(rank < comm_ptr->local_size);

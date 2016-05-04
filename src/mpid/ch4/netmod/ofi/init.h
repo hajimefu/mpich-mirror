@@ -587,7 +587,7 @@ static inline int MPIDI_CH4_NM_free_mem(void *ptr)
 static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm *comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
     if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
         MPIDIU_comm_rank_to_pid(comm_ptr, idx, &lpid, &avtid);
     else if(is_remote)

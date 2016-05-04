@@ -205,7 +205,7 @@ static inline int MPIDII_src_comm_to_lut(MPIDII_rank_map_t *src,
                                          int size, int total_mapper_size, int mapper_offset)
 {
     int mpi_errno = MPI_SUCCESS, i;
-    MPIDII_rank_map_lut_t *lut;
+    MPIDII_rank_map_lut_t *lut = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
@@ -287,7 +287,7 @@ static inline int MPIDII_src_comm_to_mlut(MPIDII_rank_map_t *src,
                                           int size, int total_mapper_size, int mapper_offset)
 {
     int mpi_errno = MPI_SUCCESS, i;
-    MPIDII_rank_map_mlut_t *mlut;
+    MPIDII_rank_map_mlut_t *mlut = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
@@ -384,7 +384,7 @@ static inline int MPIDII_src_mlut_to_mlut(MPIDII_rank_map_t *src,
 {
     int mpi_errno = MPI_SUCCESS, i;
     int size = MPIDII_map_size(*mapper);
-    MPIDII_rank_map_mlut_t *mlut;
+    MPIDII_rank_map_mlut_t *mlut = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_MLUT_TO_MLUT);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_MLUT_TO_MLUT);
@@ -426,7 +426,7 @@ static inline int MPIDII_src_map_to_lut(MPIDII_rank_map_t *src,
 {
     int mpi_errno = MPI_SUCCESS, i;
     int size = MPIDII_map_size(*mapper);
-    MPIDII_rank_map_lut_t *lut;
+    MPIDII_rank_map_lut_t *lut = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_MPIDII_MAP_TO_LUT);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_MAP_TO_LUT);
@@ -929,10 +929,9 @@ static inline int MPIDII_set_map(MPIDII_rank_map_t *src_rmap,
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " multiple mapper"));
     if (mapper->type == MPIR_COMM_MAP_TYPE__DUP) {
-        int _size = MPIDII_map_size(*mapper);
         MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                 (MPL_DBG_FDEST, " check map_size %d, src_comm_size %d",
-                 _size, src_comm_size));
+                 MPIDII_map_size(*mapper), src_comm_size));
         if (src_mode == MPIDII_RANK_MAP_MLUT) {
             MPIDII_src_comm_to_mlut(src_rmap, dest_rmap, src_comm_size,
                              total_mapper_size, mapper_offset);

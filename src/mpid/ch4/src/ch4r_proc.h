@@ -201,7 +201,7 @@ static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPIR_Comm * comm)
     MPIDI_STATE_DECL(MPID_STATE_MPIDIU_RANK_TO_LPID);
     MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_RANK_TO_LPID);
 
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
     MPIDIU_comm_rank_to_pid(comm, rank, &lpid, &avtid);
     if (avtid == 0) {
         ret = lpid;
@@ -216,7 +216,7 @@ static inline int MPIDI_CH4U_rank_to_lpid(int rank, MPIR_Comm * comm)
 static inline int MPIDI_CH4U_get_node_id(MPIR_Comm *comm, int rank, MPID_Node_id_t *id_p)
 {
     int mpi_errno = MPI_SUCCESS;
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
     MPIDIU_comm_rank_to_pid(comm, rank, &lpid, &avtid);
     *id_p = MPIDI_CH4_Global.node_map[avtid][lpid];
 

@@ -548,7 +548,7 @@ __CH4_INLINE__ int MPIDI_Comm_get_lpid(MPIR_Comm * comm_ptr,
                                        int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     int mpi_errno = MPI_SUCCESS;
-    int avtid = 0, lpid;
+    int avtid = 0, lpid = 0;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_GET_LPID);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_GET_LPID);
 
@@ -665,7 +665,7 @@ __CH4_INLINE__ int MPIDI_GPID_ToLpidArray(int size, MPIR_Gpid gpid[], int lpid[]
 
     /* update node_map */
     for (i = 0; i < size; i++) {
-        int _avtid, _lpid;
+        int _avtid = 0, _lpid = 0;
         /* if this is a new process, update node_map and locality */
         if (MPIDIU_LPID_IS_NEW_AVT(lpid[i])) {
             MPIDIU_LPID_CLEAR_NEW_AVT_MARK(lpid[i]);
@@ -703,7 +703,7 @@ __CH4_INLINE__ int MPIDI_Create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
     MPIDI_STATE_DECL(MPID_STATE_CH4_CREATE_INTERCOMM_FROM_LPIDS);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CREATE_INTERCOMM_FROM_LPIDS);
 
-    MPIDII_rank_map_mlut_t *mlut;
+    MPIDII_rank_map_mlut_t *mlut = NULL;
     MPIDII_COMM(newcomm_ptr,map).mode = MPIDII_RANK_MAP_MLUT;
     MPIDII_COMM(newcomm_ptr,map).avtid = -1;
     mpi_errno = MPIDII_alloc_mlut(&mlut, size);
