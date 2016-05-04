@@ -12,8 +12,6 @@
 
 if BUILD_CH4_SHM_SIMPLE
 
-AM_CPPFLAGS += -I$(top_srcdir)/src/mpid/ch4/shm/simple
-
 noinst_HEADERS += src/mpid/ch4/shm/simple/am.h        \
                   src/mpid/ch4/shm/simple/coll.h      \
                   src/mpid/ch4/shm/simple/datatypes.h \
