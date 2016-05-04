@@ -14,14 +14,14 @@
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_SHMI_STUB_am_request_t;
+} MPIDI_STUB_am_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_SHMI_STUB_request_t;
+} MPIDI_STUB_request_t;
 
-typedef struct MPIDI_CH4_SHMI_STUB_comm_t {
+typedef struct MPIDI_STUB_comm_t {
     int dummy;
-} MPIDI_CH4_SHMI_STUB_comm_t;
+} MPIDI_STUB_comm_t;
 
 #endif /* SHM_STUB_PRE_H_INCLUDED */

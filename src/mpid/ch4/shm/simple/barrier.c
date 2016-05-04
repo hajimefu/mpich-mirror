@@ -17,19 +17,19 @@
 /* ------------------------------------------------------- */
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init
+#define FUNCNAME MPIDI_SIMPLE_barrier_vars_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-int MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_barrier_vars_t *barrier_region)
+int MPIDI_SIMPLE_barrier_vars_init(MPIDI_SIMPLE_barrier_vars_t *barrier_region)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH4_SHMI_SIMPLE_BARRIER_VARS_INIT);
+    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SIMPLE_BARRIER_VARS_INIT);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH4_SHMI_SIMPLE_BARRIER_VARS_INIT);
+    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SIMPLE_BARRIER_VARS_INIT);
 
-    if(MPIDI_CH4_SHMI_SIMPLE_mem_region.local_rank == 0)
-        for(i = 0; i < MPIDI_CH4_SHMI_SIMPLE_NUM_BARRIER_VARS; ++i) {
+    if(MPIDI_SIMPLE_mem_region.local_rank == 0)
+        for(i = 0; i < MPIDI_SIMPLE_NUM_BARRIER_VARS; ++i) {
             OPA_store_int(&barrier_region[i].context_id, -1);
             OPA_store_int(&barrier_region[i].usage_cnt, 0);
             OPA_store_int(&barrier_region[i].cnt, 0);
@@ -37,7 +37,7 @@ int MPIDI_CH4_SHMI_SIMPLE_barrier_vars_init(MPIDI_CH4_SHMI_SIMPLE_barrier_vars_t
             OPA_store_int(&barrier_region[i].sig, 0);
         }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH4_SHMI_SIMPLE_BARRIER_VARS_INIT);
+    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SIMPLE_BARRIER_VARS_INIT);
     return mpi_errno;
 }
 

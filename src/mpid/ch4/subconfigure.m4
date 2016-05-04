@@ -289,17 +289,17 @@ for shm in $ch4_shm ; do
 
     shm_upper=`echo ${shm} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
     if test -z "$ch4_shm_request_decl" ; then
-        ch4_shm_request_decl="MPIDI_CH4_SHMI_${shm_upper}_request_t ${shm};"
+        ch4_shm_request_decl="MPIDI_${shm_upper}_request_t ${shm};"
     else
         ch4_shm_request_decl="${ch4_shm_request_decl} \\
-MPIDI_CH4_SHMI_${shm_upper}_request_t ${shm};"
+MPIDI_${shm_upper}_request_t ${shm};"
     fi
 
     if test -z "$ch4_shm_comm_decl" ; then
-        ch4_shm_comm_decl="MPIDI_CH4_SHMI_${shm_upper}_comm_t ${shm};"
+        ch4_shm_comm_decl="MPIDI_${shm_upper}_comm_t ${shm};"
     else
         ch4_shm_comm_decl="${ch4_shm_comm_decl} \\
-MPIDI_CH4_SHMI_${shm_upper}_comm_t ${shm};"
+MPIDI_${shm_upper}_comm_t ${shm};"
     fi
 
 

@@ -32,10 +32,10 @@ typedef struct {
     struct MPIDU_Segment *segment_ptr;
     size_t               segment_first;
     size_t               segment_size;
-} MPIDI_CH4_SHMI_SIMPLE_request_t;
+} MPIDI_SIMPLE_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_CH4_SHMI_SIMPLE_comm_t;
+} MPIDI_SIMPLE_comm_t;
 
 #endif /* SHM_SIMPLE_PRE_H_INCLUDED */
