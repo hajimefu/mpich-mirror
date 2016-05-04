@@ -7,8 +7,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_STUB_DIRECT_H_INCLUDED
-#define CH4_SHM_STUB_DIRECT_H_INCLUDED
+#ifndef SHM_DIRECT_H_INCLUDED
+#define SHM_DIRECT_H_INCLUDED
 
 #include "shm.h"
 #include "init.h"

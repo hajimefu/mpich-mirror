@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_STUB_RMA_H_INCLUDED
-#define CH4_SHM_STUB_RMA_H_INCLUDED
+#ifndef RMA_H_INCLUDED
+#define RMA_H_INCLUDED
 
 #include "shm_impl.h"
 
@@ -140,4 +140,4 @@ static inline int MPIDI_CH4_SHM_accumulate(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_RMA_H_INCLUDED */
+#endif /* RMA_H_INCLUDED */

@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_STUB_PROBE_H_INCLUDED
-#define CH4_SHM_STUB_PROBE_H_INCLUDED
+#ifndef PROBE_H_INCLUDED
+#define PROBE_H_INCLUDED
 
 #include "shm_impl.h"
 
@@ -33,4 +33,4 @@ static inline int MPIDI_CH4_SHM_iprobe(int source,
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_PROBE_H_INCLUDED */
+#endif /* PROBE_H_INCLUDED */

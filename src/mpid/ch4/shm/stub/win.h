@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_STUB_WIN_H_INCLUDED
-#define CH4_SHM_STUB_WIN_H_INCLUDED
+#ifndef WIN_H_INCLUDED
+#define WIN_H_INCLUDED
 
 #include "shm_impl.h"
 
@@ -182,4 +182,4 @@ static inline int MPIDI_CH4_SHM_win_lock_all(int assert, MPIR_Win * win)
 }
 
 
-#endif /* SHM_WIN_H_INCLUDED */
+#endif /* WIN_H_INCLUDED */

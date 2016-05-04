@@ -9,8 +9,8 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef SHM_STUB_PRE_H_INCLUDED
-#define SHM_STUB_PRE_H_INCLUDED
+#ifndef STUB_PRE_H_INCLUDED
+#define STUB_PRE_H_INCLUDED
 
 typedef struct {
     int dummy;

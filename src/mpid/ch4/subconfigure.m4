@@ -83,10 +83,10 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_netmod_pre_include" ; then
-        ch4_netmod_pre_include="#include \"../${net}/${net}_pre.h\""
+        ch4_netmod_pre_include="#include \"../netmod/${net}/${net}_pre.h\""
     else
         ch4_netmod_pre_include="${ch4_netmod_pre_include}
-#include \"../${net}/${net}_pre.h\""
+#include \"../netmod/${net}/${net}_pre.h\""
     fi
 
     net_upper=`echo ${net} | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`

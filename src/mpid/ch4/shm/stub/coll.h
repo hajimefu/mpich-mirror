@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_COLL_H_INCLUDED
-#define SHM_COLL_H_INCLUDED
+#ifndef COLL_H_INCLUDED
+#define COLL_H_INCLUDED
 
 #include "shm_impl.h"
 #include "ch4_impl.h"
@@ -676,4 +676,4 @@ static inline int MPIDI_CH4_SHM_iscatterv(const void * sendbuf, const int * send
     return mpi_errno;
 }
 
-#endif
+#endif /* COLL_H_INCLUDED */

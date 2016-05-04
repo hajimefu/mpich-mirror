@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_STUB_DYNPROC_H_INCLUDED
-#define CH4_SHM_STUB_DYNPROC_H_INCLUDED
+#ifndef SPAWN_H_INCLUDED
+#define SPAWN_H_INCLUDED
 
 #include "shm_impl.h"
 
@@ -47,4 +47,4 @@ static inline int MPIDI_CH4_SHM_comm_accept(const char *port_name,
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_WIN_H_INCLUDED */
+#endif /* SPAWN_H_INCLUDED */
