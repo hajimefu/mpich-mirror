@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef RMA_H_INCLUDED
-#define RMA_H_INCLUDED
+#ifndef NETMOD_UCX_RMA_H_INCLUDED
+#define NETMOD_UCX_RMA_H_INCLUDED
 
 #include "impl.h"
 
@@ -304,4 +304,4 @@ static inline int MPIDI_CH4_NM_accumulate(const void *origin_addr,
                                  target_rank, target_disp, target_count, target_datatype, op, win);
 }
 
-#endif /* RMA_H_INCLUDED */
+#endif /* NETMOD_UCX_RMA_H_INCLUDED */

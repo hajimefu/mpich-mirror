@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef WIN_H_INCLUDED
-#define WIN_H_INCLUDED
+#ifndef NETMOD_UCX_WIN_H_INCLUDED
+#define NETMOD_UCX_WIN_H_INCLUDED
 
 #include "impl.h"
 struct _UCX_share {
@@ -497,4 +497,4 @@ static inline int MPIDI_CH4_NM_win_lock_all(int assert, MPIR_Win * win)
 }
 
 
-#endif /* WIN_H_INCLUDED */
+#endif /* NETMOD_UCX_WIN_H_INCLUDED */

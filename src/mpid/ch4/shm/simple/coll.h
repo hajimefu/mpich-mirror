@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_COLL_H_INCLUDED
-#define SHM_COLL_H_INCLUDED
+#ifndef SHM_SIMPLE_COLL_H_INCLUDED
+#define SHM_SIMPLE_COLL_H_INCLUDED
 
 #include "impl.h"
 #include "ch4_impl.h"

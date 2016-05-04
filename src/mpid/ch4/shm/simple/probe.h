@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_PROBE_H_INCLUDED
-#define SHM_PROBE_H_INCLUDED
+#ifndef SHM_SIMPLE_PROBE_H_INCLUDED
+#define SHM_SIMPLE_PROBE_H_INCLUDED
 
 #include "impl.h"
 
@@ -137,4 +137,4 @@ fn_exit:
     return mpi_errno;
 }
 
-#endif /* SHM_PROBE_H_INCLUDED */
+#endif /* SHM_SIMPLE_PROBE_H_INCLUDED */

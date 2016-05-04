@@ -9,8 +9,8 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef PRE_H_INCLUDED
-#define PRE_H_INCLUDED
+#ifndef NETMOD_PORTALS4_PRE_H_INCLUDED
+#define NETMOD_PORTALS4_PRE_H_INCLUDED
 
 #include "portals4.h"
 
@@ -44,4 +44,4 @@ typedef struct {
     int dummy;
 } MPIDI_PORTALS4_addr_t;
 
-#endif
+#endif /* NETMOD_PORTALS4_PRE_H_INCLUDED */

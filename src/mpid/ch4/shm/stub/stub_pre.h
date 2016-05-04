@@ -9,8 +9,8 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef STUB_PRE_H_INCLUDED
-#define STUB_PRE_H_INCLUDED
+#ifndef SHM_STUB_PRE_H_INCLUDED
+#define SHM_STUB_PRE_H_INCLUDED
 
 typedef struct {
     int dummy;
@@ -20,9 +20,8 @@ typedef struct {
     int dummy;
 } MPIDI_CH4_SHMI_STUB_request_t;
 
-typedef struct MPIDI_CH4_SHM_STUB_comm_t {
+typedef struct MPIDI_CH4_SHMI_STUB_comm_t {
     int dummy;
 } MPIDI_CH4_SHMI_STUB_comm_t;
 
-
-#endif
+#endif /* SHM_STUB_PRE_H_INCLUDED */

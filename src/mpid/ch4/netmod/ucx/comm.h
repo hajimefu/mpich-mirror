@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef COMM_H_INCLUDED
-#define COMM_H_INCLUDED
+#ifndef NETMOD_UCX_COMM_H_INCLUDED
+#define NETMOD_UCX_COMM_H_INCLUDED
 
 #include "impl.h"
 
@@ -45,4 +45,4 @@ fn_exit:
     return mpi_errno;
 }
 
-#endif /* COMM_H_INCLUDED */
+#endif /* NETMOD_UCX_COMM_H_INCLUDED */

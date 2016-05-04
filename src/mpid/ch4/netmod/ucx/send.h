@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef SEND_H_INCLUDED
-#define SEND_H_INCLUDED
+#ifndef NETMOD_UCX_SEND_H_INCLUDED
+#define NETMOD_UCX_SEND_H_INCLUDED
 #include <ucp/api/ucp.h>
 #include "impl.h"
 #include "types.h"
@@ -350,4 +350,4 @@ static inline int MPIDI_CH4_NM_cancel_send(MPIR_Request * sreq)
     return MPIDI_CH4U_cancel_send(sreq);
 }
 
-#endif /* SEND_H_INCLUDED */
+#endif /* NETMOD_UCX_SEND_H_INCLUDED */

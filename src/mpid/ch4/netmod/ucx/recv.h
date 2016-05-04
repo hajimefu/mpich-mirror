@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef RECV_H_INCLUDED
-#define RECV_H_INCLUDED
+#ifndef NETMOD_UCX_RECV_H_INCLUDED
+#define NETMOD_UCX_RECV_H_INCLUDED
 
 #include "impl.h"
 
@@ -185,4 +185,4 @@ static inline int MPIDI_CH4_NM_cancel_recv(MPIR_Request * rreq)
     return MPIDI_CH4U_cancel_recv(rreq);
 }
 
-#endif /* RECV_H_INCLUDED */
+#endif /* NETMOD_UCX_RECV_H_INCLUDED */

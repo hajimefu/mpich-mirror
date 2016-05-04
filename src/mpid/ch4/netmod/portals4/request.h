@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef REQUEST_H_INCLUDED
-#define REQUEST_H_INCLUDED
+#ifndef NETMOD_PTL_REQUEST_H_INCLUDED
+#define NETMOD_PTL_REQUEST_H_INCLUDED
 
 #include "impl.h"
 
@@ -29,4 +29,4 @@ static inline void MPIDI_CH4_NM_am_request_finalize(MPIR_Request *req)
     }
 }
 
-#endif /* REQUEST_H_INCLUDED */
+#endif /* NETMOD_PTL_REQUEST_H_INCLUDED */

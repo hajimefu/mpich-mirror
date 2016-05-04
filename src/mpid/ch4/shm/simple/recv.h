@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_RECV_H_INCLUDED
-#define SHM_RECV_H_INCLUDED
+#ifndef SHM_SIMPLE_RECV_H_INCLUDED
+#define SHM_SIMPLE_RECV_H_INCLUDED
 
 #include "impl.h"
 #include "ch4_impl.h"
@@ -332,4 +332,4 @@ static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request *rreq)
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_RECV_H_INCLUDED */
+#endif /* SHM_SIMPLE_RECV_H_INCLUDED */

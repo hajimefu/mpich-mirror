@@ -7,8 +7,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef COMM_H_INCLUDED
-#define COMM_H_INCLUDED
+#ifndef SHM_STUB_COMM_H_INCLUDED
+#define SHM_STUB_COMM_H_INCLUDED
 
 #include "shm_impl.h"
 static inline int MPIDI_CH4_SHM_comm_create(MPIR_Comm * comm)
@@ -25,4 +25,4 @@ static inline int MPIDI_CH4_SHM_comm_destroy(MPIR_Comm * comm)
 }
 
 
-#endif /* COMM_H_INCLUDED */
+#endif /* SHM_STUB_COMM_H_INCLUDED */

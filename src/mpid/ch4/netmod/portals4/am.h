@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef AM_H_INCLUDED
-#define AM_H_INCLUDED
+#ifndef NETMOD_PTL_AM_H_INCLUDED
+#define NETMOD_PTL_AM_H_INCLUDED
 
 #include "impl.h"
 
@@ -365,4 +365,4 @@ static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
 }
 
 
-#endif /* AM_H_INCLUDED */
+#endif /* NETMOD_PTL_AM_H_INCLUDED */

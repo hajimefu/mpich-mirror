@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef DATATYPE_H_INCLUDED
-#define DATATYPE_H_INCLUDED
+#ifndef NETMOD_UCX_DATATYPE_H_INCLUDED
+#define NETMOD_UCX_DATATYPE_H_INCLUDED
 
 #include "impl.h"
 #include "types.h"
@@ -139,4 +139,4 @@ static inline void MPIDI_CH4_NM_datatype_dup_hook(MPIR_Datatype *datatype_p) {
     return MPIDI_CH4_NM_datatype_commit_hook(&datatype_p->handle);
 }
 
-#endif /* DATATYPE_H_INCLUDED */
+#endif /* NETMOD_UCX_DATATYPE_H_INCLUDED */

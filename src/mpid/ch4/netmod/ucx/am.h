@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef AM_H_INCLUDED
-#define AM_H_INCLUDED
+#ifndef NETMOD_UCX_AM_H_INCLUDED
+#define NETMOD_UCX_AM_H_INCLUDED
 
 #include "impl.h"
 
@@ -500,4 +500,4 @@ static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
 }
 
 
-#endif /* AM_H_INCLUDED */
+#endif /* NETMOD_UCX_AM_H_INCLUDED */

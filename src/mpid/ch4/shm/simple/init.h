@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_INIT_H_INCLUDED
-#define SHM_INIT_H_INCLUDED
+#ifndef SHM_SIMPLE_INIT_H_INCLUDED
+#define SHM_SIMPLE_INIT_H_INCLUDED
 
 #include "impl.h"
 #include "ch4_types.h"
@@ -308,4 +308,4 @@ static inline int MPIDI_CH4_SHM_create_intercomm_from_lpids(MPIR_Comm *newcomm_p
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_INIT_H_INCLUDED */
+#endif /* SHM_SIMPLE_INIT_H_INCLUDED */

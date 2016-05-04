@@ -7,8 +7,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_AM_H_INCLUDED
-#define SHM_AM_H_INCLUDED
+#ifndef SHM_SIMPLE_AM_H_INCLUDED
+#define SHM_SIMPLE_AM_H_INCLUDED
 
 #include "impl.h"
 
@@ -164,4 +164,4 @@ static inline size_t MPIDI_CH4_SHM_am_inject_max_sz(void)
     return 0;
 }
 
-#endif /* SHM_AM_H_INCLUDED */
+#endif /* SHM_SIMPLE_AM_H_INCLUDED */

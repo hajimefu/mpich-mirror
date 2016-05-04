@@ -40,4 +40,4 @@ typedef struct {
     int dummy;
 } MPIDI_STUB_addr_t;
 
-#endif
+#endif /* NETMOD_STUB_PRE_H_INCLUDED */

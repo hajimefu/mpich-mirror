@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef IMPL_H_INCLUDED
-#define IMPL_H_INCLUDED
+#ifndef NETMOD_UCX_IMPL_H_INCLUDED
+#define NETMOD_UCX_IMPL_H_INCLUDED
 
 #include <mpidimpl.h>
 #include "types.h"
@@ -182,4 +182,4 @@ static inline int MPIDI_UCX_get_source(uint64_t match_bits)
 
 extern int MPIR_Datatype_init_names(void);
 
-#endif /* IMPL_H_INCLUDED */
+#endif /* NETMOD_UCX_IMPL_H_INCLUDED */

@@ -38,4 +38,4 @@ typedef struct {
     int dummy;
 } MPIDI_CH4_SHMI_SIMPLE_comm_t;
 
-#endif
+#endif /* SHM_SIMPLE_PRE_H_INCLUDED */

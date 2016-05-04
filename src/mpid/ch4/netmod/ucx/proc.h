@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef PROC_H_INCLUDED
-#define PROC_H_INCLUDED
+#ifndef NETMOD_UCX_PROC_H_INCLUDED
+#define NETMOD_UCX_PROC_H_INCLUDED
 
 #include "impl.h"
 
@@ -23,4 +23,4 @@ static inline int MPIDI_CH4_NM_rank_is_local(int rank, MPIR_Comm * comm)
     return ret;
 }
 
-#endif /* PROC_H_INCLUDED */
+#endif /* NETMOD_UCX_PROC_H_INCLUDED */

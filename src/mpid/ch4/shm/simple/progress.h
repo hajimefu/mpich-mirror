@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_PROGRESS_H_INCLUDED
-#define SHM_PROGRESS_H_INCLUDED
+#ifndef SHM_SIMPLE_PROGRESS_H_INCLUDED
+#define SHM_SIMPLE_PROGRESS_H_INCLUDED
 
 #include "impl.h"
 
@@ -415,4 +415,4 @@ static inline int MPIDI_CH4_SHM_progress_deactivate(int id)
     return MPI_SUCCESS;
 }
 
-#endif /* SHM_PROGRESS_H_INCLUDED */
+#endif /* SHM_SIMPLE_PROGRESS_H_INCLUDED */

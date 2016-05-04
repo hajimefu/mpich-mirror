@@ -8,7 +8,7 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef IMPL_H_INCLUDED
-#define IMPL_H_INCLUDED
+#ifndef SHM_STUB_IMPL_H_INCLUDED
+#define SHM_STUB_IMPL_H_INCLUDED
 
-#endif /* IMPL_H_INCLUDED */
+#endif /* SHM_STUB_IMPL_H_INCLUDED */

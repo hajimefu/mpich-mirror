@@ -6,8 +6,8 @@
  *  Portions of this code were written by Mellanox Technologies Ltd.
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
-#ifndef REQUEST_H_INCLUDED
-#define REQUEST_H_INCLUDED
+#ifndef NETMOD_UCX_REQUEST_H_INCLUDED
+#define NETMOD_UCX_REQUEST_H_INCLUDED
 
 #include "impl.h"
 #include "mpidch4.h"
@@ -240,4 +240,4 @@ static inline void MPIDI_UCX_Handle_recv_callback(void *request, ucs_status_t st
     rreq->status.MPI_ERROR = mpi_errno;
 }
 
-#endif /* REQUEST_H_INCLUDED */
+#endif /* NETMOD_UCX_REQUEST_H_INCLUDED */
