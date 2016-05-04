@@ -9,8 +9,8 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 
-#ifndef SHM_SIMPLE_PRE_H_INCLUDED
-#define SHM_SIMPLE_PRE_H_INCLUDED
+#ifndef SHM_POSIX_PRE_H_INCLUDED
+#define SHM_POSIX_PRE_H_INCLUDED
 
 #include <mpi.h>
 
@@ -32,10 +32,10 @@ typedef struct {
     struct MPIDU_Segment *segment_ptr;
     size_t               segment_first;
     size_t               segment_size;
-} MPIDI_SIMPLE_request_t;
+} MPIDI_POSIX_request_t;
 
 typedef struct {
     int dummy;
-} MPIDI_SIMPLE_comm_t;
+} MPIDI_POSIX_comm_t;
 
-#endif /* SHM_SIMPLE_PRE_H_INCLUDED */
+#endif /* SHM_POSIX_PRE_H_INCLUDED */

@@ -8,10 +8,10 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_SIMPLE_REQUEST_H_INCLUDED
-#define SHM_SIMPLE_REQUEST_H_INCLUDED
+#ifndef SHM_POSIX_REQUEST_H_INCLUDED
+#define SHM_POSIX_REQUEST_H_INCLUDED
 
-#include "impl.h"
+#include "posix_impl.h"
 
 static inline void MPIDI_CH4_SHM_am_request_init(MPIR_Request *req)
 {
@@ -23,4 +23,4 @@ static inline void MPIDI_CH4_SHM_am_request_finalize(MPIR_Request *req)
     MPIU_Assert(0);
 }
 
-#endif /* SHM_SIMPLE_REQUEST_H_INCLUDED */
+#endif /* SHM_POSIX_REQUEST_H_INCLUDED */

@@ -191,8 +191,8 @@ AC_ARG_ENABLE(ch4-shm,
          yes       - Build CH4 shared memory, but do not use it by default (Your chosen netmod must provide it).
          exclusive - Build and exclusively use CH4 shared memory. (Default)
        module-list(optional).  comma separated list of shared memory modules:
-         simple   - simple shared memory implementation
-    ],,enable_ch4_shm=exclusive:simple)
+         posix     - POSIX shared memory implementation
+    ],,enable_ch4_shm=exclusive:posix)
 
 AC_ARG_ENABLE(ch4-shm-direct,
     [--enable-ch4-shm-direct
@@ -224,7 +224,7 @@ fi
 # $ch4_shm - contains the shm mods
 if test -z "${ch4_shm}" ; then
    if test "$ch4_shm_level" != "no" ; then
-      ch4_shm="simple"
+      ch4_shm="posix"
    fi
 else
    ch4_shm=`echo ${ch4_shm} | sed -e 's/,/ /g'`

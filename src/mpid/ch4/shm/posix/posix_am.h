@@ -7,10 +7,10 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_SIMPLE_AM_H_INCLUDED
-#define SHM_SIMPLE_AM_H_INCLUDED
+#ifndef SHM_POSIX_AM_H_INCLUDED
+#define SHM_POSIX_AM_H_INCLUDED
 
-#include "impl.h"
+#include "posix_impl.h"
 
 static inline int MPIDI_CH4_SHM_reg_hdr_handler(int handler_id,
                                                 MPIDI_CH4_SHM_am_origin_handler_fn origin_handler_fn,
@@ -164,4 +164,4 @@ static inline size_t MPIDI_CH4_SHM_am_inject_max_sz(void)
     return 0;
 }
 
-#endif /* SHM_SIMPLE_AM_H_INCLUDED */
+#endif /* SHM_POSIX_AM_H_INCLUDED */

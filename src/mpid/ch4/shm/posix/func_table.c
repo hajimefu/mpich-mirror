@@ -12,7 +12,7 @@
 #define SHM_DISABLE_INLINES
 #include <mpidimpl.h>
 #include "shm_direct.h"
-MPIDI_CH4_SHM_funcs_t MPIDI_CH4_SHM_simple_funcs = {
+MPIDI_CH4_SHM_funcs_t MPIDI_CH4_SHM_posix_funcs = {
     MPIDI_CH4_SHM_init,
     MPIDI_CH4_SHM_finalize,
     MPIDI_CH4_SHM_progress,
@@ -48,7 +48,7 @@ MPIDI_CH4_SHM_funcs_t MPIDI_CH4_SHM_simple_funcs = {
     MPIDI_CH4_SHM_am_request_init,
 };
 
-MPIDI_CH4_SHM_native_funcs_t MPIDI_CH4_SHM_native_simple_funcs = {
+MPIDI_CH4_SHM_native_funcs_t MPIDI_CH4_SHM_native_posix_funcs = {
     MPIDI_CH4_SHM_send,
     MPIDI_CH4_SHM_ssend,
     MPIDI_CH4_SHM_startall,

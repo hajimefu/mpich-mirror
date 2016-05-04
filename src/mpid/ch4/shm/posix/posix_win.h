@@ -8,10 +8,10 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef SHM_SIMPLE_WIN_H_INCLUDED
-#define SHM_SIMPLE_WIN_H_INCLUDED
+#ifndef SHM_POSIX_WIN_H_INCLUDED
+#define SHM_POSIX_WIN_H_INCLUDED
 
-#include "impl.h"
+#include "posix_impl.h"
 
 static inline int MPIDI_CH4_SHM_win_set_info(MPIR_Win *win, MPIR_Info *info)
 {
@@ -182,4 +182,4 @@ static inline int MPIDI_CH4_SHM_win_lock_all(int assert, MPIR_Win *win)
 }
 
 
-#endif /* SHM_SIMPLE_WIN_H_INCLUDED */
+#endif /* SHM_POSIX_WIN_H_INCLUDED */

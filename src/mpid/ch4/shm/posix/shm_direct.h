@@ -10,19 +10,18 @@
 #ifndef SHM_DIRECT_H_INCLUDED
 #define SHM_DIRECT_H_INCLUDED
 
-#include "shm.h"
-#include "init.h"
-#include "probe.h"
-#include "progress.h"
-#include "recv.h"
-#include "request.h"
-#include "send.h"
-#include "win.h"
-#include "rma.h"
-#include "am.h"
-#include "spawn.h"
-#include "comm.h"
-#include "coll.h"
-#include "unimpl.h"
+#include "posix_init.h"
+#include "posix_probe.h"
+#include "posix_progress.h"
+#include "posix_recv.h"
+#include "posix_request.h"
+#include "posix_send.h"
+#include "posix_win.h"
+#include "posix_rma.h"
+#include "posix_am.h"
+#include "posix_spawn.h"
+#include "posix_comm.h"
+#include "posix_coll.h"
+#include "posix_unimpl.h"
 
 #endif /* SHM_DIRECT_H_INCLUDED */
