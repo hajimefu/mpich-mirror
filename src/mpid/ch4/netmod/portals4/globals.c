@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#include "impl.h"
-#include "types.h"
+#include "ptl_impl.h"
+#include "ptl_types.h"
 
 MPIDI_PTL_global_t     MPIDI_PTL_global = { 0 };
 MPIDI_PTL_addr_t      *MPIDI_PTL_addr_table = NULL;

@@ -11,7 +11,7 @@
 #ifndef NETMOD_PTL_COMM_H_INCLUDED
 #define NETMOD_PTL_COMM_H_INCLUDED
 
-#include "impl.h"
+#include "ptl_impl.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH4_NM_comm_create

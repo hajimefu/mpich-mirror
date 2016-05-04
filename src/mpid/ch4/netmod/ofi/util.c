@@ -10,8 +10,8 @@
  */
 
 #include <mpidimpl.h>
-#include "impl.h"
-#include "events.h"
+#include "ofi_impl.h"
+#include "ofi_events.h"
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_handle_cq_error_util

@@ -7,7 +7,7 @@
  *  Copyright (C) Mellanox Technologies Ltd. 2016. ALL RIGHTS RESERVED
  */
 #include <mpidimpl.h>
-#include "impl.h"
-#include "types.h"
+#include "ucx_impl.h"
+#include "ucx_types.h"
 
 MPIDI_UCX_global_t MPIDI_UCX_global = { 0 };

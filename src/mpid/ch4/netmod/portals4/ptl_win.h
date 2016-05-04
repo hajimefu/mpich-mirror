@@ -11,7 +11,7 @@
 #ifndef NETMOD_PTL_WIN_H_INCLUDED
 #define NETMOD_PTL_WIN_H_INCLUDED
 
-#include "impl.h"
+#include "ptl_impl.h"
 
 static inline int MPIDI_CH4_NM_win_set_info(MPIR_Win * win, MPIR_Info * info)
 {

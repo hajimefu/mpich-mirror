@@ -4,37 +4,37 @@
  *      See COPYRIGHT in top-level directory.
  *
  *  Portions of this code were written by Intel Corporation.
- *  Copyright (C) 2011-2012 Intel Corporation.  Intel provides this material
+ *  Copyright (C) 2011-2016 Intel Corporation.  Intel provides this material
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef NETMOD_PTL_PROBE_H_INCLUDED
-#define NETMOD_PTL_PROBE_H_INCLUDED
+#ifndef NETMOD_AM_OFI_PROBE_H_INCLUDED
+#define NETMOD_AM_OFI_PROBE_H_INCLUDED
 
-#include "ptl_impl.h"
+#include "ofi_impl.h"
 
 static inline int MPIDI_CH4_NM_probe(int source,
                                      int tag,
-                                     MPIR_Comm * comm, int context_offset, MPI_Status * status)
+                                     MPIR_Comm *comm, int context_offset, MPI_Status *status)
 {
     return MPIDI_CH4U_probe(source, tag, comm, context_offset, status);
 }
 
 static inline int MPIDI_CH4_NM_improbe(int source,
                                        int tag,
-                                       MPIR_Comm * comm,
+                                       MPIR_Comm *comm,
                                        int context_offset,
-                                       int *flag, MPIR_Request ** message, MPI_Status * status)
+                                       int *flag, MPIR_Request **message, MPI_Status *status)
 {
     return MPIDI_CH4U_improbe(source, tag, comm, context_offset, flag, message, status);
 }
 
 static inline int MPIDI_CH4_NM_iprobe(int source,
                                       int tag,
-                                      MPIR_Comm * comm,
-                                      int context_offset, int *flag, MPI_Status * status)
+                                      MPIR_Comm *comm,
+                                      int context_offset, int *flag, MPI_Status *status)
 {
     return MPIDI_CH4U_iprobe(source, tag, comm, context_offset, flag, status);
 }
 
-#endif /* NETMOD_PTL_PROBE_H_INCLUDED */
+#endif /* NETMOD_AM_OFI_PROBE_H_INCLUDED */

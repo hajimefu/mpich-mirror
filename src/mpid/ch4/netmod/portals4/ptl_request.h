@@ -11,7 +11,7 @@
 #ifndef NETMOD_PTL_REQUEST_H_INCLUDED
 #define NETMOD_PTL_REQUEST_H_INCLUDED
 
-#include "impl.h"
+#include "ptl_impl.h"
 
 static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
 {

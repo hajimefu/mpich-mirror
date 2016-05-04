@@ -11,30 +11,30 @@
 #ifndef NETMOD_DIRECT_H_INCLUDED
 #define NETMOD_DIRECT_H_INCLUDED
 
-#include "am.h"
-#include "events.h"
-#include "comm.h"
-#include "proc.h"
-#include "progress.h"
-#include "unimpl.h"
-#include "init.h"
-#include "coll.h"
-#include "datatype.h"
+#include "ofi_am.h"
+#include "ofi_events.h"
+#include "ofi_comm.h"
+#include "ofi_proc.h"
+#include "ofi_progress.h"
+#include "ofi_unimpl.h"
+#include "ofi_init.h"
+#include "ofi_coll.h"
+#include "ofi_datatype.h"
 
 #ifdef USE_OFI_TAGGED
-#include "probe.h"
-#include "recv.h"
-#include "send.h"
-#include "win.h"
-#include "rma.h"
-#include "spawn.h"
+#include "ofi_probe.h"
+#include "ofi_recv.h"
+#include "ofi_send.h"
+#include "ofi_win.h"
+#include "ofi_rma.h"
+#include "ofi_spawn.h"
 #else
-#include "am_probe.h"
-#include "am_recv.h"
-#include "am_send.h"
-#include "am_win.h"
-#include "am_rma.h"
-#include "am_spawn.h"
+#include "ofi_am_probe.h"
+#include "ofi_am_recv.h"
+#include "ofi_am_send.h"
+#include "ofi_am_win.h"
+#include "ofi_am_rma.h"
+#include "ofi_am_spawn.h"
 #endif /* USE_OFI_TAGGED */
 
 #endif /* NETMOD_DIRECT_H_INCLUDED */

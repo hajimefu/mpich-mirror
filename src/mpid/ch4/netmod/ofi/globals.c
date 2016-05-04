@@ -9,5 +9,5 @@
  *  Contributor License Agreement dated February 8, 2012.
  */
 #include <mpidimpl.h>
-#include "impl.h"
+#include "ofi_impl.h"
 MPIDI_OFI_global_t      MPIDI_Global     = { 0 };

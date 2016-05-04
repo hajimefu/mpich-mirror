@@ -12,8 +12,8 @@
 #define NETMOD_PTL_INIT_H_INCLUDED
 
 #include "mpidch4r.h"
-#include "types.h"
-#include "impl.h"
+#include "ptl_types.h"
+#include "ptl_impl.h"
 #include "portals4.h"
 
 static inline int MPIDI_PTL_append_overflow(size_t i)

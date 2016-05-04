@@ -11,7 +11,7 @@
 #ifndef NETMOD_PTL_PROGRESS_H_INCLUDED
 #define NETMOD_PTL_PROGRESS_H_INCLUDED
 
-#include "impl.h"
+#include "ptl_impl.h"
 
 static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
 {
