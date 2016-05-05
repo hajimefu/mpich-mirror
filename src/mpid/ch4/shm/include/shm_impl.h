@@ -551,11 +551,11 @@ MPIDI_CH4_SHM_STATIC_INLINE_PREFIX int MPIDI_CH4_SHM_iscatterv(const void * send
 
 #else
 
-#define __shm_direct_stub__     0
+#define __shm_direct_stubshm__     0
 #define __shm_direct_posix__    1
 
-#if SHM_DIRECT==__shm_direct_stub__
-#include "../stub/shm_direct.h"
+#if SHM_DIRECT==__shm_direct_stubshm__
+#include "../stubshm/shm_direct.h"
 #elif SHM_DIRECT==__shm_direct_posix__
 #include "../posix/shm_direct.h"
 #else

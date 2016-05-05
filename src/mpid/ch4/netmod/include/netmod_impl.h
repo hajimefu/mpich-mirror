@@ -556,14 +556,14 @@ MPIDI_CH4_NM_STATIC_INLINE_PREFIX void MPIDI_CH4_NM_datatype_destroy_hook(MPIR_D
 #endif /* NETMOD_DISABLE_INLINES  */
 
 #else
-#define __netmod_direct_stub__   0
+#define __netmod_direct_stubnm__   0
 #define __netmod_direct_ofi__    1
 #define __netmod_direct_shm__    2
 #define __netmod_direct_ucx__    3
 #define __netmod_direct_portals4__ 4
 
-#if NETMOD_DIRECT==__netmod_direct_stub__
-#include "../stub/netmod_direct.h"
+#if NETMOD_DIRECT==__netmod_direct_stubnm__
+#include "../stubnm/netmod_direct.h"
 #elif NETMOD_DIRECT==__netmod_direct_ofi__
 #include "../ofi/netmod_direct.h"
 #elif NETMOD_DIRECT==__netmod_direct_shm__
