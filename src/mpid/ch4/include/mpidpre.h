@@ -20,6 +20,7 @@
 #include "mpid_sched.h"
 #include "mpid_timers_fallback.h"
 #include "netmodpre.h"
+#include "shmpre.h"
 #include "mpl_uthash.h"
 
 typedef struct {
