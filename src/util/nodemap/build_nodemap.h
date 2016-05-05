@@ -57,7 +57,7 @@ static inline int MPIR_NODEMAP_publish_node_id(int sz, int myrank)
     int key_max_sz;
     char *kvs_name;
     char hostname[MAX_HOSTNAME_LEN];
-    MPIU_CHKLMEM_DECL(1);
+    MPIU_CHKLMEM_DECL(2);
 
     /* set hostname */
 
@@ -343,7 +343,7 @@ static inline int MPIR_NODEMAP_build_nodemap(int sz,
     int odd_even_cliques = 0;
     int pmi_version = 1;
     int pmi_subversion = 1;
-    MPIU_CHKLMEM_DECL(4);
+    MPIU_CHKLMEM_DECL(5);
 
     /* See if the user wants to override our default values */
     MPL_env2int("PMI_VERSION", &pmi_version);
