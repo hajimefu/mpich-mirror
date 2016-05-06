@@ -12,10 +12,10 @@
 #include "ucx_impl.h"
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_create
+#define FUNCNAME MPIDI_NM_comm_create
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_create(MPIR_Comm * comm)
+static inline int MPIDI_NM_comm_create(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_CREATE);
@@ -29,10 +29,10 @@ fn_exit:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_destroy
+#define FUNCNAME MPIDI_NM_comm_destroy
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_destroy(MPIR_Comm * comm)
+static inline int MPIDI_NM_comm_destroy(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_COMM_DESTROY);

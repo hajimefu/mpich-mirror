@@ -10,7 +10,7 @@
 ##  Contributor License Agreement dated February 8, 2012.
 ##
 
-if BUILD_CH4_SHM_POSIX
+if BUILD_SHM_POSIX
 
 noinst_HEADERS += src/mpid/ch4/shm/posix/posix_am.h        \
                   src/mpid/ch4/shm/posix/posix_coll.h      \

@@ -13,12 +13,12 @@
 
 #include "stubshm_impl.h"
 
-static inline void MPIDI_CH4_SHM_am_request_init(MPIR_Request *req)
+static inline void MPIDI_SHM_am_request_init(MPIR_Request *req)
 {
     MPIU_Assert(0);
 }
 
-static inline void MPIDI_CH4_SHM_am_request_finalize(MPIR_Request *req)
+static inline void MPIDI_SHM_am_request_finalize(MPIR_Request *req)
 {
     MPIU_Assert(0);
 }

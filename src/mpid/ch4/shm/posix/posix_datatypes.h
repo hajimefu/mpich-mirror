@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_DATATYPES_H
-#define CH4_SHM_DATATYPES_H
+#ifndef SHM_DATATYPES_H
+#define SHM_DATATYPES_H
 
 /* ************************************************************************** */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_datatypes.h                */
@@ -181,4 +181,4 @@ typedef struct MPIDI_POSIX_fbox_arrays {
     MPIDI_POSIX_fastbox_t **out;
 } MPIDI_POSIX_fbox_arrays_t;
 
-#endif /* ifndef CH4_SHM_DATATYPES_H */
+#endif /* ifndef SHM_DATATYPES_H */

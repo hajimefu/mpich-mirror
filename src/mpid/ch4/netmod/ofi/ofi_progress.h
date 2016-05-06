@@ -49,10 +49,10 @@ int MPIDI_OFI_progress_generic(void *netmod_context,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_progress
+#define FUNCNAME MPIDI_NM_progress
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
+static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 {
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);

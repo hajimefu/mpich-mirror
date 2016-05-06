@@ -14,7 +14,7 @@
 #include "posix_impl.h"
 
 
-static inline int MPIDI_CH4_SHM_improbe(int source,
+static inline int MPIDI_SHM_improbe(int source,
                                         int tag,
                                         MPIR_Comm *comm,
                                         int context_offset,
@@ -90,7 +90,7 @@ fn_exit:
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_SHM_iprobe(int source,
+static inline int MPIDI_SHM_iprobe(int source,
                                        int tag,
                                        MPIR_Comm *comm,
                                        int context_offset, int *flag, MPI_Status *status)

@@ -406,7 +406,7 @@ int MPIDI_OFI_control_handler(void      *am_hdr,
                                       void     **data,
                                       size_t    *data_sz,
                                       int       *is_contig,
-                                      MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                                      MPIDI_NM_am_completion_handler_fn *cmpl_handler_fn,
                                       MPIR_Request **req)
 {
     int                  senderrank;

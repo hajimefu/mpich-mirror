@@ -40,10 +40,10 @@ static inline int MPIDI_PTL_append_overflow(size_t i)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_init
+#define FUNCNAME MPIDI_NM_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_init(int rank,
+static inline int MPIDI_NM_init(int rank,
                                     int size,
                                     int appnum,
                                     int *tag_ub,
@@ -168,7 +168,7 @@ static inline int MPIDI_CH4_NM_init(int rank,
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_finalize(void)
+static inline int MPIDI_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
     int ret, i;
@@ -197,57 +197,57 @@ static inline int MPIDI_CH4_NM_finalize(void)
 }
 
 
-static inline int MPIDI_CH4_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
+static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
+static inline int MPIDI_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
+static inline int MPIDI_NM_get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
     *id_p = MPIDI_PTL_global.node_map[rank];
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
+static inline int MPIDI_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
 {
     *max_id_p = MPIDI_PTL_global.max_node_id;
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_getallincomm(MPIR_Comm * comm_ptr,
+static inline int MPIDI_NM_getallincomm(MPIR_Comm * comm_ptr,
                                             int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
+static inline int MPIDI_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
+static inline int MPIDI_NM_create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
                                                            int size, const int lpids[])
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_free_mem(void *ptr)
+static inline int MPIDI_NM_free_mem(void *ptr)
 {
     return MPIDI_CH4U_free_mem(ptr);
 }
 
-static inline void *MPIDI_CH4_NM_alloc_mem(size_t size, MPIR_Info * info_ptr)
+static inline void *MPIDI_NM_alloc_mem(size_t size, MPIR_Info * info_ptr)
 {
     return MPIDI_CH4U_alloc_mem(size, info_ptr);
 }

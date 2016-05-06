@@ -11,8 +11,8 @@
 
 #include <ucp/api/ucp.h>
 
-#define HAVE_MPIDI_CH4_NM_datatype_commit_hook
-#define HAVE_MPIDI_CH4_NM_datatype_destroy_hook
+#define HAVE_MPIDI_NM_datatype_commit_hook
+#define HAVE_MPIDI_NM_datatype_destroy_hook
 
 typedef struct {
    int has_ucp;

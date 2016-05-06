@@ -53,27 +53,27 @@ for net in $ch4_netmods ; do
     fi
 
     if test -z "$ch4_nets_func_decl" ; then
-        ch4_nets_func_decl="MPIDI_CH4_NM_${net}_funcs"
+        ch4_nets_func_decl="MPIDI_NM_${net}_funcs"
     else
-        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_CH4_NM_${net}_funcs"
+        ch4_nets_func_decl="${ch4_nets_func_decl}, MPIDI_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_decl" ; then
-        ch4_nets_native_func_decl="MPIDI_CH4_NM_native_${net}_funcs"
+        ch4_nets_native_func_decl="MPIDI_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_CH4_NM_native_${net}_funcs"
+        ch4_nets_native_func_decl="${ch4_nets_native_func_decl}, MPIDI_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_func_array" ; then
-        ch4_nets_func_array="&MPIDI_CH4_NM_${net}_funcs"
+        ch4_nets_func_array="&MPIDI_NM_${net}_funcs"
     else
-        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_CH4_NM_${net}_funcs"
+        ch4_nets_func_array="${ch4_nets_func_array}, &MPIDI_NM_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_native_func_array" ; then
-        ch4_nets_native_func_array="&MPIDI_CH4_NM_native_${net}_funcs"
+        ch4_nets_native_func_array="&MPIDI_NM_native_${net}_funcs"
     else
-        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_CH4_NM_native_${net}_funcs"
+        ch4_nets_native_func_array="${ch4_nets_native_func_array}, &MPIDI_NM_native_${net}_funcs"
     fi
 
     if test -z "$ch4_nets_strings" ; then
@@ -242,7 +242,7 @@ for shm in $ch4_shm ; do
         AC_MSG_ERROR([Shared memory module ${shm} is unknown "$srcdir/src/mpid/ch4/shm/${shm}"])
     fi
     shm_macro=`echo $shm | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-    shm_macro="MPIDI_CH4_SHM_${shm_macro}"
+    shm_macro="MPIDI_SHM_${shm_macro}"
 
     if test -z "$ch4_shm_array" ; then
         ch4_shm_array="$shm_macro"
@@ -251,27 +251,27 @@ for shm in $ch4_shm ; do
     fi
 
     if test -z "$ch4_shm_func_decl" ; then
-        ch4_shm_func_decl="MPIDI_CH4_SHM_${shm}_funcs"
+        ch4_shm_func_decl="MPIDI_SHM_${shm}_funcs"
     else
-        ch4_shm_func_decl="${ch4_shm_func_decl}, MPIDI_CH4_SHM_${shm}_funcs"
+        ch4_shm_func_decl="${ch4_shm_func_decl}, MPIDI_SHM_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_native_func_decl" ; then
-        ch4_shm_native_func_decl="MPIDI_CH4_SHM_native_${shm}_funcs"
+        ch4_shm_native_func_decl="MPIDI_SHM_native_${shm}_funcs"
     else
-        ch4_shm_native_func_decl="${ch4_shm_native_func_decl}, MPIDI_CH4_SHM_native_${shm}_funcs"
+        ch4_shm_native_func_decl="${ch4_shm_native_func_decl}, MPIDI_SHM_native_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_func_array" ; then
-        ch4_shm_func_array="&MPIDI_CH4_SHM_${shm}_funcs"
+        ch4_shm_func_array="&MPIDI_SHM_${shm}_funcs"
     else
-        ch4_shm_func_array="${ch4_shm_func_array}, &MPIDI_CH4_SHM_${shm}_funcs"
+        ch4_shm_func_array="${ch4_shm_func_array}, &MPIDI_SHM_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_native_func_array" ; then
-        ch4_shm_native_func_array="&MPIDI_CH4_SHM_native_${shm}_funcs"
+        ch4_shm_native_func_array="&MPIDI_SHM_native_${shm}_funcs"
     else
-        ch4_shm_native_func_array="${ch4_shm_native_func_array}, &MPIDI_CH4_SHM_native_${shm}_funcs"
+        ch4_shm_native_func_array="${ch4_shm_native_func_array}, &MPIDI_SHM_native_${shm}_funcs"
     fi
 
     if test -z "$ch4_shm_strings" ; then

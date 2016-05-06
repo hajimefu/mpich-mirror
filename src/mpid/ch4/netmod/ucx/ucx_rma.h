@@ -79,7 +79,7 @@ static inline int MPIDI_UCX_contig_get(void *origin_addr,
 
 
 }
-static inline int MPIDI_CH4_NM_put(const void *origin_addr,
+static inline int MPIDI_NM_put(const void *origin_addr,
                                    int origin_count,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
@@ -137,7 +137,7 @@ static inline int MPIDI_CH4_NM_put(const void *origin_addr,
 
 }
 
-static inline int MPIDI_CH4_NM_get(void *origin_addr,
+static inline int MPIDI_NM_get(void *origin_addr,
                                    int origin_count,
                                    MPI_Datatype origin_datatype,
                                    int target_rank,
@@ -192,7 +192,7 @@ static inline int MPIDI_CH4_NM_get(void *origin_addr,
 
 }
 
-static inline int MPIDI_CH4_NM_rput(const void *origin_addr,
+static inline int MPIDI_NM_rput(const void *origin_addr,
                                     int origin_count,
                                     MPI_Datatype origin_datatype,
                                     int target_rank,
@@ -206,7 +206,7 @@ static inline int MPIDI_CH4_NM_rput(const void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
+static inline int MPIDI_NM_compare_and_swap(const void *origin_addr,
                                                 const void *compare_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
@@ -217,7 +217,7 @@ static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
                                        datatype, target_rank, target_disp, win);
 }
 
-static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
+static inline int MPIDI_NM_raccumulate(const void *origin_addr,
                                            int origin_count,
                                            MPI_Datatype origin_datatype,
                                            int target_rank,
@@ -231,7 +231,7 @@ static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
                                   target_datatype, op, win, request);
 }
 
-static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_rget_accumulate(const void *origin_addr,
                                                int origin_count,
                                                MPI_Datatype origin_datatype,
                                                void *result_addr,
@@ -249,7 +249,7 @@ static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
                                       target_datatype, op, win, request);
 }
 
-static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
+static inline int MPIDI_NM_fetch_and_op(const void *origin_addr,
                                             void *result_addr,
                                             MPI_Datatype datatype,
                                             int target_rank,
@@ -260,7 +260,7 @@ static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_NM_rget(void *origin_addr,
+static inline int MPIDI_NM_rget(void *origin_addr,
                                     int origin_count,
                                     MPI_Datatype origin_datatype,
                                     int target_rank,
@@ -274,7 +274,7 @@ static inline int MPIDI_CH4_NM_rget(void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_get_accumulate(const void *origin_addr,
                                               int origin_count,
                                               MPI_Datatype origin_datatype,
                                               void *result_addr,
@@ -292,7 +292,7 @@ static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
                                      target_datatype, op, win);
 }
 
-static inline int MPIDI_CH4_NM_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_accumulate(const void *origin_addr,
                                           int origin_count,
                                           MPI_Datatype origin_datatype,
                                           int target_rank,

@@ -20,7 +20,7 @@ static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
     void *p_data;
     void *in_data;
     size_t data_sz, in_data_sz;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn = NULL;
+    MPIDI_NM_am_completion_handler_fn cmpl_handler_fn = NULL;
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
@@ -83,7 +83,7 @@ static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
+static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 {
     ptl_event_t e;
     unsigned int which;
@@ -127,55 +127,55 @@ static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_test(void)
+static inline int MPIDI_NM_progress_test(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_poke(void)
+static inline int MPIDI_NM_progress_poke(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline void MPIDI_CH4_NM_progress_start(MPID_Progress_state * state)
+static inline void MPIDI_NM_progress_start(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline void MPIDI_CH4_NM_progress_end(MPID_Progress_state * state)
+static inline void MPIDI_NM_progress_end(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline int MPIDI_CH4_NM_progress_wait(MPID_Progress_state * state)
+static inline int MPIDI_NM_progress_wait(MPID_Progress_state * state)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_register(int (*progress_fn) (int *), int *id)
+static inline int MPIDI_NM_progress_register(int (*progress_fn) (int *), int *id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_deregister(int id)
+static inline int MPIDI_NM_progress_deregister(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_activate(int id)
+static inline int MPIDI_NM_progress_activate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_progress_deactivate(int id)
+static inline int MPIDI_NM_progress_deactivate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

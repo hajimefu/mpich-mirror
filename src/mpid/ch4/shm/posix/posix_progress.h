@@ -333,8 +333,8 @@ fn_exit:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_progress)
-static inline int MPIDI_CH4_SHM_progress(int blocking)
+#define FCNAME DECL_FUNC(MPIDI_SHM_progress)
+static inline int MPIDI_SHM_progress(int blocking)
 {
     int complete = 0;
     MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
@@ -361,55 +361,55 @@ static inline int MPIDI_CH4_SHM_progress(int blocking)
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_test(void)
+static inline int MPIDI_SHM_progress_test(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_poke(void)
+static inline int MPIDI_SHM_progress_poke(void)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline void MPIDI_CH4_SHM_progress_start(MPID_Progress_state *state)
+static inline void MPIDI_SHM_progress_start(MPID_Progress_state *state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline void MPIDI_CH4_SHM_progress_end(MPID_Progress_state *state)
+static inline void MPIDI_SHM_progress_end(MPID_Progress_state *state)
 {
     MPIU_Assert(0);
     return;
 }
 
-static inline int MPIDI_CH4_SHM_progress_wait(MPID_Progress_state *state)
+static inline int MPIDI_SHM_progress_wait(MPID_Progress_state *state)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_register(int (*progress_fn)(int *))
+static inline int MPIDI_SHM_progress_register(int (*progress_fn)(int *))
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_deregister(int id)
+static inline int MPIDI_SHM_progress_deregister(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_activate(int id)
+static inline int MPIDI_SHM_progress_activate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_progress_deactivate(int id)
+static inline int MPIDI_SHM_progress_deactivate(int id)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

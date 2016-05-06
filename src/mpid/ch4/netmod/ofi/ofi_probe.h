@@ -100,10 +100,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_probe
+#define FUNCNAME MPIDI_NM_probe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_probe(int source,
+static inline int MPIDI_NM_probe(int source,
                                      int tag,
                                      MPIR_Comm *comm, int context_offset, MPI_Status *status)
 {
@@ -128,10 +128,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_improbe
+#define FUNCNAME MPIDI_NM_improbe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_improbe(int source,
+static inline int MPIDI_NM_improbe(int source,
                                        int tag,
                                        MPIR_Comm *comm,
                                        int context_offset,
@@ -154,10 +154,10 @@ static inline int MPIDI_CH4_NM_improbe(int source,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_iprobe
+#define FUNCNAME MPIDI_NM_iprobe
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_iprobe(int source,
+static inline int MPIDI_NM_iprobe(int source,
                                       int tag,
                                       MPIR_Comm *comm,
                                       int context_offset, int *flag, MPI_Status *status)

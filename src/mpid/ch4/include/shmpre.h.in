@@ -13,7 +13,7 @@
 
 @ch4_shm_pre_include@
 
-#define MPIDI_CH4_SHM_REQUEST_DECL       @ch4_shm_request_decl@
-#define MPIDI_CH4_SHM_COMM_DECL          @ch4_shm_comm_decl@
+#define MPIDI_SHM_REQUEST_DECL       @ch4_shm_request_decl@
+#define MPIDI_SHM_COMM_DECL          @ch4_shm_comm_decl@
 
 #endif /* SHMPRE_H_INCLUDED */

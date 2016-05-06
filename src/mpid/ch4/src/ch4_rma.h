@@ -27,7 +27,7 @@ __CH4_INLINE__ int MPIDI_Put(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_PUT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_PUT);
-    mpi_errno = MPIDI_CH4_NM_put(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_put(origin_addr, origin_count, origin_datatype,
                                  target_rank, target_disp, target_count, target_datatype, win);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -53,7 +53,7 @@ __CH4_INLINE__ int MPIDI_Get(void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GET);
-    mpi_errno = MPIDI_CH4_NM_get(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_get(origin_addr, origin_count, origin_datatype,
                                  target_rank, target_disp, target_count, target_datatype, win);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -80,7 +80,7 @@ __CH4_INLINE__ int MPIDI_Accumulate(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ACCUMULATE);
-    mpi_errno = MPIDI_CH4_NM_accumulate(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_accumulate(origin_addr, origin_count, origin_datatype,
                                         target_rank, target_disp, target_count,
                                         target_datatype, op, win);
     if (mpi_errno != MPI_SUCCESS) {
@@ -106,7 +106,7 @@ __CH4_INLINE__ int MPIDI_Compare_and_swap(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMPARE_AND_SWAP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMPARE_AND_SWAP);
-    mpi_errno = MPIDI_CH4_NM_compare_and_swap(origin_addr, compare_addr, result_addr,
+    mpi_errno = MPIDI_NM_compare_and_swap(origin_addr, compare_addr, result_addr,
                                               datatype, target_rank, target_disp, win);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -134,7 +134,7 @@ __CH4_INLINE__ int MPIDI_Raccumulate(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_RACCUMULATE);
-    mpi_errno = MPIDI_CH4_NM_raccumulate(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_raccumulate(origin_addr, origin_count, origin_datatype,
                                          target_rank, target_disp, target_count,
                                          target_datatype, op, win, request);
     if (mpi_errno != MPI_SUCCESS) {
@@ -166,7 +166,7 @@ __CH4_INLINE__ int MPIDI_Rget_accumulate(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RGET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_RGET_ACCUMULATE);
-    mpi_errno = MPIDI_CH4_NM_rget_accumulate(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_rget_accumulate(origin_addr, origin_count, origin_datatype,
                                              result_addr, result_count, result_datatype,
                                              target_rank, target_disp, target_count,
                                              target_datatype, op, win, request);
@@ -193,7 +193,7 @@ __CH4_INLINE__ int MPIDI_Fetch_and_op(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FETCH_AND_OP);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FETCH_AND_OP);
-    mpi_errno = MPIDI_CH4_NM_fetch_and_op(origin_addr, result_addr,
+    mpi_errno = MPIDI_NM_fetch_and_op(origin_addr, result_addr,
                                           datatype, target_rank, target_disp, op, win);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -221,7 +221,7 @@ __CH4_INLINE__ int MPIDI_Rget(void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RGET);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_RGET);
-    mpi_errno = MPIDI_CH4_NM_rget(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_rget(origin_addr, origin_count, origin_datatype,
                                   target_rank, target_disp, target_count,
                                   target_datatype, win, request);
     if (mpi_errno != MPI_SUCCESS) {
@@ -249,7 +249,7 @@ __CH4_INLINE__ int MPIDI_Rput(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_RPUT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_RPUT);
-    mpi_errno = MPIDI_CH4_NM_rput(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_rput(origin_addr, origin_count, origin_datatype,
                                   target_rank, target_disp, target_count,
                                   target_datatype, win, request);
     if (mpi_errno != MPI_SUCCESS) {
@@ -280,7 +280,7 @@ __CH4_INLINE__ int MPIDI_Get_accumulate(const void *origin_addr,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_GET_ACCUMULATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GET_ACCUMULATE);
-    mpi_errno = MPIDI_CH4_NM_get_accumulate(origin_addr, origin_count, origin_datatype,
+    mpi_errno = MPIDI_NM_get_accumulate(origin_addr, origin_count, origin_datatype,
                                             result_addr, result_count, result_datatype,
                                             target_rank, target_disp, target_count, target_datatype,
                                             op, win);

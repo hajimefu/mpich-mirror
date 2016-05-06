@@ -98,7 +98,7 @@ static ucp_generic_dt_ops_t MPIDI_UCX_datatype_ops = {
 };
 
 
-static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p){
+static inline void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p){
 
     int in_use;
 
@@ -111,7 +111,7 @@ static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p)
 
     return;
 }
-static inline void MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
+static inline void MPIDI_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
     ucp_datatype_t ucp_datatype;
     ucs_status_t status;
     size_t size;
@@ -134,9 +134,9 @@ static inline void MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
 
     return;
 }
-static inline void MPIDI_CH4_NM_datatype_dup_hook(MPIR_Datatype *datatype_p) {
+static inline void MPIDI_NM_datatype_dup_hook(MPIR_Datatype *datatype_p) {
 
-    return MPIDI_CH4_NM_datatype_commit_hook(&datatype_p->handle);
+    return MPIDI_NM_datatype_commit_hook(&datatype_p->handle);
 }
 
 #endif /* NETMOD_UCX_DATATYPE_H_INCLUDED */

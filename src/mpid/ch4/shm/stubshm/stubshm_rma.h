@@ -13,7 +13,7 @@
 
 #include "stubshm_impl.h"
 
-static inline int MPIDI_CH4_SHM_put(const void *origin_addr,
+static inline int MPIDI_SHM_put(const void *origin_addr,
                                 int origin_count,
                                 MPI_Datatype origin_datatype,
                                 int target_rank,
@@ -24,7 +24,7 @@ static inline int MPIDI_CH4_SHM_put(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_get(void *origin_addr,
+static inline int MPIDI_SHM_get(void *origin_addr,
                                 int origin_count,
                                 MPI_Datatype origin_datatype,
                                 int target_rank,
@@ -35,7 +35,7 @@ static inline int MPIDI_CH4_SHM_get(void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_rput(const void *origin_addr,
+static inline int MPIDI_SHM_rput(const void *origin_addr,
                                  int origin_count,
                                  MPI_Datatype origin_datatype,
                                  int target_rank,
@@ -49,7 +49,7 @@ static inline int MPIDI_CH4_SHM_rput(const void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_SHM_compare_and_swap(const void *origin_addr,
+static inline int MPIDI_SHM_compare_and_swap(const void *origin_addr,
                                              const void *compare_addr,
                                              void *result_addr,
                                              MPI_Datatype datatype,
@@ -59,7 +59,7 @@ static inline int MPIDI_CH4_SHM_compare_and_swap(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_raccumulate(const void *origin_addr,
+static inline int MPIDI_SHM_raccumulate(const void *origin_addr,
                                         int origin_count,
                                         MPI_Datatype origin_datatype,
                                         int target_rank,
@@ -72,7 +72,7 @@ static inline int MPIDI_CH4_SHM_raccumulate(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_rget_accumulate(const void *origin_addr,
+static inline int MPIDI_SHM_rget_accumulate(const void *origin_addr,
                                             int origin_count,
                                             MPI_Datatype origin_datatype,
                                             void *result_addr,
@@ -88,7 +88,7 @@ static inline int MPIDI_CH4_SHM_rget_accumulate(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_fetch_and_op(const void *origin_addr,
+static inline int MPIDI_SHM_fetch_and_op(const void *origin_addr,
                                          void *result_addr,
                                          MPI_Datatype datatype,
                                          int target_rank,
@@ -99,7 +99,7 @@ static inline int MPIDI_CH4_SHM_fetch_and_op(const void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_SHM_rget(void *origin_addr,
+static inline int MPIDI_SHM_rget(void *origin_addr,
                                  int origin_count,
                                  MPI_Datatype origin_datatype,
                                  int target_rank,
@@ -113,7 +113,7 @@ static inline int MPIDI_CH4_SHM_rget(void *origin_addr,
 }
 
 
-static inline int MPIDI_CH4_SHM_get_accumulate(const void *origin_addr,
+static inline int MPIDI_SHM_get_accumulate(const void *origin_addr,
                                            int origin_count,
                                            MPI_Datatype origin_datatype,
                                            void *result_addr,
@@ -128,7 +128,7 @@ static inline int MPIDI_CH4_SHM_get_accumulate(const void *origin_addr,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_accumulate(const void *origin_addr,
+static inline int MPIDI_SHM_accumulate(const void *origin_addr,
                                        int origin_count,
                                        MPI_Datatype origin_datatype,
                                        int target_rank,

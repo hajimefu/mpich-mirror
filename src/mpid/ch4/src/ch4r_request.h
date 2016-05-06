@@ -26,7 +26,7 @@ static inline MPIR_Request *MPIDI_CH4I_am_request_create()
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
 
     req = MPIDI_CH4I_alloc_and_init_req(2);
-    MPIDI_CH4_NM_am_request_init(req);
+    MPIDI_NM_am_request_init(req);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
     MPIDI_CH4U_REQUEST(req, req)    =
@@ -51,7 +51,7 @@ static inline MPIR_Request *MPIDI_CH4I_am_win_request_create()
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
 
     req = MPIDI_CH4I_alloc_and_init_req(1);
-    MPIDI_CH4_NM_am_request_init(req);
+    MPIDI_NM_am_request_init(req);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
     MPIDI_CH4U_REQUEST(req, req)         =
@@ -76,7 +76,7 @@ __CH4_INLINE__ void MPIDI_CH4I_am_request_complete(MPIR_Request *req)
             MPIDI_CH4R_release_buf(MPIDI_CH4U_REQUEST(req, req));
             MPIDI_CH4U_REQUEST(req, req) = NULL;
         }
-        MPIDI_CH4_NM_am_request_finalize(req);
+        MPIDI_NM_am_request_finalize(req);
         MPIDI_CH4U_request_release(req);
     }
 }
@@ -96,7 +96,7 @@ static inline int MPIDI_CH4R_anysource_matched(MPIR_Request *rreq, int caller, i
 
     if (MPIDI_CH4R_NETMOD == caller) {
 #ifdef MPIDI_BUILD_CH4_SHM
-        mpi_errno = MPIDI_CH4_SHM_cancel_recv(rreq);
+        mpi_errno = MPIDI_SHM_cancel_recv(rreq);
 
         /* If the netmod is cancelling the request, then shared memory will
          * just copy the status from the shared memory side because the netmod
@@ -109,7 +109,7 @@ static inline int MPIDI_CH4R_anysource_matched(MPIR_Request *rreq, int caller, i
 #endif
         *continue_matching = 0;
     } else if (MPIDI_CH4R_SHM == caller) {
-        mpi_errno = MPIDI_CH4_NM_cancel_recv(rreq);
+        mpi_errno = MPIDI_NM_cancel_recv(rreq);
 
         /* If the netmod has already matched this request, shared memory will
          * lose and should stop matching this request */

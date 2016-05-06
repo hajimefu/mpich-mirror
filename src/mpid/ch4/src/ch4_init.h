@@ -70,17 +70,17 @@ static inline int MPIDI_choose_netmod(void)
 
     if (strcmp(MPIR_CVAR_CH4_NETMOD, "") == 0) {
         /* netmod not specified, using the default */
-        MPIDI_CH4_NM_func = MPIDI_CH4_NM_funcs[0];
-        MPIDI_CH4_NM_native_func = MPIDI_CH4_NM_native_funcs[0];
+        MPIDI_NM_func = MPIDI_NM_funcs[0];
+        MPIDI_NM_native_func = MPIDI_NM_native_funcs[0];
         goto fn_exit;
     }
 
     for (i = 0; i < MPIDI_num_netmods; ++i) {
         /* use MPL variant of strncasecmp if we get one */
         if (!strncasecmp
-            (MPIR_CVAR_CH4_NETMOD, MPIDI_CH4_NM_strings[i], MPIDI_MAX_NETMOD_STRING_LEN)) {
-            MPIDI_CH4_NM_func = MPIDI_CH4_NM_funcs[i];
-            MPIDI_CH4_NM_native_func = MPIDI_CH4_NM_native_funcs[i];
+            (MPIR_CVAR_CH4_NETMOD, MPIDI_NM_strings[i], MPIDI_MAX_NETMOD_STRING_LEN)) {
+            MPIDI_NM_func = MPIDI_NM_funcs[i];
+            MPIDI_NM_native_func = MPIDI_NM_native_funcs[i];
             goto fn_exit;
         }
     }
@@ -113,17 +113,17 @@ static inline int MPIDI_choose_shm(void)
 
     if (strcmp(MPIR_CVAR_CH4_SHM, "") == 0) {
         /* shm not specified, using the default */
-        MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[0];
-        MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[0];
+        MPIDI_SHM_func = MPIDI_SHM_funcs[0];
+        MPIDI_SHM_native_func = MPIDI_SHM_native_funcs[0];
         goto fn_exit;
     }
 
     for (i = 0; i < MPIDI_num_shms; ++i) {
         /* use MPL variant of strncasecmp if we get one */
         if (!strncasecmp
-            (MPIR_CVAR_CH4_SHM, MPIDI_CH4_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
-            MPIDI_CH4_SHM_func = MPIDI_CH4_SHM_funcs[i];
-            MPIDI_CH4_SHM_native_func = MPIDI_CH4_SHM_native_funcs[i];
+            (MPIR_CVAR_CH4_SHM, MPIDI_SHM_strings[i], MPIDI_MAX_SHM_STRING_LEN)) {
+            MPIDI_SHM_func = MPIDI_SHM_funcs[i];
+            MPIDI_SHM_native_func = MPIDI_SHM_native_funcs[i];
             goto fn_exit;
         }
     }
@@ -259,7 +259,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;
     /* discuss */
 
-    mpi_errno = MPIDI_CH4_NM_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
+    mpi_errno = MPIDI_NM_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                   MPIR_Process.comm_world,
                                   MPIR_Process.comm_self, has_parent,
                                   1, &netmod_contexts);
@@ -289,7 +289,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
 #endif
 
 #ifdef MPIDI_BUILD_CH4_SHM
-    mpi_errno = MPIDI_CH4_SHM_init(rank, size);
+    mpi_errno = MPIDI_SHM_init(rank, size);
 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
@@ -356,10 +356,10 @@ __CH4_INLINE__ int MPIDI_Finalize(void)
     MPIDI_STATE_DECL(MPID_STATE_CH4_FINALIZE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FINALIZE);
 
-    mpi_errno = MPIDI_CH4_NM_finalize();
+    mpi_errno = MPIDI_NM_finalize();
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #ifdef MPIDI_BUILD_CH4_SHM
-    mpi_errno = MPIDI_CH4_SHM_finalize();
+    mpi_errno = MPIDI_SHM_finalize();
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 #endif
 
@@ -512,7 +512,7 @@ __CH4_INLINE__ void *MPIDI_Alloc_mem(size_t size, MPIR_Info * info_ptr)
     MPIDI_STATE_DECL(MPID_STATE_CH4_ALLOC_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_ALLOC_MEM);
 
-    p = MPIDI_CH4_NM_alloc_mem(size, info_ptr);
+    p = MPIDI_NM_alloc_mem(size, info_ptr);
 
     MPIDI_FUNC_EXIT(MPID_STATE_CH4_ALLOC_MEM);
     return p;
@@ -527,7 +527,7 @@ __CH4_INLINE__ int MPIDI_Free_mem(void *ptr)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_FREE_MEM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_FREE_MEM);
-    mpi_errno = MPIDI_CH4_NM_free_mem(ptr);
+    mpi_errno = MPIDI_NM_free_mem(ptr);
 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -576,7 +576,7 @@ __CH4_INLINE__ int MPIDI_GPID_Get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gp
     MPIDI_STATE_DECL(MPID_STATE_CH4_GPID_GET);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GPID_GET);
 
-    mpi_errno = MPIDI_CH4_NM_gpid_get(comm_ptr, rank, gpid);
+    mpi_errno = MPIDI_NM_gpid_get(comm_ptr, rank, gpid);
     MPIDI_CH4U_get_node_id(comm_ptr, rank, &MPIDII_GPID(gpid).node);
 
     if (mpi_errno != MPI_SUCCESS) {
@@ -633,7 +633,7 @@ __CH4_INLINE__ int MPIDI_GPID_GetAllInComm(MPIR_Comm * comm_ptr,
     MPIDI_STATE_DECL(MPID_STATE_CH4_GETALLINCOMM);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GETALLINCOMM);
 
-    mpi_errno = MPIDI_CH4_NM_getallincomm(comm_ptr, local_size, local_gpids, singleAVT);
+    mpi_errno = MPIDI_NM_getallincomm(comm_ptr, local_size, local_gpids, singleAVT);
 
     if (MPIDII_COMM(comm_ptr,map).mode == MPIDII_RANK_MAP_MLUT) {
         *singleAVT = FALSE;
@@ -655,7 +655,7 @@ __CH4_INLINE__ int MPIDI_GPID_ToLpidArray(int size, MPIR_Gpid gpid[], int lpid[]
     MPIDI_STATE_DECL(MPID_STATE_CH4_GPID_TOLPIDARRAY);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_GPID_TOLPIDARRAY);
 
-    mpi_errno = MPIDI_CH4_NM_gpid_tolpidarray(size, gpid, lpid);
+    mpi_errno = MPIDI_NM_gpid_tolpidarray(size, gpid, lpid);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }

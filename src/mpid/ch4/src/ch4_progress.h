@@ -39,12 +39,12 @@ __CH4_INLINE__ int MPIDI_Progress_test(void)
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_CH4I_THREAD_PROGRESS_MUTEX);
     }
     /* todo: progress unexp_list */
-    mpi_errno = MPIDI_CH4_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
+    mpi_errno = MPIDI_NM_progress(MPIDI_CH4_Global.netmod_context[0], 0);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
 #ifdef MPIDI_CH4_EXCLUSIVE_SHM
-    mpi_errno = MPIDI_CH4_SHM_progress(0);
+    mpi_errno = MPIDI_SHM_progress(0);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }

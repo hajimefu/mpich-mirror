@@ -1,4 +1,4 @@
-if BUILD_CH4_SHM_STUBSHM
+if BUILD_SHM_STUBSHM
 
 mpi_core_sources += src/mpid/ch4/shm/stubshm/globals.c    \
                     src/mpid/ch4/shm/stubshm/func_table.c

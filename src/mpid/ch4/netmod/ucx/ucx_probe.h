@@ -64,7 +64,7 @@ fn_fail:
    goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_improbe(int source,
+static inline int MPIDI_NM_improbe(int source,
                                        int tag,
                                        MPIR_Comm * comm,
                                        int context_offset,
@@ -107,7 +107,7 @@ fn_fail:
 }
 
 
-static inline int MPIDI_CH4_NM_iprobe(int source,
+static inline int MPIDI_NM_iprobe(int source,
                                       int tag,
                                       MPIR_Comm * comm,
                                       int context_offset, int *flag, MPI_Status * status)

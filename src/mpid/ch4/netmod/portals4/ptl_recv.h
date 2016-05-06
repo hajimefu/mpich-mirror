@@ -13,7 +13,7 @@
 
 #include "ptl_impl.h"
 
-static inline int MPIDI_CH4_NM_recv(void *buf,
+static inline int MPIDI_NM_recv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -25,7 +25,7 @@ static inline int MPIDI_CH4_NM_recv(void *buf,
     return MPIDI_CH4U_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
 }
 
-static inline int MPIDI_CH4_NM_recv_init(void *buf,
+static inline int MPIDI_NM_recv_init(void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -37,7 +37,7 @@ static inline int MPIDI_CH4_NM_recv_init(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_imrecv(void *buf,
+static inline int MPIDI_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       MPIR_Request * message, MPIR_Request ** rreqp)
@@ -46,7 +46,7 @@ static inline int MPIDI_CH4_NM_imrecv(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_NM_irecv(void *buf,
+static inline int MPIDI_NM_irecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -56,7 +56,7 @@ static inline int MPIDI_CH4_NM_irecv(void *buf,
     return MPIDI_CH4U_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_cancel_recv(MPIR_Request * rreq)
+static inline int MPIDI_NM_cancel_recv(MPIR_Request * rreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

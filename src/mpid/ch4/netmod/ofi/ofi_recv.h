@@ -121,10 +121,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_recv
+#define FUNCNAME MPIDI_NM_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_recv(void *buf,
                                         int count,
                                         MPI_Datatype datatype,
                                         int rank,
@@ -143,10 +143,10 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_recv_init
+#define FUNCNAME MPIDI_NM_recv_init
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_recv_init(void          *buf,
                                              int            count,
                                              MPI_Datatype   datatype,
                                              int            rank,
@@ -190,10 +190,10 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void          *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_imrecv
+#define FUNCNAME MPIDI_NM_imrecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
                                           int count,
                                           MPI_Datatype datatype,
                                           MPIR_Request *message, MPIR_Request **rreqp)
@@ -226,10 +226,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_irecv
+#define FUNCNAME MPIDI_NM_irecv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -246,10 +246,10 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_cancel_recv
+#define FUNCNAME MPIDI_NM_cancel_recv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPIR_Request *rreq)
+__ALWAYS_INLINE__ int MPIDI_NM_cancel_recv(MPIR_Request *rreq)
 {
 
     int mpi_errno = MPI_SUCCESS;
@@ -266,7 +266,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_cancel_recv(MPIR_Request *rreq)
 
     if(ret == 0) {
         while((!MPIR_STATUS_GET_CANCEL_BIT(rreq->status)) && (!MPIR_cc_is_complete(&rreq->cc))) {
-            if((mpi_errno = MPIDI_CH4_NM_progress(&MPIDI_OFI_REQUEST(rreq, context), 0)) != MPI_SUCCESS)
+            if((mpi_errno = MPIDI_NM_progress(&MPIDI_OFI_REQUEST(rreq, context), 0)) != MPI_SUCCESS)
                 goto fn_exit;
         }
 

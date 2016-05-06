@@ -26,7 +26,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm)
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     /* Ask the netmod for locality information. If it decided not to build it,
      * it will call back up to the CH4U function to get the infomration. */
-    ret = MPIDI_CH4_NM_rank_is_local(rank, comm);
+    ret = MPIDI_NM_rank_is_local(rank, comm);
 #else
     ret = MPIDI_CH4U_rank_is_local(rank, comm);
 #endif

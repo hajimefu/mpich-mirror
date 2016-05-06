@@ -379,10 +379,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_connect
+#define FUNCNAME MPIDI_NM_comm_connect
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_connect(const char *port_name,
+static inline int MPIDI_NM_comm_connect(const char *port_name,
                                             MPIR_Info  *info,
                                             int         root,
                                             MPIR_Comm  *comm_ptr,
@@ -443,10 +443,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_disconnect
+#define FUNCNAME MPIDI_NM_comm_disconnect
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_disconnect(MPIR_Comm *comm_ptr)
+static inline int MPIDI_NM_comm_disconnect(MPIR_Comm *comm_ptr)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
@@ -465,10 +465,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_open_port
+#define FUNCNAME MPIDI_NM_comm_open_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_open_port(MPIR_Info *info_ptr, char *port_name)
+static inline int MPIDI_NM_open_port(MPIR_Info *info_ptr, char *port_name)
 {
     int mpi_errno     = MPI_SUCCESS;
     int str_errno     = MPL_STR_SUCCESS;
@@ -491,10 +491,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_close_port
+#define FUNCNAME MPIDI_NM_comm_close_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_close_port(const char *port_name)
+static inline int MPIDI_NM_close_port(const char *port_name)
 {
     int mpi_errno = MPI_SUCCESS;
     int port_name_tag;
@@ -510,10 +510,10 @@ static inline int MPIDI_CH4_NM_close_port(const char *port_name)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_comm_close_port
+#define FUNCNAME MPIDI_NM_comm_close_port
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_comm_accept(const char *port_name,
+static inline int MPIDI_NM_comm_accept(const char *port_name,
                                            MPIR_Info  *info,
                                            int         root,
                                            MPIR_Comm  *comm_ptr,

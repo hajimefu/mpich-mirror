@@ -13,7 +13,7 @@
 
 #include "ofi_impl.h"
 
-static inline int MPIDI_CH4_NM_send(const void *buf,
+static inline int MPIDI_NM_send(const void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -23,7 +23,7 @@ static inline int MPIDI_CH4_NM_send(const void *buf,
     return MPIDI_CH4U_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_rsend(const void *buf,
+static inline int MPIDI_NM_rsend(const void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -35,7 +35,7 @@ static inline int MPIDI_CH4_NM_rsend(const void *buf,
 
 
 
-static inline int MPIDI_CH4_NM_irsend(const void *buf,
+static inline int MPIDI_NM_irsend(const void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -45,7 +45,7 @@ static inline int MPIDI_CH4_NM_irsend(const void *buf,
     return MPIDI_CH4U_irsend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_ssend(const void *buf,
+static inline int MPIDI_NM_ssend(const void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -55,12 +55,12 @@ static inline int MPIDI_CH4_NM_ssend(const void *buf,
     return MPIDI_CH4U_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_startall(int count, MPIR_Request *requests[])
+static inline int MPIDI_NM_startall(int count, MPIR_Request *requests[])
 {
     return MPIDI_CH4U_startall(count, requests);
 }
 
-static inline int MPIDI_CH4_NM_send_init(const void *buf,
+static inline int MPIDI_NM_send_init(const void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -71,7 +71,7 @@ static inline int MPIDI_CH4_NM_send_init(const void *buf,
     return MPIDI_CH4U_send_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_ssend_init(const void *buf,
+static inline int MPIDI_NM_ssend_init(const void *buf,
                                           int count,
                                           MPI_Datatype datatype,
                                           int rank,
@@ -82,7 +82,7 @@ static inline int MPIDI_CH4_NM_ssend_init(const void *buf,
     return MPIDI_CH4U_ssend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_bsend_init(const void *buf,
+static inline int MPIDI_NM_bsend_init(const void *buf,
                                           int count,
                                           MPI_Datatype datatype,
                                           int rank,
@@ -93,7 +93,7 @@ static inline int MPIDI_CH4_NM_bsend_init(const void *buf,
     return MPIDI_CH4U_bsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_rsend_init(const void *buf,
+static inline int MPIDI_NM_rsend_init(const void *buf,
                                           int count,
                                           MPI_Datatype datatype,
                                           int rank,
@@ -104,7 +104,7 @@ static inline int MPIDI_CH4_NM_rsend_init(const void *buf,
     return MPIDI_CH4U_rsend_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_isend(const void *buf,
+static inline int MPIDI_NM_isend(const void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -114,7 +114,7 @@ static inline int MPIDI_CH4_NM_isend(const void *buf,
     return MPIDI_CH4U_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_issend(const void *buf,
+static inline int MPIDI_NM_issend(const void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -124,7 +124,7 @@ static inline int MPIDI_CH4_NM_issend(const void *buf,
     return MPIDI_CH4U_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-static inline int MPIDI_CH4_NM_cancel_send(MPIR_Request *sreq)
+static inline int MPIDI_NM_cancel_send(MPIR_Request *sreq)
 {
     return MPIDI_CH4U_cancel_send(sreq);
 }

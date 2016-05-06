@@ -14,21 +14,21 @@
 /*
   These are the stub functions for datatype hooks.
   When actually implementing these make sure to #define
-  HAVE_MPIDI_CH4_NM_datatype_commit_hook and/or HAVE_MPIDI_CH4_NM_datatype_destroy_hook
+  HAVE_MPIDI_NM_datatype_commit_hook and/or HAVE_MPIDI_NM_datatype_destroy_hook
   in ofi_pre.h
 */
 
-static inline void MPIDI_CH4_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p)
+static inline void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p)
 {
     return;
 }
 
-static inline void MPIDI_CH4_NM_datatype_commit_hook(MPI_Datatype *datatype_p)
+static inline void MPIDI_NM_datatype_commit_hook(MPI_Datatype *datatype_p)
 {
     return;
 }
 
-static inline void MPIDI_CH4_NM_datatype_dup_hook(MPIR_Datatype *datatype_p)
+static inline void MPIDI_NM_datatype_dup_hook(MPIR_Datatype *datatype_p)
 {
     return;
 }

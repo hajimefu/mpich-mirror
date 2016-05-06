@@ -217,7 +217,7 @@ __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CONNECT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CONNECT);
-    mpi_errno = MPIDI_CH4_NM_comm_connect(port_name, info, root, comm, newcomm_ptr);
+    mpi_errno = MPIDI_NM_comm_connect(port_name, info, root, comm, newcomm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -239,7 +239,7 @@ __CH4_INLINE__ int MPIDI_Comm_disconnect(MPIR_Comm *comm_ptr)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DISCONNECT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DISCONNECT);
-    mpi_errno = MPIDI_CH4_NM_comm_disconnect(comm_ptr);
+    mpi_errno = MPIDI_NM_comm_disconnect(comm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -261,7 +261,7 @@ __CH4_INLINE__ int MPIDI_Open_port(MPIR_Info *info_ptr, char *port_name)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_OPEN_PORT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_OPEN_PORT);
-    mpi_errno = MPIDI_CH4_NM_open_port(info_ptr, port_name);
+    mpi_errno = MPIDI_NM_open_port(info_ptr, port_name);
 
     if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -283,7 +283,7 @@ __CH4_INLINE__ int MPIDI_Close_port(const char *port_name)
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_CLOSE_PORT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_CLOSE_PORT);
-    mpi_errno = MPIDI_CH4_NM_close_port(port_name);
+    mpi_errno = MPIDI_NM_close_port(port_name);
 
     if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -307,7 +307,7 @@ __CH4_INLINE__ int MPIDI_Comm_accept(const char *port_name,
     int mpi_errno;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_ACCEPT);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_ACCEPT);
-    mpi_errno = MPIDI_CH4_NM_comm_accept(port_name, info, root, comm, newcomm_ptr);
+    mpi_errno = MPIDI_NM_comm_accept(port_name, info, root, comm, newcomm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);

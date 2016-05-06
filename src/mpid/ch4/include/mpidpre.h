@@ -191,7 +191,7 @@ typedef struct {
         }netmod;
 
         union {
-            MPIDI_CH4_SHM_REQUEST_DECL
+            MPIDI_SHM_REQUEST_DECL
         }shm;
     }ch4;
 } MPIDI_Devreq_t;
@@ -377,7 +377,7 @@ typedef struct MPIDI_Devcomm_t {
         }netmod;
 
         union {
-            MPIDI_CH4_SHM_COMM_DECL
+            MPIDI_SHM_COMM_DECL
         }shm;
 
         MPIDII_rank_map_t map;
@@ -437,13 +437,13 @@ extern MPIDII_av_table_t *MPIDII_av_table0;
 #define MPID_Dev_comm_create_hook(a)  (MPID_Comm_create(a))
 #define MPID_Dev_comm_destroy_hook(a) (MPID_Comm_destroy(a))
 
-#ifdef HAVE_MPIDI_CH4_NM_datatype_commit_hook
-#define MPID_Dev_datatype_commit_hook  MPIDI_CH4_NM_datatype_commit_hook
-#define MPID_Dev_datatype_dup_hook  MPIDI_CH4_NM_datatype_dup_hook
+#ifdef HAVE_MPIDI_NM_datatype_commit_hook
+#define MPID_Dev_datatype_commit_hook  MPIDI_NM_datatype_commit_hook
+#define MPID_Dev_datatype_dup_hook  MPIDI_NM_datatype_dup_hook
 #endif
 
-#ifdef HAVE_MPIDI_CH4_NM_datatype_commit_hook
-#define MPID_Dev_datatype_destroy_hook  MPIDI_CH4_NM_datatype_destroy_hook
+#ifdef HAVE_MPIDI_NM_datatype_commit_hook
+#define MPID_Dev_datatype_destroy_hook  MPIDI_NM_datatype_destroy_hook
 #endif
 
 /* operation for (avtid, lpid) to/from "lpid64" */

@@ -451,7 +451,7 @@ static inline MPIR_Request *MPIDI_OFI_context_to_request(void *context)
 extern int   MPIDI_OFI_handle_cq_error_util(ssize_t ret);
 extern int   MPIDI_OFI_control_handler(void *am_hdr,
                                                void **data,size_t *data_sz,int *is_contig,
-                                               MPIDI_CH4_NM_am_completion_handler_fn *cmpl_handler_fn,
+                                               MPIDI_NM_am_completion_handler_fn *cmpl_handler_fn,
                                                MPIR_Request **req);
 extern void  MPIDI_OFI_map_create(void **map);
 extern void  MPIDI_OFI_map_destroy(void *map);

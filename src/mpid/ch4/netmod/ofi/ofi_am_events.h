@@ -25,7 +25,7 @@ static inline int MPIDI_OFI_handle_short_am(MPIDI_OFI_am_header_t *msg_hdr)
     void *in_data;
 
     size_t data_sz, in_data_sz;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
+    MPIDI_NM_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
@@ -100,7 +100,7 @@ static inline int MPIDI_OFI_handle_short_am_hdr(MPIDI_OFI_am_header_t         *m
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *rreq = NULL;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn = NULL;
+    MPIDI_NM_am_completion_handler_fn cmpl_handler_fn = NULL;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_SHORT_AM_HDR);
@@ -263,7 +263,7 @@ static inline int MPIDI_OFI_do_handle_long_am(MPIDI_OFI_am_header_t         *msg
     MPIR_Request *rreq;
     void *p_data;
     size_t data_sz, rem, done, curr_len, in_data_sz;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
+    MPIDI_NM_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
 
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_DO_HANDLE_LONG_AM);

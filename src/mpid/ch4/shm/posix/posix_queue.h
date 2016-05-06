@@ -8,8 +8,8 @@
  *  to Argonne National Laboratory subject to Software Grant and Corporate
  *  Contributor License Agreement dated February 8, 2012.
  */
-#ifndef CH4_SHM_QUEUE_H
-#define CH4_SHM_QUEUE_H
+#ifndef SHM_QUEUE_H
+#define SHM_QUEUE_H
 
 /* ------------------------------------------------------- */
 /* from mpid/ch3/channels/nemesis/include/mpid_nem_debug.h */
@@ -326,4 +326,4 @@ static inline void MPIDI_POSIX_queue_dequeue(MPIDI_POSIX_queue_ptr_t qhead, MPID
 
 #endif /* !defined(MPIDI_POSIX_USE_LOCK_FREE_QUEUES) */
 
-#endif /* ifndef CH4_SHM_QUEUE_H */
+#endif /* ifndef SHM_QUEUE_H */

@@ -103,12 +103,12 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPIR_Comm * comm)
     int max_n_avts;
     MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CREATE);
-    mpi_errno = MPIDI_CH4_NM_comm_create(comm);
+    mpi_errno = MPIDI_NM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
 #if defined(MPIDI_BUILD_CH4_SHM)
-    mpi_errno = MPIDI_CH4_SHM_comm_create(comm);
+    mpi_errno = MPIDI_SHM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
@@ -214,12 +214,12 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
             MPIDIU_avt_release_ref(MPIDII_COMM(comm,local_map).avtid);
     }
 
-    mpi_errno = MPIDI_CH4_NM_comm_destroy(comm);
+    mpi_errno = MPIDI_NM_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }
 #if defined(MPIDI_BUILD_CH4_SHM)
-    mpi_errno = MPIDI_CH4_SHM_comm_destroy(comm);
+    mpi_errno = MPIDI_SHM_comm_destroy(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
     }

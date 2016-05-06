@@ -16,23 +16,23 @@
 
 static inline int MPIDI_OFI_progress_do_queue(void *netmod_context);
 
-static inline void MPIDI_CH4_NM_am_request_init(MPIR_Request *req)
+static inline void MPIDI_NM_am_request_init(MPIR_Request *req)
 {
     MPIDI_OFI_AMREQUEST(req, req_hdr) = NULL;
 }
 
-static inline void MPIDI_CH4_NM_am_request_finalize(MPIR_Request *req)
+static inline void MPIDI_NM_am_request_finalize(MPIR_Request *req)
 {
     MPIDI_OFI_am_clear_request(req);
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_reg_hdr_handler
+#define FUNCNAME MPIDI_NM_reg_hdr_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_reg_hdr_handler(int handler_id,
-                                               MPIDI_CH4_NM_am_origin_handler_fn origin_handler_fn,
-                                               MPIDI_CH4_NM_am_target_handler_fn target_handler_fn)
+static inline int MPIDI_NM_reg_hdr_handler(int handler_id,
+                                               MPIDI_NM_am_origin_handler_fn origin_handler_fn,
+                                               MPIDI_NM_am_target_handler_fn target_handler_fn)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_REG_HDR_HANDLER);
@@ -53,10 +53,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_am_hdr
+#define FUNCNAME MPIDI_NM_send_am_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
+static inline int MPIDI_NM_send_am_hdr(int           rank,
                                            MPIR_Comm    *comm,
                                            int           handler_id,
                                            const void   *am_hdr,
@@ -81,10 +81,10 @@ static inline int MPIDI_CH4_NM_send_am_hdr(int           rank,
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_am
+#define FUNCNAME MPIDI_NM_send_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am(int           rank,
+static inline int MPIDI_NM_send_am(int           rank,
                                        MPIR_Comm    *comm,
                                        int           handler_id,
                                        const void   *am_hdr,
@@ -107,10 +107,10 @@ static inline int MPIDI_CH4_NM_send_am(int           rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_amv
+#define FUNCNAME MPIDI_NM_send_amv
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_amv(int rank,
+static inline int MPIDI_NM_send_amv(int rank,
                                         MPIR_Comm *comm,
                                         int handler_id,
                                         struct iovec *am_hdr,
@@ -148,7 +148,7 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_NM_send_am(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
                                      data, count, datatype, sreq, netmod_context);
 
     if(is_allocated)
@@ -161,10 +161,10 @@ static inline int MPIDI_CH4_NM_send_amv(int rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_amv_hdr
+#define FUNCNAME MPIDI_NM_send_amv_hdr
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
+static inline int MPIDI_NM_send_amv_hdr(int rank,
                                             MPIR_Comm *comm,
                                             int handler_id,
                                             struct iovec *am_hdr,
@@ -199,7 +199,7 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    mpi_errno = MPIDI_CH4_NM_send_am_hdr(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_NM_send_am_hdr(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
                                          sreq, netmod_context);
 
     if(is_allocated)
@@ -212,10 +212,10 @@ static inline int MPIDI_CH4_NM_send_amv_hdr(int rank,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_am_hdr_reply
+#define FUNCNAME MPIDI_NM_send_am_hdr_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
                                                  int           src_rank,
                                                  int           handler_id,
                                                  const void   *am_hdr,
@@ -237,10 +237,10 @@ static inline int MPIDI_CH4_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_send_am_reply
+#define FUNCNAME MPIDI_NM_send_am_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
                                              int           src_rank,
                                              int           handler_id,
                                              const void   *am_hdr,
@@ -267,7 +267,7 @@ static inline int MPIDI_CH4_NM_send_am_reply(MPIU_Context_id_t context_id,
     return mpi_errno;
 }
 
-static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_amv_reply(MPIU_Context_id_t context_id,
                                               int           src_rank,
                                               int           handler_id,
                                               struct iovec *am_hdr,
@@ -305,7 +305,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
-    mpi_errno = MPIDI_CH4_NM_send_am_reply(context_id, src_rank, handler_id, am_hdr_buf, am_hdr_sz,
+    mpi_errno = MPIDI_NM_send_am_reply(context_id, src_rank, handler_id, am_hdr_buf, am_hdr_sz,
                                            data, count, datatype, sreq);
 
     if(is_allocated)
@@ -317,7 +317,7 @@ static inline int MPIDI_CH4_NM_send_amv_reply(MPIU_Context_id_t context_id,
     return mpi_errno;
 }
 
-static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
+static inline size_t MPIDI_NM_am_hdr_max_sz(void)
 {
     /* Maximum size that fits in short send */
     size_t max_shortsend = MPIDI_OFI_DEFAULT_SHORT_SEND_SIZE -
@@ -328,7 +328,7 @@ static inline size_t MPIDI_CH4_NM_am_hdr_max_sz(void)
     return MPL_MIN(max_shortsend, max_representable);
 }
 
-static inline int MPIDI_CH4_NM_inject_am_hdr(int         rank,
+static inline int MPIDI_NM_inject_am_hdr(int         rank,
                                              MPIR_Comm  *comm,
                                              int         handler_id,
                                              const void *am_hdr,
@@ -351,7 +351,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_CH4_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
                                                    int         src_rank,
                                                    int         handler_id,
                                                    const void *am_hdr,
@@ -375,7 +375,7 @@ fn_fail:
     goto fn_exit;
 }
 
-static inline size_t MPIDI_CH4_NM_am_inject_max_sz(void)
+static inline size_t MPIDI_NM_am_inject_max_sz(void)
 {
     if (unlikely(MPIDI_Global.max_buffered_send < sizeof(MPIDI_OFI_am_header_t)))
         return 0;

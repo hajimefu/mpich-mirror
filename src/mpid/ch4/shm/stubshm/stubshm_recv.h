@@ -14,8 +14,8 @@
 #include "stubshm_impl.h"
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
-static inline int MPIDI_CH4_SHM_recv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_SHM_recv)
+static inline int MPIDI_SHM_recv(void *buf,
                                  int count,
                                  MPI_Datatype datatype,
                                  int rank,
@@ -27,7 +27,7 @@ static inline int MPIDI_CH4_SHM_recv(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_recv_init(void *buf,
+static inline int MPIDI_SHM_recv_init(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -39,7 +39,7 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
 }
 
 
-static inline int MPIDI_CH4_SHM_imrecv(void *buf,
+static inline int MPIDI_SHM_imrecv(void *buf,
                                    int count,
                                    MPI_Datatype datatype,
                                    MPIR_Request * message, MPIR_Request ** rreqp)
@@ -49,8 +49,8 @@ static inline int MPIDI_CH4_SHM_imrecv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_irecv)
-static inline int MPIDI_CH4_SHM_irecv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_SHM_irecv)
+static inline int MPIDI_SHM_irecv(void *buf,
                                   int count,
                                   MPI_Datatype datatype,
                                   int rank,
@@ -61,7 +61,7 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request * rreq)
+static inline int MPIDI_SHM_cancel_recv(MPIR_Request * rreq)
 {
     MPIU_Assert(0);
     return MPI_SUCCESS;

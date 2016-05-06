@@ -49,8 +49,8 @@ typedef struct {
     struct iovec    am_iov[MPIDI_UCX_NUM_AM_BUFFERS];
     void           *am_bufs[MPIDI_UCX_NUM_AM_BUFFERS];
     MPIDI_UCX_ucp_request_t *ucp_am_requests[MPIDI_UCX_NUM_AM_BUFFERS];
-    MPIDI_CH4_NM_am_target_handler_fn am_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
-    MPIDI_CH4_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
+    MPIDI_NM_am_target_handler_fn am_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
+    MPIDI_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
 } MPIDI_UCX_global_t;
 
 #define MPIDI_UCX_GPID(gpid) ((gpid)->dev.netmod.ucx)

@@ -19,7 +19,7 @@ static inline int MPIDI_UCX_am_handler(void *msg, size_t msg_sz)
     void *p_data;
     void *in_data;
     size_t data_sz, in_data_sz;
-    MPIDI_CH4_NM_am_completion_handler_fn cmpl_handler_fn;
+    MPIDI_NM_am_completion_handler_fn cmpl_handler_fn;
     struct iovec *iov;
     int i, is_contig, iov_len;
     size_t done, curr_len, rem;
@@ -108,10 +108,10 @@ static inline void MPIDI_UCX_Handle_am_recv(void *request, ucs_status_t status,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_progress
+#define FUNCNAME MPIDI_NM_progress
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_progress(void *netmod_context, int blocking)
+static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 {
     int mpi_errno = MPI_SUCCESS;
     static int am_repost_idx = 0;

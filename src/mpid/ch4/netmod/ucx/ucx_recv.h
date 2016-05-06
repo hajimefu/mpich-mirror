@@ -135,7 +135,7 @@ static inline int do_irecv(void *buf,
 
 }
 
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_recv(void *buf,
                                     int count,
                                     MPI_Datatype datatype,
                                     int rank,
@@ -148,7 +148,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv(void *buf,
   return do_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_recv_init(void *buf,
                                          int count,
                                          MPI_Datatype datatype,
                                          int rank,
@@ -159,14 +159,14 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_recv_init(void *buf,
     return MPIDI_CH4U_recv_init(buf, count, datatype, rank, tag, comm, context_offset, request);
 }
 
-__ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
+__ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       MPIR_Request * message, MPIR_Request ** rreqp)
 {
     return MPIDI_CH4U_imrecv(buf, count, datatype, message, rreqp);
 }
- __ALWAYS_INLINE__ int MPIDI_CH4_NM_irecv(void *buf,
+ __ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -180,7 +180,7 @@ __ALWAYS_INLINE__ int MPIDI_CH4_NM_imrecv(void *buf,
 
 }
 
-static inline int MPIDI_CH4_NM_cancel_recv(MPIR_Request * rreq)
+static inline int MPIDI_NM_cancel_recv(MPIR_Request * rreq)
 {
     return MPIDI_CH4U_cancel_recv(rreq);
 }

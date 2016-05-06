@@ -87,8 +87,8 @@ fn_fail:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
-static inline int MPIDI_CH4_SHM_recv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_SHM_recv)
+static inline int MPIDI_SHM_recv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
@@ -111,8 +111,8 @@ static inline int MPIDI_CH4_SHM_recv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_recv)
-static inline int MPIDI_CH4_SHM_recv_init(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_SHM_recv)
+static inline int MPIDI_SHM_recv_init(void *buf,
                                           int count,
                                           MPI_Datatype datatype,
                                           int rank,
@@ -142,7 +142,7 @@ static inline int MPIDI_CH4_SHM_recv_init(void *buf,
 }
 
 
-static inline int MPIDI_CH4_SHM_imrecv(void *buf,
+static inline int MPIDI_SHM_imrecv(void *buf,
                                        int count,
                                        MPI_Datatype datatype,
                                        MPIR_Request *message, MPIR_Request **rreqp)
@@ -275,8 +275,8 @@ fn_fail:
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_irecv)
-static inline int MPIDI_CH4_SHM_irecv(void *buf,
+#define FCNAME DECL_FUNC(MPIDI_SHM_irecv)
+static inline int MPIDI_SHM_irecv(void *buf,
                                       int count,
                                       MPI_Datatype datatype,
                                       int rank,
@@ -295,8 +295,8 @@ static inline int MPIDI_CH4_SHM_irecv(void *buf,
 }
 
 #undef FCNAME
-#define FCNAME DECL_FUNC(MPIDI_CH4_SHM_cancel_recv)
-static inline int MPIDI_CH4_SHM_cancel_recv(MPIR_Request *rreq)
+#define FCNAME DECL_FUNC(MPIDI_SHM_cancel_recv)
+static inline int MPIDI_SHM_cancel_recv(MPIR_Request *rreq)
 {
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_POSIX_SHM_MUTEX);
     MPIR_Request *req = MPIDI_POSIX_recvq_posted.head;

@@ -14,7 +14,7 @@
 #include "stubshm_impl.h"
 
 
-static inline int MPIDI_CH4_SHM_improbe(int source,
+static inline int MPIDI_SHM_improbe(int source,
                                     int tag,
                                     MPIR_Comm * comm,
                                     int context_offset,
@@ -24,7 +24,7 @@ static inline int MPIDI_CH4_SHM_improbe(int source,
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_CH4_SHM_iprobe(int source,
+static inline int MPIDI_SHM_iprobe(int source,
                                    int tag,
                                    MPIR_Comm * comm,
                                    int context_offset, int *flag, MPI_Status * status)

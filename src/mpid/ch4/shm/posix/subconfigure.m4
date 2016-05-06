@@ -41,13 +41,13 @@ dnl Parse the shmmod arguments
         # the POSIX shmmod depends on the common shm code
         build_mpid_common_shm=yes
     ])
-    AM_CONDITIONAL([BUILD_CH4_SHM_POSIX],[test "X$build_ch4_shm_posix" = "Xyes"])
+    AM_CONDITIONAL([BUILD_SHM_POSIX],[test "X$build_ch4_shm_posix" = "Xyes"])
 ])dnl
 
 AC_DEFUN([PAC_SUBCFG_BODY_]PAC_SUBCFG_AUTO_SUFFIX,[
-AM_COND_IF([BUILD_CH4_SHM_POSIX],[
+AM_COND_IF([BUILD_SHM_POSIX],[
     AC_MSG_NOTICE([RUNNING CONFIGURE FOR ch4:shm:posix])
-])dnl end AM_COND_IF(BUILD_CH4_SHM_POSIX,...)
+])dnl end AM_COND_IF(BUILD_SHM_POSIX,...)
 ])dnl end _BODY
 
 [#] end of __file__

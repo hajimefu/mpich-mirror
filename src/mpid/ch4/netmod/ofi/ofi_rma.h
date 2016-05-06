@@ -378,10 +378,10 @@ fn_fail:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_put
+#define FUNCNAME MPIDI_NM_put
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_put(const void   *origin_addr,
+static inline int MPIDI_NM_put(const void   *origin_addr,
                                    int           origin_count,
                                    MPI_Datatype  origin_datatype,
                                    int           target_rank,
@@ -531,10 +531,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_get
+#define FUNCNAME MPIDI_NM_get
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_get(void         *origin_addr,
+static inline int MPIDI_NM_get(void         *origin_addr,
                                    int           origin_count,
                                    MPI_Datatype  origin_datatype,
                                    int           target_rank,
@@ -619,10 +619,10 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_rput
+#define FUNCNAME MPIDI_NM_rput
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_rput(const void   *origin_addr,
+static inline int MPIDI_NM_rput(const void   *origin_addr,
                                     int           origin_count,
                                     MPI_Datatype  origin_datatype,
                                     int           target_rank,
@@ -681,10 +681,10 @@ fn_exit:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_compare_and_swap
+#define FUNCNAME MPIDI_NM_compare_and_swap
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_compare_and_swap(const void *origin_addr,
+static inline int MPIDI_NM_compare_and_swap(const void *origin_addr,
                                                 const void *compare_addr,
                                                 void *result_addr,
                                                 MPI_Datatype datatype,
@@ -917,7 +917,7 @@ am_fallback:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_get_accumulate
+#define FUNCNAME MPIDI_NM_get_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_OFI_do_get_accumulate(const void    *origin_addr,
@@ -1112,10 +1112,10 @@ am_fallback:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_raccumulate
+#define FUNCNAME MPIDI_NM_raccumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
+static inline int MPIDI_NM_raccumulate(const void *origin_addr,
                                            int origin_count,
                                            MPI_Datatype origin_datatype,
                                            int target_rank,
@@ -1145,10 +1145,10 @@ static inline int MPIDI_CH4_NM_raccumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_rget_accumulate
+#define FUNCNAME MPIDI_NM_rget_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_rget_accumulate(const void *origin_addr,
                                                int origin_count,
                                                MPI_Datatype origin_datatype,
                                                void *result_addr,
@@ -1176,10 +1176,10 @@ static inline int MPIDI_CH4_NM_rget_accumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_fetch_and_op
+#define FUNCNAME MPIDI_NM_fetch_and_op
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
+static inline int MPIDI_NM_fetch_and_op(const void *origin_addr,
                                             void *result_addr,
                                             MPI_Datatype datatype,
                                             int target_rank,
@@ -1202,10 +1202,10 @@ static inline int MPIDI_CH4_NM_fetch_and_op(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_rget
+#define FUNCNAME MPIDI_NM_rget
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_rget(void *origin_addr,
+static inline int MPIDI_NM_rget(void *origin_addr,
                                     int origin_count,
                                     MPI_Datatype origin_datatype,
                                     int target_rank,
@@ -1262,10 +1262,10 @@ fn_exit:
 
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_get_accumulate
+#define FUNCNAME MPIDI_NM_get_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_get_accumulate(const void *origin_addr,
                                               int origin_count,
                                               MPI_Datatype origin_datatype,
                                               void *result_addr,
@@ -1289,10 +1289,10 @@ static inline int MPIDI_CH4_NM_get_accumulate(const void *origin_addr,
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NM_accumulate
+#define FUNCNAME MPIDI_NM_accumulate
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_CH4_NM_accumulate(const void *origin_addr,
+static inline int MPIDI_NM_accumulate(const void *origin_addr,
                                           int origin_count,
                                           MPI_Datatype origin_datatype,
                                           int target_rank,

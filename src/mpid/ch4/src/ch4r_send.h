@@ -53,7 +53,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
         ssend_req.sreq_ptr = (uint64_t) sreq;
         MPIR_cc_incr(sreq->cc_ptr, &c);
 
-        mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, MPIDI_CH4U_SSEND_REQ,
+        mpi_errno = MPIDI_NM_send_am(rank, comm, MPIDI_CH4U_SSEND_REQ,
                                          &ssend_req, sizeof(ssend_req),
                                          buf, count, datatype, sreq, NULL);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -68,7 +68,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
         (void) dt_contig;
         if (dt_size <= MPIR_CVAR_CH4R_EAGER_THRESHOLD) {
             /* Eager send */
-            mpi_errno = MPIDI_CH4_NM_send_am(rank, comm, MPIDI_CH4U_SEND,
+            mpi_errno = MPIDI_NM_send_am(rank, comm, MPIDI_CH4U_SEND,
                                              &am_hdr, sizeof(am_hdr),
                                              buf, count, datatype, sreq, NULL);
         }
@@ -84,7 +84,7 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
             MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype = datatype;
             MPIDI_CH4U_REQUEST(sreq, req->lreq).msg_tag  = match_bits;
             MPIDI_CH4U_REQUEST(sreq, src_rank)           = rank;
-            mpi_errno = MPIDI_CH4_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
+            mpi_errno = MPIDI_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
                                                    &lreq_hdr, sizeof(lreq_hdr), NULL);
         }
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -317,7 +317,7 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPIR_Request * requests[])
 
         case MPIDI_PTYPE_RECV:
 #ifdef MPIDI_BUILD_CH4_SHM
-            mpi_errno = MPIDI_CH4_NM_irecv(MPIDI_CH4U_REQUEST(preq, buffer),
+            mpi_errno = MPIDI_NM_irecv(MPIDI_CH4U_REQUEST(preq, buffer),
                                     MPIDI_CH4U_REQUEST(preq, count),
                                     datatype, rank, tag,
                                     preq->comm,
@@ -333,7 +333,7 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPIR_Request * requests[])
 
         case MPIDI_PTYPE_SEND:
 #ifdef MPIDI_BUILD_CH4_SHM
-            mpi_errno = MPIDI_CH4_NM_isend(MPIDI_CH4U_REQUEST(preq, buffer),
+            mpi_errno = MPIDI_NM_isend(MPIDI_CH4U_REQUEST(preq, buffer),
                                     MPIDI_CH4U_REQUEST(preq, count),
                                     datatype, rank, tag,
                                     preq->comm,
@@ -349,7 +349,7 @@ __CH4_INLINE__ int MPIDI_CH4U_startall(int count, MPIR_Request * requests[])
 
         case MPIDI_PTYPE_SSEND:
 #ifdef MPIDI_BUILD_CH4_SHM
-           mpi_errno = MPIDI_CH4_NM_issend(MPIDI_CH4U_REQUEST(preq, buffer),
+           mpi_errno = MPIDI_NM_issend(MPIDI_CH4U_REQUEST(preq, buffer),
                                      MPIDI_CH4U_REQUEST(preq, count),
                                      datatype, rank, tag,
                                      preq->comm,
