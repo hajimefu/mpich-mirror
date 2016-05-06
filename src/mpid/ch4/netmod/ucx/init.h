@@ -139,6 +139,9 @@ static inline int MPIDI_CH4_NM_finalize(void)
     int i, max_n_avts;
     max_n_avts = MPIDIU_get_max_n_avts();
 
+    MPIR_Comm_release(MPIR_Process.comm_world);
+    MPIR_Comm_release(MPIR_Process.comm_self);
+
     MPIDI_CH4U_finalize();
 
     /* cancel and free active message buffers */
