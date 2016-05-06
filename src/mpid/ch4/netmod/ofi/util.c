@@ -193,7 +193,7 @@ void MPIDI_OFI_index_allocator_destroy(void *indexmap)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4_NMI_OFI_Win_lock_advance
+#define FUNCNAME MPIDI_OFI_win_lock_advance
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int
