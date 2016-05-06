@@ -168,6 +168,7 @@ static inline MPIR_Request  *MPIDI_CH4_NM_UCX_Alloc_recv_request_done()
     req->status.MPI_ERROR = MPI_SUCCESS;
     req->u.nbc.errflag = MPIR_ERR_NONE;
     req->kind = MPIR_REQUEST_KIND__RECV;
+    req->comm = NULL;
 
     MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMOD_REQUEST_RECV_DONE);
     return req;
