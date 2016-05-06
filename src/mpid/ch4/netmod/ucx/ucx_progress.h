@@ -86,19 +86,18 @@ static inline void MPIDI_UCX_Handle_am_recv(void *request, ucs_status_t status,
                                                     ucp_tag_recv_info_t * info)
 {
     int mpi_errno = MPI_SUCCESS;
-    static int am_recv_idx = 0;
+    MPIDI_UCX_ucp_request_t *ucp_request = (MPIDI_UCX_ucp_request_t *)request;
 
     if (status == UCS_ERR_CANCELED) {
         goto fn_exit;
     }
 
-    /* call the AM handler */
-    MPIDI_UCX_am_handler(MPIDI_UCX_global.am_bufs[am_recv_idx], info->length);
-
-    /* update the idx */
-    ++am_recv_idx;
-    if (am_recv_idx == MPIDI_UCX_NUM_AM_BUFFERS) {
-        am_recv_idx = 0;
+    if (ucp_request->req) {
+        MPIDI_UCX_am_handler(ucp_request->req, info->length);
+        MPL_free(ucp_request->req);
+        ucp_request->req = NULL;
+    } else {
+        ucp_request->req = (void *)TRUE;
     }
 
  fn_exit:
@@ -114,31 +113,32 @@ static inline void MPIDI_UCX_Handle_am_recv(void *request, ucs_status_t status,
 static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 {
     int mpi_errno = MPI_SUCCESS;
-    static int am_repost_idx = 0;
+    ucp_tag_recv_info_t info;
+    MPIDI_UCX_ucp_request_t *ucp_request;
+    void *am_buf;
+
+    /* check for active messages */
+    while (ucp_tag_probe_nb(MPIDI_UCX_global.worker, MPIDI_UCX_AM_TAG, ~MPIDI_UCX_AM_TAG, 0, &info)) {
+        am_buf = MPL_malloc(info.length);
+        ucp_request = (MPIDI_UCX_ucp_request_t *)ucp_tag_recv_nb(MPIDI_UCX_global.worker,
+                                                                 am_buf,
+                                                                 info.length,
+                                                                 ucp_dt_make_contig(1),
+                                                                 MPIDI_UCX_AM_TAG,
+                                                                 ~MPIDI_UCX_AM_TAG,
+                                                                 &MPIDI_UCX_Handle_am_recv);
+        if (ucp_request->req == NULL) {
+            ucp_request->req = am_buf;
+        } else {
+            MPIDI_UCX_am_handler(am_buf, info.length);
+            MPL_free(am_buf);
+            ucp_request->req = NULL;
+        }
+        ucp_request_release(ucp_request);
+    }
 
     ucp_worker_progress(MPIDI_UCX_global.worker);
 
-    while (ucp_request_is_completed(MPIDI_UCX_global.ucp_am_requests[am_repost_idx])) {
-        /* release the ucp request */
-        ucp_request_release(MPIDI_UCX_global.ucp_am_requests[am_repost_idx]);
-
-        /* repost the buffer */
-        MPIDI_UCX_global.ucp_am_requests[am_repost_idx] =
-            (MPIDI_UCX_ucp_request_t*)ucp_tag_recv_nb(MPIDI_UCX_global.worker,
-                                                              MPIDI_UCX_global.am_bufs[am_repost_idx],
-                                                              MPIDI_UCX_MAX_AM_EAGER_SZ,
-                                                              ucp_dt_make_contig(1),
-                                                              MPIDI_UCX_AM_TAG,
-                                                              ~MPIDI_UCX_AM_TAG,
-                                                              &MPIDI_UCX_Handle_am_recv);
-        MPIDI_CH4_UCX_REQUEST(MPIDI_UCX_global.ucp_am_requests[am_repost_idx], tag_recv_nb);
-
-        /* update the idx */
-        ++am_repost_idx;
-        if (am_repost_idx == MPIDI_UCX_NUM_AM_BUFFERS) {
-            am_repost_idx = 0;
-        }
-    }
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_THREAD_WORKER_MUTEX);
 
   fn_exit:

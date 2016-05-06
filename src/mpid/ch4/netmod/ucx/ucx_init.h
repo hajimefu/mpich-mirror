@@ -99,22 +99,7 @@ static inline int MPIDI_NM_init(int rank,
         MPIDI_UCX_CHK_STATUS(ucx_status, ep_create);
     }
 
-    /* -------------------------------- */
-    /* Setup CH4U Active Messages       */
-    /* -------------------------------- */
     MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
-    for (i = 0; i < MPIDI_UCX_NUM_AM_BUFFERS; i++) {
-        MPIDI_UCX_global.am_bufs[i] = MPL_malloc(MPIDI_UCX_MAX_AM_EAGER_SZ);
-        MPIDI_UCX_global.ucp_am_requests[i] =
-             (MPIDI_UCX_ucp_request_t *)ucp_tag_recv_nb(MPIDI_UCX_global.worker,
-                                                                MPIDI_UCX_global.am_bufs[i],
-                                                                MPIDI_UCX_MAX_AM_EAGER_SZ,
-                                                                ucp_dt_make_contig(1),
-                                                                MPIDI_UCX_AM_TAG,
-                                                                ~MPIDI_UCX_AM_TAG,
-                                                                &MPIDI_UCX_Handle_am_recv);
-        MPIDI_CH4_UCX_REQUEST(MPIDI_UCX_global.ucp_am_requests[i], tag_recv_nb);
-    }
 
     mpi_errno = MPIR_Datatype_init_names();
     MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
@@ -143,14 +128,6 @@ static inline int MPIDI_NM_finalize(void)
     MPIR_Comm_release(MPIR_Process.comm_self);
 
     MPIDI_CH4U_finalize();
-
-    /* cancel and free active message buffers */
-    for (i = 0; i < MPIDI_UCX_NUM_AM_BUFFERS; i++) {
-        ucp_request_cancel(MPIDI_UCX_global.worker,
-                           MPIDI_UCX_global.ucp_am_requests[i]);
-        ucp_request_release(MPIDI_UCX_global.ucp_am_requests[i]);
-        MPL_free(MPIDI_UCX_global.am_bufs[i]);
-    }
 
     if (MPIDI_UCX_global.worker != NULL)
         ucp_worker_destroy(MPIDI_UCX_global.worker);
