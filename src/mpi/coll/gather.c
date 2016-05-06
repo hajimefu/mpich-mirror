@@ -126,7 +126,7 @@ int MPIR_Gather_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 #endif
 
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     /* Use binomial tree algorithm. */
     
@@ -484,7 +484,7 @@ int MPIR_Gather_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
  fn_exit:
     MPIU_CHKLMEM_FREEALL();
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)
@@ -532,7 +532,7 @@ int MPIR_Gather_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
         return MPI_SUCCESS;
     }
 
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     remote_size = comm_ptr->remote_size; 
     local_size = comm_ptr->local_size; 
@@ -654,7 +654,7 @@ int MPIR_Gather_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
  fn_exit:
     MPIU_CHKLMEM_FREEALL();
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)

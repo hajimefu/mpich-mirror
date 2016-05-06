@@ -132,7 +132,7 @@ int MPIR_Barrier_intra( MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag )
 
     /* Only one collective operation per communicator can be active at any
        time */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     size = comm_ptr->local_size;
     /* Trivial barriers return immediately */
@@ -170,7 +170,7 @@ int MPIR_Barrier_intra( MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag )
     }
 
  fn_exit:
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)

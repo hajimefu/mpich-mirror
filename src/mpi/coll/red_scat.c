@@ -302,7 +302,7 @@ int MPIR_Reduce_scatter_intra(const void *sendbuf, void *recvbuf, const int recv
     nbytes = total_count * type_size;
     
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     /* total_count*extent eventually gets malloced. it isn't added to
      * a user-passed in buffer */
@@ -883,7 +883,7 @@ fn_exit:
     MPIU_CHKLMEM_FREEALL();
 
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
 
     {
         MPIR_Per_thread_t *per_thread = NULL;

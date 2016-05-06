@@ -4343,8 +4343,8 @@ int MPIR_Comm_init(MPIR_Comm *);
 /* Collective functions cannot be called from multiple threads. These
    are stubs used in the collective communication calls to check for
    user error. Currently they are just being macroed out. */
-#define MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER(comm_ptr)
-#define MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT(comm_ptr)
+#define MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER(comm_ptr)
+#define MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT(comm_ptr)
 
 /* Miscellaneous */
 void MPIU_SetTimeout( int );

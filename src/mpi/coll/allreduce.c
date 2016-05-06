@@ -201,7 +201,7 @@ int MPIR_Allreduce_intra (
     MPIU_CHKLMEM_DECL(3);
     
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     if (count == 0) goto fn_exit;
 
@@ -599,7 +599,7 @@ int MPIR_Allreduce_intra (
 
   fn_exit:
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
 
     MPIU_CHKLMEM_FREEALL();
     if (mpi_errno_ret)
@@ -638,7 +638,7 @@ int MPIR_Allreduce_inter (
     MPIR_Comm *newcomm_ptr = NULL;
     MPIU_CHKLMEM_DECL(1);
 
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     if (comm_ptr->rank == 0) {
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
@@ -692,7 +692,7 @@ int MPIR_Allreduce_inter (
     }
 
   fn_exit:
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     MPIU_CHKLMEM_FREEALL();
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;

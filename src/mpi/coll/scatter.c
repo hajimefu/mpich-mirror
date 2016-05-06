@@ -95,7 +95,7 @@ int MPIR_Scatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype
         return MPI_SUCCESS;
 
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     is_homogeneous = 1;
 #ifdef MPID_HAS_HETERO
@@ -403,7 +403,7 @@ int MPIR_Scatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype
  fn_exit:
     MPIU_CHKLMEM_FREEALL();
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)
@@ -446,7 +446,7 @@ int MPIR_Scatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
         /* local processes other than root do nothing */
         return MPI_SUCCESS;
     }
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
     remote_size = comm_ptr->remote_size; 
     local_size  = comm_ptr->local_size; 
@@ -553,7 +553,7 @@ int MPIR_Scatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
  fn_exit:
     MPIU_CHKLMEM_FREEALL();
     /* check if multiple threads are calling this collective function */
-    MPIDU_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
+    MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)
