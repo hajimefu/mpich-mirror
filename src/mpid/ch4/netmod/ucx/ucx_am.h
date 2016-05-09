@@ -33,17 +33,6 @@ fn_fail:
 }
 
 
-static inline void MPIDI_UCX_am_request_complete(MPIR_Request *req)
-{
-    int count;
-    MPIR_cc_decr(req->cc_ptr, &count);
-    MPIU_Assert(count >= 0);
-
-    if(count == 0) {
-        MPIDI_CH4U_request_release(req);
-    }
-}
-
 static inline void MPIDI_UCX_send_am_callback(void *request, ucs_status_t status)
 {
     MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
@@ -55,7 +44,6 @@ static inline void MPIDI_UCX_send_am_callback(void *request, ucs_status_t status
         if (req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
             MPL_free(req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
         }
-        MPIDI_UCX_am_request_complete(req);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](req);
         ucp_request->req = NULL;
     } else {
@@ -131,7 +119,6 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
     /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         goto fn_exit;
     }
@@ -140,7 +127,6 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
        and complete the send request */
     if(ucp_request->req){
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
@@ -215,7 +201,6 @@ static inline int MPIDI_NM_send_am(int rank,
     /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         goto fn_exit;
     }
@@ -224,7 +209,6 @@ static inline int MPIDI_NM_send_am(int rank,
        and complete the send request */
     if(ucp_request->req){
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
@@ -346,7 +330,6 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
     /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         goto fn_exit;
     }
@@ -355,7 +338,6 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
        and complete the send request */
     if(ucp_request->req){
         MPL_free(send_buf);
-        MPIDI_UCX_am_request_complete(sreq);
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](sreq);
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
