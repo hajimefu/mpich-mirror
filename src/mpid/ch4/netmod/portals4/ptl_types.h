@@ -34,6 +34,12 @@ typedef struct {
 } MPIDI_PTL_am_reply_token_t;
 
 typedef struct {
+    ptl_process_t  process;
+    ptl_pt_index_t pt;
+} MPIDI_PTL_addr_t;
+
+typedef struct {
+    MPIDI_PTL_addr_t *addr_table;
     MPID_Node_id_t *node_map;
     MPID_Node_id_t  max_node_id;
     char *kvsname;
@@ -49,13 +55,7 @@ typedef struct {
     ptl_handle_md_t md;
 } MPIDI_PTL_global_t;
 
-typedef struct {
-    ptl_process_t  process;
-    ptl_pt_index_t pt;
-} MPIDI_PTL_addr_t;
-
 extern MPIDI_PTL_global_t       MPIDI_PTL_global;
-extern MPIDI_PTL_addr_t        *MPIDI_PTL_addr_table;
 
 #define MPIDI_PTL_CONTEXT_ID_BITS 32
 #define MPIDI_PTL_TAG_BITS 32

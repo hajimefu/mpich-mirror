@@ -140,13 +140,13 @@ static inline int MPIDI_NM_init(int rank,
     ret = PMI_Barrier();
 
     /* get and store business cards in address table */
-    MPIDI_PTL_addr_table = MPL_malloc(size * sizeof(MPIDI_PTL_addr_t));
+    MPIDI_PTL_global.addr_table = MPL_malloc(size * sizeof(MPIDI_PTL_addr_t));
     for (i = 0; i < size; i++) {
         sprintf(keyS, "PTL-%d", i);
         ret = PMI_KVS_Get(MPIDI_PTL_global.kvsname, keyS, valS, val_max_sz);
-        MPL_str_get_binary_arg(valS, "NID", (char *)&MPIDI_PTL_addr_table[i].process.phys.nid, sizeof(MPIDI_PTL_addr_table[i].process.phys.nid), &len);
-        MPL_str_get_binary_arg(valS, "PID", (char *)&MPIDI_PTL_addr_table[i].process.phys.pid, sizeof(MPIDI_PTL_addr_table[i].process.phys.pid), &len);
-        MPL_str_get_binary_arg(valS, "PTI", (char *)&MPIDI_PTL_addr_table[i].pt, sizeof(MPIDI_PTL_addr_table[i].pt), &len);
+        MPL_str_get_binary_arg(valS, "NID", (char *)&MPIDI_PTL_global.addr_table[i].process.phys.nid, sizeof(MPIDI_PTL_global.addr_table[i].process.phys.nid), &len);
+        MPL_str_get_binary_arg(valS, "PID", (char *)&MPIDI_PTL_global.addr_table[i].process.phys.pid, sizeof(MPIDI_PTL_global.addr_table[i].process.phys.pid), &len);
+        MPL_str_get_binary_arg(valS, "PTI", (char *)&MPIDI_PTL_global.addr_table[i].pt, sizeof(MPIDI_PTL_global.addr_table[i].pt), &len);
     }
 
     /* Setup CH4R Active Messages */
@@ -190,7 +190,7 @@ static inline int MPIDI_NM_finalize(void)
     PtlFini();
 
     MPL_free(MPIDI_PTL_global.node_map);
-    MPL_free(MPIDI_PTL_addr_table);
+    MPL_free(MPIDI_PTL_global.addr_table);
     MPL_free(MPIDI_PTL_global.kvsname);
 
     return mpi_errno;

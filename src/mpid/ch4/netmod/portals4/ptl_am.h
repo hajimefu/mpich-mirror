@@ -60,8 +60,8 @@ static inline int MPIDI_NM_send_am_hdr(int rank,
     sreq->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
     ret = PtlPut(MPIDI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
-                 PTL_ACK_REQ, MPIDI_PTL_addr_table[rank].process,
-                 MPIDI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
+                 PTL_ACK_REQ, MPIDI_PTL_global.addr_table[rank].process,
+                 MPIDI_PTL_global.addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
@@ -120,8 +120,8 @@ static inline int MPIDI_NM_send_am(int rank,
 
         ret = PtlMDBind(MPIDI_PTL_global.ni, &md, &sreq->dev.ch4.ch4u.netmod_am.portals4.md);
         ret = PtlPut(sreq->dev.ch4.ch4u.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_PTL_addr_table[rank].process,
-                     MPIDI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_PTL_global.addr_table[rank].process,
+                     MPIDI_PTL_global.addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     } else {
         /* copy everything into pack_buffer */
         MPID_Segment *segment;
@@ -138,8 +138,8 @@ static inline int MPIDI_NM_send_am(int rank,
         sreq->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
         ret = PtlPut(MPIDI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_PTL_addr_table[rank].process,
-                     MPIDI_PTL_addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_PTL_global.addr_table[rank].process,
+                     MPIDI_PTL_global.addr_table[rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
 
  fn_exit:
@@ -236,8 +236,8 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
 
         ret = PtlMDBind(MPIDI_PTL_global.ni, &md, &sreq->dev.ch4.ch4u.netmod_am.portals4.md);
         ret = PtlPut(sreq->dev.ch4.ch4u.netmod_am.portals4.md, 0, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_PTL_addr_table[src_rank].process,
-                     MPIDI_PTL_addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_PTL_global.addr_table[src_rank].process,
+                     MPIDI_PTL_global.addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
     } else {
         /* copy everything into pack_buffer */
         MPID_Segment *segment;
@@ -254,8 +254,8 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
         sreq->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
         ret = PtlPut(MPIDI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz + data_sz,
-                     PTL_ACK_REQ, MPIDI_PTL_addr_table[src_rank].process,
-                     MPIDI_PTL_addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
+                     PTL_ACK_REQ, MPIDI_PTL_global.addr_table[src_rank].process,
+                     MPIDI_PTL_global.addr_table[src_rank].pt, match_bits, 0, sreq, ptl_hdr);
     }
 
  fn_exit:
@@ -310,8 +310,8 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
     inject_req->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
     ret = PtlPut(MPIDI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
-                 PTL_ACK_REQ, MPIDI_PTL_addr_table[rank].process,
-                 MPIDI_PTL_addr_table[rank].pt, match_bits, 0, inject_req, ptl_hdr);
+                 PTL_ACK_REQ, MPIDI_PTL_global.addr_table[rank].process,
+                 MPIDI_PTL_global.addr_table[rank].pt, match_bits, 0, inject_req, ptl_hdr);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
@@ -348,8 +348,8 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     inject_req->dev.ch4.ch4u.netmod_am.portals4.pack_buffer = send_buf;
 
     ret = PtlPut(MPIDI_PTL_global.md, (ptl_size_t)send_buf, am_hdr_sz,
-                 PTL_ACK_REQ, MPIDI_PTL_addr_table[src_rank].process,
-                 MPIDI_PTL_addr_table[src_rank].pt, match_bits, 0, inject_req, ptl_hdr);
+                 PTL_ACK_REQ, MPIDI_PTL_global.addr_table[src_rank].process,
+                 MPIDI_PTL_global.addr_table[src_rank].pt, match_bits, 0, inject_req, ptl_hdr);
 
  fn_exit:
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
