@@ -173,8 +173,14 @@ static inline int MPIDI_CH4_NM_finalize(void)
     int mpi_errno = MPI_SUCCESS;
     int ret, i;
 
+    MPIR_Comm_release(MPIR_Process.comm_world);
+    MPIR_Comm_release(MPIR_Process.comm_self);
+
+    MPIDI_CH4U_finalize();
+
     for (i = 0; i < MPIDI_PTL_NUM_OVERFLOW_BUFFERS; i++) {
         ret = PtlMEUnlink(MPIDI_PTL_global.overflow_me_handles[i]);
+        MPL_free(MPIDI_PTL_global.overflow_bufs[i]);
     }
     ret = PtlMDRelease(MPIDI_PTL_global.md);
     ret = PtlPTFree(MPIDI_PTL_global.ni, MPIDI_PTL_global.pt);
@@ -182,6 +188,10 @@ static inline int MPIDI_CH4_NM_finalize(void)
     ret = PtlEQFree(MPIDI_PTL_global.eqs[0]);
     ret = PtlNIFini(MPIDI_PTL_global.ni);
     PtlFini();
+
+    MPL_free(MPIDI_PTL_global.node_map);
+    MPL_free(MPIDI_PTL_addr_table);
+    MPL_free(MPIDI_PTL_global.kvsname);
 
     return mpi_errno;
 }
