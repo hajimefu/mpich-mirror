@@ -15,9 +15,6 @@
 #include "ch4_impl.h"
 
 #include <ucs/type/status.h>
-#if !defined (MPIDI_CH4_EXCLUSIVE_SHM) && !defined(MPIDI_BUILD_CH4_SHM)
-#define MPIDI_UCX_SHM 1
-#endif
 
 #define MPIDI_UCX_COMM(comm)     ((comm)->dev.ch4.netmod.ucx)
 #define MPIDI_UCX_REQ(req)       ((req)->dev.ch4.netmod.ucx)

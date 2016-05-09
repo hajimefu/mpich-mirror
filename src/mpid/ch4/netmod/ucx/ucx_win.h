@@ -89,12 +89,10 @@ static inline int MPIDI_UCX_Win_allgather(MPIR_Win *win, size_t length,
         status = ucp_ep_rkey_unpack(MPIDI_UCX_COMM_TO_EP(comm_ptr, i),
                             &rkey_recv_buff[recv_disps[i]],
                             &(MPIDI_UCX_WIN_INFO(win, i).rkey));
-#ifdef MPIDI_UCX_SHM
         if(status == UCS_ERR_UNREACHABLE) {
             MPIDI_UCX_WIN_INFO(win, i).rkey= NULL;
         }
         else
-#endif
             MPIDI_UCX_CHK_STATUS(status, ucp_mem_map);
      }
     share_data = MPL_malloc(comm_ptr->local_size * sizeof(struct _UCX_share));

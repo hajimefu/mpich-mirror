@@ -105,11 +105,7 @@ static inline int MPIDI_NM_put(const void *origin_addr,
     if(unlikely((origin_bytes == 0) ||(target_rank == MPI_PROC_NULL)))
         goto fn_exit;
 
-#ifdef MPIDI_UCX_SHM
     if(!target_contig || !origin_contig || MPIDI_UCX_WIN_INFO(win, target_rank).rkey == NULL)
-#else
-    if(!target_contig ||  !origin_contig)
-#endif
        return  MPIDI_CH4U_put(origin_addr, origin_count, origin_datatype,
                           target_rank, target_disp, target_count, target_datatype, win);
 
@@ -162,12 +158,8 @@ static inline int MPIDI_NM_get(void *origin_addr,
     MPIDI_Datatype_check_contig(target_datatype,target_contig);
 
 
-#ifdef MPIDI_UCX_SHM
     if(!origin_contig || !target_contig ||  MPIDI_UCX_WIN_INFO(win, target_rank).rkey == NULL )
-#else
-    if(!target_contig || !origin_contig)
-#endif
-     return MPIDI_CH4U_get(origin_addr, origin_count, origin_datatype,
+         return MPIDI_CH4U_get(origin_addr, origin_count, origin_datatype,
                           target_rank, target_disp, target_count, target_datatype, win);
 
     MPIDI_CH4U_EPOCH_CHECK_SYNC(win, mpi_errno, goto fn_fail);
