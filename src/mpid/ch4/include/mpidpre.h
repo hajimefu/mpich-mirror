@@ -25,7 +25,7 @@
 
 typedef struct {
     union {
-        MPIDI_CH4_NETMOD_DT_DECL
+        MPIDI_NM_DT_DECL
     }netmod;
 } MPIDI_Devdt_t;
 #define MPID_DEV_DATATYPE_DECL   MPIDI_Devdt_t   dev;
@@ -159,7 +159,7 @@ typedef struct MPIDI_CH4U_req_ext_t {
 
 typedef struct MPIDI_CH4U_req_t {
     union {
-        MPIDI_CH4_NETMOD_REQUEST_AM_DECL
+        MPIDI_NM_REQUEST_AM_DECL
     }netmod_am;
     MPIDI_CH4U_req_ext_t *req;
     MPIDI_ptype       p_type;
@@ -187,7 +187,7 @@ typedef struct {
 
         /* Used by the netmod direct apis */
         union {
-            MPIDI_CH4_NETMOD_REQUEST_DECL
+            MPIDI_NM_REQUEST_DECL
         }netmod;
 
         union {
@@ -288,7 +288,7 @@ typedef struct MPIDI_CH4U_win_t {
 typedef struct {
     MPIDI_CH4U_win_t ch4u;
     union {
-        MPIDI_CH4_NETMOD_WIN_DECL
+        MPIDI_NM_WIN_DECL
     }netmod;
 } MPIDI_Devwin_t;
 
@@ -373,7 +373,7 @@ typedef struct MPIDI_Devcomm_t {
 
         /* Used by the netmod direct apis */
         union {
-            MPIDI_CH4_NETMOD_COMM_DECL
+            MPIDI_NM_COMM_DECL
         }netmod;
 
         union {
@@ -393,13 +393,13 @@ typedef uint16_t MPID_Node_id_t;
 
 typedef struct {
     union {
-        MPIDI_CH4_NETMOD_OP_DECL
+        MPIDI_NM_OP_DECL
     }netmod;
 } MPIDI_Devop_t;
 
 typedef struct {
     union {
-        MPIDI_CH4_NETMOD_GPID_DECL
+        MPIDI_NM_GPID_DECL
     } netmod;
     MPID_Node_id_t node;
 } MPIDI_Devgpid_t;
@@ -414,7 +414,7 @@ typedef struct {
 
 typedef struct {
     union {
-        MPIDI_CH4_NETMOD_ADDR_DECL
+        MPIDI_NM_ADDR_DECL
     } netmod;
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     MPIDII_locality_t is_local;
