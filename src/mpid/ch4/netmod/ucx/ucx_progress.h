@@ -91,15 +91,6 @@ static inline void MPIDI_UCX_Handle_am_recv(void *request, ucs_status_t status,
     if (status == UCS_ERR_CANCELED) {
         goto fn_exit;
     }
-
-    if (ucp_request->req) {
-        MPIDI_UCX_am_handler(ucp_request->req, info->length);
-        MPL_free(ucp_request->req);
-        ucp_request->req = NULL;
-    } else {
-        ucp_request->req = (void *)TRUE;
-    }
-
  fn_exit:
     return;
  fn_fail:
@@ -116,25 +107,30 @@ static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
     ucp_tag_recv_info_t info;
     MPIDI_UCX_ucp_request_t *ucp_request;
     void *am_buf;
-
+    ucp_tag_message_h message_handle;
     /* check for active messages */
-    while (ucp_tag_probe_nb(MPIDI_UCX_global.worker, MPIDI_UCX_AM_TAG, ~MPIDI_UCX_AM_TAG, 0, &info)) {
+     message_handle =
+             ucp_tag_probe_nb(MPIDI_UCX_global.worker, MPIDI_UCX_AM_TAG,
+                                ~MPIDI_UCX_AM_TAG, 1, &info);
+    while (message_handle) {
         am_buf = MPL_malloc(info.length);
-        ucp_request = (MPIDI_UCX_ucp_request_t *)ucp_tag_recv_nb(MPIDI_UCX_global.worker,
+        ucp_request = (MPIDI_UCX_ucp_request_t *)ucp_tag_msg_recv_nb(MPIDI_UCX_global.worker,
                                                                  am_buf,
                                                                  info.length,
                                                                  ucp_dt_make_contig(1),
-                                                                 MPIDI_UCX_AM_TAG,
-                                                                 ~MPIDI_UCX_AM_TAG,
+                                                                  message_handle,
                                                                  &MPIDI_UCX_Handle_am_recv);
-        if (ucp_request->req == NULL) {
-            ucp_request->req = am_buf;
-        } else {
-            MPIDI_UCX_am_handler(am_buf, info.length);
-            MPL_free(am_buf);
-            ucp_request->req = NULL;
+        while(!ucp_request_is_completed(ucp_request)){
+            ucp_worker_progress(MPIDI_UCX_global.worker);
         }
+
         ucp_request_release(ucp_request);
+        MPIDI_UCX_am_handler(am_buf, info.length);
+        MPL_free(am_buf);
+         message_handle =
+             ucp_tag_probe_nb(MPIDI_UCX_global.worker, MPIDI_UCX_AM_TAG,
+                                ~MPIDI_UCX_AM_TAG, 1, &info);
+
     }
 
     ucp_worker_progress(MPIDI_UCX_global.worker);
