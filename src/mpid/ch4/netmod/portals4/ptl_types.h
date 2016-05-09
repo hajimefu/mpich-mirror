@@ -24,16 +24,6 @@
 #define MPIDI_PTL_MAX_AM_HANDLERS      (64)
 
 typedef struct {
-    union {
-        uint64_t val;
-        struct {
-            uint32_t context_id;
-            uint32_t src_rank;
-        } data;
-    };
-} MPIDI_PTL_am_reply_token_t;
-
-typedef struct {
     ptl_process_t  process;
     ptl_pt_index_t pt;
 } MPIDI_PTL_addr_t;
