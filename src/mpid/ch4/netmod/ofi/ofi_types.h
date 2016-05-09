@@ -481,11 +481,6 @@ typedef struct {
     MPIR_Comm                        *comm_ptr;
     MPIR_Request                     *localreq;
     struct fi_cq_tagged_entry         wc;
-} MPIDI_OFI_huge_chunk_t;
-
-typedef struct {
-    uint16_t  seqno;
-    void     *chunk_q;
 } MPIDI_OFI_huge_recv_t;
 
 typedef struct MPIDI_OFI_huge_counter_t {

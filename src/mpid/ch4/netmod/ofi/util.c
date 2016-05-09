@@ -363,7 +363,6 @@ static inline void MPIDI_OFI_get_huge_cleanup(MPIDI_OFI_send_control_t *info)
     /* Look up the per destination receive queue object */
     recv = (MPIDI_OFI_huge_recv_t *)MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);
-    MPIDI_OFI_map_destroy(recv->chunk_q);
     MPIDI_OFI_map_erase(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,info->origin_rank);
     MPL_free(recv);
 }
@@ -371,35 +370,22 @@ static inline void MPIDI_OFI_get_huge_cleanup(MPIDI_OFI_send_control_t *info)
 static inline void MPIDI_OFI_get_huge(MPIDI_OFI_send_control_t *info)
 {
     MPIDI_OFI_huge_recv_t  *recv;
-    MPIDI_OFI_huge_chunk_t *hc;
-    MPIR_Comm          *comm_ptr;
+    MPIR_Comm              *comm_ptr;
     /* Look up the communicator */
     comm_ptr = MPIDI_CH4U_context_id_to_comm(info->comm_id);
     /* Look up the per destination receive queue object */
     recv = (MPIDI_OFI_huge_recv_t *)MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                          info->origin_rank);
-
     if(recv == MPIDI_OFI_MAP_NOT_FOUND) {
-        recv        = (MPIDI_OFI_huge_recv_t *)MPL_malloc(sizeof(*recv));
-        recv->seqno = 0;
-        MPIDI_OFI_map_create(&recv->chunk_q);
+        recv        = (MPIDI_OFI_huge_recv_t *)MPL_calloc(sizeof(*recv),1);
         MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
                                   info->origin_rank, recv);
     }
-
-    hc = (MPIDI_OFI_huge_chunk_t *)MPIDI_OFI_map_lookup(recv->chunk_q,info->seqno);
-
-    if(hc == MPIDI_OFI_MAP_NOT_FOUND) {
-        hc = (MPIDI_OFI_huge_chunk_t *)MPL_malloc(sizeof(*hc));
-        memset(hc,0, sizeof(*hc));
-        hc->event_id = MPIDI_OFI_EVENT_GET_HUGE;
-        MPIDI_OFI_map_set(recv->chunk_q,info->seqno,hc);
-    }
-
-    hc->cur_offset     = MPIDI_Global.max_send;
-    hc->remote_info    = *info;
-    hc->comm_ptr       = comm_ptr;
-    MPIDI_OFI_get_huge_event(NULL, (MPIR_Request *)hc);
+    recv->event_id       = MPIDI_OFI_EVENT_GET_HUGE;
+    recv->cur_offset     = MPIDI_Global.max_send;
+    recv->remote_info    = *info;
+    recv->comm_ptr       = comm_ptr;
+    MPIDI_OFI_get_huge_event(NULL, (MPIR_Request *)recv);
 }
 
 int MPIDI_OFI_control_handler(void      *am_hdr,

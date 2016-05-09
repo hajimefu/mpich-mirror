@@ -153,7 +153,6 @@ fn_fail:
 static inline int MPIDI_OFI_recv_huge_event(struct fi_cq_tagged_entry *wc, MPIR_Request *rreq)
 {
     MPIDI_OFI_huge_recv_t *recv;
-    MPIDI_OFI_huge_chunk_t *hc;
     MPIR_Comm *comm_ptr;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
@@ -162,29 +161,16 @@ static inline int MPIDI_OFI_recv_huge_event(struct fi_cq_tagged_entry *wc, MPIR_
     comm_ptr = MPIDI_OFI_REQUEST(rreq, util_comm);
     recv = (MPIDI_OFI_huge_recv_t *) MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
                                                                           MPIDI_OFI_init_get_source(wc->tag));
-
     if(recv == MPIDI_OFI_MAP_NOT_FOUND) {
-        recv = (MPIDI_OFI_huge_recv_t *) MPL_malloc(sizeof(*recv));
-        recv->seqno = 0;
-        MPIDI_OFI_map_create(&recv->chunk_q);
+        recv = (MPIDI_OFI_huge_recv_t *) MPL_calloc(sizeof(*recv), 1);
         MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters, MPIDI_OFI_init_get_source(wc->tag), recv);
     }
 
-    /* Look up the receive in the chunk queue */
-    hc = (MPIDI_OFI_huge_chunk_t *) MPIDI_OFI_map_lookup(recv->chunk_q, recv->seqno);
-
-    if(hc == MPIDI_OFI_MAP_NOT_FOUND) {
-        hc = (MPIDI_OFI_huge_chunk_t *) MPL_malloc(sizeof(*hc));
-        memset(hc, 0, sizeof(*hc));
-        hc->event_id = MPIDI_OFI_EVENT_GET_HUGE;
-        MPIDI_OFI_map_set(recv->chunk_q, recv->seqno, hc);
-    }
-
-    recv->seqno++;
-    hc->localreq = rreq;
-    hc->done_fn  = MPIDI_OFI_recv_event;
-    hc->wc       = *wc;
-    MPIDI_OFI_get_huge_event(NULL, (MPIR_Request *) hc);
+    recv->event_id = MPIDI_OFI_EVENT_GET_HUGE;
+    recv->localreq = rreq;
+    recv->done_fn  = MPIDI_OFI_recv_event;
+    recv->wc       = *wc;
+    MPIDI_OFI_get_huge_event(NULL, (MPIR_Request *) recv);
 
     MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_HUGE_EVENT);
     return MPI_SUCCESS;
@@ -237,7 +223,6 @@ static inline int MPIDI_OFI_send_huge_event(struct fi_cq_tagged_entry *wc, MPIR_
         MPIU_Assert(ptr != MPIDI_OFI_MAP_NOT_FOUND);
         cntr = (MPIDI_OFI_huge_counter_t *) ptr;
         cntr->outstanding--;
-
         if(cntr->outstanding == 0) {
             MPIDI_OFI_send_control_t ctrl;
             uint64_t key;
@@ -287,41 +272,41 @@ static inline int MPIDI_OFI_ssend_ack_event(struct fi_cq_tagged_entry *wc, MPIR_
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_OFI_get_huge_event(struct fi_cq_tagged_entry *wc,
-                                                   MPIR_Request      *req)
+                                           MPIR_Request              *req)
 {
-    int                 mpi_errno = MPI_SUCCESS;
-    MPIDI_OFI_huge_chunk_t *hc = (MPIDI_OFI_huge_chunk_t *)req;
-    uint64_t            remote_key;
+    int                    mpi_errno = MPI_SUCCESS;
+    MPIDI_OFI_huge_recv_t *recv = (MPIDI_OFI_huge_recv_t *)req;
+    uint64_t               remote_key;
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_GETHUGE_EVENT);
 
-    if(hc->localreq && hc->cur_offset!=0) {
-        size_t bytesSent  = hc->cur_offset - MPIDI_Global.max_send;
-        size_t bytesLeft  = hc->remote_info.msgsize - bytesSent - MPIDI_Global.max_send;
+    if(recv->localreq && recv->cur_offset!=0) {
+        size_t bytesSent  = recv->cur_offset - MPIDI_Global.max_send;
+        size_t bytesLeft  = recv->remote_info.msgsize - bytesSent - MPIDI_Global.max_send;
         size_t bytesToGet = (bytesLeft<=MPIDI_Global.max_send)?bytesLeft:MPIDI_Global.max_send;
 
         if(bytesToGet == 0ULL) {
             MPIDI_OFI_send_control_t ctrl;
-            hc->wc.len = hc->cur_offset;
-            hc->done_fn(&hc->wc, hc->localreq);
+            recv->wc.len = recv->cur_offset;
+            recv->done_fn(&recv->wc, recv->localreq);
             ctrl.type = MPIDI_OFI_CTRL_HUGEACK;
-            MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_do_control_send(&ctrl,NULL,0,hc->remote_info.origin_rank,
-                                                                             hc->comm_ptr,hc->remote_info.ackreq,
-                                                                             FALSE));
-            MPL_free(hc);
+            MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_do_control_send(&ctrl,NULL,0,recv->remote_info.origin_rank,
+                                                             recv->comm_ptr,recv->remote_info.ackreq,
+                                                             FALSE));
+            /* "recv" and maps will be freed in MPIDI_OFI_get_huge_cleanup */
             goto fn_exit;
         }
 
-        remote_key = hc->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
+        remote_key = recv->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
         MPIDI_OFI_CALL_RETRY_NOLOCK(fi_read(MPIDI_OFI_EP_TX_RMA(0),                                           /* endpoint     */
-                                                    (void *)((uintptr_t)hc->wc.buf + hc->cur_offset),       /* local buffer */
+                                                    (void *)((uintptr_t)recv->wc.buf + recv->cur_offset),       /* local buffer */
                                                     bytesToGet,                                             /* bytes        */
                                                     NULL,                                                   /* descriptor   */
-                                                    MPIDI_OFI_comm_to_phys(hc->comm_ptr,hc->remote_info.origin_rank,MPIDI_OFI_API_MSG), /* Destination  */
-                                                    hc->cur_offset,                                         /* remote maddr */
+                                                    MPIDI_OFI_comm_to_phys(recv->comm_ptr,recv->remote_info.origin_rank,MPIDI_OFI_API_MSG), /* Destination  */
+                                                    recv->cur_offset,                                         /* remote maddr */
                                                     remote_key,                                             /* Key          */
-                                                    (void *)&hc->context),rdma_readfrom);                   /* Context      */
-        hc->cur_offset+=bytesToGet;
+                                                    (void *)&recv->context),rdma_readfrom);                   /* Context      */
+        recv->cur_offset+=bytesToGet;
     }
 
 fn_exit:
