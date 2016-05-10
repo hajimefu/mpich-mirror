@@ -59,4 +59,8 @@ typedef struct {
     int dummy;
 } MPIDI_UCX_comm_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_UCX_op_t;
+
 #endif /* NETMOD_UCX_PRE_H_INCLUDED */

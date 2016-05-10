@@ -98,7 +98,7 @@ static ucp_generic_dt_ops_t MPIDI_UCX_datatype_ops = {
 };
 
 
-static inline void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p){
+static inline void MPIDI_NM_datatype_destroy(MPIR_Datatype *datatype_p){
 
     int in_use;
 
@@ -111,32 +111,30 @@ static inline void MPIDI_NM_datatype_destroy_hook(MPIR_Datatype *datatype_p){
 
     return;
 }
-static inline void MPIDI_NM_datatype_commit_hook(MPI_Datatype *datatype_p){
+static inline void MPIDI_NM_datatype_commit(MPIR_Datatype *datatype_p){
     ucp_datatype_t ucp_datatype;
     ucs_status_t status;
     size_t size;
-    MPIR_Datatype *datatype_ptr;
     int is_contig;
 
-    MPID_Datatype_get_ptr(*datatype_p, datatype_ptr);
-    datatype_ptr->dev.netmod.ucx.has_ucp = 0;
-    MPID_Datatype_is_contig(*datatype_p, &is_contig);
+    datatype_p->dev.netmod.ucx.has_ucp = 0;
+    MPID_Datatype_is_contig(datatype_p->handle, &is_contig);
 
     if (!is_contig) {
         status = ucp_dt_create_generic(&MPIDI_UCX_datatype_ops,
                                        datatype_p, &ucp_datatype);
         MPIU_Assertp(status == UCS_OK);
-        datatype_ptr->dev.netmod.ucx.ucp_datatype = ucp_datatype;
+        datatype_p->dev.netmod.ucx.ucp_datatype = ucp_datatype;
 
-        datatype_ptr->dev.netmod.ucx.has_ucp = 1;
-        MPIU_Object_add_ref(datatype_ptr);
+        datatype_p->dev.netmod.ucx.has_ucp = 1;
+        MPIU_Object_add_ref(datatype_p);
     }
 
     return;
 }
-static inline void MPIDI_NM_datatype_dup_hook(MPIR_Datatype *datatype_p) {
-
-    return MPIDI_NM_datatype_commit_hook(&datatype_p->handle);
+static inline void MPIDI_NM_datatype_dup(MPIR_Datatype *old_datatype_p,
+                                         MPIR_Datatype *new_datatype_p) {
+    return;
 }
 
 #endif /* NETMOD_UCX_DATATYPE_H_INCLUDED */

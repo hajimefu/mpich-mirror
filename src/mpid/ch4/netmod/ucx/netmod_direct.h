@@ -21,6 +21,7 @@
 #include "ucx_spawn.h"
 #include "ucx_comm.h"
 #include "ucx_datatype.h"
+#include "ucx_op.h"
 #include "ucx_proc.h"
 #include "ucx_coll.h"
 #endif /* NETMOD_DIRECT_H_INCLUDED */
