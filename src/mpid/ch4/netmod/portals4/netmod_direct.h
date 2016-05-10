@@ -25,4 +25,6 @@
 #include "ptl_unimpl.h"
 #include "ptl_proc.h"
 #include "ptl_coll.h"
+#include "ptl_datatype.h"
+#include "ptl_op.h"
 #endif /* NETMOD_DIRECT_H_INCLUDED */

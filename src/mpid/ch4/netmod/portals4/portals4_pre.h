@@ -44,4 +44,8 @@ typedef struct {
     int dummy;
 } MPIDI_PORTALS4_addr_t;
 
+typedef struct {
+    int dummy;
+} MPIDI_PORTALS4_op_t;
+
 #endif /* NETMOD_PORTALS4_PRE_H_INCLUDED */
