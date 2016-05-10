@@ -256,7 +256,7 @@ __CH4_INLINE__ int MPIDI_Init(int *argc,
     MPIDII_COMM(MPIR_Process.comm_self,local_map).mode = MPIDII_RANK_MAP_NONE;
     MPIDIU_avt_add_ref(0);
 
-    MPIR_Process.attrs.tag_ub = (1 << MPIDI_CH4U_TAG_SHIFT) - 1;
+    MPIR_Process.attrs.tag_ub = (1ULL << MPIDI_CH4U_TAG_SHIFT) - 1;
     /* discuss */
 
     mpi_errno = MPIDI_NM_init(rank, size, appnum, &MPIR_Process.attrs.tag_ub,

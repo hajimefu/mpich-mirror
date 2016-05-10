@@ -86,8 +86,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFI_gpid_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIU_Context_id_t)*8 >= MPIDI_OFI_AM_CONTEXT_ID_BITS);
 
-
-    *tag_ub = (1 << MPIDI_OFI_TAG_SHIFT) - 1;
+    *tag_ub = (1ULL << MPIDI_OFI_TAG_SHIFT) - 1;
 
     MPID_Thread_mutex_create(&MPIDI_OFI_THREAD_UTIL_MUTEX, &thr_err);
     MPID_Thread_mutex_create(&MPIDI_OFI_THREAD_PROGRESS_MUTEX, &thr_err);
