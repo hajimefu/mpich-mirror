@@ -84,6 +84,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devreq_t)>=sizeof(MPIDI_OFI_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIR_Request)>=sizeof(MPIDI_OFI_win_request_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devgpid_t)>=sizeof(MPIDI_OFI_gpid_t));
+    CH4_COMPILE_TIME_ASSERT(sizeof(MPIU_Context_id_t)*8 >= MPIDI_OFI_AM_CONTEXT_ID_BITS);
 
 
     *tag_ub = (1 << MPIDI_OFI_TAG_SHIFT) - 1;

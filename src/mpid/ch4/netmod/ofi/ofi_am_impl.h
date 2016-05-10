@@ -224,7 +224,6 @@ static inline int MPIDI_OFI_do_send_am_header(int                         rank,
     msg_hdr->data_sz    = 0;
     msg_hdr->am_type    = MPIDI_AMTYPE_SHORT_HDR;
 
-    MPIR_Assert(comm->context_id  < (1 << MPIDI_OFI_AM_CONTEXT_ID_BITS));
     MPIR_Assert((uint64_t)comm->rank < (1ULL << MPIDI_OFI_AM_RANK_BITS));
 
     MPIDI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = NULL;
@@ -484,7 +483,6 @@ static inline int MPIDI_OFI_do_inject(int           rank,
     msg_hdr.data_sz     = 0;
     msg_hdr.am_type     = MPIDI_AMTYPE_SHORT_HDR;
 
-    MPIR_Assert(comm->context_id < (1 << MPIDI_OFI_AM_CONTEXT_ID_BITS));
     MPIR_Assert((uint64_t)comm->rank < (1ULL << MPIDI_OFI_AM_RANK_BITS));
 
     msg_iov[0].iov_base = (void *) &msg_hdr;
