@@ -102,20 +102,4 @@ __CH4_INLINE__ int MPIDI_Request_complete(MPIR_Request * req)
     return MPI_SUCCESS;
 }
 
-#undef FUNCNAME
-#define FUNCNAME MPIDI_request_create
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ MPIR_Request *MPIDI_Request_create(void)
-{
-    MPIR_Request *req;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQUEST_CREATE);
-
-    req = MPIDI_CH4I_alloc_and_init_req(1);
-
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_CREATE);
-    return req;
-}
-
 #endif /* CH4_REQUEST_H_INCLUDED */

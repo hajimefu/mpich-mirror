@@ -25,8 +25,9 @@ static inline MPIR_Request *MPIDI_CH4I_am_request_create()
     MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
 
-    req = MPIDI_CH4I_alloc_and_init_req(2);
+    req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(req);
+    MPIR_Request_add_ref(req);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
     MPIDI_CH4U_REQUEST(req, req)    =
@@ -50,7 +51,7 @@ static inline MPIR_Request *MPIDI_CH4I_am_win_request_create()
     MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
     MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
 
-    req = MPIDI_CH4I_alloc_and_init_req(1);
+    req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(req);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);

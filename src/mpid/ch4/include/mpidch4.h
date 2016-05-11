@@ -71,7 +71,6 @@ MPIDI_CH4I_API(void, Request_set_completed, MPIR_Request *);
 MPIDI_CH4I_API(void, Request_release, MPIR_Request *);
 MPIDI_CH4I_API(int, Request_complete, MPIR_Request *);
 MPIDI_CH4I_API(int, Request_is_anysource, MPIR_Request *);
-MPIDI_CH4I_API(MPIR_Request *, Request_create, void);
 MPIDI_CH4I_API(int, Send, const void *, int, MPI_Datatype, int, int, MPIR_Comm *, int,
                MPIR_Request **);
 MPIDI_CH4I_API(int, Ssend, const void *, int, MPI_Datatype, int, int, MPIR_Comm *, int,
@@ -286,7 +285,6 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm);
 #define MPID_Raccumulate                 MPIDI_Raccumulate
 #define MPID_Recv                        MPIDI_Recv
 #define MPID_Recv_init                   MPIDI_Recv_init
-#define MPID_Request_create              MPIDI_Request_create
 #define MPID_Request_release             MPIDI_Request_release
 #define MPID_Request_complete            MPIDI_Request_complete
 #define MPID_Request_is_anysource        MPIDI_Request_is_anysource

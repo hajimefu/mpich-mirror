@@ -77,40 +77,6 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_alloc_and_init_req
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline MPIR_Request *MPIDI_CH4I_alloc_and_init_req(int refcount)
-{
-    MPIR_Request *req;
-
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
-
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
-    MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIDI_CH4U_REQUEST(req, req) = NULL;
-    MPIR_cc_set(&req->cc, 1);
-    MPIU_Object_set_ref(req, refcount);
-    MPIR_STATUS_SET_COUNT(req->status, 0);
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->cc_ptr            = &req->cc;
-    req->u.ureq.greq_fns          = NULL;
-    req->status.MPI_SOURCE = MPI_UNDEFINED;
-    req->status.MPI_TAG    = MPI_UNDEFINED;
-    req->status.MPI_ERROR  = MPI_SUCCESS;
-    req->comm              = NULL;
-    req->u.nbc.errflag     = MPIR_ERR_NONE;
-    MPIR_REQUEST_CLEAR_DBG(req);
-#ifdef MPIDI_BUILD_CH4_SHM
-    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
-#endif
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_ALLOC_AND_INIT_REQ);
-    return req;
-}
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4I_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -332,11 +298,9 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPIR_Request *req)
 
 #define MPIDI_Request_create_null_rreq(rreq_, mpi_errno_, FAIL_)        \
   do {                                                                  \
-    (rreq_) = MPIDI_Request_create();                                   \
+    (rreq_) = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);             \
     if ((rreq_) != NULL) {                                              \
-      MPIU_Object_set_ref((rreq_), 1);                                  \
       MPIR_cc_set(&(rreq_)->cc, 0);                                     \
-      (rreq_)->kind = MPIR_REQUEST_KIND__RECV;                                \
       MPIR_Status_set_procnull(&(rreq_)->status);                       \
     }                                                                   \
     else {                                                              \

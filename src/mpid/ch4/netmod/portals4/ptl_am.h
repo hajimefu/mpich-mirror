@@ -303,7 +303,7 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
     match_bits = MPIDI_PTL_init_tag(comm->context_id, MPIDI_PTL_AM_TAG);
 
     /* create an internal request for the inject */
-    inject_req = MPIDI_Request_create();
+    inject_req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(inject_req);
     send_buf = MPL_malloc(am_hdr_sz);
     MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
@@ -341,7 +341,7 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     match_bits = MPIDI_PTL_init_tag(use_comm->context_id, MPIDI_PTL_AM_TAG);
 
     /* create an internal request for the inject */
-    inject_req = MPIDI_Request_create();
+    inject_req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(inject_req);
     send_buf = MPL_malloc(am_hdr_sz);
     MPIU_Memcpy(send_buf, am_hdr, am_hdr_sz);
