@@ -14,6 +14,8 @@
 #define HAVE_MPIDI_NM_datatype_commit_hook
 #define HAVE_MPIDI_NM_datatype_destroy_hook
 
+
+#define MPIDI_UCX_NAME_LEN             (512)
 typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;
@@ -48,7 +50,7 @@ typedef struct {
 } MPIDI_UCX_win_t;
 
 typedef struct {
-    char addr[128];
+    char addr[MPIDI_UCX_NAME_LEN];
 } MPIDI_UCX_gpid_t;
 
 typedef struct {

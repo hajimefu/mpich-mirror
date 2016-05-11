@@ -29,9 +29,6 @@
 #define MPIDI_UCX_AM_TAG               (1 << 28)
 #define MPIDI_UCX_MAX_AM_HANDLERS      (64)
 
-#define MPIDI_UCX_BUF_POOL_SIZE            (1024)
-#define MPIDI_UCX_BUF_POOL_NUM             (1024)
-
 typedef struct {
     void *req;
 } MPIDI_UCX_ucp_request_t;
@@ -46,7 +43,6 @@ typedef struct {
     ucp_address_t *if_address;
     char kvsname[MPIDI_UCX_KVSAPPSTRLEN];
     char pname[MPI_MAX_PROCESSOR_NAME];
-    struct iovec    am_iov[MPIDI_UCX_NUM_AM_BUFFERS];
     MPIDI_NM_am_target_handler_fn am_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
     MPIDI_NM_am_origin_handler_fn send_cmpl_handlers[MPIDI_UCX_MAX_AM_HANDLERS];
 } MPIDI_UCX_global_t;

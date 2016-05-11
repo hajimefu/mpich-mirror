@@ -61,10 +61,8 @@ static inline int MPIDI_NM_init(int rank,
     ucx_status  = ucp_worker_create(MPIDI_UCX_global.context, UCS_THREAD_MODE_SERIALIZED,
                              &MPIDI_UCX_global.worker);
     MPIDI_UCX_CHK_STATUS(ucx_status, worker_create);
-
     ucx_status = ucp_worker_get_address (MPIDI_UCX_global.worker, &MPIDI_UCX_global.if_address, &MPIDI_UCX_global.addrname_len);
     MPIDI_UCX_CHK_STATUS(ucx_status, get_worker_address);
-
     val = valS;
     str_errno = MPL_str_add_binary_arg(&val, (int *) &maxlen, "UCX", (char *) MPIDI_UCX_global.if_address,
                             (int) MPIDI_UCX_global.addrname_len);
@@ -81,20 +79,20 @@ static inline int MPIDI_NM_init(int rank,
     pmi_errno =  PMI_Barrier();
     MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
-    table = MPL_malloc(size * MPIDI_UCX_global.addrname_len);
+    table = MPL_malloc(size * MPIDI_UCX_NAME_LEN );
     MPIDI_UCX_global.pmi_addr_table = table;
-
+    memset(table,0x0, MPIDI_UCX_NAME_LEN*size);
     maxlen = MPIDI_UCX_KVSAPPSTRLEN;
 
     for (i = 0; i < size; i++) {
         sprintf(keyS, "UCX-%d", i);
         pmi_errno = PMI_KVS_Get(MPIDI_UCX_global.kvsname, keyS, valS, MPIDI_UCX_KVSAPPSTRLEN);
         MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_commit);
-        str_errno = MPL_str_get_binary_arg(valS, "UCX", &table[i * MPIDI_UCX_global.addrname_len],
-                                (int) MPIDI_UCX_global.addrname_len, (int *) &maxlen);
+        str_errno = MPL_str_get_binary_arg(valS, "UCX", &table[i * MPIDI_UCX_NAME_LEN ],
+                                (int)MPIDI_UCX_NAME_LEN , (int *) &maxlen);
         /* MPIDI_UCX_STR_ERRCHK(str_errno, buscard_len); */
         ucx_status = ucp_ep_create(MPIDI_UCX_global.worker,
-                                (ucp_address_t *) & table[i * MPIDI_UCX_global.addrname_len],
+                                (ucp_address_t *) & table[i * MPIDI_UCX_NAME_LEN],
                                 &MPIDI_UCX_AV(&MPIDIU_get_av(0, i)).dest);
         MPIDI_UCX_CHK_STATUS(ucx_status, ep_create);
     }
@@ -182,10 +180,10 @@ static inline int MPIDI_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * 
     size_t sz;
     MPIDIU_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
     MPIU_Assert(rank < comm_ptr->local_size);
-    sz = sizeof(MPIDI_UCX_GPID(gpid).addr);
+    sz = MPIDI_UCX_NAME_LEN;// sizeof(MPIDI_UCX_GPID(gpid).addr);
     memset(MPIDI_UCX_GPID(gpid).addr, 0, sz);
     memcpy(MPIDI_UCX_GPID(gpid).addr,
-           &MPIDI_UCX_global.pmi_addr_table[lpid * MPIDI_UCX_global.addrname_len], sz);
+           &MPIDI_UCX_global.pmi_addr_table[lpid * MPIDI_UCX_NAME_LEN ], sz);
     MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(gpid).addr));
   fn_exit:
     return mpi_errno;
@@ -236,10 +234,10 @@ static inline int MPIDI_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid
         for (k = 0; k < max_n_avts; k++) {
             if (MPIDIU_get_av_table(k) == NULL) { continue; }
             for(j = 0; j < MPIDIU_get_av_table(k)->size; j++) {
-                sz = sizeof(MPIDI_UCX_GPID(&gpid[i]).addr);
+                sz = MPIDI_UCX_NAME_LEN;//  sizeof(MPIDI_UCX_GPID(&gpid[i]).addr);
                 MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(&gpid[i]).addr));
 
-                if(!memcmp(&MPIDI_UCX_global.pmi_addr_table[j * MPIDI_UCX_global.addrname_len],
+                if(!memcmp(&MPIDI_UCX_global.pmi_addr_table[j * MPIDI_UCX_NAME_LEN],
                            MPIDI_UCX_GPID(&gpid[i]).addr, sz)) {
                     lpid[i] = MPIDIU_LPID_CREATE(k, j);
                     found = 1;
