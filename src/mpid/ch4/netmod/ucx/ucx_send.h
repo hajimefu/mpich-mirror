@@ -41,7 +41,8 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
     if (ucp_request == NULL) {
-        req = MPIDI_UCX_Alloc_send_request_done();
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_cc_set(&req->cc, 0);
         goto fn_exit;
    }
 
@@ -50,8 +51,8 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
        ucp_request->req = NULL;
        ucp_request_release(ucp_request);
    } else {
-       req = MPIDI_UCX_Request_create();
-       (req)->kind = MPIR_REQUEST_KIND__SEND;
+       req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+       MPIR_Request_add_ref(req);
        ucp_request->req = req;
        ucp_request_release(ucp_request);
    }
@@ -98,7 +99,8 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
 
     if (ucp_request == NULL) {
-        req = MPIDI_UCX_Alloc_send_request_done();
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_cc_set(&req->cc, 0);
         goto fn_exit;
    }
 
@@ -108,8 +110,8 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
        ucp_request_release(ucp_request);
       }
     else{
-       req = MPIDI_UCX_Request_create();
-       (req)->kind = MPIR_REQUEST_KIND__SEND;
+       req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+       MPIR_Request_add_ref(req);
        ucp_request->req = req;
        ucp_request_release(ucp_request);
    }
@@ -150,8 +152,8 @@ static inline int ucx_send(const void *buf,
         mpi_errno = MPI_SUCCESS;
 
         if (have_request) {
-            *request = MPIDI_UCX_Request_create();
-            (*request)->kind = MPIR_REQUEST_KIND__SEND;
+            *request = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+            MPIR_Request_add_ref(*request);
             MPIDI_CH4U_request_complete((*request));
         }
 

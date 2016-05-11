@@ -149,37 +149,6 @@ static inline int MPIDI_UCX_get_source(uint64_t match_bits)
 			  ucs_status_string(UCS_PTR_STATUS(_req)));	\
   } while (0)
 
-#define MPIDI_Request_init_sreq(sreq_)	\
-{								\
-    (sreq_)->kind = MPIR_REQUEST_KIND__SEND;	  \
-    (sreq_)->comm = comm;		          \
-    (sreq_)->u.persist.real_request   = NULL;    \
-    MPIR_Comm_add_ref(comm);		\
-    MPIR_cc_set(&sreq_->cc, 1);     \
-    req->cc_ptr = &req->cc;         \
-    MPIU_Object_set_ref(req, 2);    \
-    req->u.ureq.greq_fns = NULL;       \
-    MPIR_STATUS_SET_COUNT(req->status, 0);\
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE); \
-    req->status.MPI_SOURCE = MPI_UNDEFINED;\
-    req->status.MPI_TAG = MPI_UNDEFINED;\
-    req->status.MPI_ERROR = MPI_SUCCESS;\
-    req->errflag = MPIR_ERR_NONE;\
-}
-
-#define MPIDI_Request_init_rreq(rreq_)	\
-{								\
-    (rreq_)->kind = MPIR_REQUEST_KIND__RECV;	    \
-    (rreq_)->u.persist.real_request   = NULL;      \
-    MPIR_cc_set(&rreq_->cc, 1);             \
-    rreq_->cc_ptr = &rreq_->cc;             \
-    MPIU_Object_set_ref((rreq_), 2);        \
-    (rreq_)->u.ureq.greq_fns = NULL;               \
-    MPIR_STATUS_SET_COUNT(rreq_->status, 0);\
-    (rreq_)->status.MPI_ERROR = MPI_SUCCESS;\
-    (rreq_)->u.nbc.errflag = MPIR_ERR_NONE;\
-}
-
 extern int MPIR_Datatype_init_names(void);
 
 #endif /* NETMOD_UCX_IMPL_H_INCLUDED */

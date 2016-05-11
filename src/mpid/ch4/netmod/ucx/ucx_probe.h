@@ -89,7 +89,7 @@ static inline int MPIDI_NM_improbe(int source,
         goto fn_exit;
     }
     *flag = 1;
-     req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
+     req = (MPIR_Request *)MPIR_Request_create(MPIR_REQUEST_KIND__MPROBE);
      MPIU_Assert(req);
      MPIDI_UCX_REQ(req).message_handler = message_handler;
 
@@ -98,7 +98,6 @@ static inline int MPIDI_NM_improbe(int source,
      status->MPI_TAG = MPIDI_UCX_get_tag(info.sender_tag);
      count = info.length;
      MPIR_STATUS_SET_COUNT(*status, count);
-     req->kind = MPIR_REQUEST_KIND__MPROBE;
 fn_exit:
     *message = req;
     return mpi_errno;

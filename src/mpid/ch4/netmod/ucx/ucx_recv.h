@@ -36,8 +36,8 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
 
 
     if (ucp_request->req == NULL) {
-        req = MPIDI_UCX_Request_create();
-        MPIDI_Request_init_rreq(req);
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        MPIR_Request_add_ref(req);
         ucp_request->req = req;
         ucp_request_release(ucp_request);
       }
@@ -46,7 +46,6 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     }
-    (req)->kind = MPIR_REQUEST_KIND__RECV;
 fn_exit:
     *request = req;
     return mpi_errno;
@@ -78,8 +77,8 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
 
 
     if (ucp_request->req == NULL) {
-        req = MPIDI_UCX_Request_create();
-        MPIDI_Request_init_rreq(req);
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        MPIR_Request_add_ref(req);
         ucp_request->req = req;
         ucp_request_release(ucp_request);
       }
@@ -111,8 +110,8 @@ static inline int do_irecv(void *buf,
     MPIR_Datatype *dt_ptr;
 
     if (unlikely(rank == MPI_PROC_NULL)) {
-        req = MPIDI_UCX_Request_create();
-        req->kind = MPIR_REQUEST_KIND__RECV;
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        MPIR_Request_add_ref(req);
         req->status.MPI_ERROR = MPI_SUCCESS;
         req->status.MPI_SOURCE = rank;
         req->status.MPI_TAG = tag;
