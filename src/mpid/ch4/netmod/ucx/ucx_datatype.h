@@ -64,17 +64,18 @@ static inline size_t  MPIDI_UCX_Packed_size(void *state) {
 static inline size_t MPIDI_UCX_Pack(void *state, size_t offset, void *dest, size_t max_length){
 
     struct MPIDI_UCX_pack_state *pack_state = (struct MPIDI_UCX_pack_state *) state;
-    MPI_Aint last = max_length;
+    MPI_Aint last =MPL_MIN(pack_state->packsize, offset+max_length);
 
     MPID_Segment_pack(pack_state->segment_ptr, offset, &last, dest);
 
-    return (size_t) last;
+    return (size_t) last-offset;
 }
 static inline ucs_status_t MPIDI_UCX_Unpack(void *state, size_t offset, const void *src, size_t count){
 
     struct MPIDI_UCX_pack_state *pack_state = (struct MPIDI_UCX_pack_state *) state;
+    size_t last = MPL_MIN(pack_state->packsize, offset+count);
 
-    MPID_Segment_unpack(pack_state->segment_ptr, offset, &count, (void*)src);
+    MPID_Segment_unpack(pack_state->segment_ptr, offset, &last, (void*)src);
 
     return UCS_OK;
 }
