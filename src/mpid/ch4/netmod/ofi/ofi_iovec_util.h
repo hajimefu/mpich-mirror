@@ -247,7 +247,7 @@ int MPIDI_OFI_merge_iov_list(MPIDI_OFI_iovec_state_t *iov_state,
                                      size_t                          *target_iovs_nout)
 {
     int rc;
-    uintptr_t origin_addr = NULL,target_addr = NULL;
+    uintptr_t origin_addr = (uintptr_t)NULL,target_addr = (uintptr_t)NULL;
     uintptr_t origin_last_addr=0,target_last_addr=0;
     int       origin_idx=0, target_idx=0;
     size_t    len = 0,last_len=0;
@@ -315,7 +315,7 @@ int MPIDI_OFI_merge_iov_list2(MPIDI_OFI_iovec_state_t *iov_state,
                                       size_t                          *target_iovs_nout)
 {
     int rc;
-    uintptr_t origin_addr = NULL,result_addr = NULL,target_addr = NULL;
+    uintptr_t origin_addr = (uintptr_t)NULL,result_addr = (uintptr_t)NULL,target_addr = (uintptr_t)NULL;
     uintptr_t origin_last_addr=0,result_last_addr=0,target_last_addr=0;
     int       origin_idx=0, result_idx=0, target_idx=0;
     size_t    len = 0,last_len=0;
