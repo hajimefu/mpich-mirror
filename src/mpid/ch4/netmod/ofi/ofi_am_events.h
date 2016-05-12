@@ -184,7 +184,7 @@ static inline int MPIDI_OFI_handle_long_am_hdr(MPIDI_OFI_am_header_t *msg_hdr)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_AM_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_AM_HDR);
 
-    rreq = MPIDI_OFI_am_request_alloc_and_init(1);
+    rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
 
     mpi_errno = MPIDI_OFI_am_init_request(NULL, 0, rreq);
 
@@ -223,7 +223,7 @@ static inline int MPIDI_OFI_handle_long_hdr(MPIDI_OFI_am_header_t *msg_hdr)
     MPIDI_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
     MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
 
-    rreq = MPIDI_OFI_am_request_alloc_and_init(1);
+    rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
 
     mpi_errno = MPIDI_OFI_am_init_request(NULL, 0, rreq);
 

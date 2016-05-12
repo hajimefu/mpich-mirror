@@ -182,7 +182,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_allocate_win_request_put_get(int                
 
     o_size=sizeof(struct iovec);
     t_size=sizeof(struct fi_rma_iov);
-    req = MPIDI_OFI_win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size));
+    req = MPIDI_OFI_win_request_alloc_and_init(MPIDI_Global.iov_limit*(o_size+t_size));
     *winreq = req;
 
     req->noncontig->buf.iov.put_get.originv = (struct iovec *)&req->noncontig->buf.iov_store[0];
@@ -222,7 +222,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_allocate_win_request_accumulate(int             
 
     o_size=sizeof(struct fi_ioc);
     t_size=sizeof(struct fi_rma_ioc);
-    req = MPIDI_OFI_win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size));
+    req = MPIDI_OFI_win_request_alloc_and_init(MPIDI_Global.iov_limit*(o_size+t_size));
     *winreq = req;
 
     req->noncontig->buf.iov.accumulate.originv = (struct fi_ioc *)&req->noncontig->buf.iov_store[0];
@@ -266,7 +266,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_allocate_win_request_get_accumulate(int         
     o_size=sizeof(struct fi_ioc);
     t_size=sizeof(struct fi_rma_ioc);
     r_size=sizeof(struct fi_ioc);
-    req = MPIDI_OFI_win_request_alloc_and_init(1,MPIDI_Global.iov_limit*(o_size+t_size+r_size));
+    req = MPIDI_OFI_win_request_alloc_and_init(MPIDI_Global.iov_limit*(o_size+t_size+r_size));
     *winreq = req;
 
     req->noncontig->buf.iov.get_accumulate.originv = (struct fi_ioc *)&req->noncontig->buf.iov_store[0];
@@ -643,15 +643,15 @@ static inline int MPIDI_NM_rput(const void   *origin_addr,
 
     if(unlikely((origin_bytes == 0) ||(target_rank == MPI_PROC_NULL))) {
         mpi_errno  = MPI_SUCCESS;
-        rreq       = MPIDI_OFI_request_alloc_and_init(2);
-        rreq->kind = MPIR_REQUEST_KIND__RMA;
+        rreq       = MPIR_Request_create(MPIR_REQUEST_KIND__RMA);
+        MPIR_Request_add_ref(rreq);
         MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
     if(target_rank == win->comm_ptr->rank) {
-        rreq       = MPIDI_OFI_request_alloc_and_init(2);
-        rreq->kind = MPIR_REQUEST_KIND__RMA;
+        rreq       = MPIR_Request_create(MPIR_REQUEST_KIND__RMA);
+        MPIR_Request_add_ref(rreq);
         offset     = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
         mpi_errno = MPIR_Localcopy(origin_addr,
                                    origin_count,
@@ -1225,15 +1225,15 @@ static inline int MPIDI_NM_rget(void *origin_addr,
 
     if(unlikely((origin_bytes == 0) || (target_rank == MPI_PROC_NULL))) {
         mpi_errno  = MPI_SUCCESS;
-        rreq       = MPIDI_OFI_request_alloc_and_init(2);
-        rreq->kind = MPIR_REQUEST_KIND__RMA;
+        rreq       = MPIR_Request_create(MPIR_REQUEST_KIND__RMA);
+        MPIR_Request_add_ref(rreq);
         MPIDI_CH4U_request_complete(rreq);
         goto fn_exit;
     }
 
     if(target_rank == win->comm_ptr->rank) {
-        rreq       = MPIDI_OFI_request_alloc_and_init(2);
-        rreq->kind = MPIR_REQUEST_KIND__RMA;
+        rreq       = MPIR_Request_create(MPIR_REQUEST_KIND__RMA);
+        MPIR_Request_add_ref(rreq);
         offset = win->disp_unit * target_disp;
         mpi_errno  = MPIR_Localcopy((char *)win->base + offset,
                                     target_count,

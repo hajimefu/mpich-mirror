@@ -50,27 +50,6 @@ static inline int MPIDI_OFI_progress_do_queue(void *netmod_context);
         } while (_ret == -FI_EAGAIN);                                   \
     } while (0)
 
-static inline MPIR_Request *MPIDI_OFI_am_request_alloc_and_init(int count)
-{
-    MPIR_Request *req;
-    req = (MPIR_Request *) MPIU_Handle_obj_alloc(&MPIR_Request_mem);
-    MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIR_cc_set(&req->cc, 1);
-    req->cc_ptr = &req->cc;
-    MPIU_Object_set_ref(req, count);
-    req->u.ureq.greq_fns = NULL;
-    MPIR_STATUS_SET_COUNT(req->status, 0);
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->status.MPI_SOURCE = MPI_UNDEFINED;
-    req->status.MPI_TAG = MPI_UNDEFINED;
-    req->status.MPI_ERROR = MPI_SUCCESS;
-    req->comm = NULL;
-    MPIDI_OFI_AMREQUEST(req, req_hdr) = NULL;
-    MPIR_REQUEST_CLEAR_DBG(req);
-    return req;
-}
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_am_clear_request
 #undef FCNAME
@@ -526,7 +505,7 @@ static inline int MPIDI_OFI_do_inject(int           rank,
         MPIR_Request *sreq;
         char *ibuf;
 
-        sreq = MPIDI_OFI_request_alloc_and_init(1);
+        sreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
         MPIU_Assert(sreq);
         ibuf = (char *) MPL_malloc(am_hdr_sz + sizeof(msg_hdr));
         MPIU_Assert(ibuf);
