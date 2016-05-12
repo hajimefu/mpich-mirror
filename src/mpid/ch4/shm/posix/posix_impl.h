@@ -108,15 +108,15 @@ typedef struct {
 
 #define MPIDI_POSIX_REQUEST_CREATE_SREQ(sreq_)	\
 {								\
-    MPIDI_POSIX_REQUEST_ALLOC_AND_INIT(sreq_,2);      \
-    (sreq_)->kind = MPIR_REQUEST_KIND__SEND;				\
+    (sreq_) = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);             \
+    MPIR_Request_add_ref((sreq_));                                      \
     (sreq_)->u.persist.real_request   = NULL;                          \
 }
 
 #define MPIDI_POSIX_REQUEST_CREATE_RREQ(rreq_)	\
 {								\
-    MPIDI_POSIX_REQUEST_ALLOC_AND_INIT(rreq_,2);      \
-    (rreq_)->kind = MPIR_REQUEST_KIND__RECV;				\
+    (rreq_) = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);             \
+    MPIR_Request_add_ref((rreq_));                                      \
     (rreq_)->u.persist.real_request   = NULL;                          \
 }
 
@@ -145,26 +145,6 @@ typedef struct {
 /*
  * Helper routines and macros for request completion
  */
-#define MPIDI_POSIX_REQUEST_ALLOC_AND_INIT(req,count)     \
-  do {                                                              \
-    (req) = (MPIR_Request*)MPIU_Handle_obj_alloc(&MPIR_Request_mem);      \
-    if (req == NULL)                                                       \
-        MPID_Abort(NULL, MPI_ERR_NO_SPACE, -1, "Cannot allocate Request"); \
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)        \
-                == MPIR_REQUEST);                       \
-    MPIR_cc_set(&req->cc, 1);                           \
-    req->cc_ptr = &req->cc;                             \
-    MPIU_Object_set_ref(req, count);                    \
-    req->u.ureq.greq_fns          = NULL;                      \
-    MPIR_STATUS_SET_COUNT(req->status, 0);              \
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);     \
-    req->status.MPI_SOURCE    = MPI_UNDEFINED;          \
-    req->status.MPI_TAG       = MPI_UNDEFINED;          \
-    req->status.MPI_ERROR     = MPI_SUCCESS;            \
-    req->comm                 = NULL;                   \
-    MPIR_REQUEST_CLEAR_DBG(req);                        \
-  } while (0)
-
 #define DECL_FUNC(FUNCNAME)  MPL_QUOTE(FUNCNAME)
 
 #undef FUNCNAME
