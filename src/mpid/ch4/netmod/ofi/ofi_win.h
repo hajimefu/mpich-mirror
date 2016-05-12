@@ -683,7 +683,8 @@ static inline int MPIDI_NM_win_allocate_shared(MPI_Aint    size,
 
     mpi_errno = MPIDI_OFI_win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
                                            MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
-
+    if (mpi_errno != MPI_SUCCESS)
+        MPIR_ERR_POP(mpi_errno);
     win                   = *win_ptr;
     MPIDI_CH4U_WIN(win, shared_table) = (MPIDI_CH4U_win_shared_info_t*)MPL_malloc(
         sizeof(MPIDI_CH4U_win_shared_info_t)*comm_ptr->local_size);
