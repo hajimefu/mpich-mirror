@@ -50,7 +50,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                                  int	        do_av_table,
                                                  int         do_scalable_ep,
                                                  int         do_am,
-                                                 int         do_tagged)
+                                                 int         do_tagged,
+                                                 int         do_data)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen;
@@ -140,7 +141,9 @@ static inline int MPIDI_OFI_init_generic(int         rank,
         hints->caps |= FI_MULTI_RECV;            /* Shared receive buffer   */
     }
 
-    hints->caps |= FI_DIRECTED_RECV;         /* Match source address    */
+    if (do_data) {
+        hints->caps |= FI_DIRECTED_RECV;         /* Match source address    */
+    }
 
     /* ------------------------------------------------------------------------ */
     /* FI_VERSION provides binary backward and forward compatibility support    */
@@ -399,7 +402,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
             MPIDI_Global.am_msg[i].iov_count = 1;
             MPIDI_OFI_CALL_RETRY(fi_recvmsg(MPIDI_OFI_EP_RX_MSG(0),
                                                     &MPIDI_Global.am_msg[i],
-                                                    FI_MULTI_RECV | FI_COMPLETION), prepost);
+                                                    FI_MULTI_RECV | FI_COMPLETION), prepost, MPIDI_OFI_CALL_LOCK);
         }
 
         /* Grow the header handlers down */
@@ -482,7 +485,8 @@ static inline int MPIDI_NM_init(int         rank,
                                                MPIDI_OFI_ENABLE_AV_TABLE,
                                                MPIDI_OFI_ENABLE_SCALABLE_ENDPOINTS,
                                                MPIDI_OFI_ENABLE_AM,
-                                               MPIDI_OFI_ENABLE_TAGGED);
+                                               MPIDI_OFI_ENABLE_TAGGED,
+                                               MPIDI_OFI_ENABLE_DATA);
     return mpi_errno;
 }
 

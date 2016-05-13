@@ -815,4 +815,3 @@ void MPIDI_OFI_index_datatypes()
     add_index(MPI_LONG_DOUBLE_INT,&index);
     create_dt_map();
 }
-

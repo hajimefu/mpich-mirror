@@ -61,7 +61,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
         goto fn_exit;
     }
 
-    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, context_id, tag);
+    match_bits = MPIDI_OFI_init_recvtag(&mask_bits, context_id, rank, tag, MPIDI_OFI_ENABLE_DATA);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     MPIDI_OFI_REQUEST(rreq, datatype) = datatype;
@@ -95,7 +95,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
                                               NULL,
                                               (MPI_ANY_SOURCE == rank) ? FI_ADDR_UNSPEC : MPIDI_OFI_comm_to_phys(comm, rank,
                                                       MPIDI_OFI_API_TAG),
-                                              match_bits, mask_bits, (void *) &(MPIDI_OFI_REQUEST(rreq, context))), trecv);
+                                              match_bits, mask_bits, (void *) &(MPIDI_OFI_REQUEST(rreq, context))), trecv, MPIDI_OFI_CALL_LOCK);
     else {
         MPIDI_OFI_REQUEST(rreq,util.iov).iov_base = recv_buf;
         MPIDI_OFI_REQUEST(rreq,util.iov).iov_len  = data_sz;
@@ -109,7 +109,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
         msg.data      = 0;
         msg.addr      = FI_ADDR_UNSPEC;
 
-        MPIDI_OFI_CALL_RETRY(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0), &msg, flags), trecv);
+        MPIDI_OFI_CALL_RETRY(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0), &msg, flags), trecv, MPIDI_OFI_CALL_LOCK);
     }
 
 fn_exit:

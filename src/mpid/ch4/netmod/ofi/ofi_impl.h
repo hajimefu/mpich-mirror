@@ -134,13 +134,17 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               fi_strerror(-_ret));          \
     } while (0)
 
-#define MPIDI_OFI_CALL_RETRY(FUNC,STR)                               \
+#define MPIDI_OFI_CALL_LOCK 1
+#define MPIDI_OFI_CALL_NO_LOCK 0
+#define MPIDI_OFI_CALL_RETRY(FUNC,STR,LOCK)                               \
     do {                                                    \
     ssize_t _ret;                                           \
     do {                                                    \
-        MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);   \
+        if (LOCK == MPIDI_OFI_CALL_LOCK)                    \
+            MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);   \
         _ret = FUNC;                                        \
-        MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);    \
+        if (LOCK == MPIDI_OFI_CALL_LOCK)                    \
+            MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);    \
         if(likely(_ret==0)) break;                          \
         MPIDI_OFI_ERR(_ret!=-FI_EAGAIN,             \
                               mpi_errno,                    \
@@ -151,7 +155,11 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                               __LINE__,                     \
                               FCNAME,                       \
                               fi_strerror(-_ret));          \
+        if (LOCK == MPIDI_OFI_CALL_NO_LOCK)                 \
+            MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);     \
         MPIDI_OFI_PROGRESS();                                \
+        if (LOCK == MPIDI_OFI_CALL_NO_LOCK)                 \
+            MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);    \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
@@ -178,28 +186,6 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
 
-
-#define MPIDI_OFI_CALL_RETRY_NOLOCK(FUNC,STR)                          \
-  do                                                          \
-    {                                                         \
-     ssize_t _ret;                                            \
-     do {                                                     \
-         _ret = FUNC;                                         \
-         if (likely(_ret==0)) break;                          \
-         MPIDI_OFI_ERR(_ret!=-FI_EAGAIN,              \
-                               mpi_errno,                     \
-                               MPI_ERR_OTHER,                 \
-                               "**ofid_"#STR,                 \
-                               "**ofid_"#STR" %s %d %s %s",   \
-                               __SHORT_FILE__,                \
-                               __LINE__,                      \
-                               FCNAME,                        \
-                               fi_strerror(-_ret));           \
-         MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);     \
-         MPIDI_OFI_PROGRESS();                                 \
-         MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);    \
-     } while (_ret == -FI_EAGAIN);                            \
-    } while (0)
 
 #define MPIDI_OFI_PMI_CALL_POP(FUNC,STR)                    \
   do                                                          \
@@ -345,11 +331,19 @@ static inline bool MPIDI_OFI_is_tag_sync(uint64_t match_bits)
 }
 
 static inline uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
+                                                      int               source,
                                                       int               tag,
-                                                      uint64_t          type)
+                                                      uint64_t          type,
+                                                      int               do_data)
 {
     uint64_t match_bits;
     match_bits = contextid;
+
+    if (!do_data) {
+        match_bits = (match_bits << MPIDI_OFI_SOURCE_SHIFT);
+        match_bits |= source;
+    }
+
     match_bits = (match_bits << MPIDI_OFI_TAG_SHIFT);
     match_bits |= (MPIDI_OFI_TAG_MASK & tag) | type;
     return match_bits;
@@ -358,12 +352,27 @@ static inline uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
 /* receive posting */
 static inline uint64_t MPIDI_OFI_init_recvtag(uint64_t          *mask_bits,
                                                       MPIR_Context_id_t  contextid,
-                                                      int                tag)
+                                                      int                source,
+                                                      int                tag,
+                                                      int                do_data)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_OFI_PROTOCOL_MASK;
     match_bits = contextid;
-    match_bits = (match_bits << MPIDI_OFI_TAG_SHIFT);
+
+    if (!do_data) {
+        match_bits = (match_bits << MPIDI_OFI_SOURCE_SHIFT);
+
+        if(MPI_ANY_SOURCE == source) {
+            match_bits = (match_bits << MPIDI_OFI_TAG_SHIFT);
+            *mask_bits |= MPIDI_OFI_SOURCE_MASK;
+        } else {
+            match_bits |= source;
+            match_bits = (match_bits << MPIDI_OFI_TAG_SHIFT);
+        }
+    } else {
+        match_bits = (match_bits << MPIDI_OFI_TAG_SHIFT);
+    }
 
     if(MPI_ANY_TAG == tag)
         *mask_bits |= MPIDI_OFI_TAG_MASK;
@@ -378,10 +387,39 @@ static inline int MPIDI_OFI_init_get_tag(uint64_t match_bits)
     return ((int)(match_bits & MPIDI_OFI_TAG_MASK));
 }
 
+static inline int MPIDI_OFI_init_get_source(uint64_t match_bits)
+{
+    return ((int)((match_bits & MPIDI_OFI_SOURCE_MASK) >> MPIDI_OFI_TAG_SHIFT));
+}
+
 static inline MPIR_Request *MPIDI_OFI_context_to_request(void *context)
 {
     char *base = (char *) context;
     return (MPIR_Request *) container_of(base, MPIR_Request, dev.ch4.netmod);
+}
+
+#define MPIDI_OFI_DO_INJECT 1
+#define MPIDI_OFI_DO_SEND   0
+
+static inline int MPIDI_OFI_send_handler(struct fid_ep *ep, const void *buf, size_t len,
+                                        void *desc, uint64_t dest, fi_addr_t dest_addr,
+                                        uint64_t tag, void *context, int is_inject,
+                                        int do_data, int do_lock)
+{
+    int mpi_errno = MPI_SUCCESS;
+
+    if (is_inject) {
+        if (do_data) MPIDI_OFI_CALL_RETRY(fi_tinjectdata(ep, buf, len, dest, dest_addr, tag), tinjectdata, do_lock);
+        else MPIDI_OFI_CALL_RETRY(fi_tinject(ep, buf, len, dest_addr, tag), tinject, do_lock);
+    } else {
+        if (do_data) MPIDI_OFI_CALL_RETRY(fi_tsenddata(ep, buf, len, desc, dest, dest_addr, tag, context), tsenddata, do_lock);
+        else MPIDI_OFI_CALL_RETRY(fi_tsend(ep, buf, len, desc, dest_addr, tag, context), tsend, do_lock);
+    }
+
+fn_exit:
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
 
 /* Utility functions */

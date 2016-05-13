@@ -16,6 +16,8 @@
 #include "ofi_am_events.h"
 #include "ofi_control.h"
 
+static inline int MPIDI_OFI_cqe_get_source(struct fi_cq_tagged_entry *wc, int do_data);
+
 static inline int MPIDI_OFI_get_huge_event(struct fi_cq_tagged_entry *wc, MPIR_Request *req);
 
 #undef FUNCNAME
@@ -28,7 +30,7 @@ static inline int MPIDI_OFI_peek_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PEEK_EVENT);
     MPIDI_OFI_REQUEST(rreq, util_id)  = MPIDI_OFI_PEEK_FOUND;
-    rreq->status.MPI_SOURCE = wc->data;
+    rreq->status.MPI_SOURCE = MPIDI_OFI_cqe_get_source(wc, MPIDI_OFI_ENABLE_DATA);
     rreq->status.MPI_TAG    = MPIDI_OFI_init_get_tag(wc->tag);
     count                   = wc->len;
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
@@ -80,7 +82,7 @@ static inline int MPIDI_OFI_recv_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_RECV_EVENT);
 
     rreq->status.MPI_ERROR  = MPI_SUCCESS;
-    rreq->status.MPI_SOURCE = wc->data;
+    rreq->status.MPI_SOURCE = MPIDI_OFI_cqe_get_source(wc, MPIDI_OFI_ENABLE_DATA);
     rreq->status.MPI_TAG    = MPIDI_OFI_init_get_tag(wc->tag);
     count                   = wc->len;
     MPIR_STATUS_SET_COUNT(rreq->status, count);
@@ -124,15 +126,16 @@ static inline int MPIDI_OFI_recv_event(struct fi_cq_tagged_entry *wc, MPIR_Reque
     /* If syncronous, ack and complete when the ack is done */
     if(unlikely(MPIDI_OFI_is_tag_sync(wc->tag))) {
         uint64_t ss_bits = MPIDI_OFI_init_sendtag(MPIDI_OFI_REQUEST(rreq, util_id),
+                                                          MPIDI_OFI_REQUEST(rreq, util_comm->rank),
                                                           rreq->status.MPI_TAG,
-                                                          MPIDI_OFI_SYNC_SEND_ACK);
+                                                          MPIDI_OFI_SYNC_SEND_ACK, MPIDI_OFI_ENABLE_DATA);
         MPIR_Comm *c = MPIDI_OFI_REQUEST(rreq, util_comm);
         int r = rreq->status.MPI_SOURCE;
-        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_tinjectdata(MPIDI_OFI_EP_TX_TAG(0), NULL, 0,
-                                                   MPIDI_OFI_REQUEST(rreq, util_comm->rank),
-                                                   MPIDI_OFI_comm_to_phys(c, r, MPIDI_OFI_API_TAG),
-                                                   ss_bits), tsendsync);
-
+        mpi_errno = MPIDI_OFI_send_handler(MPIDI_OFI_EP_TX_TAG(0), NULL, 0, NULL,
+                               MPIDI_OFI_REQUEST(rreq, util_comm->rank),
+                               MPIDI_OFI_comm_to_phys(c, r, MPIDI_OFI_API_TAG),
+                               ss_bits, NULL, MPIDI_OFI_DO_INJECT, MPIDI_OFI_ENABLE_DATA, MPIDI_OFI_CALL_NO_LOCK);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
     MPIDI_CH4U_request_complete(rreq);
@@ -160,10 +163,10 @@ static inline int MPIDI_OFI_recv_huge_event(struct fi_cq_tagged_entry *wc, MPIR_
     /* Look up the receive sequence number and chunk queue */
     comm_ptr = MPIDI_OFI_REQUEST(rreq, util_comm);
     recv = (MPIDI_OFI_huge_recv_t *) MPIDI_OFI_map_lookup(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters,
-                                                          wc->data);
+                                                          MPIDI_OFI_cqe_get_source(wc, MPIDI_OFI_ENABLE_DATA));
     if(recv == MPIDI_OFI_MAP_NOT_FOUND) {
         recv = (MPIDI_OFI_huge_recv_t *) MPL_calloc(sizeof(*recv), 1);
-        MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters, wc->data, recv);
+        MPIDI_OFI_map_set(MPIDI_OFI_COMM(comm_ptr).huge_recv_counters, MPIDI_OFI_cqe_get_source(wc, MPIDI_OFI_ENABLE_DATA), recv);
     }
 
     recv->event_id = MPIDI_OFI_EVENT_GET_HUGE;
@@ -299,14 +302,15 @@ static inline int MPIDI_OFI_get_huge_event(struct fi_cq_tagged_entry *wc,
 
         remote_key = recv->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
         MPIDI_OFI_CONDITIONAL_CNTR_INCR();
-        MPIDI_OFI_CALL_RETRY_NOLOCK(fi_read(MPIDI_OFI_EP_TX_RMA(0),                                           /* endpoint     */
+        MPIDI_OFI_CALL_RETRY(fi_read(MPIDI_OFI_EP_TX_RMA(0),                                           /* endpoint     */
                                                     (void *)((uintptr_t)recv->wc.buf + recv->cur_offset),       /* local buffer */
                                                     bytesToGet,                                             /* bytes        */
                                                     NULL,                                                   /* descriptor   */
                                                     MPIDI_OFI_comm_to_phys(recv->comm_ptr,recv->remote_info.origin_rank,MPIDI_OFI_API_MSG), /* Destination  */
                                                     recv->cur_offset,                                         /* remote maddr */
                                                     remote_key,                                             /* Key          */
-                                                    (void *)&recv->context),rdma_readfrom);                   /* Context      */
+                                                    (void *)&recv->context),rdma_readfrom,             /* Context */
+                             MPIDI_OFI_CALL_NO_LOCK);
         recv->cur_offset+=bytesToGet;
     }
 
@@ -388,7 +392,7 @@ static inline int MPIDI_OFI_accept_probe_event(struct fi_cq_tagged_entry *wc,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_ACCEPT_PROBE_EVENT);
     MPIDI_OFI_dynamic_process_request_t *ctrl = (MPIDI_OFI_dynamic_process_request_t *)rreq;
-    ctrl->source = wc->data;
+    ctrl->source = MPIDI_OFI_cqe_get_source(wc, MPIDI_OFI_ENABLE_DATA);
     ctrl->tag    = MPIDI_OFI_init_get_tag(wc->tag);
     ctrl->msglen = wc->len;
     ctrl->done   = MPIDI_OFI_PEEK_FOUND;
@@ -820,5 +824,9 @@ fn_fail:
     goto fn_exit;
 }
 
+static inline int MPIDI_OFI_cqe_get_source(struct fi_cq_tagged_entry *wc, int do_data) {
+    if (do_data) return wc->data;
+    else return MPIDI_OFI_init_get_source(wc->tag);
+}
 
 #endif /* NETMOD_OFI_EVENTS_H_INCLUDED */

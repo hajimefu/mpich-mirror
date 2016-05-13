@@ -258,7 +258,9 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
     req[1].done            = MPIDI_OFI_PEEK_START;
     req[1].event_id        = MPIDI_OFI_EVENT_ACCEPT_PROBE;
     match_bits             = MPIDI_OFI_init_recvtag(&mask_bits,port_id,
-                                                            MPI_ANY_TAG);
+                                                            MPI_ANY_SOURCE,
+                                                            MPI_ANY_TAG,
+                                                            MPIDI_OFI_ENABLE_DATA);
     match_bits            |= MPIDI_OFI_DYNPROC_SEND;
 
     if(phase == 0) {
@@ -277,7 +279,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
 
         while(req[0].done != MPIDI_OFI_PEEK_FOUND) {
             req[0].done = MPIDI_OFI_PEEK_START;
-            MPIDI_OFI_CALL(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0),&msg,FI_PEEK|FI_COMPLETION),trecv);
+            MPIDI_OFI_CALL(fi_trecvmsg(MPIDI_OFI_EP_RX_TAG(0),&msg,FI_PEEK|FI_COMPLETION|MPIDI_OFI_ENABLE_DATA),trecv);
             MPIDI_OFI_PROGRESS_WHILE(req[0].done == MPIDI_OFI_PEEK_START);
         }
 
@@ -300,7 +302,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
                                               FI_ADDR_UNSPEC,
                                               match_bits,
                                               mask_bits,
-                                              &req[0].context),trecv);
+                                              &req[0].context),trecv, MPIDI_OFI_CALL_LOCK);
         MPIDI_OFI_CALL_RETRY(fi_trecv(MPIDI_OFI_EP_RX_TAG(0),
                                               *out_node_table,
                                               entries*sizeof(MPID_Node_id_t),
@@ -308,7 +310,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
                                               FI_ADDR_UNSPEC,
                                               match_bits,
                                               mask_bits,
-                                              &req[1].context),trecv);
+                                              &req[1].context),trecv, MPIDI_OFI_CALL_LOCK);
 
         MPIDI_OFI_PROGRESS_WHILE(!req[0].done || !req[1].done);
         memcpy(conname, *out_addr_table+req[0].source*MPIDI_Global.addrnamelen, MPIDI_Global.addrnamelen);
@@ -326,7 +328,10 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         MPID_Node_id_t  nodetblsz = sizeof(*my_node_table)*comm_ptr->local_size;
         my_node_table             = (MPID_Node_id_t *)MPL_malloc(nodetblsz);
 
-        match_bits                = MPIDI_OFI_init_sendtag(port_id, tag, MPIDI_OFI_DYNPROC_SEND);
+        match_bits                = MPIDI_OFI_init_sendtag(port_id,
+                                                                   comm_ptr->rank,
+                                                                   tag,MPIDI_OFI_DYNPROC_SEND,
+                                                                   MPIDI_OFI_ENABLE_DATA);
 
         for(i=0; i<comm_ptr->local_size; i++) {
             size_t sz = MPIDI_Global.addrnamelen;
@@ -346,22 +351,26 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
         req[0].event_id = MPIDI_OFI_EVENT_DYNPROC_DONE;
         req[1].done     = 0;
         req[1].event_id = MPIDI_OFI_EVENT_DYNPROC_DONE;
-        MPIDI_OFI_CALL_RETRY(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0),
-                                              my_addr_table,
-                                              tblsz,
-                                              NULL,
-                                              comm_ptr->rank,
-                                              *conn,
-                                              match_bits,
-                                              (void *) &req[0].context),tsenddata);
-        MPIDI_OFI_CALL_RETRY(fi_tsenddata(MPIDI_OFI_EP_TX_TAG(0),
-                                              my_node_table,
-                                              nodetblsz,
-                                              NULL,
-                                              comm_ptr->rank,
-                                              *conn,
-                                              match_bits,
-                                              (void *) &req[1].context),tsenddata);
+        mpi_errno = MPIDI_OFI_send_handler(MPIDI_OFI_EP_TX_TAG(0),
+                               my_addr_table,
+                               tblsz,
+                               NULL,
+                               comm_ptr->rank,
+                               *conn,
+                               match_bits,
+                               (void *) &req[0].context,
+                               MPIDI_OFI_DO_SEND, MPIDI_OFI_ENABLE_DATA, MPIDI_OFI_CALL_LOCK);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        MPIDI_OFI_send_handler(MPIDI_OFI_EP_TX_TAG(0),
+                               my_node_table,
+                               nodetblsz,
+                               NULL,
+                               comm_ptr->rank,
+                               *conn,
+                               match_bits,
+                               (void *) &req[1].context,
+                               MPIDI_OFI_DO_SEND, MPIDI_OFI_ENABLE_DATA, MPIDI_OFI_CALL_LOCK);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
         MPIDI_OFI_PROGRESS_WHILE(!req[0].done || !req[1].done);
 

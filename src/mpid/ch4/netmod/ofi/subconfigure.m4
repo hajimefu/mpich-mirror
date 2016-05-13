@@ -31,6 +31,7 @@ dnl Parse the device arguments
     do_direct_provider=false
     do_av_table=false
     do_tagged=true
+    do_data=true
     echo "Parsing Arguments for OFI Netmod"
     for arg in $args_array; do
     case ${arg} in
@@ -50,6 +51,9 @@ dnl Parse the device arguments
               do_tagged=false
               echo " ---> CH4::OFI Disable fi_tagged interfaces : $arg"
               ;;
+      no-data)
+              do_data=false
+              echo " ---> CH4::OFI Disable immediate data field : $arg"
     esac
     done
     IFS=$SAVE_IFS
@@ -72,6 +76,11 @@ dnl Parse the device arguments
     if [test "$do_tagged" = "true"]; then
        AC_DEFINE([USE_OFI_TAGGED], [1], [Define to use fi_tagged interfaces])
        AC_MSG_NOTICE([Enabling fi_tagged interfaces])
+    fi
+
+    if [test "$do_data" = "true"]; then
+       AC_DEFINE([USE_OFI_IMMEDIATE_DATA], [1], [Define to use immediate data field])
+       AC_MSG_NOTICE([Enabling immediate data field])
     fi
 ])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI],[test "X$build_ch4_netmod_ofi" = "Xyes"])
