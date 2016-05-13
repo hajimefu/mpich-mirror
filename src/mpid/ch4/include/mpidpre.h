@@ -206,6 +206,10 @@ typedef struct {
 #define MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)  NULL
 #endif
 
+__ALWAYS_INLINE__ void MPID_Request_init(struct MPIR_Request *req);
+
+__ALWAYS_INLINE__ void MPID_Request_finalize(struct MPIR_Request *req);
+
 typedef struct MPIDI_CH4U_win_shared_info{
     uint32_t disp_unit;
     size_t  size;

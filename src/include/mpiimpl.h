@@ -1658,25 +1658,6 @@ extern MPIU_Object_alloc_t MPIR_Request_mem;
 extern MPIR_Request MPIR_Request_direct[];
 
 /*@
-  MPID_Request_init - Initialize device parts of request
-
-  Return value:
-  None
-  @*/
-void MPID_Request_init(MPIR_Request *);
-
-/*@
-  MPID_Request_finalize - Deallocate device parts of request
-
-  Input Parameter:
-. request - request to release
-
-  Module:
-  Request
-@*/
-void MPID_Request_finalize(MPIR_Request *);
-
-/*@
   MPID_Request_complete - Complete a request
 
   Input Parameter:

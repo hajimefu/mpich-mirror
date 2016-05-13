@@ -14,4 +14,17 @@
 #include "mpidu_datatype.h"
 #include "mpidch4.h"
 
+__ALWAYS_INLINE__ void MPID_Request_init(MPIR_Request *req)
+{
+    MPIDI_CH4U_REQUEST(req, req) = NULL;
+#ifdef MPIDI_BUILD_CH4_SHM
+    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
+#endif
+}
+
+__ALWAYS_INLINE__ void MPID_Request_finalize(MPIR_Request *req)
+{
+    return;
+}
+
 #endif /* MPIDPOST_H_INCLUDED */

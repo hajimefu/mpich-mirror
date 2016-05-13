@@ -55,19 +55,6 @@ static void init_comm()
 
 MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 
-void MPID_Request_init(MPIR_Request *req)
-{
-    MPIDI_CH4U_REQUEST(req, req) = NULL;
-#ifdef MPIDI_BUILD_CH4_SHM
-    MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req) = NULL;
-#endif
-}
-
-void MPID_Request_finalize(MPIR_Request *req)
-{
-    return;
-}
-
 #if defined(MPL_USE_DBG_LOGGING)
 MPL_dbg_class MPIDI_CH4_DBG_GENERAL;
 MPL_dbg_class MPIDI_CH4_DBG_MAP;
