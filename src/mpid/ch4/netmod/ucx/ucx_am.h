@@ -347,6 +347,7 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
         sreq->dev.ch4.ch4u.netmod_am.ucx.handler_id = handler_id;
         ucp_request->req = sreq;
         ucp_request_release(ucp_request);
+        
     }
 
  fn_exit:
@@ -413,6 +414,7 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
         MPL_free(send_buf);
     } else if (ucp_request->req) {
         MPL_free(send_buf);
+        ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     } else {
         ucp_request->req = send_buf;
@@ -463,6 +465,7 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
         MPL_free(send_buf);
     } else if (ucp_request->req) {
         MPL_free(send_buf);
+        ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     } else {
         ucp_request->req = send_buf;
