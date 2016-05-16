@@ -121,13 +121,18 @@ static inline int MPIDI_NM_init(int rank,
 static inline int MPIDI_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS, thr_err, pmi_errno;
-    int i, max_n_avts;
+    int i,j, max_n_avts;
+    MPIR_Errflag_t errflag;
+    MPIR_Comm *comm;
     max_n_avts = MPIDIU_get_max_n_avts();
 
-    MPIR_Comm_release(MPIR_Process.comm_world);
-    MPIR_Comm_release(MPIR_Process.comm_self);
+    for(i=0; i<max_n_avts; i++) {
+        for( j= 0;  j < MPIDIU_get_av_table(i)->size;j++)
+            ucp_ep_destroy(MPIDI_UCX_AV(&MPIDIU_get_av(i, j)).dest);
+    }
+    pmi_errno =  PMI_Barrier();
+    MPIDI_UCX_PMI_ERROR(pmi_errno, pmi_barrier);
 
-    MPIDI_CH4U_finalize();
 
     if (MPIDI_UCX_global.worker != NULL)
         ucp_worker_destroy(MPIDI_UCX_global.worker);
@@ -135,8 +140,15 @@ static inline int MPIDI_NM_finalize(void)
     if (MPIDI_UCX_global.context != NULL)
         ucp_cleanup(MPIDI_UCX_global.context);
 
+    comm = MPIR_Process.comm_world;
+    MPIR_Comm_release_always(comm);
+
+    comm = MPIR_Process.comm_self;
+    MPIR_Comm_release_always(comm);
+
     MPL_free(MPIDI_UCX_global.pmi_addr_table);
 
+    MPIDI_CH4U_finalize();
     PMI_Finalize();
 
   fn_exit:
