@@ -29,9 +29,12 @@ static inline int MPIDI_UCX_Win_allgather(MPIR_Win *win, size_t length,
     int *rkey_sizes, *recv_disps, i;
     char *rkey_buffer, *rkey_recv_buff = NULL;
     struct _UCX_share *share_data;
-    size_t size = MPL_MAX(length, 4096);
+    size_t size;
     void *base;
-
+    if (length == 0)
+        size = 1024;
+    else
+        size = length;
     MPIR_Comm *comm_ptr     = win->comm_ptr;
 
     ucp_context_h ucp_context = MPIDI_UCX_global.context;
