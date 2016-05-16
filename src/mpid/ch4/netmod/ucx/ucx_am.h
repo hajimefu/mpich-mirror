@@ -238,8 +238,31 @@ static inline int MPIDI_NM_send_amv_hdr(int rank,
                                         size_t iov_len,
                                         MPIR_Request * sreq, void *netmod_context)
 {
-    MPIR_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    size_t am_hdr_sz = 0, i;
+    char *am_hdr_buf;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_AMV_HDR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_SEND_AMV_HDR);
+
+    for(i = 0; i < iov_len; i++) {
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
+    MPIU_Assert(am_hdr_buf);
+    am_hdr_sz = 0;
+
+    for(i = 0; i < iov_len; i++) {
+        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    mpi_errno = MPIDI_NM_send_am_hdr(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+                                         sreq, netmod_context);
+    MPL_free(am_hdr_buf);
+     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_SEND_AMV_HDR);
+    return mpi_errno;
 }
 
 #undef FUNCNAME
@@ -256,9 +279,34 @@ static inline int MPIDI_NM_send_amv(int rank,
                                         MPI_Datatype datatype,
                                         MPIR_Request * sreq, void *netmod_context)
 {
-    MPIR_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    size_t am_hdr_sz = 0, i;
+    char *am_hdr_buf;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_AMV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_SEND_AMV);
+
+    for(i = 0; i < iov_len; i++) {
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
+    MPIU_Assert(am_hdr_buf);
+    am_hdr_sz = 0;
+
+    for(i = 0; i < iov_len; i++) {
+        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    mpi_errno = MPIDI_NM_send_am(rank, comm, handler_id, am_hdr_buf, am_hdr_sz,
+                                     data, count, datatype, sreq, netmod_context);
+
+    MPL_free(am_hdr_buf);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_SEND_AMV);
+    return mpi_errno;
 }
+
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_NM_send_am_hdr_reply
@@ -270,8 +318,9 @@ static inline int MPIDI_NM_send_am_hdr_reply(MPIR_Context_id_t context_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPIR_Request * sreq)
 {
-    MPIR_Assert(0);
-    return MPI_SUCCESS;
+
+   return    MPIDI_NM_send_am_hdr(src_rank, MPIDI_CH4U_context_id_to_comm(context_id), handler_id,
+                         am_hdr, am_hdr_sz,sreq, NULL);
 }
 
 #undef FUNCNAME
@@ -365,14 +414,37 @@ static inline int MPIDI_NM_send_amv_reply(MPIR_Context_id_t context_id,
                                               const void *data, MPI_Count count,
                                               MPI_Datatype datatype, MPIR_Request * sreq)
 {
-    MPIR_Assert(0);
-    return MPI_SUCCESS;
+    int mpi_errno = MPI_SUCCESS;
+    size_t am_hdr_sz = 0, i;
+    char *am_hdr_buf;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_SEND_AMV_REPLY);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_SEND_AMV_REPLY);
+
+    for(i = 0; i < iov_len; i++) {
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
+
+    MPIU_Assert(am_hdr_buf);
+    am_hdr_sz = 0;
+
+    for(i = 0; i < iov_len; i++) {
+        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        am_hdr_sz += am_hdr[i].iov_len;
+    }
+
+    mpi_errno = MPIDI_NM_send_am_reply(context_id, src_rank, handler_id, am_hdr_buf, am_hdr_sz,
+                                           data, count, datatype, sreq);
+    MPL_free(am_hdr_buf);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_SEND_AMV_REPLY);
+    return mpi_errno;
 }
 
 static inline size_t MPIDI_NM_am_hdr_max_sz(void)
 {
-    MPIR_Assert(0);
-    return 0;
+    return (MPIDI_UCX_MAX_AM_EAGER_SZ - sizeof(MPIDI_UCX_am_header_t));
 }
 
 static inline int MPIDI_NM_inject_am_hdr(int rank,
@@ -480,8 +552,7 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIR_Context_id_t context_id,
 
 static inline size_t MPIDI_NM_am_inject_max_sz(void)
 {
-    MPIR_Assert(0);
-    return 0;
+    return MPIDI_NM_am_hdr_max_sz();
 }
 
 
