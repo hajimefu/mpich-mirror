@@ -95,7 +95,7 @@ __CH4_INLINE__ void MPIDI_CH4I_request_release(MPIR_Request * req)
         if (req->comm)
             MPIR_Comm_release(req->comm);
 
-        if (req->u.ureq.greq_fns)
+        if (unlikely(req->kind == MPIR_REQUEST_KIND__GREQUEST && req->u.ureq.greq_fns))
             MPL_free(req->u.ureq.greq_fns);
 
         MPIU_Handle_obj_free(&MPIR_Request_mem, req);
