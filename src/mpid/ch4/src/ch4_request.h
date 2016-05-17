@@ -77,20 +77,6 @@ __CH4_INLINE__ void MPIDI_Request_release_ref(MPIR_Request * req)
    the ch4r/netmod/shmmod fields of the request.
 */
 #undef FUNCNAME
-#define FUNCNAME MPIDI_request_release
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_Request_release(MPIR_Request * req)
-{
-    MPIDI_STATE_DECL(MPID_STATE_CH4_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_REQUEST_RELEASE);
-
-    MPIDI_CH4I_request_release(req);
-
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_REQUEST_RELEASE);
-}
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_request_complete
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -98,7 +84,7 @@ __CH4_INLINE__ int MPIDI_Request_complete(MPIR_Request * req)
 {
     int incomplete;
     MPIR_cc_decr(req->cc_ptr, &incomplete);
-    MPIDI_CH4I_request_release(req);
+    MPIR_Request_free(req);
     return MPI_SUCCESS;
 }
 

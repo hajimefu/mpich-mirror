@@ -68,7 +68,6 @@ MPIDI_CH4I_API(int, Recv, void *, int, MPI_Datatype, int, int, MPIR_Comm *, int,
 MPIDI_CH4I_API(int, Recv_init, void *, int, MPI_Datatype, int, int, MPIR_Comm *, int,
                MPIR_Request **);
 MPIDI_CH4I_API(void, Request_set_completed, MPIR_Request *);
-MPIDI_CH4I_API(void, Request_release, MPIR_Request *);
 MPIDI_CH4I_API(int, Request_complete, MPIR_Request *);
 MPIDI_CH4I_API(int, Request_is_anysource, MPIR_Request *);
 MPIDI_CH4I_API(int, Send, const void *, int, MPI_Datatype, int, int, MPIR_Comm *, int,

@@ -113,7 +113,7 @@ static inline void MPIDI_UCX_Handle_send_callback(void *request, ucs_status_t st
         MPIU_Assert(c >= 0);
 
         if (c == 0) {
-            MPIDI_Request_release(req);
+            MPIR_Request_free(req);
         }
         ucp_request->req = NULL;
     }

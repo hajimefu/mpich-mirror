@@ -77,34 +77,6 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_CH4I_request_release
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-__CH4_INLINE__ void MPIDI_CH4I_request_release(MPIR_Request * req)
-{
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQEUST_RELEASE);
-    int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
-
-    if (count == 0) {
-        MPIU_Assert(MPIR_cc_is_complete(&req->cc));
-
-        if (req->comm)
-            MPIR_Comm_release(req->comm);
-
-        if (unlikely(req->kind == MPIR_REQUEST_KIND__GREQUEST && req->u.ureq.greq_fns))
-            MPL_free(req->u.ureq.greq_fns);
-
-        MPIU_Handle_obj_free(&MPIR_Request_mem, req);
-    }
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_RELEASE);
-    return;
-}
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_CH4U_request_release
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -114,9 +86,9 @@ __CH4_INLINE__ void MPIDI_CH4U_request_release(MPIR_Request * req)
     MPIDI_FUNC_ENTER(MPID_STATE_CH4R_REQEUST_RELEASE);
 
     if (req->kind == MPIR_REQUEST_KIND__PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
-        MPIDI_CH4I_request_release(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
+        MPIR_Request_free(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
     }
-    MPIDI_CH4I_request_release(req);
+    MPIR_Request_free(req);
     MPIDI_FUNC_EXIT(MPID_STATE_CH4R_REQUEST_RELEASE);
 }
 
