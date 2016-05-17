@@ -15,6 +15,8 @@
 #include "mpidch4r.h"
 
 #include "mpihandlemem.h"
+#include "mpiu_os_wrappers_pre.h"
+#include "mpiu_shm_wrappers.h"
 #include "pmi.h"
 
 #include "mpidu_shm.h"
