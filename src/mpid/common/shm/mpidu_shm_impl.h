@@ -7,6 +7,7 @@
 #define MPIDU_SHM_IMPL_H
 
 #include "mpidimpl.h"
+#include "mpiu_os_wrappers.h"
 
 #include "mpidu_shm.h"
 

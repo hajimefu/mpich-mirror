@@ -17,7 +17,7 @@ typedef struct MPIDU_shm_seg
 {
     MPIU_Size_t segment_len;
     /* Handle to shm seg */
-    MPL_shm_hnd_t hnd;
+    MPIU_SHMW_Hnd_t hnd;
     /* Pointers */
     char *base_addr;
     /* Misc */

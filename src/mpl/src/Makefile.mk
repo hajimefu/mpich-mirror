@@ -13,4 +13,3 @@ include src/sock/Makefile.mk
 include src/str/Makefile.mk
 include src/thread/Makefile.mk
 include src/timer/Makefile.mk
-include src/shm/Makefile.mk

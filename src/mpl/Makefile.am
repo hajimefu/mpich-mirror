@@ -30,8 +30,7 @@ mpl_headers =               \
     include/mpl_msg.h       \
     include/mpl_sock.h      \
     include/mpl_iov.h       \
-    include/mpl_bt.h        \
-    include/mpl_shm.h
+    include/mpl_bt.h
 
 if MPL_EMBEDDED_MODE
 noinst_HEADERS = $(mpl_headers)

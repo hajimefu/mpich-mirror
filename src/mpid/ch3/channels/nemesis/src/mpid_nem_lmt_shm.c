@@ -8,6 +8,7 @@
 #include "mpid_nem_inline.h"
 #include "mpid_nem_datatypes.h"
 
+#include "mpiu_os_wrappers.h"
 #if defined(MPL_USE_DBG_LOGGING) && 0
 #define DBG_LMT(x) x
 #else
@@ -107,10 +108,10 @@ typedef struct MPID_nem_copy_buf
 static inline int lmt_shm_progress_vc(MPIDI_VC_t *vc, int *done);
 static int lmt_shm_send_progress(MPIDI_VC_t *vc, MPIR_Request *req, int *done);
 static int lmt_shm_recv_progress(MPIDI_VC_t *vc, MPIR_Request *req, int *done);
-static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t handle);
-static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t handle);
-static int MPID_nem_detach_shm_region(MPID_nem_copy_buf_t **buf, MPL_shm_hnd_t handle);
-static int MPID_nem_delete_shm_region(MPID_nem_copy_buf_t **buf, MPL_shm_hnd_t *handle_p);
+static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t handle);
+static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t handle);
+static int MPID_nem_detach_shm_region(MPID_nem_copy_buf_t **buf, MPIU_SHMW_Hnd_t handle);
+static int MPID_nem_delete_shm_region(MPID_nem_copy_buf_t **buf, MPIU_SHMW_Hnd_t *handle_p);
 
 /* number of iterations to wait for the other side to process a buffer */
 #define LMT_POLLS_BEFORE_GIVING_UP 5000
@@ -191,7 +192,7 @@ int MPID_nem_lmt_shm_start_recv(MPIDI_VC_t *vc, MPIR_Request *req, MPL_IOV s_coo
     }
 
     /* send CTS with handle for copy buffer */
-    mpi_errno = MPL_shm_hnd_get_serialized_by_ref((vc_ch->lmt_copy_buf_handle), &ser_lmt_copy_buf_handle);
+    mpi_errno = MPIU_SHMW_Hnd_get_serialized_by_ref((vc_ch->lmt_copy_buf_handle), &ser_lmt_copy_buf_handle);
     if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
     
     MPID_nem_lmt_send_CTS(vc, req, ser_lmt_copy_buf_handle, (int)strlen(ser_lmt_copy_buf_handle) + 1);
@@ -253,7 +254,7 @@ int MPID_nem_lmt_shm_start_send(MPIDI_VC_t *vc, MPIR_Request *req, MPL_IOV r_coo
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_LMT_SHM_START_SEND);
 
     if (vc_ch->lmt_copy_buf == NULL){
-        mpi_errno = MPL_shm_hnd_deserialize(vc_ch->lmt_copy_buf_handle, r_cookie.MPL_IOV_BUF, strlen(r_cookie.MPL_IOV_BUF));
+        mpi_errno = MPIU_SHMW_Hnd_deserialize(vc_ch->lmt_copy_buf_handle, r_cookie.MPL_IOV_BUF, strlen(r_cookie.MPL_IOV_BUF));
         if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
         mpi_errno = MPID_nem_attach_shm_region(&vc_ch->lmt_copy_buf, vc_ch->lmt_copy_buf_handle);
@@ -262,7 +263,7 @@ int MPID_nem_lmt_shm_start_send(MPIDI_VC_t *vc, MPIR_Request *req, MPL_IOV r_coo
     }
     else{
         char *ser_lmt_copy_buf_handle=NULL;
-        mpi_errno = MPL_shm_hnd_get_serialized_by_ref(vc_ch->lmt_copy_buf_handle, &ser_lmt_copy_buf_handle);
+        mpi_errno = MPIU_SHMW_Hnd_get_serialized_by_ref(vc_ch->lmt_copy_buf_handle, &ser_lmt_copy_buf_handle);
         if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
         if (strncmp(ser_lmt_copy_buf_handle, r_cookie.MPL_IOV_BUF, r_cookie.MPL_IOV_LEN) < 0){
             /* Each side allocated its own buffer, lexicographically lower valued buffer handle is deleted */
@@ -272,10 +273,10 @@ int MPID_nem_lmt_shm_start_send(MPIDI_VC_t *vc, MPIR_Request *req, MPL_IOV r_coo
             vc_ch->lmt_copy_buf = NULL;
 
             /* The shared memory handle is not valid any more -- so get a new shm handle */
-            mpi_errno = MPL_shm_hnd_init(&vc_ch->lmt_copy_buf_handle);
+            mpi_errno = MPIU_SHMW_Hnd_init(&vc_ch->lmt_copy_buf_handle);
             if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
-            mpi_errno = MPL_shm_hnd_deserialize(vc_ch->lmt_copy_buf_handle, r_cookie.MPL_IOV_BUF, strlen(r_cookie.MPL_IOV_BUF));
+            mpi_errno = MPIU_SHMW_Hnd_deserialize(vc_ch->lmt_copy_buf_handle, r_cookie.MPL_IOV_BUF, strlen(r_cookie.MPL_IOV_BUF));
             if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
             mpi_errno = MPID_nem_attach_shm_region(&vc_ch->lmt_copy_buf, vc_ch->lmt_copy_buf_handle);
@@ -868,7 +869,7 @@ int MPID_nem_lmt_shm_vc_terminated(MPIDI_VC_t *vc)
 #define FUNCNAME MPID_nem_allocate_shm_region
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t handle)
+static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t handle)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_ALLOCATE_SHM_REGION);
@@ -881,7 +882,7 @@ static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd
         goto fn_exit;
     }
 
-    mpi_errno = MPL_shm_seg_create_and_attach(handle, sizeof(MPID_nem_copy_buf_t), (char **)buf_p, 0);
+    mpi_errno = MPIU_SHMW_Seg_create_and_attach(handle, sizeof(MPID_nem_copy_buf_t), (char **)buf_p, 0);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
  fn_exit:
@@ -895,7 +896,7 @@ static int MPID_nem_allocate_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd
 #define FUNCNAME MPID_nem_attach_shm_region
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t handle)
+static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t handle)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_ATTACH_SHM_REGION);
@@ -908,10 +909,10 @@ static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t
         goto fn_exit;
     }
 
-    mpi_errno = MPL_shm_seg_attach(handle, sizeof(MPID_nem_copy_buf_t), (char **)buf_p, 0);
+    mpi_errno = MPIU_SHMW_Seg_attach(handle, sizeof(MPID_nem_copy_buf_t), (char **)buf_p, 0);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPL_shm_seg_remove(handle);
+    mpi_errno = MPIU_SHMW_Seg_remove(handle);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
  fn_exit:
@@ -925,14 +926,14 @@ static int MPID_nem_attach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t
 #define FUNCNAME MPID_nem_detach_shm_region
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int MPID_nem_detach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t handle)
+static int MPID_nem_detach_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t handle)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_DETACH_SHM_REGION);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_DETACH_SHM_REGION);
 
-    mpi_errno = MPL_shm_seg_detach(handle, (char **)buf_p, sizeof(MPID_nem_copy_buf_t));
+    mpi_errno = MPIU_SHMW_Seg_detach(handle, (char **)buf_p, sizeof(MPID_nem_copy_buf_t));
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
  fn_exit:
@@ -946,20 +947,20 @@ static int MPID_nem_detach_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t
 #define FUNCNAME MPID_nem_delete_shm_region
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int MPID_nem_delete_shm_region(MPID_nem_copy_buf_t **buf_p, MPL_shm_hnd_t *handle_p)
+static int MPID_nem_delete_shm_region(MPID_nem_copy_buf_t **buf_p, MPIU_SHMW_Hnd_t *handle_p)
 {
     int mpi_errno = MPI_SUCCESS;
     MPIDI_STATE_DECL(MPID_STATE_MPID_NEM_DELETE_SHM_REGION);
 
     MPIDI_FUNC_ENTER(MPID_STATE_MPID_NEM_DELETE_SHM_REGION);
 
-    mpi_errno = MPL_shm_seg_remove(*handle_p);
+    mpi_errno = MPIU_SHMW_Seg_remove(*handle_p);
     if (mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
     mpi_errno = MPID_nem_detach_shm_region(buf_p, *handle_p); 
     if (mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
-    mpi_errno = MPL_shm_hnd_finalize(handle_p);
+    mpi_errno = MPIU_SHMW_Hnd_finalize(handle_p);
     if(mpi_errno != MPI_SUCCESS) { MPIR_ERR_POP(mpi_errno); }
 
  fn_exit:
