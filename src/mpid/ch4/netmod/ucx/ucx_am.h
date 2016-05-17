@@ -190,14 +190,29 @@ static inline int MPIDI_NM_send_am(int rank,
         MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
         MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
         MPIR_Memcpy(send_buf + am_hdr_sz + sizeof(ucx_hdr), data + dt_true_lb, data_sz);
+       }
+    else {
+        size_t segment_first;
+        struct MPIDU_Segment *segment_ptr;
+        segment_ptr = MPIDU_Segment_alloc();
+        MPIR_ERR_CHKANDJUMP1(segment_ptr == NULL, mpi_errno,
+                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "Send MPIDU_Segment_alloc");
+        MPIDU_Segment_init(data, count, datatype, segment_ptr, 0);
+        segment_first = 0;
+        last = data_sz;
+        send_buf = MPL_malloc(data_sz + am_hdr_sz + sizeof(ucx_hdr)); 
+
+        MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+        MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+        MPIDU_Segment_pack(segment_ptr, segment_first, &last, send_buf+am_hdr_sz+sizeof(ucx_hdr));
+        MPIDU_Segment_free(segment_ptr);
+    }
 
         ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                          data_sz + am_hdr_sz + sizeof(ucx_hdr),
                                                                          ucp_dt_make_contig(1), ucx_tag,
                                                                          &MPIDI_UCX_send_am_callback);
         MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
-    }
-
     /* send is done. free all resources and complete the request */
     if (ucp_request == NULL) {
         MPL_free(send_buf);
