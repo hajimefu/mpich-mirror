@@ -380,7 +380,7 @@ int MPIDU_Type_struct(int count,
 	    }
 	}
 
-	if (!is_builtin && !MPID_Datatype_is_contig(old_dtp))
+	if (!is_builtin && !old_dtp->is_contig)
 	{
 	    old_are_contig = 0;
 	}

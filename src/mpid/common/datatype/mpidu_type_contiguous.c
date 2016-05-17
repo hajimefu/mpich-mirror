@@ -121,8 +121,8 @@ int MPIDU_Type_contiguous(int count,
 	new_dtp->builtin_element_size = old_dtp->builtin_element_size;
         new_dtp->basic_type       = el_type;
 
-        new_dtp->is_contig    = MPID_Datatype_is_contig(old_dtp);
-        if(MPID_Datatype_is_contig(old_dtp))
+	new_dtp->is_contig    = old_dtp->is_contig;
+        if(old_dtp->is_contig)
             new_dtp->max_contig_blocks = 1;
         else
             new_dtp->max_contig_blocks = count * old_dtp->max_contig_blocks;

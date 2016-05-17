@@ -56,7 +56,7 @@ int MPIR_Pack_impl(const void *inbuf,
     } else {
         MPIR_Datatype *dt_ptr;
         MPID_Datatype_get_ptr(datatype, dt_ptr);
-	contig     = MPID_Datatype_is_contig(dt_ptr);
+	contig     = dt_ptr->is_contig;
         dt_true_lb = dt_ptr->true_lb;
         data_sz    = incount * dt_ptr->size;
     }

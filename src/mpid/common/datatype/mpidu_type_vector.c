@@ -114,7 +114,7 @@ int MPIDU_Type_vector(int count,
 	old_true_ub   = old_dtp->true_ub;
 	old_sz        = old_dtp->size;
 	old_extent    = old_dtp->extent;
-	old_is_contig = MPID_Datatype_is_contig(old_dtp);
+	old_is_contig = old_dtp->is_contig;
 
 	new_dtp->size           = count * blocklength * old_dtp->size;
 	new_dtp->has_sticky_lb  = old_dtp->has_sticky_lb;
