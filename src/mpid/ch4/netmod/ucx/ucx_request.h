@@ -31,67 +31,6 @@ static inline void MPIDI_NM_am_request_finalize(MPIR_Request *req)
     /* MPIDI_CH4U_request_release(req); */
 }
 
-
-#if 0
-static inline void MPIDI_NM_request_release(MPIR_Request * req)
-{
-    int count;
-
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_NM_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NM_REQUEST_RELEASE);
-
-
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    printf("release request %d %d\n", count,MPIDI_UCX_REQ(req).is_ucx_req);
-    MPIU_Assert(count >= 0);
-    if (count == 0) {
-        MPIU_Assert(MPID_cc_is_complete(&req->cc));
-        if (req->comm){
-            MPIR_Comm_release(req->comm);
-            req->comm = NULL;
-        }
-        if (req->u.ureq.greq_fns)
-            MPL_free(req->u.ureq.greq_fns);
-        if(!MPIDI_UCX_REQ(req).is_ucx_req)
-             MPIU_Handle_obj_free(&MPIR_Request_mem, req);
-        else{
-            MPIDI_UCX_REQ(req).is_call_done = 0;
-            MPIDI_UCX_REQ(req).in_nb = 1;
-            ucp_request_release(MPIDI_UCX_REQ(req).ucx_request);
-        }
-    }
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NM_REQUEST_RELEASE);
-    return;
-}
-#endif
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_netmod_request_init
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline void MPIDI_netmod_request_init(MPIR_Request* req)
-{
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_NETMOD_REQUEST_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_NETMOD_REQUEST_INIT);
-
-    MPIU_Assert(req != NULL);
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIR_cc_set(&req->cc, 1);
-    req->cc_ptr = &req->cc;
-    MPIU_Object_set_ref(req, 2);
-    req->u.ureq.greq_fns = NULL;
-    MPIR_STATUS_SET_COUNT(req->status, 0);
-    MPIR_STATUS_SET_CANCEL_BIT(req->status, FALSE);
-    req->status.MPI_SOURCE = MPI_UNDEFINED;
-    req->status.MPI_TAG = MPI_UNDEFINED;
-    req->status.MPI_ERROR = MPI_SUCCESS;
-    req->comm = NULL;
-    req->u.nbc.errflag = MPIR_ERR_NONE;
-
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_NETMODE_REQUEST_INIT);
-
-}
 static inline void MPIDI_UCX_Request_init_callback(void *request)
 {
 
