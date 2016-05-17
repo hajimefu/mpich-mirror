@@ -235,7 +235,7 @@ static inline int MPIDI_NM_win_free(MPIR_Win ** win_ptr)
     MPIDI_CH4U_EPOCH_FREE_CHECK(win,mpi_errno,return mpi_errno);
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
-    if(win->create_flavor != MPI_WIN_FLAVOR_SHARED){
+    if(win->create_flavor != MPI_WIN_FLAVOR_SHARED && win->create_flavor != MPI_WIN_FLAVOR_DYNAMIC){
         ucp_mem_unmap(MPIDI_UCX_global.context, MPIDI_UCX_WIN(win).mem_h);
          MPL_free(MPIDI_UCX_WIN(win).info_table);
     }

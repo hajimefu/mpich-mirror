@@ -92,6 +92,13 @@ static inline int MPIDI_NM_put(const void *origin_addr,
     size_t target_bytes,origin_bytes;
     MPI_Aint       origin_true_lb,target_true_lb;
     size_t         offset;
+    if(win->create_flavor == MPI_WIN_FLAVOR_DYNAMIC)
+       return  MPIDI_CH4U_put(origin_addr, origin_count, origin_datatype,
+                          target_rank, target_disp, target_count, target_datatype, win);
+
+
+
+
 
     MPIDI_Datatype_check_contig_size_lb(target_datatype,target_count,
                                         target_contig,target_bytes,
@@ -148,6 +155,9 @@ static inline int MPIDI_NM_get(void *origin_addr,
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_GET);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_GET);
+    if(win->create_flavor == MPI_WIN_FLAVOR_DYNAMIC)
+        return MPIDI_CH4U_get(origin_addr, origin_count, origin_datatype,
+                          target_rank, target_disp, target_count, target_datatype, win);
 
     MPIDI_Datatype_check_contig_size(origin_datatype,origin_count,
                                      origin_contig,origin_bytes);
