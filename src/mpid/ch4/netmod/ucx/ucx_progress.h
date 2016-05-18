@@ -111,7 +111,7 @@ static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
     /* check for active messages */
      message_handle =
              ucp_tag_probe_nb(MPIDI_UCX_global.worker, MPIDI_UCX_AM_TAG,
-                                ~MPIDI_UCX_AM_TAG, 1, &info);
+                                MPIDI_UCX_AM_TAG, 1, &info);
     while (message_handle) {
         am_buf = MPL_malloc(info.length);
         ucp_request = (MPIDI_UCX_ucp_request_t *)ucp_tag_msg_recv_nb(MPIDI_UCX_global.worker,
