@@ -90,7 +90,7 @@ static inline int MPIDI_NM_improbe(int source,
     }
     *flag = 1;
      req = (MPIR_Request *)MPIR_Request_create(MPIR_REQUEST_KIND__MPROBE);
-     MPIU_Assert(req);
+     MPIR_Assert(req);
      MPIDI_UCX_REQ(req).message_handler = message_handler;
 
 

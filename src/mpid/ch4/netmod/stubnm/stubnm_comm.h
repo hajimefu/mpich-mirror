@@ -20,7 +20,7 @@
 static inline int MPIDI_NM_comm_create(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -31,7 +31,7 @@ static inline int MPIDI_NM_comm_create(MPIR_Comm * comm)
 static inline int MPIDI_NM_comm_destroy(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 

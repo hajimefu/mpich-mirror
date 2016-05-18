@@ -671,7 +671,7 @@ int MPIDI_Populate_vc_node_ids(MPIDI_PG_t *pg, int our_pg_rank)
 
     mpi_errno = MPIR_NODEMAP_build_nodemap(pg->size, our_pg_rank, out_nodemap, &g_max_node_id);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-    MPIU_Assert(g_max_node_id >= 0);
+    MPIR_Assert(g_max_node_id >= 0);
 
     for (i = 0; i < pg->size; i++) {
         pg->vct[i].node_id = out_nodemap[i];

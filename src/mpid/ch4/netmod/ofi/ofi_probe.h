@@ -32,8 +32,8 @@ static inline int MPIDI_OFI_do_iprobe(int source,
     MPIR_Request r, *rreq;      /* don't need to init request, output only */
     struct fi_msg_tagged msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
 
     if(unlikely(source == MPI_PROC_NULL)) {
         MPIR_Status_set_procnull(status);
@@ -74,7 +74,7 @@ static inline int MPIDI_OFI_do_iprobe(int source,
         case  MPIDI_OFI_PEEK_NOT_FOUND:
             *flag = 0;
 
-            if(message) MPIU_Handle_obj_free(&MPIR_Request_mem, rreq);
+            if(message) MPIR_Handle_obj_free(&MPIR_Request_mem, rreq);
 
             goto fn_exit;
             break;
@@ -88,11 +88,11 @@ static inline int MPIDI_OFI_do_iprobe(int source,
             break;
 
         default:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -108,8 +108,8 @@ static inline int MPIDI_NM_probe(int source,
                                      MPIR_Comm *comm, int context_offset, MPI_Status *status)
 {
     int mpi_errno = MPI_SUCCESS, flag = 0;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
 
     while(!flag) {
         mpi_errno = MPIDI_Iprobe(source, tag, comm, context_offset, &flag, status);
@@ -121,7 +121,7 @@ static inline int MPIDI_NM_probe(int source,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_PROBE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -137,8 +137,8 @@ static inline int MPIDI_NM_improbe(int source,
                                        int context_offset,
                                        int *flag, MPIR_Request **message, MPI_Status *status)
 {
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
     /* Set flags for mprobe peek, when ready */
     int mpi_errno = MPIDI_OFI_do_iprobe(source, tag, comm, context_offset,
                                                 flag, status, message, FI_CLAIM | FI_COMPLETION);
@@ -146,10 +146,10 @@ static inline int MPIDI_NM_improbe(int source,
     if(*flag && *message) {
         (*message)->kind = MPIR_REQUEST_KIND__MPROBE;
         (*message)->comm = comm;
-        MPIU_Object_add_ref(comm);
+        MPIR_Object_add_ref(comm);
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_IMPROBE);
     return mpi_errno;
 }
 
@@ -163,10 +163,10 @@ static inline int MPIDI_NM_iprobe(int source,
                                       int context_offset, int *flag, MPI_Status *status)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
     mpi_errno = MPIDI_OFI_do_iprobe(source, tag, comm, context_offset, flag, status, NULL, 0ULL);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_NETMOD_IPROBE);
     return mpi_errno;
 }
 

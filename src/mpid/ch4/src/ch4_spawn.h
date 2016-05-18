@@ -87,8 +87,8 @@ __CH4_INLINE__ int MPIDI_Comm_spawn_multiple(int         count,
     int           *pmi_errcodes = 0, pmi_errno=0;
     int            total_num_processes, should_accept = 1;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
 
     memset(port_name, 0, sizeof(port_name));
 
@@ -200,7 +200,7 @@ fn_exit:
     if(pmi_errcodes)
         MPL_free(pmi_errcodes);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_SPAWN_MULTIPLE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -215,8 +215,8 @@ __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
                                       int root, MPIR_Comm *comm, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_CONNECT);
     mpi_errno = MPIDI_NM_comm_connect(port_name, info, root, comm, newcomm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
@@ -224,7 +224,7 @@ __CH4_INLINE__ int MPIDI_Comm_connect(const char *port_name,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_CONNECT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -237,8 +237,8 @@ fn_fail:
 __CH4_INLINE__ int MPIDI_Comm_disconnect(MPIR_Comm *comm_ptr)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DISCONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_DISCONNECT);
     mpi_errno = MPIDI_NM_comm_disconnect(comm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
@@ -246,7 +246,7 @@ __CH4_INLINE__ int MPIDI_Comm_disconnect(MPIR_Comm *comm_ptr)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_DISCONNECT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -259,8 +259,8 @@ fn_fail:
 __CH4_INLINE__ int MPIDI_Open_port(MPIR_Info *info_ptr, char *port_name)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OPEN_PORT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OPEN_PORT);
     mpi_errno = MPIDI_NM_open_port(info_ptr, port_name);
 
     if(mpi_errno != MPI_SUCCESS) {
@@ -268,7 +268,7 @@ __CH4_INLINE__ int MPIDI_Open_port(MPIR_Info *info_ptr, char *port_name)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OPEN_PORT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -281,8 +281,8 @@ fn_fail:
 __CH4_INLINE__ int MPIDI_Close_port(const char *port_name)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_CLOSE_PORT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_CLOSE_PORT);
     mpi_errno = MPIDI_NM_close_port(port_name);
 
     if(mpi_errno != MPI_SUCCESS) {
@@ -290,7 +290,7 @@ __CH4_INLINE__ int MPIDI_Close_port(const char *port_name)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_CLOSE_PORT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -305,8 +305,8 @@ __CH4_INLINE__ int MPIDI_Comm_accept(const char *port_name,
                                      int root, MPIR_Comm *comm, MPIR_Comm **newcomm_ptr)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_ACCEPT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_ACCEPT);
     mpi_errno = MPIDI_NM_comm_accept(port_name, info, root, comm, newcomm_ptr);
 
     if(mpi_errno != MPI_SUCCESS) {
@@ -314,7 +314,7 @@ __CH4_INLINE__ int MPIDI_Comm_accept(const char *port_name,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_ACCEPT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

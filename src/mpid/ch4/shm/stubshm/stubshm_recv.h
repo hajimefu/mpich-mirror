@@ -23,7 +23,7 @@ static inline int MPIDI_SHM_recv(void *buf,
                                  MPIR_Comm * comm,
                                  int context_offset, MPI_Status * status, MPIR_Request ** request)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -34,7 +34,7 @@ static inline int MPIDI_SHM_recv_init(void *buf,
                                       int tag,
                                       MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -44,7 +44,7 @@ static inline int MPIDI_SHM_imrecv(void *buf,
                                    MPI_Datatype datatype,
                                    MPIR_Request * message, MPIR_Request ** rreqp)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -57,13 +57,13 @@ static inline int MPIDI_SHM_irecv(void *buf,
                                   int tag,
                                   MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_cancel_recv(MPIR_Request * rreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

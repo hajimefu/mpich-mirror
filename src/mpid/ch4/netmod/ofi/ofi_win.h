@@ -31,8 +31,8 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
     unsigned gen_id;
     uint32_t *disp_units;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
 
     /* Calculate a canonical context id */
     raw_prefix = MPIR_CONTEXT_READ_FIELD(PREFIX,comm_ptr->context_id);
@@ -97,7 +97,7 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_ALLGATHER);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_ALLGATHER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -118,8 +118,8 @@ static inline int MPIDI_OFI_win_init(MPI_Aint     length,
     int       mpi_errno = MPI_SUCCESS;
     uint64_t  window_instance;
     MPIR_Win *win;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_WIN_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_WIN_INIT);
 
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devwin_t)>=sizeof(MPIDI_OFI_win_t));
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_Devdt_t)>=sizeof(MPIDI_OFI_datatype_t));
@@ -140,7 +140,7 @@ static inline int MPIDI_OFI_win_init(MPI_Aint     length,
     MPIDI_OFI_WIN(win).win_id = ((uint64_t)comm_ptr->context_id) | (window_instance<<32);
     MPIDI_OFI_map_set(MPIDI_Global.win_map,MPIDI_OFI_WIN(win).win_id,win);
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -158,17 +158,17 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
     uint64_t tcount, donecount;
     MPIDI_OFI_win_request_t *r;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
     tcount    = MPIDI_Global.cntr;
     donecount = fi_cntr_read(MPIDI_Global.rma_ctr);
 
-    MPIU_Assert(donecount <= tcount);
+    MPIR_Assert(donecount <= tcount);
 
     while(tcount > donecount) {
-        MPIU_Assert(donecount <= tcount);
+        MPIR_Assert(donecount <= tcount);
         MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
         MPIDI_OFI_PROGRESS();
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
@@ -204,7 +204,7 @@ static inline int MPIDI_Win_progress_fence(MPIR_Win *win)
     MPIDI_OFI_WIN(win).syncQ = NULL;
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_OFI_PROGRESS_WIN_COUNTER_FENCE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -217,15 +217,15 @@ fn_fail:
 static inline int MPIDI_NM_win_set_info(MPIR_Win *win, MPIR_Info *info)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
 
     mpi_errno = MPIDI_CH4R_win_set_info(win, info);
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_SET_INFO);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -239,8 +239,8 @@ static inline int MPIDI_NM_win_start(MPIR_Group *group, int assert, MPIR_Win *wi
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_START);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_START);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_START);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_START);
 
     MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
 
@@ -258,7 +258,7 @@ static inline int MPIDI_NM_win_start(MPIR_Group *group, int assert, MPIR_Win *wi
     MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_START;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_START);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_START);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -273,8 +273,8 @@ static inline int MPIDI_NM_win_complete(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
 
     MPIDI_CH4U_EPOCH_START_CHECK2(win,mpi_errno,goto fn_fail);
 
@@ -282,7 +282,7 @@ static inline int MPIDI_NM_win_complete(MPIR_Win *win)
 
     MPIR_Group *group;
     group = MPIDI_CH4U_WIN(win, sync).sc.group;
-    MPIU_Assert(group != NULL);
+    MPIR_Assert(group != NULL);
     MPIDI_OFI_win_control_t msg;
     msg.type = MPIDI_OFI_CTRL_COMPLETE;
 
@@ -303,7 +303,7 @@ static inline int MPIDI_NM_win_complete(MPIR_Win *win)
     MPIDI_CH4U_WIN(win, sync).sc.group = NULL;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_COMPLETE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -318,8 +318,8 @@ static inline int MPIDI_NM_win_post(MPIR_Group *group, int assert, MPIR_Win *win
     int peer, index, mpi_errno = MPI_SUCCESS;
     MPIDI_OFI_win_control_t msg;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_POST);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_POST);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_POST);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_POST);
 
     MPIDI_CH4U_EPOCH_POST_CHECK(win,mpi_errno,goto fn_fail);
 
@@ -329,7 +329,7 @@ static inline int MPIDI_NM_win_post(MPIR_Group *group, int assert, MPIR_Win *win
                         "**group");
 
     MPIDI_CH4U_WIN(win, sync).pw.group = group;
-    MPIU_Assert(group != NULL);
+    MPIR_Assert(group != NULL);
 
     msg.type = MPIDI_OFI_CTRL_POST;
 
@@ -345,7 +345,7 @@ static inline int MPIDI_NM_win_post(MPIR_Group *group, int assert, MPIR_Win *win
     MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_POST;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_POST);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_POST);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -359,8 +359,8 @@ static inline int MPIDI_NM_win_wait(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_WAIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_WAIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_WAIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_WAIT);
 
     MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
@@ -377,7 +377,7 @@ static inline int MPIDI_NM_win_wait(MPIR_Win *win)
     MPIDI_CH4U_EPOCH_ORIGIN_EVENT(win);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_WAIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_WAIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -391,8 +391,8 @@ static inline int MPIDI_NM_win_test(MPIR_Win *win, int *flag)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_TEST);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_TEST);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_TEST);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_TEST);
 
     MPIDI_CH4U_EPOCH_TARGET_CHECK(win,MPIDI_CH4U_EPOTYPE_POST,mpi_errno,return mpi_errno);
 
@@ -411,7 +411,7 @@ static inline int MPIDI_NM_win_test(MPIR_Win *win, int *flag)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_TEST);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_TEST);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -425,8 +425,8 @@ static inline int MPIDI_NM_win_lock(int lock_type, int rank, int assert, MPIR_Wi
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK);
 
     MPIDI_CH4U_win_sync_lock *slock = &MPIDI_CH4U_WIN(win, sync).lock;
     MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
@@ -450,7 +450,7 @@ fn_exit0:
     MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_LOCK;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -463,8 +463,8 @@ fn_fail:
 static inline int MPIDI_NM_win_unlock(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
 
     MPIDI_CH4U_EPOCH_ORIGIN_CHECK(win, MPIDI_CH4U_EPOTYPE_LOCK, mpi_errno, return mpi_errno);
 
@@ -486,7 +486,7 @@ fn_exit0:
     MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -500,15 +500,15 @@ fn_fail:
 static inline int MPIDI_NM_win_get_info(MPIR_Win *win, MPIR_Info **info_p_p)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
 
     mpi_errno = MPIDI_CH4R_win_get_info(win, info_p_p);
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_GET_INFO);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -525,8 +525,8 @@ static inline int MPIDI_NM_win_free(MPIR_Win **win_ptr)
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
     MPIR_Win      *win       = *win_ptr;
     uint32_t       window_instance;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FREE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FREE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FREE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FREE);
 
     MPIDI_CH4U_EPOCH_FREE_CHECK(win,mpi_errno,return mpi_errno);
 
@@ -548,7 +548,7 @@ static inline int MPIDI_NM_win_free(MPIR_Win **win_ptr)
     MPIDI_CH4R_win_finalize(win_ptr);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FREE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FREE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -562,8 +562,8 @@ static inline int MPIDI_NM_win_fence(int massert, MPIR_Win *win)
 {
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FENCE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FENCE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FENCE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FENCE);
 
     MPIDI_CH4U_EPOCH_FENCE_CHECK(win, mpi_errno, goto fn_fail);
 
@@ -586,7 +586,7 @@ static inline int MPIDI_NM_win_fence(int massert, MPIR_Win *win)
     mpi_errno = MPIR_Barrier_impl(win->comm_ptr, &errflag);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FENCE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FENCE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -607,8 +607,8 @@ static inline int MPIDI_NM_win_create(void       *base,
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
     MPIR_Win       *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE);
 
     mpi_errno        = MPIDI_OFI_win_init(length,
                                                   disp_unit,
@@ -632,7 +632,7 @@ static inline int MPIDI_NM_win_create(void       *base,
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_CREATE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -645,13 +645,13 @@ fn_fail:
 static inline int MPIDI_NM_win_attach(MPIR_Win *win, void *base, MPI_Aint size)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
 
     MPIR_ERR_CHKANDSTMT((win->create_flavor != MPI_WIN_FLAVOR_DYNAMIC), mpi_errno,
                         MPI_ERR_RMA_FLAVOR, goto fn_fail, "**rmaflavor");
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_ATTACH);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -678,8 +678,8 @@ static inline int MPIDI_NM_win_allocate_shared(MPI_Aint    size,
     void           *map_ptr;
     MPIDI_CH4U_win_shared_info_t *shared_table = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
 
     mpi_errno = MPIDI_OFI_win_init(size,disp_unit,win_ptr,info_ptr,comm_ptr,
                                            MPI_WIN_FLAVOR_SHARED, MPI_WIN_UNIFIED);
@@ -780,7 +780,7 @@ static inline int MPIDI_NM_win_allocate_shared(MPI_Aint    size,
         /* If we hit this assert, we need to iterate
          * trying more addresses
          */
-        MPIU_Assert(rc == 1);
+        MPIR_Assert(rc == 1);
         map_ptr = mmap(map_ptr, mapsize,
                        PROT_READ|PROT_WRITE,
                        MAP_SHARED|MAP_FIXED,
@@ -821,7 +821,7 @@ fn_zero:
     if(first) shm_unlink(shm_key);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE_SHARED);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -834,12 +834,12 @@ fn_fail:
 static inline int MPIDI_NM_win_detach(MPIR_Win *win, const void *base)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_DETACH);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_DETACH);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_DETACH);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_DETACH);
     MPIR_ERR_CHKANDSTMT((win->create_flavor != MPI_WIN_FLAVOR_DYNAMIC), mpi_errno,
                         MPI_ERR_RMA_FLAVOR, goto fn_fail, "**rmaflavor");
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_DETACH);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_DETACH);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -857,8 +857,8 @@ static inline int MPIDI_NM_win_shared_query(MPIR_Win *win,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
     int offset = rank;
     int i;
     uintptr_t  base = (uintptr_t) MPIDI_CH4U_WIN(win, mmap_addr);
@@ -878,7 +878,7 @@ static inline int MPIDI_NM_win_shared_query(MPIR_Win *win,
     else
         *(void **)baseptr = NULL;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_SHARED_QUERY);
     return mpi_errno;
 }
 
@@ -899,8 +899,8 @@ static inline int MPIDI_NM_win_allocate(MPI_Aint     size,
     void           *baseP;
     MPIR_Win       *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
 
     mpi_errno = MPIDI_OFI_win_init(size,disp_unit,win_ptr, info, comm,
                                            MPI_WIN_FLAVOR_ALLOCATE, MPI_WIN_UNIFIED);
@@ -924,7 +924,7 @@ static inline int MPIDI_NM_win_allocate(MPI_Aint     size,
     if(mpi_errno!=MPI_SUCCESS) goto fn_fail;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_ALLOCATE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -937,15 +937,15 @@ fn_fail:
 static inline int MPIDI_NM_win_flush(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
 
     MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_OFI_MPI_CALL_POP(MPIDI_Win_progress_fence(win));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -958,14 +958,14 @@ fn_fail:
 static inline int MPIDI_NM_win_flush_local_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
 
     MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
     MPIDI_OFI_MPI_CALL_POP(MPIDI_Win_progress_fence(win));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL_ALL);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -978,8 +978,8 @@ fn_fail:
 static inline int MPIDI_NM_win_unlock_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
     int i;
     MPIDI_CH4U_win_lock_info *lockQ;
 
@@ -987,7 +987,7 @@ static inline int MPIDI_NM_win_unlock_all(MPIR_Win *win)
 
     MPIDI_OFI_MPI_CALL_POP(MPIDI_Win_progress_fence(win));
 
-    MPIU_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
+    MPIR_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
 
     lockQ = (MPIDI_CH4U_win_lock_info *) MPIDI_CH4U_WIN(win, lockQ);
 
@@ -1013,7 +1013,7 @@ static inline int MPIDI_NM_win_unlock_all(MPIR_Win *win)
     MPIDI_CH4U_WIN(win, sync).target_epoch_type = MPIDI_CH4U_EPOTYPE_NONE;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_UNLOCK_ALL);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1031,8 +1031,8 @@ static inline int MPIDI_NM_win_create_dynamic(MPIR_Info *info,
     int             rc        = MPI_SUCCESS;
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
     MPIR_Win       *win;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
 
     rc = MPIDI_OFI_win_init((uintptr_t)UINTPTR_MAX-(uintptr_t)MPI_BOTTOM,
                                     1,win_ptr, info, comm,
@@ -1053,7 +1053,7 @@ static inline int MPIDI_NM_win_create_dynamic(MPIR_Info *info,
     mpi_errno = MPIR_Barrier_impl(comm, &errflag);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_CREATE_DYNAMIC);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1066,15 +1066,15 @@ fn_fail:
 static inline int MPIDI_NM_win_flush_local(int rank, MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
 
     MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     MPIDI_OFI_MPI_CALL_POP(MPIDI_Win_progress_fence(win));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_LOCAL);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1088,15 +1088,15 @@ fn_fail:
 static inline int MPIDI_NM_win_sync(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SYNC);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_SYNC);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_SYNC);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_SYNC);
 
     MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
 
     OPA_read_write_barrier();
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_SYNC);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_SYNC);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1109,14 +1109,14 @@ fn_fail:
 static inline int MPIDI_NM_win_flush_all(MPIR_Win *win)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
 
     MPIDI_CH4U_EPOCH_LOCK_CHECK(win,mpi_errno,goto fn_fail);
     MPIDI_OFI_MPI_CALL_POP(MPIDI_Win_progress_fence(win));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FLUSH_ALL);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -1131,8 +1131,8 @@ static inline int MPIDI_NM_win_lock_all(int assert, MPIR_Win *win)
     int mpi_errno = MPI_SUCCESS;
     MPIDI_CH4U_win_lock_info *lockQ;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
 
     MPIDI_CH4U_EPOCH_CHECK_TYPE(win,mpi_errno,goto fn_fail);
 
@@ -1141,7 +1141,7 @@ static inline int MPIDI_NM_win_lock_all(int assert, MPIR_Win *win)
 
     if(!MPIDI_CH4U_WIN(win, lockQ)) {
         MPIDI_CH4U_WIN(win, lockQ) = (MPIDI_CH4U_win_lock_info *) MPL_calloc(size, sizeof(MPIDI_CH4U_win_lock_info));
-        MPIU_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
+        MPIR_Assert(MPIDI_CH4U_WIN(win, lockQ) != NULL);
     }
 
     lockQ = MPIDI_CH4U_WIN(win, lockQ);
@@ -1172,7 +1172,7 @@ static inline int MPIDI_NM_win_lock_all(int assert, MPIR_Win *win)
     MPIDI_CH4U_WIN(win, sync).origin_epoch_type = MPIDI_CH4U_EPOTYPE_LOCK_ALL;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_LOCK_ALL);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

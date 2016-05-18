@@ -20,7 +20,7 @@ static inline int MPIDI_SHM_improbe(int source,
                                     int context_offset,
                                     int *flag, MPIR_Request ** message, MPI_Status * status)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -29,7 +29,7 @@ static inline int MPIDI_SHM_iprobe(int source,
                                    MPIR_Comm * comm,
                                    int context_offset, int *flag, MPI_Status * status)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

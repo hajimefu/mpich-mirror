@@ -377,7 +377,7 @@ typedef struct {
 } MPIDI_OFI_send_control_t;
 
 typedef struct {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     void *pad;
 } MPIDI_OFI_offset_checker_t;
 
@@ -454,7 +454,7 @@ typedef struct {
 } MPIDI_OFI_win_noncontig_t;
 
 typedef struct MPIDI_OFI_win_request {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     char pad[MPIDI_REQUEST_HDR_SIZE - MPIDI_OFI_OBJECT_HEADER_SIZE];
     struct fi_context                     context;          /* fixed field, do not move */
     int                                   event_id;         /* fixed field, do not move */

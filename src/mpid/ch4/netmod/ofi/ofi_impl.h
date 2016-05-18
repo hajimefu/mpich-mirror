@@ -70,13 +70,13 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
     } while (0)
 
 #define MPIDI_OFI_ssendack_request_t_tls_free(req) \
-  MPIU_Handle_obj_free(&MPIR_Request_mem, (req))
+  MPIR_Handle_obj_free(&MPIR_Request_mem, (req))
 
 #define MPIDI_OFI_ssendack_request_t_alloc_and_init(req)        \
     do {                                                                \
         MPIDI_OFI_ssendack_request_t_tls_alloc(req);            \
-        MPIU_Assert(req != NULL);                                       \
-        MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle)                    \
+        MPIR_Assert(req != NULL);                                       \
+        MPIR_Assert(HANDLE_GET_MPI_KIND(req->handle)                    \
                     == MPID_SSENDACK_REQUEST);                          \
     } while (0)
 
@@ -302,16 +302,16 @@ __ALWAYS_INLINE__ void MPIDI_OFI_win_datatype_unmap(MPIDI_OFI_win_datatype_t *dt
 __ALWAYS_INLINE__ void MPIDI_OFI_win_request_complete(MPIDI_OFI_win_request_t *req)
 {
     int count;
-    MPIU_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
-    MPIU_Object_release_ref(req, &count);
-    MPIU_Assert(count >= 0);
+    MPIR_Assert(HANDLE_GET_MPI_KIND(req->handle) == MPIR_REQUEST);
+    MPIR_Object_release_ref(req, &count);
+    MPIR_Assert(count >= 0);
     if (count == 0)
     {
         MPIDI_OFI_win_datatype_unmap(&req->noncontig->target_dt);
         MPIDI_OFI_win_datatype_unmap(&req->noncontig->origin_dt);
         MPIDI_OFI_win_datatype_unmap(&req->noncontig->result_dt);
         MPL_free(req->noncontig);
-        MPIU_Handle_obj_free(&MPIR_Request_mem, (req));
+        MPIR_Handle_obj_free(&MPIR_Request_mem, (req));
     }
 }
 
@@ -344,7 +344,7 @@ static inline bool MPIDI_OFI_is_tag_sync(uint64_t match_bits)
     return (0 != (MPIDI_OFI_SYNC_SEND & match_bits));
 }
 
-static inline uint64_t MPIDI_OFI_init_sendtag(MPIU_Context_id_t contextid,
+static inline uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
                                                       int               source,
                                                       int               tag,
                                                       uint64_t          type)
@@ -360,7 +360,7 @@ static inline uint64_t MPIDI_OFI_init_sendtag(MPIU_Context_id_t contextid,
 
 /* receive posting */
 static inline uint64_t MPIDI_OFI_init_recvtag(uint64_t          *mask_bits,
-                                                      MPIU_Context_id_t  contextid,
+                                                      MPIR_Context_id_t  contextid,
                                                       int                source,
                                                       int                tag)
 {

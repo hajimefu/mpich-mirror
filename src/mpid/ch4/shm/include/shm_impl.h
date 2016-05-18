@@ -79,27 +79,27 @@ MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_amv(int rank, MPIR_Comm * co
     return MPIDI_SHM_func->inject_amv( rank, comm, handler_id, am_hdrs, iov_len, data, count, datatype, shm_context);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPIR_Request * sreq) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_am_hdr_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, MPIR_Request * sreq) {
     return MPIDI_SHM_func->send_am_hdr_reply( context_id, handler_id, am_hdr, am_hdr_sz, sreq);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_am_hdr_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz) {
     return MPIDI_SHM_func->inject_am_hdr_reply( context_id, handler_id, am_hdr, am_hdr_sz);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPIR_Request * sreq) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_am_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype, MPIR_Request * sreq) {
     return MPIDI_SHM_func->send_am_reply( context_id, handler_id, am_hdr, am_hdr_sz, data, count, datatype, sreq);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_am_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_am_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, const void * am_hdr, size_t am_hdr_sz, const void * data, MPI_Count count, MPI_Datatype datatype) {
     return MPIDI_SHM_func->inject_am_reply( context_id, handler_id, am_hdr, am_hdr_sz, data, count, datatype);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPIR_Request * sreq) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_send_amv_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdr, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype, MPIR_Request * sreq) {
     return MPIDI_SHM_func->send_amv_reply( context_id, handler_id, am_hdr, iov_len, data, count, datatype, sreq);
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_amv_reply(MPIU_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_inject_amv_reply(MPIR_Context_id_t context_id, int src_rank, int handler_id, struct iovec * am_hdrs, size_t iov_len, const void * data, MPI_Count count, MPI_Datatype datatype) {
     return MPIDI_SHM_func->inject_amv_reply( context_id, handler_id, am_hdrs, iov_len, data, count, datatype);
 };
 
@@ -111,7 +111,7 @@ MPIDI_SHM_STATIC_INLINE_PREFIX size_t MPIDI_SHM_am_inject_max_sz(void) {
     return MPIDI_SHM_func->am_inject_max_sz();
 };
 
-MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_comm_get_lpid(MPIR_Comm * comm_ptr, int idx, int * lpid_ptr, MPIU_BOOL is_remote) {
+MPIDI_SHM_STATIC_INLINE_PREFIX int MPIDI_SHM_comm_get_lpid(MPIR_Comm * comm_ptr, int idx, int * lpid_ptr, MPL_bool is_remote) {
     return MPIDI_SHM_func->comm_get_lpid( comm_ptr, idx, lpid_ptr, is_remote);
 };
 

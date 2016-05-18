@@ -26,8 +26,8 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPIR_Comm * comm)
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type,is_localcomm;
     MPIDI_CH4U_rreq_t **uelist;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT_COMM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_INIT_COMM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_INIT_COMM);
 
     /*
       Prevents double initialization of some special communicators.
@@ -45,8 +45,8 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPIR_Comm * comm)
     subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
     is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
-    MPIU_Assert(subcomm_type <= 3);
-    MPIU_Assert(is_localcomm <= 1);
+    MPIR_Assert(subcomm_type <= 3);
+    MPIR_Assert(is_localcomm <= 1);
     MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] = comm;
     MPIDI_CH4U_COMM(comm, posted_list) = NULL;
     MPIDI_CH4U_COMM(comm, unexp_list)  = NULL;
@@ -65,7 +65,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init_comm(MPIR_Comm * comm)
 
     MPIDI_CH4U_COMM(comm, window_instance) = 0;
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT_COMM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_INIT_COMM);
     return mpi_errno;
 }
 
@@ -76,25 +76,25 @@ fn_exit:
 __CH4_INLINE__ int MPIDI_CH4U_destroy_comm(MPIR_Comm * comm)
 {
     int mpi_errno = MPI_SUCCESS, comm_idx, subcomm_type, is_localcomm;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_DESTROY_COMM);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_DESTROY_COMM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_DESTROY_COMM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_DESTROY_COMM);
 
     comm_idx     = MPIDI_CH4U_get_context_index(comm->recvcontext_id);
     subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, comm->recvcontext_id);
     is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, comm->recvcontext_id);
 
-    MPIU_Assert(subcomm_type <=3);
-    MPIU_Assert(is_localcomm <= 1);
-    MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] != NULL);
+    MPIR_Assert(subcomm_type <=3);
+    MPIR_Assert(is_localcomm <= 1);
+    MPIR_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] != NULL);
 
     if (MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[subcomm_type]) {
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4u.posted_list == NULL);
-        MPIU_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4u.unexp_list == NULL);
+        MPIR_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4u.posted_list == NULL);
+        MPIR_Assert(MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type]->dev.ch4.ch4u.unexp_list == NULL);
     }
     MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type] = NULL;
 
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_DESTROY_COMM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_DESTROY_COMM);
     return mpi_errno;
 }
 
@@ -107,8 +107,8 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPIR_Comm * comm_world, MPIR_Comm * comm_self
                                    int num_contexts, void **netmod_contexts)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_INIT);
 
     MPIDI_CH4_Global.is_ch4u_initialized = 0;
 
@@ -125,7 +125,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPIR_Comm * comm_world, MPIR_Comm * comm_self
 
     MPIDI_CH4_Global.buf_pool = MPIDI_CH4U_create_buf_pool(MPIDI_CH4I_BUF_POOL_NUM,
                                                            MPIDI_CH4I_BUF_POOL_SZ);
-    MPIU_Assert(MPIDI_CH4_Global.buf_pool);
+    MPIR_Assert(MPIDI_CH4_Global.buf_pool);
 
     mpi_errno = MPIDI_NM_reg_hdr_handler(MPIDI_CH4U_SEND,
                                              &MPIDI_CH4U_send_origin_cmpl_handler,
@@ -247,7 +247,7 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPIR_Comm * comm_world, MPIR_Comm * comm_self
     MPIDI_CH4_Global.win_hash = NULL;
 
     MPIDI_CH4_Global.is_ch4u_initialized = 1;
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_INIT);
 
   fn_exit:
     return mpi_errno;
@@ -261,13 +261,13 @@ __CH4_INLINE__ int MPIDI_CH4U_init(MPIR_Comm * comm_world, MPIR_Comm * comm_self
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void MPIDI_CH4U_finalize()
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FINALIZE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_FINALIZE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_FINALIZE);
     MPIDI_CH4_Global.is_ch4u_initialized = 0;
     MPL_HASH_CLEAR(dev.ch4u.hash_handle, MPIDI_CH4_Global.win_hash);
     MPIDI_CH4R_destroy_buf_pool(MPIDI_CH4_Global.buf_pool);
     MPL_free(MPIDI_CH4_Global.comm_req_lists);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FINALIZE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_FINALIZE);
 }
 
 #undef FUNCNAME
@@ -276,11 +276,11 @@ __CH4_INLINE__ void MPIDI_CH4U_finalize()
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPIR_Info * info_ptr)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_ALLOC_MEM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_ALLOC_MEM);
     void *p;
     p = MPL_malloc(size);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_ALLOC_MEM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_ALLOC_MEM);
     return p;
 }
 
@@ -291,10 +291,10 @@ __CH4_INLINE__ void *MPIDI_CH4U_alloc_mem(size_t size, MPIR_Info * info_ptr)
 __CH4_INLINE__ int MPIDI_CH4U_free_mem(void *ptr)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4U_FREE_MEM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_FREE_MEM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_FREE_MEM);
     MPL_free(ptr);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4U_FREE_MEM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_FREE_MEM);
     return mpi_errno;
 }
 

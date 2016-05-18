@@ -29,8 +29,8 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -61,7 +61,7 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -80,8 +80,8 @@ __ALWAYS_INLINE__ int ucx_sync_send_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -106,7 +106,7 @@ __ALWAYS_INLINE__ int ucx_sync_send_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -126,8 +126,8 @@ __ALWAYS_INLINE__ int ucx_sync_send_non_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -153,7 +153,7 @@ __ALWAYS_INLINE__ int ucx_sync_send_non_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -181,8 +181,8 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
     ucp_ep_h ep;
     uint64_t ucx_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND_CONTINOUS);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -214,7 +214,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
 fn_exit:
     *request = req;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND_CONTINOUS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND_CONTINOUS);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -239,8 +239,8 @@ static inline int ucx_send(const void *buf,
     MPI_Aint dt_true_lb;
     MPIR_Datatype *dt_ptr;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND);
 
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
@@ -266,7 +266,7 @@ static inline int ucx_send(const void *buf,
                                have_request, dt_ptr);
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -286,8 +286,8 @@ static inline int ucx_sync_send(const void *buf,
     MPI_Aint dt_true_lb;
     MPIR_Datatype *dt_ptr;
 
-    MPIDI_STATE_DECL(MPID_STATE_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND);
 
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
@@ -312,7 +312,7 @@ static inline int ucx_sync_send(const void *buf,
                                have_request, dt_ptr);
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -331,10 +331,10 @@ static inline int MPIDI_NM_send(const void *buf,
 {
 
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND);
     mpi_errno = ucx_send(buf, count, datatype, rank, tag, comm, context_offset, request, 0);
-    MPIDI_FUNC_EXIT(MPID_STATE_SEND);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_SEND);
     return mpi_errno;
 }
 

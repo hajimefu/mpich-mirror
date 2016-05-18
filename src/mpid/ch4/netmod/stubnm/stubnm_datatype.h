@@ -15,20 +15,20 @@
 
 static inline void MPIDI_NM_datatype_destroy(MPIR_Datatype *datatype_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_datatype_commit(MPIR_Datatype *datatype_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_datatype_dup(MPIR_Datatype *old_datatype_p,
                                          MPIR_Datatype *new_datatype_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 

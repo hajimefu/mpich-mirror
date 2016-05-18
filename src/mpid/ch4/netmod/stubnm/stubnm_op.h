@@ -15,13 +15,13 @@
 
 static inline void MPIDI_NM_op_destroy(MPIR_Op *op_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_op_commit(MPIR_Op *op_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 

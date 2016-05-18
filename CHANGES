@@ -1239,7 +1239,7 @@ www.mcs.anl.gov/mpi/mpich2/mpich2_1_0_6changes.htm.
   underlying physical topology to the MPI routines (Dims_create and the
   reorder == true cases in Cart_create and Graph_create).  
 
-- New memory allocation macros, MPIU_CHK[PL]MEM_*(), have been added to help
+- New memory allocation macros, MPIR_CHK[PL]MEM_*(), have been added to help
   prevent memory leaks.  See mpich2/src/include/mpir_mem.h.
 
 - New error reporting macros, MPIU_ERR_*, have been added to simplify the error

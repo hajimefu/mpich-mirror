@@ -65,10 +65,10 @@ static inline int MPIDI_NM_init(int rank,
     char *keyS, *valS, *buscard;
 
     /* Make sure our IOV is the same as portals4's IOV */
-    MPIU_Assert(sizeof(ptl_iovec_t) == sizeof(MPL_IOV));
-    MPIU_Assert(((void*)&(((ptl_iovec_t*)0)->iov_base)) == ((void*)&(((MPL_IOV*)0)->MPL_IOV_BUF)));
-    MPIU_Assert(((void*)&(((ptl_iovec_t*)0)->iov_len))  == ((void*)&(((MPL_IOV*)0)->MPL_IOV_LEN)));
-    MPIU_Assert(sizeof(((ptl_iovec_t*)0)->iov_len) == sizeof(((MPL_IOV*)0)->MPL_IOV_LEN));
+    MPIR_Assert(sizeof(ptl_iovec_t) == sizeof(MPL_IOV));
+    MPIR_Assert(((void*)&(((ptl_iovec_t*)0)->iov_base)) == ((void*)&(((MPL_IOV*)0)->MPL_IOV_BUF)));
+    MPIR_Assert(((void*)&(((ptl_iovec_t*)0)->iov_len))  == ((void*)&(((MPL_IOV*)0)->MPL_IOV_LEN)));
+    MPIR_Assert(sizeof(((ptl_iovec_t*)0)->iov_len) == sizeof(((MPL_IOV*)0)->MPL_IOV_LEN));
 
     /* init portals */
     ret = PtlInit();
@@ -198,15 +198,15 @@ static inline int MPIDI_NM_finalize(void)
 
 
 static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
-                                             int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+                                             int idx, int *lpid_ptr, MPL_bool is_remote)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -225,20 +225,20 @@ static inline int MPIDI_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * ma
 static inline int MPIDI_NM_getallincomm(MPIR_Comm * comm_ptr,
                                             int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
                                                            int size, const int lpids[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

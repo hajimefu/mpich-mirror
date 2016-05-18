@@ -13,7 +13,6 @@
 #define NETMOD_OFI_PRE_H_INCLUDED
 
 #include <mpi.h>
-#include "mpihandlemem.h"
 #include <rdma/fabric.h>
 #include <rdma/fi_endpoint.h>
 #include <rdma/fi_domain.h>
@@ -66,7 +65,7 @@ enum {
 typedef struct {
     /* context id and src rank so the target side can
        issue RDMA read operation */
-    MPIU_Context_id_t context_id;
+    MPIR_Context_id_t context_id;
     int src_rank;
 
     uint64_t src_offset;

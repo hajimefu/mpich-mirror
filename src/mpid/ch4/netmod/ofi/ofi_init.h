@@ -12,7 +12,7 @@
 #define NETMOD_OFI_INIT_H_INCLUDED
 
 #include "ofi_impl.h"
-#include "mpich_cvars.h"
+#include "mpir_cvars.h"
 #include "pmi.h"
 
 static inline int MPIDI_OFI_choose_provider(struct fi_info *prov, struct fi_info **prov_use);
@@ -64,8 +64,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     char keyS[MPIDI_KVSAPPSTRLEN];
     size_t optlen;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_INIT);
 
     CH4_COMPILE_TIME_ASSERT(offsetof(struct MPIR_Request, dev.ch4.netmod) ==
                             offsetof(MPIDI_OFI_chunk_request,context));
@@ -122,7 +122,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     /* substructures                                                            */
     /* ------------------------------------------------------------------------ */
     hints = fi_allocinfo();
-    MPIU_Assert(hints != NULL);
+    MPIR_Assert(hints != NULL);
 
     hints->mode = FI_CONTEXT|FI_ASYNC_IOV;   /* We can handle contexts  */
     hints->caps = 0ULL;                      /* Tag matching interface  */
@@ -311,7 +311,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     MPIDI_Global.addrnamelen = FI_NAME_MAX;
     MPIDI_OFI_CALL(fi_getname((fid_t) MPIDI_Global.ep, MPIDI_Global.addrname,
                                       &MPIDI_Global.addrnamelen), getname);
-    MPIU_Assert(MPIDI_Global.addrnamelen <= FI_NAME_MAX);
+    MPIR_Assert(MPIDI_Global.addrnamelen <= FI_NAME_MAX);
 
     val = valS;
     str_errno = MPL_STR_SUCCESS;
@@ -366,7 +366,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
            See MPIDI_OFI_do_send_am for short/long switching logic */
         size_t min_msg_sz = MPL_MAX(MPIDI_OFI_DEFAULT_SHORT_SEND_SIZE,
                                     MPIR_CVAR_CH4R_EAGER_THRESHOLD + MPIDI_NM_am_hdr_max_sz() + sizeof(MPIDI_OFI_am_header_t));
-        MPIU_Assert(min_msg_sz <= MPIDI_Global.max_send);
+        MPIR_Assert(min_msg_sz <= MPIDI_Global.max_send);
         MPIDI_Global.am_buf_pool = MPIDI_CH4U_create_buf_pool(MPIDI_OFI_BUF_POOL_NUM, MPIDI_OFI_BUF_POOL_SIZE);
         mpi_errno             = MPIDI_CH4U_init(comm_world, comm_self, num_contexts, netmod_contexts);
 
@@ -385,7 +385,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
             MPIDI_Global.am_bufs[i]          = MPL_malloc(MPIDI_OFI_AM_BUFF_SZ);
             MPIDI_Global.am_reqs[i].event_id = MPIDI_OFI_EVENT_AM_RECV;
             MPIDI_Global.am_reqs[i].index    = i;
-            MPIU_Assert(MPIDI_Global.am_bufs[i]);
+            MPIR_Assert(MPIDI_Global.am_bufs[i]);
             MPIDI_Global.am_iov[i].iov_base  = MPIDI_Global.am_bufs[i];
             MPIDI_Global.am_iov[i].iov_len   = MPIDI_OFI_AM_BUFF_SZ;
             MPIDI_Global.am_msg[i].msg_iov   = &MPIDI_Global.am_iov[i];
@@ -426,7 +426,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                                    parent_port,
                                                    MPIDI_MAX_KVS_VALUE_LEN), pmi);
         MPIDI_OFI_MPI_CALL_POP(MPIDI_Comm_connect(parent_port, NULL, 0, comm_world, &MPIR_Process.comm_parent));
-        MPIU_Assert(MPIR_Process.comm_parent != NULL);
+        MPIR_Assert(MPIR_Process.comm_parent != NULL);
         MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
 
@@ -448,7 +448,7 @@ fn_exit:
     if(table)
         MPL_free(table);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -506,7 +506,7 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
     /* Progress until we drain all inflight injection emulation requests */
     while(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) > 0)
         MPIDI_OFI_PROGRESS();
-    MPIU_Assert(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) == 0);
+    MPIR_Assert(OPA_load_int(&MPIDI_Global.am_inflight_inject_emus) == 0);
 
     if(do_scalable_ep) {
         MPIDI_OFI_CALL(fi_close((fid_t) MPIDI_OFI_EP_TX_TAG(0)), epclose);
@@ -545,8 +545,8 @@ static inline int MPIDI_OFI_finalize_generic(int do_scalable_ep,
 
         MPIDI_CH4R_destroy_buf_pool(MPIDI_Global.am_buf_pool);
 
-        MPIU_Assert(MPIDI_Global.cq_buff_head == MPIDI_Global.cq_buff_tail);
-        MPIU_Assert(slist_empty(&MPIDI_Global.cq_buff_list));
+        MPIR_Assert(MPIDI_Global.cq_buff_head == MPIDI_Global.cq_buff_tail);
+        MPIR_Assert(slist_empty(&MPIDI_Global.cq_buff_list));
     }
 
     PMI_Finalize();
@@ -585,7 +585,7 @@ static inline int MPIDI_NM_free_mem(void *ptr)
 }
 
 static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm *comm_ptr,
-                                             int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+                                             int idx, int *lpid_ptr, MPL_bool is_remote)
 {
     int avtid = 0, lpid = 0;
     if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM)
@@ -603,11 +603,11 @@ static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm *comm_ptr,
 static inline int MPIDI_NM_gpid_get(MPIR_Comm *comm_ptr, int rank, MPIR_Gpid *gpid)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(rank < comm_ptr->local_size);
+    MPIR_Assert(rank < comm_ptr->local_size);
     size_t sz = sizeof(MPIDI_OFI_GPID(gpid).addr);
     MPIDI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_OFI_COMM_TO_PHYS(comm_ptr, rank),
                                         &MPIDI_OFI_GPID(gpid).addr, &sz), avlookup);
-    MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(gpid).addr));
+    MPIR_Assert(sz <= sizeof(MPIDI_OFI_GPID(gpid).addr));
 fn_exit:
     return mpi_errno;
 fn_fail:
@@ -659,7 +659,7 @@ static inline int MPIDI_NM_gpid_tolpidarray_generic(int       size,
             for(j = 0; j < MPIDIU_get_av_table(k)->size; j++) {
                 size_t sz = sizeof(MPIDI_OFI_GPID(&gpid[i]).addr);
                 MPIDI_OFI_CALL(fi_av_lookup(MPIDI_Global.av, MPIDI_OFI_TO_PHYS(k, j), &tbladdr, &sz), avlookup);
-                MPIU_Assert(sz <= sizeof(MPIDI_OFI_GPID(&gpid[i]).addr));
+                MPIR_Assert(sz <= sizeof(MPIDI_OFI_GPID(&gpid[i]).addr));
 
                 if(!memcmp(tbladdr, MPIDI_OFI_GPID(&gpid[i]).addr, sz)) {
                     lpid[i] = MPIDIU_LPID_CREATE(k, j);
@@ -732,8 +732,8 @@ static inline int MPIDI_OFI_create_endpoint(struct fi_info          *prov_use,
     struct fi_tx_attr tx_attr;
     struct fi_rx_attr rx_attr;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
 
     if(do_scalable_ep) {
         MPIDI_OFI_CALL(fi_scalable_ep(domain, prov_use, ep, NULL), ep);
@@ -828,7 +828,7 @@ static inline int MPIDI_OFI_create_endpoint(struct fi_info          *prov_use,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_CREATE_ENDPOINT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

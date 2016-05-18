@@ -16,7 +16,7 @@ static inline int MPIDI_SHM_reg_hdr_handler(int handler_id,
                                                 MPIDI_SHM_am_origin_handler_fn origin_handler_fn,
                                                 MPIDI_SHM_am_target_handler_fn target_handler_fn)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -26,7 +26,7 @@ static inline int MPIDI_SHM_send_am_hdr(int rank,
                                             const void *am_hdr,
                                             size_t am_hdr_sz, MPIR_Request *sreq, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -39,7 +39,7 @@ static inline int MPIDI_SHM_send_am(int rank,
                                         MPI_Count count,
                                         MPI_Datatype datatype, MPIR_Request *sreq, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -52,20 +52,20 @@ static inline int MPIDI_SHM_send_amv(int rank,
                                          MPI_Count count,
                                          MPI_Datatype datatype, MPIR_Request *sreq, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_send_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_send_am_hdr_reply(MPIR_Context_id_t context_id, int src_rank,
                                                   int handler_id,
                                                   const void *am_hdr,
                                                   size_t am_hdr_sz, MPIR_Request *sreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_send_am_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_send_am_reply(MPIR_Context_id_t context_id, int src_rank,
                                               int handler_id,
                                               const void *am_hdr,
                                               size_t am_hdr_sz,
@@ -73,11 +73,11 @@ static inline int MPIDI_SHM_send_am_reply(MPIU_Context_id_t context_id, int src_
                                               MPI_Count count,
                                               MPI_Datatype datatype, MPIR_Request *sreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_send_amv_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_send_amv_reply(MPIR_Context_id_t context_id, int src_rank,
                                                int handler_id,
                                                struct iovec *am_hdr,
                                                size_t iov_len,
@@ -85,13 +85,13 @@ static inline int MPIDI_SHM_send_amv_reply(MPIU_Context_id_t context_id, int src
                                                MPI_Count count,
                                                MPI_Datatype datatype, MPIR_Request *sreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline size_t MPIDI_SHM_am_hdr_max_sz(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
@@ -100,7 +100,7 @@ static inline int MPIDI_SHM_inject_am_hdr(int rank,
                                               int handler_id,
                                               const void *am_hdr, size_t am_hdr_sz, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -112,7 +112,7 @@ static inline int MPIDI_SHM_inject_am(int rank,
                                           const void *data,
                                           MPI_Count count, MPI_Datatype datatype, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -124,43 +124,43 @@ static inline int MPIDI_SHM_inject_amv(int rank,
                                            const void *data,
                                            MPI_Count count, MPI_Datatype datatype, void *shm_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_inject_am_hdr_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_inject_am_hdr_reply(MPIR_Context_id_t context_id, int src_rank,
                                                     int handler_id,
                                                     const void *am_hdr, size_t am_hdr_sz)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_inject_am_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_inject_am_reply(MPIR_Context_id_t context_id, int src_rank,
                                                 int handler_id,
                                                 const void *am_hdr,
                                                 size_t am_hdr_sz,
                                                 const void *data,
                                                 MPI_Count count, MPI_Datatype datatype)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
-static inline int MPIDI_SHM_inject_amv_reply(MPIU_Context_id_t context_id, int src_rank,
+static inline int MPIDI_SHM_inject_amv_reply(MPIR_Context_id_t context_id, int src_rank,
                                                  int handler_id,
                                                  struct iovec *am_hdr,
                                                  size_t iov_len,
                                                  const void *data,
                                                  MPI_Count count, MPI_Datatype datatype)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline size_t MPIDI_SHM_am_inject_max_sz(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 

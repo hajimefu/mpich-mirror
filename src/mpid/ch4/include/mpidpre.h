@@ -335,12 +335,12 @@ typedef struct {
 } MPIDII_gpid_t;
 
 typedef struct {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     MPIDII_lpid_t lpid[0];
 } MPIDII_rank_map_lut_t;
 
 typedef struct {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     MPIDII_gpid_t gpid[0];
 } MPIDII_rank_map_mlut_t;
 
@@ -426,7 +426,7 @@ typedef struct {
 } MPIDII_av_entry_t;
 
 typedef struct {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     int size;
     MPIDII_av_entry_t table[0];
 } MPIDII_av_table_t;

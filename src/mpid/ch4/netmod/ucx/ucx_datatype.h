@@ -107,7 +107,7 @@ static inline void MPIDI_NM_datatype_destroy(MPIR_Datatype *datatype_p){
 
     if( datatype_p->dev.netmod.ucx.has_ucp == 1) {
         ucp_dt_destroy(ucp_datatype);
-        MPIU_Object_release_ref(datatype_p, &in_use);
+        MPIR_Object_release_ref(datatype_p, &in_use);
     }
 
     return;
@@ -124,11 +124,11 @@ static inline void MPIDI_NM_datatype_commit(MPIR_Datatype *datatype_p){
     if (!is_contig) {
         status = ucp_dt_create_generic(&MPIDI_UCX_datatype_ops,
                                        datatype_p, &ucp_datatype);
-        MPIU_Assertp(status == UCS_OK);
+        MPIR_Assertp(status == UCS_OK);
         datatype_p->dev.netmod.ucx.ucp_datatype = ucp_datatype;
 
         datatype_p->dev.netmod.ucx.has_ucp = 1;
-        MPIU_Object_add_ref(datatype_p);
+        MPIR_Object_add_ref(datatype_p);
     }
 
     return;

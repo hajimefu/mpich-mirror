@@ -16,13 +16,13 @@
 
 __CH4_INLINE__ int MPIDI_Request_is_anysource(MPIR_Request * req)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 __CH4_INLINE__ int MPIDI_Request_is_pending_failure(MPIR_Request * req)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

@@ -51,7 +51,7 @@ static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
         }
 
         data_sz = MPL_MIN(data_sz, in_data_sz);
-        MPIU_Memcpy(p_data, in_data, data_sz);
+        MPIR_Memcpy(p_data, in_data, data_sz);
         MPIR_STATUS_SET_COUNT(rreq->status, data_sz);
     } else {
         done = 0;
@@ -61,7 +61,7 @@ static inline int MPIDI_PTL_am_handler(ptl_event_t *e)
 
         for(i = 0; i < iov_len && rem > 0; i++) {
             curr_len = MPL_MIN(rem, iov[i].iov_len);
-            MPIU_Memcpy(iov[i].iov_base, (char *) in_data + done, curr_len);
+            MPIR_Memcpy(iov[i].iov_base, (char *) in_data + done, curr_len);
             rem -= curr_len;
             done += curr_len;
         }
@@ -91,7 +91,7 @@ static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
     while (PtlEQPoll(MPIDI_PTL_global.eqs, 2, 0, &e, &which) != PTL_EQ_EMPTY) {
         switch (e.type) {
         case PTL_EVENT_PUT:
-            MPIU_Assert(e.ptl_list == PTL_OVERFLOW_LIST);
+            MPIR_Assert(e.ptl_list == PTL_OVERFLOW_LIST);
             MPIDI_PTL_am_handler(&e);
             break;
         case PTL_EVENT_ACK:
@@ -101,7 +101,7 @@ static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
                 int handler_id = sreq->dev.ch4.ch4u.netmod_am.portals4.handler_id;
 
                 MPIR_cc_decr(sreq->cc_ptr, &count);
-                MPIU_Assert(count >= 0);
+                MPIR_Assert(count >= 0);
 
                 if (count == 0) {
                     MPIDI_CH4U_request_release(sreq);
@@ -129,55 +129,55 @@ static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 
 static inline int MPIDI_NM_progress_test(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_progress_poke(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline void MPIDI_NM_progress_start(MPID_Progress_state * state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline void MPIDI_NM_progress_end(MPID_Progress_state * state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline int MPIDI_NM_progress_wait(MPID_Progress_state * state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_progress_register(int (*progress_fn) (int *), int *id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_progress_deregister(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_progress_activate(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_progress_deactivate(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

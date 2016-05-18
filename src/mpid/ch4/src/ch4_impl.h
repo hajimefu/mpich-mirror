@@ -43,8 +43,8 @@ static inline MPIR_Comm *MPIDI_CH4U_context_id_to_comm(uint64_t context_id)
     int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
     int subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, context_id);
     int is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
-    MPIU_Assert(subcomm_type <= 3);
-    MPIU_Assert(is_localcomm <= 2);
+    MPIR_Assert(subcomm_type <= 3);
+    MPIR_Assert(is_localcomm <= 2);
     return MPIDI_CH4_Global.comm_req_lists[comm_idx].comm[is_localcomm][subcomm_type];
 }
 
@@ -53,8 +53,8 @@ static inline MPIDI_CH4U_rreq_t **MPIDI_CH4U_context_id_to_uelist(uint64_t conte
     int comm_idx     = MPIDI_CH4U_get_context_index(context_id);
     int subcomm_type = MPIR_CONTEXT_READ_FIELD(SUBCOMM, context_id);
     int is_localcomm = MPIR_CONTEXT_READ_FIELD(IS_LOCALCOMM, context_id);
-    MPIU_Assert(subcomm_type <= 3);
-    MPIU_Assert(is_localcomm <= 2);
+    MPIR_Assert(subcomm_type <= 3);
+    MPIR_Assert(is_localcomm <= 2);
     return &MPIDI_CH4_Global.comm_req_lists[comm_idx].uelist[is_localcomm][subcomm_type];
 }
 
@@ -65,13 +65,13 @@ static inline uint64_t MPIDI_CH4U_generate_win_id(MPIR_Comm *comm_ptr)
                 ((uint64_t)((MPIDI_CH4U_COMM(comm_ptr, window_instance))++)<<32));
 }
 
-static inline MPIU_Context_id_t MPIDI_CH4U_win_id_to_context(uint64_t win_id)
+static inline MPIR_Context_id_t MPIDI_CH4U_win_id_to_context(uint64_t win_id)
 {
     /* pick the lower 32-bit to extract context id */
     return (win_id - 1) & 0xffffffff;
 }
 
-static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
+static inline MPIR_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
 {
     return MPIDI_CH4U_win_id_to_context(MPIDI_CH4U_WIN(win, win_id));
 }
@@ -82,14 +82,14 @@ static inline MPIU_Context_id_t MPIDI_CH4U_win_to_context(const MPIR_Win *win)
 #define FCNAME MPL_QUOTE(FUNCNAME)
 __CH4_INLINE__ void MPIDI_CH4U_request_release(MPIR_Request * req)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_REQUEST_RELEASE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_REQEUST_RELEASE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4R_REQUEST_RELEASE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4R_REQEUST_RELEASE);
 
     if (req->kind == MPIR_REQUEST_KIND__PREQUEST_RECV && NULL != MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req)) {
         MPIR_Request_free(MPIDI_CH4I_REQUEST_ANYSOURCE_PARTNER(req));
     }
     MPIR_Request_free(req);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_REQUEST_RELEASE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4R_REQUEST_RELEASE);
 }
 
 #undef FUNCNAME
@@ -288,7 +288,7 @@ __CH4_INLINE__ void MPIDI_CH4U_request_complete(MPIR_Request *req)
     ((type *) ((char *)ptr - offsetof(type, field)))
 #endif
 
-static inline uint64_t MPIDI_CH4U_init_send_tag(MPIU_Context_id_t contextid, int source, int tag)
+static inline uint64_t MPIDI_CH4U_init_send_tag(MPIR_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits;
     match_bits = contextid;
@@ -300,7 +300,7 @@ static inline uint64_t MPIDI_CH4U_init_send_tag(MPIU_Context_id_t contextid, int
 }
 
 static inline uint64_t MPIDI_CH4U_init_recvtag(uint64_t * mask_bits,
-                                              MPIU_Context_id_t contextid, int source, int tag)
+                                              MPIR_Context_id_t contextid, int source, int tag)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_CH4U_PROTOCOL_MASK;
@@ -332,8 +332,8 @@ static inline int MPIDI_CH4I_valid_group_rank(MPIR_Comm  *comm,
                                               int         rank,
                                               MPIR_Group *grp)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_VALID_GROUP_RANK);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_VALID_GROUP_RANK);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4I_VALID_GROUP_RANK);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4I_VALID_GROUP_RANK);
 
     int lpid;
     int size = grp->size;
@@ -352,7 +352,7 @@ static inline int MPIDI_CH4I_valid_group_rank(MPIR_Comm  *comm,
 
     ret = (z < size);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_VALID_GROUP_RANK);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4I_VALID_GROUP_RANK);
 fn_exit:
     return ret;
 }

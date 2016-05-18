@@ -140,8 +140,8 @@ static inline int MPIDI_UCX_Win_init(MPI_Aint     length,
 {
     int       mpi_errno = MPI_SUCCESS;
     MPIR_Win *win;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_UCX_WIN_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_UCX_WIN_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_UCX_WIN_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_UCX_WIN_INIT);
 
     mpi_errno = MPIDI_CH4R_win_init(length, disp_unit, &win, info, comm_ptr, create_flavor, model);
     MPIR_ERR_CHKANDSTMT(mpi_errno != MPI_SUCCESS,
@@ -154,7 +154,7 @@ static inline int MPIDI_UCX_Win_init(MPI_Aint     length,
     memset(&MPIDI_UCX_WIN(win), 0, sizeof(MPIDI_UCX_win_t));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_UCX_PROGRESS_WIN_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_UCX_PROGRESS_WIN_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -239,7 +239,7 @@ static inline int MPIDI_NM_win_free(MPIR_Win ** win_ptr)
         win->base = NULL;
     MPIDI_CH4R_win_finalize(win_ptr);
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_WIN_FREE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_WIN_FREE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -276,8 +276,8 @@ static inline int MPIDI_NM_win_create(void *base,
     MPIR_Errflag_t  errflag   = MPIR_ERR_NONE;
     MPIR_Win       *win;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_WIN_CREATE);
 
     MPIDI_UCX_Win_init(length, disp_unit, win_ptr, info,
                                comm_ptr,MPI_WIN_FLAVOR_CREATE,
@@ -297,7 +297,7 @@ static inline int MPIDI_NM_win_create(void *base,
     if(mpi_errno != MPI_SUCCESS) goto fn_fail;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_WIN_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_WIN_CREATE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -342,8 +342,8 @@ static inline int MPIDI_NM_win_allocate(MPI_Aint length,
     MPIR_Win       *win;
     void *base = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_WIN_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_WIN_WIN_ALLOCATE);
 
     MPIDI_UCX_Win_init(length, disp_unit, win_ptr, info,
                                comm_ptr,MPI_WIN_FLAVOR_ALLOCATE,
@@ -363,7 +363,7 @@ static inline int MPIDI_NM_win_allocate(MPI_Aint length,
 
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_WIN_ALLOCATE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

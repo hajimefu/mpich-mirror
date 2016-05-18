@@ -37,14 +37,14 @@
 static inline size_t MPIDI_CH4R_get_mapsize(size_t size,
 					    size_t *psz)
 {
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_MAPSIZE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_MAPSIZE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4R_GET_MAPSIZE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4R_GET_MAPSIZE);
 
     long    page_sz = sysconf(_SC_PAGESIZE);
     size_t  mapsize = (size + (page_sz-1))&(~(page_sz-1));
     *psz            = page_sz;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_MAPSIZE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4R_GET_MAPSIZE);
     return mapsize;
 }
 
@@ -62,14 +62,14 @@ static inline int MPIDI_CH4R_check_maprange_ok(void   *start,
     size_t  i,num_pages = mapsize/page_sz;
     char   *ptr         = (char *)start;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
 
     for(i=0; i<num_pages; i++) {
         rc = msync(ptr,page_sz,0);
 
         if(rc == -1) {
-            MPIU_Assert(errno == ENOMEM);
+            MPIR_Assert(errno == ENOMEM);
             ptr+=page_sz;
         } else
             goto fn_exit;
@@ -77,7 +77,7 @@ static inline int MPIDI_CH4R_check_maprange_ok(void   *start,
 
     ret = 1;
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4R_CHECK_MAPRANGE_OK);
     return ret;
 }
 
@@ -104,8 +104,8 @@ static inline void *MPIDI_CH4R_generate_random_addr(size_t size)
     struct random_data rbuf;
 #endif
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
 
 #ifndef USE_SYM_HEAP
     map_pointer = -1ULL;
@@ -140,7 +140,7 @@ static inline void *MPIDI_CH4R_generate_random_addr(size_t size)
 #endif
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4R_GENERATE_RANDOM_ADDR);
     return (void *)map_pointer;
 }
 
@@ -163,8 +163,8 @@ static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
     size_t    page_sz;
 #endif
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
 
 #ifndef USE_SYM_HEAP
     iter = 0;
@@ -262,7 +262,7 @@ static inline int MPIDI_CH4R_get_symmetric_heap(MPI_Aint    size,
     *base = baseP;
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4R_GET_SYMMETRIC_HEAP);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

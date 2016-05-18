@@ -55,13 +55,13 @@ int MPIDI_OFI_progress_generic(void *netmod_context,
 static inline int MPIDI_NM_progress(void *netmod_context, int blocking)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_PROGRESS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_PROGRESS);
     mpi_errno = MPIDI_OFI_progress_generic(netmod_context,
                                                    blocking,
                                                    MPIDI_OFI_ENABLE_AM,
                                                    MPIDI_OFI_ENABLE_TAGGED);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_PROGRESS);
     return mpi_errno;
 }
 

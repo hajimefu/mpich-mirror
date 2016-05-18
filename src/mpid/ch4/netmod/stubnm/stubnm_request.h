@@ -15,12 +15,12 @@
 
 static inline void MPIDI_NM_am_request_init(MPIR_Request *req)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 }
 
 static inline void MPIDI_NM_am_request_finalize(MPIR_Request *req)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 }
 
 #endif /* NETMOD_STUBNM_REQUEST_H_INCLUDED */

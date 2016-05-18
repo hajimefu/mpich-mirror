@@ -18,8 +18,8 @@ static inline int MPIDII_alloc_lut(MPIDII_rank_map_lut_t **lut, int size)
     int mpi_errno = MPI_SUCCESS;
     MPIDII_rank_map_lut_t *new_lut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDIU_ALLOC_LUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_ALLOC_LUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDIU_ALLOC_LUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDIU_ALLOC_LUT);
 
     new_lut = (MPIDII_rank_map_lut_t *) MPL_malloc(sizeof(MPIDII_rank_map_lut_t)
                                                        + size * sizeof(MPIDII_lpid_t));
@@ -28,16 +28,16 @@ static inline int MPIDII_alloc_lut(MPIDII_rank_map_lut_t **lut, int size)
         MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**nomem");
     }
 
-    MPIU_Object_set_ref(new_lut, 1);
+    MPIR_Object_set_ref(new_lut, 1);
     *lut = new_lut;
 
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
             (MPL_DBG_FDEST, "alloc lut %p, size %ld, refcount=%d",
              new_lut,
              size * sizeof(MPIDII_lpid_t),
-             MPIU_Object_get_ref(new_lut)));
+             MPIR_Object_get_ref(new_lut)));
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_ALLOC_LUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDIU_ALLOC_LUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -52,16 +52,16 @@ static inline int MPIDIU_release_lut(MPIDII_rank_map_lut_t *lut)
     int mpi_errno = MPI_SUCCESS;
     int count = 0;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDIU_RELEASE_LUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_RELEASE_LUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDIU_RELEASE_LUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDIU_RELEASE_LUT);
 
-    MPIU_Object_release_ref(lut, &count);
+    MPIR_Object_release_ref(lut, &count);
     if (count == 0) {
         MPL_free(lut);
         MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
                 (MPL_DBG_FDEST, "free lut %p", lut));
     }
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_RELEASE_LUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDIU_RELEASE_LUT);
     return mpi_errno;
 }
 
@@ -74,8 +74,8 @@ static inline int MPIDII_alloc_mlut(MPIDII_rank_map_mlut_t **mlut, int size)
     int mpi_errno = MPI_SUCCESS;
     MPIDII_rank_map_mlut_t *new_mlut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDIU_ALLOC_MLUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_ALLOC_MLUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDIU_ALLOC_MLUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDIU_ALLOC_MLUT);
 
     new_mlut = (MPIDII_rank_map_mlut_t *) MPL_malloc(sizeof(MPIDII_rank_map_mlut_t)
                                                        + size * sizeof(MPIDII_gpid_t));
@@ -84,16 +84,16 @@ static inline int MPIDII_alloc_mlut(MPIDII_rank_map_mlut_t **mlut, int size)
         MPIR_ERR_SETANDJUMP(mpi_errno, MPI_ERR_OTHER, "**nomem");
     }
 
-    MPIU_Object_set_ref(new_mlut, 1);
+    MPIR_Object_set_ref(new_mlut, 1);
     *mlut = new_mlut;
 
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
             (MPL_DBG_FDEST, "alloc mlut %p, size %ld, refcount=%d",
              new_mlut,
              size * sizeof(MPIDII_gpid_t),
-             MPIU_Object_get_ref(new_mlut)));
+             MPIR_Object_get_ref(new_mlut)));
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_ALLOC_MLUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDIU_ALLOC_MLUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -108,17 +108,17 @@ static inline int MPIDIU_release_mlut(MPIDII_rank_map_mlut_t *mlut)
     int mpi_errno = MPI_SUCCESS;
     int count = 0;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDIU_RELEASE_MLUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDIU_RELEASE_MLUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDIU_RELEASE_MLUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDIU_RELEASE_MLUT);
 
-    MPIU_Object_release_ref(mlut, &count);
+    MPIR_Object_release_ref(mlut, &count);
     if (count == 0) {
         MPL_free(mlut);
         MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MEMORY, VERBOSE,
                 (MPL_DBG_FDEST, "free mlut %p", mlut));
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDIU_RELEASE_MLUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDIU_RELEASE_MLUT);
     return mpi_errno;
 }
 
@@ -205,8 +205,8 @@ static inline int MPIDII_src_comm_to_lut(MPIDII_rank_map_t *src,
     int mpi_errno = MPI_SUCCESS, i;
     MPIDII_rank_map_lut_t *lut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
 
     if (!mapper_offset) {
         mpi_errno = MPIDII_alloc_lut(&lut, total_mapper_size);
@@ -266,11 +266,11 @@ static inline int MPIDII_src_comm_to_lut(MPIDII_rank_map_t *src,
             break;
         case MPIDII_RANK_MAP_MLUT:
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_SRC_COMM_TO_LUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -287,8 +287,8 @@ static inline int MPIDII_src_comm_to_mlut(MPIDII_rank_map_t *src,
     int mpi_errno = MPI_SUCCESS, i;
     MPIDII_rank_map_mlut_t *mlut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
 
     if (!mapper_offset) {
         mpi_errno = MPIDII_alloc_mlut(&mlut, total_mapper_size);
@@ -360,12 +360,12 @@ static inline int MPIDII_src_comm_to_mlut(MPIDII_rank_map_t *src,
             }
             break;
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_SRC_COMM_TO_MLUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -384,8 +384,8 @@ static inline int MPIDII_src_mlut_to_mlut(MPIDII_rank_map_t *src,
     int size = MPIDII_map_size(*mapper);
     MPIDII_rank_map_mlut_t *mlut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_MLUT_TO_MLUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_MLUT_TO_MLUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_MLUT_TO_MLUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_MLUT_TO_MLUT);
 
     if (!mapper_offset) {
         mpi_errno = MPIDII_alloc_mlut(&mlut, total_mapper_size);
@@ -407,7 +407,7 @@ fn_exit:
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " src mode %d, dest mode %d",
              (int) src->mode, (int) dest->mode));
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_MLUT_TO_MLUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_MLUT_TO_MLUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -426,8 +426,8 @@ static inline int MPIDII_src_map_to_lut(MPIDII_rank_map_t *src,
     int size = MPIDII_map_size(*mapper);
     MPIDII_rank_map_lut_t *lut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_MAP_TO_LUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_MAP_TO_LUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_MAP_TO_LUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_MAP_TO_LUT);
 
     if (!mapper_offset) {
         mpi_errno = MPIDII_alloc_lut(&lut, total_mapper_size);
@@ -495,7 +495,7 @@ static inline int MPIDII_src_map_to_lut(MPIDII_rank_map_t *src,
             goto fn_fail;
     }
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_MAP_TO_LUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_MAP_TO_LUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -509,8 +509,8 @@ static inline void MPIDII_direct_of_src_rmap(MPIDII_rank_map_t *src,
                                              MPIDII_rank_map_t *dest,
                                              MPIR_Comm_map_t* mapper)
 {
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
     dest->mode = src->mode;
     dest->size = MPIDII_map_size(*mapper);
     dest->avtid = src->avtid;
@@ -537,23 +537,23 @@ static inline void MPIDII_direct_of_src_rmap(MPIDII_rank_map_t *src,
             dest->irreg.lut.t = src->irreg.lut.t;
             dest->irreg.lut.lpid = src->irreg.lut.lpid;
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
-                    (MPL_DBG_FDEST, "\tref count %d", MPIU_Object_get_ref(src->irreg.lut.t)));
-            MPIU_Object_add_ref(src->irreg.lut.t);
+                    (MPL_DBG_FDEST, "\tref count %d", MPIR_Object_get_ref(src->irreg.lut.t)));
+            MPIR_Object_add_ref(src->irreg.lut.t);
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src lut"));
             break;
         case MPIDII_RANK_MAP_MLUT:
             dest->irreg.mlut.t = src->irreg.mlut.t;
             dest->irreg.mlut.gpid = src->irreg.mlut.gpid;
-            MPIU_Object_add_ref(src->irreg.mlut.t);
+            MPIR_Object_add_ref(src->irreg.mlut.t);
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src mlut"));
             break;
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_DIRECT_OF_SRC_RMAP);
 }
 
 #undef FUNCNAME
@@ -565,8 +565,8 @@ static inline void MPIDII_offset_of_src_rmap(MPIDII_rank_map_t *src,
                                              MPIR_Comm_map_t *mapper,
                                              int offset)
 {
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
     dest->avtid = src->avtid;
     dest->size = MPIDII_map_size(*mapper);
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
@@ -610,8 +610,8 @@ static inline void MPIDII_offset_of_src_rmap(MPIDII_rank_map_t *src,
             dest->irreg.lut.t = src->irreg.lut.t;
             dest->irreg.lut.lpid = &src->irreg.lut.lpid[offset];
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
-                    (MPL_DBG_FDEST, "\tref count %d", MPIU_Object_get_ref(src->irreg.lut.t)));
-            MPIU_Object_add_ref(src->irreg.lut.t);
+                    (MPL_DBG_FDEST, "\tref count %d", MPIR_Object_get_ref(src->irreg.lut.t)));
+            MPIR_Object_add_ref(src->irreg.lut.t);
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src lut"));
             break;
@@ -619,15 +619,15 @@ static inline void MPIDII_offset_of_src_rmap(MPIDII_rank_map_t *src,
             dest->mode = src->mode;
             dest->irreg.mlut.t = src->irreg.mlut.t;
             dest->irreg.mlut.gpid = &src->irreg.mlut.gpid[offset];
-            MPIU_Object_add_ref(src->irreg.mlut.t);
+            MPIR_Object_add_ref(src->irreg.mlut.t);
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, "\tadd ref to src mlut"));
             break;
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_OFFSET_OF_SRC_RMAP);
 }
 
 #undef FUNCNAME
@@ -639,8 +639,8 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
                                              MPIR_Comm_map_t *mapper,
                                              int stride, int blocksize, int offset)
 {
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
     dest->avtid = src->avtid;
     MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
             (MPL_DBG_FDEST, " source mode %d", (int) src->mode));
@@ -655,8 +655,8 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
             dest->reg.stride.stride = stride;
             dest->reg.stride.blocksize = blocksize;
             dest->reg.stride.offset = offset;
-            MPIU_Assert(stride > 0);
-            MPIU_Assert(blocksize > 0);
+            MPIR_Assert(stride > 0);
+            MPIR_Assert(blocksize > 0);
             break;
         case MPIDII_RANK_MAP_DIRECT:
             if (blocksize == 1) {
@@ -668,8 +668,8 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
             dest->reg.stride.stride = stride;
             dest->reg.stride.blocksize = blocksize;
             dest->reg.stride.offset = offset;
-            MPIU_Assert(stride > 0);
-            MPIU_Assert(blocksize > 0);
+            MPIR_Assert(stride > 0);
+            MPIR_Assert(blocksize > 0);
             break;
         case MPIDII_RANK_MAP_OFFSET:
             if (blocksize == 1) {
@@ -725,10 +725,10 @@ static inline void MPIDII_stride_of_src_rmap(MPIDII_rank_map_t *src,
             MPIDII_src_mlut_to_mlut(src, dest, mapper, mapper->src_mapping_size, 0);
             break;
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_STRIDE_OF_SRC_RMAP);
 }
 
 #undef FUNCNAME
@@ -742,8 +742,8 @@ static inline int MPIDII_check_convert_mlut_to_lut(MPIDII_rank_map_t *src)
     int avtid;
     MPIDII_rank_map_mlut_t *mlut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
 
     if (src->mode != MPIDII_RANK_MAP_MLUT) { goto fn_exit; }
 
@@ -777,7 +777,7 @@ static inline int MPIDII_check_convert_mlut_to_lut(MPIDII_rank_map_t *src)
             (MPL_DBG_FDEST, " avtid %d", src->avtid));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_CONVERT_MLUT_TO_LUT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -793,8 +793,8 @@ static inline int MPIDII_check_convert_lut_to_regular(MPIDII_rank_map_t *src)
     int mode_detected, offset, blocksize, stride;
     MPIDII_rank_map_lut_t *lut = NULL;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
 
     if (src->mode != MPIDII_RANK_MAP_LUT
         && src->mode != MPIDII_RANK_MAP_LUT_INTRA) { goto fn_exit; }
@@ -861,7 +861,7 @@ static inline int MPIDII_check_convert_lut_to_regular(MPIDII_rank_map_t *src)
             break;
     }
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_CONVERT_LUT_TO_REGULAR);
     return mpi_errno;
 }
 
@@ -877,8 +877,8 @@ static inline int MPIDII_set_map(MPIDII_rank_map_t *src_rmap,
     int mpi_errno = MPI_SUCCESS;
     MPIDII_rank_map_mode src_mode;
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_SET_MAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_SET_MAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_SET_MAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_SET_MAP);
 
     src_mode = src_rmap->mode;
 
@@ -949,7 +949,7 @@ static inline int MPIDII_set_map(MPIDII_rank_map_t *src_rmap,
     }
 
     fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_SET_MAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_SET_MAP);
     return mpi_errno;
 }
 
@@ -965,17 +965,17 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
     int total_mapper_size, mapper_offset;
 
 
-    MPIDI_STATE_DECL(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
 
     /* do some sanity checks */
     MPL_LL_FOREACH(comm->mapper_head, mapper) {
         if (mapper->src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
+            MPIR_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
                         mapper->dir == MPIR_COMM_MAP_DIR__L2R);
 
         if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM)
-            MPIU_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
+            MPIR_Assert(mapper->dir == MPIR_COMM_MAP_DIR__L2L ||
                         mapper->dir == MPIR_COMM_MAP_DIR__R2L);
     }
 
@@ -1026,7 +1026,7 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
             }
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2L */
-            MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
+            MPIR_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
             if (comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
                 MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
@@ -1064,7 +1064,7 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
         if (mapper->dir == MPIR_COMM_MAP_DIR__L2L || mapper->dir == MPIR_COMM_MAP_DIR__R2L)
             continue;
 
-        MPIU_Assert(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
+        MPIR_Assert(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
 
         if (mapper->dir == MPIR_COMM_MAP_DIR__L2R) {
             if (src_comm->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
@@ -1083,7 +1083,7 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
             }
         }
         else {  /* mapper->dir == MPIR_COMM_MAP_DIR__R2R */
-            MPIU_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
+            MPIR_Assert(src_comm->comm_kind == MPIR_COMM_KIND__INTERCOMM);
             MPL_DBG_MSG_FMT(MPIDI_CH4_DBG_MAP, VERBOSE,
                     (MPL_DBG_FDEST, " inter->, R2R, size=%d, total_mapper_size=%d, mapper_offset=%d",
                      src_comm->remote_size, total_mapper_size, mapper_offset));
@@ -1121,7 +1121,7 @@ __CH4_INLINE__ int MPIDII_comm_create_rank_map(MPIR_Comm *comm)
         MPIDII_COMM(comm,local_map).mode = MPIDII_RANK_MAP_NONE;
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDII_COMM_CREATE_RANK_MAP);
     return mpi_errno;
 }
 

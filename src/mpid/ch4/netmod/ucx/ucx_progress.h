@@ -50,7 +50,7 @@ static inline int MPIDI_UCX_am_handler(void *msg, size_t msg_sz)
         }
 
         data_sz = MPL_MIN(data_sz, in_data_sz);
-        MPIU_Memcpy(p_data, in_data, data_sz);
+        MPIR_Memcpy(p_data, in_data, data_sz);
         MPIR_STATUS_SET_COUNT(rreq->status, data_sz);
     } else {
         done = 0;
@@ -60,7 +60,7 @@ static inline int MPIDI_UCX_am_handler(void *msg, size_t msg_sz)
 
         for(i = 0; i < iov_len && rem > 0; i++) {
             curr_len = MPL_MIN(rem, iov[i].iov_len);
-            MPIU_Memcpy(iov[i].iov_base, (char *) in_data + done, curr_len);
+            MPIR_Memcpy(iov[i].iov_base, (char *) in_data + done, curr_len);
             rem -= curr_len;
             done += curr_len;
         }

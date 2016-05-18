@@ -20,13 +20,13 @@ static inline int MPIDI_NM_reg_hdr_handler(int handler_id,
                                                MPIDI_NM_am_target_handler_fn target_handler_fn)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_REG_HDR_HANDLER);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_REG_HDR_HANDLER);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_REG_HDR_HANDLER);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_REG_HDR_HANDLER);
 
     MPIDI_UCX_global.am_handlers[handler_id] = target_handler_fn;
     MPIDI_UCX_global.send_cmpl_handlers[handler_id] = origin_handler_fn;
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_REG_HDR_HANDLER);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_REG_HDR_HANDLER);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -93,8 +93,8 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
     char *send_buf;
     MPIDI_UCX_am_header_t ucx_hdr;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(0, 0, MPIDI_UCX_AM_TAG);
@@ -107,8 +107,8 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
 
     /* just pack and send for now */
     send_buf = MPL_malloc(am_hdr_sz + sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+    MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+    MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
 
     ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
@@ -139,7 +139,7 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
     }
 
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR);
     return mpi_errno;
  fn_fail:
     goto fn_exit;
@@ -170,8 +170,8 @@ static inline int MPIDI_NM_send_am(int rank,
     int             dt_contig;
     MPIDI_UCX_am_header_t ucx_hdr;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(0, 0, MPIDI_UCX_AM_TAG);
@@ -187,9 +187,9 @@ static inline int MPIDI_NM_send_am(int rank,
     if (dt_contig) {
         /* just pack and send for now */
         send_buf = MPL_malloc(data_sz + am_hdr_sz + sizeof(ucx_hdr));
-        MPIU_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
-        MPIU_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
-        MPIU_Memcpy(send_buf + am_hdr_sz + sizeof(ucx_hdr), data + dt_true_lb, data_sz);
+        MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+        MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+        MPIR_Memcpy(send_buf + am_hdr_sz + sizeof(ucx_hdr), data + dt_true_lb, data_sz);
 
         ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                          data_sz + am_hdr_sz + sizeof(ucx_hdr),
@@ -221,7 +221,7 @@ static inline int MPIDI_NM_send_am(int rank,
     }
 
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_SEND_AM);
     return mpi_errno;
  fn_fail:
     goto fn_exit;
@@ -238,7 +238,7 @@ static inline int MPIDI_NM_send_amv_hdr(int rank,
                                         size_t iov_len,
                                         MPIR_Request * sreq, void *netmod_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -256,7 +256,7 @@ static inline int MPIDI_NM_send_amv(int rank,
                                         MPI_Datatype datatype,
                                         MPIR_Request * sreq, void *netmod_context)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -264,13 +264,13 @@ static inline int MPIDI_NM_send_amv(int rank,
 #define FUNCNAME MPIDI_NM_send_am_hdr_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_am_hdr_reply(MPIR_Context_id_t context_id,
                                                  int src_rank,
                                                  int handler_id,
                                                  const void *am_hdr,
                                                  size_t am_hdr_sz, MPIR_Request * sreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -278,7 +278,7 @@ static inline int MPIDI_NM_send_am_hdr_reply(MPIU_Context_id_t context_id,
 #define FUNCNAME MPIDI_NM_send_am_reply
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_am_reply(MPIR_Context_id_t context_id,
                                              int src_rank,
                                              int handler_id,
                                              const void *am_hdr,
@@ -298,8 +298,8 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
     MPIDI_UCX_am_header_t ucx_hdr;
     MPIR_Comm *use_comm;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
     use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
     ep = MPIDI_UCX_COMM_TO_EP(use_comm, src_rank);
@@ -316,9 +316,9 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
     if (dt_contig) {
         /* just pack and send for now */
         send_buf = MPL_malloc(data_sz + am_hdr_sz + sizeof(ucx_hdr));
-        MPIU_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
-        MPIU_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
-        MPIU_Memcpy(send_buf + am_hdr_sz + sizeof(ucx_hdr), data + dt_true_lb, data_sz);
+        MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+        MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+        MPIR_Memcpy(send_buf + am_hdr_sz + sizeof(ucx_hdr), data + dt_true_lb, data_sz);
 
         ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                          data_sz + am_hdr_sz + sizeof(ucx_hdr),
@@ -351,13 +351,13 @@ static inline int MPIDI_NM_send_am_reply(MPIU_Context_id_t context_id,
     }
 
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_SEND_AM);
     return mpi_errno;
  fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_NM_send_amv_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_send_amv_reply(MPIR_Context_id_t context_id,
                                               int src_rank,
                                               int handler_id,
                                               struct iovec *am_hdr,
@@ -365,13 +365,13 @@ static inline int MPIDI_NM_send_amv_reply(MPIU_Context_id_t context_id,
                                               const void *data, MPI_Count count,
                                               MPI_Datatype datatype, MPIR_Request * sreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline size_t MPIDI_NM_am_hdr_max_sz(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
@@ -388,8 +388,8 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
     char *send_buf;
     MPIDI_UCX_am_header_t ucx_hdr;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_SEND_AM_HDR);
 
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(0, 0, MPIDI_UCX_AM_TAG);
@@ -400,8 +400,8 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
 
     /* just pack and send for now */
     send_buf = MPL_malloc(am_hdr_sz + sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+    MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+    MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
 
     ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
@@ -421,13 +421,13 @@ static inline int MPIDI_NM_inject_am_hdr(int rank,
     }
 
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_SEND_AM_HDR);
     return mpi_errno;
  fn_fail:
     goto fn_exit;
 }
 
-static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
+static inline int MPIDI_NM_inject_am_hdr_reply(MPIR_Context_id_t context_id,
                                                    int src_rank,
                                                    int handler_id,
                                                    const void *am_hdr, size_t am_hdr_sz)
@@ -440,8 +440,8 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     MPIDI_UCX_am_header_t ucx_hdr;
     MPIR_Comm *use_comm;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_INJECT_AM_HDR_REPLY);
 
     use_comm = MPIDI_CH4U_context_id_to_comm(context_id);
     ep = MPIDI_UCX_COMM_TO_EP(use_comm, src_rank);
@@ -452,8 +452,8 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
 
     /* just pack and send for now */
     send_buf = MPL_malloc(am_hdr_sz + sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
-    MPIU_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
+    MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
+    MPIR_Memcpy(send_buf + sizeof(ucx_hdr), am_hdr, am_hdr_sz);
     ucp_request = (MPIDI_UCX_ucp_request_t*) ucp_tag_send_nb(ep, send_buf,
                                                                      am_hdr_sz + sizeof(ucx_hdr),
                                                                      ucp_dt_make_contig(1), ucx_tag,
@@ -472,7 +472,7 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
     }
 
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_SEND_AM);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_SEND_AM);
     return mpi_errno;
  fn_fail:
     goto fn_exit;
@@ -480,7 +480,7 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIU_Context_id_t context_id,
 
 static inline size_t MPIDI_NM_am_inject_max_sz(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 

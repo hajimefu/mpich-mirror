@@ -62,7 +62,7 @@ static inline int MPIR_cc_is_complete(MPIR_cc_t * cc_ptr)
         OPA_write_barrier();                                    \
         MPL_VG_ANNOTATE_HAPPENS_BEFORE(cc_ptr_);                \
         ctr_ = OPA_fetch_and_decr_int(cc_ptr_);                 \
-        MPIU_Assert(ctr_ >= 1);                                 \
+        MPIR_Assert(ctr_ >= 1);                                 \
         *(incomplete_) = (ctr_ != 1);                           \
         /* TODO check if this HA is actually necessary */       \
         if (!*(incomplete_)) {                                  \

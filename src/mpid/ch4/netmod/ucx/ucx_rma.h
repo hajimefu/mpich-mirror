@@ -86,8 +86,8 @@ static inline int MPIDI_NM_put(const void *origin_addr,
                                    MPI_Aint target_disp,
                                    int target_count, MPI_Datatype target_datatype, MPIR_Win * win)
 {
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_PUT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_PUT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_PUT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_PUT);
     int            target_contig,origin_contig,mpi_errno = MPI_SUCCESS;
     size_t target_bytes,origin_bytes;
     MPI_Aint       origin_true_lb,target_true_lb;
@@ -146,8 +146,8 @@ static inline int MPIDI_NM_get(void *origin_addr,
     size_t origin_bytes;
     size_t         offset;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_UCX_GET);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_UCX_GET);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_GET);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_GET);
 
     MPIDI_Datatype_check_contig_size(origin_datatype,origin_count,
                                      origin_contig,origin_bytes);

@@ -2,8 +2,6 @@
 #ifndef MPIDU_SHM_H
 #define MPIDU_SHM_H
 
-#include "mpiutil.h"
-
 #define MPIDU_SHM_MAX_FNAME_LEN 256
 #define MPIDU_SHM_CACHE_LINE_LEN 64
 
@@ -15,7 +13,7 @@ typedef struct MPIDU_shm_barrier
 
 typedef struct MPIDU_shm_seg
 {
-    MPIU_Size_t segment_len;
+    size_t segment_len;
     /* Handle to shm seg */
     MPIU_SHMW_Hnd_t hnd;
     /* Pointers */

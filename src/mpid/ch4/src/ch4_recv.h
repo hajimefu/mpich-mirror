@@ -26,8 +26,8 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
                               int context_offset, MPI_Status * status, MPIR_Request ** request)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_RECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_RECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_RECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_RECV);
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno =
@@ -83,7 +83,7 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
         MPIR_ERR_POP(mpi_errno);
     }
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_RECV);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -103,12 +103,12 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
                                    MPIR_Request ** request)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_RECV_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_RECV_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_RECV_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_RECV_INIT);
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_recv_init(buf, count, datatype, rank, tag,
                                        comm, context_offset, request);
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
 #else
     if (unlikely(rank == MPI_ANY_SOURCE))
@@ -145,7 +145,7 @@ __CH4_INLINE__ int MPIDI_Recv_init(void *buf,
         }
     }
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_RECV_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_RECV_INIT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -165,8 +165,8 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
                                MPI_Status * status)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_MRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_MRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_MRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_MRECV);
 
     MPI_Request   req_handle;
     int           active_flag;
@@ -228,7 +228,7 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
     MPIR_Request_extract_status(rreq, status);
     MPIR_Request_complete(&req_handle, rreq, status, &active_flag);
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_MRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_MRECV);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -244,8 +244,8 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
                                 MPIR_Request * message, MPIR_Request ** rreqp)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_IMRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_IMRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_IMRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_IMRECV);
 
     if (message == NULL)
     {
@@ -274,7 +274,7 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
         MPIR_ERR_POP(mpi_errno);
     }
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_IMRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_IMRECV);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -292,8 +292,8 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
                                MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_IRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_IRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_IRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_IRECV);
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);
@@ -337,7 +337,7 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
         MPIR_ERR_POP(mpi_errno);
     }
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_IRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_IRECV);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -350,8 +350,8 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
 __CH4_INLINE__ int MPIDI_Cancel_recv(MPIR_Request * rreq)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_CANCEL_RECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_CANCEL_RECV);
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_cancel_recv(rreq);
 #else
@@ -364,7 +364,7 @@ __CH4_INLINE__ int MPIDI_Cancel_recv(MPIR_Request * rreq)
         MPIR_ERR_POP(mpi_errno);
     }
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_CANCEL_RECV);
     return mpi_errno;
   fn_fail:
     goto fn_exit;

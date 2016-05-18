@@ -20,8 +20,8 @@
 __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm)
 {
     int ret;
-    MPIDI_STATE_DECL(MPIDI_STATE_CH4_RANK_IS_LOCAL);
-    MPIDI_FUNC_ENTER(MPIDI_STATE_CH4_RANK_IS_LOCAL);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPIDI_STATE_CH4_RANK_IS_LOCAL);
+    MPIR_FUNC_VERBOSE_ENTER(MPIDI_STATE_CH4_RANK_IS_LOCAL);
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     /* Ask the netmod for locality information. If it decided not to build it,
@@ -31,7 +31,7 @@ __CH4_INLINE__ int MPIDI_CH4_rank_is_local(int rank, MPIR_Comm * comm)
     ret = MPIDI_CH4U_rank_is_local(rank, comm);
 #endif
 
-    MPIDI_FUNC_EXIT(MPIDI_STATE_CH4_RANK_IS_LOCAL);
+    MPIR_FUNC_VERBOSE_EXIT(MPIDI_STATE_CH4_RANK_IS_LOCAL);
     return ret;
 }
 #endif /* CH4_PROC_H_INCLUDED */

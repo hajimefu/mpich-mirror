@@ -21,8 +21,8 @@
 static inline int MPIDI_NM_comm_create(MPIR_Comm *comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_CREATE);
 
     MPIDI_OFI_map_create(&MPIDI_OFI_COMM(comm).huge_send_counters);
     MPIDI_OFI_map_create(&MPIDI_OFI_COMM(comm).huge_recv_counters);
@@ -35,9 +35,9 @@ static inline int MPIDI_NM_comm_create(MPIR_Comm *comm)
     if(comm->comm_kind == MPIR_COMM_KIND__INTERCOMM)
         goto fn_exit;
 
-    MPIU_Assert(comm->coll_fns != NULL);
+    MPIR_Assert(comm->coll_fns != NULL);
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_CREATE);
     return mpi_errno;
 }
 
@@ -48,8 +48,8 @@ fn_exit:
 static inline int MPIDI_NM_comm_destroy(MPIR_Comm *comm)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
 
     mpi_errno = MPIDI_CH4U_destroy_comm(comm);
     MPIDI_OFI_map_destroy(MPIDI_OFI_COMM(comm).huge_send_counters);
@@ -57,7 +57,7 @@ static inline int MPIDI_NM_comm_destroy(MPIR_Comm *comm)
     MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).win_id_allocator);
     MPIDI_OFI_index_allocator_destroy(MPIDI_OFI_COMM(comm).rma_id_allocator);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_DESTROY);
     return mpi_errno;
 }
 

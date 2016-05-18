@@ -24,9 +24,9 @@ int MPIDI_POSIX_barrier_vars_init(MPIDI_POSIX_barrier_vars_t *barrier_region)
 {
     int mpi_errno = MPI_SUCCESS;
     int i;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
 
     if(MPIDI_POSIX_mem_region.local_rank == 0)
         for(i = 0; i < MPIDI_POSIX_NUM_BARRIER_VARS; ++i) {
@@ -37,7 +37,7 @@ int MPIDI_POSIX_barrier_vars_init(MPIDI_POSIX_barrier_vars_t *barrier_region)
             OPA_store_int(&barrier_region[i].sig, 0);
         }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_POSIX_BARRIER_VARS_INIT);
     return mpi_errno;
 }
 

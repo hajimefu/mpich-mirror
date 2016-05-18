@@ -13,7 +13,7 @@
 
 #include <mpidimpl.h>
 #include <stdio.h>
-#include "mpich_cvars.h"
+#include "mpir_cvars.h"
 #include "pmi.h"
 
 /* Macros and inlines */

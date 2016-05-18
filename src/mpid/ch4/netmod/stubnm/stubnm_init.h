@@ -26,60 +26,60 @@ static inline int MPIDI_NM_init(int rank,
     int mpi_errno = MPI_SUCCESS;
 
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
 static inline int MPIDI_NM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
 
 static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
-                                             int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+                                             int idx, int *lpid_ptr, MPL_bool is_remote)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * gpid)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_get_node_id(MPIR_Comm * comm, int rank, MPID_Node_id_t * id_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_get_max_node_id(MPIR_Comm * comm, MPID_Node_id_t * max_id_p)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_getallincomm(MPIR_Comm * comm_ptr,
                                             int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_NM_create_intercomm_from_lpids(MPIR_Comm * newcomm_ptr,
                                                            int size, const int lpids[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

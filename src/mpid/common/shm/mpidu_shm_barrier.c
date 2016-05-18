@@ -16,9 +16,9 @@ static int barrier_init = 0;
 int MPIDU_shm_barrier_init(MPIDU_shm_barrier_t *barrier_region,
                            MPIDU_shm_barrier_ptr_t *barrier, int init_values)
 {
-    MPIDI_STATE_DECL(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
     
     *barrier = barrier_region;
     if (init_values) {
@@ -29,7 +29,7 @@ int MPIDU_shm_barrier_init(MPIDU_shm_barrier_t *barrier_region,
     sense = 0;
     barrier_init = 1;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDU_SHM_BARRIER_INIT);
 
     return MPI_SUCCESS;
 }
@@ -42,9 +42,9 @@ int MPIDU_shm_barrier_init(MPIDU_shm_barrier_t *barrier_region,
 int MPIDU_shm_barrier(MPIDU_shm_barrier_t *barrier, int num_local)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDU_SHM_BARRIER);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDU_SHM_BARRIER);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDU_SHM_BARRIER);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDU_SHM_BARRIER);
 
     if (num_local == 1)
         goto fn_exit;
@@ -67,6 +67,6 @@ int MPIDU_shm_barrier(MPIDU_shm_barrier_t *barrier, int num_local)
 
  fn_fail:
  fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDU_SHM_BARRIER);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDU_SHM_BARRIER);
     return mpi_errno;
 }

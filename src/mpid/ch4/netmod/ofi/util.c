@@ -20,12 +20,12 @@
 int   MPIDI_OFI_handle_cq_error_util(ssize_t ret)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
 
     mpi_errno = MPIDI_OFI_handle_cq_error(ret);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_HANDLE_CQ_ERROR);
     return mpi_errno;
 }
 
@@ -44,7 +44,7 @@ void MPIDI_OFI_map_create(void **out_map)
 {
     MPIDI_OFI_map_t *map;
     map = MPL_malloc(sizeof(MPIDI_OFI_map_t));
-    MPIU_Assert(map != NULL);
+    MPIR_Assert(map != NULL);
     map->head = NULL;
     *out_map  = map;
 }
@@ -67,7 +67,7 @@ void MPIDI_OFI_map_set(void     *in_map,
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_UTIL_MUTEX);
     map             = (MPIDI_OFI_map_t*)in_map;
     map_entry       = MPL_malloc(sizeof(MPIDI_OFI_map_entry_t));
-    MPIU_Assert(map_entry != NULL);
+    MPIR_Assert(map_entry != NULL);
     map_entry->key   = id;
     map_entry->value = val;
     MPL_HASH_ADD(hh,map->head,key,sizeof(uint64_t),map_entry);
@@ -82,7 +82,7 @@ void MPIDI_OFI_map_erase(void     *in_map,
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_UTIL_MUTEX);
     map             = (MPIDI_OFI_map_t*)in_map;
     MPL_HASH_FIND(hh,map->head,&id,sizeof(uint64_t),map_entry);
-    MPIU_Assert(map_entry != NULL);
+    MPIR_Assert(map_entry != NULL);
     MPL_HASH_DELETE(hh, map->head, map_entry);
     MPL_free(map_entry);
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_UTIL_MUTEX);
@@ -268,7 +268,7 @@ static inline int MPIDI_OFI_win_lock_request_proc(const MPIDI_OFI_win_control_t 
     lock->rank                = info->origin_rank;
     lock->type                = info->lock_type;
     struct MPIDI_CH4U_win_queue *q = &MPIDI_CH4U_WIN(win, sync).lock.local.requested;
-    MPIU_Assert((q->head != NULL) ^ (q->tail == NULL));
+    MPIR_Assert((q->head != NULL) ^ (q->tail == NULL));
 
     if(q->tail == NULL)
         q->head = lock;
@@ -305,7 +305,7 @@ static inline int MPIDI_OFI_win_unlock_proc(const MPIDI_OFI_win_control_t *info,
 {
     int mpi_errno;
     --MPIDI_CH4U_WIN(win, sync).lock.local.count;
-    MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
+    MPIR_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.local.count >= 0);
     mpi_errno = MPIDI_OFI_win_lock_advance(win);
     if(mpi_errno != MPI_SUCCESS)
         MPIR_ERR_SETANDSTMT(mpi_errno, MPI_ERR_RMA_SYNC,
@@ -345,10 +345,10 @@ static inline void MPIDI_OFI_win_unlock_done_proc(const MPIDI_OFI_win_control_t 
     if(MPIDI_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4U_EPOTYPE_LOCK)
         MPIDI_CH4U_WIN(win, sync).lock.remote.locked = 0;
     else if(MPIDI_CH4U_WIN(win, sync).origin_epoch_type == MPIDI_CH4U_EPOTYPE_LOCK_ALL) {
-        MPIU_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked > 0);
+        MPIR_Assert((int)MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked > 0);
         MPIDI_CH4U_WIN(win, sync).lock.remote.allLocked -= 1;
     } else
-        MPIU_Assert(0);
+        MPIR_Assert(0);
 
 }
 
@@ -428,7 +428,7 @@ int MPIDI_OFI_control_handler(void      *am_hdr,
     MPIR_Win *win;
     senderrank = control->origin_rank;
     win        = (MPIR_Win *)MPIDI_OFI_map_lookup(MPIDI_Global.win_map,control->win_id);
-    MPIU_Assert(win != MPIDI_OFI_MAP_NOT_FOUND);
+    MPIR_Assert(win != MPIDI_OFI_MAP_NOT_FOUND);
 
     switch(control->type) {
         case MPIDI_OFI_CTRL_LOCKREQ:
@@ -463,7 +463,7 @@ int MPIDI_OFI_control_handler(void      *am_hdr,
             fprintf(stderr, "Bad control type: 0x%08x  %d\n",
                     control->type,
                     control->type);
-            MPIU_Assert(0);
+            MPIR_Assert(0);
     }
 
 fn_exit:
@@ -704,8 +704,8 @@ static inline void create_dt_map()
                        &fi_dt,
                        mpi_ops[j],
                        &fi_op);
-            MPIU_Assert(fi_dt != (enum fi_datatype)-1);
-            MPIU_Assert(fi_op != (enum fi_op)-1);
+            MPIR_Assert(fi_dt != (enum fi_datatype)-1);
+            MPIR_Assert(fi_op != (enum fi_op)-1);
             _TBL.dt                       = fi_dt;
             _TBL.op                       = fi_op;
             _TBL.atomic_valid             = 0;

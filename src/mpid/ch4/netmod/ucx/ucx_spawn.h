@@ -67,13 +67,13 @@ static inline int MPIDI_NM_comm_disconnect(MPIR_Comm * comm_ptr)
     int mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
 
-    MPIDI_STATE_DECL(MPID_STATE_COMM_DISCONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_COMM_DISCONNECT);
 
 
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_COMM_DISCONNECT);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -89,13 +89,13 @@ static inline int MPIDI_NM_comm_accept(const char *port_name,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPID_STATE_COMM_ACCEPT);
-    MPIDI_FUNC_ENTER(MPID_STATE_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_COMM_ACCEPT);
 
 
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_COMM_ACCEPT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_COMM_ACCEPT);
     return mpi_errno;
   fn_fail:
     goto fn_exit;

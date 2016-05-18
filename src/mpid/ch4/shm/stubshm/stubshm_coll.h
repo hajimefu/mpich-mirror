@@ -22,7 +22,7 @@ static inline int MPIDI_SHM_barrier(MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -36,7 +36,7 @@ static inline int MPIDI_SHM_bcast(void *buffer, int count, MPI_Datatype datatype
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -50,7 +50,7 @@ static inline int MPIDI_SHM_allreduce(const void *sendbuf, void *recvbuf, int co
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -65,7 +65,7 @@ static inline int MPIDI_SHM_allgather(const void *sendbuf, int sendcount, MPI_Da
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -80,7 +80,7 @@ static inline int MPIDI_SHM_allgatherv(const void *sendbuf, int sendcount, MPI_D
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -95,7 +95,7 @@ static inline int MPIDI_SHM_gather(const void *sendbuf, int sendcount, MPI_Datat
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -111,7 +111,7 @@ static inline int MPIDI_SHM_gatherv(const void *sendbuf, int sendcount, MPI_Data
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -126,7 +126,7 @@ static inline int MPIDI_SHM_scatter(const void *sendbuf, int sendcount, MPI_Data
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -142,7 +142,7 @@ static inline int MPIDI_SHM_scatterv(const void *sendbuf, const int *sendcounts,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -157,7 +157,7 @@ static inline int MPIDI_SHM_alltoall(const void *sendbuf, int sendcount, MPI_Dat
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -174,7 +174,7 @@ static inline int MPIDI_SHM_alltoallv(const void *sendbuf, const int *sendcounts
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -189,7 +189,7 @@ static inline int MPIDI_SHM_alltoallw(const void *sendbuf, const int sendcounts[
                                          MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -203,7 +203,7 @@ static inline int MPIDI_SHM_reduce(const void *sendbuf, void *recvbuf, int count
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -217,7 +217,7 @@ static inline int MPIDI_SHM_reduce_scatter(const void *sendbuf, void *recvbuf,
                                               MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -230,7 +230,7 @@ static inline int MPIDI_SHM_reduce_scatter_block(const void *sendbuf, void *recv
                                                     MPI_Op op, MPIR_Comm *comm_ptr, MPIR_Errflag_t *errflag)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -244,7 +244,7 @@ static inline int MPIDI_SHM_scan(const void *sendbuf, void *recvbuf, int count,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -259,7 +259,7 @@ static inline int MPIDI_SHM_exscan(const void *sendbuf, void *recvbuf, int count
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -274,7 +274,7 @@ static inline int MPIDI_SHM_neighbor_allgather(const void *sendbuf, int sendcoun
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -289,7 +289,7 @@ static inline int MPIDI_SHM_neighbor_allgatherv(const void *sendbuf, int sendcou
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -304,7 +304,7 @@ static inline int MPIDI_SHM_neighbor_alltoall(const void *sendbuf, int sendcount
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -320,7 +320,7 @@ static inline int MPIDI_SHM_neighbor_alltoallv(const void *sendbuf, const int se
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -337,7 +337,7 @@ static inline int MPIDI_SHM_neighbor_alltoallw(const void *sendbuf, const int se
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -352,7 +352,7 @@ static inline int MPIDI_SHM_ineighbor_allgather(const void *sendbuf, int sendcou
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -367,7 +367,7 @@ static inline int MPIDI_SHM_ineighbor_allgatherv(const void *sendbuf, int sendco
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -383,7 +383,7 @@ static inline int MPIDI_SHM_ineighbor_alltoall(const void *sendbuf, int sendcoun
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -399,7 +399,7 @@ static inline int MPIDI_SHM_ineighbor_alltoallv(const void *sendbuf, const int s
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -416,7 +416,7 @@ static inline int MPIDI_SHM_ineighbor_alltoallw(const void *sendbuf, const int s
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -429,7 +429,7 @@ static inline int MPIDI_SHM_ibarrier(MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -443,7 +443,7 @@ static inline int MPIDI_SHM_ibcast(void *buffer, int count, MPI_Datatype datatyp
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -458,7 +458,7 @@ static inline int MPIDI_SHM_iallgather(const void *sendbuf, int sendcount, MPI_D
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -473,7 +473,7 @@ static inline int MPIDI_SHM_iallgatherv(const void *sendbuf, int sendcount, MPI_
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -488,7 +488,7 @@ static inline int MPIDI_SHM_ialltoall(const void *sendbuf, int sendcount, MPI_Da
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -505,7 +505,7 @@ static inline int MPIDI_SHM_ialltoallv(const void *sendbuf, const int *sendcount
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -521,7 +521,7 @@ static inline int MPIDI_SHM_ialltoallw(const void *sendbuf, const int *sendcount
                                               MPIR_Comm *comm_ptr, MPI_Request * req)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -535,7 +535,7 @@ static inline int MPIDI_SHM_iexscan(const void *sendbuf, void *recvbuf, int coun
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -550,7 +550,7 @@ static inline int MPIDI_SHM_igather(const void *sendbuf, int sendcount, MPI_Data
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -566,7 +566,7 @@ static inline int MPIDI_SHM_igatherv(const void *sendbuf, int sendcount, MPI_Dat
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -582,7 +582,7 @@ static inline int MPIDI_SHM_ireduce_scatter_block(const void *sendbuf, void *rec
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -597,7 +597,7 @@ static inline int MPIDI_SHM_ireduce_scatter(const void *sendbuf, void *recvbuf,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -612,7 +612,7 @@ static inline int MPIDI_SHM_ireduce(const void *sendbuf, void *recvbuf, int coun
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -627,7 +627,7 @@ static inline int MPIDI_SHM_iallreduce(const void *sendbuf, void *recvbuf, int c
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -642,7 +642,7 @@ static inline int MPIDI_SHM_iscan(const void *sendbuf, void *recvbuf, int count,
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIU_Assert(0);
+    MPIR_Assert(0);
 
     return mpi_errno;
 }
@@ -657,7 +657,7 @@ static inline int MPIDI_SHM_iscatter(const void * sendbuf, int sendcount,
                                         int root, MPIR_Comm *comm, MPI_Request * request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 
@@ -672,7 +672,7 @@ static inline int MPIDI_SHM_iscatterv(const void * sendbuf, const int * sendcoun
                                          MPIR_Comm *comm, MPI_Request * request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return mpi_errno;
 }
 

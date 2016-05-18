@@ -34,15 +34,15 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *rreq = NULL;
     uint64_t match_bits, mask_bits;
-    MPIU_Context_id_t context_id = comm->recvcontext_id + context_offset;
+    MPIR_Context_id_t context_id = comm->recvcontext_id + context_offset;
     size_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
     MPIR_Datatype *dt_ptr;
     struct fi_msg_tagged msg;
     char *recv_buf;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_IRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_DO_IRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_DO_IRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_DO_IRECV);
 
     if(mode == MPIDI_OFI_ON_HEAP)         /* Branch should compile out */
         MPIDI_OFI_REQUEST_CREATE(rreq);
@@ -113,7 +113,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_DO_IRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_DO_IRECV);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -134,11 +134,11 @@ __ALWAYS_INLINE__ int MPIDI_NM_recv(void *buf,
                                         MPI_Status *status, MPIR_Request **request)
 {
     int mpi_errno;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_RECV);
     mpi_errno = MPIDI_OFI_do_irecv(buf, count, datatype, rank, tag, comm,
                                            context_offset, request, MPIDI_OFI_ON_HEAP, 0ULL);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_RECV);
     return mpi_errno;
 }
 
@@ -156,8 +156,8 @@ __ALWAYS_INLINE__ int MPIDI_NM_recv_init(void          *buf,
                                              MPIR_Request **request)
 {
     MPIR_Request *rreq;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_RECV_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_RECV_INIT);
 
     MPIDI_OFI_REQUEST_CREATE((rreq));
 
@@ -185,7 +185,7 @@ __ALWAYS_INLINE__ int MPIDI_NM_recv_init(void          *buf,
         MPID_Datatype_add_ref(dt_ptr);
     }
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_RECV_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_RECV_INIT);
     return MPI_SUCCESS;
 }
 
@@ -200,8 +200,8 @@ __ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *rreq;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IMRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_IMRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_IMRECV);
 
     if(message == NULL) {
         MPIDI_OFI_request_create_null_rreq(rreq, mpi_errno, fn_fail);
@@ -209,8 +209,8 @@ __ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
         goto fn_exit;
     }
 
-    MPIU_Assert(message != NULL);
-    MPIU_Assert(message->kind == MPIR_REQUEST_KIND__MPROBE);
+    MPIR_Assert(message != NULL);
+    MPIR_Assert(message->kind == MPIR_REQUEST_KIND__MPROBE);
 
     *rreqp = rreq = message;
 
@@ -219,7 +219,7 @@ __ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
                                            &rreq, MPIDI_OFI_USE_EXISTING, FI_CLAIM | FI_COMPLETION);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_IMRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_IMRECV);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -237,11 +237,11 @@ __ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
                                          MPIR_Comm *comm, int context_offset, MPIR_Request **request)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_IRECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_IRECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_IRECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_IRECV);
     mpi_errno = MPIDI_OFI_do_irecv(buf, count, datatype, rank, tag, comm,
                                            context_offset, request, MPIDI_OFI_ON_HEAP, 0ULL);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_IRECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_IRECV);
     return mpi_errno;
 }
 
@@ -254,8 +254,8 @@ __ALWAYS_INLINE__ int MPIDI_NM_cancel_recv(MPIR_Request *rreq)
 
     int mpi_errno = MPI_SUCCESS;
     ssize_t ret;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
 
 #ifndef MPIDI_BUILD_CH4_SHM
     MPIDI_OFI_PROGRESS();
@@ -278,7 +278,7 @@ __ALWAYS_INLINE__ int MPIDI_NM_cancel_recv(MPIR_Request *rreq)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_CANCEL_RECV);
     return mpi_errno;
 #ifndef MPIDI_BUILD_CH4_SHM
 fn_fail:

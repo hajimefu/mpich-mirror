@@ -49,7 +49,7 @@ static inline void MPIDI_UCX_Handle_send_callback(void *request, ucs_status_t st
     if(ucp_request->req){
         req = ucp_request->req;
         MPIR_cc_decr(req->cc_ptr, &c);
-        MPIU_Assert(c >= 0);
+        MPIR_Assert(c >= 0);
 
         if (c == 0) {
             MPIR_Request_free(req);

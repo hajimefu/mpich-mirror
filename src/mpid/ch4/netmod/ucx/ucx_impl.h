@@ -25,7 +25,7 @@
 #define MPIDI_UCX_WIN(win) ((win)->dev.netmod.ucx)
 #define MPIDI_UCX_WIN_INFO(win, rank) MPIDI_UCX_WIN(win).info_table[rank]
 
-static inline uint64_t MPIDI_UCX_init_tag(MPIU_Context_id_t contextid, int source, uint64_t tag)
+static inline uint64_t MPIDI_UCX_init_tag(MPIR_Context_id_t contextid, int source, uint64_t tag)
 {
     uint64_t ucp_tag = 0;
     ucp_tag = contextid;
@@ -56,7 +56,7 @@ static inline uint64_t MPIDI_UCX_tag_mask(int mpi_tag, int src)
     return tag_mask;
 }
 
-static inline uint64_t MPIDI_UCX_recv_tag(int mpi_tag, int src, MPIU_Context_id_t contextid)
+static inline uint64_t MPIDI_UCX_recv_tag(int mpi_tag, int src, MPIR_Context_id_t contextid)
 {
     uint64_t ucp_tag = contextid;
 

@@ -10,8 +10,6 @@
 #ifndef MPID_TICKETLOCK_H_INCLUDED
 #define MPID_TICKETLOCK_H_INCLUDED
 
-#include "mpiutil.h"
-
 #define __MUTEX_INLINE__ __attribute__((always_inline))static inline
 
 #define MPIDI_CH4_CACHELINE_SIZE 64
@@ -90,7 +88,7 @@ MPIDI_CH4I_Thread_mutex_destroy(MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 __MUTEX_INLINE__ void
 MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m, int *mpi_error)
 {
-        MPIU_Assert(0);
+        MPIR_Assert(0);
 }
 
 

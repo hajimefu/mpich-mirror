@@ -23,7 +23,7 @@ static inline int MPIDI_NM_recv(void *buf,
                                     MPI_Status * status, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return err;
 }
 
@@ -35,7 +35,7 @@ static inline int MPIDI_NM_recv_init(void *buf,
                                          MPIR_Comm * comm,
                                          int context_offset, MPIR_Request ** request)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -44,7 +44,7 @@ static inline int MPIDI_NM_imrecv(void *buf,
                                       MPI_Datatype datatype,
                                       MPIR_Request * message, MPIR_Request ** rreqp)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -56,13 +56,13 @@ static inline int MPIDI_NM_irecv(void *buf,
                                      MPIR_Comm * comm, int context_offset, MPIR_Request ** request)
 {
     int err = MPI_SUCCESS;
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return err;
 }
 
 static inline int MPIDI_NM_cancel_recv(MPIR_Request * rreq)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

@@ -54,7 +54,7 @@ extern MPIDI_PTL_global_t       MPIDI_PTL_global;
 #define MPIDI_PTL_CTX_MASK      (0xFFFFFFFF00000000ULL)
 #define MPIDI_PTL_TAG_SHIFT     (MPIDI_PTL_TAG_BITS)
 
-static inline ptl_match_bits_t MPIDI_PTL_init_tag(MPIU_Context_id_t contextid, int tag)
+static inline ptl_match_bits_t MPIDI_PTL_init_tag(MPIR_Context_id_t contextid, int tag)
 {
     ptl_match_bits_t match_bits = 0;
     match_bits = contextid;

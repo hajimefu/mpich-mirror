@@ -36,17 +36,17 @@ static inline int MPIDI_SHM_init(int rank, int size)
     MPIDI_POSIX_cell_t(*cells_p)[MPIDI_POSIX_NUM_CELLS];
     MPIDI_POSIX_queue_t *recv_queues_p = NULL;
     MPIDI_POSIX_queue_t *free_queues_p = NULL;
-    MPIU_CHKPMEM_DECL(9);
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_INIT);
+    MPIR_CHKPMEM_DECL(9);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_SHM_INIT);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_SHM_INIT);
 
     MPIDI_POSIX_mem_region.num_seg = 1;
-    MPIU_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.seg, MPIDU_shm_seg_info_ptr_t,
+    MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.seg, MPIDU_shm_seg_info_ptr_t,
                         MPIDI_POSIX_mem_region.num_seg * sizeof(MPIDU_shm_seg_info_t), mpi_errno,
                         "mem_region segments");
-    MPIU_CHKPMEM_MALLOC(local_procs, int *, size * sizeof(int), mpi_errno, "local process index array");
-    MPIU_CHKPMEM_MALLOC(local_ranks, int *, size * sizeof(int), mpi_errno, "mem_region local ranks");
+    MPIR_CHKPMEM_MALLOC(local_procs, int *, size * sizeof(int), mpi_errno, "local process index array");
+    MPIR_CHKPMEM_MALLOC(local_ranks, int *, size * sizeof(int), mpi_errno, "mem_region local ranks");
 
     for(i = 0; i < size; i++) {
         if(MPIDI_CH4_rank_is_local(i, MPIR_Process.comm_world)) {
@@ -138,9 +138,9 @@ static inline int MPIDI_SHM_init(int rank, int size)
     MPIDI_POSIX_mem_region.Elements = cells_p[local_rank];
 
     /* Tables of pointers to shared memory Qs */
-    MPIU_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.FreeQ, MPIDI_POSIX_queue_ptr_t *,
+    MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.FreeQ, MPIDI_POSIX_queue_ptr_t *,
                         size * sizeof(MPIDI_POSIX_queue_ptr_t), mpi_errno, "FreeQ");
-    MPIU_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.RecvQ, MPIDI_POSIX_queue_ptr_t *,
+    MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.RecvQ, MPIDI_POSIX_queue_ptr_t *,
                         size * sizeof(MPIDI_POSIX_queue_ptr_t), mpi_errno, "RecvQ");
 
     /* Init table entry for our Qs */
@@ -164,8 +164,8 @@ static inline int MPIDI_SHM_init(int rank, int size)
         MPIDI_POSIX_mem_region.FreeQ[grank] = &free_queues_p[i];
         MPIDI_POSIX_mem_region.RecvQ[grank] = &recv_queues_p[i];
 
-        MPIU_Assert(MPIDI_POSIX_ALIGNED(MPIDI_POSIX_mem_region.FreeQ[grank], MPIDI_POSIX_CACHE_LINE_LEN));
-        MPIU_Assert(MPIDI_POSIX_ALIGNED(MPIDI_POSIX_mem_region.RecvQ[grank], MPIDI_POSIX_CACHE_LINE_LEN));
+        MPIR_Assert(MPIDI_POSIX_ALIGNED(MPIDI_POSIX_mem_region.FreeQ[grank], MPIDI_POSIX_CACHE_LINE_LEN));
+        MPIR_Assert(MPIDI_POSIX_ALIGNED(MPIDI_POSIX_mem_region.RecvQ[grank], MPIDI_POSIX_CACHE_LINE_LEN));
     }
 
     /* make pointers to our queues global so we don't have to dereference the array */
@@ -179,12 +179,12 @@ static inline int MPIDI_SHM_init(int rank, int size)
         MPIR_ERR_POP(mpi_errno);
 
     /* Allocate table of pointers to fastboxes */
-    MPIU_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.mailboxes.in, MPIDI_POSIX_fastbox_t **,
+    MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.mailboxes.in, MPIDI_POSIX_fastbox_t **,
                         num_local * sizeof(MPIDI_POSIX_fastbox_t *), mpi_errno, "fastboxes");
-    MPIU_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.mailboxes.out, MPIDI_POSIX_fastbox_t **,
+    MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.mailboxes.out, MPIDI_POSIX_fastbox_t **,
                         num_local * sizeof(MPIDI_POSIX_fastbox_t *), mpi_errno, "fastboxes");
 
-    MPIU_Assert(num_local > 0);
+    MPIR_Assert(num_local > 0);
 
 #define MPIDI_POSIX_MAILBOX_INDEX(sender, receiver) (((sender) > (receiver)) ? ((num_local-1) * (sender) + (receiver)) :		\
                                           (((sender) < (receiver)) ? ((num_local-1) * (sender) + ((receiver)-1)) : 0))
@@ -205,13 +205,13 @@ static inline int MPIDI_SHM_init(int rank, int size)
 
 #undef MPIDI_POSIX_MAILBOX_INDEX
 
-    MPIU_CHKPMEM_COMMIT();
+    MPIR_CHKPMEM_COMMIT();
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_INIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_SHM_INIT);
     return mpi_errno;
 fn_fail:
     /* --BEGIN ERROR HANDLING-- */
-    MPIU_CHKPMEM_REAP();
+    MPIR_CHKPMEM_REAP();
     goto fn_exit;
     /* --END ERROR HANDLING-- */
 }
@@ -221,8 +221,8 @@ fn_fail:
 static inline int MPIDI_SHM_finalize(void)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_FINALIZE);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_FINALIZE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_SHM_FINALIZE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_SHM_FINALIZE);
 
     /* local barrier */
     mpi_errno = MPIDU_shm_barrier(MPIDI_POSIX_mem_region.barrier, MPIDI_POSIX_mem_region.num_local);
@@ -245,7 +245,7 @@ static inline int MPIDI_SHM_finalize(void)
         MPIR_ERR_POP(mpi_errno);
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_FINALIZE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_SHM_FINALIZE);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -253,26 +253,26 @@ fn_fail:
 
 static inline void *MPIDI_SHM_alloc_mem(size_t size, MPIR_Info *info_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return NULL;
 }
 
 static inline int MPIDI_SHM_free_mem(void *ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_comm_get_lpid(MPIR_Comm *comm_ptr,
-                                              int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+                                              int idx, int *lpid_ptr, MPL_bool is_remote)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_gpid_get(MPIR_Comm *comm_ptr, int rank, MPIR_Gpid *gpid)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
@@ -291,20 +291,20 @@ static inline int MPIDI_SHM_get_max_node_id(MPIR_Comm *comm, MPID_Node_id_t *max
 static inline int MPIDI_SHM_getallincomm(MPIR_Comm *comm_ptr,
                                              int local_size, MPIR_Gpid local_gpids[], int *singleAVT)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_create_intercomm_from_lpids(MPIR_Comm *newcomm_ptr,
                                                             int size, const int lpids[])
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

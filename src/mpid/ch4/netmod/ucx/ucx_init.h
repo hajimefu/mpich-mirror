@@ -10,7 +10,7 @@
 #define NETMOD_UCX_INIT_H_INCLUDED
 
 #include "ucx_impl.h"
-#include "mpich_cvars.h"
+#include "mpir_cvars.h"
 #include "ucx_types.h"
 #include "pmi.h"
 #include <ucp/api/ucp.h>
@@ -42,8 +42,8 @@ static inline int MPIDI_NM_init(int rank,
 
     size_t address_length = 0;
 
-    MPIDI_STATE_DECL(MPID_STATE_INIT);
-    MPIDI_FUNC_ENTER(MPID_STATE_INIT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_INIT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_INIT);
 
     ucx_status = ucp_config_read(NULL, NULL, &config);
     MPIDI_UCX_CHK_STATUS(ucx_status, read_config);
@@ -103,7 +103,7 @@ static inline int MPIDI_NM_init(int rank,
     MPIDI_CH4_UCX_MPI_ERROR(mpi_errno);
 
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_EXIT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_EXIT);
     return mpi_errno;
   fn_fail:
     if (MPIDI_UCX_global.worker != NULL)
@@ -157,7 +157,7 @@ static inline int MPIDI_NM_finalize(void)
 }
 
 static inline int MPIDI_NM_comm_get_lpid(MPIR_Comm * comm_ptr,
-                                             int idx, int *lpid_ptr, MPIU_BOOL is_remote)
+                                             int idx, int *lpid_ptr, MPL_bool is_remote)
 {
     int avtid = 0, lpid = 0;
    if(comm_ptr->comm_kind == MPIR_COMM_KIND__INTRACOMM) {
@@ -179,12 +179,12 @@ static inline int MPIDI_NM_gpid_get(MPIR_Comm * comm_ptr, int rank, MPIR_Gpid * 
     int avtid = 0, lpid = 0;
     size_t sz;
     MPIDIU_comm_rank_to_pid(comm_ptr, rank, &lpid, &avtid);
-    MPIU_Assert(rank < comm_ptr->local_size);
+    MPIR_Assert(rank < comm_ptr->local_size);
     sz = MPIDI_UCX_NAME_LEN;// sizeof(MPIDI_UCX_GPID(gpid).addr);
     memset(MPIDI_UCX_GPID(gpid).addr, 0, sz);
     memcpy(MPIDI_UCX_GPID(gpid).addr,
            &MPIDI_UCX_global.pmi_addr_table[lpid * MPIDI_UCX_NAME_LEN ], sz);
-    MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(gpid).addr));
+    MPIR_Assert(sz <= sizeof(MPIDI_UCX_GPID(gpid).addr));
   fn_exit:
     return mpi_errno;
   fn_fail:
@@ -235,7 +235,7 @@ static inline int MPIDI_NM_gpid_tolpidarray(int size, MPIR_Gpid gpid[], int lpid
             if (MPIDIU_get_av_table(k) == NULL) { continue; }
             for(j = 0; j < MPIDIU_get_av_table(k)->size; j++) {
                 sz = MPIDI_UCX_NAME_LEN;//  sizeof(MPIDI_UCX_GPID(&gpid[i]).addr);
-                MPIU_Assert(sz <= sizeof(MPIDI_UCX_GPID(&gpid[i]).addr));
+                MPIR_Assert(sz <= sizeof(MPIDI_UCX_GPID(&gpid[i]).addr));
 
                 if(!memcmp(&MPIDI_UCX_global.pmi_addr_table[j * MPIDI_UCX_NAME_LEN],
                            MPIDI_UCX_GPID(&gpid[i]).addr, sz)) {

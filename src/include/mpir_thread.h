@@ -82,4 +82,7 @@ extern MPID_Thread_mutex_t MPIR_THREAD_POBJ_PMI_MUTEX;
 #define MPIR_THREAD_POBJ_WIN_MUTEX(_win_ptr)   _win_ptr->mutex
 #endif
 
+#define MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER(comm_ptr)
+#define MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT(comm_ptr)
+
 #endif /* MPIR_THREAD_H_INCLUDED */

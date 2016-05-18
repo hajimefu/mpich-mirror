@@ -15,7 +15,7 @@
 
 static inline int MPIDI_SHM_rank_is_local(int rank, MPIR_Comm * comm)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 #endif /* SHM_STUBSHM_PROC_H_INCLUDED */

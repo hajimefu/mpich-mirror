@@ -24,8 +24,8 @@ static inline int MPIDI_POSIX_progress_recv(int blocking, int *completion_count)
     size_t data_sz;
     int in_cell = 0;
     MPIDI_POSIX_cell_ptr_t cell = NULL;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     /* try to match with unexpected */
     MPIR_Request *sreq = MPIDI_POSIX_recvq_unexpected.head;
     MPIR_Request *prev_sreq = NULL;
@@ -55,8 +55,8 @@ match_l: {
         if(type == MPIDI_POSIX_TYPEACK) {
             /* ACK message doesn't have a matching receive! */
             int c;
-            MPIU_Assert(in_cell);
-            MPIU_Assert(pending);
+            MPIR_Assert(in_cell);
+            MPIR_Assert(pending);
             MPIR_cc_decr(pending->cc_ptr, &c);
             MPIDI_CH4U_request_release(pending);
             goto release_cell_l;
@@ -97,7 +97,7 @@ match_l: {
                     int srank = in_cell ? cell->rank : sreq->status.MPI_SOURCE;
                     MPIR_Request *req_ack = NULL;
                     MPIDI_POSIX_REQUEST_CREATE_SREQ(req_ack);
-                    MPIU_Object_set_ref(req_ack, 1);
+                    MPIR_Object_set_ref(req_ack, 1);
                     req_ack->comm = req->comm;
                     MPIR_Comm_add_ref(req->comm);
 
@@ -121,7 +121,7 @@ match_l: {
                 else if(type == MPIDI_POSIX_TYPELMT)
                     data_sz = MPIDI_POSIX_EAGER_THRESHOLD;
                 else
-                    MPIU_Assert(0);
+                    MPIR_Assert(0);
 
                 /* check for user buffer overflow */
                 size_t user_data_sz = MPIDI_POSIX_REQUEST(req)->data_sz;
@@ -143,7 +143,7 @@ match_l: {
                         MPIDI_POSIX_REQUEST(req)->segment_first = last;
                 } else
                     /* contig */
-                    if(send_buffer) MPIU_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
+                    if(send_buffer) MPIR_Memcpy(recv_buffer, (void *) send_buffer, data_sz);
                 MPIDI_POSIX_REQUEST(req)->data_sz -= data_sz;
                 MPIDI_POSIX_REQUEST(req)->user_buf += data_sz;
 
@@ -174,7 +174,7 @@ match_l: {
             /* free the cell, move to unexpected queue */
             MPIR_Request *rreq;
             MPIDI_POSIX_REQUEST_CREATE_RREQ(rreq);
-            MPIU_Object_set_ref(rreq, 1);
+            MPIR_Object_set_ref(rreq, 1);
             /* set status */
             rreq->status.MPI_SOURCE = cell->rank;
             rreq->status.MPI_TAG = cell->tag;
@@ -186,7 +186,7 @@ match_l: {
 
             if(data_sz > 0) {
                 MPIDI_POSIX_REQUEST(rreq)->user_buf = (char *)MPL_malloc(data_sz);
-                MPIU_Memcpy(MPIDI_POSIX_REQUEST(rreq)->user_buf, (void *) cell->pkt.mpich.p.payload, data_sz);
+                MPIR_Memcpy(MPIDI_POSIX_REQUEST(rreq)->user_buf, (void *) cell->pkt.mpich.p.payload, data_sz);
             } else {
                 MPIDI_POSIX_REQUEST(rreq)->user_buf = NULL;
             }
@@ -227,7 +227,7 @@ release_cell_l:
 
     (*completion_count)++;
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_SHM_DO_PROGRESS_RECV);
     return mpi_errno;
 }
 
@@ -243,8 +243,8 @@ static inline int MPIDI_POSIX_progress_send(int blocking, int *completion_count)
     MPIDI_POSIX_cell_ptr_t cell = NULL;
     MPIR_Request *sreq = MPIDI_POSIX_sendq.head;
     MPIR_Request *prev_sreq = NULL;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
 
     if(sreq == NULL)
         goto fn_exit;
@@ -286,7 +286,7 @@ static inline int MPIDI_POSIX_progress_send(int blocking, int *completion_count)
                     MPID_Segment_free(MPIDI_POSIX_REQUEST(sreq)->segment_ptr);
                 } else {
                     /* contig */
-                    MPIU_Memcpy((void *) recv_buffer, MPIDI_POSIX_REQUEST(sreq)->user_buf, data_sz);
+                    MPIR_Memcpy((void *) recv_buffer, MPIDI_POSIX_REQUEST(sreq)->user_buf, data_sz);
                 }
 
                 cell->pkt.mpich.type = MPIDI_POSIX_TYPEEAGER;
@@ -311,7 +311,7 @@ static inline int MPIDI_POSIX_progress_send(int blocking, int *completion_count)
                 MPIDI_POSIX_REQUEST(sreq)->segment_first = last;
             } else {
                 /* contig */
-                MPIU_Memcpy((void *) recv_buffer, MPIDI_POSIX_REQUEST(sreq)->user_buf, MPIDI_POSIX_EAGER_THRESHOLD);
+                MPIR_Memcpy((void *) recv_buffer, MPIDI_POSIX_REQUEST(sreq)->user_buf, MPIDI_POSIX_EAGER_THRESHOLD);
                 MPIDI_POSIX_REQUEST(sreq)->user_buf += MPIDI_POSIX_EAGER_THRESHOLD;
             }
 
@@ -328,7 +328,7 @@ static inline int MPIDI_POSIX_progress_send(int blocking, int *completion_count)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_SHM_DO_PROGRESS_SEND);
     return mpi_errno;
 }
 
@@ -337,8 +337,8 @@ fn_exit:
 static inline int MPIDI_SHM_progress(int blocking)
 {
     int complete = 0;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_SHM_PROGRESS);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_SHM_PROGRESS);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_SHM_PROGRESS);
 
     do {
         /* Receieve progress */
@@ -357,61 +357,61 @@ static inline int MPIDI_SHM_progress(int blocking)
             break;
     } while(blocking);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_SHM_PROGRESS);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_SHM_PROGRESS);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_test(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_poke(void)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline void MPIDI_SHM_progress_start(MPID_Progress_state *state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline void MPIDI_SHM_progress_end(MPID_Progress_state *state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return;
 }
 
 static inline int MPIDI_SHM_progress_wait(MPID_Progress_state *state)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_register(int (*progress_fn)(int *))
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_deregister(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_activate(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 static inline int MPIDI_SHM_progress_deactivate(int id)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 

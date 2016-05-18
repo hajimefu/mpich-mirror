@@ -16,51 +16,51 @@
 
 __CH4_INLINE__ int MPIDI_Comm_AS_enabled(MPIR_Comm * comm)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_reenable_anysource(MPIR_Comm * comm, MPIR_Group ** failed_group_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_remote_group_failed(MPIR_Comm * comm, MPIR_Group ** failed_group_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_group_failed(MPIR_Comm * comm_ptr, MPIR_Group ** failed_group_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return MPI_SUCCESS;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_failure_ack(MPIR_Comm * comm_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_failure_get_acked(MPIR_Comm * comm_ptr,
                                                 MPIR_Group ** failed_group_ptr)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_revoke(MPIR_Comm * comm_ptr, int is_remote)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
 __CH4_INLINE__ int MPIDI_Comm_get_all_failed_procs(MPIR_Comm * comm_ptr, MPIR_Group ** failed_group,
                                                    int tag)
 {
-    MPIU_Assert(0);
+    MPIR_Assert(0);
     return 0;
 }
 
@@ -78,8 +78,8 @@ __CH4_INLINE__ int MPIDI_Comm_split_type(MPIR_Comm  *comm_ptr,
     int            idx;
     MPID_Node_id_t node_id;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_SPLIT_TYPE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_SPLIT_TYPE);
 
     if(split_type == MPI_COMM_TYPE_SHARED) {
         MPIDI_Comm_get_lpid(comm_ptr,comm_ptr->rank,&idx,FALSE);
@@ -88,7 +88,7 @@ __CH4_INLINE__ int MPIDI_Comm_split_type(MPIR_Comm  *comm_ptr,
     } else
         mpi_errno              = MPIR_Comm_split_impl(comm_ptr, MPI_UNDEFINED, key, newcomm_ptr);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_SPLIT_TYPE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_SPLIT_TYPE);
     return mpi_errno;
 }
 
@@ -101,8 +101,8 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPIR_Comm * comm)
     int mpi_errno;
     int i, *uniq_avtids;
     int max_n_avts;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_CREATE);
     mpi_errno = MPIDI_NM_comm_create(comm);
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POP(mpi_errno);
@@ -158,7 +158,7 @@ __CH4_INLINE__ int MPIDI_Comm_create(MPIR_Comm * comm)
     }
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_CREATE);
     return mpi_errno;
   fn_fail:
     goto fn_exit;
@@ -173,8 +173,8 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
     int mpi_errno;
     int i, *uniq_avtids;
     int max_n_avts;
-    MPIDI_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_COMM_DESTROY);
     /* release ref to avts */
     switch (MPIDII_COMM(comm,map).mode) {
         case MPIDII_RANK_MAP_NONE:
@@ -238,7 +238,7 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
         MPIDIU_release_mlut(MPIDII_COMM(comm,local_map).irreg.mlut.t);
     }
   fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4_COMM_DESTROY);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4_COMM_DESTROY);
     return mpi_errno;
   fn_fail:
     goto fn_exit;

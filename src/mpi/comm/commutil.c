@@ -106,7 +106,7 @@ int MPII_Comm_init(MPIR_Comm * comm_p)
 
 #if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
     MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_COMM_MUTEX(comm_p), &thr_err);
-    MPIU_Assert(thr_err == 0);
+    MPIR_Assert(thr_err == 0);
 #endif
     /* Fields not set include context_id, remote and local size, and
      * kind, since different communicator construction routines need
@@ -1009,7 +1009,7 @@ int MPIR_Comm_delete_internal(MPIR_Comm * comm_ptr)
 
 #if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
         MPID_Thread_mutex_destroy(&MPIR_THREAD_POBJ_COMM_MUTEX(comm_ptr), &thr_err);
-        MPIU_Assert(thr_err == 0);
+        MPIR_Assert(thr_err == 0);
 #endif
         /* We need to release the error handler */
         if (comm_ptr->errhandler &&

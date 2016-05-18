@@ -14,7 +14,6 @@
 #include <mpidimpl.h>
 #include "mpidch4r.h"
 
-#include "mpihandlemem.h"
 #include "mpiu_os_wrappers_pre.h"
 #include "mpiu_shm_wrappers.h"
 #include "pmi.h"
@@ -50,7 +49,7 @@ typedef struct {
 } MPIDI_POSIX_vcr_t;
 
 struct MPIDI_POSIX_vcrt_t {
-    MPIU_OBJECT_HEADER;
+    MPIR_OBJECT_HEADER;
     unsigned                    size;         /**< Number of entries in the table */
     MPIDI_POSIX_vcr_t vcr_table[0]; /**< Array of virtual connection references */
 };
@@ -150,13 +149,13 @@ typedef struct {
 #undef FUNCNAME
 #define FUNCNAME nothing
 #define BEGIN_FUNC(FUNCNAME)                    \
-  MPIDI_STATE_DECL(FUNCNAME);                   \
-  MPIDI_FUNC_ENTER(FUNCNAME);
+  MPIR_FUNC_VERBOSE_STATE_DECL(FUNCNAME);                   \
+  MPIR_FUNC_VERBOSE_ENTER(FUNCNAME);
 #define END_FUNC(FUNCNAME)                      \
-  MPIDI_FUNC_EXIT(FUNCNAME);
+  MPIR_FUNC_VERBOSE_EXIT(FUNCNAME);
 #define END_FUNC_RC(FUNCNAME) \
   fn_exit:                    \
-  MPIDI_FUNC_EXIT(FUNCNAME);  \
+  MPIR_FUNC_VERBOSE_EXIT(FUNCNAME);  \
   return mpi_errno;           \
 fn_fail:                      \
   goto fn_exit;

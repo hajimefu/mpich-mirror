@@ -146,15 +146,15 @@ static inline int MPIDI_OFI_dynproc_create_intercomm(const char      *port_name,
         case MPIDII_RANK_MAP_LUT_INTRA:
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.t = MPIDII_COMM(comm_ptr,map).irreg.lut.t;
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.lut.lpid = MPIDII_COMM(comm_ptr,map).irreg.lut.lpid;
-            MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.lut.t);
+            MPIR_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.lut.t);
             break;
         case MPIDII_RANK_MAP_MLUT:
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.t = MPIDII_COMM(comm_ptr,map).irreg.mlut.t;
             MPIDII_COMM(tmp_comm_ptr,local_map).irreg.mlut.gpid = MPIDII_COMM(comm_ptr,map).irreg.mlut.gpid;
-            MPIU_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.mlut.t);
+            MPIR_Object_add_ref(MPIDII_COMM(comm_ptr,map).irreg.mlut.t);
             break;
         case MPIDII_RANK_MAP_NONE:
-            MPIU_Assert(0);
+            MPIR_Assert(0);
             break;
     }
 
@@ -337,7 +337,7 @@ static inline int MPIDI_OFI_dynproc_exchange_map(int              root,
                                                 MPIDI_OFI_COMM_TO_PHYS(comm_ptr, i),
                                                 my_addr_table+i*MPIDI_Global.addrnamelen,
                                                 &sz),avlookup);
-            MPIU_Assert(sz == MPIDI_Global.addrnamelen);
+            MPIR_Assert(sz == MPIDI_Global.addrnamelen);
         }
 
         for(i=0; i<comm_ptr->local_size; i++)
@@ -389,8 +389,8 @@ static inline int MPIDI_NM_comm_connect(const char *port_name,
                                             MPIR_Comm **newcomm)
 {
     int                entries,mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
 
     char           *parent_addr_table = NULL;
     MPID_Node_id_t *parent_node_table = NULL;
@@ -436,7 +436,7 @@ static inline int MPIDI_NM_comm_connect(const char *port_name,
                                                                               (char *)"Connect"));
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_SPAWN_MUTEX);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_CONNECT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -451,14 +451,14 @@ static inline int MPIDI_NM_comm_disconnect(MPIR_Comm *comm_ptr)
     int            mpi_errno = MPI_SUCCESS;
     MPIR_Errflag_t errflag   = MPIR_ERR_NONE;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
 
     MPIDI_OFI_MPI_CALL_POP(MPIR_Barrier_impl(comm_ptr, &errflag));
     MPIDI_OFI_MPI_CALL_POP(MPIR_Comm_free_impl(comm_ptr));
 
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_DISCONNECT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -474,8 +474,8 @@ static inline int MPIDI_NM_open_port(MPIR_Info *info_ptr, char *port_name)
     int str_errno     = MPL_STR_SUCCESS;
     int port_name_tag = 0;
     int len           = MPI_MAX_PORT_NAME;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
 
     MPIDI_OFI_MPI_CALL_POP(MPIDI_OFI_get_port_name_tag(&port_name_tag));
     MPIDI_OFI_STR_CALL(MPL_str_add_int_arg(&port_name,&len,MPIDI_OFI_PORT_NAME_TAG_KEY,
@@ -484,7 +484,7 @@ static inline int MPIDI_NM_open_port(MPIR_Info *info_ptr, char *port_name)
                                                        MPIDI_Global.addrname,
                                                        MPIDI_Global.addrnamelen),port_str);
 fn_exit:
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_OPEN_PORT);
     return mpi_errno;
 fn_fail:
     goto fn_exit;
@@ -499,13 +499,13 @@ static inline int MPIDI_NM_close_port(const char *port_name)
     int mpi_errno = MPI_SUCCESS;
     int port_name_tag;
 
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
 
     mpi_errno = MPIDI_OFI_get_tag_from_port(port_name, &port_name_tag);
     MPIDI_OFI_free_port_name_tag(port_name_tag);
 
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
     return mpi_errno;
 }
 
@@ -524,8 +524,8 @@ static inline int MPIDI_NM_comm_accept(const char *port_name,
     MPID_Node_id_t *child_node_table    = NULL;
     ssize_t         child_table_sz      = -1LL;
     int             child_root          = -1;
-    MPIDI_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
-    MPIDI_FUNC_ENTER(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
 
     MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_SPAWN_MUTEX);
     int rank = comm_ptr->rank;
@@ -564,7 +564,7 @@ static inline int MPIDI_NM_comm_accept(const char *port_name,
                                                                               (char *)"Accept"));
 fn_exit:
     MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_SPAWN_MUTEX);
-    MPIDI_FUNC_EXIT(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_COMM_CLOSE_PORT);
     return mpi_errno;
 
 fn_fail:

@@ -22,8 +22,8 @@ static inline MPIR_Request *MPIDI_CH4I_am_request_create()
 {
     MPIR_Request *req;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_REQUEST_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4I_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4I_REQUEST_CREATE);
 
     req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(req);
@@ -32,10 +32,10 @@ static inline MPIR_Request *MPIDI_CH4I_am_request_create()
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
     MPIDI_CH4U_REQUEST(req, req)    =
         (MPIDI_CH4U_req_ext_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
-    MPIU_Assert(MPIDI_CH4U_REQUEST(req, req));
+    MPIR_Assert(MPIDI_CH4U_REQUEST(req, req));
     MPIDI_CH4U_REQUEST(req, req->status) = 0;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4I_REQUEST_CREATE);
 
     return req;
 }
@@ -48,8 +48,8 @@ static inline MPIR_Request *MPIDI_CH4I_am_win_request_create()
 {
     MPIR_Request *req;
 
-    MPIDI_STATE_DECL(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
-    MPIDI_FUNC_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
 
     req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIDI_NM_am_request_init(req);
@@ -57,10 +57,10 @@ static inline MPIR_Request *MPIDI_CH4I_am_win_request_create()
     CH4_COMPILE_TIME_ASSERT(sizeof(MPIDI_CH4U_req_ext_t) <= MPIDI_CH4I_BUF_POOL_SZ);
     MPIDI_CH4U_REQUEST(req, req)         =
         (MPIDI_CH4U_req_ext_t *) MPIDI_CH4R_get_buf(MPIDI_CH4_Global.buf_pool);
-    MPIU_Assert(MPIDI_CH4U_REQUEST(req, req));
+    MPIR_Assert(MPIDI_CH4U_REQUEST(req, req));
     MPIDI_CH4U_REQUEST(req, req->status) = 0;
 
-    MPIDI_FUNC_EXIT(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4I_WIN_REQUEST_CREATE);
     return req;
 }
 
@@ -90,10 +90,10 @@ static inline int MPIDI_CH4R_anysource_matched(MPIR_Request *rreq, int caller, i
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPIDI_STATE_DECL(MPIDI_CH4R_ANYSOURCE_MATCHED);
-    MPIDI_FUNC_ENTER(MPIDI_CH4R_ANYSOURCE_MATCHED);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPIDI_CH4R_ANYSOURCE_MATCHED);
+    MPIR_FUNC_VERBOSE_ENTER(MPIDI_CH4R_ANYSOURCE_MATCHED);
 
-    MPIU_Assert(MPIDI_CH4R_NETMOD == caller || MPIDI_CH4R_SHM == caller);
+    MPIR_Assert(MPIDI_CH4R_NETMOD == caller || MPIDI_CH4R_SHM == caller);
 
     if (MPIDI_CH4R_NETMOD == caller) {
 #ifdef MPIDI_BUILD_CH4_SHM
@@ -117,7 +117,7 @@ static inline int MPIDI_CH4R_anysource_matched(MPIR_Request *rreq, int caller, i
         *continue_matching = !MPIR_STATUS_GET_CANCEL_BIT(rreq->status);
     }
 
-    MPIDI_FUNC_EXIT(MPIDI_CH4R_ANYSOURCE_MATCHED);
+    MPIR_FUNC_VERBOSE_EXIT(MPIDI_CH4R_ANYSOURCE_MATCHED);
     return mpi_errno;
 }
 
