@@ -265,11 +265,11 @@ static inline int MPIDI_NM_send_amv_hdr(int rank,
     }
 
     am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
-    MPIU_Assert(am_hdr_buf);
+    MPIR_Assert(am_hdr_buf);
     am_hdr_sz = 0;
 
     for(i = 0; i < iov_len; i++) {
-        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        MPIR_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
@@ -306,11 +306,11 @@ static inline int MPIDI_NM_send_amv(int rank,
     }
 
     am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
-    MPIU_Assert(am_hdr_buf);
+    MPIR_Assert(am_hdr_buf);
     am_hdr_sz = 0;
 
     for(i = 0; i < iov_len; i++) {
-        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        MPIR_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
@@ -442,11 +442,11 @@ static inline int MPIDI_NM_send_amv_reply(MPIR_Context_id_t context_id,
 
     am_hdr_buf = (char *) MPL_malloc(am_hdr_sz);
 
-    MPIU_Assert(am_hdr_buf);
+    MPIR_Assert(am_hdr_buf);
     am_hdr_sz = 0;
 
     for(i = 0; i < iov_len; i++) {
-        MPIU_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
+        MPIR_Memcpy(am_hdr_buf + am_hdr_sz, am_hdr[i].iov_base, am_hdr[i].iov_len);
         am_hdr_sz += am_hdr[i].iov_len;
     }
 
