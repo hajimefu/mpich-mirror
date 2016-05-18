@@ -7,7 +7,7 @@
 #ifndef HAVE_MPIDPKT_H
 #define HAVE_MPIDPKT_H
 
-#include "oputil.h"
+#include "mpir_op_util.h"
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -842,7 +842,7 @@ typedef struct MPIDI_CH3_Pkt_close {
 
 typedef struct MPIDI_CH3_Pkt_revoke {
     MPIDI_CH3_Pkt_type_t type;
-    MPIU_Context_id_t revoked_comm;
+    MPIR_Context_id_t revoked_comm;
 } MPIDI_CH3_Pkt_revoke_t;
 
 typedef union MPIDI_CH3_Pkt {

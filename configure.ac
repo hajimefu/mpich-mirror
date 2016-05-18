@@ -518,13 +518,6 @@ AC_ARG_ENABLE(mutex-timing,
 	AC_HELP_STRING([--enable-mutex-timing], [calculate the time spent waiting on mutexes]),
 	AC_DEFINE(MPIU_MUTEX_WAIT_TIME,1,[Define to enable timing mutexes]))
 
-AC_ARG_ENABLE(handle-allocation,
-	AC_HELP_STRING([--enable-handle-allocation=type],
-			[Choose the method used for allocating MPI
-			 object handles.  Values may be 'tls' for
-			 thread-local storage or 'mutex' for simple
-			 locking.  'mutex' is the default.]),,enable_handle_allocation=default)
-
 AC_ARG_ENABLE([predefined-refcount],
 	AS_HELP_STRING([--enable-predefined-refcount],
                        [control whether predefined objects like
@@ -920,7 +913,7 @@ fi
 if test "$enable_error_checking" = "yes" ; then
    enable_error_checking=all
 fi
-# glue_romio.h needs the variable HAVE_ERROR_CHECKING to have the value 0 or 1
+# mpir_ext.h needs the variable HAVE_ERROR_CHECKING to have the value 0 or 1
 HAVE_ERROR_CHECKING=0
 case "$enable_error_checking" in 
     no)
@@ -939,22 +932,22 @@ case "$enable_error_checking" in
     AC_MSG_WARN([Unknown value $enable_error_checking for enable-error-checking])
     ;;
 esac
-# permit @HAVE_ERROR_CHECKING@ substitution in glue_romio.h 
+# permit @HAVE_ERROR_CHECKING@ substitution in mpir_ext.h
 AC_SUBST([HAVE_ERROR_CHECKING])
 
 # error-messages
 case "$enable_error_messages" in 
     no|none)
-        error_message_kind="MPICH_ERROR_MSG_NONE"
+        error_message_kind="MPICH_ERROR_MSG__NONE"
     ;;
     all|yes)
-	error_message_kind="MPICH_ERROR_MSG_ALL"
+	error_message_kind="MPICH_ERROR_MSG__ALL"
     ;;
     generic)
-	error_message_kind="MPICH_ERROR_MSG_GENERIC"
+	error_message_kind="MPICH_ERROR_MSG__GENERIC"
     ;;
     class)
-	error_message_kind="MPICH_ERROR_MSG_CLASS"
+	error_message_kind="MPICH_ERROR_MSG__CLASS"
     ;;
     *)
     AC_MSG_WARN([Unknown value $enable_error_messages for enable-error-messages])
@@ -1121,14 +1114,14 @@ fi
 if test "$timing_name" != "none" ; then
     timing_kind=`echo $timing_name | \
        tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-    timing_kind=MPID_TIMING_KIND_$timing_kind
+    timing_kind=MPICH_TIMING_KIND__$timing_kind
     AC_DEFINE_UNQUOTED(HAVE_TIMING,$timing_kind,[define to enable timing collection])
     if test "$collect_stats" = "true" ; then
         AC_DEFINE(COLLECT_STATS,1,[define to enable collection of statistics])
     fi
 fi
 
-use_logging_variable="MPID_LOGGING_`echo $logging_name | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
+use_logging_variable="MPICH_LOGGING__`echo $logging_name | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
 AC_DEFINE_UNQUOTED(USE_LOGGING,$use_logging_variable,[define to choose logging library])
 # ----------------------------------------------------------------------------
 # End of logging tests
@@ -1357,20 +1350,20 @@ if test "$MPICH_THREAD_LEVEL" != "MPI_THREAD_SINGLE"; then
 fi
 
 # Check for value thread_cs choice; set the refcount default if necessary
-thread_granularity=MPICH_THREAD_GRANULARITY_SINGLE
-thread_refcount=MPIU_REFCOUNT_NONE
+thread_granularity=MPICH_THREAD_GRANULARITY__SINGLE
+thread_refcount=MPICH_REFCOUNT__NONE
 if test "$enable_threads" = "multiple" ; then
     case $enable_thread_cs in 
     global)
-    thread_granularity=MPICH_THREAD_GRANULARITY_GLOBAL
+    thread_granularity=MPICH_THREAD_GRANULARITY__GLOBAL
     if test "$enable_refcount" = "default" ; then enable_refcount=none ; fi
     ;;
     per-object|per_object)
-    thread_granularity=MPICH_THREAD_GRANULARITY_PER_OBJECT
+    thread_granularity=MPICH_THREAD_GRANULARITY__POBJ
     if test "$enable_refcount" = "default" ; then enable_refcount=lock-free ; fi
     ;;
     lock-free|lock_free|lockfree)
-    thread_granularity=MPICH_THREAD_GRANULARITY_LOCK_FREE
+    thread_granularity=MPICH_THREAD_GRANULARITY__LOCKFREE
     if test "$enable_refcount" = "default" ; then enable_refcount=lock-free ; fi
     if test "$enable_predefined_refcount" = "default" ; then enable_predefined_refcount=no ; fi
     AC_MSG_ERROR([--enable-thread-cs=lock-free is not supported yet, please select a different granularity])
@@ -1382,10 +1375,10 @@ if test "$enable_threads" = "multiple" ; then
 
     case $enable_refcount in
     lock-free|lock_free|lockfree)
-    thread_refcount=MPIU_REFCOUNT_LOCKFREE
+    thread_refcount=MPICH_REFCOUNT__LOCKFREE
     ;;
     none)
-    thread_refcount=MPIU_REFCOUNT_NONE
+    thread_refcount=MPICH_REFCOUNT__NONE
     ;;
     *)
     AC_MSG_ERROR([Unrecognized value $enable_refcount for --enable-refcount])
@@ -1395,24 +1388,10 @@ fi
 AC_DEFINE_UNQUOTED([MPICH_THREAD_GRANULARITY],$thread_granularity,[Method used to implement atomic updates and access])
 
 if test "$enable_predefined_refcount" = "no" ; then
-    AC_DEFINE([MPIU_THREAD_SUPPRESS_PREDEFINED_REFCOUNTS],[1],[define to disable reference counting predefined objects like MPI_COMM_WORLD])
+    AC_DEFINE([MPICH_THREAD_SUPPRESS_PREDEFINED_REFCOUNTS],[1],[define to disable reference counting predefined objects like MPI_COMM_WORLD])
 fi
 
-case $enable_handle_allocation in
-    mutex|default)
-        handle_allocation_method=MPIU_HANDLE_ALLOCATION_MUTEX
-    ;;
-    tls)
-        handle_allocation_method=MPIU_HANDLE_ALLOCATION_THREAD_LOCAL
-    ;;
-    *)
-        AC_MSG_ERROR([Unrecognized value $enable_handle_allocation for --enable-handle-allocation])
-    ;;
-esac
-AC_DEFINE_UNQUOTED([MPIU_HANDLE_ALLOCATION_METHOD],$handle_allocation_method,[Method used to allocate MPI object handles])
-
-
-AC_DEFINE_UNQUOTED([MPIU_THREAD_REFCOUNT],$thread_refcount,[Method used to implement refcount updates])
+AC_DEFINE_UNQUOTED([MPICH_THREAD_REFCOUNT],$thread_refcount,[Method used to implement refcount updates])
 
 # enable-g
 # strip off multiple options, separated by commas
@@ -4562,7 +4541,7 @@ if test "$ac_cv_func_vsnprintf" = "yes" ; then
 #include <stdarg.h>],vsnprintf)
 fi
 # We would like to use strerror in the file namepublisher; it is also used
-# in MPIU_Strerror (whose implementation is broken if strerror is not found)
+# in MPIR_Strerror (whose implementation is broken if strerror is not found)
 AC_CHECK_FUNCS(strerror strncasecmp)
 AC_FUNC_STRERROR_R
 if test "$ac_cv_func_strerror_r" = "yes" ; then
@@ -4746,27 +4725,13 @@ AC_SUBST(MPI_F77_AINT)
 export MPI_F77_AINT
 # ----------------------------------------------------------------------------
 
-# define MPIU_Size_t - used to express the size of objects
-# This is used in mpiu_type_defs.h to define MPIU_SIZE_T, 
-# and is used in various parts of ch3 and mpid/common/sock.  
-# This is used to handle the potential problem that a message is 
-# too long to fit with an int.  However, we may still need to make
-# some more adjustments in the code (this may not be used everywhere
-# that it is needed).
-#
-# FIXME: this should really be in a util configure file, but we don't
-# have one at the moment
-#
-MPIU_SIZE_T="unsigned $MPI_AINT"
-AC_DEFINE_UNQUOTED(MPIU_SIZE_T,$MPIU_SIZE_T,[Set to a type that can express the size of the entire address space]) 
-
 if test "$ac_cv_sizeof_void_p" -lt "$aint_size" ; then
     AC_DEFINE(USE_AINT_FOR_ATTRVAL,1,[Define if MPI_Aint should be used instead of void * for storing attribute values])
 fi
 
 # with MPI_AINT defined, now we can
 # Get the size for the bsendoverhead
-AC_CHECK_SIZEOF(MPIR_Bsend_data_t,0,[
+AC_CHECK_SIZEOF(MPII_Bsend_data_t,0,[
 #define MPI_Datatype int
 typedef $MPI_AINT MPI_Aint;
 #ifdef HAVE_STDLIB_H
@@ -4775,16 +4740,16 @@ typedef $MPI_AINT MPI_Aint;
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
-#include "${master_top_srcdir}/src/include/mpibsend.h"]
+#include "${master_top_srcdir}/src/include/mpii_bsend.h"]
 )
-if test "$ac_cv_sizeof_MPIR_Bsend_data_t" = "0" ; then
+if test "$ac_cv_sizeof_MPII_Bsend_data_t" = "0" ; then
     AC_MSG_ERROR([Unable to determine the size of MPI_BSEND_OVERHEAD])
     # In the past, a default of 128 was used (still likely good enough),
     # but the autoconf SIZEOF macro has been changed to ignore the second
     # argument, so code that depended on the prior defined behavior now
     # silently breaks.
 fi
-BSEND_OVERHEAD=$ac_cv_sizeof_MPIR_Bsend_data_t
+BSEND_OVERHEAD=$ac_cv_sizeof_MPII_Bsend_data_t
 export BSEND_OVERHEAD
 AC_SUBST(BSEND_OVERHEAD)
 
@@ -5561,7 +5526,7 @@ AC_OUTPUT(Makefile \
           test/commands/Makefile \
           src/include/mpichinfo.h \
 	  mpich-doxygen \
-          src/include/glue_romio.h \
+          src/include/mpir_ext.h \
           src/binding/cxx/mpicxx.h \
 	  src/binding/fortran/mpif_h/mpif.h \
 	  src/binding/fortran/mpif_h/setbotf.f \

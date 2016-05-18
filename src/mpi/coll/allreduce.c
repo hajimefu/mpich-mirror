@@ -198,7 +198,7 @@ int MPIR_Allreduce_intra (
         send_idx, recv_idx, last_idx, send_cnt, recv_cnt, *cnts, *disps; 
     MPI_Aint true_extent, true_lb, extent;
     void *tmp_buf;
-    MPIU_CHKLMEM_DECL(3);
+    MPIR_CHKLMEM_DECL(3);
     
     /* check if multiple threads are calling this collective function */
     MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
@@ -315,8 +315,8 @@ int MPIR_Allreduce_intra (
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
         MPID_Datatype_get_extent_macro(datatype, extent);
 
-        MPIU_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
-        MPIU_CHKLMEM_MALLOC(tmp_buf, void *, count*(MPL_MAX(extent,true_extent)), mpi_errno, "temporary buffer");
+        MPIR_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
+        MPIR_CHKLMEM_MALLOC(tmp_buf, void *, count*(MPL_MAX(extent,true_extent)), mpi_errno, "temporary buffer");
 	
         /* adjust for potential negative lower bound in datatype */
         tmp_buf = (void *)((char*)tmp_buf - true_lb);
@@ -448,8 +448,8 @@ int MPIR_Allreduce_intra (
                    each process receives and the displacement within
                    the buffer */
 
-		MPIU_CHKLMEM_MALLOC(cnts, int *, pof2*sizeof(int), mpi_errno, "counts");
-		MPIU_CHKLMEM_MALLOC(disps, int *, pof2*sizeof(int), mpi_errno, "displacements");
+		MPIR_CHKLMEM_MALLOC(cnts, int *, pof2*sizeof(int), mpi_errno, "counts");
+		MPIR_CHKLMEM_MALLOC(disps, int *, pof2*sizeof(int), mpi_errno, "displacements");
 
                 for (i=0; i<(pof2-1); i++) 
                     cnts[i] = count/pof2;
@@ -601,7 +601,7 @@ int MPIR_Allreduce_intra (
     /* check if multiple threads are calling this collective function */
     MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
 
-    MPIU_CHKLMEM_FREEALL();
+    MPIR_CHKLMEM_FREEALL();
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     return (mpi_errno);
@@ -636,7 +636,7 @@ int MPIR_Allreduce_inter (
     MPI_Aint true_extent, true_lb, extent;
     void *tmp_buf=NULL;
     MPIR_Comm *newcomm_ptr = NULL;
-    MPIU_CHKLMEM_DECL(1);
+    MPIR_CHKLMEM_DECL(1);
 
     MPIR_ERR_CHECK_MULTIPLE_THREADS_ENTER( comm_ptr );
 
@@ -645,16 +645,16 @@ int MPIR_Allreduce_inter (
         MPID_Datatype_get_extent_macro(datatype, extent);
         /* I think this is the worse case, so we can avoid an assert()
          * inside the for loop */
-        /* Should MPIU_CHKLMEM_MALLOC do this? */
-        MPIU_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
-        MPIU_CHKLMEM_MALLOC(tmp_buf, void *, count*(MPL_MAX(extent,true_extent)), mpi_errno, "temporary buffer");
+        /* Should MPIR_CHKLMEM_MALLOC do this? */
+        MPIR_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
+        MPIR_CHKLMEM_MALLOC(tmp_buf, void *, count*(MPL_MAX(extent,true_extent)), mpi_errno, "temporary buffer");
         /* adjust for potential negative lower bound in datatype */
         tmp_buf = (void *)((char*)tmp_buf - true_lb);
     }
 
     /* Get the local intracommunicator */
     if (!comm_ptr->local_comm)
-        MPIR_Setup_intercomm_localcomm( comm_ptr );
+        MPII_Setup_intercomm_localcomm( comm_ptr );
 
     newcomm_ptr = comm_ptr->local_comm;
 
@@ -693,7 +693,7 @@ int MPIR_Allreduce_inter (
 
   fn_exit:
     MPIR_ERR_CHECK_MULTIPLE_THREADS_EXIT( comm_ptr );
-    MPIU_CHKLMEM_FREEALL();
+    MPIR_CHKLMEM_FREEALL();
     if (mpi_errno_ret)
         mpi_errno = mpi_errno_ret;
     else if (*errflag != MPIR_ERR_NONE)
@@ -817,12 +817,12 @@ int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
     int mpi_errno = MPI_SUCCESS;
     MPIR_Comm *comm_ptr = NULL;
     MPIR_Errflag_t errflag = MPIR_ERR_NONE;
-    MPID_MPI_STATE_DECL(MPID_STATE_MPI_ALLREDUCE);
+    MPIR_FUNC_TERSE_STATE_DECL(MPID_STATE_MPI_ALLREDUCE);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
     
     MPID_THREAD_CS_ENTER(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
-    MPID_MPI_COLL_FUNC_ENTER(MPID_STATE_MPI_ALLREDUCE);
+    MPIR_FUNC_TERSE_COLL_ENTER(MPID_STATE_MPI_ALLREDUCE);
 
     /* Validate parameters, especially handles needing to be converted */
 #   ifdef HAVE_ERROR_CHECKING
@@ -895,7 +895,7 @@ int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
     /* ... end of body of routine ... */
     
   fn_exit:
-    MPID_MPI_COLL_FUNC_EXIT(MPID_STATE_MPI_ALLREDUCE);
+    MPIR_FUNC_TERSE_COLL_EXIT(MPID_STATE_MPI_ALLREDUCE);
     MPID_THREAD_CS_EXIT(GLOBAL, MPIR_THREAD_GLOBAL_ALLFUNC_MUTEX);
     return mpi_errno;
 

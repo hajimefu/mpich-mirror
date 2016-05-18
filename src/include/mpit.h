@@ -45,7 +45,7 @@ static inline cvar_table_entry_t * LOOKUP_CVAR_BY_NAME(const char* cvar_name)
     unsigned cvar_idx;
     name2index_hash_t *hash_entry;
     HASH_FIND_STR(cvar_hash, cvar_name, hash_entry);
-    MPIU_Assert(hash_entry != NULL);
+    MPIR_Assert(hash_entry != NULL);
     cvar_idx = hash_entry->idx;
     return (cvar_table_entry_t *)utarray_eltptr(cvar_table, cvar_idx);
 }
@@ -105,7 +105,7 @@ static inline cvar_table_entry_t * LOOKUP_CVAR_BY_NAME(const char* cvar_name)
 #define MPIR_T_CVAR_REGISTER_STATIC(dtype_, name_, addr_, count_, verb_, \
             scope_, default_, cat_, desc_) \
     do { \
-        MPIU_Assert(count_ > 0); \
+        MPIR_Assert(count_ > 0); \
         MPIR_T_CVAR_REGISTER_impl(dtype_, #name_, addr_, count_, MPI_T_ENUM_NULL, \
             verb_, MPI_T_BIND_NO_OBJECT, scope_, NULL, NULL, default_, cat_, desc_); \
     } while (0)
@@ -117,8 +117,8 @@ static inline cvar_table_entry_t * LOOKUP_CVAR_BY_NAME(const char* cvar_name)
 #define MPIR_T_CVAR_REGISTER_DYNAMIC(dtype_, name_, addr_, count_, etype_, \
             verb_, bind_, scope_, get_addr_, get_count_, default_, cat_, desc_) \
     do { \
-        MPIU_Assert(addr_ != NULL || get_addr_ != NULL); \
-        MPIU_Assert(count_ > 0 || get_count_ != NULL); \
+        MPIR_Assert(addr_ != NULL || get_addr_ != NULL); \
+        MPIR_Assert(count_ > 0 || get_count_ != NULL); \
         MPIR_T_CVAR_REGISTER_impl(dtype_, #name_, addr_, count_, etype_, \
             verb_, bind_, scope_, get_addr_, get_count_, default_, cat_, desc_); \
     } while (0)
@@ -427,4 +427,22 @@ static inline cvar_table_entry_t * LOOKUP_CVAR_BY_NAME(const char* cvar_name)
             addr_, count_, verb_, bind_, flags_, get_value_, get_count_, cat_, desc_) \
     PVAR_GATED_ACTION(MODULE, MPIR_T_PVAR_LOWWATERMARK_REGISTER_DYNAMIC_impl(dtype_, name_, \
             addr_, count_, verb_, bind_, flags_, get_value_, get_count_, cat_, desc_))
-#endif
+
+int MPIR_T_cvar_handle_alloc_impl(int cvar_index, void *obj_handle, MPI_T_cvar_handle *handle, int *count);
+int MPIR_T_cvar_read_impl(MPI_T_cvar_handle handle, void *buf);
+int MPIR_T_cvar_write_impl(MPI_T_cvar_handle handle, const void *buf);
+int MPIR_T_pvar_session_create_impl(MPI_T_pvar_session *session);
+int MPIR_T_pvar_session_free_impl(MPI_T_pvar_session *session);
+int MPIR_T_pvar_handle_alloc_impl(MPI_T_pvar_session session, int pvar_index, void *obj_handle, MPI_T_pvar_handle *handle, int *count);
+int MPIR_T_pvar_handle_free_impl(MPI_T_pvar_session session, MPI_T_pvar_handle *handle);
+int MPIR_T_pvar_start_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle);
+int MPIR_T_pvar_stop_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle);
+int MPIR_T_pvar_read_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle, void *buf);
+int MPIR_T_pvar_write_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle, const void *buf);
+int MPIR_T_pvar_reset_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle);
+int MPIR_T_pvar_readreset_impl(MPI_T_pvar_session session, MPI_T_pvar_handle handle, void *buf);
+int MPIR_T_category_get_cvars_impl(int cat_index, int len, int indices[]);
+int MPIR_T_category_get_pvars_impl(int cat_index, int len, int indices[]);
+int MPIR_T_category_get_categories_impl(int cat_index, int len, int indices[]);
+
+#endif  /* MPIT_H_INCLUDED */

@@ -27,7 +27,7 @@
 #define __include_mpidi_mutex_h__
 
 #include <opa_primitives.h>
-#include <mpiutil.h>
+#include <mpiimpl.h>
 #include <malloc.h>
 
 #define MPIDI_THREAD_ID() Kernel_ProcessorID()
@@ -310,11 +310,11 @@ MPIDI_Mutex_initialize()
   extern int pthread_mutexattr_settype(pthread_mutexattr_t *__attr, int __kind);
 #endif
 #ifndef __PE__
-#if (MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT)
+#if (MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ)
    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-#else /*(MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT)*/
+#else /*(MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ)*/
    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK_NP);
-#endif /*(MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT)*/
+#endif /*(MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ)*/
 #else /* __PE__ */
 #if !defined(__AIX__)
    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);

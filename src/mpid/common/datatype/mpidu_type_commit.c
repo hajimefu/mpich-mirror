@@ -26,7 +26,7 @@ int MPIDU_Type_commit(MPI_Datatype *datatype_p)
     int           mpi_errno=MPI_SUCCESS;
     MPIDU_Datatype *datatype_ptr;
 
-    MPIU_Assert(HANDLE_GET_KIND(*datatype_p) != HANDLE_KIND_BUILTIN);
+    MPIR_Assert(HANDLE_GET_KIND(*datatype_p) != HANDLE_KIND_BUILTIN);
 
     MPIDU_Datatype_get_ptr(*datatype_p, datatype_ptr);
 
@@ -63,8 +63,8 @@ int MPIDU_Type_commit(MPI_Datatype *datatype_p)
         MPIDI_Dataloop_dot_printf(datatype_ptr->dataloop, 0, 1);
 #endif
 
-#ifdef MPIDU_Dev_datatype_commit_hook
-       MPIDU_Dev_datatype_commit_hook(datatype_ptr);
+#ifdef MPID_Dev_datatype_commit_hook
+       MPID_Dev_datatype_commit_hook(datatype_ptr);
 #endif /* MPID_Dev_datatype_commit_hook */
 
     }

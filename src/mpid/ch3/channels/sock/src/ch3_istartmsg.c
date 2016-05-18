@@ -11,21 +11,21 @@
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static MPIR_Request * create_request(void * hdr, intptr_t hdr_sz,
-				     MPIU_Size_t nb)
+				     size_t nb)
 {
     MPIR_Request * sreq;
-    MPIDI_STATE_DECL(MPID_STATE_CREATE_REQUEST);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CREATE_REQUEST);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_CREATE_REQUEST);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CREATE_REQUEST);
 
     sreq = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     /* --BEGIN ERROR HANDLING-- */
     if (sreq == NULL)
 	return NULL;
     /* --END ERROR HANDLING-- */
-    MPIU_Object_set_ref(sreq, 2);
+    MPIR_Object_set_ref(sreq, 2);
     sreq->kind = MPIR_REQUEST_KIND__SEND;
-    MPIU_Assert(hdr_sz == sizeof(MPIDI_CH3_Pkt_t));
+    MPIR_Assert(hdr_sz == sizeof(MPIDI_CH3_Pkt_t));
     sreq->dev.pending_pkt = *(MPIDI_CH3_Pkt_t *) hdr;
     sreq->dev.iov[0].MPL_IOV_BUF = 
 	(MPL_IOV_BUF_CAST)((char *) &sreq->dev.pending_pkt + nb);
@@ -33,7 +33,7 @@ static MPIR_Request * create_request(void * hdr, intptr_t hdr_sz,
     sreq->dev.iov_count = 1;
     sreq->dev.OnDataAvail = 0;
     
-    MPIDI_FUNC_EXIT(MPID_STATE_CREATE_REQUEST);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CREATE_REQUEST);
     return sreq;
 }
 
@@ -55,11 +55,11 @@ int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
     MPIR_Request * sreq = NULL;
     MPIDI_CH3I_VC *vcch = &vc->ch;
     int mpi_errno = MPI_SUCCESS;
-    MPIDI_STATE_DECL(MPID_STATE_MPIDI_CH3_ISTARTMSG);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3_ISTARTMSG);
 
-    MPIDI_FUNC_ENTER(MPID_STATE_MPIDI_CH3_ISTARTMSG);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_CH3_ISTARTMSG);
     
-    MPIU_Assert( hdr_sz <= sizeof(MPIDI_CH3_Pkt_t));
+    MPIR_Assert( hdr_sz <= sizeof(MPIDI_CH3_Pkt_t));
 
     /* The SOCK channel uses a fixed length header, the size of which is the 
        maximum of all possible packet headers */
@@ -73,7 +73,7 @@ int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
 	   data, queuing any unsent data. */
 	if (MPIDI_CH3I_SendQ_empty(vcch)) /* MT */
 	{
-	    MPIU_Size_t nb;
+	    size_t nb;
 	    int rc;
 
 	    MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL,VERBOSE,
@@ -211,6 +211,6 @@ int MPIDI_CH3_iStartMsg(MPIDI_VC_t * vc, void * hdr, intptr_t hdr_sz,
 
   fn_fail:
     *sreq_ptr = sreq;
-    MPIDI_FUNC_EXIT(MPID_STATE_MPIDI_CH3_ISTARTMSG);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_CH3_ISTARTMSG);
     return mpi_errno;
 }
