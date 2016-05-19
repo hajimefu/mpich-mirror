@@ -448,9 +448,8 @@ extern MPIDII_av_table_t *MPIDII_av_table0;
 #define MPID_Dev_comm_create_hook(a)  (MPID_Comm_create(a))
 #define MPID_Dev_comm_destroy_hook(a) (MPID_Comm_destroy(a))
 
-#define MPIDU_Dev_datatype_commit_hook   MPIDI_NM_datatype_commit
-#define MPIDU_Dev_datatype_dup_hook      MPIDI_NM_datatype_dup
-#define MPIDU_Dev_datatype_destroy_hook  MPIDI_NM_datatype_destroy
+#define MPID_Dev_datatype_commit_hook   MPIDI_NM_datatype_commit
+#define MPID_Dev_datatype_destroy_hook  MPIDI_NM_datatype_destroy
 
 #define MPID_Dev_op_commit_hook          MPIDI_NM_op_commit
 #define MPID_Dev_op_destroy_hook         MPIDI_NM_op_destroy
