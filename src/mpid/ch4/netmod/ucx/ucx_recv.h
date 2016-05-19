@@ -163,9 +163,59 @@ __ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
                                       MPI_Datatype datatype,
                                       MPIR_Request * message, MPIR_Request ** rreqp)
 {
-    return MPIDI_CH4U_imrecv(buf, count, datatype, message, rreqp);
+    ucp_tag_message_h  message_handler;
+    int mpi_errno = MPI_SUCCESS;
+    size_t data_sz;
+    int dt_contig;
+    MPIR_Request *req;
+    MPI_Aint dt_true_lb;
+    MPIDI_UCX_ucp_request_t *ucp_request;
+
+    MPIR_Datatype *dt_ptr;
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+   if (message == NULL) {
+        mpi_errno = MPI_SUCCESS;
+         MPIDI_CH4U_request_complete(req);
+        *rreqp = req;
+
+        goto fn_exit;
+    }
+
+    message_handler = MPIDI_UCX_REQ(message).message_handler;
+    if(dt_contig)
+        ucp_request = (MPIDI_UCX_ucp_request_t*)ucp_tag_msg_recv_nb(MPIDI_UCX_global.worker,
+                                                    buf+dt_true_lb, data_sz,  ucp_dt_make_contig(1),
+                                                    message_handler,
+                                                    &MPIDI_UCX_Handle_recv_callback);
+    else  ucp_request = (MPIDI_UCX_ucp_request_t*)ucp_tag_msg_recv_nb(MPIDI_UCX_global.worker,
+                                                    buf, count,  dt_ptr->dev.netmod.ucx.ucp_datatype,
+                                                     message_handler,
+                                                    &MPIDI_UCX_Handle_recv_callback);
+
+
+    MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
+
+    if (ucp_request->req == NULL) {
+        req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        MPIR_Request_add_ref(req);
+        ucp_request->req = req;
+        ucp_request_release(ucp_request);
+      }
+     else {
+        req  = ucp_request->req;
+        ucp_request->req = NULL;
+        ucp_request_release(ucp_request);
+    }
+
+
+fn_exit:
+    *rreqp = req;
+    return mpi_errno;
+fn_fail:
+    goto fn_exit;
 }
- __ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
+
+__ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
                                      int count,
                                      MPI_Datatype datatype,
                                      int rank,
