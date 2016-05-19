@@ -18,7 +18,7 @@ static inline int ucx_do_iprobe(int source,
 {
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
-    int count;
+    MPI_Aint count;
     ucp_tag_recv_info_t info;
     ucp_tag_message_h  message_handler;
     tag_mask = MPIDI_UCX_tag_mask(tag, source);
@@ -58,7 +58,7 @@ static inline int MPIDI_NM_improbe(int source,
 
     int mpi_errno = MPI_SUCCESS;
     uint64_t ucp_tag, tag_mask;
-    int count;
+    MPI_Aint count;
     ucp_tag_recv_info_t info;
     ucp_tag_message_h  message_handler;
     MPIR_Request *req;

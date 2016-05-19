@@ -70,7 +70,7 @@ fn_fail:
 static inline void MPIDI_UCX_Handle_recv_callback(void *request, ucs_status_t status,
                                                           ucp_tag_recv_info_t * info)
 {
-    int count;
+    MPI_Aint count;
     int mpi_errno;
     MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     MPIR_Request *rreq = NULL;
