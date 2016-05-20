@@ -401,6 +401,10 @@ static inline MPIR_Request *MPIDI_OFI_context_to_request(void *context)
 #define MPIDI_OFI_DO_INJECT 1
 #define MPIDI_OFI_DO_SEND   0
 
+#undef FUNCNAME
+#define FUNCNAME MPIDI_OFI_send_handler
+#undef FCNAME
+#define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_OFI_send_handler(struct fid_ep *ep, const void *buf, size_t len,
                                         void *desc, uint64_t dest, fi_addr_t dest_addr,
                                         uint64_t tag, void *context, int is_inject,
