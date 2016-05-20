@@ -38,12 +38,14 @@ __ALWAYS_INLINE__ int ucx_irecv_continous(void *buf,
     if (ucp_request->req == NULL) {
         req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
         MPIR_Request_add_ref(req);
+        MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
         ucp_request->req = req;
         ucp_request_release(ucp_request);
       }
      else {
         req  = ucp_request->req;
         ucp_request->req = NULL;
+        MPIDI_UCX_REQ(req).a.ucp_request = NULL;
         ucp_request_release(ucp_request);
     }
 fn_exit:
@@ -80,10 +82,13 @@ __ALWAYS_INLINE__ int ucx_irecv_non_continous(void *buf,
         req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
         MPIR_Request_add_ref(req);
         ucp_request->req = req;
+        MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
         ucp_request_release(ucp_request);
       }
      else {
         req  = ucp_request->req;
+
+        MPIDI_UCX_REQ(req).a.ucp_request = NULL;
         ucp_request->req = NULL;
         ucp_request_release(ucp_request);
     }
@@ -181,7 +186,7 @@ __ALWAYS_INLINE__ int MPIDI_NM_imrecv(void *buf,
         goto fn_exit;
     }
 
-    message_handler = MPIDI_UCX_REQ(message).message_handler;
+    message_handler = MPIDI_UCX_REQ(message).a.message_handler;
     if(dt_contig)
         ucp_request = (MPIDI_UCX_ucp_request_t*)ucp_tag_msg_recv_nb(MPIDI_UCX_global.worker,
                                                     buf+dt_true_lb, data_sz,  ucp_dt_make_contig(1),
@@ -231,7 +236,11 @@ __ALWAYS_INLINE__ int MPIDI_NM_irecv(void *buf,
 
 static inline int MPIDI_NM_cancel_recv(MPIR_Request * rreq)
 {
-    return MPIDI_CH4U_cancel_recv(rreq);
+
+    if(MPIDI_UCX_REQ(rreq).a.ucp_request){
+        ucp_request_cancel(MPIDI_UCX_global.worker, MPIDI_UCX_REQ(rreq).a.ucp_request);
+    }
+
 }
 
 #endif /* NETMOD_UCX_RECV_H_INCLUDED */

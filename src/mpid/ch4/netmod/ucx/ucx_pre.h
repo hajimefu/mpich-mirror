@@ -17,12 +17,19 @@
 
 #define MPIDI_UCX_NAME_LEN             (512)
 typedef struct {
+    void *req;
+} MPIDI_UCX_ucp_request_t;
+
+typedef struct {
    int has_ucp;
    ucp_datatype_t ucp_datatype;
 } MPIDI_UCX_dt_t;
 
 typedef struct {
-  ucp_tag_message_h  message_handler;
+    union {
+        ucp_tag_message_h  message_handler;
+        MPIDI_UCX_ucp_request_t *ucp_request;
+    }a;
 } MPIDI_UCX_request_t;
 
 typedef struct {

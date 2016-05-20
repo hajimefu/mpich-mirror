@@ -43,9 +43,15 @@ static inline void MPIDI_UCX_Handle_send_callback(void *request, ucs_status_t st
 {
     int c;
     int mpi_errno;
-
     MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     MPIR_Request *req = NULL;
+    if (unlikely (status == UCS_ERR_CANCELED)) {
+        req = ucp_request->req;
+        MPIDI_CH4U_request_complete(req);
+        MPIR_STATUS_SET_CANCEL_BIT(req->status, TRUE);
+        ucp_request->req = NULL;
+        goto fn_exit;
+    }
     if(ucp_request->req){
         req = ucp_request->req;
         MPIR_cc_decr(req->cc_ptr, &c);
@@ -74,7 +80,14 @@ static inline void MPIDI_UCX_Handle_recv_callback(void *request, ucs_status_t st
     int mpi_errno;
     MPIDI_UCX_ucp_request_t* ucp_request = (MPIDI_UCX_ucp_request_t*) request;
     MPIR_Request *rreq = NULL;
-    if(!ucp_request->req) {
+    if (unlikely (status == UCS_ERR_CANCELED)) {
+        rreq = ucp_request->req;
+        MPIDI_CH4U_request_complete(rreq);
+        MPIR_STATUS_SET_CANCEL_BIT(rreq->status, TRUE);
+        ucp_request->req = NULL;
+        goto fn_exit;
+        }
+   if(!ucp_request->req) {
         rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
         MPIR_cc_set(&rreq->cc, 0);
         rreq->status.MPI_SOURCE = MPIDI_UCX_get_source(info->sender_tag);

@@ -43,17 +43,20 @@ __ALWAYS_INLINE__ int ucx_send_continous(const void *buf,
     if (ucp_request == NULL) {
         req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
         MPIR_cc_set(&req->cc, 0);
+        MPIDI_UCX_REQ(req).a.ucp_request = NULL;
         goto fn_exit;
-   }
+    }
 
-   if(ucp_request->req){
-       req = ucp_request->req;
-       ucp_request->req = NULL;
+    if(ucp_request->req){
+        req = ucp_request->req;
+        ucp_request->req = NULL;
+       MPIDI_UCX_REQ(req).a.ucp_request = NULL;
        ucp_request_release(ucp_request);
    } else {
        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
        MPIR_Request_add_ref(req);
        ucp_request->req = req;
+       MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
        ucp_request_release(ucp_request);
    }
 
@@ -90,15 +93,16 @@ __ALWAYS_INLINE__ int ucx_sync_send_continous(const void *buf,
                                      ucx_tag, &MPIDI_UCX_Handle_send_callback);
 
     MPIDI_CH4_UCX_REQUEST(ucp_request, tag_send_nb);
-
    if(ucp_request->req){
        req = ucp_request->req;
        ucp_request->req = NULL;
+       MPIDI_UCX_REQ(req).a.ucp_request = NULL;
        ucp_request_release(ucp_request);
    } else {
        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
        MPIR_Request_add_ref(req);
        ucp_request->req = req;
+       MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
        ucp_request_release(ucp_request);
    }
 
@@ -141,12 +145,14 @@ __ALWAYS_INLINE__ int ucx_sync_send_non_continous(const void *buf,
        req = ucp_request->req;
        ucp_request->req = NULL;
        ucp_request_release(ucp_request);
+       MPIDI_UCX_REQ(req).a.ucp_request = NULL;
       }
     else{
        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
        MPIR_Request_add_ref(req);
        ucp_request->req = req;
        ucp_request_release(ucp_request);
+       MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
    }
 
 
@@ -194,6 +200,7 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
 
     if (ucp_request == NULL) {
         req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIDI_UCX_REQ(req).a.ucp_request = NULL;
         MPIR_cc_set(&req->cc, 0);
         goto fn_exit;
    }
@@ -201,12 +208,14 @@ __ALWAYS_INLINE__ int ucx_send_non_continous(const void *buf,
    if(ucp_request->req){
        req = ucp_request->req;
        ucp_request->req = NULL;
+       MPIDI_UCX_REQ(req).a.ucp_request = NULL;
        ucp_request_release(ucp_request);
       }
     else{
        req = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
        MPIR_Request_add_ref(req);
        ucp_request->req = req;
+       MPIDI_UCX_REQ(req).a.ucp_request = ucp_request;
        ucp_request_release(ucp_request);
    }
 
@@ -485,7 +494,10 @@ static inline int MPIDI_NM_issend(const void *buf,
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline int MPIDI_NM_cancel_send(MPIR_Request * sreq)
 {
-    return MPIDI_CH4U_cancel_send(sreq);
+    if(MPIDI_UCX_REQ(sreq).a.ucp_request){
+        ucp_request_cancel(MPIDI_UCX_global.worker, MPIDI_UCX_REQ(sreq).a.ucp_request);
+        ucp_request_release(MPIDI_UCX_REQ(sreq).a.ucp_request);
+    }
 }
 
 #endif /* NETMOD_UCX_SEND_H_INCLUDED */

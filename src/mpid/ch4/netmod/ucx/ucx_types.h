@@ -30,10 +30,6 @@
 #define MPIDI_UCX_MAX_AM_HANDLERS      (64)
 
 typedef struct {
-    void *req;
-} MPIDI_UCX_ucp_request_t;
-
-typedef struct {
     int avtid;
     ucp_context_h context;
     ucp_worker_h worker;
