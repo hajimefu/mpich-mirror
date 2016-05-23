@@ -92,7 +92,7 @@ MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m
 }
 
 
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__GLOBAL
 
 #define MPIDI_CH4I_THREAD_CS_ENTER_POBJ(mutex)
 #define MPIDI_CH4I_THREAD_CS_EXIT_POBJ(mutex)
@@ -109,7 +109,7 @@ MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m
 #define MPIDI_CH4I_THREAD_CS_TRY_ALLGRAN(mutex)   MPIDI_CH4I_THREAD_CS_TRY_GLOBAL(m)
 #define MPIDI_CH4I_THREAD_CS_YIELD_ALLGRAN(mutex) MPIDI_CH4I_THREAD_CS_YIELD_GLOBAL(m)
 
-#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+#elif MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ
 
 #define MPIDI_CH4I_THREAD_CS_ENTER_POBJ(m)                   \
         do {                                                \
@@ -156,7 +156,7 @@ MPIDI_CH4I_Thread_cond_wait(MPIDU_Thread_cond_t * cond, MPIDI_CH4_Ticket_lock *m
 
 #error "Ticket locks are only supported in Global or Per-Object Granularity"
 
-#endif /* MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_GLOBAL */
+#endif /* MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__GLOBAL */
 
 #define MPIDI_CH4I_THREAD_CS_ENTER(name, mutex) MPIDI_CH4I_THREAD_CS_ENTER_##name(mutex)
 #define MPIDI_CH4I_THREAD_CS_EXIT(name, mutex)  MPIDI_CH4I_THREAD_CS_EXIT_##name(mutex)
