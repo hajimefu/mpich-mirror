@@ -212,47 +212,6 @@ fn_fail:
 }
 
 #undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_handle_long_hdr
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_OFI_handle_long_hdr(MPIDI_OFI_am_header_t *msg_hdr)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIDI_OFI_lmt_msg_payload_t *lmt_msg;
-    MPIR_Request *rreq;
-
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
-
-    rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
-
-    mpi_errno = MPIDI_OFI_am_init_request(NULL, 0, rreq);
-
-    if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
-
-    lmt_msg = (MPIDI_OFI_lmt_msg_payload_t *) msg_hdr->payload;
-    MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info)    = *lmt_msg;
-    MPIDI_OFI_AMREQUEST_HDR(rreq, msg_hdr)     = *msg_hdr;
-    MPIDI_OFI_AMREQUEST_HDR(rreq, rreq_ptr)    = (void *) rreq;
-
-    MPIDI_OFI_AMREQUEST_HDR(rreq, am_hdr)      = MPL_malloc(msg_hdr->am_hdr_sz);
-    MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_cntr)    = ((msg_hdr->am_hdr_sz - 1) / MPIDI_Global.max_send) + 1;
-
-    MPIDI_OFI_do_rdma_read(MPIDI_OFI_AMREQUEST_HDR(rreq, am_hdr),
-                                   lmt_msg->am_hdr_src,
-                                   msg_hdr->am_hdr_sz,
-                                   lmt_msg->context_id,
-                                   lmt_msg->src_rank,
-                                   rreq);
-
-fn_exit:
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_HDR);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_do_handle_long_am
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
@@ -417,35 +376,6 @@ static inline int MPIDI_OFI_handle_lmt_ack(MPIDI_OFI_am_header_t         *msg_hd
 
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_HANDLE_LMT_ACK);
-    return mpi_errno;
-fn_fail:
-    goto fn_exit;
-}
-
-#undef FUNCNAME
-#define FUNCNAME MPIDI_OFI_handle_long_hdr_ack
-#undef FCNAME
-#define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_OFI_handle_long_hdr_ack(MPIDI_OFI_am_header_t         *msg_hdr)
-{
-    int mpi_errno = MPI_SUCCESS;
-    MPIR_Request *sreq;
-    MPIDI_OFI_ack_msg_payload_t *ack_msg;
-    int handler_id;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_HANDLE_LONG_HDR_ACK);
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_HANDLE_LONG_HDR_ACK);
-
-    ack_msg = (MPIDI_OFI_ack_msg_payload_t *) msg_hdr->payload;
-    sreq    = (MPIR_Request *)             ack_msg->sreq_ptr;
-
-    handler_id = MPIDI_OFI_AMREQUEST_HDR(sreq, msg_hdr).handler_id;
-    MPIDI_OFI_am_request_complete(sreq);
-    mpi_errno = MPIDI_Global.am_send_cmpl_handlers[handler_id](sreq);
-
-    if(mpi_errno) MPIR_ERR_POP(mpi_errno);
-
-fn_exit:
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_HANDLE_LONG_HDR_ACK);
     return mpi_errno;
 fn_fail:
     goto fn_exit;

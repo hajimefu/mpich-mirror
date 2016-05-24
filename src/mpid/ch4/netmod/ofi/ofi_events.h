@@ -434,9 +434,6 @@ static inline int MPIDI_OFI_am_send_event(struct fi_cq_tagged_entry *wc,
     switch(msg_hdr->am_type) {
         case MPIDI_AMTYPE_LMT_ACK:
         case MPIDI_AMTYPE_LMT_REQ:
-        case MPIDI_AMTYPE_LMT_HDR_REQ:
-        case MPIDI_AMTYPE_LONG_HDR_REQ:
-        case MPIDI_AMTYPE_LONG_HDR_ACK:
             goto fn_exit;
 
         default:
@@ -496,29 +493,8 @@ static inline int MPIDI_OFI_am_recv_event(struct fi_cq_tagged_entry *wc,
 
             break;
 
-        case MPIDI_AMTYPE_LMT_HDR_REQ:
-            mpi_errno = MPIDI_OFI_handle_long_am_hdr(am_hdr);
-
-            if(mpi_errno) MPIR_ERR_POP(mpi_errno);
-
-            break;
-
         case MPIDI_AMTYPE_LMT_ACK:
             mpi_errno = MPIDI_OFI_handle_lmt_ack(am_hdr);
-
-            if(mpi_errno) MPIR_ERR_POP(mpi_errno);
-
-            break;
-
-        case MPIDI_AMTYPE_LONG_HDR_REQ:
-            mpi_errno = MPIDI_OFI_handle_long_hdr(am_hdr);
-
-            if(mpi_errno) MPIR_ERR_POP(mpi_errno);
-
-            break;
-
-        case MPIDI_AMTYPE_LONG_HDR_ACK:
-            mpi_errno = MPIDI_OFI_handle_long_hdr_ack(am_hdr);
 
             if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
@@ -555,40 +531,6 @@ static inline int MPIDI_OFI_am_read_event(struct fi_cq_tagged_entry *wc,
 
     if(ofi_req->req_hdr->lmt_cntr)
         goto fn_exit;
-
-    switch(ofi_req->req_hdr->msg_hdr.am_type) {
-        case MPIDI_AMTYPE_LMT_HDR_REQ:
-            rreq = (MPIR_Request *)ofi_req->req_hdr->rreq_ptr;
-            MPIDI_OFI_AMREQUEST_HDR(rreq, msg_hdr).am_type = MPIDI_AMTYPE_LMT_REQ;
-            mpi_errno = MPIDI_OFI_do_handle_long_am(&MPIDI_OFI_AMREQUEST_HDR(rreq, msg_hdr),
-                                                            &MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info),
-                                                            MPIDI_OFI_AMREQUEST_HDR(rreq, am_hdr));
-
-            if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
-
-            MPIDI_OFI_am_request_complete(rreq);
-            goto fn_exit;
-
-        case MPIDI_AMTYPE_LONG_HDR_REQ:
-            rreq = (MPIR_Request *)ofi_req->req_hdr->rreq_ptr;
-            mpi_errno = MPIDI_OFI_dispatch_ack(MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info).src_rank,
-                                                       MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info).context_id,
-                                                       MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info.sreq_ptr),
-                                                       MPIDI_AMTYPE_LONG_HDR_ACK, netmod_context);
-
-            if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
-
-            mpi_errno = MPIDI_OFI_handle_short_am_hdr(&MPIDI_OFI_AMREQUEST_HDR(rreq, msg_hdr),
-                                                              MPIDI_OFI_AMREQUEST_HDR(rreq, am_hdr));
-
-            if(mpi_errno != MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);
-
-            MPIDI_OFI_am_request_complete(rreq);
-            goto fn_exit;
-
-        default:
-            break;
-    }
 
     rreq = (MPIR_Request *)ofi_req->req_hdr->rreq_ptr;
     mpi_errno = MPIDI_OFI_dispatch_ack(MPIDI_OFI_AMREQUEST_HDR(rreq, lmt_info).src_rank,
