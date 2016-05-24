@@ -224,9 +224,9 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
                             #STR);                              \
     } while (0)
 
-#define MPIDI_OFI_REQUEST_CREATE(req)                 \
+#define MPIDI_OFI_REQUEST_CREATE(req, kind)                 \
     do {                                                      \
-        (req) = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);  \
+        (req) = MPIR_Request_create(kind);  \
         MPIR_Request_add_ref((req));                                \
     } while (0)
 

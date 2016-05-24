@@ -37,8 +37,7 @@
     do {                                                                \
         if(sigreq)                                                      \
         {                                                               \
-            MPIDI_OFI_REQUEST_CREATE((*(sigreq)));              \
-            (*sigreq)->kind             = MPIR_REQUEST_KIND__RMA;             \
+            MPIDI_OFI_REQUEST_CREATE((*(sigreq)), MPIR_REQUEST_KIND__RMA); \
             MPIR_cc_set((*(sigreq))->cc_ptr, 0);                        \
             *(flags)                    = FI_COMPLETION;                \
             *(ep)                       = MPIDI_OFI_EP_TX_RMA(0); \

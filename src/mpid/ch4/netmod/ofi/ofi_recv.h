@@ -45,11 +45,12 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_DO_IRECV);
 
     if(mode == MPIDI_OFI_ON_HEAP)         /* Branch should compile out */
-        MPIDI_OFI_REQUEST_CREATE(rreq);
-    else if(mode == MPIDI_OFI_USE_EXISTING)
+        MPIDI_OFI_REQUEST_CREATE(rreq, MPIR_REQUEST_KIND__RECV);
+    else if(mode == MPIDI_OFI_USE_EXISTING) {
         rreq = *request;
+        rreq->kind = MPIR_REQUEST_KIND__RECV;
+    }
 
-    rreq->kind = MPIR_REQUEST_KIND__RECV;
     *request = rreq;
 
     if(unlikely(rank == MPI_PROC_NULL)) {
@@ -159,10 +160,9 @@ __ALWAYS_INLINE__ int MPIDI_NM_recv_init(void          *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_RECV_INIT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_RECV_INIT);
 
-    MPIDI_OFI_REQUEST_CREATE((rreq));
+    MPIDI_OFI_REQUEST_CREATE((rreq), MPIR_REQUEST_KIND__PREQUEST_RECV);
 
     *request = rreq;
-    rreq->kind = MPIR_REQUEST_KIND__PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
 

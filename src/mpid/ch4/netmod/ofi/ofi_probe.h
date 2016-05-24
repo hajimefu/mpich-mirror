@@ -49,7 +49,7 @@ static inline int MPIDI_OFI_do_iprobe(int source,
         remote_proc = MPIDI_OFI_comm_to_phys(comm, source, MPIDI_OFI_API_TAG);
 
     if(message)
-        MPIDI_OFI_REQUEST_CREATE(rreq);
+        MPIDI_OFI_REQUEST_CREATE(rreq, MPIR_REQUEST_KIND__MPROBE);
     else
         rreq = &r;
 
@@ -144,7 +144,6 @@ static inline int MPIDI_NM_improbe(int source,
                                                 flag, status, message, FI_CLAIM | FI_COMPLETION);
 
     if(*flag && *message) {
-        (*message)->kind = MPIR_REQUEST_KIND__MPROBE;
         (*message)->comm = comm;
         MPIR_Object_add_ref(comm);
     }

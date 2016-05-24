@@ -99,8 +99,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_SEND_NORMAL);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_SEND_NORMAL);
 
-    MPIDI_OFI_REQUEST_CREATE(sreq);
-    sreq->kind = MPIR_REQUEST_KIND__SEND;
+    MPIDI_OFI_REQUEST_CREATE(sreq, MPIR_REQUEST_KIND__SEND);
     *request = sreq;
     match_bits = MPIDI_OFI_init_sendtag(comm->context_id + context_offset, comm->rank, tag, type, MPIDI_OFI_ENABLE_DATA);
     MPIDI_OFI_REQUEST(sreq, event_id) = MPIDI_OFI_EVENT_SEND;
@@ -239,8 +238,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send(MPIDI_OFI_SENDPARAMS, int noreq, uint64_t s
         mpi_errno = MPI_SUCCESS;
 
         if(!noreq) {
-            MPIDI_OFI_REQUEST_CREATE((*request));
-            (*request)->kind = MPIR_REQUEST_KIND__SEND;
+            MPIDI_OFI_REQUEST_CREATE((*request), MPIR_REQUEST_KIND__SEND);
             MPIDI_CH4U_request_complete((*request));
         }
 
@@ -277,11 +275,10 @@ __ALWAYS_INLINE__ int MPIDI_OFI_persistent_send(MPIDI_OFI_SENDPARAMS)
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_PSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NM_PSEND);
 
-    MPIDI_OFI_REQUEST_CREATE(sreq);
+    MPIDI_OFI_REQUEST_CREATE(sreq, MPIR_REQUEST_KIND__PREQUEST_SEND);
     *request = sreq;
 
     MPIR_Comm_add_ref(comm);
-    sreq->kind = MPIR_REQUEST_KIND__PREQUEST_SEND;
     sreq->comm = comm;
     MPIDI_OFI_REQUEST(sreq, util.persist.buf)   = (void *) buf;
     MPIDI_OFI_REQUEST(sreq, util.persist.count) = count;
