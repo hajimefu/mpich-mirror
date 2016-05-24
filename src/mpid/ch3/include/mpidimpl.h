@@ -294,7 +294,6 @@ extern MPIDI_Process_t MPIDI_Process;
     (sreq_)->dev.user_count = count;				\
     (sreq_)->dev.datatype = datatype;				\
     (sreq_)->dev.iov_count	   = 0;                         \
-    MPIR_REQUEST_CLEAR_DBG(sreq_);                              \
 }
 
 /* This is the receive request version of MPIDI_Request_create_sreq */
