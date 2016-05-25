@@ -28,7 +28,7 @@
         {                                                          \
             MPIR_Datatype *dtp_ = NULL;                            \
             MPID_Datatype_get_ptr((datatype_), dtp_);              \
-            MPID_Datatype_add_ref(dtp_);                           \
+            MPIR_Datatype_add_ref(dtp_);                           \
         }                                                          \
     } while (0)
 #define dtype_release_if_not_builtin(datatype_)                    \

@@ -207,7 +207,7 @@ void MPIDI_Recvq_process_out_of_order_msgs(pami_task_t src, pami_context_t conte
 	if (HANDLE_GET_KIND(ooreq->mpid.datatype) != HANDLE_KIND_BUILTIN)
           {
             MPIDU_Datatype_get_ptr(ooreq->mpid.datatype, ooreq->mpid.datatype_ptr);
-            MPIDU_Datatype_add_ref(ooreq->mpid.datatype_ptr);
+            MPIR_Datatype_add_ref(ooreq->mpid.datatype_ptr);
           }
 #ifdef QUEUE_BINARY_SEARCH_SUPPORT
         if(MPIDI_Process.queue_binary_search_support_on)

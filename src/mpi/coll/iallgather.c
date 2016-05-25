@@ -98,7 +98,7 @@ int MPIR_Iallgather_rec_dbl(const void *sendbuf, int sendcount, MPI_Datatype sen
     ss->recvtype = recvtype;
     /* ensure that recvtype doesn't disappear immediately after last _recv but before _cb */
     if (recv_dtp)
-        MPID_Datatype_add_ref(recv_dtp);
+        MPIR_Datatype_add_ref(recv_dtp);
 
     mask = 0x1;
     i = 0;

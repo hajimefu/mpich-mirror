@@ -345,7 +345,7 @@ MPID_Get(void         *origin_addr,
       req->buffer      = MPL_malloc(req->origin.dt.size);
       MPID_assert(req->buffer != NULL);
 
-      MPIDU_Datatype_add_ref(req->origin.dt.pointer);
+      MPIR_Datatype_add_ref(req->origin.dt.pointer);
       req->origin.addr  = origin_addr;
       req->origin.count = origin_count;
       req->origin.datatype = origin_datatype;
@@ -412,8 +412,8 @@ MPID_Get(void         *origin_addr,
      * is still needed for communication -- decrement the ref in the callback to allow the MPIR_Datatype
      * to be freed once the PAMI communication has completed.
      */
-    MPIDU_Datatype_add_ref(req->origin.dt.pointer);
-    MPIDU_Datatype_add_ref(req->target.dt.pointer);
+    MPIR_Datatype_add_ref(req->origin.dt.pointer);
+    MPIR_Datatype_add_ref(req->target.dt.pointer);
   }
   /* The pamid one-sided design requires context post in order to handle the
    * case where the number of pending rma operation exceeds the

@@ -102,7 +102,7 @@ int MPIDU_Datatype_set_contents(MPIR_Datatype *new_dtp,
     for (i=0; i < nr_types; i++) {
 	if (HANDLE_GET_KIND(array_of_types[i]) != HANDLE_KIND_BUILTIN) {
 	    MPIDU_Datatype_get_ptr(array_of_types[i], old_dtp);
-	    MPIDU_Datatype_add_ref(old_dtp);
+	    MPIR_Datatype_add_ref(old_dtp);
 	}
     }
 

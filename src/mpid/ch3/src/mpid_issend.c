@@ -95,7 +95,7 @@ int MPID_Issend(const void * buf, int count, MPI_Datatype datatype, int rank, in
 	/* If we're not complete, then add a reference to the datatype */
 	if (sreq && sreq->dev.OnDataAvail) {
 	    sreq->dev.datatype_ptr = dt_ptr;
-	    MPIDU_Datatype_add_ref(dt_ptr);
+	    MPIR_Datatype_add_ref(dt_ptr);
 	}
     }
     else
@@ -115,7 +115,7 @@ int MPID_Issend(const void * buf, int count, MPI_Datatype datatype, int rank, in
 	if (sreq && dt_ptr != NULL)
 	{
 	    sreq->dev.datatype_ptr = dt_ptr;
-	    MPIDU_Datatype_add_ref(dt_ptr);
+	    MPIR_Datatype_add_ref(dt_ptr);
 	}
     }
 

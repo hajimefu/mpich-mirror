@@ -54,7 +54,7 @@ MPID_PSendRequest(const void    * buf,
   if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
     {
       MPIDU_Datatype_get_ptr(datatype, sreq->mpid.datatype_ptr);
-      MPIDU_Datatype_add_ref(sreq->mpid.datatype_ptr);
+      MPIR_Datatype_add_ref(sreq->mpid.datatype_ptr);
     }
 
   return MPI_SUCCESS;

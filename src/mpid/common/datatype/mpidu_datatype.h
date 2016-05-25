@@ -22,8 +22,6 @@
 #define MPIDU_Datatype_get_basic_id(a) ((a)&0x000000ff)
 #define MPIDU_Datatype_get_basic_size(a) (((a)&0x0000ff00)>>8)
 
-#define MPIDU_Datatype_add_ref(datatype_ptr) MPIR_Object_add_ref((datatype_ptr))
-
 #define MPIDU_Datatype_get_basic_type(a,basic_type_) do {                    \
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
@@ -551,11 +549,11 @@ int MPIDU_Datatype_set_contents(struct MPIR_Datatype *ptr,
 			       const MPI_Datatype *types);
 
 void MPIDU_Datatype_free_contents(struct MPIR_Datatype *ptr);
-void MPIDI_Datatype_get_contents_aints(MPIR_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
 				       MPI_Aint *user_aints);
-void MPIDI_Datatype_get_contents_types(MPIR_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,
 				       MPI_Datatype *user_types);
-void MPIDI_Datatype_get_contents_ints(MPIR_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
 				      int *user_ints);
 
 void MPIDU_Datatype_free(struct MPIR_Datatype *ptr);

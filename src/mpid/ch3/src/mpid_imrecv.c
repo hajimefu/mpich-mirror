@@ -100,7 +100,7 @@ int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
             {
                 MPIDU_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
-                MPIDU_Datatype_add_ref(rreq->dev.datatype_ptr);
+                MPIR_Datatype_add_ref(rreq->dev.datatype_ptr);
             }
 
         }
@@ -114,7 +114,7 @@ int MPID_Imrecv(void *buf, int count, MPI_Datatype datatype,
         if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
         {
             MPIDU_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
-            MPIDU_Datatype_add_ref(rreq->dev.datatype_ptr);
+            MPIR_Datatype_add_ref(rreq->dev.datatype_ptr);
         }
     }
     else if (MPIDI_Request_get_msg_type(rreq) == MPIDI_REQUEST_SELF_MSG)

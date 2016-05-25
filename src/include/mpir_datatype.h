@@ -161,6 +161,8 @@ struct MPIR_Datatype {
 
 extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
+#define MPIR_Datatype_add_ref(datatype_ptr) MPIR_Object_add_ref((datatype_ptr))
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );
