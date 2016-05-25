@@ -169,7 +169,7 @@ int MPI_Type_create_subarray(int ndims,
             }
 
             /* Get handles to MPI objects. */
-            MPID_Datatype_get_ptr(oldtype, datatype_ptr);
+            MPIR_Datatype_get_ptr(oldtype, datatype_ptr);
 
             /* Validate datatype_ptr */
             MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
@@ -315,7 +315,7 @@ int MPI_Type_create_subarray(int ndims,
     }
     ints[3*ndims + 1] = order;
 
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
 					   MPI_COMBINER_SUBARRAY,
 					   3 * ndims + 2, /* ints */

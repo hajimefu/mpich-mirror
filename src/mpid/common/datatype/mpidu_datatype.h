@@ -16,7 +16,6 @@
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
 
-#define MPIDU_Datatype_get_ptr(a,ptr)   MPIR_Getb_ptr(Datatype,a,0x000000ff,ptr)
 /* MPIDU_Datatype_get_basic_id() is useful for creating and indexing into arrays
    that store data on a per-basic type basis */
 #define MPIDU_Datatype_get_basic_id(a) ((a)&0x000000ff)
@@ -356,7 +355,7 @@ do {									\
         }                                                                      \
         else {                                                                 \
             MPIR_Datatype *dtp_ = NULL;                                        \
-            MPIDU_Datatype_get_ptr((dtype_), dtp_);                             \
+            MPIR_Datatype_get_ptr((dtype_), dtp_);                             \
             *(is_contig_) = dtp_->is_contig;                                   \
         }                                                                      \
     } while (0)
@@ -370,7 +369,7 @@ do {									\
         }                                                                      \
         else {                                                                 \
             MPIR_Datatype *dtp_ = NULL;                                        \
-            MPIDU_Datatype_get_ptr((dtype_), dtp_);                             \
+            MPIR_Datatype_get_ptr((dtype_), dtp_);                             \
             *(true_lb_) = dtp_->true_lb;                                       \
         }                                                                      \
     } while (0)

@@ -152,7 +152,7 @@ static int MPIR_Bcast_binomial(
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
         is_contig = 1;
     else {
-        MPID_Datatype_get_ptr(datatype, dtp);
+        MPIR_Datatype_get_ptr(datatype, dtp);
         is_contig = MPIR_Datatype_is_contig(dtp);
     }
 
@@ -508,7 +508,7 @@ static int MPIR_Bcast_scatter_doubling_allgather(
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
         is_contig = 1;
     else {
-        MPID_Datatype_get_ptr(datatype, dtp);
+        MPIR_Datatype_get_ptr(datatype, dtp);
         is_contig = MPIR_Datatype_is_contig(dtp);
     }
 
@@ -814,7 +814,7 @@ static int MPIR_Bcast_scatter_ring_allgather(
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
         is_contig = 1;
     else {
-        MPID_Datatype_get_ptr(datatype, dtp);
+        MPIR_Datatype_get_ptr(datatype, dtp);
         is_contig = MPIR_Datatype_is_contig(dtp);
     }
 
@@ -1558,7 +1558,7 @@ int MPI_Bcast( void *buffer, int count, MPI_Datatype datatype, int root,
 	    }
 	    
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype_get_ptr(datatype, datatype_ptr);
+                MPIR_Datatype_get_ptr(datatype, datatype_ptr);
                 MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPIR_Datatype_committed_ptr( datatype_ptr, mpi_errno );

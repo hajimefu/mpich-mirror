@@ -267,7 +267,7 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
     MPIDI_VC_FAI_send_seqnum(vc, seqnum);
     MPIDI_Request_set_seqnum(sreq, seqnum);
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
+        MPIR_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIR_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
     sreq->dev.partner_request = NULL;
@@ -370,7 +370,7 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
     MPIDI_VC_FAI_send_seqnum(vc, seqnum);
     MPIDI_Request_set_seqnum(sreq, seqnum);
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
+        MPIR_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIR_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
     sreq->dev.partner_request = NULL;
@@ -473,7 +473,7 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
     MPIDI_VC_FAI_send_seqnum(vc, seqnum);
     MPIDI_Request_set_seqnum(sreq, seqnum);
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
+        MPIR_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIR_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
     sreq->dev.partner_request = NULL;
@@ -576,7 +576,7 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
     MPIDI_VC_FAI_send_seqnum(vc, seqnum);
     MPIDI_Request_set_seqnum(sreq, seqnum);
     if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
-        MPIDU_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
+        MPIR_Datatype_get_ptr(datatype, sreq->dev.datatype_ptr);
         MPIR_Datatype_add_ref(sreq->dev.datatype_ptr);
     }
     sreq->dev.partner_request = NULL;

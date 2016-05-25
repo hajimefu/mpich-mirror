@@ -104,7 +104,7 @@ int MPI_Status_set_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Cou
         {
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                 MPIR_Datatype *datatype_ptr = NULL;
-                MPID_Datatype_get_ptr(datatype, datatype_ptr);
+                MPIR_Datatype_get_ptr(datatype, datatype_ptr);
                 MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
             }

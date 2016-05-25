@@ -476,7 +476,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
                         MPIR_ERRTEST_DATATYPE(sendtypes[i], "sendtype[i]", mpi_errno);
                     }
                     if ((sendcounts[i] > 0) && (HANDLE_GET_KIND(sendtypes[i]) != HANDLE_KIND_BUILTIN)) {
-                        MPID_Datatype_get_ptr(sendtypes[i], sendtype_ptr);
+                        MPIR_Datatype_get_ptr(sendtypes[i], sendtype_ptr);
                         MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                         MPIR_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
@@ -489,7 +489,7 @@ int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
                     MPIR_ERRTEST_DATATYPE(recvtypes[i], "recvtype[i]", mpi_errno);
                 }
                 if ((recvcounts[i] > 0) && (HANDLE_GET_KIND(recvtypes[i]) != HANDLE_KIND_BUILTIN)) {
-                    MPID_Datatype_get_ptr(recvtypes[i], recvtype_ptr);
+                    MPIR_Datatype_get_ptr(recvtypes[i], recvtype_ptr);
                     MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     MPIR_Datatype_committed_ptr( recvtype_ptr, mpi_errno );

@@ -98,7 +98,7 @@ int MPIR_Create_unnamed_predefined( MPI_Datatype old, int combiner,
 	    break;
 	}
 
-	MPID_Datatype_get_ptr( type->d, new_dtp );
+	MPIR_Datatype_get_ptr( type->d, new_dtp );
 	mpi_errno = MPID_Datatype_set_contents(new_dtp, combiner,
 					       nvals, 0, 0, vals,
 					       NULL, NULL );
@@ -209,7 +209,7 @@ static int MPIR_Create_unnamed_predefined( MPI_Datatype old, int combiner,
 	    break;
 	}
 
-	MPID_Datatype_get_ptr(*new_ptr, new_dtp);
+	MPIR_Datatype_get_ptr(*new_ptr, new_dtp);
 	mpi_errno = MPID_Datatype_set_contents(new_dtp,
 					       combiner,
 					       nvals,

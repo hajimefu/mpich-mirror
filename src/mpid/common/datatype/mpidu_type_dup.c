@@ -49,7 +49,7 @@ int MPIDU_Type_dup(MPI_Datatype oldtype,
 	    /* --END ERROR HANDLING-- */
 	}
 
-	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
+	MPIR_Datatype_get_ptr(oldtype, old_dtp);
 
 	/* fill in datatype */
 	MPIR_Object_set_ref(new_dtp, 1);

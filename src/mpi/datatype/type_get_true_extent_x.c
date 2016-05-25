@@ -34,7 +34,7 @@ void MPIR_Type_get_true_extent_x_impl(MPI_Datatype datatype, MPI_Count *true_lb,
 {
     MPIR_Datatype *datatype_ptr = NULL;
 
-    MPID_Datatype_get_ptr(datatype, datatype_ptr);
+    MPIR_Datatype_get_ptr(datatype, datatype_ptr);
 
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN) {
         *true_lb     = 0;
@@ -99,7 +99,7 @@ int MPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Count *true_lb, MPI_Co
         {
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                 MPIR_Datatype *datatype_ptr = NULL;
-                MPID_Datatype_get_ptr(datatype, datatype_ptr);
+                MPIR_Datatype_get_ptr(datatype, datatype_ptr);
                 MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
             }
 

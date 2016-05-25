@@ -67,7 +67,7 @@ int MPIDU_Type_create_resized(MPI_Datatype oldtype,
 	/* user-defined base type */
 	MPIR_Datatype *old_dtp;
 
-	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
+	MPIR_Datatype_get_ptr(oldtype, old_dtp);
 
 	new_dtp->size           = old_dtp->size;
 	new_dtp->has_sticky_ub  = 0;

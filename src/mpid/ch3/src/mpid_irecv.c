@@ -106,7 +106,7 @@ int MPID_Irecv(void * buf, MPI_Aint count, MPI_Datatype datatype, int rank, int 
 		   entire message has arrived. */
 		if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 		{
-		    MPIDU_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
+		    MPIR_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
 		    MPIR_Datatype_add_ref(rreq->dev.datatype_ptr);
 		}
 	    
@@ -120,7 +120,7 @@ int MPID_Irecv(void * buf, MPI_Aint count, MPI_Datatype datatype, int rank, int 
 	    if (mpi_errno) MPIR_ERR_POP( mpi_errno );
 	    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPIDU_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
+		MPIR_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
 		MPIR_Datatype_add_ref(rreq->dev.datatype_ptr);
 	    }
 	}
@@ -151,7 +151,7 @@ int MPID_Irecv(void * buf, MPI_Aint count, MPI_Datatype datatype, int rank, int 
 	
 	if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	{
-	    MPIDU_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
+	    MPIR_Datatype_get_ptr(datatype, rreq->dev.datatype_ptr);
 	    MPIR_Datatype_add_ref(rreq->dev.datatype_ptr);
 	}
 

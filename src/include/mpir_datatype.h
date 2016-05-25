@@ -209,6 +209,8 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
         basic_type_ = MPI_DATATYPE_NULL;                            \
  } while(0)
 
+#define MPIR_Datatype_get_ptr(a,ptr)   MPIR_Getb_ptr(Datatype,a,0x000000ff,ptr)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

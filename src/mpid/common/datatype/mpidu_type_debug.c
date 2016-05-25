@@ -47,7 +47,7 @@ void MPIDI_Datatype_dot_printf(MPI_Datatype type,
 	MPIR_Datatype *dt_p;
 	MPIDU_Dataloop *loop_p;
 
-	MPIDU_Datatype_get_ptr(type, dt_p);
+	MPIR_Datatype_get_ptr(type, dt_p);
 	loop_p = dt_p->dataloop;
 
 	MPIDI_Dataloop_dot_printf(loop_p, depth, header);
@@ -250,7 +250,7 @@ void MPIDI_Datatype_printf(MPI_Datatype type,
     else {
 	MPIR_Datatype *type_ptr;
 
-	MPIDU_Datatype_get_ptr(type, type_ptr);
+	MPIR_Datatype_get_ptr(type, type_ptr);
 	string = MPIDU_Datatype_combiner_to_string(type_ptr->contents->combiner);
 	sticky_lb = type_ptr->has_sticky_lb;
 	sticky_ub = type_ptr->has_sticky_ub;
@@ -462,7 +462,7 @@ void MPIDU_Datatype_debug(MPI_Datatype type,
 
     if (is_builtin) return;
 
-    MPIDU_Datatype_get_ptr(type, dtp);
+    MPIR_Datatype_get_ptr(type, dtp);
     MPIR_Assert(dtp != NULL);
 
     MPL_DBG_OUT_FMT(MPIR_DBG_DATATYPE,(MPL_DBG_FDEST,
@@ -530,7 +530,7 @@ void MPIDI_Datatype_contents_printf(MPI_Datatype type,
 	return;
     }
 
-    MPIDU_Datatype_get_ptr(type, dtp);
+    MPIR_Datatype_get_ptr(type, dtp);
     cp = dtp->contents;
 
     if (cp == NULL) {

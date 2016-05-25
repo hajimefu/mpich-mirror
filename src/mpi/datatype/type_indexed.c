@@ -62,7 +62,7 @@ int MPIR_Type_indexed_impl(int count, const int *array_of_blocklengths,
     for (i=0; i < count; i++) {
 	ints[i + count + 1] = array_of_displacements[i];
     }
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
 					   MPI_COMBINER_INDEXED,
 					   2*count + 1, /* ints */
@@ -164,7 +164,7 @@ int MPI_Type_indexed(int count,
 	    MPIR_ERRTEST_DATATYPE(oldtype, "datatype", mpi_errno);
 
             if (HANDLE_GET_KIND(oldtype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype_get_ptr( oldtype, datatype_ptr );
+                MPIR_Datatype_get_ptr( oldtype, datatype_ptr );
                 MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
             }
             /* verify that all blocklengths are >= 0 */

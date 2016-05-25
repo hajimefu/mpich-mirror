@@ -40,7 +40,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
 	return 0;
     }
 
-    MPIDU_Datatype_get_ptr(type, datatype_ptr);
+    MPIR_Datatype_get_ptr(type, datatype_ptr);
     MPIR_Assert(datatype_ptr->is_committed);
     MPIR_Assert(*array_len_p >= datatype_ptr->max_contig_blocks);
 

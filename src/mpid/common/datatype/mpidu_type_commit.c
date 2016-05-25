@@ -27,7 +27,7 @@ int MPIDU_Type_commit(MPI_Datatype *datatype_p)
 
     MPIR_Assert(HANDLE_GET_KIND(*datatype_p) != HANDLE_KIND_BUILTIN);
 
-    MPIDU_Datatype_get_ptr(*datatype_p, datatype_ptr);
+    MPIR_Datatype_get_ptr(*datatype_p, datatype_ptr);
 
     if (datatype_ptr->is_committed == 0) {
        datatype_ptr->is_committed = 1;

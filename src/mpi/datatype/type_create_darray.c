@@ -407,7 +407,7 @@ int MPI_Type_create_darray(int size,
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Datatype_get_ptr(oldtype, datatype_ptr);
+    MPIR_Datatype_get_ptr(oldtype, datatype_ptr);
     MPID_Datatype_get_extent_macro(oldtype, orig_extent);
 
     /* Validate parameters and objects (post conversion) */
@@ -726,7 +726,7 @@ int MPI_Type_create_darray(int size,
 	ints[i + 3*ndims + 3] = array_of_psizes[i];
     }
     ints[4*ndims + 3] = order;
-    MPID_Datatype_get_ptr(new_handle, datatype_ptr);
+    MPIR_Datatype_get_ptr(new_handle, datatype_ptr);
     mpi_errno = MPID_Datatype_set_contents(datatype_ptr,
 					   MPI_COMBINER_DARRAY,
 					   4*ndims + 4,

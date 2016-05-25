@@ -178,7 +178,7 @@ int MPI_Ineighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype se
         {
             if (HANDLE_GET_KIND(sendtype) != HANDLE_KIND_BUILTIN) {
                 MPIR_Datatype *sendtype_ptr = NULL;
-                MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
+                MPIR_Datatype_get_ptr(sendtype, sendtype_ptr);
                 MPIR_Datatype_valid_ptr(sendtype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPIR_Datatype_committed_ptr(sendtype_ptr, mpi_errno);
@@ -187,7 +187,7 @@ int MPI_Ineighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype se
 
             if (HANDLE_GET_KIND(recvtype) != HANDLE_KIND_BUILTIN) {
                 MPIR_Datatype *recvtype_ptr = NULL;
-                MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
+                MPIR_Datatype_get_ptr(recvtype, recvtype_ptr);
                 MPIR_Datatype_valid_ptr(recvtype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPIR_Datatype_committed_ptr(recvtype_ptr, mpi_errno);

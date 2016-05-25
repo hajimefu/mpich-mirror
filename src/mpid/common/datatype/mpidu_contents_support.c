@@ -22,7 +22,7 @@ void MPIDU_Type_access_contents(MPI_Datatype type,
     MPIR_Type_get_envelope_impl(type, &nr_ints, &nr_aints, &nr_types, &combiner);
 
     /* hardcoded handling of MPICH contents format... */
-    MPIDU_Datatype_get_ptr(type, dtp);
+    MPIR_Datatype_get_ptr(type, dtp);
     DLOOP_Assert(dtp != NULL);
 
     cp = dtp->contents;

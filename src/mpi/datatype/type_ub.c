@@ -76,7 +76,7 @@ int MPI_Type_ub(MPI_Datatype datatype, MPI_Aint *displacement)
 #   endif
 
     /* Convert MPI object handles to object pointers */
-    MPID_Datatype_get_ptr(datatype, datatype_ptr);
+    MPIR_Datatype_get_ptr(datatype, datatype_ptr);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING

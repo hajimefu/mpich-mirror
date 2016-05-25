@@ -104,7 +104,7 @@ int MPIDU_Type_vector(int count,
     else /* user-defined base type (oldtype) */ {
 	MPIR_Datatype *old_dtp;
 
-	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
+	MPIR_Datatype_get_ptr(oldtype, old_dtp);
 	el_sz   = old_dtp->builtin_element_size;
 	el_type = old_dtp->basic_type;
 

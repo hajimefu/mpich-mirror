@@ -27,7 +27,7 @@
             HANDLE_GET_KIND((datatype_)) != HANDLE_KIND_BUILTIN)   \
         {                                                          \
             MPIR_Datatype *dtp_ = NULL;                            \
-            MPID_Datatype_get_ptr((datatype_), dtp_);              \
+            MPIR_Datatype_get_ptr((datatype_), dtp_);              \
             MPIR_Datatype_add_ref(dtp_);                           \
         }                                                          \
     } while (0)
@@ -37,7 +37,7 @@
             HANDLE_GET_KIND((datatype_)) != HANDLE_KIND_BUILTIN)   \
         {                                                          \
             MPIR_Datatype *dtp_ = NULL;                            \
-            MPID_Datatype_get_ptr((datatype_), dtp_);              \
+            MPIR_Datatype_get_ptr((datatype_), dtp_);              \
             MPID_Datatype_release(dtp_);                           \
         }                                                          \
     } while (0)

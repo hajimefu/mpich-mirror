@@ -413,7 +413,7 @@ int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype 
         is_contig = 1;
     }
     else {
-        MPID_Datatype_get_ptr(datatype, dtp);
+        MPIR_Datatype_get_ptr(datatype, dtp);
         is_contig = MPIR_Datatype_is_contig(dtp);
     }
 
@@ -665,7 +665,7 @@ int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype dat
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
         is_contig = 1;
     else {
-        MPID_Datatype_get_ptr(datatype, dtp);
+        MPIR_Datatype_get_ptr(datatype, dtp);
         is_contig = MPIR_Datatype_is_contig(dtp);
     }
 
@@ -1057,7 +1057,7 @@ int MPI_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Com
 
             if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN) {
                 MPIR_Datatype *datatype_ptr = NULL;
-                MPID_Datatype_get_ptr(datatype, datatype_ptr);
+                MPIR_Datatype_get_ptr(datatype, datatype_ptr);
                 MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);

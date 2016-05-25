@@ -49,7 +49,7 @@ MPIDI_RecvMsg_Unexp(MPIR_Request  * rreq,
       /* -------------------------------------------------------- */
       if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
         {
-          MPIDU_Datatype_get_ptr(datatype, rreq->mpid.datatype_ptr);
+          MPIR_Datatype_get_ptr(datatype, rreq->mpid.datatype_ptr);
           MPIR_Datatype_add_ref(rreq->mpid.datatype_ptr);
         }
 
@@ -127,7 +127,7 @@ MPIDI_RecvMsg_Unexp(MPIR_Request  * rreq,
         }
       if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
         {
-          MPIDU_Datatype_get_ptr(datatype, rreq->mpid.datatype_ptr);
+          MPIR_Datatype_get_ptr(datatype, rreq->mpid.datatype_ptr);
           MPIR_Datatype_add_ref(rreq->mpid.datatype_ptr);
         }
      }

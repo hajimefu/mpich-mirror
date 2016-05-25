@@ -346,7 +346,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
     MPIDU_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
     total_len = origin_dtp_size * origin_count;
 
-    MPIDU_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
+    MPIR_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
     MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
     basic_type = origin_dtp_ptr->basic_type;
     MPIDU_Datatype_get_size_macro(basic_type, predefined_dtp_size);
@@ -493,7 +493,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
     MPIDU_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
     total_len = origin_dtp_size * origin_count;
 
-    MPIDU_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
+    MPIR_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
     MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
     basic_type = origin_dtp_ptr->basic_type;
     MPIDU_Datatype_get_size_macro(basic_type, predefined_dtp_size);

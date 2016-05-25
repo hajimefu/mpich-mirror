@@ -73,7 +73,7 @@ int MPI_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype)
 #   endif
     
     /* Convert MPI object handles to object pointers */
-    MPID_Datatype_get_ptr( oldtype, datatype_ptr );
+    MPIR_Datatype_get_ptr( oldtype, datatype_ptr );
     
     /* Convert MPI object handles to object pointers */
 #   ifdef HAVE_ERROR_CHECKING
@@ -95,7 +95,7 @@ int MPI_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype)
 
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_DUP,
 				           0, /* ints */

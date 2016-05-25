@@ -114,7 +114,7 @@ static MPI_Aint MPIDU_Type_struct_alignsize(int count,
 	{
 	    MPIR_Datatype *dtp;
 
-	    MPIDU_Datatype_get_ptr(oldtype_array[i], dtp);
+	    MPIR_Datatype_get_ptr(oldtype_array[i], dtp);
 	    tmp_alignsize = dtp->alignsize;
 	    if (derived_alignsize < tmp_alignsize)
 		derived_alignsize = tmp_alignsize;
@@ -246,7 +246,7 @@ int MPIDU_Type_struct(int count,
 	}
 	else
 	{
-	    MPIDU_Datatype_get_ptr(oldtype_array[i], old_dtp);
+	    MPIR_Datatype_get_ptr(oldtype_array[i], old_dtp);
 
 	    /* Ensure that "builtin_element_size" fits into an int datatype. */
 	    MPIR_Ensure_Aint_fits_in_int(old_dtp->builtin_element_size);

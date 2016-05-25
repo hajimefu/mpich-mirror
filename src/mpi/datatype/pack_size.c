@@ -117,7 +117,7 @@ int MPI_Pack_size(int incount,
 	    
 	    if (HANDLE_GET_KIND(datatype) != HANDLE_KIND_BUILTIN)
 	    {
-		MPID_Datatype_get_ptr(datatype, datatype_ptr);
+		MPIR_Datatype_get_ptr(datatype, datatype_ptr);
 		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 		MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno) goto fn_fail;

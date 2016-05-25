@@ -197,7 +197,7 @@ static int MPIR_Datatype_finalize(void *dummy ATTRIBUTE((unused)) )
 
     for (i=0; mpi_pairtypes[i] != (MPI_Datatype) -1; i++) {
 	if (mpi_pairtypes[i] != MPI_DATATYPE_NULL) {
-	    MPID_Datatype_get_ptr(mpi_pairtypes[i], dptr);
+	    MPIR_Datatype_get_ptr(mpi_pairtypes[i], dptr);
 	    MPID_Datatype_release(dptr);
 	    mpi_pairtypes[i] = MPI_DATATYPE_NULL;
 	}
@@ -241,7 +241,7 @@ int MPIR_Datatype_builtin_fillin(void)
 	       disabled at configure time.  skip those cases. */
 	    if (d == MPI_DATATYPE_NULL) continue;
 	    
-	    MPID_Datatype_get_ptr(d,dptr);
+	    MPIR_Datatype_get_ptr(d,dptr);
 	    /* --BEGIN ERROR HANDLING-- */
 	    if (dptr < MPIR_Datatype_builtin ||
 		dptr > MPIR_Datatype_builtin + MPIR_DATATYPE_N_BUILTIN)
@@ -288,7 +288,7 @@ void MPIR_Datatype_iscontig(MPI_Datatype datatype, int *flag)
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
         *flag = 1;
     else  {
-        MPID_Datatype_get_ptr(datatype, datatype_ptr);
+        MPIR_Datatype_get_ptr(datatype, datatype_ptr);
         *flag = MPIR_Datatype_is_contig(datatype_ptr);
     }
 }

@@ -175,7 +175,7 @@ extern MPIDI_Process_t MPIDI_Process;
     }									\
     else								\
     {									\
-	MPIDU_Datatype_get_ptr((datatype_), (dt_ptr_));			\
+	MPIR_Datatype_get_ptr((datatype_), (dt_ptr_));			\
 	(dt_contig_out_) = MPIR_Datatype_is_contig(dt_ptr_);		\
 	(data_sz_out_) = (intptr_t) (count_) * (dt_ptr_)->size;	\
         (dt_true_lb_)    = (dt_ptr_)->true_lb;                          \

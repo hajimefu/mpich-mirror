@@ -47,7 +47,7 @@ int MPIR_Type_hvector_impl(int count, int blocklength, MPI_Aint stride, MPI_Data
 
     ints[0] = count;
     ints[1] = blocklength;
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_HVECTOR,
                                            2, /* ints (count, blocklength) */
@@ -118,7 +118,7 @@ int MPI_Type_hvector(int count,
 	    MPIR_ERRTEST_DATATYPE(oldtype, "datatype", mpi_errno);
 
             if (HANDLE_GET_KIND(oldtype) != HANDLE_KIND_BUILTIN) {
-                MPID_Datatype_get_ptr(oldtype, datatype_ptr);
+                MPIR_Datatype_get_ptr(oldtype, datatype_ptr);
                 MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno) goto fn_fail;
             }

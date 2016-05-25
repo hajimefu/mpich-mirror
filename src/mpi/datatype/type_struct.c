@@ -55,7 +55,7 @@ int MPIR_Type_struct_impl(int count, const int *array_of_blocklengths,
         ints[i+1] = array_of_blocklengths[i];
     }
     
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
                                            MPI_COMBINER_STRUCT,
                                            count+1, /* ints (count, blocklengths) */
@@ -183,7 +183,7 @@ int MPI_Type_struct(int count,
 
                 if (array_of_types[i] != MPI_DATATYPE_NULL &&
                     HANDLE_GET_KIND(array_of_types[i]) != HANDLE_KIND_BUILTIN) {
-                    MPID_Datatype_get_ptr(array_of_types[i], datatype_ptr);
+                    MPIR_Datatype_get_ptr(array_of_types[i], datatype_ptr);
                     MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 }
 	    }

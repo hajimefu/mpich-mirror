@@ -78,7 +78,7 @@ int MPI_Type_create_resized(MPI_Datatype oldtype,
 	    MPIR_ERRTEST_DATATYPE(oldtype, "datatype", mpi_errno);
 
             /* Validate datatype_ptr */
-	    MPID_Datatype_get_ptr(oldtype, datatype_ptr);
+	    MPIR_Datatype_get_ptr(oldtype, datatype_ptr);
             MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
 	    /* If datatype_ptr is not valid, it will be reset to null */
             if (mpi_errno) goto fn_fail;
@@ -98,7 +98,7 @@ int MPI_Type_create_resized(MPI_Datatype oldtype,
     aints[0] = lb;
     aints[1] = extent;
 
-    MPID_Datatype_get_ptr(new_handle, new_dtp);
+    MPIR_Datatype_get_ptr(new_handle, new_dtp);
     mpi_errno = MPID_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_RESIZED,
 				           0,

@@ -127,11 +127,11 @@ int MPIDI_CH3I_Put(const void *origin_addr, int origin_count, MPI_Datatype
         /* if source or target datatypes are derived, increment their
          * reference counts */
         if (!MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) {
-            MPIDU_Datatype_get_ptr(origin_datatype, dtp);
+            MPIR_Datatype_get_ptr(origin_datatype, dtp);
             MPIR_Datatype_add_ref(dtp);
         }
         if (!MPIR_DATATYPE_IS_PREDEFINED(target_datatype)) {
-            MPIDU_Datatype_get_ptr(target_datatype, dtp);
+            MPIR_Datatype_get_ptr(target_datatype, dtp);
             MPIR_Datatype_add_ref(dtp);
         }
 
@@ -306,11 +306,11 @@ int MPIDI_CH3I_Get(void *origin_addr, int origin_count, MPI_Datatype
         /* if source or target datatypes are derived, increment their
          * reference counts */
         if (!MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) {
-            MPIDU_Datatype_get_ptr(origin_datatype, dtp);
+            MPIR_Datatype_get_ptr(origin_datatype, dtp);
             MPIR_Datatype_add_ref(dtp);
         }
         if (!MPIR_DATATYPE_IS_PREDEFINED(target_datatype)) {
-            MPIDU_Datatype_get_ptr(target_datatype, dtp);
+            MPIR_Datatype_get_ptr(target_datatype, dtp);
             MPIR_Datatype_add_ref(dtp);
         }
 
@@ -478,10 +478,10 @@ int MPIDI_CH3I_Accumulate(const void *origin_addr, int origin_count, MPI_Datatyp
         /* if source or target datatypes are derived, increment their
          * reference counts */
         if (!MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) {
-            MPIDU_Datatype_get_ptr(origin_datatype, origin_dtp);
+            MPIR_Datatype_get_ptr(origin_datatype, origin_dtp);
         }
         if (!MPIR_DATATYPE_IS_PREDEFINED(target_datatype)) {
-            MPIDU_Datatype_get_ptr(target_datatype, target_dtp);
+            MPIR_Datatype_get_ptr(target_datatype, target_dtp);
         }
 
         /* Get size and count for predefined datatype elements */
@@ -704,13 +704,13 @@ int MPIDI_CH3I_Get_accumulate(const void *origin_addr, int origin_count,
         /* if source or target datatypes are derived, increment their
          * reference counts */
         if (is_empty_origin == FALSE && !MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) {
-            MPIDU_Datatype_get_ptr(origin_datatype, origin_dtp);
+            MPIR_Datatype_get_ptr(origin_datatype, origin_dtp);
         }
         if (!MPIR_DATATYPE_IS_PREDEFINED(result_datatype)) {
-            MPIDU_Datatype_get_ptr(result_datatype, result_dtp);
+            MPIR_Datatype_get_ptr(result_datatype, result_dtp);
         }
         if (!MPIR_DATATYPE_IS_PREDEFINED(target_datatype)) {
-            MPIDU_Datatype_get_ptr(target_datatype, target_dtp);
+            MPIR_Datatype_get_ptr(target_datatype, target_dtp);
         }
 
         if (is_empty_origin == FALSE) {

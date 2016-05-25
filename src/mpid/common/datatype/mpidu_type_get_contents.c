@@ -49,7 +49,7 @@ int MPIDU_Type_get_contents(MPI_Datatype datatype,
 		datatype != MPI_LONG_DOUBLE_INT);
     /* --END ERROR HANDLING-- */
 
-    MPIDU_Datatype_get_ptr(datatype, dtp);
+    MPIR_Datatype_get_ptr(datatype, dtp);
     cp = dtp->contents;
     MPIR_Assert(cp != NULL);
 
@@ -82,7 +82,7 @@ int MPIDU_Type_get_contents(MPI_Datatype datatype,
     {
     	if (HANDLE_GET_KIND(array_of_datatypes[i]) != HANDLE_KIND_BUILTIN)
 	{
-	    MPIDU_Datatype_get_ptr(array_of_datatypes[i], dtp);
+	    MPIR_Datatype_get_ptr(array_of_datatypes[i], dtp);
 	    MPIR_Datatype_add_ref(dtp);
 	}
     }

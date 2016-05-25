@@ -964,7 +964,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         first = stream_offset;
         last = first + source_count * source_dtp_size;
 
-        MPIDU_Datatype_get_ptr(target_dtp, dtp);
+        MPIR_Datatype_get_ptr(target_dtp, dtp);
         vec_len = dtp->max_contig_blocks * target_count + 1;
         /* +1 needed because Rob says so */
         dloop_vec = (DLOOP_VECTOR *)

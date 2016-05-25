@@ -121,7 +121,7 @@ int MPIDU_Type_indexed(int count,
 	/* user-defined base type (oldtype) */
 	MPIR_Datatype *old_dtp;
 
-	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
+	MPIR_Datatype_get_ptr(oldtype, old_dtp);
 
 	/* Ensure that "builtin_element_size" fits into an int datatype. */
 	MPIR_Ensure_Aint_fits_in_int(old_dtp->builtin_element_size);
