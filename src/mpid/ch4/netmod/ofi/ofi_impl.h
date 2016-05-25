@@ -27,15 +27,15 @@
 /* Trick doesn't work with gcc or clang                      */
 #if defined(__INTEL_COMPILER)
 #ifndef __cplusplus
-struct MPIU_Object_alloc_t;
-#define ILU(ret,fcname,...) inline __attribute__((always_inline)) ret MPIU_##fcname(__VA_ARGS__)
-ILU(void *, Handle_obj_alloc_unsafe, struct MPIU_Object_alloc_t *);
-ILU(void *, Handle_obj_alloc, struct MPIU_Object_alloc_t *);
+struct MPIR_Object_alloc_t;
+#define ILU(ret,fcname,...) inline __attribute__((always_inline)) ret MPIR_##fcname(__VA_ARGS__)
+ILU(void *, Handle_obj_alloc_unsafe, struct MPIR_Object_alloc_t *);
+ILU(void *, Handle_obj_alloc, struct MPIR_Object_alloc_t *);
 ILU(void *, Handle_direct_init, void *, int, int, int);
 ILU(void *, Handle_indirect_init, void *(* *)[], int *, int, int, int, int);
-ILU(void, Handle_obj_alloc_complete, struct MPIU_Object_alloc_t *, int);
-ILU(void, Handle_obj_free, struct MPIU_Object_alloc_t *objmem, void *object);
-ILU(void *, Handle_get_ptr_indirect, int, struct MPIU_Object_alloc_t *);
+ILU(void, Handle_obj_alloc_complete, struct MPIR_Object_alloc_t *, int);
+ILU(void, Handle_obj_free, struct MPIR_Object_alloc_t *objmem, void *object);
+ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
 #undef ILU
 #endif /* __cplusplus */
 #endif /* __clang__ || __INTEL_COMPILER */
