@@ -443,7 +443,6 @@ extern MPIR_Object_alloc_t MPIDU_Datatype_mem;
 /* FIXME: Given that this is relatively static, an adequate alternative is
    to provide a check that this value is valid. */
 #define MPIDU_DATATYPE_N_BUILTIN 69
-extern MPIDU_Datatype MPIDU_Datatype_builtin[MPIDU_DATATYPE_N_BUILTIN + 1];
 
 #define MPIDU_DTYPE_BEGINNING  0
 #define MPIDU_DTYPE_END       -1
