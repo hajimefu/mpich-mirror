@@ -70,25 +70,6 @@
     }                                                                   \
 } while(0)
 
-#define MPIDU_Datatype_get_loopptr_macro(a,lptr_,hetero_) do {  		\
-    void *ptr;								\
-    switch (HANDLE_GET_KIND(a)) {					\
-        case HANDLE_KIND_DIRECT:					\
-            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
-            MPIDU_GET_FIELD(hetero_,lptr_,);                             \
-            break;							\
-        case HANDLE_KIND_INDIRECT:					\
-            ptr = ((MPIR_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
-            MPIDU_GET_FIELD(hetero_,lptr_,);                             \
-            break;							\
-        case HANDLE_KIND_INVALID:					\
-        case HANDLE_KIND_BUILTIN:					\
-        default:							\
-            lptr_ = 0;							\
-            break;							\
-    }									\
-} while(0)
 #define MPIDU_Datatype_set_loopdepth_macro(a,depth_,hetero_) do {        \
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
