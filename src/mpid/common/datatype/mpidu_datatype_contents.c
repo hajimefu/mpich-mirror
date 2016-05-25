@@ -16,7 +16,7 @@
 
   Returns MPI_SUCCESS on success, MPI error code on error.
 @*/
-int MPIDU_Datatype_set_contents(MPIDU_Datatype *new_dtp,
+int MPIDU_Datatype_set_contents(MPIR_Datatype *new_dtp,
 			       int combiner,
 			       int nr_ints,
 			       int nr_aints,
@@ -27,8 +27,8 @@ int MPIDU_Datatype_set_contents(MPIDU_Datatype *new_dtp,
 {
     int i, contents_size, align_sz = 8, epsilon, mpi_errno;
     int struct_sz, ints_sz, aints_sz, types_sz;
-    MPIDU_Datatype_contents *cp;
-    MPIDU_Datatype *old_dtp;
+    MPIR_Datatype_contents *cp;
+    MPIR_Datatype *old_dtp;
     char *ptr;
 
 #ifdef HAVE_MAX_STRUCT_ALIGNMENT
@@ -37,7 +37,7 @@ int MPIDU_Datatype_set_contents(MPIDU_Datatype *new_dtp,
     }
 #endif
 
-    struct_sz = sizeof(MPIDU_Datatype_contents);
+    struct_sz = sizeof(MPIR_Datatype_contents);
     types_sz  = nr_types * sizeof(MPI_Datatype);
     ints_sz   = nr_ints * sizeof(int);
     aints_sz  = nr_aints * sizeof(MPI_Aint);
@@ -59,7 +59,7 @@ int MPIDU_Datatype_set_contents(MPIDU_Datatype *new_dtp,
 
     contents_size = struct_sz + types_sz + ints_sz + aints_sz;
 
-    cp = (MPIDU_Datatype_contents *) MPL_malloc(contents_size);
+    cp = (MPIR_Datatype_contents *) MPL_malloc(contents_size);
     /* --BEGIN ERROR HANDLING-- */
     if (cp == NULL) {
 	mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
@@ -109,11 +109,11 @@ int MPIDU_Datatype_set_contents(MPIDU_Datatype *new_dtp,
     return MPI_SUCCESS;
 }
 
-void MPIDU_Datatype_free_contents(MPIDU_Datatype *dtp)
+void MPIDU_Datatype_free_contents(MPIR_Datatype *dtp)
 {
-    int i, struct_sz = sizeof(MPIDU_Datatype_contents);
+    int i, struct_sz = sizeof(MPIR_Datatype_contents);
     int align_sz = 8, epsilon;
-    MPIDU_Datatype *old_dtp;
+    MPIR_Datatype *old_dtp;
     MPI_Datatype *array_of_types;
 
     if ((epsilon = struct_sz % align_sz)) {
@@ -134,7 +134,7 @@ void MPIDU_Datatype_free_contents(MPIDU_Datatype *dtp)
     dtp->contents = NULL;
 }
 
-void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_ints(MPIR_Datatype_contents *cp,
 				      int *user_ints)
 {
     char *ptr;
@@ -147,7 +147,7 @@ void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
     }
 #endif
 
-    struct_sz = sizeof(MPIDU_Datatype_contents);
+    struct_sz = sizeof(MPIR_Datatype_contents);
     types_sz  = cp->nr_types * sizeof(MPI_Datatype);
 
     /* pad the struct, types, and ints before we allocate.
@@ -168,7 +168,7 @@ void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
     return;
 }
 
-void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_aints(MPIR_Datatype_contents *cp,
 				       MPI_Aint *user_aints)
 {
     char *ptr;
@@ -181,7 +181,7 @@ void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
     }
 #endif
 
-    struct_sz = sizeof(MPIDU_Datatype_contents);
+    struct_sz = sizeof(MPIR_Datatype_contents);
     types_sz  = cp->nr_types * sizeof(MPI_Datatype);
     ints_sz   = cp->nr_ints * sizeof(int);
 
@@ -206,7 +206,7 @@ void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
     return;
 }
 
-void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,
+void MPIDI_Datatype_get_contents_types(MPIR_Datatype_contents *cp,
 				       MPI_Datatype *user_types)
 {
     char *ptr;
@@ -219,7 +219,7 @@ void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,
     }
 #endif
 
-    struct_sz = sizeof(MPIDU_Datatype_contents);
+    struct_sz = sizeof(MPIR_Datatype_contents);
 
     /* pad the struct, types, and ints before we allocate.
      *

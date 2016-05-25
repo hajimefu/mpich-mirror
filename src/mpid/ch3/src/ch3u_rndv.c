@@ -206,7 +206,7 @@ int MPIDI_CH3_PktHandler_RndvClrToSend( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt,
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t data_sz;
-    MPIDU_Datatype* dt_ptr;
+    MPIR_Datatype* dt_ptr;
     int mpi_errno = MPI_SUCCESS;
     
     MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"received rndv CTS pkt");

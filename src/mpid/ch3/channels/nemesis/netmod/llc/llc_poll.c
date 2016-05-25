@@ -236,7 +236,7 @@ int MPID_nem_llc_recv_posted(struct MPIDI_VC *vc, struct MPIR_Request *req)
     int mpi_errno = MPI_SUCCESS, llc_errno;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     int i;
 

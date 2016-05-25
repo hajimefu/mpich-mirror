@@ -38,7 +38,7 @@ void MPIDI_PAMI_datatype_commit_hook (MPI_Datatype *ptr)
      */
     if (MPIDI_Process.typed_onesided == 1) {
 
-      MPIDU_Datatype*datatype_ptr;
+      MPIR_Datatype*datatype_ptr;
       MPIDU_Datatype_get_ptr(*ptr, datatype_ptr);
 
       pami_result_t pami_dtop_result;
@@ -83,7 +83,7 @@ void MPIDI_PAMI_datatype_commit_hook (MPI_Datatype *ptr)
  * \brief Destroy PAMI datatype representation of MPI Datatype.
  *
  */
-void MPIDI_PAMI_datatype_destroy_hook (MPIDU_Datatype*ptr)
+void MPIDI_PAMI_datatype_destroy_hook (MPIR_Datatype*ptr)
 {
     /* If a PAMI datatype was created, destroy it if this is the
      * last reference to the MPIDU_Datatypeptr.
@@ -113,7 +113,7 @@ void MPIDI_PAMI_datatype_dup_hook (MPI_Datatype *ptr)
      */
     if (MPIDI_Process.typed_onesided == 1) {
 
-      MPIDU_Datatype*datatype_ptr;
+      MPIR_Datatype*datatype_ptr;
       MPIDU_Datatype_get_ptr(*ptr, datatype_ptr);
 
       pami_result_t pami_dtop_result;

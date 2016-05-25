@@ -51,7 +51,7 @@ int MPIDO_Alltoall(const void *sendbuf,
 #endif
    TRACE_ERR("Entering MPIDO_Alltoall\n");
    volatile unsigned active = 1;
-   MPIDU_Datatype*sdt, *rdt;
+   MPIR_Datatype*sdt, *rdt;
    pami_type_t stype, rtype;
    MPI_Aint sdt_true_lb=0, rdt_true_lb;
    MPIDI_Post_coll_t alltoall_post;
@@ -200,7 +200,7 @@ int MPIDO_Alltoall(const void *sendbuf,
          if(my_md->check_correct.values.rangeminmax)
          {
             MPI_Aint data_true_lb ATTRIBUTE((unused));
-            MPIDU_Datatype*data_ptr;
+            MPIR_Datatype*data_ptr;
             int data_size, data_contig ATTRIBUTE((unused));
             MPIDI_Datatype_get_info(sendcount, sendtype, data_contig, data_size, data_ptr, data_true_lb); 
             if((my_md->range_lo <= data_size) &&
@@ -289,7 +289,7 @@ int MPIDO_Alltoall_simple(const void *sendbuf,
    size_t send_size = 0;
    size_t recv_size = 0;
    MPIDU_Segment segment;
-   MPIDU_Datatype*sdt, *rdt;
+   MPIR_Datatype*sdt, *rdt;
    MPI_Aint sdt_true_lb=0, rdt_true_lb;
    MPIDI_Post_coll_t alltoall_post;
    int sndlen, rcvlen, snd_contig = 1, rcv_contig = 1;

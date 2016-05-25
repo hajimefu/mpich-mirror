@@ -486,7 +486,7 @@ int MPIDI_CH3U_Request_unpack_uebuf(MPIR_Request * rreq)
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t userbuf_sz;
-    MPIDU_Datatype * dt_ptr;
+    MPIR_Datatype * dt_ptr;
     intptr_t unpack_sz;
     int mpi_errno = MPI_SUCCESS;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3U_REQUEST_UNPACK_UEBUF);

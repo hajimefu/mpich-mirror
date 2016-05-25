@@ -945,7 +945,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         int vec_len, i, count;
         MPI_Aint type_extent, type_size;
         MPI_Datatype type;
-        MPIDU_Datatype*dtp;
+        MPIR_Datatype*dtp;
         MPI_Aint curr_len;
         void *curr_loc;
         int accumulated_count;

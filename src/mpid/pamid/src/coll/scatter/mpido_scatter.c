@@ -106,7 +106,7 @@ int MPIDO_Scatter(const void *sendbuf,
     return -1;
   }
 #endif
-  MPIDU_Datatype* data_ptr;
+  MPIR_Datatype* data_ptr;
   MPI_Aint true_lb ATTRIBUTE((unused));
   int contig, nbytes ATTRIBUTE((unused));
   const int rank = comm_ptr->rank;
@@ -365,7 +365,7 @@ int MPIDO_Scatter_simple(const void *sendbuf,
     return -1;
   }
 #endif
-  MPIDU_Datatype* data_ptr;
+  MPIR_Datatype* data_ptr;
   const int rank = comm_ptr->rank;
   int success = 1, snd_contig = 1, rcv_contig = 1;
   void *snd_noncontig_buff = NULL, *rcv_noncontig_buff = NULL;

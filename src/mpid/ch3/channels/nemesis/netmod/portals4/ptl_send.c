@@ -109,7 +109,7 @@ static int send_msg(ptl_hdr_data_t ssend_flag, struct MPIDI_VC *vc, const void *
     intptr_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPIR_Request *sreq = NULL;
     ptl_me_t me;
     int initial_iov_count, remaining_iov_count;

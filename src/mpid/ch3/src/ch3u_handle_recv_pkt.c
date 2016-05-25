@@ -107,7 +107,7 @@ int MPIDI_CH3U_Receive_data_found(MPIR_Request *rreq, char *buf, intptr_t *bufle
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t userbuf_sz;
-    MPIDU_Datatype * dt_ptr = NULL;
+    MPIR_Datatype * dt_ptr = NULL;
     intptr_t data_sz;
     int mpi_errno = MPI_SUCCESS;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3U_RECEIVE_DATA_FOUND);
@@ -299,7 +299,7 @@ int MPIDI_CH3U_Post_data_receive_found(MPIR_Request * rreq)
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t userbuf_sz;
-    MPIDU_Datatype * dt_ptr = NULL;
+    MPIR_Datatype * dt_ptr = NULL;
     intptr_t data_sz;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3U_POST_DATA_RECEIVE_FOUND);
 

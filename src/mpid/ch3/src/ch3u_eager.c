@@ -341,7 +341,7 @@ int MPIDI_CH3_PktHandler_EagerShortSend( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt,
 	    int            dt_contig;
 	    MPI_Aint       dt_true_lb;
 	    intptr_t userbuf_sz;
-	    MPIDU_Datatype *dt_ptr;
+	    MPIR_Datatype *dt_ptr;
 	    intptr_t data_sz;
 
 	    /* Make sure that we handle the general (non-contiguous)

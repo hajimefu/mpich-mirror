@@ -42,7 +42,7 @@ int MPIDU_Type_get_envelope(MPI_Datatype datatype,
 	*num_datatypes = 0;
     }
     else {
-	MPIDU_Datatype *dtp;
+	MPIR_Datatype *dtp;
 
 	MPIDU_Datatype_get_ptr(datatype, dtp);
 

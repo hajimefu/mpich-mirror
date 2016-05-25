@@ -24,7 +24,7 @@ static int _mxm_isend(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req,
                       int type, mxm_mq_h mxm_mq, int mxm_rank, int id, mxm_tag_t tag, int block);
 #if 0   /* Consider using this function in case non contiguous data */
 static int _mxm_process_sdtype(MPIR_Request ** rreq_p, MPI_Datatype datatype,
-                               MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
+                               MPIR_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count);
 #endif
 
@@ -246,7 +246,7 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *sreq = NULL;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
     MPI_Aint dt_true_lb;
@@ -349,7 +349,7 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *sreq = NULL;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
     MPI_Aint dt_true_lb;
@@ -452,7 +452,7 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *sreq = NULL;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
     MPI_Aint dt_true_lb;
@@ -555,7 +555,7 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
 {
     int mpi_errno = MPI_SUCCESS;
     MPIR_Request *sreq = NULL;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     int dt_contig;
     intptr_t data_sz;
     MPI_Aint dt_true_lb;
@@ -787,7 +787,7 @@ static int _mxm_isend(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req,
 
 #if 0   /* Consider using this function in case non contiguous data */
 static int _mxm_process_sdtype(MPIR_Request ** sreq_p, MPI_Datatype datatype,
-                               MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
+                               MPIR_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count)
 {
     int mpi_errno = MPI_SUCCESS;

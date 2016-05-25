@@ -308,7 +308,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
     MPI_Aint predefined_dtp_size, predefined_dtp_extent, predefined_dtp_count;
     MPI_Aint total_len, rest_len;
     MPI_Aint origin_dtp_size;
-    MPIDU_Datatype*origin_dtp_ptr = NULL;
+    MPIR_Datatype*origin_dtp_ptr = NULL;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3I_SHM_ACC_OP);
 
     MPIR_FUNC_VERBOSE_RMA_ENTER(MPID_STATE_MPIDI_CH3I_SHM_ACC_OP);
@@ -443,7 +443,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
     MPI_Aint predefined_dtp_size, predefined_dtp_extent, predefined_dtp_count;
     MPI_Aint total_len, rest_len;
     MPI_Aint origin_dtp_size;
-    MPIDU_Datatype*origin_dtp_ptr = NULL;
+    MPIR_Datatype*origin_dtp_ptr = NULL;
     int is_empty_origin = FALSE;
     int mpi_errno = MPI_SUCCESS;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3I_SHM_GET_ACC_OP);

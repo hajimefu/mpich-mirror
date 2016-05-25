@@ -18,9 +18,9 @@ int MPIDU_Type_create_resized(MPI_Datatype oldtype,
 			     MPI_Aint extent,
 			     MPI_Datatype *newtype_p)
 {
-    MPIDU_Datatype *new_dtp;
+    MPIR_Datatype *new_dtp;
 
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp) return MPIDI_Type_create_resized_memory_error();
     /* --END ERROR HANDLING-- */
@@ -65,7 +65,7 @@ int MPIDU_Type_create_resized(MPI_Datatype oldtype,
     else
     {
 	/* user-defined base type */
-	MPIDU_Datatype *old_dtp;
+	MPIR_Datatype *old_dtp;
 
 	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
 

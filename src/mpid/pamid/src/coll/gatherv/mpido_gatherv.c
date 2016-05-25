@@ -53,7 +53,7 @@ int MPIDO_Gatherv(const void *sendbuf,
    int i;
    int contig ATTRIBUTE((unused)), rsize ATTRIBUTE((unused)), ssize ATTRIBUTE((unused));
    int pamidt = 1;
-   MPIDU_Datatype*dt_ptr = NULL;
+   MPIR_Datatype*dt_ptr = NULL;
    MPI_Aint send_true_lb, recv_true_lb;
    char *sbuf, *rbuf;
    pami_type_t stype, rtype;
@@ -223,7 +223,7 @@ int MPIDO_Gatherv(const void *sendbuf,
          if(my_md->check_correct.values.rangeminmax)
          {
             MPI_Aint data_true_lb;
-            MPIDU_Datatype*data_ptr;
+            MPIR_Datatype*data_ptr;
             int data_size, data_contig;
             MPIDI_Datatype_get_info(sendcount, sendtype, data_contig, data_size, data_ptr, data_true_lb); 
             if((my_md->range_lo <= data_size) &&
@@ -324,7 +324,7 @@ int MPIDO_Gatherv_simple(const void *sendbuf,
   int totalrecvcount  = 0;
    pami_type_t rtype = PAMI_TYPE_NULL;
    MPIDU_Segment segment;
-   MPIDU_Datatype*data_ptr = NULL;
+   MPIR_Datatype*data_ptr = NULL;
    int send_true_lb, recv_true_lb = 0;
    int i, tmp;
    volatile unsigned gatherv_active = 1;

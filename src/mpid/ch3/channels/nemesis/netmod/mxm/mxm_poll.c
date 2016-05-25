@@ -18,7 +18,7 @@ static void _mxm_recv_completion_cb(void *context);
 static int _mxm_irecv(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req, int id, mxm_mq_h mxm_mq,
                       mxm_tag_t mxm_tag);
 static int _mxm_process_rdtype(MPIR_Request ** rreq_p, MPI_Datatype datatype,
-                               MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
+                               MPIR_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count);
 
 #undef FUNCNAME
@@ -158,7 +158,7 @@ int MPID_nem_mxm_recv(MPIDI_VC_t * vc, MPIR_Request * rreq)
     intptr_t data_sz;
     int dt_contig;
     MPI_Aint dt_true_lb;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_NEM_MXM_RECV);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_NEM_MXM_RECV);
@@ -234,7 +234,7 @@ static int _mxm_handle_rreq(MPIR_Request * req)
     int dt_contig;
     MPI_Aint dt_true_lb ATTRIBUTE((unused));
     intptr_t userbuf_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     intptr_t data_sz;
     MPID_nem_mxm_vc_area *vc_area ATTRIBUTE((unused)) = NULL;
     MPID_nem_mxm_req_area *req_area = NULL;
@@ -437,7 +437,7 @@ static int _mxm_irecv(MPID_nem_mxm_ep_t * ep, MPID_nem_mxm_req_area * req, int i
 
 
 static int _mxm_process_rdtype(MPIR_Request ** rreq_p, MPI_Datatype datatype,
-                               MPIDU_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
+                               MPIR_Datatype* dt_ptr, intptr_t data_sz, const void *buf,
                                int count, mxm_req_buffer_t ** iov_buf, int *iov_count)
 {
     int mpi_errno = MPI_SUCCESS;

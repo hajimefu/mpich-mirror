@@ -112,7 +112,7 @@ static MPI_Aint MPIDU_Type_struct_alignsize(int count,
 	}
 	else
 	{
-	    MPIDU_Datatype *dtp;
+	    MPIR_Datatype *dtp;
 
 	    MPIDU_Datatype_get_ptr(oldtype_array[i], dtp);
 	    tmp_alignsize = dtp->alignsize;
@@ -158,7 +158,7 @@ int MPIDU_Type_struct(int count,
     MPI_Aint true_lb_disp = 0, true_ub_disp = 0, sticky_lb_disp = 0,
 	sticky_ub_disp = 0, lb_disp = 0, ub_disp = 0;
 
-    MPIDU_Datatype *new_dtp;
+    MPIR_Datatype *new_dtp;
 
     if (count == 0) return MPIDU_Type_zerolen(newtype);
 
@@ -173,7 +173,7 @@ int MPIDU_Type_struct(int count,
 #endif
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {
@@ -218,7 +218,7 @@ int MPIDU_Type_struct(int count,
 	MPI_Aint tmp_lb, tmp_ub, tmp_true_lb, tmp_true_ub;
 	MPI_Aint tmp_el_sz;
 	MPI_Datatype tmp_el_type;
-	MPIDU_Datatype *old_dtp = NULL;
+	MPIR_Datatype *old_dtp = NULL;
 
 	/* Interpreting typemap to not include 0 blklen things, including
 	 * MPI_LB and MPI_UB. -- Rob Ross, 10/31/2005

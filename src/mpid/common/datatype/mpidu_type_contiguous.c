@@ -32,12 +32,12 @@ int MPIDU_Type_contiguous(int count,
     int is_builtin;
     MPI_Aint el_sz;
     MPI_Datatype el_type;
-    MPIDU_Datatype *new_dtp;
+    MPIR_Datatype *new_dtp;
 
     if (count == 0) return MPIDU_Type_zerolen(newtype);
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {
@@ -92,7 +92,7 @@ int MPIDU_Type_contiguous(int count,
     else
     {
 	/* user-defined base type (oldtype) */
-	MPIDU_Datatype *old_dtp;
+	MPIR_Datatype *old_dtp;
 
 	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
 	el_sz   = old_dtp->builtin_element_size;

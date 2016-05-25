@@ -20,6 +20,147 @@
 #define MPIR_DTYPE_BEGINNING  0
 #define MPIR_DTYPE_END       -1
 
+/*S
+  MPIR_Datatype_contents - Holds envelope and contents data for a given
+                           datatype
+
+  Notes:
+  Space is allocated beyond the structure itself in order to hold the
+  arrays of types, ints, and aints, in that order.
+
+  S*/
+typedef struct MPIR_Datatype_contents {
+    int combiner;
+    int nr_ints;
+    int nr_aints;
+    int nr_types;
+    /* space allocated beyond structure used to store the types[],
+     * ints[], and aints[], in that order.
+     */
+} MPIR_Datatype_contents;
+
+/* Datatype Structure */
+/*S
+  MPIR_Datatype - Description of the MPID Datatype structure
+
+  Notes:
+  The 'ref_count' is needed for nonblocking operations such as
+.vb
+   MPI_Type_struct( ... , &newtype );
+   MPI_Irecv( buf, 1000, newtype, ..., &request );
+   MPI_Type_free( &newtype );
+   ...
+   MPI_Wait( &request, &status );
+.ve
+
+  Module:
+  Datatype-DS
+
+  Notes:
+
+  Alternatives:
+  The following alternatives for the layout of this structure were considered.
+  Most were not chosen because any benefit in performance or memory
+  efficiency was outweighed by the added complexity of the implementation.
+
+  A number of fields contain only boolean inforation ('is_contig',
+  'has_sticky_ub', 'has_sticky_lb', 'is_permanent', 'is_committed').  These
+  could be combined and stored in a single bit vector.
+
+  'MPI_Type_dup' could be implemented with a shallow copy, where most of the
+  data fields, would not be copied into the new object created by
+  'MPI_Type_dup'; instead, the new object could point to the data fields in
+  the old object.  However, this requires more code to make sure that fields
+  are found in the correct objects and that deleting the old object doesn't
+  invalidate the dup'ed datatype.
+
+  Originally we attempted to keep contents/envelope data in a non-optimized
+  dataloop.  The subarray and darray types were particularly problematic,
+  and eventually we decided it would be simpler to just keep contents/
+  envelope data in arrays separately.
+
+  Earlier versions of the ADI used a single API to change the 'ref_count',
+  with each MPI object type having a separate routine.  Since reference
+  count changes are always up or down one, and since all MPI objects
+  are defined to have the 'ref_count' field in the same place, the current
+  ADI3 API uses two routines, 'MPIR_Object_add_ref' and
+  'MPIR_Object_release_ref', to increment and decrement the reference count.
+
+  S*/
+struct MPIR_Datatype {
+    /* handle and ref_count are filled in by MPIR_Handle_obj_alloc() */
+    MPIR_OBJECT_HEADER; /* adds handle and ref_count fields */
+
+    /* basic parameters for datatype, accessible via MPI calls */
+    MPI_Aint size;   /* MPI_Count could be 128 bits, so use MPI_Aint */
+    MPI_Aint extent, ub, lb, true_ub, true_lb;
+
+    /* chars affecting subsequent datatype processing and creation */
+    MPI_Aint alignsize;
+    int has_sticky_ub, has_sticky_lb;
+    int is_permanent; /* non-zero if datatype is a predefined type */
+    int is_committed;
+
+    /* element information; used for accumulate and get elements
+     * basic_type: describes basic type (predefined type). If the
+     *             type is composed of the same basic type, it is
+     *             set to that type, otherwise it is set to MPI_DATATYPE_NULL.
+     * n_builtin_elements: refers to the number of builtin type elements.
+     * builtin_element_size: refers to the size of builtin type. If the
+     *                       type is composed of the same builtin type,
+     *                       it is set to size of that type, otherwise it
+     *                       is set to -1.
+     */
+    int      basic_type;
+    MPI_Aint n_builtin_elements;
+    MPI_Aint builtin_element_size;
+
+    /* information on contiguity of type, for processing shortcuts.
+     *
+     * is_contig is non-zero only if N instances of the type would be
+     * contiguous.
+     */
+    int is_contig;
+    /* Upper bound on the number of contig blocks for one instance.
+     * It is not trivial to calculate the *real* number of contig
+     * blocks in the case where old datatype is non-contiguous
+     */
+    MPI_Aint max_contig_blocks;
+
+    /* pointer to contents and envelope data for the datatype */
+    MPIR_Datatype_contents *contents;
+
+    /* dataloop members, including a pointer to the loop, the size in bytes,
+     * and a depth used to verify that we can process it (limited stack depth
+     */
+    struct MPIR_Dataloop *dataloop; /* might be optimized for homogenous */
+    MPI_Aint              dataloop_size;
+    int                   dataloop_depth;
+#if defined(MPID_HAS_HETERO) || 1
+    struct MPIR_Dataloop *hetero_dloop; /* heterogeneous dataloop */
+    MPI_Aint              hetero_dloop_size;
+    int                   hetero_dloop_depth;
+#endif /* MPID_HAS_HETERO */
+    /* MPI-2 attributes and name */
+    struct MPIR_Attribute *attributes;
+    char                  name[MPI_MAX_OBJECT_NAME];
+
+    /* not yet used; will be used to track what processes have cached
+     * copies of this type.
+     */
+    int32_t cache_id;
+    /* MPID_Lpidmask mask; */
+
+    /* int (*free_fn)( struct MPIR_Datatype * ); */ /* Function to free this datatype */
+
+    /* Other, device-specific information */
+#ifdef MPID_DEV_DATATYPE_DECL
+    MPID_DEV_DATATYPE_DECL
+#endif
+};
+
+extern MPIR_Object_alloc_t MPIR_Datatype_mem;
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

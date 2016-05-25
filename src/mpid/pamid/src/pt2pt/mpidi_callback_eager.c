@@ -224,7 +224,7 @@ MPIDI_RecvCB(pami_context_t    context,
   /*  Calculate message length for reception.  */
   /* ----------------------------------------- */
   unsigned dt_contig, dt_size;
-  MPIDU_Datatype*dt_ptr;
+  MPIR_Datatype*dt_ptr;
   MPI_Aint dt_true_lb;
   MPIDI_Datatype_get_info(rreq->mpid.userbufcount,
                           rreq->mpid.datatype,

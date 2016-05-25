@@ -16,7 +16,7 @@
   MPIDU_Datatype_free
 
 Input Parameters:
-. MPIDU_Datatype ptr - pointer to MPID datatype structure that is no longer
+. MPIR_Datatype ptr - pointer to MPID datatype structure that is no longer
   referenced
 
 Output Parameters:
@@ -33,7 +33,7 @@ Output Parameters:
   types that are no longer referenced as well.
 
   @*/
-void MPIDU_Datatype_free(MPIDU_Datatype *ptr)
+void MPIDU_Datatype_free(MPIR_Datatype *ptr)
 {
     MPL_DBG_MSG_P(MPIR_DBG_DATATYPE,VERBOSE,"type %x freed.", ptr->handle);
 

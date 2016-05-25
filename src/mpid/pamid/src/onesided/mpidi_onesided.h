@@ -183,7 +183,7 @@ typedef struct MPIDI_WinLock_info
 
 typedef struct
 {
-  MPIDU_Datatype* pointer;
+  MPIR_Datatype* pointer;
   MPI_Datatype    type;
   int             count;
   int             contig;

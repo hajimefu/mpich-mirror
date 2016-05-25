@@ -302,7 +302,7 @@ MPIDO_Allgather(const void *sendbuf,
    */
    const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);
    int config[6], i;
-   MPIDU_Datatype* dt_null = NULL;
+   MPIR_Datatype* dt_null = NULL;
    MPI_Aint send_true_lb = 0;
    MPI_Aint recv_true_lb = 0;
    int comm_size = comm_ptr->local_size;
@@ -646,7 +646,7 @@ MPIDO_Allgather_simple(const void *sendbuf,
    * *********************************
    */
    const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);
-   MPIDU_Datatype* dt_null = NULL;
+   MPIR_Datatype* dt_null = NULL;
    void *snd_noncontig_buff = NULL, *rcv_noncontig_buff = NULL;
    MPI_Aint send_true_lb = 0;
    MPI_Aint recv_true_lb = 0;

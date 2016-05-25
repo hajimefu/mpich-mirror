@@ -27,7 +27,7 @@ int MPID_nem_llc_isend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Data
     int mpi_errno = MPI_SUCCESS, llc_errno;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     int i;
 
@@ -960,7 +960,7 @@ int MPID_nem_llc_issend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Dat
     int mpi_errno = MPI_SUCCESS, llc_errno;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     int i;
 

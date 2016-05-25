@@ -316,7 +316,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPIR_Request      * sreq,
   size_t          data_sz;
   int             dt_contig;
   MPI_Aint        dt_true_lb;
-  MPIDU_Datatype* dt_ptr;
+  MPIR_Datatype* dt_ptr;
   void          * sndbuf;
 
   /*

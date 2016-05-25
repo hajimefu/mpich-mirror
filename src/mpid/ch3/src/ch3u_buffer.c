@@ -42,8 +42,8 @@ void MPIDI_CH3U_Buffer_copy(
     MPI_Aint sdt_true_lb, rdt_true_lb;
     intptr_t sdata_sz;
     intptr_t rdata_sz;
-    MPIDU_Datatype* sdt_ptr;
-    MPIDU_Datatype* rdt_ptr;
+    MPIR_Datatype* sdt_ptr;
+    MPIR_Datatype* rdt_ptr;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3U_BUFFER_COPY);
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MEMCPY);
 

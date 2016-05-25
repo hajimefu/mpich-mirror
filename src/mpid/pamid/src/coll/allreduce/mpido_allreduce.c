@@ -467,7 +467,7 @@ int MPIDO_Allreduce_simple(const void *sendbuf,
    pami_xfer_t allred;
    const pami_metadata_t *my_allred_md = (pami_metadata_t *)NULL;
    const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);
-   MPIDU_Datatype*data_ptr;
+   MPIR_Datatype*data_ptr;
    MPI_Aint data_true_lb = 0;
    int data_size, data_contig;
 

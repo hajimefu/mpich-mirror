@@ -93,7 +93,7 @@ static int populate_iov_from_req(MPIR_Request *req)
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t data_sz;
-    MPIDU_Datatype* dt_ptr;
+    MPIR_Datatype* dt_ptr;
 
     /* find out contig/noncontig, size, and lb for the datatype */
     MPIDI_Datatype_get_info(req->dev.user_count, req->dev.datatype,

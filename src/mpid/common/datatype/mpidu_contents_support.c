@@ -16,8 +16,8 @@ void MPIDU_Type_access_contents(MPI_Datatype type,
 {
     int nr_ints, nr_aints, nr_types, combiner;
     int types_sz, struct_sz, ints_sz, epsilon, align_sz = 8;
-    MPIDU_Datatype *dtp;
-    MPIDU_Datatype_contents *cp;
+    MPIR_Datatype *dtp;
+    MPIR_Datatype_contents *cp;
 
     MPIR_Type_get_envelope_impl(type, &nr_ints, &nr_aints, &nr_types, &combiner);
 
@@ -34,7 +34,7 @@ void MPIDU_Type_access_contents(MPI_Datatype type,
     }
 #endif
 
-    struct_sz = sizeof(MPIDU_Datatype_contents);
+    struct_sz = sizeof(MPIR_Datatype_contents);
     types_sz  = nr_types * sizeof(MPI_Datatype);
     ints_sz   = nr_ints * sizeof(int);
 

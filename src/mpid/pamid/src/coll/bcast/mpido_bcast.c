@@ -46,7 +46,7 @@ int MPIDO_Bcast(void *buffer,
         *noncontig_buff = NULL;
    volatile unsigned active = 1;
    MPI_Aint data_true_lb = 0;
-   MPIDU_Datatype*data_ptr;
+   MPIR_Datatype*data_ptr;
    MPIDU_Segment segment;
    MPIDI_Post_coll_t bcast_post;
    const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);
@@ -282,7 +282,7 @@ int MPIDO_Bcast_simple(void *buffer,
         *noncontig_buff = NULL;
    volatile unsigned active = 1;
    MPI_Aint data_true_lb = 0;
-   MPIDU_Datatype*data_ptr;
+   MPIR_Datatype*data_ptr;
    MPIDU_Segment segment;
    MPIDI_Post_coll_t bcast_post;
    const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);

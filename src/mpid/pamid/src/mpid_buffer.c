@@ -54,8 +54,8 @@ void MPIDI_Buffer_copy(
     MPI_Aint sdt_true_lb, rdt_true_lb;
     intptr_t sdata_sz;
     intptr_t rdata_sz;
-    MPIDU_Datatype* sdt_ptr;
-    MPIDU_Datatype* rdt_ptr;
+    MPIR_Datatype* sdt_ptr;
+    MPIR_Datatype* rdt_ptr;
 
     MPI_Aint  sdt_extent;
     MPI_Aint  rdt_extent;

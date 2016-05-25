@@ -34,8 +34,8 @@ int MPIDU_Type_get_contents(MPI_Datatype datatype,
 			   MPI_Datatype array_of_datatypes[])
 {
     int i, mpi_errno;
-    MPIDU_Datatype *dtp;
-    MPIDU_Datatype_contents *cp;
+    MPIR_Datatype *dtp;
+    MPIR_Datatype_contents *cp;
 
     /* --BEGIN ERROR HANDLING-- */
     /* these are checked at the MPI layer, so I feel that asserts

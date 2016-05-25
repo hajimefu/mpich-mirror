@@ -64,7 +64,7 @@ Input Parameters:
   difference in starting locations of the two types in an actual struct.
 @*/
 int MPIDU_Type_create_pairtype(MPI_Datatype type,
-			      MPIDU_Datatype *new_dtp)
+			      MPIR_Datatype *new_dtp)
 {
     int err, mpi_errno = MPI_SUCCESS;
     int type_size, alignsize;

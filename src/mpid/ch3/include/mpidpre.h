@@ -385,7 +385,7 @@ typedef struct MPIDI_Request {
     intptr_t segment_size;
 
     /* Pointer to datatype for reference counting purposes */
-    struct MPIDU_Datatype* datatype_ptr;
+    struct MPIR_Datatype* datatype_ptr;
 
     /* iov and iov_count define the data to be transferred/received.  
        iov_offset points to the current head element in the IOV */

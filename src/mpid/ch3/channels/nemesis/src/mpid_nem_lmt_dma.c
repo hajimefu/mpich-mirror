@@ -234,7 +234,7 @@ static int send_sreq_data(MPIDI_VC_t *vc, MPIR_Request *sreq, knem_cookie_t *s_c
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t data_sz;
-    MPIDU_Datatype* dt_ptr;
+    MPIR_Datatype* dt_ptr;
 
     /* MT: this code assumes only one thread can be at this point at a time */
     if (knem_fd < 0) {
@@ -358,7 +358,7 @@ int MPID_nem_lmt_dma_start_recv(MPIDI_VC_t *vc, MPIR_Request *rreq, MPL_IOV s_co
     int dt_contig;
     MPI_Aint dt_true_lb;
     intptr_t data_sz;
-    MPIDU_Datatype* dt_ptr;
+    MPIR_Datatype* dt_ptr;
     volatile knem_status_t *status;
     knem_status_t current_status;
     struct lmt_dma_node *node = NULL;

@@ -47,7 +47,7 @@ int MPIDU_Type_indexed(int count,
     MPI_Aint min_lb = 0, max_ub = 0, eff_disp;
     MPI_Datatype el_type;
 
-    MPIDU_Datatype *new_dtp;
+    MPIR_Datatype *new_dtp;
 
     if (count == 0) return MPIDU_Type_zerolen(newtype);
 
@@ -57,7 +57,7 @@ int MPIDU_Type_indexed(int count,
     }
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {
@@ -119,7 +119,7 @@ int MPIDU_Type_indexed(int count,
     else
     {
 	/* user-defined base type (oldtype) */
-	MPIDU_Datatype *old_dtp;
+	MPIR_Datatype *old_dtp;
 
 	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
 

@@ -45,7 +45,7 @@ int MPIDI_CH3I_Put(const void *origin_addr, int origin_count, MPI_Datatype
 {
     int mpi_errno = MPI_SUCCESS;
     int dt_contig ATTRIBUTE((unused)), rank;
-    MPIDU_Datatype*dtp;
+    MPIR_Datatype*dtp;
     MPI_Aint dt_true_lb ATTRIBUTE((unused));
     intptr_t data_sz;
     MPIDI_VC_t *orig_vc = NULL, *target_vc = NULL;
@@ -224,7 +224,7 @@ int MPIDI_CH3I_Get(void *origin_addr, int origin_count, MPI_Datatype
     intptr_t orig_data_sz, target_data_sz;
     int dt_contig ATTRIBUTE((unused)), rank;
     MPI_Aint dt_true_lb ATTRIBUTE((unused));
-    MPIDU_Datatype*dtp;
+    MPIR_Datatype*dtp;
     MPIDI_VC_t *orig_vc = NULL, *target_vc = NULL;
     int made_progress = 0;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3I_GET);
@@ -394,7 +394,7 @@ int MPIDI_CH3I_Accumulate(const void *origin_addr, int origin_count, MPI_Datatyp
     intptr_t data_sz;
     int dt_contig ATTRIBUTE((unused)), rank;
     MPI_Aint dt_true_lb ATTRIBUTE((unused));
-    MPIDU_Datatype*dtp;
+    MPIR_Datatype*dtp;
     MPIDI_VC_t *orig_vc = NULL, *target_vc = NULL;
     int made_progress = 0;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3I_ACCUMULATE);
@@ -455,7 +455,7 @@ int MPIDI_CH3I_Accumulate(const void *origin_addr, int origin_count, MPI_Datatyp
         int is_origin_contig, is_target_contig;
         MPI_Aint stream_elem_count, stream_unit_count;
         MPI_Aint predefined_dtp_size, predefined_dtp_count, predefined_dtp_extent;
-        MPIDU_Datatype*origin_dtp = NULL, *target_dtp = NULL;
+        MPIR_Datatype*origin_dtp = NULL, *target_dtp = NULL;
         int i;
 
         /* queue it up */
@@ -607,7 +607,7 @@ int MPIDI_CH3I_Get_accumulate(const void *origin_addr, int origin_count,
     int rank;
     int dt_contig ATTRIBUTE((unused));
     MPI_Aint dt_true_lb ATTRIBUTE((unused));
-    MPIDU_Datatype*dtp;
+    MPIR_Datatype*dtp;
     MPIDI_VC_t *orig_vc = NULL, *target_vc = NULL;
     int made_progress = 0;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3I_GET_ACCUMULATE);
@@ -672,7 +672,7 @@ int MPIDI_CH3I_Get_accumulate(const void *origin_addr, int origin_count,
         int is_origin_contig, is_target_contig, is_result_contig;
         MPI_Aint stream_elem_count, stream_unit_count;
         MPI_Aint predefined_dtp_size, predefined_dtp_count, predefined_dtp_extent;
-        MPIDU_Datatype*origin_dtp = NULL, *target_dtp = NULL, *result_dtp = NULL;
+        MPIR_Datatype*origin_dtp = NULL, *target_dtp = NULL, *result_dtp = NULL;
         int is_empty_origin = FALSE;
 
         /* Judge if origin buffer is empty */

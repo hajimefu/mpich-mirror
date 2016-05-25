@@ -226,7 +226,7 @@ int MPIDO_Scatterv(const void *sendbuf,
   int contig ATTRIBUTE((unused));
   int ssize ATTRIBUTE((unused));
   int rsize ATTRIBUTE((unused));
-  MPIDU_Datatype*dt_ptr = NULL;
+  MPIR_Datatype*dt_ptr = NULL;
   MPI_Aint send_true_lb=0, recv_true_lb;
   char *sbuf, *rbuf;
   pami_type_t stype, rtype;
@@ -392,7 +392,7 @@ int MPIDO_Scatterv(const void *sendbuf,
          if(my_md->check_correct.values.rangeminmax)
          {
            MPI_Aint data_true_lb;
-           MPIDU_Datatype*data_ptr;
+           MPIR_Datatype*data_ptr;
            int data_size, data_contig;
            MPIDI_Datatype_get_info(recvcount, recvtype, data_contig, data_size, data_ptr, data_true_lb); 
            if((my_md->range_lo <= data_size) &&
@@ -482,7 +482,7 @@ int MPIDO_Scatterv_simple(const void *sendbuf,
   int rcv_contig = 1;
   int send_size = 0, recv_size = 0;
   int ssize = 0;
-  MPIDU_Datatype*dt_ptr = NULL;
+  MPIR_Datatype*dt_ptr = NULL;
   MPI_Aint send_true_lb=0, recv_true_lb=0;
   void *snd_noncontig_buff = NULL, *rcv_noncontig_buff = NULL;
   void *sbuf = NULL, *rbuf = NULL;

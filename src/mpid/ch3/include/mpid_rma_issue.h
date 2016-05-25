@@ -64,7 +64,7 @@ static inline int immed_copy(void *src, void *dest, size_t len)
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void fill_in_derived_dtp_info(MPIDI_RMA_dtype_info * dtype_info, void *dataloop,
-                                            MPIDU_Datatype* dtp)
+                                            MPIR_Datatype* dtp)
 {
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_FILL_IN_DERIVED_DTP_INFO);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_FILL_IN_DERIVED_DTP_INFO);
@@ -100,7 +100,7 @@ static inline void fill_in_derived_dtp_info(MPIDI_RMA_dtype_info * dtype_info, v
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
-                              MPIDU_Datatype* target_dtp, intptr_t stream_offset,
+                              MPIR_Datatype* target_dtp, intptr_t stream_offset,
                               void **ext_hdr_ptr, MPI_Aint * ext_hdr_sz)
 {
     MPI_Aint _ext_hdr_sz = 0, _total_sz = 0;
@@ -186,7 +186,7 @@ static int init_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int init_get_accum_ext_pkt(MPIDI_CH3_Pkt_flags_t flags,
-                                  MPIDU_Datatype* target_dtp, intptr_t stream_offset,
+                                  MPIR_Datatype* target_dtp, intptr_t stream_offset,
                                   void **ext_hdr_ptr, MPI_Aint * ext_hdr_sz)
 {
     int mpi_errno = MPI_SUCCESS;
@@ -224,7 +224,7 @@ static int issue_from_origin_buffer(MPIDI_RMA_Op_t * rma_op, MPIDI_VC_t * vc,
                                     MPIR_Request ** req_ptr)
 {
     MPI_Datatype target_datatype;
-    MPIDU_Datatype*target_dtp = NULL, *origin_dtp = NULL;
+    MPIR_Datatype*target_dtp = NULL, *origin_dtp = NULL;
     int is_origin_contig;
     MPL_IOV iov[MPL_IOV_LIMIT];
     int iovcnt = 0;
@@ -402,7 +402,7 @@ static int issue_put_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     MPIDI_CH3_Pkt_put_t *put_pkt = &rma_op->pkt.put;
     MPIR_Request *curr_req = NULL;
     MPI_Datatype target_datatype;
-    MPIDU_Datatype*target_dtp_ptr = NULL;
+    MPIR_Datatype*target_dtp_ptr = NULL;
     MPIDI_CH3_Ext_pkt_put_derived_t *ext_hdr_ptr = NULL;
     MPI_Aint ext_hdr_sz = 0;
     int mpi_errno = MPI_SUCCESS;
@@ -488,8 +488,8 @@ static int issue_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     MPI_Aint predefined_dtp_size, predefined_dtp_extent, predefined_dtp_count;
     MPI_Aint total_len, rest_len;
     MPI_Aint origin_dtp_size;
-    MPIDU_Datatype*origin_dtp_ptr = NULL;
-    MPIDU_Datatype*target_dtp_ptr = NULL;
+    MPIR_Datatype*origin_dtp_ptr = NULL;
+    MPIR_Datatype*target_dtp_ptr = NULL;
     void *ext_hdr_ptr = NULL;
     MPI_Aint ext_hdr_sz = 0;
     int mpi_errno = MPI_SUCCESS;
@@ -655,7 +655,7 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     MPI_Aint predefined_dtp_size, predefined_dtp_count, predefined_dtp_extent;
     MPI_Aint total_len, rest_len;
     MPI_Aint target_dtp_size;
-    MPIDU_Datatype*target_dtp_ptr = NULL;
+    MPIR_Datatype*target_dtp_ptr = NULL;
     void *ext_hdr_ptr = NULL;
     MPI_Aint ext_hdr_sz = 0;
     int mpi_errno = MPI_SUCCESS;
@@ -784,7 +784,7 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
         resp_req->dev.flags = flags;
 
         if (!MPIR_DATATYPE_IS_PREDEFINED(resp_req->dev.datatype)) {
-            MPIDU_Datatype*result_dtp = NULL;
+            MPIR_Datatype*result_dtp = NULL;
             MPIDU_Datatype_get_ptr(resp_req->dev.datatype, result_dtp);
             resp_req->dev.datatype_ptr = result_dtp;
             /* this will cause the datatype to be freed when the
@@ -882,7 +882,7 @@ static int issue_get_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     int mpi_errno = MPI_SUCCESS;
     MPIDI_VC_t *vc;
     MPIR_Comm *comm_ptr;
-    MPIDU_Datatype*dtp;
+    MPIR_Datatype*dtp;
     MPI_Datatype target_datatype;
     MPIR_Request *req = NULL;
     MPIR_Request *curr_req = NULL;

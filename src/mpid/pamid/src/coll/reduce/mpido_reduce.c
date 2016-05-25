@@ -47,7 +47,7 @@ int MPIDO_Reduce(const void *sendbuf,
     return -1;
   }
 #endif
-   MPIDU_Datatype*dt_null = NULL;
+   MPIR_Datatype*dt_null = NULL;
    MPI_Aint true_lb = 0;
    int dt_contig ATTRIBUTE((unused)), tsize;
    int mu;
@@ -212,7 +212,7 @@ int MPIDO_Reduce(const void *sendbuf,
          if(my_md->check_correct.values.rangeminmax)
          {
             MPI_Aint data_true_lb ATTRIBUTE((unused));
-            MPIDU_Datatype*data_ptr;
+            MPIR_Datatype*data_ptr;
             int data_size, data_contig ATTRIBUTE((unused));
             MPIDI_Datatype_get_info(count, datatype, data_contig, data_size, data_ptr, data_true_lb); 
             if((my_md->range_lo <= data_size) &&
@@ -306,7 +306,7 @@ int MPIDO_Reduce_simple(const void *sendbuf,
     return -1;
   }
 #endif
-   MPIDU_Datatype*dt_null = NULL;
+   MPIR_Datatype*dt_null = NULL;
    MPI_Aint true_lb = 0;
    int dt_contig, tsize;
    int mu;

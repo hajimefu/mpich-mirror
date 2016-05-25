@@ -90,7 +90,7 @@ _data_sz_out)                                                   \
     }                                                           \
   else                                                          \
     {                                                           \
-        MPIDU_Datatype*_dt_ptr;                                 \
+        MPIR_Datatype*_dt_ptr;                                 \
         MPIDU_Datatype_get_ptr((_datatype), (_dt_ptr));          \
         (_data_sz_out)   = (_count) * (_dt_ptr)->size;          \
     }                                                           \

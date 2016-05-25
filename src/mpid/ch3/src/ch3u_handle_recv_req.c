@@ -8,7 +8,7 @@
 #include "mpidrma.h"
 
 static int create_derived_datatype(MPIR_Request * req, MPIDI_RMA_dtype_info * dtype_info,
-                                   MPIDU_Datatype** dtp);
+                                   MPIR_Datatype** dtp);
 
 #undef FUNCNAME
 #define FUNCNAME MPIDI_CH3U_Handle_recv_req
@@ -563,7 +563,7 @@ int MPIDI_CH3_ReqHandler_PutDerivedDTRecvComplete(MPIDI_VC_t * vc ATTRIBUTE((unu
                                                   MPIR_Request * rreq, int *complete)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDU_Datatype*new_dtp = NULL;
+    MPIR_Datatype*new_dtp = NULL;
     MPIDI_RMA_dtype_info *dtype_info = NULL;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_CH3_REQHANDLER_PUTDERIVEDDTRECVCOMPLETE);
 
@@ -611,7 +611,7 @@ int MPIDI_CH3_ReqHandler_AccumMetadataRecvComplete(MPIDI_VC_t * vc ATTRIBUTE((un
                                                    MPIR_Request * rreq, int *complete)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDU_Datatype*new_dtp = NULL;
+    MPIR_Datatype*new_dtp = NULL;
     MPIDI_RMA_dtype_info *dtype_info = NULL;
     MPI_Aint basic_type_extent, basic_type_size;
     MPI_Aint total_len, rest_len, stream_elem_count;
@@ -726,7 +726,7 @@ int MPIDI_CH3_ReqHandler_GaccumMetadataRecvComplete(MPIDI_VC_t * vc,
                                                     MPIR_Request * rreq, int *complete)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDU_Datatype*new_dtp = NULL;
+    MPIR_Datatype*new_dtp = NULL;
     MPIDI_RMA_dtype_info *dtype_info = NULL;
     MPI_Aint basic_type_extent, basic_type_size;
     MPI_Aint total_len, rest_len, stream_elem_count;
@@ -859,7 +859,7 @@ int MPIDI_CH3_ReqHandler_GetDerivedDTRecvComplete(MPIDI_VC_t * vc,
                                                   MPIR_Request * rreq, int *complete)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDU_Datatype*new_dtp = NULL;
+    MPIR_Datatype*new_dtp = NULL;
     MPIDI_RMA_dtype_info *dtype_info = NULL;
     MPIDI_CH3_Pkt_t upkt;
     MPIDI_CH3_Pkt_get_resp_t *get_resp_pkt = &upkt.get_resp;
@@ -1078,9 +1078,9 @@ int MPIDI_CH3_ReqHandler_ReloadIOV(MPIDI_VC_t * vc ATTRIBUTE((unused)),
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static int create_derived_datatype(MPIR_Request * req, MPIDI_RMA_dtype_info * dtype_info,
-                                   MPIDU_Datatype** dtp)
+                                   MPIR_Datatype** dtp)
 {
-    MPIDU_Datatype*new_dtp;
+    MPIR_Datatype*new_dtp;
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint ptrdiff;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CREATE_DERIVED_DATATYPE);
@@ -1088,7 +1088,7 @@ static int create_derived_datatype(MPIR_Request * req, MPIDI_RMA_dtype_info * dt
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CREATE_DERIVED_DATATYPE);
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype*) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype*) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     if (!new_dtp) {
         MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
                              "MPIR_Datatype_mem");

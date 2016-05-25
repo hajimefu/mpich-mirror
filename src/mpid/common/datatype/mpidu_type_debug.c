@@ -44,7 +44,7 @@ void MPIDI_Datatype_dot_printf(MPI_Datatype type,
 	return;
     }
     else {
-	MPIDU_Datatype *dt_p;
+	MPIR_Datatype *dt_p;
 	MPIDU_Dataloop *loop_p;
 
 	MPIDU_Datatype_get_ptr(type, dt_p);
@@ -248,7 +248,7 @@ void MPIDI_Datatype_printf(MPI_Datatype type,
 	else sticky_ub = 0;
     }
     else {
-	MPIDU_Datatype *type_ptr;
+	MPIR_Datatype *type_ptr;
 
 	MPIDU_Datatype_get_ptr(type, type_ptr);
 	string = MPIDU_Datatype_combiner_to_string(type_ptr->contents->combiner);
@@ -441,7 +441,7 @@ void MPIDU_Datatype_debug(MPI_Datatype type,
 			  int array_ct)
 {
     int is_builtin;
-    MPIDU_Datatype *dtp ATTRIBUTE((unused));
+    MPIR_Datatype *dtp ATTRIBUTE((unused));
 
     is_builtin = (HANDLE_GET_KIND(type) == HANDLE_KIND_BUILTIN);
 
@@ -516,8 +516,8 @@ void MPIDI_Datatype_contents_printf(MPI_Datatype type,
 				    int acount)
 {
     int i;
-    MPIDU_Datatype *dtp;
-    MPIDU_Datatype_contents *cp;
+    MPIR_Datatype *dtp;
+    MPIR_Datatype_contents *cp;
 
     MPI_Aint *aints = NULL;
     MPI_Datatype *types = NULL;

@@ -42,12 +42,12 @@ int MPIDU_Type_vector(int count,
     MPI_Datatype el_type;
     MPI_Aint old_lb, old_ub, old_extent, old_true_lb, old_true_ub, eff_stride;
 
-    MPIDU_Datatype *new_dtp;
+    MPIR_Datatype *new_dtp;
 
     if (count == 0) return MPIDU_Type_zerolen(newtype);
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+    new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     if (!new_dtp) {
 	/* --BEGIN ERROR HANDLING-- */
 	mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
@@ -102,7 +102,7 @@ int MPIDU_Type_vector(int count,
 	eff_stride = (strideinbytes) ? stride : (stride * el_sz);
     }
     else /* user-defined base type (oldtype) */ {
-	MPIDU_Datatype *old_dtp;
+	MPIR_Datatype *old_dtp;
 
 	MPIDU_Datatype_get_ptr(oldtype, old_dtp);
 	el_sz   = old_dtp->builtin_element_size;

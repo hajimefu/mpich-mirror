@@ -307,7 +307,7 @@ MPIDO_Allgatherv(const void *sendbuf,
   /* function pointer to be used to point to approperiate algorithm */
 
   /* Check the nature of the buffers */
-  MPIDU_Datatype*dt_null = NULL;
+  MPIR_Datatype*dt_null = NULL;
   MPI_Aint send_true_lb  = 0;
   MPI_Aint recv_true_lb  = 0;
   size_t   send_size     = 0;
@@ -552,7 +552,7 @@ MPIDO_Allgatherv(const void *sendbuf,
           if(my_md->check_correct.values.rangeminmax)
            {
              MPI_Aint data_true_lb;
-             MPIDU_Datatype*data_ptr;
+             MPIR_Datatype*data_ptr;
              int data_size, data_contig;
              MPIDI_Datatype_get_info(sendcount, sendtype, data_contig, data_size, data_ptr, data_true_lb); 
              if((my_md->range_lo <= data_size) &&
@@ -690,7 +690,7 @@ MPIDO_Allgatherv_simple(const void *sendbuf,
    TRACE_ERR("Entering MPIDO_Allgatherv_optimized\n");
   /* function pointer to be used to point to approperiate algorithm */
   /* Check the nature of the buffers */
-  MPIDU_Datatype*dt_null = NULL;
+  MPIR_Datatype*dt_null = NULL;
   MPI_Aint send_true_lb  = 0;
   MPI_Aint recv_true_lb  = 0;
   size_t   send_size     = 0;

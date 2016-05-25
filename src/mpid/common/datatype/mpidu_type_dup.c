@@ -30,7 +30,7 @@ int MPIDU_Type_dup(MPI_Datatype oldtype,
 		  MPI_Datatype *newtype)
 {
     int mpi_errno = MPI_SUCCESS;
-    MPIDU_Datatype *new_dtp = 0, *old_dtp;
+    MPIR_Datatype *new_dtp = 0, *old_dtp;
 
     if (HANDLE_GET_KIND(oldtype) == HANDLE_KIND_BUILTIN) {
 	/* create a new type and commit it. */
@@ -39,7 +39,7 @@ int MPIDU_Type_dup(MPI_Datatype oldtype,
     }
     else {
       	/* allocate new datatype object and handle */
-	new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
+	new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
 	if (!new_dtp) {
 	    /* --BEGIN ERROR HANDLING-- */
 	    mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,

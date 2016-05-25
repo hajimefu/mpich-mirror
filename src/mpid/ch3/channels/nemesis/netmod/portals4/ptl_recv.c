@@ -94,7 +94,7 @@ static int handler_recv_dequeue_complete(const ptl_event_t *e)
     MPI_Aint last;
     MPI_Aint dt_true_lb;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr ATTRIBUTE((unused));
+    MPIR_Datatype*dt_ptr ATTRIBUTE((unused));
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_HANDLER_RECV_DEQUEUE_COMPLETE);
 
@@ -279,7 +279,7 @@ static int handler_recv_dequeue_large(const ptl_event_t *e)
     int ret;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     MPI_Aint last;
     MPIR_CHKPMEM_DECL(1);
@@ -431,7 +431,7 @@ int MPID_nem_ptl_recv_posted(MPIDI_VC_t *vc, MPIR_Request *rreq)
     ptl_me_t me;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     MPI_Aint last;
     ptl_process_t id_any;
@@ -694,7 +694,7 @@ int MPID_nem_ptl_lmt_start_recv(MPIDI_VC_t *vc,  MPIR_Request *rreq, MPL_IOV s_c
     int mpi_errno = MPI_SUCCESS;
     int dt_contig;
     intptr_t data_sz;
-    MPIDU_Datatype*dt_ptr;
+    MPIR_Datatype*dt_ptr;
     MPI_Aint dt_true_lb;
     ptl_match_bits_t match_bits;
     int was_incomplete;
