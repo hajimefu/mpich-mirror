@@ -8,8 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-#define MPID_Datatype_size_external32 MPIDU_Datatype_size_external32
-
 /* MPID_Segment */
 typedef struct DLOOP_Segment MPID_Segment; /* MPIDU_Segment */
 

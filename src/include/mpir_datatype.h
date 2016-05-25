@@ -593,6 +593,10 @@ static inline int MPIR_Datatype_set_contents(MPIR_Datatype *new_dtp,
     return MPI_SUCCESS;
 }
 
+/* contents accessor functions */
+void MPIR_Type_access_contents(MPI_Datatype type, int **ints_p, MPI_Aint **aints_p, MPI_Datatype **types_p);
+void MPIR_Type_release_contents(MPI_Datatype type, int **ints_p, MPI_Aint **aints_p, MPI_Datatype **types_p);
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );
@@ -645,5 +649,40 @@ void MPIR_Pack_size_impl(int incount, MPI_Datatype datatype, MPI_Aint *size);
 int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
                      void *outbuf, int outcount, MPI_Datatype datatype);
 void MPIR_Type_lb_impl(MPI_Datatype datatype, MPI_Aint *displacement);
+
+/* Datatype functions */
+int MPIR_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype);
+int MPIR_Type_struct(int count, const int *blocklength_array, const MPI_Aint *displacement_array, const MPI_Datatype *oldtype_array, MPI_Datatype *newtype);
+int MPIR_Type_indexed(int count, const int *blocklength_array, const void *displacement_array, int dispinbytes, MPI_Datatype oldtype, MPI_Datatype *newtype);
+int MPIR_Type_vector(int count, int blocklength, MPI_Aint stride, int strideinbytes, MPI_Datatype oldtype, MPI_Datatype *newtype);
+int MPIR_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype *newtype);
+int MPII_Type_zerolen(MPI_Datatype *newtype);
+int MPIR_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, MPI_Datatype *newtype);
+int MPIR_Type_get_envelope(MPI_Datatype datatype, int *num_integers, int *num_addresses, int *num_datatypes, int *combiner);
+int MPIR_Type_get_contents(MPI_Datatype datatype, int max_integers, int max_addresses, int max_datatypes, int array_of_integers[], MPI_Aint array_of_addresses[], MPI_Datatype array_of_datatypes[]);
+int MPIR_Type_create_pairtype(MPI_Datatype datatype, MPIR_Datatype *new_dtp);
+int MPIR_Type_flatten(MPI_Datatype type, MPI_Aint *off_array, DLOOP_Size *size_array, MPI_Aint *array_len_p);
+
+/* debugging helper functions */
+char *MPIR_Datatype_builtin_to_string(MPI_Datatype type);
+char *MPIR_Datatype_combiner_to_string(int combiner);
+void MPIR_Datatype_debug(MPI_Datatype type, int array_ct);
+
+MPI_Aint MPII_Datatype_get_basic_size_external32(MPI_Datatype el_type);
+
+static inline MPI_Aint MPIR_Datatype_size_external32(MPI_Datatype type)
+{
+    if (HANDLE_GET_KIND(type) == HANDLE_KIND_BUILTIN) {
+        return MPII_Datatype_get_basic_size_external32(type);
+    }
+    else {
+        MPIR_Dataloop *dlp = NULL;
+
+        MPIR_Datatype_get_loopptr_macro(type, dlp, MPIR_DATALOOP_HETEROGENEOUS);
+
+        return MPIR_Dataloop_stream_size(dlp,
+                MPII_Datatype_get_basic_size_external32);
+    }
+}
 
 #endif /* MPIR_DATATYPE_H_INCLUDED */

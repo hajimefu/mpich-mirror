@@ -310,7 +310,6 @@ void MPIDU_Segment_unpack_external32(struct DLOOP_Segment *segp,
 				    DLOOP_Offset *lastp,
 				    DLOOP_Buffer unpack_buffer);
 
-MPI_Aint MPIDU_Datatype_size_external32(MPI_Datatype type);
 MPI_Aint MPIDI_Datatype_get_basic_size_external32(MPI_Datatype el_type);
 
 /* debugging helper functions */

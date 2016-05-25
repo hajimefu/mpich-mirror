@@ -99,7 +99,7 @@ int MPI_Pack_external_size(const char datarep[],
 
     /* ... body of routine ... */
 
-    *size = (MPI_Aint) incount * (MPI_Aint) MPID_Datatype_size_external32(datatype);
+    *size = (MPI_Aint) incount * (MPI_Aint) MPIR_Datatype_size_external32(datatype);
 
     /* ... end of body of routine ... */
 
