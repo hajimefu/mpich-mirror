@@ -26,10 +26,10 @@ Output Parameters:
   none
 
   This function handles freeing dynamically allocated memory associated with
-  the datatype.  In the process MPIDU_Datatype_free_contents() is also called,
+  the datatype.  In the process MPIR_Datatype_free_contents() is also called,
   which handles decrementing reference counts to constituent types (in
   addition to freeing the space used for contents information).
-  MPIDU_Datatype_free_contents() will call MPIDU_Datatype_free() on constituent
+  MPIR_Datatype_free_contents() will call MPIDU_Datatype_free() on constituent
   types that are no longer referenced as well.
 
   @*/
@@ -45,7 +45,7 @@ void MPIDU_Datatype_free(MPIR_Datatype *ptr)
        null because it is null in the case of a datatype shipped to the target
        for RMA ops */  
     if (ptr->contents) {
-        MPIDU_Datatype_free_contents(ptr);
+        MPIR_Datatype_free_contents(ptr);
     }
     if (ptr->dataloop) {
 	MPIDU_Dataloop_free(&(ptr->dataloop));

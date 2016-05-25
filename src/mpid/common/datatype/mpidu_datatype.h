@@ -294,7 +294,6 @@ int MPIDU_Datatype_set_contents(struct MPIR_Datatype *ptr,
 			       const MPI_Aint *aints,
 			       const MPI_Datatype *types);
 
-void MPIDU_Datatype_free_contents(struct MPIR_Datatype *ptr);
 void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
 				       MPI_Aint *user_aints);
 void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,

@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 #define MPID_Datatype_free MPIDU_Datatype_free
-#define MPID_Datatype_free_contents MPIDU_Datatype_free_contents
 #define MPID_Datatype_set_contents MPIDU_Datatype_set_contents
 #define MPID_Datatype_size_external32 MPIDU_Datatype_size_external32
 

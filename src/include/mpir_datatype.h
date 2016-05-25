@@ -421,6 +421,31 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
     }                                                               \
 } while(0)
 
+static inline void MPIR_Datatype_free_contents(MPIR_Datatype *dtp)
+{
+    int i, struct_sz = sizeof(MPIR_Datatype_contents);
+    int align_sz = 8, epsilon;
+    MPIR_Datatype *old_dtp;
+    MPI_Datatype *array_of_types;
+
+    if ((epsilon = struct_sz % align_sz)) {
+        struct_sz += align_sz - epsilon;
+    }
+
+    /* note: relies on types being first after structure */
+    array_of_types = (MPI_Datatype *) ((char *)dtp->contents + struct_sz);
+
+    for (i=0; i < dtp->contents->nr_types; i++) {
+        if (HANDLE_GET_KIND(array_of_types[i]) != HANDLE_KIND_BUILTIN) {
+            MPIR_Datatype_get_ptr(array_of_types[i], old_dtp);
+            MPIR_Datatype_release(old_dtp);
+        }
+    }
+
+    MPL_free(dtp->contents);
+    dtp->contents = NULL;
+}
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );
