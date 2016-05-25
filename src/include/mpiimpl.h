@@ -149,8 +149,7 @@ struct MPIR_Comm;
 typedef struct MPIR_Comm MPIR_Comm;
 
 struct MPIR_Datatype;
-/* FIXME: waiting for Wes' patch revert to fix this */
-/* typedef struct MPIR_Datatype MPIR_Datatype; */
+typedef struct MPIR_Datatype MPIR_Datatype;
 
 struct MPIR_Win;
 typedef struct MPIR_Win MPIR_Win;

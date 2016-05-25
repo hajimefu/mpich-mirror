@@ -28,7 +28,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             basic_type_ = ((MPIDU_Datatype *) ptr)->basic_type;			\
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -87,7 +87,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             size_ = ((MPIDU_Datatype *) ptr)->size;			\
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -140,7 +140,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_GET_FIELD(hetero_,depth_,_depth);                      \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -160,7 +160,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_GET_FIELD(hetero_,depth_,_size);                       \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -180,7 +180,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_GET_FIELD(hetero_,lptr_,);                             \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -199,7 +199,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_SET_FIELD(hetero_,depth_,_depth);                      \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -219,7 +219,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_SET_FIELD(hetero_,depth_,_size);                       \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -239,7 +239,7 @@
     void *ptr;								\
     switch (HANDLE_GET_KIND(a)) {					\
         case HANDLE_KIND_DIRECT:					\
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			\
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
             MPIDU_SET_FIELD(hetero_,lptr_,);                             \
             break;							\
         case HANDLE_KIND_INDIRECT:					\
@@ -259,7 +259,7 @@
     void *ptr;								    \
     switch (HANDLE_GET_KIND(a)) {					    \
         case HANDLE_KIND_DIRECT:					    \
-            ptr = MPIDU_Datatype_direct+HANDLE_INDEX(a);			    \
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			    \
             extent_ = ((MPIDU_Datatype *) ptr)->extent;			    \
             break;							    \
         case HANDLE_KIND_INDIRECT:					    \
@@ -444,7 +444,6 @@ extern MPIR_Object_alloc_t MPIDU_Datatype_mem;
    to provide a check that this value is valid. */
 #define MPIDU_DATATYPE_N_BUILTIN 69
 extern MPIDU_Datatype MPIDU_Datatype_builtin[MPIDU_DATATYPE_N_BUILTIN + 1];
-extern MPIDU_Datatype MPIDU_Datatype_direct[];
 
 #define MPIDU_DTYPE_BEGINNING  0
 #define MPIDU_DTYPE_END       -1
