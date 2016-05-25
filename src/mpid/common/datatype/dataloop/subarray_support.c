@@ -25,7 +25,7 @@ int PREPEND_PREFIX(Type_convert_subarray)(int ndims,
     int i, blklens[3];
     MPI_Datatype tmp1, tmp2, types[3];
 
-    MPIDU_Datatype_get_extent_macro(oldtype, extent);
+    MPIR_Datatype_get_extent_macro(oldtype, extent);
 
     if (order == MPI_ORDER_FORTRAN) {
 	/* dimension 0 changes fastest */

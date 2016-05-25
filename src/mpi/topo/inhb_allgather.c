@@ -42,7 +42,7 @@ int MPIR_Ineighbor_allgather_default(const void *sendbuf, int sendcount, MPI_Dat
     MPI_Aint recvtype_extent;
     MPIR_CHKLMEM_DECL(2);
 
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* This is the largest offset we add to recvbuf */
     MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +

@@ -53,7 +53,7 @@ int MPIR_Ireduce_scatter_block_rec_hlv(const void *sendbuf, void *recvbuf, int r
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
 
     MPIR_Assert(MPIR_Op_is_commutative(op));
@@ -271,7 +271,7 @@ int MPIR_Ireduce_scatter_block_pairwise(const void *sendbuf, void *recvbuf, int 
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
 
     is_commutative = MPIR_Op_is_commutative(op);
@@ -410,7 +410,7 @@ int MPIR_Ireduce_scatter_block_rec_dbl(const void *sendbuf, void *recvbuf, int r
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
     is_commutative = MPIR_Op_is_commutative(op);
 
@@ -840,7 +840,7 @@ int MPIR_Ireduce_scatter_block_inter(const void *sendbuf, void *recvbuf, int rec
         /* In each group, rank 0 allocates a temp. buffer for the
            reduce */
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-        MPID_Datatype_get_extent_macro(datatype, extent);
+        MPIR_Datatype_get_extent_macro(datatype, extent);
 
         MPIR_SCHED_CHKPMEM_MALLOC(tmp_buf, void *, total_count*(MPL_MAX(extent,true_extent)), mpi_errno, "tmp_buf");
 

@@ -172,7 +172,7 @@ int MPIDO_Allgather_bcast(const void *sendbuf,
   const int rank = comm_ptr->rank;
 
   np = comm_ptr ->local_size;
-  MPIDU_Datatype_get_extent_macro(recvtype, extent);
+  MPIR_Datatype_get_extent_macro(recvtype, extent);
 
   MPIR_Ensure_Aint_fits_in_pointer ((MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
 				     np * recvcount * extent));
@@ -360,8 +360,8 @@ MPIDO_Allgather(const void *sendbuf,
     if(MPIDI_Process.cuda_aware_support_on)
     {
        MPI_Aint sdt_extent,rdt_extent;
-       MPIDU_Datatype_get_extent_macro(sendtype, sdt_extent);
-       MPIDU_Datatype_get_extent_macro(recvtype, rdt_extent);
+       MPIR_Datatype_get_extent_macro(sendtype, sdt_extent);
+       MPIR_Datatype_get_extent_macro(recvtype, rdt_extent);
        char *scbuf = NULL;
        char *rcbuf = NULL;
        int is_send_dev_buf = MPIDI_cuda_is_device_buf(sendbuf);
@@ -720,7 +720,7 @@ MPIDO_Allgather_simple(const void *sendbuf,
     {
       sbuf = PAMI_IN_PLACE;
       size_t extent;
-      MPIDU_Datatype_get_extent_macro(recvtype,extent);
+      MPIR_Datatype_get_extent_macro(recvtype,extent);
       MPIR_Localcopy(recvbuf + (rank*recvcount*extent), recvcount, recvtype,
                        rcv_noncontig_buff + (rank*recv_size), recv_size,MPI_CHAR);
     }

@@ -527,14 +527,14 @@ static int issue_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     if (MPIR_DATATYPE_IS_PREDEFINED(rma_op->origin_datatype)) {
         predefined_dtp_size = origin_dtp_size;
         predefined_dtp_count = rma_op->origin_count;
-        MPIDU_Datatype_get_extent_macro(rma_op->origin_datatype, predefined_dtp_extent);
+        MPIR_Datatype_get_extent_macro(rma_op->origin_datatype, predefined_dtp_extent);
     }
     else {
         MPIR_Datatype_get_ptr(rma_op->origin_datatype, origin_dtp_ptr);
         MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
         MPIR_Datatype_get_size_macro(origin_dtp_ptr->basic_type, predefined_dtp_size);
         predefined_dtp_count = total_len / predefined_dtp_size;
-        MPIDU_Datatype_get_extent_macro(origin_dtp_ptr->basic_type, predefined_dtp_extent);
+        MPIR_Datatype_get_extent_macro(origin_dtp_ptr->basic_type, predefined_dtp_extent);
     }
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
 
@@ -713,14 +713,14 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     if (MPIR_DATATYPE_IS_PREDEFINED(get_accum_pkt->datatype)) {
         predefined_dtp_size = target_dtp_size;
         predefined_dtp_count = get_accum_pkt->count;
-        MPIDU_Datatype_get_extent_macro(get_accum_pkt->datatype, predefined_dtp_extent);
+        MPIR_Datatype_get_extent_macro(get_accum_pkt->datatype, predefined_dtp_extent);
     }
     else {
         MPIR_Datatype_get_ptr(get_accum_pkt->datatype, target_dtp_ptr);
         MPIR_Assert(target_dtp_ptr != NULL && target_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
         MPIR_Datatype_get_size_macro(target_dtp_ptr->basic_type, predefined_dtp_size);
         predefined_dtp_count = total_len / predefined_dtp_size;
-        MPIDU_Datatype_get_extent_macro(target_dtp_ptr->basic_type, predefined_dtp_extent);
+        MPIR_Datatype_get_extent_macro(target_dtp_ptr->basic_type, predefined_dtp_extent);
     }
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
 

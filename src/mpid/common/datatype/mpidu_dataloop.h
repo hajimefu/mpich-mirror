@@ -68,7 +68,7 @@
     MPIR_Datatype_get_basic_type(handle_, basic_type_)
 
 #define DLOOP_Handle_get_extent_macro(handle_,extent_) \
-    MPIDU_Datatype_get_extent_macro(handle_,extent_)
+    MPIR_Datatype_get_extent_macro(handle_,extent_)
 
 #define DLOOP_Handle_hasloop_macro(handle_)                           \
     ((HANDLE_GET_KIND(handle_) == HANDLE_KIND_BUILTIN) ? 0 : 1)

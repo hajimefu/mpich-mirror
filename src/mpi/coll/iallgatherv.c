@@ -56,7 +56,7 @@ int MPIR_Iallgatherv_rec_dbl(const void *sendbuf, int sendcount, MPI_Datatype se
 
     /* need to receive contiguously into tmp_buf because
        displs could make the recvbuf noncontiguous */
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
     MPIR_Type_get_true_extent_impl(recvtype, &recvtype_true_lb, &recvtype_true_extent);
 
     total_count = 0;
@@ -288,7 +288,7 @@ int MPIR_Iallgatherv_bruck(const void *sendbuf, int sendcount, MPI_Datatype send
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     total_count = 0;
     for (i=0; i<comm_size; i++)
@@ -430,7 +430,7 @@ int MPIR_Iallgatherv_ring(const void *sendbuf, int sendcount, MPI_Datatype sendt
 
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     total_count = 0;
     for (i=0; i<comm_size; i++)

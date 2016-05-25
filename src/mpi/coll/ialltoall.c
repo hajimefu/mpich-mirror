@@ -63,7 +63,7 @@ int MPIR_Ialltoall_inplace(const void *sendbuf, int sendcount, MPI_Datatype send
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
     MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
     nbytes = recvtype_size * recvcount;
 
     MPIR_SCHED_CHKPMEM_MALLOC(tmp_buf, void *, nbytes, mpi_errno, "tmp_buf");
@@ -130,9 +130,9 @@ int MPIR_Ialltoall_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendty
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
     MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* allocate temporary buffer */
     /* must be same size as entire recvbuf for Phase 3 */
@@ -267,8 +267,8 @@ int MPIR_Ialltoall_perm_sr(const void *sendbuf, int sendcount, MPI_Datatype send
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     bblock = MPIR_CVAR_ALLTOALL_THROTTLE;
     if (bblock == 0) bblock = comm_size;
@@ -320,8 +320,8 @@ int MPIR_Ialltoall_pairwise(const void *sendbuf, int sendcount, MPI_Datatype sen
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* Make local copy first */
     mpi_errno = MPIR_Sched_copy(((char *)sendbuf + rank*sendcount*sendtype_extent),
@@ -475,8 +475,8 @@ int MPIR_Ialltoall_inter(const void *sendbuf, int sendcount, MPI_Datatype sendty
     rank = comm_ptr->rank;
 
     /* Get extent of send and recv types */
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* Do the pairwise exchanges */
     max_size = MPL_MAX(local_size, remote_size);

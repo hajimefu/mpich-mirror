@@ -147,7 +147,7 @@ int MPI_Type_create_subarray(int ndims,
                 goto fn_fail;
 	    }
 
-	    MPID_Datatype_get_extent_macro(oldtype, extent);
+	    MPIR_Datatype_get_extent_macro(oldtype, extent);
 
 	    /* check if MPI_Aint is large enough for size of global array.
 	       if not, complain. */
@@ -185,7 +185,7 @@ int MPI_Type_create_subarray(int ndims,
     /* TODO: CHECK THE ERROR RETURNS FROM ALL THESE!!! */
 
     /* TODO: GRAB EXTENT WITH A MACRO OR SOMETHING FASTER */
-    MPID_Datatype_get_extent_macro(oldtype, extent);
+    MPIR_Datatype_get_extent_macro(oldtype, extent);
 
     if (order == MPI_ORDER_FORTRAN) {
 	if (ndims == 1)

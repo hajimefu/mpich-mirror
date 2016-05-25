@@ -272,7 +272,7 @@ int MPIR_Reduce_scatter_intra(const void *sendbuf, void *recvbuf, const int recv
         per_thread->op_errno = 0;
     }
 
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
     
     if (HANDLE_GET_KIND(op) == HANDLE_KIND_BUILTIN) {
@@ -943,7 +943,7 @@ int MPIR_Reduce_scatter_inter(const void *sendbuf, void *recvbuf, const int recv
         }
 
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-        MPID_Datatype_get_extent_macro(datatype, extent);
+        MPIR_Datatype_get_extent_macro(datatype, extent);
 
         MPIR_CHKLMEM_MALLOC(tmp_buf, void *, total_count*(MPL_MAX(extent,true_extent)), mpi_errno, "tmp_buf");
 

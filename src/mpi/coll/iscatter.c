@@ -120,7 +120,7 @@ int MPIR_Iscatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     ss->sendcount = sendcount;
 
     if (rank == root)
-        MPID_Datatype_get_extent_macro(sendtype, extent);
+        MPIR_Datatype_get_extent_macro(sendtype, extent);
 
     relative_rank = (rank >= root) ? rank - root : rank - root + comm_size;
 
@@ -484,7 +484,7 @@ int MPIR_Iscatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
             if (rank == 0) {
                 MPIR_Type_get_true_extent_impl(recvtype, &true_lb, &true_extent);
 
-                MPID_Datatype_get_extent_macro(recvtype, extent);
+                MPIR_Datatype_get_extent_macro(recvtype, extent);
                 MPIR_Ensure_Aint_fits_in_pointer(extent*recvcount*local_size);
                 MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT sendbuf +
                                                  sendcount*remote_size*extent);
@@ -519,7 +519,7 @@ int MPIR_Iscatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     else {
         /* long message. use linear algorithm. */
         if (root == MPI_ROOT) {
-            MPID_Datatype_get_extent_macro(sendtype, extent);
+            MPIR_Datatype_get_extent_macro(sendtype, extent);
             for (i = 0; i < remote_size; i++) {
                 mpi_errno = MPIR_Sched_send(((char *)sendbuf+sendcount*i*extent),
                                             sendcount, sendtype, i, comm_ptr, s);

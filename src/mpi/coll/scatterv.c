@@ -75,7 +75,7 @@ int MPIR_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
         else
             comm_size = comm_ptr->remote_size;
 
-        MPID_Datatype_get_extent_macro(sendtype, extent);
+        MPIR_Datatype_get_extent_macro(sendtype, extent);
         /* We need a check to ensure extent will fit in a
          * pointer. That needs extent * (max count) but we can't get
          * that without looping over the input data. This is at least

@@ -103,7 +103,7 @@ static int MPIR_Reduce_binomial (
     /* Create a temporary buffer */
 
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
 
     is_commutative = MPIR_Op_is_commutative(op);
 
@@ -320,7 +320,7 @@ static int MPIR_Reduce_redscat_gather (
     /* Create a temporary buffer */
 
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
 
     /* I think this is the worse case, so we can avoid an assert() 
      * inside the for loop */
@@ -766,7 +766,7 @@ int MPIR_Reduce_intra (
         if (comm_ptr->node_roots_comm != NULL) {
 
             MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-            MPID_Datatype_get_extent_macro(datatype, extent);
+            MPIR_Datatype_get_extent_macro(datatype, extent);
 
             MPIR_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
 
@@ -963,7 +963,7 @@ int MPIR_Reduce_inter (
         if (rank == 0) {
             MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
 
-            MPID_Datatype_get_extent_macro(datatype, extent);
+            MPIR_Datatype_get_extent_macro(datatype, extent);
 	    /* I think this is the worse case, so we can avoid an assert() 
 	     * inside the for loop */
 	    /* Should MPIR_CHKLMEM_MALLOC do this? */

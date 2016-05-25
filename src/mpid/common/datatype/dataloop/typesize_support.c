@@ -169,7 +169,7 @@ void PREPEND_PREFIX(Type_calc_footprint)(MPI_Datatype type,
 	MPI_Aint mpiextent;
 
 	MPIR_Datatype_get_size_macro(type, mpisize);
-	MPIDU_Datatype_get_extent_macro(type, mpiextent);
+	MPIR_Datatype_get_extent_macro(type, mpiextent);
 	tfp->size    = (DLOOP_Offset) mpisize;
 	tfp->lb      = 0;
 	tfp->ub      = (DLOOP_Offset) mpiextent;

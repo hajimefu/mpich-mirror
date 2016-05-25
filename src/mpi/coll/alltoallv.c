@@ -82,7 +82,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
     rank = comm_ptr->rank;
 
     /* Get extent of recv type, but send type is only valid if (sendbuf!=MPI_IN_PLACE) */
-    MPID_Datatype_get_extent_macro(recvtype, recv_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recv_extent);
 
     if (sendbuf == MPI_IN_PLACE) {
         /* We use pair-wise sendrecv_replace in order to conserve memory usage,
@@ -133,7 +133,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
         bblock = MPIR_CVAR_ALLTOALL_THROTTLE;
         if (bblock == 0) bblock = comm_size;
 
-        MPID_Datatype_get_extent_macro(sendtype, send_extent);
+        MPIR_Datatype_get_extent_macro(sendtype, send_extent);
 
         MPIR_CHKLMEM_MALLOC(starray,  MPI_Status*,  2*bblock*sizeof(MPI_Status),  mpi_errno, "starray");
         MPIR_CHKLMEM_MALLOC(reqarray, MPIR_Request**, 2*bblock*sizeof(MPIR_Request *), mpi_errno, "reqarray");
@@ -260,8 +260,8 @@ int MPIR_Alltoallv_inter(const void *sendbuf, const int *sendcounts, const int *
     rank = comm_ptr->rank;
     
     /* Get extent of send and recv types */
-    MPID_Datatype_get_extent_macro(sendtype, send_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recv_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, send_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recv_extent);
     
     /* Use pairwise exchange algorithm. */
     max_size = MPL_MAX(local_size, remote_size);

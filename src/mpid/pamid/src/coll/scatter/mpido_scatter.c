@@ -143,8 +143,8 @@ int MPIDO_Scatter(const void *sendbuf,
     if(MPIDI_Process.cuda_aware_support_on)
     {
        MPI_Aint sdt_extent,rdt_extent;
-       MPIDU_Datatype_get_extent_macro(sendtype, sdt_extent);
-       MPIDU_Datatype_get_extent_macro(recvtype, rdt_extent);
+       MPIR_Datatype_get_extent_macro(sendtype, sdt_extent);
+       MPIR_Datatype_get_extent_macro(recvtype, rdt_extent);
        char *scbuf = NULL;
        char *rcbuf = NULL;
        int is_send_dev_buf = (rank == root) ? MPIDI_cuda_is_device_buf(sendbuf) : 0;

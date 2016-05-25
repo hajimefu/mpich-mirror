@@ -63,7 +63,7 @@ int MPIR_Ireduce_binomial(const void *sendbuf, void *recvbuf, int count, MPI_Dat
     /* Create a temporary buffer */
 
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
 
     is_commutative = MPIR_Op_is_commutative(op);
 
@@ -254,7 +254,7 @@ int MPIR_Ireduce_redscat_gather(const void *sendbuf, void *recvbuf, int count, M
 
     /* Create a temporary buffer */
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-    MPID_Datatype_get_extent_macro(datatype, extent);
+    MPIR_Datatype_get_extent_macro(datatype, extent);
 
     /* I think this is the worse case, so we can avoid an assert()
      * inside the for loop */
@@ -609,7 +609,7 @@ int MPIR_Ireduce_SMP(const void *sendbuf, void *recvbuf, int count, MPI_Datatype
     if (nrc != NULL) {
 
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-        MPID_Datatype_get_extent_macro(datatype, extent);
+        MPIR_Datatype_get_extent_macro(datatype, extent);
 
         MPIR_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
 
@@ -727,7 +727,7 @@ int MPIR_Ireduce_inter(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
         if (rank == 0) {
             MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
 
-            MPID_Datatype_get_extent_macro(datatype, extent);
+            MPIR_Datatype_get_extent_macro(datatype, extent);
             /* I think this is the worse case, so we can avoid an assert()
              * inside the for loop */
             /* Should MPIR_SCHED_CHKPMEM_MALLOC do this? */

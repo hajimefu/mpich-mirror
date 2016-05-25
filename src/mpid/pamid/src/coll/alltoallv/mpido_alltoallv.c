@@ -133,7 +133,7 @@ int MPIDO_Alltoallv(const void *sendbuf,
         else
         {
            size_t extent; 
-           MPIDU_Datatype_get_extent_macro(sendtype,extent);
+           MPIR_Datatype_get_extent_macro(sendtype,extent);
            for(i=0; i<size; ++i)
            {
               char* scbuf = (char*)sendbuf + senddispls[i]*extent;
@@ -217,7 +217,7 @@ int MPIDO_Alltoallv(const void *sendbuf,
         else
         {
            size_t extent; 
-           MPIDU_Datatype_get_extent_macro(recvtype,extent);
+           MPIR_Datatype_get_extent_macro(recvtype,extent);
            for(i=0; i<size; ++i)
            {
               char* scbuf = (char*)recvbuf + recvdispls[i]*extent;
@@ -369,7 +369,7 @@ int MPIDO_Alltoallv(const void *sendbuf,
       {
          size_t extent; 
          int i;
-         MPIDU_Datatype_get_extent_macro(recvtype,extent);
+         MPIR_Datatype_get_extent_macro(recvtype,extent);
          for(i=0; i<size; ++i)
          {
             char* scbuf = (char*)rcv_noncontig_buff+ precvdispls[i];
@@ -525,7 +525,7 @@ int MPIDO_Alltoallv_simple(const void *sendbuf,
       else
       {
         size_t extent; 
-        MPIDU_Datatype_get_extent_macro(sendtype,extent);
+        MPIR_Datatype_get_extent_macro(sendtype,extent);
         for(i=0; i<size; ++i)
         {
           char* scbuf = (char*)sendbuf + senddispls[i]*extent;
@@ -609,7 +609,7 @@ int MPIDO_Alltoallv_simple(const void *sendbuf,
       else
       {
         size_t extent; 
-        MPIDU_Datatype_get_extent_macro(recvtype,extent);
+        MPIR_Datatype_get_extent_macro(recvtype,extent);
         for(i=0; i<size; ++i)
         {
           char* scbuf = (char*)recvbuf + recvdispls[i]*extent;
@@ -670,7 +670,7 @@ int MPIDO_Alltoallv_simple(const void *sendbuf,
     {
       size_t extent; 
       int i;
-      MPIDU_Datatype_get_extent_macro(recvtype,extent);
+      MPIR_Datatype_get_extent_macro(recvtype,extent);
       for(i=0; i<size; ++i)
       {
         char* scbuf = (char*)rcv_noncontig_buff+ precvdispls[i];

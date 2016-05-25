@@ -46,8 +46,8 @@ int MPIR_Ineighbor_alltoallv_default(const void *sendbuf, const int sendcounts[]
 
     comm_size = comm_ptr->local_size;
 
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     for (i = 0; i < comm_size; ++i) {
         MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT sendbuf +

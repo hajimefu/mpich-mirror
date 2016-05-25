@@ -296,7 +296,7 @@ int MPIDI_CH3_ReqHandler_GaccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq
     MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
     total_len = type_size * rreq->dev.user_count;
     MPIR_Datatype_get_size_macro(basic_type, predef_dtp_size);
-    MPIDU_Datatype_get_extent_macro(basic_type, extent);
+    MPIR_Datatype_get_extent_macro(basic_type, extent);
     stream_data_len = MPL_MIN(total_len - (stream_offset / extent) * predef_dtp_size,
                                (MPIDI_CH3U_SRBuf_size / extent) * predef_dtp_size);
 
@@ -670,7 +670,7 @@ int MPIDI_CH3_ReqHandler_AccumMetadataRecvComplete(MPIDI_VC_t * vc ATTRIBUTE((un
     }
 
     MPIR_Datatype_get_size_macro(basic_dtp, basic_type_size);
-    MPIDU_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
+    MPIR_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
 
     MPIR_Assert(!MPIDI_Request_get_srbuf_flag(rreq));
     /* allocate a SRBuf for receiving stream unit */
@@ -800,7 +800,7 @@ int MPIDI_CH3_ReqHandler_GaccumMetadataRecvComplete(MPIDI_VC_t * vc,
     }
     else {
         MPIR_Datatype_get_size_macro(basic_dtp, basic_type_size);
-        MPIDU_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
+        MPIR_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
 
         MPIR_Assert(!MPIDI_Request_get_srbuf_flag(rreq));
         /* allocate a SRBuf for receiving stream unit */
@@ -1319,7 +1319,7 @@ static inline int perform_acc_in_lock_queue(MPIR_Win * win_ptr,
         MPI_Aint total_len, recv_count;
 
         MPIR_Datatype_get_size_macro(acc_pkt->datatype, type_size);
-        MPIDU_Datatype_get_extent_macro(acc_pkt->datatype, type_extent);
+        MPIR_Datatype_get_extent_macro(acc_pkt->datatype, type_extent);
 
         total_len = type_size * acc_pkt->count;
         recv_count = MPL_MIN((total_len / type_size), (MPIDI_CH3U_SRBuf_size / type_extent));
@@ -1457,7 +1457,7 @@ static inline int perform_get_acc_in_lock_queue(MPIR_Win * win_ptr,
 
     MPIR_Assert(get_accum_pkt->type == MPIDI_CH3_PKT_GET_ACCUM);
 
-    MPIDU_Datatype_get_extent_macro(get_accum_pkt->datatype, type_extent);
+    MPIR_Datatype_get_extent_macro(get_accum_pkt->datatype, type_extent);
 
     total_len = type_size * get_accum_pkt->count;
     recv_count = MPL_MIN((total_len / type_size), (MPIDI_CH3U_SRBuf_size / type_extent));

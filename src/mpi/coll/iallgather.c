@@ -78,7 +78,7 @@ int MPIR_Iallgather_rec_dbl(const void *sendbuf, int sendcount, MPI_Datatype sen
         MPIR_Datatype_get_ptr(recvtype, recv_dtp);
     }
 
-    MPID_Datatype_get_extent_macro( recvtype, recvtype_extent );
+    MPIR_Datatype_get_extent_macro( recvtype, recvtype_extent );
 
     /* This is the largest offset we add to recvbuf */
     MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
@@ -248,7 +248,7 @@ int MPIR_Iallgather_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendt
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
     MPIR_Type_get_true_extent_impl(recvtype, &recvtype_true_lb, &recvtype_true_extent);
 
     /* This is the largest offset we add to recvbuf */
@@ -354,7 +354,7 @@ int MPIR_Iallgather_ring(const void *sendbuf, int sendcount, MPI_Datatype sendty
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* This is the largest offset we add to recvbuf */
     MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
@@ -510,7 +510,7 @@ int MPIR_Iallgather_inter(const void *sendbuf, int sendcount, MPI_Datatype sendt
            gather */
         MPIR_Type_get_true_extent_impl(sendtype, &true_lb, &true_extent);
 
-        MPID_Datatype_get_extent_macro( sendtype, send_extent );
+        MPIR_Datatype_get_extent_macro( sendtype, send_extent );
         extent = MPL_MAX(send_extent, true_extent);
 
         MPIR_Ensure_Aint_fits_in_pointer(extent * sendcount * local_size);

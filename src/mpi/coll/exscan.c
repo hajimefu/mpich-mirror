@@ -133,7 +133,7 @@ int MPIR_Exscan (
     /* need to allocate temporary buffer to store partial scan*/
     MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
 
-    MPID_Datatype_get_extent_macro( datatype, extent );
+    MPIR_Datatype_get_extent_macro( datatype, extent );
 
     MPIR_CHKLMEM_MALLOC(partial_scan, void *, (count*(MPL_MAX(true_extent,extent))), mpi_errno, "partial_scan");
     /* adjust for potential negative lower bound in datatype */

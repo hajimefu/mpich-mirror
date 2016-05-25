@@ -157,8 +157,8 @@ int MPIR_Alltoall_intra(
     rank = comm_ptr->rank;
 
     /* Get extent of send and recv types */
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
 
     MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
     nbytes = sendtype_size * sendcount;
@@ -488,8 +488,8 @@ int MPIR_Alltoall_inter(
     rank = comm_ptr->rank;
 
     /* Get extent of send and recv types */
-    MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
+    MPIR_Datatype_get_extent_macro(sendtype, sendtype_extent);
+    MPIR_Datatype_get_extent_macro(recvtype, recvtype_extent);
     
     /* Do the pairwise exchanges */
     max_size = MPL_MAX(local_size, remote_size);

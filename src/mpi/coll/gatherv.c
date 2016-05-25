@@ -105,7 +105,7 @@ int MPIR_Gatherv (
         else
             comm_size = comm_ptr->remote_size;
 
-        MPID_Datatype_get_extent_macro(recvtype, extent);
+        MPIR_Datatype_get_extent_macro(recvtype, extent);
 	/* each node can make sure it is not going to overflow aint */
         MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
 					 displs[rank] * extent);

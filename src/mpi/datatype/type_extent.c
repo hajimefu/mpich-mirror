@@ -91,7 +91,7 @@ int MPI_Type_extent(MPI_Datatype datatype, MPI_Aint *extent)
 
     /* ... body of routine ...  */
 
-    MPID_Datatype_get_extent_macro(datatype, *extent);
+    MPIR_Datatype_get_extent_macro(datatype, *extent);
 
     /* ... end of body of routine ... */
 

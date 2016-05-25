@@ -408,7 +408,7 @@ int MPI_Type_create_darray(int size,
 
     /* Convert MPI object handles to object pointers */
     MPIR_Datatype_get_ptr(oldtype, datatype_ptr);
-    MPID_Datatype_get_extent_macro(oldtype, orig_extent);
+    MPIR_Datatype_get_extent_macro(oldtype, orig_extent);
 
     /* Validate parameters and objects (post conversion) */
 #   ifdef HAVE_ERROR_CHECKING

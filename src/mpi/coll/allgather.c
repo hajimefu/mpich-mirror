@@ -143,7 +143,7 @@ int MPIR_Allgather_intra (
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
 
-    MPID_Datatype_get_extent_macro( recvtype, recvtype_extent );
+    MPIR_Datatype_get_extent_macro( recvtype, recvtype_extent );
     MPIR_Datatype_get_size_macro( recvtype, type_size );
 
     /* This is the largest offset we add to recvbuf */
@@ -674,7 +674,7 @@ int MPIR_Allgather_inter (
            gather */
         MPIR_Type_get_true_extent_impl(sendtype, &true_lb, &true_extent);
 
-        MPID_Datatype_get_extent_macro( sendtype, send_extent );
+        MPIR_Datatype_get_extent_macro( sendtype, send_extent );
         extent = MPL_MAX(send_extent, true_extent);
 
 	MPIR_Ensure_Aint_fits_in_pointer(extent * sendcount * local_size);

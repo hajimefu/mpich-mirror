@@ -236,6 +236,26 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
     }                                                                   \
 } while(0)
 
+#define MPIR_Datatype_get_extent_macro(a,extent_) do {                  \
+    void *ptr;                                                          \
+    switch (HANDLE_GET_KIND(a)) {                                       \
+        case HANDLE_KIND_DIRECT:                                        \
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);                 \
+            extent_ = ((MPIR_Datatype *) ptr)->extent;                  \
+            break;                                                      \
+        case HANDLE_KIND_INDIRECT:                                      \
+            ptr = ((MPIR_Datatype *)                                    \
+             MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));       \
+            extent_ = ((MPIR_Datatype *) ptr)->extent;                  \
+            break;                                                      \
+        case HANDLE_KIND_INVALID:                                       \
+        case HANDLE_KIND_BUILTIN:                                       \
+        default:                                                        \
+            extent_ = MPIR_Datatype_get_basic_size(a);  /* same as size */  \
+            break;                                                      \
+    }                                                                   \
+} while(0)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

@@ -92,7 +92,7 @@ int MPIR_Ialltoallw_intra(const void *sendbuf, const int sendcounts[], const int
             /* only look at recvtypes/recvcounts because the send vectors are
              * ignored when sendbuf==MPI_IN_PLACE */
             MPIR_Type_get_true_extent_impl(recvtypes[i], &true_lb, &true_extent);
-            MPID_Datatype_get_extent_macro(recvtypes[i], recv_extent);
+            MPIR_Datatype_get_extent_macro(recvtypes[i], recv_extent);
             max_size = MPL_MAX(max_size, recvcounts[i] * MPL_MAX(recv_extent, true_extent));
         }
         MPIR_SCHED_CHKPMEM_MALLOC(tmp_buf, void *, max_size, mpi_errno, "Ialltoallw tmp_buf");

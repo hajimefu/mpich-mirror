@@ -351,7 +351,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
     basic_type = origin_dtp_ptr->basic_type;
     MPIR_Datatype_get_size_macro(basic_type, predefined_dtp_size);
     predefined_dtp_count = total_len / predefined_dtp_size;
-    MPIDU_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
+    MPIR_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
 
     stream_elem_count = MPIDI_CH3U_Acc_stream_size / predefined_dtp_extent;
@@ -498,7 +498,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
     basic_type = origin_dtp_ptr->basic_type;
     MPIR_Datatype_get_size_macro(basic_type, predefined_dtp_size);
     predefined_dtp_count = total_len / predefined_dtp_size;
-    MPIDU_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
+    MPIR_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
 
     stream_elem_count = MPIDI_CH3U_Acc_stream_size / predefined_dtp_extent;

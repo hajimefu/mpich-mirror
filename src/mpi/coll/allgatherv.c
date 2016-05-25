@@ -126,7 +126,7 @@ int MPIR_Allgatherv_intra (
 
     if (total_count == 0) goto fn_exit;
     
-    MPID_Datatype_get_extent_macro( recvtype, recvtype_extent );
+    MPIR_Datatype_get_extent_macro( recvtype, recvtype_extent );
     MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
 
     if ((total_count*recvtype_size < MPIR_CVAR_ALLGATHER_LONG_MSG_SIZE) &&

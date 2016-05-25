@@ -310,7 +310,7 @@ int MPIR_Allreduce_intra (
 
         /* need to allocate temporary buffer to store incoming data*/
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-        MPID_Datatype_get_extent_macro(datatype, extent);
+        MPIR_Datatype_get_extent_macro(datatype, extent);
 
         MPIR_Ensure_Aint_fits_in_pointer(count * MPL_MAX(extent, true_extent));
         MPIR_CHKLMEM_MALLOC(tmp_buf, void *, count*(MPL_MAX(extent,true_extent)), mpi_errno, "temporary buffer");
@@ -634,7 +634,7 @@ int MPIR_Allreduce_inter (
 
     if (comm_ptr->rank == 0) {
         MPIR_Type_get_true_extent_impl(datatype, &true_lb, &true_extent);
-        MPID_Datatype_get_extent_macro(datatype, extent);
+        MPIR_Datatype_get_extent_macro(datatype, extent);
         /* I think this is the worse case, so we can avoid an assert()
          * inside the for loop */
         /* Should MPIR_CHKLMEM_MALLOC do this? */

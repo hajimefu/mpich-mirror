@@ -103,7 +103,7 @@ void MPIDI_Buffer_copy(
       // 2 - Copy unpacked data into user buffer from temp buffer.
       if(MPIDI_Process.cuda_aware_support_on && MPIDI_cuda_is_device_buf(rbuf))
       {
-        MPIDU_Datatype_get_extent_macro(rdt, rdt_extent);
+        MPIR_Datatype_get_extent_macro(rdt, rdt_extent);
         char *buf =  MPL_malloc(rdt_extent * rcount);
         memset(buf, 0, rdt_extent * rcount);        
         MPIDU_Segment seg;

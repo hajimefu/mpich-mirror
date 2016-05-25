@@ -103,7 +103,7 @@ int MPIR_Scatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype
 /* Use binomial tree algorithm */
     
     if (rank == root) 
-        MPID_Datatype_get_extent_macro(sendtype, extent);
+        MPIR_Datatype_get_extent_macro(sendtype, extent);
     
     relative_rank = (rank >= root) ? rank - root : rank - root + comm_size;
     
@@ -477,7 +477,7 @@ int MPIR_Scatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
             if (rank == 0) {
                 MPIR_Type_get_true_extent_impl(recvtype, &true_lb, &true_extent);
 
-                MPID_Datatype_get_extent_macro(recvtype, extent);
+                MPIR_Datatype_get_extent_macro(recvtype, extent);
 		MPIR_Ensure_Aint_fits_in_pointer(extent*recvcount*local_size);
 		MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT sendbuf +
 						 sendcount*remote_size*extent);
@@ -519,7 +519,7 @@ int MPIR_Scatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
     else {
         /* long message. use linear algorithm. */
         if (root == MPI_ROOT) {
-            MPID_Datatype_get_extent_macro(sendtype, extent);
+            MPIR_Datatype_get_extent_macro(sendtype, extent);
             for (i=0; i<remote_size; i++) {
                 mpi_errno = MPIC_Send(((char *)sendbuf+sendcount*i*extent),
                                          sendcount, sendtype, i,

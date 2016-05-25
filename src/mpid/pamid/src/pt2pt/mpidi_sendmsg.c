@@ -354,7 +354,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPIR_Request      * sreq,
       if(MPIDI_Process.cuda_aware_support_on && on_device)
       {
         MPI_Aint dt_extent;
-        MPIDU_Datatype_get_extent_macro(sreq->mpid.datatype, dt_extent);
+        MPIR_Datatype_get_extent_macro(sreq->mpid.datatype, dt_extent);
         buf =  MPL_malloc(dt_extent * sreq->mpid.userbufcount);
 
         cudaError_t cudaerr = CudaMemcpy(buf, sreq->mpid.userbuf, dt_extent * sreq->mpid.userbufcount, cudaMemcpyDeviceToHost);

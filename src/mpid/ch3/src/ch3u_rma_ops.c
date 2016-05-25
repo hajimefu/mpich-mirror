@@ -488,13 +488,13 @@ int MPIDI_CH3I_Accumulate(const void *origin_addr, int origin_count, MPI_Datatyp
         if (MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) {
             MPIR_Datatype_get_size_macro(origin_datatype, predefined_dtp_size);
             predefined_dtp_count = origin_count;
-            MPIDU_Datatype_get_extent_macro(origin_datatype, predefined_dtp_extent);
+            MPIR_Datatype_get_extent_macro(origin_datatype, predefined_dtp_extent);
         }
         else {
             MPIR_Assert(origin_dtp->basic_type != MPI_DATATYPE_NULL);
             MPIR_Datatype_get_size_macro(origin_dtp->basic_type, predefined_dtp_size);
             predefined_dtp_count = data_sz / predefined_dtp_size;
-            MPIDU_Datatype_get_extent_macro(origin_dtp->basic_type, predefined_dtp_extent);
+            MPIR_Datatype_get_extent_macro(origin_dtp->basic_type, predefined_dtp_extent);
         }
         MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 &&
                     predefined_dtp_extent > 0);
@@ -728,13 +728,13 @@ int MPIDI_CH3I_Get_accumulate(const void *origin_addr, int origin_count,
         if (MPIR_DATATYPE_IS_PREDEFINED(target_datatype)) {
             predefined_dtp_size = target_type_size;
             predefined_dtp_count = target_count;
-            MPIDU_Datatype_get_extent_macro(target_datatype, predefined_dtp_extent);
+            MPIR_Datatype_get_extent_macro(target_datatype, predefined_dtp_extent);
         }
         else {
             MPIR_Assert(target_dtp->basic_type != MPI_DATATYPE_NULL);
             MPIR_Datatype_get_size_macro(target_dtp->basic_type, predefined_dtp_size);
             predefined_dtp_count = target_data_sz / predefined_dtp_size;
-            MPIDU_Datatype_get_extent_macro(target_dtp->basic_type, predefined_dtp_extent);
+            MPIR_Datatype_get_extent_macro(target_dtp->basic_type, predefined_dtp_extent);
         }
         MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 &&
                     predefined_dtp_extent > 0);

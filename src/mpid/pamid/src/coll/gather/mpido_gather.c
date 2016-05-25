@@ -195,8 +195,8 @@ int MPIDO_Gather(const void *sendbuf,
     if(MPIDI_Process.cuda_aware_support_on)
     {
        MPI_Aint sdt_extent,rdt_extent;
-       MPIDU_Datatype_get_extent_macro(sendtype, sdt_extent);
-       MPIDU_Datatype_get_extent_macro(recvtype, rdt_extent);
+       MPIR_Datatype_get_extent_macro(sendtype, sdt_extent);
+       MPIR_Datatype_get_extent_macro(recvtype, rdt_extent);
        char *scbuf = NULL;
        char *rcbuf = NULL;
        int is_send_dev_buf = MPIDI_cuda_is_device_buf(sendbuf);
@@ -547,7 +547,7 @@ int MPIDO_Gather_simple(const void *sendbuf,
         if(sendbuf == MPI_IN_PLACE)
         {
           size_t extent;
-          MPIDU_Datatype_get_extent_macro(recvtype,extent);
+          MPIR_Datatype_get_extent_macro(recvtype,extent);
           MPIR_Localcopy(recvbuf + (rank*recvcount*extent), recvcount, recvtype,
                          rcv_noncontig_buff + (rank*recv_size), recv_size,MPI_CHAR);
         }

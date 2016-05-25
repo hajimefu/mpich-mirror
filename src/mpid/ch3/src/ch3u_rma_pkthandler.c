@@ -748,7 +748,7 @@ int MPIDI_CH3_PktHandler_Accumulate(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
             else {
                 req->dev.OnFinal = MPIDI_CH3_ReqHandler_AccumRecvComplete;
 
-                MPIDU_Datatype_get_extent_macro(accum_pkt->datatype, extent);
+                MPIR_Datatype_get_extent_macro(accum_pkt->datatype, extent);
 
                 MPIR_Assert(!MPIDI_Request_get_srbuf_flag(req));
                 /* allocate a SRBuf for receiving stream unit */
@@ -1035,7 +1035,7 @@ int MPIDI_CH3_PktHandler_GetAccumulate(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
                     complete = 1;
                 }
                 else {
-                    MPIDU_Datatype_get_extent_macro(get_accum_pkt->datatype, extent);
+                    MPIR_Datatype_get_extent_macro(get_accum_pkt->datatype, extent);
 
                     MPIR_Assert(!MPIDI_Request_get_srbuf_flag(req));
                     /* allocate a SRBuf for receiving stream unit */
@@ -1462,7 +1462,7 @@ int MPIDI_CH3_PktHandler_FOP(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
             data_len = *buflen - sizeof(MPIDI_CH3_Pkt_t);
             data_buf = (char *) pkt + sizeof(MPIDI_CH3_Pkt_t);
 
-            MPIDU_Datatype_get_extent_macro(fop_pkt->datatype, extent);
+            MPIR_Datatype_get_extent_macro(fop_pkt->datatype, extent);
 
             req->dev.user_buf = MPL_malloc(extent);
             if (!req->dev.user_buf) {
@@ -1667,7 +1667,7 @@ int MPIDI_CH3_PktHandler_Get_AccumResp(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
             basic_type = req->dev.datatype_ptr->basic_type;
         }
 
-        MPIDU_Datatype_get_extent_macro(basic_type, basic_type_extent);
+        MPIR_Datatype_get_extent_macro(basic_type, basic_type_extent);
         MPIR_Datatype_get_size_macro(basic_type, basic_type_size);
 
         /* Note: here we get the stream_offset from the extended packet header

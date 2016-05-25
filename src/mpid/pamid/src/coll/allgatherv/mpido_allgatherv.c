@@ -178,7 +178,7 @@ int MPIDO_Allgatherv_bcast(const void *sendbuf,
    TRACE_ERR("Entering MPIDO_Allgatherv_bcast\n");
   int i, rc=MPI_ERR_INTERN;
   MPI_Aint extent;
-  MPIDU_Datatype_get_extent_macro(recvtype, extent);
+  MPIR_Datatype_get_extent_macro(recvtype, extent);
 
   if (sendbuf != MPI_IN_PLACE)
   {
@@ -374,8 +374,8 @@ MPIDO_Allgatherv(const void *sendbuf,
     if(MPIDI_Process.cuda_aware_support_on)
     {
        MPI_Aint sdt_extent,rdt_extent;
-       MPIDU_Datatype_get_extent_macro(sendtype, sdt_extent);
-       MPIDU_Datatype_get_extent_macro(recvtype, rdt_extent);
+       MPIR_Datatype_get_extent_macro(sendtype, sdt_extent);
+       MPIR_Datatype_get_extent_macro(recvtype, rdt_extent);
        char *scbuf = NULL;
        char *rcbuf = NULL;
        int is_send_dev_buf = MPIDI_cuda_is_device_buf(sendbuf);
@@ -818,7 +818,7 @@ MPIDO_Allgatherv_simple(const void *sendbuf,
     if(inplace)
     {
       size_t extent;
-      MPIDU_Datatype_get_extent_macro(recvtype,extent);
+      MPIR_Datatype_get_extent_macro(recvtype,extent);
       MPIR_Localcopy(recvbuf + displs[rank]*extent, recvcounts[rank], recvtype,
                      rcv_noncontig_buff + precvdispls[rank], precvcounts[rank],MPI_CHAR);
       scount = precvcounts[rank];
@@ -862,7 +862,7 @@ MPIDO_Allgatherv_simple(const void *sendbuf,
     {
       size_t extent;
       int i;
-      MPIDU_Datatype_get_extent_macro(recvtype,extent);
+      MPIR_Datatype_get_extent_macro(recvtype,extent);
       for(i=0; i<size; ++i)
       {
         char* scbuf = (char*)rcv_noncontig_buff+ precvdispls[i];
