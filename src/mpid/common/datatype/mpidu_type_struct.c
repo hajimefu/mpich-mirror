@@ -52,7 +52,7 @@ static MPI_Aint MPIDU_Type_struct_alignsize(int count,
 	if (oldtype_array[i] == MPI_LB || oldtype_array[i] == MPI_UB) continue;
 	else if (HANDLE_GET_KIND(oldtype_array[i]) == HANDLE_KIND_BUILTIN)
 	{
-	    tmp_alignsize = MPIDU_Datatype_get_basic_size(oldtype_array[i]);
+	    tmp_alignsize = MPIR_Datatype_get_basic_size(oldtype_array[i]);
 
 #ifdef HAVE_DOUBLE_ALIGNMENT_EXCEPTION
 	    if (oldtype_array[i] == MPI_DOUBLE) {
@@ -227,7 +227,7 @@ int MPIDU_Type_struct(int count,
 
 	if (is_builtin)
 	{
-	    tmp_el_sz   = MPIDU_Datatype_get_basic_size(oldtype_array[i]);
+	    tmp_el_sz   = MPIR_Datatype_get_basic_size(oldtype_array[i]);
 	    tmp_el_type = oldtype_array[i];
 
 	    MPIDU_DATATYPE_BLOCK_LB_UB((MPI_Aint)(blocklength_array[i]),

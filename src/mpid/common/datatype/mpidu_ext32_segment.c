@@ -184,7 +184,7 @@ static int MPIDU_Segment_contig_pack_external32_to_buf(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_EXTERNAL32_TO_BUF);
 
-    src_el_size = MPIDU_Datatype_get_basic_size(el_type);
+    src_el_size = MPIR_Datatype_get_basic_size(el_type);
     dest_el_size = MPIDI_Datatype_get_basic_size_external32(el_type);
     MPIR_Assert(dest_el_size);
 
@@ -247,7 +247,7 @@ static int MPIDU_Segment_contig_unpack_external32_to_buf(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_UNPACK_EXTERNAL32_TO_BUF);
 
-    src_el_size = MPIDU_Datatype_get_basic_size(el_type);
+    src_el_size = MPIR_Datatype_get_basic_size(el_type);
     dest_el_size = MPIDI_Datatype_get_basic_size_external32(el_type);
     MPIR_Assert(dest_el_size);
 

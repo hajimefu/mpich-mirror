@@ -38,7 +38,7 @@ void MPIR_Type_get_true_extent_x_impl(MPI_Datatype datatype, MPI_Count *true_lb,
 
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN) {
         *true_lb     = 0;
-        *true_extent = MPID_Datatype_get_basic_size(datatype);
+        *true_extent = MPIR_Datatype_get_basic_size(datatype);
     }
     else {
         *true_lb     = datatype_ptr->true_lb;

@@ -178,6 +178,8 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
                                    0);                          \
 } while(0)
 
+#define MPIR_Datatype_get_basic_size(a) (((a)&0x0000ff00)>>8)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

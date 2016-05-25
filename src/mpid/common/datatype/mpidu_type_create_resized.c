@@ -44,7 +44,7 @@ int MPIDU_Type_create_resized(MPI_Datatype oldtype,
     /* if oldtype is a basic, we build a contiguous dataloop of count = 1 */
     if (HANDLE_GET_KIND(oldtype) == HANDLE_KIND_BUILTIN)
     {
-	int oldsize = MPIDU_Datatype_get_basic_size(oldtype);
+	int oldsize = MPIR_Datatype_get_basic_size(oldtype);
 
 	new_dtp->size           = oldsize;
 	new_dtp->has_sticky_ub  = 0;

@@ -81,7 +81,7 @@ int MPIDU_Type_blockindexed(int count,
 
     if (is_builtin)
     {
-	el_sz   = (MPI_Aint) MPIDU_Datatype_get_basic_size(oldtype);
+	el_sz   = (MPI_Aint) MPIR_Datatype_get_basic_size(oldtype);
 	el_type = oldtype;
 
 	old_lb        = 0;

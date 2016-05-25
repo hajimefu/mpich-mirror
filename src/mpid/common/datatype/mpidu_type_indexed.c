@@ -95,7 +95,7 @@ int MPIDU_Type_indexed(int count,
 	/* builtins are handled differently than user-defined types because
 	 * they have no associated dataloop or datatype structure.
 	 */
-	el_sz      = MPIDU_Datatype_get_basic_size(oldtype);
+	el_sz      = MPIR_Datatype_get_basic_size(oldtype);
 	old_sz     = el_sz;
 	el_ct      = 1;
 	el_type    = oldtype;

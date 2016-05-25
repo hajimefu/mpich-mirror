@@ -231,7 +231,7 @@ static int MPIDU_Segment_contig_pack_to_iov(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_TO_IOV);
 
-    el_size = MPIDU_Datatype_get_basic_size(el_type);
+    el_size = MPIR_Datatype_get_basic_size(el_type);
     size = *blocks_p * (DLOOP_Offset) el_size;
 
     MPL_DBG_MSG_FMT(MPIR_DBG_DATATYPE,VERBOSE,(MPL_DBG_FDEST,
@@ -307,7 +307,7 @@ static int MPIDU_Segment_vector_pack_to_iov(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_VECTOR_PACK_TO_IOV);
 
-    basic_size = (DLOOP_Offset) MPIDU_Datatype_get_basic_size(el_type);
+    basic_size = (DLOOP_Offset) MPIR_Datatype_get_basic_size(el_type);
     blocks_left = *blocks_p;
 
     MPL_DBG_MSG_FMT(MPIR_DBG_DATATYPE,VERBOSE,(MPL_DBG_FDEST,
@@ -415,7 +415,7 @@ static int MPIDU_Segment_contig_flatten(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_FLATTEN);
 
-    el_size = MPIDU_Datatype_get_basic_size(el_type);
+    el_size = MPIR_Datatype_get_basic_size(el_type);
     size = *blocks_p * (DLOOP_Offset) el_size;
     idx = paramp->u.flatten.index;
 
@@ -483,7 +483,7 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_VECTOR_FLATTEN);
 
-    basic_size = (DLOOP_Offset) MPIDU_Datatype_get_basic_size(el_type);
+    basic_size = (DLOOP_Offset) MPIR_Datatype_get_basic_size(el_type);
     blocks_left = *blocks_p;
 
     for (i=0; i < count && blocks_left > 0; i++) {

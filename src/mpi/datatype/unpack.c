@@ -47,7 +47,7 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN) {
         contig     = TRUE;
         dt_true_lb = 0;
-        data_sz    = outcount * MPID_Datatype_get_basic_size(datatype);
+        data_sz    = outcount * MPIR_Datatype_get_basic_size(datatype);
     } else {
         MPIR_Datatype *dt_ptr;
         MPID_Datatype_get_ptr(datatype, dt_ptr);

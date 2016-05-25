@@ -76,7 +76,7 @@ int MPIDU_Type_vector(int count,
     is_builtin = (HANDLE_GET_KIND(oldtype) == HANDLE_KIND_BUILTIN);
 
     if (is_builtin) {
-	el_sz   = (MPI_Aint) MPIDU_Datatype_get_basic_size(oldtype);
+	el_sz   = (MPI_Aint) MPIR_Datatype_get_basic_size(oldtype);
 	el_type = oldtype;
 
 	old_lb        = 0;

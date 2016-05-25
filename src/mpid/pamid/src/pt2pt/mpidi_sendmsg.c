@@ -458,7 +458,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
   if (likely(HANDLE_GET_KIND(sreq->mpid.datatype) == HANDLE_KIND_BUILTIN))
     {
       sndbuf   = sreq->mpid.userbuf;
-      data_sz  = sreq->mpid.userbufcount * MPIDU_Datatype_get_basic_size(sreq->mpid.datatype);
+      data_sz  = sreq->mpid.userbufcount * MPIR_Datatype_get_basic_size(sreq->mpid.datatype);
     }
   else
     {
@@ -561,7 +561,7 @@ if (!TOKEN_FLOW_CONTROL_ON) {
        if (likely(HANDLE_GET_KIND(sreq->mpid.datatype) == HANDLE_KIND_BUILTIN))
          {
            sndbuf   = sreq->mpid.userbuf;
-           data_sz  = sreq->mpid.userbufcount * MPIDU_Datatype_get_basic_size(sreq->mpid.datatype);
+           data_sz  = sreq->mpid.userbufcount * MPIR_Datatype_get_basic_size(sreq->mpid.datatype);
          }
        else
         {

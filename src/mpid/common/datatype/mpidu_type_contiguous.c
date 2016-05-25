@@ -69,7 +69,7 @@ int MPIDU_Type_contiguous(int count,
 
     if (is_builtin)
     {
-	el_sz   = MPIDU_Datatype_get_basic_size(oldtype);
+	el_sz   = MPIR_Datatype_get_basic_size(oldtype);
 	el_type = oldtype;
 
 	new_dtp->size          = count * el_sz;

@@ -77,52 +77,52 @@ PMPI_LOCAL MPI_Count MPIR_Type_get_basic_type_elements(MPI_Count *bytes_p,
     }
     else {
         usable_bytes = MPL_MIN(*bytes_p,
-                           count * MPID_Datatype_get_basic_size(datatype));
+                           count * MPIR_Datatype_get_basic_size(datatype));
     }
 
     switch (datatype) {
         /* we don't get valid fortran datatype handles in all cases... */
 #ifdef HAVE_FORTRAN_BINDING
         case MPI_2REAL:
-            type1_sz = type2_sz = MPID_Datatype_get_basic_size(MPI_REAL);
+            type1_sz = type2_sz = MPIR_Datatype_get_basic_size(MPI_REAL);
             break;
         case MPI_2DOUBLE_PRECISION:
             type1_sz = type2_sz =
-                MPID_Datatype_get_basic_size(MPI_DOUBLE_PRECISION);
+                MPIR_Datatype_get_basic_size(MPI_DOUBLE_PRECISION);
             break;
         case MPI_2INTEGER:
-            type1_sz = type2_sz = MPID_Datatype_get_basic_size(MPI_INTEGER);
+            type1_sz = type2_sz = MPIR_Datatype_get_basic_size(MPI_INTEGER);
             break;
 #endif
         case MPI_2INT:
-            type1_sz = type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         case MPI_FLOAT_INT:
-            type1_sz = MPID_Datatype_get_basic_size(MPI_FLOAT);
-            type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = MPIR_Datatype_get_basic_size(MPI_FLOAT);
+            type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         case MPI_DOUBLE_INT:
-            type1_sz = MPID_Datatype_get_basic_size(MPI_DOUBLE);
-            type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = MPIR_Datatype_get_basic_size(MPI_DOUBLE);
+            type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         case MPI_LONG_INT:
-            type1_sz = MPID_Datatype_get_basic_size(MPI_LONG);
-            type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = MPIR_Datatype_get_basic_size(MPI_LONG);
+            type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         case MPI_SHORT_INT:
-            type1_sz = MPID_Datatype_get_basic_size(MPI_SHORT);
-            type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = MPIR_Datatype_get_basic_size(MPI_SHORT);
+            type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         case MPI_LONG_DOUBLE_INT:
-            type1_sz = MPID_Datatype_get_basic_size(MPI_LONG_DOUBLE);
-            type2_sz = MPID_Datatype_get_basic_size(MPI_INT);
+            type1_sz = MPIR_Datatype_get_basic_size(MPI_LONG_DOUBLE);
+            type2_sz = MPIR_Datatype_get_basic_size(MPI_INT);
             break;
         default:
             /* all other types.  this is more complicated than
              * necessary for handling these types, but it puts us in the
              * same code path for all the basics, so we stick with it.
              */
-            type1_sz = type2_sz = MPID_Datatype_get_basic_size(datatype);
+            type1_sz = type2_sz = MPIR_Datatype_get_basic_size(datatype);
             break;
     }
 

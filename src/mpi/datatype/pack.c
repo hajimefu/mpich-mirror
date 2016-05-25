@@ -52,7 +52,7 @@ int MPIR_Pack_impl(const void *inbuf,
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN) {
         contig     = TRUE;
         dt_true_lb = 0;
-        data_sz    = incount * MPID_Datatype_get_basic_size(datatype);
+        data_sz    = incount * MPIR_Datatype_get_basic_size(datatype);
     } else {
         MPIR_Datatype *dt_ptr;
         MPID_Datatype_get_ptr(datatype, dt_ptr);

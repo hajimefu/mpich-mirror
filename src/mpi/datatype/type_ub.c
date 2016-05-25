@@ -94,7 +94,7 @@ int MPI_Type_ub(MPI_Datatype datatype, MPI_Aint *displacement)
     /* ... body of routine ...  */
 
     if (HANDLE_GET_KIND(datatype) == HANDLE_KIND_BUILTIN)
-	*displacement = MPID_Datatype_get_basic_size(datatype);
+	*displacement = MPIR_Datatype_get_basic_size(datatype);
     else
 	*displacement = datatype_ptr->ub;
 

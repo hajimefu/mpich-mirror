@@ -20,7 +20,6 @@
 /* MPIDU_Datatype_get_basic_id() is useful for creating and indexing into arrays
    that store data on a per-basic type basis */
 #define MPIDU_Datatype_get_basic_id(a) ((a)&0x000000ff)
-#define MPIDU_Datatype_get_basic_size(a) (((a)&0x0000ff00)>>8)
 
 #define MPIDU_Datatype_get_basic_type(a,basic_type_) do {                    \
     void *ptr;								\
@@ -94,7 +93,7 @@
             size_ = ((MPIR_Datatype *) ptr)->size;			\
             break;							\
         case HANDLE_KIND_BUILTIN:					\
-            size_ = MPIDU_Datatype_get_basic_size(a);			\
+            size_ = MPIR_Datatype_get_basic_size(a);			\
             break;							\
         case HANDLE_KIND_INVALID:					\
         default:							\
@@ -268,7 +267,7 @@
         case HANDLE_KIND_INVALID:					    \
         case HANDLE_KIND_BUILTIN:					    \
         default:							    \
-            extent_ = MPIDU_Datatype_get_basic_size(a);  /* same as size */  \
+            extent_ = MPIR_Datatype_get_basic_size(a);  /* same as size */  \
             break;							    \
     }									    \
 } while(0)

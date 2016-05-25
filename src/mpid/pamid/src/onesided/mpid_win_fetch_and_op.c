@@ -66,7 +66,7 @@ MPIDI_WinAtomicCB(pami_context_t    context,
 
   void *dest_addr = ahdr->remote_addr; 
   int len;       
-  len = MPIDU_Datatype_get_basic_size (ahdr->datatype);
+  len = MPIR_Datatype_get_basic_size (ahdr->datatype);
 
   if (ahdr->atomic_type == MPIDI_WIN_REQUEST_COMPARE_AND_SWAP) {
 
@@ -125,7 +125,7 @@ MPIDI_WinAtomicAckCB(pami_context_t    context,
   MPIDI_AtomicHeader_t *ahdr = (MPIDI_AtomicHeader_t *) _hdr;
   //We have a valid result addr
   if (ahdr->result_addr != NULL) {
-    len = MPIDU_Datatype_get_basic_size (ahdr->datatype);
+    len = MPIR_Datatype_get_basic_size (ahdr->datatype);
     MPIR_Memcpy(ahdr->result_addr, ahdr->buf, len);
   }
     
@@ -142,7 +142,7 @@ MPIDI_Atomic (pami_context_t   context,
   MPIDI_AtomicHeader_t atomic_hdr;
   int len;
 
-  len = MPIDU_Datatype_get_basic_size (req->origin.datatype);
+  len = MPIR_Datatype_get_basic_size (req->origin.datatype);
   assert(len <= MAX_ATOMIC_TYPE_SIZE);
   if (req->buffer)
     MPIR_Memcpy(atomic_hdr.buf, req->buffer, len);
