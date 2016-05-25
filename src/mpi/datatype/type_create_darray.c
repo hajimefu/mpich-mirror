@@ -727,7 +727,7 @@ int MPI_Type_create_darray(int size,
     }
     ints[4*ndims + 3] = order;
     MPIR_Datatype_get_ptr(new_handle, datatype_ptr);
-    mpi_errno = MPID_Datatype_set_contents(datatype_ptr,
+    mpi_errno = MPIR_Datatype_set_contents(datatype_ptr,
 					   MPI_COMBINER_DARRAY,
 					   4*ndims + 4,
 					   0,

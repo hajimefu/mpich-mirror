@@ -48,7 +48,7 @@ int MPIR_Type_hvector_impl(int count, int blocklength, MPI_Aint stride, MPI_Data
     ints[0] = count;
     ints[1] = blocklength;
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_HVECTOR,
                                            2, /* ints (count, blocklength) */
 				           1, /* aints */

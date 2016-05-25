@@ -59,7 +59,7 @@ int MPIR_Type_create_indexed_block_impl(int count,
 	ints[i+2] = array_of_displacements[i];
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_INDEXED_BLOCK,
 				           count + 2, /* ints */
 				           0, /* aints */

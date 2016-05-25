@@ -50,7 +50,7 @@ int MPIR_Type_vector_impl(int count, int blocklength, int stride, MPI_Datatype o
     ints[1] = blocklength;
     ints[2] = stride;
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
                                            MPI_COMBINER_VECTOR,
                                            3, /* ints (cnt, blklen, str) */
                                            0, /* aints */

@@ -8,7 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-#define MPID_Datatype_set_contents MPIDU_Datatype_set_contents
 #define MPID_Datatype_size_external32 MPIDU_Datatype_size_external32
 
 /* MPID_Segment */

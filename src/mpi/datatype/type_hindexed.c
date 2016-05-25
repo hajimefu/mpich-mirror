@@ -149,7 +149,7 @@ int MPI_Type_hindexed(int count,
     }
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_HINDEXED,
 				           count+1, /* ints */
 				           count, /* aints (displs) */

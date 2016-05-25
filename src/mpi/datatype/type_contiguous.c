@@ -44,7 +44,7 @@ int MPIR_Type_contiguous_impl(int count,
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_CONTIGUOUS,
 				           1, /* ints (count) */
 				           0,

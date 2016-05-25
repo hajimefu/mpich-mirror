@@ -316,7 +316,7 @@ int MPI_Type_create_subarray(int ndims,
     ints[3*ndims + 1] = order;
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 					   MPI_COMBINER_SUBARRAY,
 					   3 * ndims + 2, /* ints */
 					   0, /* aints */

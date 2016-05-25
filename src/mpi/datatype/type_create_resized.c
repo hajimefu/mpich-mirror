@@ -99,7 +99,7 @@ int MPI_Type_create_resized(MPI_Datatype oldtype,
     aints[1] = extent;
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_RESIZED,
 				           0,
 				           2, /* Aints */

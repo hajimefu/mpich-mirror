@@ -49,7 +49,7 @@ int MPIR_Type_create_hindexed_block_impl(int count, int blocklength,
     ints[1] = blocklength;
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
                                            MPI_COMBINER_HINDEXED_BLOCK,
                                            2,     /* ints */
                                            count, /* aints */

@@ -59,7 +59,7 @@ int MPIR_Type_create_struct_impl(int count,
 	ints[i+1] = array_of_blocklengths[i];
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_STRUCT,
 				           count+1, /* ints (cnt,blklen) */
 				           count, /* aints (disps) */

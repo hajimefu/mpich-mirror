@@ -285,15 +285,6 @@ void MPIDU_Segment_flatten(struct DLOOP_Segment *segp,
 			  DLOOP_Offset *lengthp);
 
 /* misc */
-int MPIDU_Datatype_set_contents(struct MPIR_Datatype *ptr,
-			       int combiner,
-			       int nr_ints,
-			       int nr_aints,
-			       int nr_types,
-			       int *ints,
-			       const MPI_Aint *aints,
-			       const MPI_Datatype *types);
-
 void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
 				       MPI_Aint *user_aints);
 void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,

@@ -96,7 +96,7 @@ int MPI_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype)
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     MPIR_Datatype_get_ptr(new_handle, new_dtp);
-    mpi_errno = MPID_Datatype_set_contents(new_dtp,
+    mpi_errno = MPIR_Datatype_set_contents(new_dtp,
 				           MPI_COMBINER_DUP,
 				           0, /* ints */
 				           0, /* aints */
