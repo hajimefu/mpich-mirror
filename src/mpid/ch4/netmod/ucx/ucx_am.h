@@ -171,10 +171,28 @@ static inline int MPIDI_NM_send_am(int rank,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_SEND_AM);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_SEND_AM);
 
+    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
+    if (handler_id == MPIDI_CH4U_SEND &&
+        am_hdr_sz + sizeof(MPIDI_UCX_am_header_t) + data_sz > MPIDI_UCX_MAX_AM_EAGER_SZ) {
+        MPIDI_CH4U_send_long_req_msg_t lreq_hdr;
+
+        MPIR_Memcpy(&lreq_hdr.hdr, am_hdr, am_hdr_sz);
+        lreq_hdr.data_sz = data_sz;
+        lreq_hdr.sreq_ptr = (uint64_t)sreq;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).src_buf = data;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).count = count;
+        dtype_add_ref_if_not_builtin(datatype);
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype = datatype;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).msg_tag = lreq_hdr.hdr.msg_tag;
+        MPIDI_CH4U_REQUEST(sreq, src_rank) = rank;
+        mpi_errno = MPIDI_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
+                                           &lreq_hdr, sizeof(lreq_hdr), NULL);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        goto fn_exit;
+    }
+
     ep = MPIDI_UCX_COMM_TO_EP(comm, rank);
     ucx_tag = MPIDI_UCX_init_tag(0, 0, MPIDI_UCX_AM_TAG);
-
-    MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
@@ -562,6 +580,30 @@ static inline int MPIDI_NM_inject_am_hdr_reply(MPIR_Context_id_t context_id,
 static inline size_t MPIDI_NM_am_inject_max_sz(void)
 {
     return MPIDI_NM_am_hdr_max_sz();
+}
+
+static inline int MPIDI_NM_long_am_matched(MPIR_Request * req)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_send_long_ack_msg_t msg;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_UCX_AM_MATCHED);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_UCX_AM_MATCHED);
+
+    msg.sreq_ptr = (MPIDI_CH4U_REQUEST(req, req->rreq.peer_req_ptr));
+    msg.rreq_ptr = (uint64_t)req;
+    MPIR_Assert((void *)msg.sreq_ptr != NULL);
+    mpi_errno = MPIDI_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(req, tag)),
+                                             MPIDI_CH4U_REQUEST(req, src_rank),
+                                             MPIDI_CH4U_SEND_LONG_ACK,
+                                             &msg, sizeof(msg));
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+ fn_exit:
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_UCX_AM_MATCHED);
+    return mpi_errno;
+ fn_fail:
+    goto fn_exit;
 }
 
 
