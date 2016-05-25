@@ -169,8 +169,6 @@
     }									\
 } while(0)
 
-#define MPIDU_Datatype_valid_ptr(ptr,err) MPIR_Valid_ptr_class(Datatype,ptr,MPI_ERR_TYPE,err)
-
 /* LB/UB calculation helper macros */
 
 /* MPIDU_DATATYPE_CONTIG_LB_UB()

@@ -298,6 +298,8 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
     }                                                                       \
 } while(0)
 
+#define MPIR_Datatype_valid_ptr(ptr,err) MPIR_Valid_ptr_class(Datatype,ptr,MPI_ERR_TYPE,err)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );
