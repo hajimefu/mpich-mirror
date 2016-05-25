@@ -140,7 +140,7 @@ int MPIR_Ialltoallw_intra(const void *sendbuf, const int sendcounts[], const int
             for (i = 0; i < ss; i++) {
                 dst = (rank + i + ii) % comm_size;
                 if (recvcounts[dst]) {
-                    MPID_Datatype_get_size_macro(recvtypes[dst], type_size);
+                    MPIR_Datatype_get_size_macro(recvtypes[dst], type_size);
                     if (type_size) {
                         mpi_errno = MPIR_Sched_recv((char *)recvbuf+rdispls[dst],
                                                     recvcounts[dst], recvtypes[dst],
@@ -153,7 +153,7 @@ int MPIR_Ialltoallw_intra(const void *sendbuf, const int sendcounts[], const int
             for (i=0; i<ss; i++) {
                 dst = (rank-i-ii+comm_size) % comm_size;
                 if (sendcounts[dst]) {
-                    MPID_Datatype_get_size_macro(sendtypes[dst], type_size);
+                    MPIR_Datatype_get_size_macro(sendtypes[dst], type_size);
                     if (type_size) {
                         mpi_errno = MPIR_Sched_send((char *)sendbuf+sdispls[dst],
                                                     sendcounts[dst], sendtypes[dst],

@@ -114,14 +114,14 @@ int MPIR_Scatter_intra(const void *sendbuf, int sendcount, MPI_Datatype sendtype
             /* We separate the two cases (root and non-root) because
                in the event of recvbuf=MPI_IN_PLACE on the root,
                recvcount and recvtype are not valid */
-            MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+            MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
             MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT sendbuf +
 					     extent*sendcount*comm_size);
 
             nbytes = sendtype_size * sendcount;
         }
         else {
-            MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+            MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
             MPIR_Ensure_Aint_fits_in_pointer(extent*recvcount*comm_size);
             nbytes = recvtype_size * recvcount;
         }
@@ -446,12 +446,12 @@ int MPIR_Scatter_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
     local_size  = comm_ptr->local_size; 
 
     if (root == MPI_ROOT) {
-        MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+        MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
         nbytes = sendtype_size * sendcount * remote_size;
     }
     else {
         /* remote side */
-        MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+        MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
         nbytes = recvtype_size * recvcount * local_size;
     }
 
@@ -718,7 +718,7 @@ int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     /* catch common aliasing cases */
                     if (recvbuf != MPI_IN_PLACE && sendtype == recvtype && sendcount == recvcount && recvcount != 0) {
                         int sendtype_size;
-                        MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+                        MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
                         MPIR_ERRTEST_ALIAS_COLL(recvbuf, (char*)sendbuf + comm_ptr->rank*sendcount*sendtype_size, mpi_errno);
                     }
                 }

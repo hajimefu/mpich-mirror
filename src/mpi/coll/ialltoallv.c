@@ -54,7 +54,7 @@ int MPIR_Ialltoallv_intra(const void *sendbuf, const int sendcounts[], const int
 
     /* Get extent and size of recvtype, don't look at sendtype for MPI_IN_PLACE */
     MPID_Datatype_get_extent_macro(recvtype, recv_extent);
-    MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+    MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
 
     if (sendbuf == MPI_IN_PLACE) {
         int max_count;
@@ -116,7 +116,7 @@ int MPIR_Ialltoallv_intra(const void *sendbuf, const int sendcounts[], const int
 
         /* get size/extent for sendtype */
         MPID_Datatype_get_extent_macro(sendtype, send_extent);
-        MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+        MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
 
         /* post only bblock isends/irecvs at a time as suggested by Tony Ladd */
         for (ii=0; ii<comm_size; ii+=bblock) {
@@ -191,8 +191,8 @@ int MPIR_Ialltoallv_inter(const void *sendbuf, const int sendcounts[], const int
     /* Get extent of send and recv types */
     MPID_Datatype_get_extent_macro(sendtype, send_extent);
     MPID_Datatype_get_extent_macro(recvtype, recv_extent);
-    MPID_Datatype_get_size_macro(sendtype, sendtype_size);
-    MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+    MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
+    MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
 
     /* Use pairwise exchange algorithm. */
     max_size = MPL_MAX(local_size, remote_size);

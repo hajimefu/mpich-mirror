@@ -170,7 +170,7 @@ static int MPIR_Bcast_binomial(
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
 	/* --BEGIN HETEROGENEOUS-- */
         MPIR_Pack_size_impl(1, datatype, &type_size);
@@ -526,7 +526,7 @@ static int MPIR_Bcast_scatter_doubling_allgather(
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
         /* --BEGIN HETEROGENEOUS-- */
         MPIR_Pack_size_impl(1, datatype, &type_size);
@@ -832,7 +832,7 @@ static int MPIR_Bcast_scatter_ring_allgather(
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
 	/* --BEGIN HETEROGENEOUS-- */
         MPIR_Pack_size_impl(1, datatype, &type_size);
@@ -1022,7 +1022,7 @@ static int MPIR_SMP_Bcast(
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
         /* --BEGIN HETEROGENEOUS-- */
         MPIR_Pack_size_impl(1, datatype, &type_size);
@@ -1235,7 +1235,7 @@ int MPIR_Bcast_intra (
 
     if (count == 0) goto fn_exit;
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = MPIR_CVAR_MAX_SMP_BCAST_MSG_SIZE ? type_size*count : 0;
     if (MPIR_CVAR_ENABLE_SMP_COLLECTIVES && MPIR_CVAR_ENABLE_SMP_BCAST &&
         nbytes <= MPIR_CVAR_MAX_SMP_BCAST_MSG_SIZE && MPIR_Comm_is_node_aware(comm_ptr)) {
@@ -1265,7 +1265,7 @@ int MPIR_Bcast_intra (
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
 	/* --BEGIN HETEROGENEOUS-- */
         MPIR_Pack_size_impl(1, datatype, &type_size);

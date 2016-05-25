@@ -372,7 +372,7 @@ static inline int enqueue_lock_origin(MPIR_Win * win_ptr, MPIDI_VC_t * vc,
         MPIDI_CH3_PKT_RMA_GET_FLAGS((*pkt), flags, mpi_errno);
 
         MPIDU_Datatype_get_extent_macro(target_dtp, type_extent);
-        MPIDU_Datatype_get_size_macro(target_dtp, type_size);
+        MPIR_Datatype_get_size_macro(target_dtp, type_size);
 
         if (pkt->type == MPIDI_CH3_PKT_PUT) {
             recv_data_sz = type_size * target_count;
@@ -903,7 +903,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
 
     if (is_empty_source == FALSE) {
         MPIR_Assert(MPIR_DATATYPE_IS_PREDEFINED(source_dtp));
-        MPIDU_Datatype_get_size_macro(source_dtp, source_dtp_size);
+        MPIR_Datatype_get_size_macro(source_dtp, source_dtp_size);
         MPIDU_Datatype_get_extent_macro(source_dtp, source_dtp_extent);
     }
 

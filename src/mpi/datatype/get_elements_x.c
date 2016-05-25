@@ -315,7 +315,7 @@ int MPIR_Get_elements_x_impl(const MPI_Status *status, MPI_Datatype datatype, MP
         else {
             /* Behaves just like MPI_Get_Count in the predefined case */
             MPI_Count size;
-            MPID_Datatype_get_size_macro(datatype, size);
+            MPIR_Datatype_get_size_macro(datatype, size);
             if ((byte_count % size) != 0)
                 *elements = MPI_UNDEFINED;
             else

@@ -48,31 +48,6 @@
     }                                                                       \
 } while(0)
 
-/* Note: Probably there is some clever way to build all of these from a macro.
- */
-#define MPIDU_Datatype_get_size_macro(a,size_) do {                      \
-    void *ptr;								\
-    switch (HANDLE_GET_KIND(a)) {					\
-        case HANDLE_KIND_DIRECT:					\
-            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
-            size_ = ((MPIR_Datatype *) ptr)->size;			\
-            break;							\
-        case HANDLE_KIND_INDIRECT:					\
-            ptr = ((MPIR_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
-            size_ = ((MPIR_Datatype *) ptr)->size;			\
-            break;							\
-        case HANDLE_KIND_BUILTIN:					\
-            size_ = MPIR_Datatype_get_basic_size(a);			\
-            break;							\
-        case HANDLE_KIND_INVALID:					\
-        default:							\
-	    size_ = 0;							\
-	    break;							\
- 									\
-    }									\
-} while(0)
-
 /*
  * The following macro allows us to reference either the regular or 
  * hetero value for the 3 fields (NULL,_size,_depth) in the

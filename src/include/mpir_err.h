@@ -462,7 +462,7 @@ cvars:
             MPI_Aint errsize;                                           \
             MPIR_Datatype *errdtypeptr;					\
             MPIR_Datatype_get_ptr(dtype,errdtypeptr);			\
-            MPID_Datatype_get_size_macro(dtype,errsize);                \
+            MPIR_Datatype_get_size_macro(dtype,errsize);                \
             if (errdtypeptr && errdtypeptr->true_lb == 0 &&             \
                 errsize > 0) { ferr=1; }                        	\
         }								\

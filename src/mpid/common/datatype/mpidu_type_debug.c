@@ -256,7 +256,7 @@ void MPIDI_Datatype_printf(MPI_Datatype type,
 	sticky_ub = type_ptr->has_sticky_ub;
     }
 
-    MPIDU_Datatype_get_size_macro(type, size);
+    MPIR_Datatype_get_size_macro(type, size);
     MPIR_Type_get_true_extent_impl(type, &true_lb, &extent);
     true_ub = extent + true_lb;
     MPIR_Type_get_extent_impl(type, &lb, &extent);

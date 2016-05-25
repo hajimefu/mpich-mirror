@@ -34,7 +34,7 @@ int MPIR_Type_size_x_impl(MPI_Datatype datatype, MPI_Count *size)
 {
     int mpi_errno = MPI_SUCCESS;
 
-    MPID_Datatype_get_size_macro(datatype, *size);
+    MPIR_Datatype_get_size_macro(datatype, *size);
 
 fn_exit:
     return mpi_errno;

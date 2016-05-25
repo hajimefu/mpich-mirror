@@ -8,7 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-#define MPID_Datatype_get_size_macro MPIDU_Datatype_get_size_macro
 #define MPID_Datatype_get_extent_macro MPIDU_Datatype_get_extent_macro
 #define MPID_Datatype_is_contig MPIDU_Datatype_is_contig
 #define MPID_Datatype_release MPIDU_Datatype_release

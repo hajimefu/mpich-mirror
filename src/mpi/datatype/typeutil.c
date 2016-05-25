@@ -260,7 +260,7 @@ int MPIR_Datatype_builtin_fillin(void)
 	    dptr->is_permanent = 1;
 	    dptr->is_contig	   = 1;
 	    MPIR_Object_set_ref( dptr, 1 );
-	    MPID_Datatype_get_size_macro(mpi_dtypes[i], dptr->size);
+	    MPIR_Datatype_get_size_macro(mpi_dtypes[i], dptr->size);
 	    dptr->extent	   = dptr->size;
 	    dptr->ub	   = dptr->size;
 	    dptr->true_ub	   = dptr->size;

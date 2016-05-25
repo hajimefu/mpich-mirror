@@ -120,7 +120,7 @@ int MPIDI_Isend_self(const void * buf, MPI_Aint count, MPI_Datatype datatype, in
 	    }
 	    rreq->dev.partner_request = sreq;
 	    rreq->dev.sender_req_id = sreq->handle;
-	    MPIDU_Datatype_get_size_macro(datatype, dt_sz);
+	    MPIR_Datatype_get_size_macro(datatype, dt_sz);
 	    MPIR_STATUS_SET_COUNT(rreq->status, count * dt_sz);
 	}
 	else

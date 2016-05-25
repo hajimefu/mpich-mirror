@@ -35,7 +35,7 @@ int MPIR_Status_set_elements_x_impl(MPI_Status *status, MPI_Datatype datatype, M
     int mpi_errno = MPI_SUCCESS;
     MPI_Count size_x;
 
-    MPID_Datatype_get_size_macro(datatype, size_x);
+    MPIR_Datatype_get_size_macro(datatype, size_x);
 
     /* overflow check, should probably be a real error check? */
     if (count != 0) {

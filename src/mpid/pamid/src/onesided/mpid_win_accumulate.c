@@ -302,7 +302,7 @@ MPID_Accumulate(const void   *origin_addr,
        disp_unit = win->mpid.info[target_rank].disp_unit;
        dest_addr = (char *) base + disp_unit * target_disp;
 
-       MPIDU_Datatype_get_size_macro(origin_datatype, len);
+       MPIR_Datatype_get_size_macro(origin_datatype, len);
 
        uop = MPIR_OP_HDL_TO_FN(op);
        one = 1;

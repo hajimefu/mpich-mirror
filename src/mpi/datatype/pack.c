@@ -216,7 +216,7 @@ int MPI_Pack(const void *inbuf,
 
 	MPID_BEGIN_ERROR_CHECKS;
 	/* Verify that there is space in the buffer to pack the type */
-	MPID_Datatype_get_size_macro(datatype, tmp_sz);
+	MPIR_Datatype_get_size_macro(datatype, tmp_sz);
 
 	if (tmp_sz * incount > outsize - *position) {
 	    if (*position < 0) {

@@ -101,12 +101,12 @@ int MPIR_Igather_binomial(const void *sendbuf, int sendcount, MPI_Datatype sendt
         /* communicator is homogeneous. no need to pack buffer. */
         if (rank == root)
         {
-            MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+            MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
             nbytes = recvtype_size * recvcount;
         }
         else
         {
-            MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+            MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
             nbytes = sendtype_size * sendcount;
         }
 
@@ -437,12 +437,12 @@ int MPIR_Igather_inter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
     local_size = comm_ptr->local_size;
 
     if (root == MPI_ROOT) {
-        MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+        MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
         nbytes = recvtype_size * recvcount * remote_size;
     }
     else {
         /* remote side */
-        MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+        MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
         nbytes = sendtype_size * sendcount * local_size;
     }
 
@@ -658,7 +658,7 @@ int MPI_Igather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     /* catch common aliasing cases */
                     if (recvbuf != MPI_IN_PLACE && sendtype == recvtype && sendcount == recvcount && sendcount != 0) {
                         MPI_Aint recvtype_size;
-                        MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+                        MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
                         MPIR_ERRTEST_ALIAS_COLL(sendbuf, (char*)recvbuf + comm_ptr->rank*recvcount*recvtype_size, mpi_errno);
                     }
                 }

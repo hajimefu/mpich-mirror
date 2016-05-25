@@ -160,7 +160,7 @@ int MPIR_Alltoall_intra(
     MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
     MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
 
-    MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+    MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
     nbytes = sendtype_size * sendcount;
 
     if (sendbuf == MPI_IN_PLACE) {

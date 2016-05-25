@@ -423,7 +423,7 @@ static int issue_put_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     }
     else {
         MPI_Aint origin_type_size;
-        MPIDU_Datatype_get_size_macro(rma_op->origin_datatype, origin_type_size);
+        MPIR_Datatype_get_size_macro(rma_op->origin_datatype, origin_type_size);
 
         /* If derived datatype on target, add extended packet header. */
         MPIDI_CH3_PKT_RMA_GET_TARGET_DATATYPE(rma_op->pkt, target_datatype, mpi_errno);
@@ -520,7 +520,7 @@ static int issue_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     }
 
     /* Get total length of origin data */
-    MPIDU_Datatype_get_size_macro(rma_op->origin_datatype, origin_dtp_size);
+    MPIR_Datatype_get_size_macro(rma_op->origin_datatype, origin_dtp_size);
     total_len = origin_dtp_size * rma_op->origin_count;
 
     /* Get size and count for predefined datatype elements */
@@ -532,7 +532,7 @@ static int issue_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     else {
         MPIR_Datatype_get_ptr(rma_op->origin_datatype, origin_dtp_ptr);
         MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
-        MPIDU_Datatype_get_size_macro(origin_dtp_ptr->basic_type, predefined_dtp_size);
+        MPIR_Datatype_get_size_macro(origin_dtp_ptr->basic_type, predefined_dtp_size);
         predefined_dtp_count = total_len / predefined_dtp_size;
         MPIDU_Datatype_get_extent_macro(origin_dtp_ptr->basic_type, predefined_dtp_extent);
     }
@@ -706,7 +706,7 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     }
 
     /* Get total length of target data */
-    MPIDU_Datatype_get_size_macro(get_accum_pkt->datatype, target_dtp_size);
+    MPIR_Datatype_get_size_macro(get_accum_pkt->datatype, target_dtp_size);
     total_len = target_dtp_size * get_accum_pkt->count;
 
     /* Get size and count for predefined datatype elements */
@@ -718,7 +718,7 @@ static int issue_get_acc_op(MPIDI_RMA_Op_t * rma_op, MPIR_Win * win_ptr,
     else {
         MPIR_Datatype_get_ptr(get_accum_pkt->datatype, target_dtp_ptr);
         MPIR_Assert(target_dtp_ptr != NULL && target_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
-        MPIDU_Datatype_get_size_macro(target_dtp_ptr->basic_type, predefined_dtp_size);
+        MPIR_Datatype_get_size_macro(target_dtp_ptr->basic_type, predefined_dtp_size);
         predefined_dtp_count = total_len / predefined_dtp_size;
         MPIDU_Datatype_get_extent_macro(target_dtp_ptr->basic_type, predefined_dtp_extent);
     }
@@ -1110,7 +1110,7 @@ static int issue_fop_op(MPIDI_RMA_Op_t * rma_op,
     }
     else {
         MPI_Aint origin_dtp_size;
-        MPIDU_Datatype_get_size_macro(rma_op->origin_datatype, origin_dtp_size);
+        MPIR_Datatype_get_size_macro(rma_op->origin_datatype, origin_dtp_size);
         mpi_errno = issue_from_origin_buffer(rma_op, vc, NULL, 0,       /*ext_hdr_ptr, ext_hdr_sz */
                                              0, 1 * origin_dtp_size, &curr_req);
         if (mpi_errno != MPI_SUCCESS)

@@ -144,7 +144,7 @@ int MPIR_Allgather_intra (
     rank = comm_ptr->rank;
 
     MPID_Datatype_get_extent_macro( recvtype, recvtype_extent );
-    MPID_Datatype_get_size_macro( recvtype, type_size );
+    MPIR_Datatype_get_size_macro( recvtype, type_size );
 
     /* This is the largest offset we add to recvbuf */
     MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
@@ -936,7 +936,7 @@ int MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 if (sendbuf != MPI_IN_PLACE && sendtype == recvtype &&
                         recvcount != 0 && sendcount != 0) {
                     int recvtype_size;
-                    MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+                    MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
                     MPIR_ERRTEST_ALIAS_COLL(sendbuf, (char*)recvbuf + comm_ptr->rank*recvcount*recvtype_size, mpi_errno);
                 }
             }

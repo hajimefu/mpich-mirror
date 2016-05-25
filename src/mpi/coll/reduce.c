@@ -132,7 +132,7 @@ static int MPIR_Reduce_binomial (
         if (mpi_errno) { MPIR_ERR_POP(mpi_errno); }
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* This code is from MPICH-1. */
 
@@ -347,7 +347,7 @@ static int MPIR_Reduce_redscat_gather (
         if (mpi_errno) { MPIR_ERR_POP(mpi_errno); }
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* find nearest power-of-two less than or equal to comm_size */
     pof2 = 1;
@@ -754,7 +754,7 @@ int MPIR_Reduce_intra (
         is_commutative = (op_ptr->kind == MPIR_OP_KIND__USER_NONCOMMUTE) ? 0 : 1;
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = MPIR_CVAR_MAX_SMP_REDUCE_MSG_SIZE ? type_size*count : 0;
     if (MPIR_Comm_is_node_aware(comm_ptr) && is_commutative &&
         nbytes <= MPIR_CVAR_MAX_SMP_REDUCE_MSG_SIZE) {
@@ -863,7 +863,7 @@ int MPIR_Reduce_intra (
 
     comm_size = comm_ptr->local_size;
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* find nearest power-of-two less than or equal to comm_size */
     pof2 = 1;

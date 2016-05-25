@@ -62,7 +62,7 @@ int MPIR_Ialltoall_inplace(const void *sendbuf, int sendcount, MPI_Datatype send
 
     comm_size = comm_ptr->local_size;
     rank = comm_ptr->rank;
-    MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+    MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
     MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
     nbytes = recvtype_size * recvcount;
 
@@ -131,7 +131,7 @@ int MPIR_Ialltoall_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendty
     rank = comm_ptr->rank;
 
     MPID_Datatype_get_extent_macro(sendtype, sendtype_extent);
-    MPID_Datatype_get_size_macro(recvtype, recvtype_size);
+    MPIR_Datatype_get_size_macro(recvtype, recvtype_size);
     MPID_Datatype_get_extent_macro(recvtype, recvtype_extent);
 
     /* allocate temporary buffer */
@@ -184,7 +184,7 @@ int MPIR_Ialltoall_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendty
 
         mpi_errno = MPIR_Type_commit_impl(&newtype);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-        MPID_Datatype_get_size_macro(newtype, newtype_size);
+        MPIR_Datatype_get_size_macro(newtype, newtype_size);
 
         /* we will usually copy much less than nbytes */
         mpi_errno = MPIR_Sched_copy(recvbuf, 1, newtype, tmp_buf, newtype_size, MPI_BYTE, s);
@@ -414,7 +414,7 @@ int MPIR_Ialltoall_intra(const void *sendbuf, int sendcount, MPI_Datatype sendty
 
     comm_size = comm_ptr->local_size;
 
-    MPID_Datatype_get_size_macro(sendtype, sendtype_size);
+    MPIR_Datatype_get_size_macro(sendtype, sendtype_size);
     nbytes = sendtype_size * sendcount;
 
     if (sendbuf == MPI_IN_PLACE) {

@@ -71,7 +71,7 @@ int MPIR_Allreduce_group_intra(void *sendbuf, void *recvbuf, int count,
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* find nearest power-of-two less than or equal to comm_size */
     pof2 = 1;

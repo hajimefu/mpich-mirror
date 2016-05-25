@@ -194,7 +194,7 @@ int MPIDI_CH3_ReqHandler_AccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq,
     }
     MPIR_Assert(basic_type != MPI_DATATYPE_NULL);
 
-    MPIDU_Datatype_get_size_macro(basic_type, predef_dtp_size);
+    MPIR_Datatype_get_size_macro(basic_type, predef_dtp_size);
     predef_count = rreq->dev.recv_data_sz / predef_dtp_size;
     MPIR_Assert(predef_count > 0);
 
@@ -293,9 +293,9 @@ int MPIDI_CH3_ReqHandler_GaccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq
                                        rreq->dev.ext_hdr_ptr, &stream_offset);
 
     /* Use target data to calculate current stream unit size */
-    MPIDU_Datatype_get_size_macro(rreq->dev.datatype, type_size);
+    MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
     total_len = type_size * rreq->dev.user_count;
-    MPIDU_Datatype_get_size_macro(basic_type, predef_dtp_size);
+    MPIR_Datatype_get_size_macro(basic_type, predef_dtp_size);
     MPIDU_Datatype_get_extent_macro(basic_type, extent);
     stream_data_len = MPL_MIN(total_len - (stream_offset / extent) * predef_dtp_size,
                                (MPIDI_CH3U_SRBuf_size / extent) * predef_dtp_size);
@@ -450,7 +450,7 @@ int MPIDI_CH3_ReqHandler_FOPRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq, i
 
     MPIR_Win_get_ptr(rreq->dev.target_win_handle, win_ptr);
 
-    MPIDU_Datatype_get_size_macro(rreq->dev.datatype, type_size);
+    MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
 
     MPIDU_Datatype_is_contig(rreq->dev.datatype, &is_contig);
 
@@ -664,12 +664,12 @@ int MPIDI_CH3_ReqHandler_AccumMetadataRecvComplete(MPIDI_VC_t * vc ATTRIBUTE((un
             stream_offset = ext_hdr->stream_offset;
         }
 
-        MPIDU_Datatype_get_size_macro(rreq->dev.datatype, type_size);
+        MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
 
         basic_dtp = rreq->dev.datatype;
     }
 
-    MPIDU_Datatype_get_size_macro(basic_dtp, basic_type_size);
+    MPIR_Datatype_get_size_macro(basic_dtp, basic_type_size);
     MPIDU_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
 
     MPIR_Assert(!MPIDI_Request_get_srbuf_flag(rreq));
@@ -785,7 +785,7 @@ int MPIDI_CH3_ReqHandler_GaccumMetadataRecvComplete(MPIDI_VC_t * vc,
             stream_offset = ext_hdr->stream_offset;
         }
 
-        MPIDU_Datatype_get_size_macro(rreq->dev.datatype, type_size);
+        MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
 
         basic_dtp = rreq->dev.datatype;
     }
@@ -799,7 +799,7 @@ int MPIDI_CH3_ReqHandler_GaccumMetadataRecvComplete(MPIDI_VC_t * vc,
             MPIR_ERR_POP(mpi_errno);
     }
     else {
-        MPIDU_Datatype_get_size_macro(basic_dtp, basic_type_size);
+        MPIR_Datatype_get_size_macro(basic_dtp, basic_type_size);
         MPIDU_Datatype_get_extent_macro(basic_dtp, basic_type_extent);
 
         MPIR_Assert(!MPIDI_Request_get_srbuf_flag(rreq));
@@ -1233,7 +1233,7 @@ static inline int perform_get_in_lock_queue(MPIR_Win * win_ptr,
     get_resp_pkt->target_rank = win_ptr->comm_ptr->rank;
 
     /* length of target data */
-    MPIDU_Datatype_get_size_macro(get_pkt->datatype, type_size);
+    MPIR_Datatype_get_size_macro(get_pkt->datatype, type_size);
     MPIR_Assign_trunc(len, get_pkt->count * type_size, size_t);
 
     MPIDU_Datatype_is_contig(get_pkt->datatype, &is_contig);
@@ -1318,7 +1318,7 @@ static inline int perform_acc_in_lock_queue(MPIR_Win * win_ptr,
         MPI_Aint type_size, type_extent;
         MPI_Aint total_len, recv_count;
 
-        MPIDU_Datatype_get_size_macro(acc_pkt->datatype, type_size);
+        MPIR_Datatype_get_size_macro(acc_pkt->datatype, type_size);
         MPIDU_Datatype_get_extent_macro(acc_pkt->datatype, type_extent);
 
         total_len = type_size * acc_pkt->count;
@@ -1389,7 +1389,7 @@ static inline int perform_get_acc_in_lock_queue(MPIR_Win * win_ptr,
     sreq->dev.flags = get_accum_pkt->flags;
 
     /* Copy data into a temporary buffer */
-    MPIDU_Datatype_get_size_macro(get_accum_pkt->datatype, type_size);
+    MPIR_Datatype_get_size_macro(get_accum_pkt->datatype, type_size);
 
     /* length of target data */
     MPIR_Assign_trunc(len, get_accum_pkt->count * type_size, size_t);
@@ -1566,7 +1566,7 @@ static inline int perform_fop_in_lock_queue(MPIR_Win * win_ptr,
     /* FIXME: this function is same with PktHandler_FOP(), should
      * do code refactoring on both of them. */
 
-    MPIDU_Datatype_get_size_macro(fop_pkt->datatype, type_size);
+    MPIR_Datatype_get_size_macro(fop_pkt->datatype, type_size);
 
     MPIDU_Datatype_is_contig(fop_pkt->datatype, &is_contig);
 
@@ -1743,7 +1743,7 @@ static inline int perform_cas_in_lock_queue(MPIR_Win * win_ptr,
         cas_resp_pkt->flags |= MPIDI_CH3_PKT_FLAG_RMA_ACK;
 
     /* Copy old value into the response packet */
-    MPIDU_Datatype_get_size_macro(cas_pkt->datatype, len);
+    MPIR_Datatype_get_size_macro(cas_pkt->datatype, len);
     MPIR_Assert(len <= sizeof(MPIDI_CH3_CAS_Immed_u));
 
     if (win_ptr->shm_allocated == TRUE)

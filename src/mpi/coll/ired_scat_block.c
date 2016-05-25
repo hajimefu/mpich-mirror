@@ -70,7 +70,7 @@ int MPIR_Ireduce_scatter_block_rec_hlv(const void *sendbuf, void *recvbuf, int r
         goto fn_exit;
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* allocate temp. buffer to receive incoming data */
     MPIR_SCHED_CHKPMEM_MALLOC(tmp_recvbuf, void *, total_count*(MPL_MAX(true_extent,extent)), mpi_errno, "tmp_recvbuf");
@@ -426,7 +426,7 @@ int MPIR_Ireduce_scatter_block_rec_dbl(const void *sendbuf, void *recvbuf, int r
         goto fn_exit;
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     /* total_count*extent eventually gets malloced. it isn't added to
      * a user-passed in buffer */
@@ -781,7 +781,7 @@ int MPIR_Ireduce_scatter_block_intra(const void *sendbuf, void *recvbuf, int rec
     if (total_count == 0) {
         goto fn_exit;
     }
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = total_count * type_size;
 
     /* select an appropriate algorithm based on commutivity and message size */

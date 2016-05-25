@@ -147,7 +147,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
             for ( i=0; i<ss; i++ ) { 
                 dst = (rank+i+ii) % comm_size;
                 if (recvcounts[dst]) {
-                    MPID_Datatype_get_size_macro(recvtype, type_size);
+                    MPIR_Datatype_get_size_macro(recvtype, type_size);
                     if (type_size) {
                         MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT recvbuf +
                                                          rdispls[dst]*recv_extent);
@@ -169,7 +169,7 @@ int MPIR_Alltoallv_intra(const void *sendbuf, const int *sendcounts, const int *
             for ( i=0; i<ss; i++ ) { 
                 dst = (rank-i-ii+comm_size) % comm_size;
                 if (sendcounts[dst]) {
-                    MPID_Datatype_get_size_macro(sendtype, type_size);
+                    MPIR_Datatype_get_size_macro(sendtype, type_size);
                     if (type_size) {
                         MPIR_Ensure_Aint_fits_in_pointer(MPIR_VOID_PTR_CAST_TO_MPI_AINT sendbuf +
                                                          sdispls[dst]*send_extent);

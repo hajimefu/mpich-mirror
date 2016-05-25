@@ -59,8 +59,8 @@ int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtyp
 
     MPIR_FUNC_TERSE_ENTER(MPID_STATE_MPIR_LOCALCOPY);
 
-    MPID_Datatype_get_size_macro(sendtype, sendsize);
-    MPID_Datatype_get_size_macro(recvtype, recvsize);
+    MPIR_Datatype_get_size_macro(sendtype, sendsize);
+    MPIR_Datatype_get_size_macro(recvtype, recvsize);
 
     sdata_sz = sendsize * sendcount;
     rdata_sz = recvsize * recvcount;

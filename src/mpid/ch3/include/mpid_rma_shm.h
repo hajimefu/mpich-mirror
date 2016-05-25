@@ -343,13 +343,13 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
     }
 
     /* Get total length of origin data */
-    MPIDU_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
+    MPIR_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
     total_len = origin_dtp_size * origin_count;
 
     MPIR_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
     MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
     basic_type = origin_dtp_ptr->basic_type;
-    MPIDU_Datatype_get_size_macro(basic_type, predefined_dtp_size);
+    MPIR_Datatype_get_size_macro(basic_type, predefined_dtp_size);
     predefined_dtp_count = total_len / predefined_dtp_size;
     MPIDU_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
@@ -490,13 +490,13 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
     }
 
     /* Get total length of origin data */
-    MPIDU_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
+    MPIR_Datatype_get_size_macro(origin_datatype, origin_dtp_size);
     total_len = origin_dtp_size * origin_count;
 
     MPIR_Datatype_get_ptr(origin_datatype, origin_dtp_ptr);
     MPIR_Assert(origin_dtp_ptr != NULL && origin_dtp_ptr->basic_type != MPI_DATATYPE_NULL);
     basic_type = origin_dtp_ptr->basic_type;
-    MPIDU_Datatype_get_size_macro(basic_type, predefined_dtp_size);
+    MPIR_Datatype_get_size_macro(basic_type, predefined_dtp_size);
     predefined_dtp_count = total_len / predefined_dtp_size;
     MPIDU_Datatype_get_extent_macro(basic_type, predefined_dtp_extent);
     MPIR_Assert(predefined_dtp_count > 0 && predefined_dtp_size > 0 && predefined_dtp_extent > 0);
@@ -647,7 +647,7 @@ static inline int MPIDI_CH3I_Shm_cas_op(const void *origin_addr, const void *com
 
     dest_addr = (char *) base + disp_unit * target_disp;
 
-    MPIDU_Datatype_get_size_macro(datatype, len);
+    MPIR_Datatype_get_size_macro(datatype, len);
     MPIR_Memcpy(result_addr, dest_addr, len);
 
     if (MPIR_Compare_equal(compare_addr, dest_addr, datatype)) {
@@ -706,7 +706,7 @@ static inline int MPIDI_CH3I_Shm_fop_op(const void *origin_addr, void *result_ad
 
     dest_addr = (char *) base + disp_unit * target_disp;
 
-    MPIDU_Datatype_get_size_macro(datatype, len);
+    MPIR_Datatype_get_size_macro(datatype, len);
     MPIR_Memcpy(result_addr, dest_addr, len);
 
     uop = MPIR_OP_HDL_TO_FN(op);

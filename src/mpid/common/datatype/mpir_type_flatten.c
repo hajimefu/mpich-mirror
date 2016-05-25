@@ -35,7 +35,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
 
     if (HANDLE_GET_KIND(type) == HANDLE_KIND_BUILTIN) {
 	off_array[0] = 0;
-	MPIDU_Datatype_get_size_macro(type, size_array[0]);
+	MPIR_Datatype_get_size_macro(type, size_array[0]);
 	*array_len_p = 1;
 	return 0;
     }

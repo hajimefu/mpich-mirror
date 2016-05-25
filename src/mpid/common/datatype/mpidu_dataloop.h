@@ -62,7 +62,7 @@
     MPIDU_Datatype_get_loopptr_macro(handle_,lptr_,flag_)
 
 #define DLOOP_Handle_get_size_macro(handle_,size_) \
-    MPIDU_Datatype_get_size_macro(handle_,size_)
+    MPIR_Datatype_get_size_macro(handle_,size_)
 
 #define DLOOP_Handle_get_basic_type_macro(handle_,basic_type_) \
     MPIR_Datatype_get_basic_type(handle_, basic_type_)

@@ -138,7 +138,7 @@ int MPIR_Ibcast_binomial(void *buffer, int count, MPI_Datatype datatype, int roo
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
         MPIR_Pack_size_impl(1, datatype, &type_size);
 
@@ -426,7 +426,7 @@ int MPIR_Ibcast_scatter_rec_dbl_allgather(void *buffer, int count, MPI_Datatype 
 #endif
     MPIR_Assert(is_homogeneous); /* we don't handle the hetero case right now */
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
 
     nbytes = type_size * count;
     status->n_bytes = nbytes;
@@ -677,7 +677,7 @@ int MPIR_Ibcast_scatter_ring_allgather(void *buffer, int count, MPI_Datatype dat
     MPIR_Assert(is_homogeneous); /* we don't handle the hetero case yet */
     MPIR_SCHED_CHKPMEM_MALLOC(status, struct MPIR_Ibcast_status*,
                               sizeof(struct MPIR_Ibcast_status), mpi_errno, "MPI_Status");
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = type_size * count;
     status->n_bytes = nbytes;
     status->curr_bytes = 0;
@@ -802,7 +802,7 @@ int MPIR_Ibcast_SMP(void *buffer, int count, MPI_Datatype datatype, int root, MP
      * possible, and MPI_Pack_size() in other places.
      */
     if (is_homogeneous)
-        MPID_Datatype_get_size_macro(datatype, type_size);
+        MPIR_Datatype_get_size_macro(datatype, type_size);
     else
         MPIR_Pack_size_impl(1, datatype, &type_size);
 
@@ -877,7 +877,7 @@ int MPIR_Ibcast_intra(void *buffer, int count, MPI_Datatype datatype, int root, 
     MPIR_Assert(is_homogeneous); /* we don't handle the hetero case right now */
 
     comm_size = comm_ptr->local_size;
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = type_size * count;
 
     /* simplistic implementation for now */

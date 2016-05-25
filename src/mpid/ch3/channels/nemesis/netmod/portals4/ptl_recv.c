@@ -31,7 +31,7 @@ static void dequeue_req(const ptl_event_t *e)
     rreq->status.MPI_SOURCE = NPTL_MATCH_GET_RANK(e->match_bits);
     rreq->status.MPI_TAG = NPTL_MATCH_GET_TAG(e->match_bits);
 
-    MPIDU_Datatype_get_size_macro(rreq->dev.datatype, r_len);
+    MPIR_Datatype_get_size_macro(rreq->dev.datatype, r_len);
     r_len *= rreq->dev.user_count;
 
     s_len = NPTL_HEADER_GET_LENGTH(e->hdr_data);

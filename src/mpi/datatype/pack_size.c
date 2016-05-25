@@ -32,7 +32,7 @@ int MPI_Pack_size(int incount, MPI_Datatype datatype, MPI_Comm comm, int *size) 
 void MPIR_Pack_size_impl(int incount, MPI_Datatype datatype, MPI_Aint *size)
 {
     MPI_Aint typesize;
-    MPID_Datatype_get_size_macro(datatype, typesize);
+    MPIR_Datatype_get_size_macro(datatype, typesize);
     *size = incount * typesize;
 }
 

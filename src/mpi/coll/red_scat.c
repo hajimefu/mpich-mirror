@@ -298,7 +298,7 @@ int MPIR_Reduce_scatter_intra(const void *sendbuf, void *recvbuf, const int recv
         goto fn_exit;
     }
 
-    MPID_Datatype_get_size_macro(datatype, type_size);
+    MPIR_Datatype_get_size_macro(datatype, type_size);
     nbytes = total_count * type_size;
     
     /* total_count*extent eventually gets malloced. it isn't added to
