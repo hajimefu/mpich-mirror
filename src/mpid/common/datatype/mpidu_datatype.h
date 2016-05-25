@@ -50,26 +50,6 @@
     ((MPIR_Datatype *)ptr)->dataloop##fieldname_ = value_
 #endif
 
-#define MPIDU_Datatype_set_loopsize_macro(a,depth_,hetero_) do {         \
-    void *ptr;								\
-    switch (HANDLE_GET_KIND(a)) {					\
-        case HANDLE_KIND_DIRECT:					\
-            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
-            MPIDU_SET_FIELD(hetero_,depth_,_size);                       \
-            break;							\
-        case HANDLE_KIND_INDIRECT:					\
-            ptr = ((MPIR_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
-            MPIDU_SET_FIELD(hetero_,depth_,_size);                       \
-            break;							\
-        case HANDLE_KIND_INVALID:					\
-        case HANDLE_KIND_BUILTIN:					\
-        default:							\
-            depth_ = 0;                                                 \
-            break;							\
-    }                                                                   \
-} while(0)
-
 /* LB/UB calculation helper macros */
 
 /* MPIDU_DATATYPE_CONTIG_LB_UB()
