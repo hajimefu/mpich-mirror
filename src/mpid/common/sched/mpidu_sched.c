@@ -38,7 +38,7 @@
         {                                                          \
             MPIR_Datatype *dtp_ = NULL;                            \
             MPIR_Datatype_get_ptr((datatype_), dtp_);              \
-            MPID_Datatype_release(dtp_);                           \
+            MPIR_Datatype_release(dtp_);                           \
         }                                                          \
     } while (0)
 

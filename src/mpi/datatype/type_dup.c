@@ -122,7 +122,7 @@ int MPI_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype)
 	    &new_dtp->attributes );
 	if (mpi_errno)
 	{
-            MPID_Datatype_release(new_dtp);
+            MPIR_Datatype_release(new_dtp);
 	    goto fn_fail;
 	}
     }

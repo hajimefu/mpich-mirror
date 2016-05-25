@@ -47,7 +47,7 @@ static int get_count(MPIR_Comm *comm, int tag, void *state)
 static int dtp_release_ref(MPIR_Comm *comm, int tag, void *state)
 {
     MPIR_Datatype *recv_dtp = state;
-    MPID_Datatype_release(recv_dtp);
+    MPIR_Datatype_release(recv_dtp);
     return MPI_SUCCESS;
 }
 

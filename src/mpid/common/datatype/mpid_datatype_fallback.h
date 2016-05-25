@@ -8,7 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-#define MPID_Datatype_release MPIDU_Datatype_release
 #define MPIR_Datatype_valid_ptr MPIDU_Datatype_valid_ptr
 
 #define MPID_Datatype_get_loopdepth_macro MPIDU_Datatype_get_loopdepth_macro

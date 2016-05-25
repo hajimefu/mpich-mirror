@@ -198,7 +198,7 @@ static int MPIR_Datatype_finalize(void *dummy ATTRIBUTE((unused)) )
     for (i=0; mpi_pairtypes[i] != (MPI_Datatype) -1; i++) {
 	if (mpi_pairtypes[i] != MPI_DATATYPE_NULL) {
 	    MPIR_Datatype_get_ptr(mpi_pairtypes[i], dptr);
-	    MPID_Datatype_release(dptr);
+	    MPIR_Datatype_release(dptr);
 	    mpi_pairtypes[i] = MPI_DATATYPE_NULL;
 	}
     }

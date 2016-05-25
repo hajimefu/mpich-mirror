@@ -591,7 +591,7 @@ int MPID_Request_complete(MPIR_Request *req)
 void MPID_Request_finalize(MPIR_Request *req)
 {
     if (req->dev.datatype_ptr != NULL) {
-        MPIDU_Datatype_release(req->dev.datatype_ptr);
+        MPIR_Datatype_release(req->dev.datatype_ptr);
     }
 
     if (req->dev.segment_ptr != NULL) {

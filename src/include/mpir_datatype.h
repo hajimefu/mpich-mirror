@@ -270,6 +270,34 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
         }                                                                      \
     } while (0)
 
+/* MPIR_Datatype_release decrements the reference count on the MPIR_Datatype
+ * and, if the refct is then zero, frees the MPIR_Datatype and associated
+ * structures.
+ */
+#define MPIR_Datatype_release(datatype_ptr) do {                            \
+    int inuse_;                                                             \
+                                                                            \
+    MPIR_Object_release_ref((datatype_ptr),&inuse_);                        \
+    if (!inuse_) {                                                          \
+        int lmpi_errno = MPI_SUCCESS;                                       \
+     if (MPIR_Process.attr_free && datatype_ptr->attributes) {              \
+         lmpi_errno = MPIR_Process.attr_free( datatype_ptr->handle,         \
+                               &datatype_ptr->attributes );                 \
+     }                                                                      \
+     /* LEAVE THIS COMMENTED OUT UNTIL WE HAVE SOME USE FOR THE FREE_FN     \
+     if (datatype_ptr->free_fn) {                                           \
+         mpi_errno = (datatype_ptr->free_fn)( datatype_ptr );               \
+          if (mpi_errno) {                                                  \
+           MPIR_FUNC_TERSE_EXIT(MPID_STATE_MPI_TYPE_FREE);                  \
+           return MPIR_Err_return_comm( 0, FCNAME, mpi_errno );             \
+          }                                                                 \
+     } */                                                                   \
+        if (lmpi_errno == MPI_SUCCESS) {                                    \
+         MPIDU_Datatype_free(datatype_ptr);                                 \
+        }                                                                   \
+    }                                                                       \
+} while(0)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

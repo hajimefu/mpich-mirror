@@ -43,7 +43,7 @@ MPIDI_Win_DoneCB(pami_context_t  context,
                                      req->origin.count,
                                      req->origin.datatype);
           MPID_assert(mpi_errno == MPI_SUCCESS);
-          MPIDU_Datatype_release(req->origin.dt.pointer);
+          MPIR_Datatype_release(req->origin.dt.pointer);
           MPL_free(req->buffer);
           MPL_free(req->user_buffer);
           req->buffer_free = 0;
@@ -88,8 +88,8 @@ MPIDI_Win_DoneCB(pami_context_t  context,
      * which was still needed for communication -- that communication has completed, so now release the ref
      * in the callback to allow the MPIDU_Datatypeto be freed.
      */
-    MPIDU_Datatype_release(req->origin.dt.pointer);
-    MPIDU_Datatype_release(req->target.dt.pointer);
+    MPIR_Datatype_release(req->origin.dt.pointer);
+    MPIR_Datatype_release(req->target.dt.pointer);
   }
   MPIDI_Progress_signal();
 }
