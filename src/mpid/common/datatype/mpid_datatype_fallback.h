@@ -8,10 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-/* Macros */
-#define MPID_DTYPE_BEGINNING MPIDU_DTYPE_BEGINNING
-#define MPID_DTYPE_END MPIDU_DTYPE_END
-
 typedef MPIDU_Datatype MPIR_Datatype;
 typedef MPIDU_Datatype_contents MPIR_Datatype_contents;
 

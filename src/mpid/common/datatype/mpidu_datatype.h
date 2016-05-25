@@ -433,11 +433,6 @@ typedef struct MPIDU_Datatype {
 
 extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
-/* Preallocated datatype objects */
-
-#define MPIDU_DTYPE_BEGINNING  0
-#define MPIDU_DTYPE_END       -1
-
 /* LB/UB calculation helper macros */
 
 /* MPIDU_DATATYPE_CONTIG_LB_UB()

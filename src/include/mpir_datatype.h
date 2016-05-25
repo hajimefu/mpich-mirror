@@ -17,6 +17,8 @@
 /* FIXME: Given that this is relatively static, an adequate alternative is
    to provide a check that this value is valid. */
 #define MPIR_DATATYPE_N_BUILTIN 69
+#define MPIR_DTYPE_BEGINNING  0
+#define MPIR_DTYPE_END       -1
 
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
