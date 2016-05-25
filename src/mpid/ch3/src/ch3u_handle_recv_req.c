@@ -315,7 +315,7 @@ int MPIDI_CH3_ReqHandler_GaccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq
         get_accum_resp_pkt->flags |= MPIDI_CH3_PKT_FLAG_RMA_ACK;
 
     /* check if data is contiguous and get true lb */
-    MPIDU_Datatype_is_contig(rreq->dev.datatype, &is_contig);
+    MPIR_Datatype_is_contig(rreq->dev.datatype, &is_contig);
     MPIDU_Datatype_get_true_lb(rreq->dev.datatype, &dt_true_lb);
 
     resp_req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
@@ -452,7 +452,7 @@ int MPIDI_CH3_ReqHandler_FOPRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq, i
 
     MPIR_Datatype_get_size_macro(rreq->dev.datatype, type_size);
 
-    MPIDU_Datatype_is_contig(rreq->dev.datatype, &is_contig);
+    MPIR_Datatype_is_contig(rreq->dev.datatype, &is_contig);
 
     /* Create response request */
     resp_req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
@@ -1236,7 +1236,7 @@ static inline int perform_get_in_lock_queue(MPIR_Win * win_ptr,
     MPIR_Datatype_get_size_macro(get_pkt->datatype, type_size);
     MPIR_Assign_trunc(len, get_pkt->count * type_size, size_t);
 
-    MPIDU_Datatype_is_contig(get_pkt->datatype, &is_contig);
+    MPIR_Datatype_is_contig(get_pkt->datatype, &is_contig);
 
     if (get_pkt->flags & MPIDI_CH3_PKT_FLAG_RMA_IMMED_RESP) {
         void *src = (void *) (get_pkt->addr), *dest = (void *) (get_resp_pkt->info.data);
@@ -1465,7 +1465,7 @@ static inline int perform_get_acc_in_lock_queue(MPIR_Win * win_ptr,
 
     sreq->dev.user_buf = (void *) MPL_malloc(recv_count * type_size);
 
-    MPIDU_Datatype_is_contig(get_accum_pkt->datatype, &is_contig);
+    MPIR_Datatype_is_contig(get_accum_pkt->datatype, &is_contig);
 
     /* NOTE: 'copy data + ACC' needs to be atomic */
 
@@ -1568,7 +1568,7 @@ static inline int perform_fop_in_lock_queue(MPIR_Win * win_ptr,
 
     MPIR_Datatype_get_size_macro(fop_pkt->datatype, type_size);
 
-    MPIDU_Datatype_is_contig(fop_pkt->datatype, &is_contig);
+    MPIR_Datatype_is_contig(fop_pkt->datatype, &is_contig);
 
     if (fop_pkt->type == MPIDI_CH3_PKT_FOP_IMMED) {
         MPIDI_Pkt_init(fop_resp_pkt, MPIDI_CH3_PKT_FOP_RESP_IMMED);

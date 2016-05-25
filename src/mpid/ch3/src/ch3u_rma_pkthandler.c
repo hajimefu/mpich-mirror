@@ -512,7 +512,7 @@ int MPIDI_CH3_PktHandler_Get(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
         /* length of target data */
         MPIR_Datatype_get_size_macro(get_pkt->datatype, type_size);
 
-        MPIDU_Datatype_is_contig(get_pkt->datatype, &is_contig);
+        MPIR_Datatype_is_contig(get_pkt->datatype, &is_contig);
 
         if (get_pkt->flags & MPIDI_CH3_PKT_FLAG_RMA_IMMED_RESP) {
             MPIR_Assign_trunc(len, get_pkt->count * type_size, size_t);

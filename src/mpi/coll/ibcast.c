@@ -119,7 +119,7 @@ int MPIR_Ibcast_binomial(void *buffer, int count, MPI_Datatype datatype, int roo
         goto fn_exit;
     }
 
-    MPID_Datatype_is_contig(datatype, &is_contig);
+    MPIR_Datatype_is_contig(datatype, &is_contig);
 
     is_homogeneous = 1;
 #ifdef MPID_HAS_HETERO

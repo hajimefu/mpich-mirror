@@ -256,6 +256,20 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
     }                                                                   \
 } while(0)
 
+/* helper macro: takes an MPI_Datatype handle value and returns TRUE in
+ * (*is_config_) if the type is contiguous */
+#define MPIR_Datatype_is_contig(dtype_, is_contig_)                            \
+    do {                                                                       \
+        if (HANDLE_GET_KIND(dtype_) == HANDLE_KIND_BUILTIN) {                  \
+            *(is_contig_) = TRUE;                                              \
+        }                                                                      \
+        else {                                                                 \
+            MPIR_Datatype *dtp_ = NULL;                                        \
+            MPIR_Datatype_get_ptr((dtype_), dtp_);                             \
+            *(is_contig_) = dtp_->is_contig;                                   \
+        }                                                                      \
+    } while (0)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

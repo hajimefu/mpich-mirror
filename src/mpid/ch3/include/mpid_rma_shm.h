@@ -383,7 +383,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
         MPIDU_Segment_pack(seg, first, &last, packed_buf);
         MPIDU_Segment_free(seg);
 
-        MPIDU_Datatype_is_contig(basic_type, &is_predef_contig);
+        MPIR_Datatype_is_contig(basic_type, &is_predef_contig);
 
         if (!is_predef_contig) {
             void *tmpbuf = MPL_malloc(stream_count * predefined_dtp_extent);
@@ -530,7 +530,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
         MPIDU_Segment_pack(seg, first, &last, packed_buf);
         MPIDU_Segment_free(seg);
 
-        MPIDU_Datatype_is_contig(basic_type, &is_predef_contig);
+        MPIR_Datatype_is_contig(basic_type, &is_predef_contig);
 
         if (!is_predef_contig) {
             void *tmpbuf = MPL_malloc(stream_count * predefined_dtp_extent);

@@ -135,8 +135,8 @@ int MPIDI_CH3I_Put(const void *origin_addr, int origin_count, MPI_Datatype
             MPIR_Datatype_add_ref(dtp);
         }
 
-        MPIDU_Datatype_is_contig(origin_datatype, &is_origin_contig);
-        MPIDU_Datatype_is_contig(target_datatype, &is_target_contig);
+        MPIR_Datatype_is_contig(origin_datatype, &is_origin_contig);
+        MPIR_Datatype_is_contig(target_datatype, &is_target_contig);
 
         /* Judge if we can use IMMED data packet */
         if (MPIR_DATATYPE_IS_PREDEFINED(origin_datatype) &&
@@ -314,8 +314,8 @@ int MPIDI_CH3I_Get(void *origin_addr, int origin_count, MPI_Datatype
             MPIR_Datatype_add_ref(dtp);
         }
 
-        MPIDU_Datatype_is_contig(origin_datatype, &is_origin_contig);
-        MPIDU_Datatype_is_contig(target_datatype, &is_target_contig);
+        MPIR_Datatype_is_contig(origin_datatype, &is_origin_contig);
+        MPIR_Datatype_is_contig(target_datatype, &is_target_contig);
 
         MPIR_Datatype_get_size_macro(target_datatype, target_type_size);
         MPIR_Assign_trunc(target_data_sz, target_count * target_type_size, intptr_t);
@@ -514,8 +514,8 @@ int MPIDI_CH3I_Accumulate(const void *origin_addr, int origin_count, MPI_Datatyp
             }
         }
 
-        MPIDU_Datatype_is_contig(origin_datatype, &is_origin_contig);
-        MPIDU_Datatype_is_contig(target_datatype, &is_target_contig);
+        MPIR_Datatype_is_contig(origin_datatype, &is_origin_contig);
+        MPIR_Datatype_is_contig(target_datatype, &is_target_contig);
 
         /* Judge if we can use IMMED data packet */
         if (MPIR_DATATYPE_IS_PREDEFINED(origin_datatype) &&
@@ -758,14 +758,14 @@ int MPIDI_CH3I_Get_accumulate(const void *origin_addr, int origin_count,
         }
 
         if (is_empty_origin == FALSE) {
-            MPIDU_Datatype_is_contig(origin_datatype, &is_origin_contig);
+            MPIR_Datatype_is_contig(origin_datatype, &is_origin_contig);
         }
         else {
             /* If origin buffer is empty, mark origin data as contig data */
             is_origin_contig = 1;
         }
-        MPIDU_Datatype_is_contig(target_datatype, &is_target_contig);
-        MPIDU_Datatype_is_contig(result_datatype, &is_result_contig);
+        MPIR_Datatype_is_contig(target_datatype, &is_target_contig);
+        MPIR_Datatype_is_contig(result_datatype, &is_result_contig);
 
         /* Judge if we can use IMMED data packet */
         if ((is_empty_origin == TRUE || MPIR_DATATYPE_IS_PREDEFINED(origin_datatype)) &&
@@ -1172,7 +1172,7 @@ int MPID_Fetch_and_op(const void *origin_addr, void *result_addr,
         MPIR_Datatype_get_size_macro(datatype, type_size);
         MPIR_Assert(type_size <= sizeof(MPIDI_CH3_FOP_Immed_u));
 
-        MPIDU_Datatype_is_contig(datatype, &is_contig);
+        MPIR_Datatype_is_contig(datatype, &is_contig);
 
         if (is_contig) {
             /* Judge if we can use IMMED data packet */

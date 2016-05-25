@@ -817,7 +817,7 @@ int llc_poll(int in_blocking_poll, llc_send_f sfnc, llc_recv_f rfnc)
                 if (req->kind != MPIR_REQUEST_KIND__MPROBE) {
                     /* Unpack non-contiguous dt */
                     int is_contig;
-                    MPIDU_Datatype_is_contig(req->dev.datatype, &is_contig);
+                    MPIR_Datatype_is_contig(req->dev.datatype, &is_contig);
                     if (!is_contig) {
                         dprintf("llc_poll,unpack noncontiguous data to user buffer\n");
 
