@@ -53,7 +53,7 @@
     MPIR_Datatype_get_loopptr_macro(handle_,lptr_,flag_)
 
 #define DLOOP_Handle_set_loopptr_macro(handle_,lptr_,flag_) \
-    MPIDU_Datatype_set_loopptr_macro(handle_,lptr_,flag_)
+    MPIR_Datatype_set_loopptr_macro(handle_,lptr_,flag_)
 
 #define DLOOP_Handle_set_loopdepth_macro(handle_,depth_,flag_) \
     MPIR_Datatype_set_loopdepth_macro(handle_,depth_,flag_)
