@@ -95,7 +95,7 @@ int MPI_Unpack_external(const char datarep[],
 
 		MPID_Datatype_get_ptr(datatype, datatype_ptr);
 		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
-		MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
+		MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
 	    }
 		
 	    /* If datatye_ptr is not valid, it will be reset to null */

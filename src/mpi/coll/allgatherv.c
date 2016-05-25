@@ -1050,7 +1050,7 @@ int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
                     MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                    MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
+                    MPIR_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 }
                 MPIR_ERRTEST_USERBUFFER(sendbuf,sendcount,sendtype,mpi_errno);
@@ -1080,7 +1080,7 @@ int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
                 MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
+                MPIR_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
             }
             for (i=0; i<comm_size; i++) {

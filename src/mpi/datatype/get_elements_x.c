@@ -414,7 +414,7 @@ int MPI_Get_elements_x(const MPI_Status *status, MPI_Datatype datatype, MPI_Coun
                 MPIR_Datatype *datatype_ptr = NULL;
                 MPID_Datatype_get_ptr(datatype, datatype_ptr);
                 MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
-                MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
+                MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
             }
 
             /* TODO more checks may be appropriate (counts, in_place, buffer aliasing, etc) */

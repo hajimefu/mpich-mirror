@@ -1175,7 +1175,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                     MPID_Datatype_get_ptr(datatype, datatype_ptr);
                     MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                    MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
+                    MPIR_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                 }
 
@@ -1204,7 +1204,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                         MPID_Datatype_get_ptr(datatype, datatype_ptr);
                         MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     MPIR_ERRTEST_RECVBUF_INPLACE(recvbuf, count, mpi_errno);
@@ -1218,7 +1218,7 @@ int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
                         MPID_Datatype_get_ptr(datatype, datatype_ptr);
                         MPIR_Datatype_valid_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( datatype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( datatype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     MPIR_ERRTEST_SENDBUF_INPLACE(sendbuf, count, mpi_errno);

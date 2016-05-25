@@ -163,6 +163,21 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
 #define MPIR_Datatype_add_ref(datatype_ptr) MPIR_Object_add_ref((datatype_ptr))
 
+/* to be used only after MPIR_Datatype_valid_ptr(); the check on
+ * err == MPI_SUCCESS ensures that we won't try to dereference the
+ * pointer if something has already been detected as wrong.
+ */
+#define MPIR_Datatype_committed_ptr(ptr,err) do {               \
+    if ((err == MPI_SUCCESS) && !((ptr)->is_committed))         \
+        err = MPIR_Err_create_code(MPI_SUCCESS,                 \
+                                   MPIR_ERR_RECOVERABLE,        \
+                                   FCNAME,                      \
+                                   __LINE__,                    \
+                                   MPI_ERR_TYPE,                \
+                                   "**dtypecommit",             \
+                                   0);                          \
+} while(0)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

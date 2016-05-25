@@ -89,7 +89,7 @@ int MPIR_Ext_datatype_iscommitted(MPI_Datatype datatype)
         MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-        MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
+        MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 

@@ -275,21 +275,6 @@
 
 #define MPIDU_Datatype_valid_ptr(ptr,err) MPIR_Valid_ptr_class(Datatype,ptr,MPI_ERR_TYPE,err)
 
-/* to be used only after MPIDU_Datatype_valid_ptr(); the check on
- * err == MPI_SUCCESS ensures that we won't try to dereference the
- * pointer if something has already been detected as wrong.
- */
-#define MPIDU_Datatype_committed_ptr(ptr,err) do {               \
-    if ((err == MPI_SUCCESS) && !((ptr)->is_committed))		\
-        err = MPIR_Err_create_code(MPI_SUCCESS,			\
-				   MPIR_ERR_RECOVERABLE,	\
-				   FCNAME,			\
-				   __LINE__,			\
-				   MPI_ERR_TYPE,		\
-				   "**dtypecommit",		\
-				   0);				\
-} while(0)
-
 /* LB/UB calculation helper macros */
 
 /* MPIDU_DATATYPE_CONTIG_LB_UB()

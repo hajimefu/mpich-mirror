@@ -232,7 +232,7 @@ int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
                         MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     for (i=0; i<comm_size; i++) {
@@ -265,7 +265,7 @@ int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
                         MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     MPIR_ERRTEST_USERBUFFER(recvbuf,recvcount,recvtype,mpi_errno);
@@ -284,7 +284,7 @@ int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[
                         MPID_Datatype_get_ptr(sendtype, sendtype_ptr);
                         MPIR_Datatype_valid_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( sendtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     for (i=0; i<comm_size; i++) {
@@ -302,7 +302,7 @@ int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[
                         MPID_Datatype_get_ptr(recvtype, recvtype_ptr);
                         MPIR_Datatype_valid_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
-                        MPID_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
+                        MPIR_Datatype_committed_ptr( recvtype_ptr, mpi_errno );
                         if (mpi_errno != MPI_SUCCESS) goto fn_fail;
                     }
                     MPIR_ERRTEST_RECVBUF_INPLACE(recvbuf, recvcount, mpi_errno);

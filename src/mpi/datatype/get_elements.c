@@ -94,7 +94,7 @@ int MPI_Get_elements(const MPI_Status *status, MPI_Datatype datatype, int *count
 		MPIR_Datatype_valid_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
-                MPID_Datatype_committed_ptr(datatype_ptr, mpi_errno);
+                MPIR_Datatype_committed_ptr(datatype_ptr, mpi_errno);
                 if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 	    }
         }
