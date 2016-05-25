@@ -434,15 +434,6 @@ typedef struct MPIDU_Datatype {
 extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
 /* Preallocated datatype objects */
-/* This value should be set to greatest value used as the type index suffix in
- * the predefined handles.  That is, look at the last two hex digits of all
- * predefined datatype handles, take the greatest one, and convert it to decimal
- * here. */
-/* FIXME calculating this value this way is foolish, we should make this more
- * automatic and less error prone */
-/* FIXME: Given that this is relatively static, an adequate alternative is
-   to provide a check that this value is valid. */
-#define MPIDU_DATATYPE_N_BUILTIN 69
 
 #define MPIDU_DTYPE_BEGINNING  0
 #define MPIDU_DTYPE_END       -1
