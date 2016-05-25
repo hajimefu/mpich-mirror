@@ -382,4 +382,28 @@ static inline size_t MPIDI_NM_am_inject_max_sz(void)
     return MPIDI_Global.max_buffered_send - sizeof(MPIDI_OFI_am_header_t);
 }
 
+static inline int MPIDI_NM_long_am_matched(MPIR_Request * req)
+{
+    int mpi_errno = MPI_SUCCESS;
+    MPIDI_CH4U_send_long_ack_msg_t msg;
+
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_AM_MATCHED);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_AM_MATCHED);
+
+    msg.sreq_ptr = (MPIDI_CH4U_REQUEST(req, req->rreq.peer_req_ptr));
+    msg.rreq_ptr = (uint64_t)req;
+    MPIR_Assert((void *)msg.sreq_ptr != NULL);
+    mpi_errno = MPIDI_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(req, tag)),
+                                             MPIDI_CH4U_REQUEST(req, src_rank),
+                                             MPIDI_CH4U_SEND_LONG_ACK,
+                                             &msg, sizeof(msg));
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
+ fn_exit:
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_AM_MATCHED);
+    return mpi_errno;
+ fn_fail:
+    goto fn_exit;
+}
+
 #endif /* NETMOD_OFI_AM_H_INCLUDED */

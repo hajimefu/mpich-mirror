@@ -409,18 +409,35 @@ static inline int MPIDI_OFI_do_send_am(int           rank,
     MPI_Aint        dt_true_lb, last;
     MPIR_Datatype  *dt_ptr;
     int             need_lock = !is_reply;
-    size_t          threshold;
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_DO_SEND_AM);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_DO_SEND_AM);
 
-    MPIDI_OFI_AMREQUEST(sreq, req_hdr) = NULL;
-    mpi_errno = MPIDI_OFI_am_init_request(am_hdr, am_hdr_sz, sreq);
-
-    if(mpi_errno) MPIR_ERR_POP(mpi_errno);
-
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     send_buf = (char *) buf + dt_true_lb;
+
+    if (handler_id == MPIDI_CH4U_SEND &&
+        am_hdr_sz + data_sz + sizeof(MPIDI_OFI_am_header_t) > MPIDI_OFI_DEFAULT_SHORT_SEND_SIZE) {
+        MPIDI_CH4U_send_long_req_msg_t lreq_hdr;
+
+        MPIR_Memcpy(&lreq_hdr.hdr, am_hdr, am_hdr_sz);
+        lreq_hdr.data_sz = data_sz;
+        lreq_hdr.sreq_ptr = (uint64_t)sreq;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).src_buf = buf;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).count = count;
+        dtype_add_ref_if_not_builtin(datatype);
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).datatype = datatype;
+        MPIDI_CH4U_REQUEST(sreq, req->lreq).msg_tag = lreq_hdr.hdr.msg_tag;
+        MPIDI_CH4U_REQUEST(sreq, src_rank) = rank;
+        mpi_errno = MPIDI_NM_inject_am_hdr(rank, comm, MPIDI_CH4U_SEND_LONG_REQ,
+                                           &lreq_hdr, sizeof(lreq_hdr), NULL);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+        goto fn_exit;
+    }
+
+    MPIDI_OFI_AMREQUEST(sreq, req_hdr) = NULL;
+    mpi_errno = MPIDI_OFI_am_init_request(am_hdr, am_hdr_sz, sreq);
+    if(mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     if(!dt_contig) {
         size_t segment_first;
@@ -441,14 +458,15 @@ static inline int MPIDI_OFI_do_send_am(int           rank,
         MPIDI_OFI_AMREQUEST_HDR(sreq, pack_buffer) = NULL;
     }
 
-    /* We don't want to do the long send if CH4R is doing eager send.
-       This looks somewhat ad-hoc, should be addressed in the upcoming AM API change. */
-    threshold = MPL_MAX(MPIDI_OFI_DEFAULT_SHORT_SEND_SIZE, MPIR_CVAR_CH4R_EAGER_THRESHOLD + am_hdr_sz + sizeof(MPIDI_OFI_am_header_t));
-    mpi_errno = ((am_hdr_sz + data_sz + sizeof(MPIDI_OFI_am_header_t)) <= threshold) ?
-                MPIDI_OFI_send_am_short(rank, comm, handler_id, MPIDI_OFI_AMREQUEST_HDR(sreq, am_hdr),
-                                                am_hdr_sz, send_buf, data_sz, sreq, need_lock) :
-                MPIDI_OFI_send_am_long(rank, comm, handler_id, MPIDI_OFI_AMREQUEST_HDR(sreq, am_hdr),
-                                               am_hdr_sz, send_buf, data_sz, sreq, need_lock);
+    if (am_hdr_sz + data_sz + sizeof(MPIDI_OFI_am_header_t) <= MPIDI_OFI_DEFAULT_SHORT_SEND_SIZE) {
+        mpi_errno = MPIDI_OFI_send_am_short(rank, comm, handler_id, MPIDI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+                                            am_hdr_sz, send_buf, data_sz, sreq, need_lock);
+    } else {
+        mpi_errno = MPIDI_OFI_send_am_long(rank, comm, handler_id, MPIDI_OFI_AMREQUEST_HDR(sreq, am_hdr),
+                                           am_hdr_sz, send_buf, data_sz, sreq, need_lock);
+    }
+    if (mpi_errno) MPIR_ERR_POP(mpi_errno);
+
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_DO_SEND_AM);
     return mpi_errno;

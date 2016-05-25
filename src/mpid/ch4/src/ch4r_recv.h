@@ -143,24 +143,14 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
             MPIDI_CH4U_REQUEST(unexp_req, req->status) |= MPIDI_CH4U_REQ_MATCHED;
         }
         else if (MPIDI_CH4U_REQUEST(unexp_req, req->status) & MPIDI_CH4U_REQ_LONG_RTS) {
-            MPIDI_CH4U_send_long_ack_msg_t msg;
-
-            /* Matching receive is now posted, sending CTS to the peer */
-            msg.sreq_ptr = MPIDI_CH4U_REQUEST(unexp_req, req->rreq.peer_req_ptr);
-            msg.rreq_ptr = (uint64_t) unexp_req;
-            MPIR_Assert((void *)msg.sreq_ptr != NULL);
-
-            mpi_errno = MPIDI_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(unexp_req, tag)),
-                                                         MPIDI_CH4U_REQUEST(unexp_req, src_rank),
-                                                         MPIDI_CH4U_SEND_LONG_ACK,
-                                                         &msg, sizeof(msg));
-            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-
+            /* Matching receive is now posted, tell the netmod */
             dtype_add_ref_if_not_builtin(datatype);
             MPIDI_CH4U_REQUEST(unexp_req, datatype) = datatype;
             MPIDI_CH4U_REQUEST(unexp_req, buffer) = (char *) buf;
             MPIDI_CH4U_REQUEST(unexp_req, count) = count;
             *request = unexp_req;
+            mpi_errno = MPIDI_NM_long_am_matched(unexp_req);
+            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             goto fn_exit;
         }
         else {
@@ -314,23 +304,13 @@ __CH4_INLINE__ int MPIDI_CH4U_imrecv(void *buf,
         MPIDI_CH4U_REQUEST(message, req->status) |= MPIDI_CH4U_REQ_UNEXP_CLAIMED;
     }
     else if (MPIDI_CH4U_REQUEST(message, req->status) & MPIDI_CH4U_REQ_LONG_RTS) {
-        MPIDI_CH4U_send_long_ack_msg_t msg;
-
-        /* Matching receive is now posted, sending CTS to the peer */
-        msg.sreq_ptr = MPIDI_CH4U_REQUEST(message, req->rreq.peer_req_ptr);
-        msg.rreq_ptr = (uint64_t) message;
-        MPIR_Assert((void *)msg.sreq_ptr != NULL);
-        mpi_errno = MPIDI_NM_inject_am_hdr_reply(MPIDI_CH4U_get_context(MPIDI_CH4U_REQUEST(message, tag)),
-                                                     MPIDI_CH4U_REQUEST(message, src_rank),
-                                                     MPIDI_CH4U_SEND_LONG_ACK,
-                                                     &msg, sizeof(msg));
-        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-
+        /* Matching receive is now posted, tell the netmod */
         message->kind = MPIR_REQUEST_KIND__RECV;
         dtype_add_ref_if_not_builtin(datatype);
         MPIDI_CH4U_REQUEST(message, datatype) = datatype;
         MPIDI_CH4U_REQUEST(message, buffer) = (char *) buf;
         MPIDI_CH4U_REQUEST(message, count) = count;
+        mpi_errno = MPIDI_NM_long_am_matched(message);
     }
     else {
         mpi_errno = MPIDI_CH4U_unexp_mrecv_cmpl_handler(message);

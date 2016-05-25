@@ -100,6 +100,10 @@ MPIDI_NM_STATIC_INLINE_PREFIX size_t MPIDI_NM_am_inject_max_sz(void) {
     return MPIDI_NM_func->am_inject_max_sz();
 };
 
+MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_long_am_matched(MPIR_Request * req) {
+    return MPIDI_NM_func->long_am_matched(req)
+}
+
 MPIDI_NM_STATIC_INLINE_PREFIX int MPIDI_NM_comm_get_lpid(MPIR_Comm * comm_ptr, int idx, int * lpid_ptr, MPL_bool is_remote) {
     return MPIDI_NM_func->comm_get_lpid( comm_ptr, idx, lpid_ptr, is_remote);
 };

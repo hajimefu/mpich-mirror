@@ -43,16 +43,6 @@ cvars:
       description : >-
         If non-empty, this cvar specifies which shm module to use
 
-    - name        : MPIR_CVAR_CH4R_EAGER_THRESHOLD
-      category    : CH4
-      type        : int
-      default     : 32768
-      class       : device
-      verbosity   : MPI_T_VERBOSITY_USER_BASIC
-      scope       : MPI_T_SCOPE_ALL_EQ
-      description : >-
-        Specifies eager/rendezvous threshold for CH4R send routines
-
 === END_MPI_T_CVAR_INFO_BLOCK ===
 */
 

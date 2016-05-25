@@ -1473,6 +1473,8 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
         MPIDI_CH4U_REQUEST(rreq, count) = lreq_hdr->data_sz;
         MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_LONG_RTS;
         MPIDI_CH4U_REQUEST(rreq, req->rreq.peer_req_ptr) = lreq_hdr->sreq_ptr;
+        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
+        MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
 
         /* MPIDI_CS_ENTER(); */
         if (root_comm) {
@@ -1485,24 +1487,16 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
         /* MPIDI_CS_EXIT(); */
     }
     else {
-        MPIDI_CH4U_send_long_ack_msg_t msg;
-
+        /* Matching receive was posted, tell the netmod */
         MPIR_Comm_release(root_comm); /* -1 for posted_list */
-
-        /* Matching receive was posted; sending CTS */
-        msg.sreq_ptr = lreq_hdr->sreq_ptr;
-        msg.rreq_ptr = (uint64_t) rreq;
-        MPIR_Assert((void *) msg.sreq_ptr != NULL);
-        mpi_errno = MPIDI_NM_inject_am_hdr_reply(context_id,
-                                                     hdr->src_rank,
-                                                     MPIDI_CH4U_SEND_LONG_ACK,
-                                                     &msg, sizeof(msg));
+        MPIDI_CH4U_REQUEST(rreq, req->status) |= MPIDI_CH4U_REQ_LONG_RTS;
+        MPIDI_CH4U_REQUEST(rreq, req->rreq.peer_req_ptr) = lreq_hdr->sreq_ptr;
+        MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
+        MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
+        mpi_errno = MPIDI_NM_long_am_matched(rreq);
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
     }
-
-    MPIDI_CH4U_REQUEST(rreq, tag) = hdr->msg_tag;
-    MPIDI_CH4U_REQUEST(rreq, src_rank) = hdr->src_rank;
 
 fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_CH4U_SEND_LONG_REQ_HANDLER);

@@ -44,7 +44,8 @@ MPIDI_NM_funcs_t MPIDI_NM_ofi_funcs = {
     MPIDI_NM_send_am_reply,
     MPIDI_NM_send_amv_reply,
     MPIDI_NM_am_hdr_max_sz,
-    MPIDI_NM_am_inject_max_sz
+    MPIDI_NM_am_inject_max_sz,
+    MPIDI_NM_long_am_matched
 };
 
 MPIDI_NM_native_funcs_t MPIDI_NM_native_ofi_funcs = {
