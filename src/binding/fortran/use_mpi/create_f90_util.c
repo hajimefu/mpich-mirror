@@ -114,8 +114,8 @@ int MPIR_Create_unnamed_predefined( MPI_Datatype old, int combiner,
             /* we used MPID_Type_contiguous and then stomped it's contents
              * information, so make sure that the basic_type is usable by
              * MPID_Type_commit */
-            MPID_Datatype_get_basic_type(old, old_basic);
-            MPID_Datatype_get_basic_type(new_dtp->handle, new_basic);
+            MPIR_Datatype_get_basic_type(old, old_basic);
+            MPIR_Datatype_get_basic_type(new_dtp->handle, new_basic);
             MPIR_Assert(new_basic == old_basic);
         }
 #endif

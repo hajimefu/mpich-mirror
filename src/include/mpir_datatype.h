@@ -180,6 +180,35 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
 #define MPIR_Datatype_get_basic_size(a) (((a)&0x0000ff00)>>8)
 
+#define MPIR_Datatype_get_basic_type(a,basic_type_) do {            \
+    void *ptr;                                                      \
+    switch (HANDLE_GET_KIND(a)) {                                   \
+        case HANDLE_KIND_DIRECT:                                    \
+            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);             \
+            basic_type_ = ((MPIR_Datatype *) ptr)->basic_type;      \
+            break;                                                  \
+        case HANDLE_KIND_INDIRECT:                                  \
+            ptr = ((MPIR_Datatype *)                                \
+             MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));   \
+            basic_type_ = ((MPIR_Datatype *) ptr)->basic_type;      \
+            break;                                                  \
+        case HANDLE_KIND_BUILTIN:                                   \
+            basic_type_ = a;                                        \
+            break;                                                  \
+        case HANDLE_KIND_INVALID:                                   \
+        default:                                                    \
+         basic_type_ = 0;                                           \
+         break;                                                     \
+                                                                    \
+    }                                                               \
+    /* This macro returns the builtin type, if 'basic_type' is not  \
+     * a builtin type, it must be a pair type composed of different \
+     * builtin types, so we return MPI_DATATYPE_NULL here.          \
+     */                                                             \
+    if (HANDLE_GET_KIND(basic_type_) != HANDLE_KIND_BUILTIN)        \
+        basic_type_ = MPI_DATATYPE_NULL;                            \
+ } while(0)
+
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );

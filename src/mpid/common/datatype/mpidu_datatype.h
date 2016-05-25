@@ -21,35 +21,6 @@
    that store data on a per-basic type basis */
 #define MPIDU_Datatype_get_basic_id(a) ((a)&0x000000ff)
 
-#define MPIDU_Datatype_get_basic_type(a,basic_type_) do {                    \
-    void *ptr;								\
-    switch (HANDLE_GET_KIND(a)) {					\
-        case HANDLE_KIND_DIRECT:					\
-            ptr = MPIR_Datatype_direct+HANDLE_INDEX(a);			\
-            basic_type_ = ((MPIR_Datatype *) ptr)->basic_type;			\
-            break;							\
-        case HANDLE_KIND_INDIRECT:					\
-            ptr = ((MPIR_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
-            basic_type_ = ((MPIR_Datatype *) ptr)->basic_type;			\
-            break;							\
-        case HANDLE_KIND_BUILTIN:					\
-            basic_type_ = a;						\
-            break;							\
-        case HANDLE_KIND_INVALID:					\
-        default:							\
-	    basic_type_ = 0;						\
-	    break;							\
- 									\
-    }									\
-    /* This macro returns the builtin type, if 'basic_type' is not      \
-     * a builtin type, it must be a pair type composed of different     \
-     * builtin types, so we return MPI_DATATYPE_NULL here.              \
-     */                                                                 \
-    if (HANDLE_GET_KIND(basic_type_) != HANDLE_KIND_BUILTIN)                \
-        basic_type_ = MPI_DATATYPE_NULL;                                    \
- } while(0)
-
 /* MPIDU_Datatype_release decrements the reference count on the MPIR_Datatype
  * and, if the refct is then zero, frees the MPIR_Datatype and associated
  * structures.

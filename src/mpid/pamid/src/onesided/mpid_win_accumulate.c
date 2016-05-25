@@ -317,8 +317,8 @@ MPID_Accumulate(const void   *origin_addr,
   {
     win->mpid.sync.total += req->target.dt.num_contig;
     MPI_Datatype basic_type = MPI_DATATYPE_NULL;
-    MPIDU_Datatype_get_basic_type(origin_datatype, basic_type);
-    /* MPIDU_Datatype_get_basic_type() doesn't handle the struct types */
+    MPIR_Datatype_get_basic_type(origin_datatype, basic_type);
+    /* MPIR_Datatype_get_basic_type() doesn't handle the struct types */
     if ((origin_datatype == MPI_FLOAT_INT)  ||
         (origin_datatype == MPI_DOUBLE_INT) ||
         (origin_datatype == MPI_LONG_INT)   ||

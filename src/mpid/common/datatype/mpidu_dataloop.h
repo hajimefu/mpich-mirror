@@ -65,7 +65,7 @@
     MPIDU_Datatype_get_size_macro(handle_,size_)
 
 #define DLOOP_Handle_get_basic_type_macro(handle_,basic_type_) \
-    MPIDU_Datatype_get_basic_type(handle_, basic_type_)
+    MPIR_Datatype_get_basic_type(handle_, basic_type_)
 
 #define DLOOP_Handle_get_extent_macro(handle_,extent_) \
     MPIDU_Datatype_get_extent_macro(handle_,extent_)

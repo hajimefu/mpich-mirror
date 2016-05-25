@@ -211,7 +211,7 @@ int MPID_Fetch_and_op(const void *origin_addr, void *result_addr,
       return MPI_SUCCESS;
 
   MPI_Datatype basic_type = MPI_DATATYPE_NULL;
-  MPIDU_Datatype_get_basic_type(datatype, basic_type);
+  MPIR_Datatype_get_basic_type(datatype, basic_type);
   if ((datatype == MPI_FLOAT_INT)  ||
       (datatype == MPI_DOUBLE_INT) ||
       (datatype == MPI_LONG_INT)   ||
