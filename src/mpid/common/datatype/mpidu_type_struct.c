@@ -173,7 +173,7 @@ int MPIDU_Type_struct(int count,
 #endif
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {
@@ -206,7 +206,7 @@ int MPIDU_Type_struct(int count,
 
     if (i == count)
     {
-	MPIR_Handle_obj_free(&MPIDU_Datatype_mem, new_dtp);
+	MPIR_Handle_obj_free(&MPIR_Datatype_mem, new_dtp);
 	return MPIDU_Type_zerolen(newtype);
     }
 

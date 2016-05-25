@@ -50,7 +50,7 @@ int MPIDU_Type_blockindexed(int count,
     if (count == 0) return MPIDU_Type_zerolen(newtype);
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {

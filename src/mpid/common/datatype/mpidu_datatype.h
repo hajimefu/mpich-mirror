@@ -33,7 +33,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             basic_type_ = ((MPIDU_Datatype *) ptr)->basic_type;			\
             break;							\
         case HANDLE_KIND_BUILTIN:					\
@@ -92,7 +92,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             size_ = ((MPIDU_Datatype *) ptr)->size;			\
             break;							\
         case HANDLE_KIND_BUILTIN:					\
@@ -145,7 +145,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_GET_FIELD(hetero_,depth_,_depth);                      \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -165,7 +165,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_GET_FIELD(hetero_,depth_,_size);                       \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -185,7 +185,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_GET_FIELD(hetero_,lptr_,);                             \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -204,7 +204,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_SET_FIELD(hetero_,depth_,_depth);                      \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -224,7 +224,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_SET_FIELD(hetero_,depth_,_size);                       \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -244,7 +244,7 @@
             break;							\
         case HANDLE_KIND_INDIRECT:					\
             ptr = ((MPIDU_Datatype *)					\
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	\
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	\
             MPIDU_SET_FIELD(hetero_,lptr_,);                             \
             break;							\
         case HANDLE_KIND_INVALID:					\
@@ -264,7 +264,7 @@
             break;							    \
         case HANDLE_KIND_INDIRECT:					    \
             ptr = ((MPIDU_Datatype *)					    \
-		   MPIR_Handle_get_ptr_indirect(a,&MPIDU_Datatype_mem));	    \
+		   MPIR_Handle_get_ptr_indirect(a,&MPIR_Datatype_mem));	    \
             extent_ = ((MPIDU_Datatype *) ptr)->extent;			    \
             break;							    \
         case HANDLE_KIND_INVALID:					    \
@@ -431,7 +431,7 @@ typedef struct MPIDU_Datatype {
 #endif
 } MPIDU_Datatype;
 
-extern MPIR_Object_alloc_t MPIDU_Datatype_mem;
+extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
 /* Preallocated datatype objects */
 /* This value should be set to greatest value used as the type index suffix in

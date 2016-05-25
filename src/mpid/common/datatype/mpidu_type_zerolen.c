@@ -30,7 +30,7 @@ int MPIDU_Type_zerolen(MPI_Datatype *newtype)
     MPIDU_Datatype *new_dtp;
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp)
     {

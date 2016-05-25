@@ -8,11 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-/* Variables */
-#define MPIR_Datatype_direct MPIR_Datatype_direct
-#define MPIR_Datatype_builtin MPIDU_Datatype_builtin
-#define MPIR_Datatype_mem MPIDU_Datatype_mem
-
 /* Macros */
 #define MPIR_DATATYPE_N_BUILTIN MPIDU_DATATYPE_N_BUILTIN
 #define MPID_DTYPE_BEGINNING MPIDU_DTYPE_BEGINNING

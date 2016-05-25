@@ -20,7 +20,7 @@ int MPIDU_Type_create_resized(MPI_Datatype oldtype,
 {
     MPIDU_Datatype *new_dtp;
 
-    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+    new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     /* --BEGIN ERROR HANDLING-- */
     if (!new_dtp) return MPIDI_Type_create_resized_memory_error();
     /* --END ERROR HANDLING-- */

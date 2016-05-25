@@ -1088,10 +1088,10 @@ static int create_derived_datatype(MPIR_Request * req, MPIDI_RMA_dtype_info * dt
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CREATE_DERIVED_DATATYPE);
 
     /* allocate new datatype object and handle */
-    new_dtp = (MPIDU_Datatype*) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+    new_dtp = (MPIDU_Datatype*) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
     if (!new_dtp) {
         MPIR_ERR_SETANDJUMP1(mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
-                             "MPIDU_Datatype_mem");
+                             "MPIR_Datatype_mem");
     }
 
     *dtp = new_dtp;

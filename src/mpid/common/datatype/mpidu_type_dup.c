@@ -39,7 +39,7 @@ int MPIDU_Type_dup(MPI_Datatype oldtype,
     }
     else {
       	/* allocate new datatype object and handle */
-	new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIDU_Datatype_mem);
+	new_dtp = (MPIDU_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);
 	if (!new_dtp) {
 	    /* --BEGIN ERROR HANDLING-- */
 	    mpi_errno = MPIR_Err_create_code(MPI_SUCCESS, MPIR_ERR_RECOVERABLE,
