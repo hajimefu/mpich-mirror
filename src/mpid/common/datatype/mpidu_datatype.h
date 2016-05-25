@@ -301,8 +301,6 @@ void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,
 void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
 				      int *user_ints);
 
-void MPIDU_Datatype_free(struct MPIR_Datatype *ptr);
-
 void MPIDU_Dataloop_update(struct DLOOP_Dataloop *dataloop,
 			  MPI_Aint ptrdiff);
 

@@ -161,6 +161,8 @@ struct MPIR_Datatype {
 
 extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
+static inline void MPIR_Datatype_free(MPIR_Datatype *ptr);
+
 #define MPIR_Datatype_add_ref(datatype_ptr) MPIR_Object_add_ref((datatype_ptr))
 
 /* to be used only after MPIR_Datatype_valid_ptr(); the check on
@@ -293,7 +295,7 @@ extern MPIR_Object_alloc_t MPIR_Datatype_mem;
           }                                                                 \
      } */                                                                   \
         if (lmpi_errno == MPI_SUCCESS) {                                    \
-         MPIDU_Datatype_free(datatype_ptr);                                 \
+         MPIR_Datatype_free(datatype_ptr);                                 \
         }                                                                   \
     }                                                                       \
 } while(0)
@@ -444,6 +446,52 @@ static inline void MPIR_Datatype_free_contents(MPIR_Datatype *dtp)
 
     MPL_free(dtp->contents);
     dtp->contents = NULL;
+}
+
+/*@
+  MPIR_Datatype_free
+
+Input Parameters:
+. MPIR_Datatype ptr - pointer to MPID datatype structure that is no longer
+  referenced
+
+Output Parameters:
+  none
+
+  Return Value:
+  none
+
+  This function handles freeing dynamically allocated memory associated with
+  the datatype.  In the process MPIR_Datatype_free_contents() is also called,
+  which handles decrementing reference counts to constituent types (in
+  addition to freeing the space used for contents information).
+  MPIR_Datatype_free_contents() will call MPIR_Datatype_free() on constituent
+  types that are no longer referenced as well.
+
+  @*/
+static inline void MPIR_Datatype_free(MPIR_Datatype *ptr)
+{
+    MPL_DBG_MSG_P(MPIR_DBG_DATATYPE,VERBOSE,"type %x freed.", ptr->handle);
+
+#ifdef MPID_Dev_datatype_destroy_hook
+    MPID_Dev_datatype_destroy_hook(ptr);
+#endif /* MPID_Dev_datatype_destroy_hook */
+
+    /* before freeing the contents, check whether the pointer is not
+       null because it is null in the case of a datatype shipped to the target
+       for RMA ops */
+    if (ptr->contents) {
+        MPIR_Datatype_free_contents(ptr);
+    }
+    if (ptr->dataloop) {
+        MPIDU_Dataloop_free(&(ptr->dataloop));
+    }
+#if defined(MPID_HAS_HETERO) || 1
+    if (ptr->hetero_dloop) {
+        MPIDU_Dataloop_free(&(ptr->hetero_dloop));
+    }
+#endif /* MPID_HAS_HETERO */
+    MPIR_Handle_obj_free(&MPIR_Datatype_mem, ptr);
 }
 
 /* This routine is used to install an attribute free routine for datatypes
