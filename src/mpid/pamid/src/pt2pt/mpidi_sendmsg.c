@@ -387,7 +387,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPIR_Request      * sreq,
 #endif
         MPID_assert(buf != NULL);
 
-        MPIDU_Segment_init(buf,
+        MPIR_Segment_init(buf,
                           sreq->mpid.userbufcount,
                           sreq->mpid.datatype,
                           &segment,

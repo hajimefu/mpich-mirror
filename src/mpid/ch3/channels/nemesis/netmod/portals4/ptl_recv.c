@@ -490,7 +490,7 @@ int MPID_nem_ptl_recv_posted(MPIDI_VC_t *vc, MPIR_Request *rreq)
             MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Small noncontig message");
             rreq->dev.segment_ptr = MPIDU_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1(rreq->dev.segment_ptr == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
-            MPIDU_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype, rreq->dev.segment_ptr, 0);
+            MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype, rreq->dev.segment_ptr, 0);
             rreq->dev.segment_first = 0;
             rreq->dev.segment_size = data_sz;
 
@@ -528,7 +528,7 @@ int MPID_nem_ptl_recv_posted(MPIDI_VC_t *vc, MPIR_Request *rreq)
             MPL_DBG_MSG(MPIDI_CH3_DBG_CHANNEL, VERBOSE, "Large noncontig message");
             rreq->dev.segment_ptr = MPIDU_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1(rreq->dev.segment_ptr == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
-            MPIDU_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype, rreq->dev.segment_ptr, 0);
+            MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype, rreq->dev.segment_ptr, 0);
             rreq->dev.segment_first = 0;
             rreq->dev.segment_size = data_sz;
 
@@ -731,7 +731,7 @@ int MPID_nem_ptl_lmt_start_recv(MPIDI_VC_t *vc,  MPIR_Request *rreq, MPL_IOV s_c
         rreq->dev.segment_ptr = MPIDU_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(rreq->dev.segment_ptr == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem",
                              "**nomem %s", "MPIDU_Segment_alloc");
-        MPIDU_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype,
+        MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, rreq->dev.datatype,
                           rreq->dev.segment_ptr, 0);
         rreq->dev.segment_first = 0;
         rreq->dev.segment_size = data_sz;

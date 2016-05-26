@@ -75,7 +75,7 @@ int MPIR_Pack_impl(const void *inbuf,
     segp = MPID_Segment_alloc();
     MPIR_ERR_CHKANDJUMP1(segp == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment");
     
-    mpi_errno = MPID_Segment_init(inbuf, incount, datatype, segp, 0);
+    mpi_errno = MPIR_Segment_init(inbuf, incount, datatype, segp, 0);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     /* NOTE: the use of buffer values and positions in MPI_Pack and in

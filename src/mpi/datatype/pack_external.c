@@ -126,7 +126,7 @@ int MPI_Pack_external(const char datarep[],
 	goto fn_fail;
     }
     /* --END ERROR HANDLING-- */
-    mpi_errno = MPID_Segment_init(inbuf, incount, datatype, segp, 1);
+    mpi_errno = MPIR_Segment_init(inbuf, incount, datatype, segp, 1);
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     /* NOTE: the use of buffer values and positions in MPI_Pack_external and

@@ -415,7 +415,7 @@ static int get_next_req(MPIDI_VC_t *vc)
            we decided to use the remote side's buffer. */
         req->dev.segment_ptr = MPIDU_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1((req->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
-        MPIDU_Segment_init(req->dev.user_buf, req->dev.user_count, req->dev.datatype, req->dev.segment_ptr, 0);
+        MPIR_Segment_init(req->dev.user_buf, req->dev.user_count, req->dev.datatype, req->dev.segment_ptr, 0);
         req->dev.segment_first = 0;
     }
     vc_ch->lmt_buf_num = 0;

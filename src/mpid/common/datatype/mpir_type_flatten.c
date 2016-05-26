@@ -45,7 +45,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
     MPIR_Assert(*array_len_p >= datatype_ptr->max_contig_blocks);
 
     segp = MPIDU_Segment_alloc();
-    err = MPIDU_Segment_init(0, 1, type, segp, 0); /* first 0 is bufptr,
+    err = MPIR_Segment_init(0, 1, type, segp, 0); /* first 0 is bufptr,
                                                    * 1 is count
                                                    * last 0 is homogeneous
                                                    */

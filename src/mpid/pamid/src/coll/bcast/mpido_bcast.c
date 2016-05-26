@@ -122,7 +122,7 @@ int MPIDO_Bcast(void *buffer,
       if(rank == root)
       {
          DLOOP_Offset last = data_size;
-         MPIDU_Segment_init(buffer, count, datatype, &segment, 0);
+         MPIR_Segment_init(buffer, count, datatype, &segment, 0);
          MPIDU_Segment_pack(&segment, 0, &last, noncontig_buff);
       }
    }
@@ -335,7 +335,7 @@ int MPIDO_Bcast_simple(void *buffer,
       if(rank == root)
       {
          DLOOP_Offset last = data_size;
-         MPIDU_Segment_init(buffer, count, datatype, &segment, 0);
+         MPIR_Segment_init(buffer, count, datatype, &segment, 0);
          MPIDU_Segment_pack(&segment, 0, &last, noncontig_buff);
       }
    }

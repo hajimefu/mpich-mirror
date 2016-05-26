@@ -176,7 +176,7 @@ int MPIDI_CH3U_Receive_data_found(MPIR_Request *rreq, char *buf, intptr_t *bufle
 	rreq->dev.segment_ptr = MPIDU_Segment_alloc( );
         MPIR_ERR_CHKANDJUMP1((rreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
 
- 	MPIDU_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, 
+ 	MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, 
 			  rreq->dev.datatype, rreq->dev.segment_ptr, 0);
 	rreq->dev.segment_first = 0;
 	rreq->dev.segment_size  = data_sz;
@@ -348,7 +348,7 @@ int MPIDI_CH3U_Post_data_receive_found(MPIR_Request * rreq)
 	MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"IOV loaded for non-contiguous read");
 	rreq->dev.segment_ptr = MPIDU_Segment_alloc( );
         MPIR_ERR_CHKANDJUMP1((rreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
-	MPIDU_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, 
+	MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, 
 			  rreq->dev.datatype, rreq->dev.segment_ptr, 0);
 	rreq->dev.segment_first = 0;
 	rreq->dev.segment_size = data_sz;

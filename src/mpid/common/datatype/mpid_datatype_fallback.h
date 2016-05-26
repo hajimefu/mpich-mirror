@@ -9,9 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Segment */
-typedef struct DLOOP_Segment MPID_Segment; /* MPIDU_Segment */
-
-#define MPID_Segment_init MPIDU_Segment_init
 #define MPID_Segment_alloc MPIDU_Segment_alloc
 #define MPID_Segment_free MPIDU_Segment_free
 #define MPID_Segment_pack MPIDU_Segment_pack

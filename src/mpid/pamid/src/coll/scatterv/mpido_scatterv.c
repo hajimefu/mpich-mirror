@@ -580,7 +580,7 @@ int MPIDO_Scatterv_simple(const void *sendbuf,
                 "Fatal:  Cannot allocate pack buffer");
           }
           DLOOP_Offset last = send_size;
-          MPIDU_Segment_init(sendbuf, sndcount, sendtype, &segment, 0);
+          MPIR_Segment_init(sendbuf, sndcount, sendtype, &segment, 0);
           MPIDU_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
        }
      }

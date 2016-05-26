@@ -109,7 +109,7 @@ void MPIDI_Buffer_copy(
         MPIDU_Segment seg;
         DLOOP_Offset last;
 
-        MPIDU_Segment_init(buf, rcount, rdt, &seg, 0);
+        MPIR_Segment_init(buf, rcount, rdt, &seg, 0);
         last = sdata_sz;
         MPIDU_Segment_unpack(&seg, 0, &last, (char*)sbuf + sdt_true_lb);
         /* --BEGIN ERROR HANDLING-- */
@@ -134,7 +134,7 @@ void MPIDI_Buffer_copy(
         MPIDU_Segment seg;
         DLOOP_Offset last;
 
-        MPIDU_Segment_init(rbuf, rcount, rdt, &seg, 0);
+        MPIR_Segment_init(rbuf, rcount, rdt, &seg, 0);
         last = sdata_sz;
         MPIDU_Segment_unpack(&seg, 0, &last, (char*)sbuf + sdt_true_lb);
         /* --BEGIN ERROR HANDLING-- */
@@ -151,7 +151,7 @@ void MPIDI_Buffer_copy(
         MPIDU_Segment seg;
         DLOOP_Offset last;
 
-        MPIDU_Segment_init(sbuf, scount, sdt, &seg, 0);
+        MPIR_Segment_init(sbuf, scount, sdt, &seg, 0);
         last = sdata_sz;
         MPIDU_Segment_pack(&seg, 0, &last, (char*)rbuf + rdt_true_lb);
         /* --BEGIN ERROR HANDLING-- */
@@ -183,8 +183,8 @@ void MPIDI_Buffer_copy(
         }
         /* --END ERROR HANDLING-- */
 
-        MPIDU_Segment_init(sbuf, scount, sdt, &sseg, 0);
-        MPIDU_Segment_init(rbuf, rcount, rdt, &rseg, 0);
+        MPIR_Segment_init(sbuf, scount, sdt, &sseg, 0);
+        MPIR_Segment_init(rbuf, rcount, rdt, &rseg, 0);
 
         sfirst = 0;
         rfirst = 0;

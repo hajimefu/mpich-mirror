@@ -1476,7 +1476,7 @@ www.mcs.anl.gov/mpi/mpich2/mpich2_1_0_6changes.htm.
   output.  Otherwise, the output message will be base on the error message
   associated with the mpi_errno parameter.
 
-- MPID_Segment_init() now takes an additional boolean parameter that specifies
+- MPIR_Segment_init() now takes an additional boolean parameter that specifies
   if the segment processing code is to produce/consume homogeneous (FALSE) or
   heterogeneous (TRUE) data.
 
