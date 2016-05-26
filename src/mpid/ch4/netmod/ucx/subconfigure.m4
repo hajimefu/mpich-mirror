@@ -25,13 +25,6 @@ AM_COND_IF([BUILD_CH4_NETMOD_UCX],[
     PAC_PUSH_FLAG(LIBS)
     PAC_CHECK_HEADER_LIB_FATAL(ucx, ucp/api/ucp.h, ucp, ucp_config_read)
     PAC_POP_FLAG(LIBS)
-    if [test "$enable_sharedlibs" = "osx-gcc" ]; then
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib], [LDFLAGS])
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ucx}/lib], [LDFLAGS])
-    else
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${prefix}/lib -Wl,--enable-new-dtags], [LDFLAGS])
-        PAC_APPEND_FLAG([-Wl,-rpath -Wl,${with_ucx}/lib -Wl,--enable-new-dtags], [LDFLAGS])
-    fi
 
     if [test "$do_static_fabric" = "true"]; then
        PAC_APPEND_FLAG([-L${with_ucx}/lib],[WRAPPER_STATIC_LDFLAGS])
@@ -39,7 +32,6 @@ AM_COND_IF([BUILD_CH4_NETMOD_UCX],[
     else
        PAC_APPEND_FLAG([-L${with_ucx}/lib -lucp],[LIBS])
     fi
-    PAC_APPEND_FLAG([-lstdc++ -ldl -lpthread],[LIBS])
 
 ])dnl end AM_COND_IF(BUILD_CH4_NETMOD_OFI,...)
 ])dnl end _BODY
