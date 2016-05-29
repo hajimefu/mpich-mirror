@@ -103,8 +103,6 @@ static inline int MPIDI_NM_send_am_hdr(int           rank,
     ucx_hdr.handler_id = handler_id;
     ucx_hdr.data_sz = 0;
 
-    MPIR_cc_incr(sreq->cc_ptr, &c);
-
     /* just pack and send for now */
     send_buf = MPL_malloc(am_hdr_sz + sizeof(ucx_hdr));
     MPIR_Memcpy(send_buf, &ucx_hdr, sizeof(ucx_hdr));
@@ -181,8 +179,6 @@ static inline int MPIDI_NM_send_am(int rank,
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
     ucx_hdr.data_sz = data_sz;
-
-    MPIR_cc_incr(sreq->cc_ptr, &c);
 
     if (dt_contig) {
         /* just pack and send for now */
@@ -374,8 +370,6 @@ static inline int MPIDI_NM_send_am_reply(MPIR_Context_id_t context_id,
     /* initialize our portion of the hdr */
     ucx_hdr.handler_id = handler_id;
     ucx_hdr.data_sz = data_sz;
-
-    MPIR_cc_incr(sreq->cc_ptr, &c);
 
     if (dt_contig) {
         /* just pack and send for now */
