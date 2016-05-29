@@ -13,8 +13,13 @@
 #include "ucx_request.h"
 #include "ucx_probe.h"
 #include "ucx_init.h"
+#ifdef MPICH_UCX_AM_ONLY
+#include "ucx_am_send.h"
+#include "ucx_am_recv.h"
+#else
 #include "ucx_send.h"
 #include "ucx_recv.h"
+#endif
 #include "ucx_win.h"
 #include "ucx_rma.h"
 #include "ucx_am.h"
