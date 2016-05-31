@@ -114,7 +114,7 @@ static int handler_recv_dequeue_complete(const ptl_event_t *e)
             MPIR_Memcpy((char *)rreq->dev.user_buf + dt_true_lb, e->start, e->mlength);
         } else {
             last = e->mlength;
-            MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, e->start);
+            MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, e->start);
             if (last != e->mlength)
                 MPIR_ERR_SET(rreq->status.MPI_ERROR, MPI_ERR_TYPE, "**dtypemismatch");
         }
@@ -160,7 +160,7 @@ static int handler_recv_big_get(const ptl_event_t *e)
         /* if we used a temporary buffer, unpack the data */
         if (REQ_PTL(rreq)->chunk_buffer[0]) {
             last = rreq->dev.segment_size;
-            MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, REQ_PTL(rreq)->chunk_buffer[0]);
+            MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, REQ_PTL(rreq)->chunk_buffer[0]);
             MPIR_Assert(last == rreq->dev.segment_size);
         }
         mpi_errno = handler_recv_complete(e);
@@ -230,7 +230,7 @@ static int handler_recv_unpack_complete(const ptl_event_t *e)
         buf = REQ_PTL(rreq)->chunk_buffer[0];
 
     last = rreq->dev.segment_first + e->mlength;
-    MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, buf);
+    MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, buf);
     MPIR_Assert(last == rreq->dev.segment_first + e->mlength);
     
     mpi_errno = handler_recv_complete(e);
@@ -302,7 +302,7 @@ static int handler_recv_dequeue_large(const ptl_event_t *e)
             MPIR_Memcpy((char *)rreq->dev.user_buf + dt_true_lb, e->start, e->mlength);
         } else {
             last = e->mlength;
-            MPIDU_Segment_unpack(rreq->dev.segment_ptr, 0, &last, e->start);
+            MPIR_Segment_unpack(rreq->dev.segment_ptr, 0, &last, e->start);
             MPIR_Assert(last == e->mlength);
             rreq->dev.segment_first = e->mlength;
         }
@@ -328,7 +328,7 @@ static int handler_recv_dequeue_large(const ptl_event_t *e)
     
     last = rreq->dev.segment_size;
     rreq->dev.iov_count = MPL_IOV_LIMIT;
-    MPIDU_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
+    MPIR_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
 
     if (last == rreq->dev.segment_size && rreq->dev.segment_size <= MPIDI_nem_ptl_ni_limits.max_msg_size + PTL_LARGE_THRESHOLD) {
         /* Rest of message fits in one IOV */
@@ -401,7 +401,7 @@ static int handler_recv_dequeue_unpack_large(const ptl_event_t *e)
 
     MPIR_Assert(e->mlength == PTL_LARGE_THRESHOLD);
     last = PTL_LARGE_THRESHOLD;
-    MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, buf);
+    MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, buf);
     MPIR_Assert(last == PTL_LARGE_THRESHOLD);
     rreq->dev.segment_first += PTL_LARGE_THRESHOLD;
     MPL_free(REQ_PTL(rreq)->chunk_buffer[0]);
@@ -496,7 +496,7 @@ int MPID_nem_ptl_recv_posted(MPIDI_VC_t *vc, MPIR_Request *rreq)
 
             last = rreq->dev.segment_size;
             rreq->dev.iov_count = MPL_IOV_LIMIT;
-            MPIDU_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
+            MPIR_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
 
             if (last == rreq->dev.segment_size) {
                 /* entire message fits in IOV */
@@ -534,7 +534,7 @@ int MPID_nem_ptl_recv_posted(MPIDI_VC_t *vc, MPIR_Request *rreq)
 
             last = PTL_LARGE_THRESHOLD;
             rreq->dev.iov_count = MPL_IOV_LIMIT;
-            MPIDU_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
+            MPIR_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov, &rreq->dev.iov_count);
 
             if (last == PTL_LARGE_THRESHOLD) {
                 /* first chunk fits in IOV */
@@ -736,12 +736,12 @@ int MPID_nem_ptl_lmt_start_recv(MPIDI_VC_t *vc,  MPIR_Request *rreq, MPL_IOV s_c
         rreq->dev.segment_first = 0;
         rreq->dev.segment_size = data_sz;
         last = PTL_LARGE_THRESHOLD;
-        MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.tmpbuf);
+        MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.tmpbuf);
         MPIR_Assert(last == PTL_LARGE_THRESHOLD);
         rreq->dev.segment_first = PTL_LARGE_THRESHOLD;
         last = rreq->dev.segment_size;
         rreq->dev.iov_count = MPL_IOV_LIMIT;
-        MPIDU_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov,
+        MPIR_Segment_pack_vector(rreq->dev.segment_ptr, rreq->dev.segment_first, &last, rreq->dev.iov,
                                  &rreq->dev.iov_count);
         if (last == rreq->dev.segment_size && last <= MPIDI_nem_ptl_ni_limits.max_msg_size + PTL_LARGE_THRESHOLD) {
             /* Rest of message fits in one IOV */

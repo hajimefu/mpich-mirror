@@ -532,7 +532,7 @@ MPID_nem_mpich_send_seg_header (MPIDU_Segment *segment, intptr_t *segment_first,
             
             /* copy data */
             last = segment_size;
-            MPIDU_Segment_pack(segment, *segment_first, &last, (char *)pbox->cell.pkt.p.payload + sizeof(MPIDI_CH3_Pkt_t));
+            MPIR_Segment_pack(segment, *segment_first, &last, (char *)pbox->cell.pkt.p.payload + sizeof(MPIDI_CH3_Pkt_t));
             MPIR_Assert(last == segment_size);
 
             OPA_store_release_int(&pbox->flag.value, 1);
@@ -590,7 +590,7 @@ MPID_nem_mpich_send_seg_header (MPIDU_Segment *segment, intptr_t *segment_first,
     else
         last = *segment_first + MPID_NEM_MPICH_DATA_LEN - buf_offset;
 
-    MPIDU_Segment_pack(segment, *segment_first, &last, (char *)el->pkt.p.payload + buf_offset);
+    MPIR_Segment_pack(segment, *segment_first, &last, (char *)el->pkt.p.payload + buf_offset);
     datalen = buf_offset + last - *segment_first;
     *segment_first = last;
     
@@ -673,7 +673,7 @@ MPID_nem_mpich_send_seg (MPIDU_Segment *segment, intptr_t *segment_first, intptr
     else
         last = *segment_first + MPID_NEM_MPICH_DATA_LEN;
     
-    MPIDU_Segment_pack(segment, *segment_first, &last, (char *)el->pkt.p.payload);
+    MPIR_Segment_pack(segment, *segment_first, &last, (char *)el->pkt.p.payload);
     datalen = last - *segment_first;
     *segment_first = last;
     

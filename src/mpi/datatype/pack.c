@@ -79,7 +79,7 @@ int MPIR_Pack_impl(const void *inbuf,
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     /* NOTE: the use of buffer values and positions in MPI_Pack and in
-     * MPID_Segment_pack are quite different.  See code or docs or something.
+     * MPIR_Segment_pack are quite different.  See code or docs or something.
      */
     first = 0;
     last  = SEGMENT_IGNORE_LAST;
@@ -88,7 +88,7 @@ int MPIR_Pack_impl(const void *inbuf,
     MPIR_Ensure_Aint_fits_in_pointer((MPIR_VOID_PTR_CAST_TO_MPI_AINT outbuf) +
 				     (MPI_Aint) *position);
 
-    MPID_Segment_pack(segp,
+    MPIR_Segment_pack(segp,
 		      first,
 		      &last,
 		      (void *) ((char *) outbuf + *position));

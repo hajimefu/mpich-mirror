@@ -265,13 +265,13 @@ void MPIDU_Dataloop_dup(DLOOP_Dataloop *old_loop,
 void MPIDU_Dataloop_free(struct MPIDU_Dataloop **dataloop);
 
 /* Segment functions specific to MPICH */
-void MPIDU_Segment_pack_vector(struct DLOOP_Segment *segp,
+void MPIR_Segment_pack_vector(struct DLOOP_Segment *segp,
 			      DLOOP_Offset first,
 			      DLOOP_Offset *lastp,
 			      DLOOP_VECTOR *vector,
 			      int *lengthp);
 
-void MPIDU_Segment_unpack_vector(struct DLOOP_Segment *segp,
+void MPIR_Segment_unpack_vector(struct DLOOP_Segment *segp,
 				DLOOP_Offset first,
 				DLOOP_Offset *lastp,
 				DLOOP_VECTOR *vector,
@@ -294,38 +294,6 @@ void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
 
 void MPIDU_Dataloop_update(struct DLOOP_Dataloop *dataloop,
 			  MPI_Aint ptrdiff);
-
-int MPIR_Type_flatten(MPI_Datatype type,
-		      MPI_Aint *off_array,
-		      DLOOP_Size *size_array,
-		      MPI_Aint *array_len_p);
-
-void MPIDU_Segment_pack_external32(struct DLOOP_Segment *segp,
-				  DLOOP_Offset first,
-				  DLOOP_Offset *lastp, 
-				  void *pack_buffer);
-
-void MPIDU_Segment_unpack_external32(struct DLOOP_Segment *segp,
-				    DLOOP_Offset first,
-				    DLOOP_Offset *lastp,
-				    DLOOP_Buffer unpack_buffer);
-
-MPI_Aint MPIDI_Datatype_get_basic_size_external32(MPI_Datatype el_type);
-
-/* debugging helper functions */
-char *MPIDU_Datatype_builtin_to_string(MPI_Datatype type);
-char *MPIDU_Datatype_combiner_to_string(int combiner);
-void MPIDU_Datatype_debug(MPI_Datatype type, int array_ct);
-
-/* contents accessor functions */
-void MPIDU_Type_access_contents(MPI_Datatype type,
-			       int **ints_p,
-			       MPI_Aint **aints_p,
-			       MPI_Datatype **types_p);
-void MPIDU_Type_release_contents(MPI_Datatype type,
-				int **ints_p,
-				MPI_Aint **aints_p,
-				MPI_Datatype **types_p);
 
 /* end of file */
 #endif

@@ -581,7 +581,7 @@ int MPIDO_Scatterv_simple(const void *sendbuf,
           }
           DLOOP_Offset last = send_size;
           MPIR_Segment_init(sendbuf, sndcount, sendtype, &segment, 0);
-          MPIDU_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
+          MPIR_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
        }
      }
      if(recvbuf == MPI_IN_PLACE)

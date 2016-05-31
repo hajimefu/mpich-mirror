@@ -351,7 +351,7 @@ int MPIDI_CH3_ReqHandler_GaccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq
                              "MPIDU_Segment");
         MPIR_Segment_init(rreq->dev.real_user_buf, rreq->dev.user_count, rreq->dev.datatype, seg,
                           0);
-        MPIDU_Segment_pack(seg, first, &last, resp_req->dev.user_buf);
+        MPIR_Segment_pack(seg, first, &last, resp_req->dev.user_buf);
         MPIR_Segment_free(seg);
     }
 
@@ -490,7 +490,7 @@ int MPIDI_CH3_ReqHandler_FOPRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq, i
         MPIR_ERR_CHKANDJUMP1(seg == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
                              "MPIDU_Segment");
         MPIR_Segment_init(rreq->dev.real_user_buf, 1, rreq->dev.datatype, seg, 0);
-        MPIDU_Segment_pack(seg, 0, &last, resp_req->dev.user_buf);
+        MPIR_Segment_pack(seg, 0, &last, resp_req->dev.user_buf);
         MPIR_Segment_free(seg);
     }
 
@@ -1493,7 +1493,7 @@ static inline int perform_get_acc_in_lock_queue(MPIR_Win * win_ptr,
                              "MPIDU_Segment");
         MPIR_Segment_init(get_accum_pkt->addr, get_accum_pkt->count, get_accum_pkt->datatype, seg,
                           0);
-        MPIDU_Segment_pack(seg, first, &last, sreq->dev.user_buf);
+        MPIR_Segment_pack(seg, first, &last, sreq->dev.user_buf);
         MPIR_Segment_free(seg);
     }
 
@@ -1638,7 +1638,7 @@ static inline int perform_fop_in_lock_queue(MPIR_Win * win_ptr,
         MPIR_ERR_CHKANDJUMP1(seg == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
                              "MPIDU_Segment");
         MPIR_Segment_init(fop_pkt->addr, 1, fop_pkt->datatype, seg, 0);
-        MPIDU_Segment_pack(seg, 0, &last, resp_req->dev.user_buf);
+        MPIR_Segment_pack(seg, 0, &last, resp_req->dev.user_buf);
         MPIR_Segment_free(seg);
     }
 

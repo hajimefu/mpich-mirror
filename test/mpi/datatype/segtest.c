@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     r1 = MPI_Wtime();
     for (i = 0; i < 100; i++) {
         int position = 0;
-        /*MPID_Segment_pack(vecloop, src_buf, dest_buf); */
+        /*MPIR_Segment_pack(vecloop, src_buf, dest_buf); */
         MPI_Pack(src_buf, count, vectype, dest_buf, count * blocksize, &position, MPI_COMM_WORLD);
     }
     r2 = MPI_Wtime();

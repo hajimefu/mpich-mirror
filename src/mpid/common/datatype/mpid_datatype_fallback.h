@@ -8,12 +8,6 @@
 
 #include "mpidu_datatype.h"
 
-/* MPID_Segment */
-#define MPID_Segment_pack MPIDU_Segment_pack
-#define MPID_Segment_unpack MPIDU_Segment_unpack
-#define MPID_Segment_pack_external32 MPIDU_Segment_pack_external32
-#define MPID_Segment_unpack_external32 MPIDU_Segment_unpack_external32
-
 /* MPID_Type */
 #define MPID_Type_access_contents MPIDU_Type_access_contents
 #define MPID_Type_blockindexed MPIDU_Type_blockindexed

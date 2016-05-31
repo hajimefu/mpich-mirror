@@ -116,7 +116,7 @@ int MPI_Unpack_external(const char datarep[],
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     /* NOTE: buffer values and positions in MPI_Unpack_external are used very
-     * differently from use in MPID_Segment_unpack_external...
+     * differently from use in MPIR_Segment_unpack_external...
      */
     first = 0;
     last  = SEGMENT_IGNORE_LAST;
@@ -124,7 +124,7 @@ int MPI_Unpack_external(const char datarep[],
     /* Ensure that pointer increment fits in a pointer */
     MPIR_Ensure_Aint_fits_in_pointer((MPIR_VOID_PTR_CAST_TO_MPI_AINT inbuf) + *position);
 
-    MPID_Segment_unpack_external32(segp,
+    MPIR_Segment_unpack_external32(segp,
 				   first,
 				   &last,
 				   (void *) ((char *) inbuf + *position));

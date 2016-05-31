@@ -131,7 +131,7 @@ int MPID_nem_llc_isend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Data
         MPIR_Assert(last > 0);
         REQ_FIELD(sreq, pack_buf) = MPL_malloc((size_t) data_sz);
         MPIR_ERR_CHKANDJUMP(!REQ_FIELD(sreq, pack_buf), mpi_errno, MPI_ERR_OTHER, "**outofmemory");
-        MPIDU_Segment_pack(segment_ptr, segment_first, &last, (char *) (REQ_FIELD(sreq, pack_buf)));
+        MPIR_Segment_pack(segment_ptr, segment_first, &last, (char *) (REQ_FIELD(sreq, pack_buf)));
         MPIR_Assert(last == data_sz);
         write_from_buf = REQ_FIELD(sreq, pack_buf);
     }
@@ -365,7 +365,7 @@ int MPID_nem_llc_SendNoncontig(MPIDI_VC_t * vc, MPIR_Request * sreq, void *hdr,
     if (data_sz > 0) {
         REQ_FIELD(sreq, rma_buf) = MPL_malloc((size_t) sreq->dev.segment_size);
         MPIR_ERR_CHKANDJUMP(!REQ_FIELD(sreq, rma_buf), mpi_errno, MPI_ERR_OTHER, "**outofmemory");
-        MPIDU_Segment_pack(sreq->dev.segment_ptr, sreq->dev.segment_first, &data_sz,
+        MPIR_Segment_pack(sreq->dev.segment_ptr, sreq->dev.segment_first, &data_sz,
                           (char *) REQ_FIELD(sreq, rma_buf));
 
         sreq->dev.iov[1].MPL_IOV_BUF = REQ_FIELD(sreq, rma_buf);
@@ -835,7 +835,7 @@ int llc_poll(int in_blocking_poll, llc_send_f sfnc, llc_recv_f rfnc)
                         MPIR_Segment_init(req->dev.user_buf, req->dev.user_count, req->dev.datatype,
                                           &seg, 0);
                         last = unpack_sz;
-                        MPIDU_Segment_unpack(&seg, 0, &last, REQ_FIELD(req, pack_buf));
+                        MPIR_Segment_unpack(&seg, 0, &last, REQ_FIELD(req, pack_buf));
                         if (last != unpack_sz) {
                             /* --BEGIN ERROR HANDLING-- */
                             /* received data was not entirely consumed by unpack()
@@ -1052,7 +1052,7 @@ int MPID_nem_llc_issend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Dat
         MPIR_Assert(last > 0);
         REQ_FIELD(sreq, pack_buf) = MPL_malloc((size_t) data_sz);
         MPIR_ERR_CHKANDJUMP(!REQ_FIELD(sreq, pack_buf), mpi_errno, MPI_ERR_OTHER, "**outofmemory");
-        MPIDU_Segment_pack(segment_ptr, segment_first, &last, (char *) (REQ_FIELD(sreq, pack_buf)));
+        MPIR_Segment_pack(segment_ptr, segment_first, &last, (char *) (REQ_FIELD(sreq, pack_buf)));
         MPIR_Assert(last == data_sz);
         write_from_buf = REQ_FIELD(sreq, pack_buf);
     }

@@ -4,14 +4,12 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#ifndef MPIDUEXT32SEGMENT_H
-#define MPIDUEXT32SEGMENT_H
+#ifndef LOOPUTIL_H
+#define LOOPUTIL_H
 
 #include "mpichconf.h"
 
 /* FIXME!!!  TODO!!!  FOO!!!  DO THIS!!!  DETECT ME!!!
- *
- * Include mpiimpl.h up here too, taking it out of mpid_ext32_segment.c
  *
  * Consider using MPIU_INT64_T etc. types instead of the
  * EIGHT_BYTE_BASIC_TYPE stuff, or put #defines at the top of this file
@@ -42,7 +40,7 @@
 
 /* FIXME: Who defines __BYTE_ORDER or __BIG_ENDIAN?  They aren't part of C */
 /* FIXME: The else test assumes that the byte order is little endian, whereas
-   it may simply have been undetermined.  This should instead use either 
+   it may simply have been undetermined.  This should instead use either
    a configure-time test (for which there are macros) or a runtime test
    and not use this non-portable check */
 
@@ -125,8 +123,8 @@
 #endif
 
 
-/* changed the argument types to be char* instead of uint64_t* because the Sun compiler 
-   prints out warnings that the function expects unsigned long long, but is being passed 
+/* changed the argument types to be char* instead of uint64_t* because the Sun compiler
+   prints out warnings that the function expects unsigned long long, but is being passed
    signed long long in mpid_ext32_segment.c. */
 static inline void BASIC_convert64(char *src, char *dest)
 {
@@ -414,4 +412,4 @@ static inline void BASIC_convert128(char *src, char *dest)
 #error "Cannot detect a float type that is 8 bytes long"
 #endif
 
-#endif /* MPIDEXT32SEGMENT_H */
+#endif /* LOOPUTIL_H */

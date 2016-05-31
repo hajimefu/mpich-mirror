@@ -428,7 +428,7 @@ int MPIDO_Scatter_simple(const void *sendbuf,
         }
         DLOOP_Offset last = send_size * size;
         MPIR_Segment_init(sendbuf, sendcount * size, sendtype, &segment, 0);
-        MPIDU_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
+        MPIR_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
       }
     }
     else

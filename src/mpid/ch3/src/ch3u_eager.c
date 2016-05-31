@@ -411,7 +411,7 @@ int MPIDI_CH3_PktHandler_EagerShortSend( MPIDI_VC_t *vc, MPIDI_CH3_Pkt_t *pkt,
 
 		recv_data_sz = rreq->dev.recv_data_sz;
 		last    = recv_data_sz;
-		MPIDU_Segment_unpack( rreq->dev.segment_ptr, 0, 
+		MPIR_Segment_unpack( rreq->dev.segment_ptr, 0, 
 				     &last, eagershort_pkt->data );
 		if (last != recv_data_sz) {
 		    /* --BEGIN ERROR HANDLING-- */

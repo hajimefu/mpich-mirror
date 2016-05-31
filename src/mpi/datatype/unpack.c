@@ -70,7 +70,7 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
     MPIR_Assert(mpi_errno == MPI_SUCCESS);
 
     /* NOTE: the use of buffer values and positions in MPI_Unpack and in
-     * MPID_Segment_unpack are quite different.  See code or docs or something.
+     * MPIR_Segment_unpack are quite different.  See code or docs or something.
      */
     first = 0;
     last  = SEGMENT_IGNORE_LAST;
@@ -79,7 +79,7 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
     MPIR_Ensure_Aint_fits_in_pointer((MPIR_VOID_PTR_CAST_TO_MPI_AINT inbuf) +
 				     (MPI_Aint) *position);
 
-    MPID_Segment_unpack(segp,
+    MPIR_Segment_unpack(segp,
 			first,
 			&last,
 			(void *) ((char *) inbuf + *position));

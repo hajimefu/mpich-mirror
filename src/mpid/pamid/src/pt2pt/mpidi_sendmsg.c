@@ -392,7 +392,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPIR_Request      * sreq,
                           sreq->mpid.datatype,
                           &segment,
                           0);
-        MPIDU_Segment_pack(&segment, 0, &last, sndbuf);
+        MPIR_Segment_pack(&segment, 0, &last, sndbuf);
         MPID_assert(last == data_sz);
 #if CUDA_AWARE_SUPPORT
         if(MPIDI_Process.cuda_aware_support_on && on_device)

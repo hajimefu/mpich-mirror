@@ -189,7 +189,7 @@ int MPIDI_CH3U_Receive_data_found(MPIR_Request *rreq, char *buf, intptr_t *bufle
             intptr_t last;
             MPL_DBG_MSG(MPIDI_CH3_DBG_OTHER,VERBOSE,"Copying noncontiguous data to user buffer");
             last = data_sz;
-            MPIDU_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, 
+            MPIR_Segment_unpack(rreq->dev.segment_ptr, rreq->dev.segment_first, 
 				&last, buf);
             /* --BEGIN ERROR HANDLING-- */
             if (last != data_sz)

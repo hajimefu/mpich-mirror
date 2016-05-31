@@ -86,10 +86,10 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
 /********** EXTERNALLY VISIBLE FUNCTIONS FOR TYPE MANIPULATION **********/
 
 #undef FUNCNAME
-#define FUNCNAME MPIDU_Segment_pack_vector
+#define FUNCNAME MPIR_Segment_pack_vector
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-/* MPIDU_Segment_pack_vector
+/* MPIR_Segment_pack_vector
 *
 * Parameters:
 * segp    - pointer to segment structure
@@ -101,7 +101,7 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
 * lengthp - in/out parameter describing length of array (and afterwards
 *           the amount of the array that has actual data)
 */
-void MPIDU_Segment_pack_vector(struct DLOOP_Segment *segp,
+void MPIR_Segment_pack_vector(struct DLOOP_Segment *segp,
 			  DLOOP_Offset first,
 			  DLOOP_Offset *lastp,
 			  DLOOP_VECTOR *vectorp,
@@ -134,15 +134,15 @@ MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_PACK_VECTOR);
 return;
 }
 
-/* MPIDU_Segment_unpack_vector
+/* MPIR_Segment_unpack_vector
 *
 * Q: Should this be any different from pack vector?
 */
 #undef FUNCNAME
-#define FUNCNAME MPIDU_Segment_unpack_vector
+#define FUNCNAME MPIR_Segment_unpack_vector
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-void MPIDU_Segment_unpack_vector(struct DLOOP_Segment *segp,
+void MPIR_Segment_unpack_vector(struct DLOOP_Segment *segp,
 			    DLOOP_Offset first,
 			    DLOOP_Offset *lastp,
 			    DLOOP_VECTOR *vectorp,
@@ -150,7 +150,7 @@ void MPIDU_Segment_unpack_vector(struct DLOOP_Segment *segp,
 {
 MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
 MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
-MPIDU_Segment_pack_vector(segp, first, lastp, vectorp, lengthp);
+MPIR_Segment_pack_vector(segp, first, lastp, vectorp, lengthp);
 MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
 return;
 }
@@ -462,8 +462,8 @@ static int MPIDU_Segment_contig_flatten(DLOOP_Offset *blocks_p,
  * Notes:
  * - this is only called when the starting position is at the beginning
  *   of a whole block in a vector type.
- * - this was a virtual copy of MPIDU_Segment_pack_to_iov; now it has improvements
- *   that MPIDU_Segment_pack_to_iov needs.
+ * - this was a virtual copy of MPIR_Segment_pack_to_iov; now it has improvements
+ *   that MPIR_Segment_pack_to_iov needs.
  * - we return the number of blocks that we did process in region pointed to by
  *   blocks_p.
  */

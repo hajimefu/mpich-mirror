@@ -131,7 +131,7 @@ MPIDI_Win_datatype_map(MPIDI_Datatype * dt)
       DLOOP_Offset last = dt->pointer->size*dt->count;
       MPIDU_Segment seg;
       MPIR_Segment_init(NULL, dt->count, dt->type, &seg, 0);
-      MPIDU_Segment_pack_vector(&seg, 0, &last, dt->map, &dt->num_contig);
+      MPIR_Segment_pack_vector(&seg, 0, &last, dt->map, &dt->num_contig);
       MPID_assert((unsigned)dt->num_contig <= map_size);
 #ifdef TRACE_ON
       TRACE_ERR("dt->pointer->size=%d  num_contig:  orig=%u  new=%d\n", dt->pointer->size, map_size, dt->num_contig);

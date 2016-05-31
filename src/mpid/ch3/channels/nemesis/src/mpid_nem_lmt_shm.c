@@ -492,7 +492,7 @@ static int lmt_shm_send_progress(MPIDI_VC_t *vc, MPIR_Request *req, int *done)
         else
             copy_limit = MPID_NEM_COPY_BUF_LEN;
         last = (data_sz - first <= copy_limit) ? data_sz : first + copy_limit;
-	MPIDU_Segment_pack(req->dev.segment_ptr, first, &last, (void *)copy_buf->buf[buf_num]); /* cast away volatile */
+	MPIR_Segment_pack(req->dev.segment_ptr, first, &last, (void *)copy_buf->buf[buf_num]); /* cast away volatile */
         OPA_write_barrier();
         MPIR_Assign_trunc(copy_buf->len[buf_num].val, (last - first), volatile int);
 
@@ -584,7 +584,7 @@ static int lmt_shm_recv_progress(MPIDI_VC_t *vc, MPIR_Request *req, int *done)
         src_buf = ((char *)copy_buf->buf[buf_num]) - surfeit; /* cast away volatile */
         last = expected_last = (data_sz - first <= surfeit + len) ? data_sz : first + surfeit + len;
 
-	MPIDU_Segment_unpack(req->dev.segment_ptr, first, &last, src_buf);
+	MPIR_Segment_unpack(req->dev.segment_ptr, first, &last, src_buf);
 
         MPL_DBG_MSG_FMT(MPIDI_CH3_DBG_CHANNEL, VERBOSE, (MPL_DBG_FDEST, "recvd data.  last=%" PRIdPTR " data_sz=%" PRIdPTR, last, data_sz));
 

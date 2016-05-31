@@ -979,7 +979,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         }
         /* --END ERROR HANDLING-- */
 
-        MPIDU_Segment_pack_vector(segp, first, &last, dloop_vec, &vec_len);
+        MPIR_Segment_pack_vector(segp, first, &last, dloop_vec, &vec_len);
 
         type = dtp->basic_type;
         MPIR_Assert(type != MPI_DATATYPE_NULL);

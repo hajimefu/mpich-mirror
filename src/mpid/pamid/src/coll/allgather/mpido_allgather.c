@@ -748,7 +748,7 @@ MPIDO_Allgather_simple(const void *sendbuf,
         }
         DLOOP_Offset last = send_size;
         MPIR_Segment_init(sendbuf, sendcount, sendtype, &segment, 0);
-        MPIDU_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
+        MPIR_Segment_pack(&segment, 0, &last, snd_noncontig_buff);
      }
   }
   else

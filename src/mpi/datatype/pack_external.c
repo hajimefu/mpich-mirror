@@ -130,7 +130,7 @@ int MPI_Pack_external(const char datarep[],
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     /* NOTE: the use of buffer values and positions in MPI_Pack_external and
-     * in MPID_Segment_pack_external are quite different.  See code or docs
+     * in MPIR_Segment_pack_external are quite different.  See code or docs
      * or something.
      */
     first = 0;
@@ -139,7 +139,7 @@ int MPI_Pack_external(const char datarep[],
     /* Ensure that pointer increment fits in a pointer */
     MPIR_Ensure_Aint_fits_in_pointer((MPIR_VOID_PTR_CAST_TO_MPI_AINT outbuf) + *position);
 
-    MPID_Segment_pack_external32(segp,
+    MPIR_Segment_pack_external32(segp,
 				 first,
 				 &last,
 				 (void *)((char *) outbuf + *position));

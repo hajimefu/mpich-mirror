@@ -211,7 +211,7 @@ int MPID_nem_mxm_SendNoncontig(MPIDI_VC_t * vc, MPIR_Request * sreq, void *hdr,
     if (last > 0) {
         sreq->dev.tmpbuf = MPL_malloc((size_t) (sreq->dev.segment_size - sreq->dev.segment_first));
         MPIR_Assert(sreq->dev.tmpbuf);
-        MPIDU_Segment_pack(sreq->dev.segment_ptr, sreq->dev.segment_first, &last, sreq->dev.tmpbuf);
+        MPIR_Segment_pack(sreq->dev.segment_ptr, sreq->dev.segment_first, &last, sreq->dev.tmpbuf);
         MPIR_Assert(last == sreq->dev.segment_size);
 
         req_area->iov_buf[req_area->iov_count].ptr = sreq->dev.tmpbuf;
@@ -309,7 +309,7 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
                 sreq->dev.tmpbuf = MPL_malloc((size_t) packsize);
                 MPIR_Assert(sreq->dev.tmpbuf);
                 MPIR_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
-                MPIDU_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
+                MPIR_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
 
                 req_area->iov_count = 1;
                 req_area->iov_buf[0].ptr = sreq->dev.tmpbuf;
@@ -412,7 +412,7 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
                 sreq->dev.tmpbuf = MPL_malloc((size_t) packsize);
                 MPIR_Assert(sreq->dev.tmpbuf);
                 MPIR_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
-                MPIDU_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
+                MPIR_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
 
                 req_area->iov_count = 1;
                 req_area->iov_buf[0].ptr = sreq->dev.tmpbuf;
@@ -515,7 +515,7 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
                 sreq->dev.tmpbuf = MPL_malloc((size_t) packsize);
                 MPIR_Assert(sreq->dev.tmpbuf);
                 MPIR_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
-                MPIDU_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
+                MPIR_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
 
                 req_area->iov_count = 1;
                 req_area->iov_buf[0].ptr = sreq->dev.tmpbuf;
@@ -619,7 +619,7 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
                 sreq->dev.tmpbuf = MPL_malloc((size_t) packsize);
                 MPIR_Assert(sreq->dev.tmpbuf);
                 MPIR_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
-                MPIDU_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
+                MPIR_Segment_pack(sreq->dev.segment_ptr, 0, &last, sreq->dev.tmpbuf);
 
                 req_area->iov_count = 1;
                 req_area->iov_buf[0].ptr = sreq->dev.tmpbuf;
@@ -814,7 +814,7 @@ static int _mxm_process_sdtype(MPIR_Request ** sreq_p, MPI_Datatype datatype,
     MPIR_Assert(iov);
 
     last = sreq->dev.segment_size;
-    MPIDU_Segment_pack_vector(sreq->dev.segment_ptr, sreq->dev.segment_first, &last, iov, &n_iov);
+    MPIR_Segment_pack_vector(sreq->dev.segment_ptr, sreq->dev.segment_first, &last, iov, &n_iov);
     MPIR_Assert(last == sreq->dev.segment_size);
 
 #if defined(MXM_DEBUG) && (MXM_DEBUG > 0)
