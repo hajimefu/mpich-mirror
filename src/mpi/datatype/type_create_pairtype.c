@@ -6,7 +6,6 @@
  */
 
 #include <mpiimpl.h>
-#include <mpidu_dataloop.h>
 #include <stdlib.h>
 #include <limits.h>
 
@@ -15,25 +14,25 @@
  */
 #define PAIRTYPE_SIZE_EXTENT(mt1_,ut1_,mt2_,ut2_, type_size_, type_extent_, \
                              el_size_, true_ub_, alignsize_)            \
-    {									\
-	struct { ut1_ a; ut2_ b; } foo;					\
-	type_size_   = sizeof(foo.a) + sizeof(foo.b);			\
-	type_extent_ = (MPI_Aint) sizeof(foo);				\
-	el_size_ = (sizeof(foo.a) == sizeof(foo.b)) ? (int) sizeof(foo.a) : -1; \
-	true_ub_ = (MPIR_VOID_PTR_CAST_TO_MPI_AINT ((char *) &foo.b -     \
+    {                                                                   \
+        struct { ut1_ a; ut2_ b; } foo;                                 \
+        type_size_   = sizeof(foo.a) + sizeof(foo.b);                   \
+        type_extent_ = (MPI_Aint) sizeof(foo);                          \
+        el_size_ = (sizeof(foo.a) == sizeof(foo.b)) ? (int) sizeof(foo.a) : -1; \
+        true_ub_ = (MPIR_VOID_PTR_CAST_TO_MPI_AINT ((char *) &foo.b -     \
                                                   (char *) &foo.a)) +   \
                   (MPI_Aint) sizeof(foo.b);                             \
-	alignsize_ = MPL_MAX(MPIR_Datatype_get_basic_size(mt1_),	\
-                             MPIR_Datatype_get_basic_size(mt2_));	\
+        alignsize_ = MPL_MAX(MPIR_Datatype_get_basic_size(mt1_),        \
+                             MPIR_Datatype_get_basic_size(mt2_));       \
     }
 
 /*@
-  MPIDU_Type_create_pairtype - create necessary data structures for certain
+  MPIR_Type_create_pairtype - create necessary data structures for certain
   pair types (all but MPI_2INT etc., which never have the size != extent
   issue).
 
-  This function is different from the other MPIDU_Type_create functions in that
-  it fills in an already- allocated MPIDU_Datatype.  This is important for
+  This function is different from the other MPIR_Type_create functions in that
+  it fills in an already- allocated MPIR_Datatype.  This is important for
   allowing configure-time determination of the MPI type values (these types
   are stored in the "direct" space, for those familiar with how MPICH deals
   with type allocation).
@@ -63,8 +62,8 @@ Input Parameters:
   Thus in our implementation we have chosen to instead use the actual
   difference in starting locations of the two types in an actual struct.
 @*/
-int MPIDU_Type_create_pairtype(MPI_Datatype type,
-			      MPIR_Datatype *new_dtp)
+int MPIR_Type_create_pairtype(MPI_Datatype type,
+                              MPIR_Datatype *new_dtp)
 {
     int err, mpi_errno = MPI_SUCCESS;
     int type_size, alignsize;
@@ -87,36 +86,36 @@ int MPIDU_Type_create_pairtype(MPI_Datatype type,
     new_dtp->hetero_dloop_depth = -1;
 
     switch(type) {
-	case MPI_FLOAT_INT:
+        case MPI_FLOAT_INT:
             PAIRTYPE_SIZE_EXTENT(MPI_FLOAT, float, MPI_INT, int,
                                  type_size, type_extent, el_size, true_ub, alignsize);
-	    break;
-	case MPI_DOUBLE_INT:
+            break;
+        case MPI_DOUBLE_INT:
             PAIRTYPE_SIZE_EXTENT(MPI_DOUBLE, double, MPI_INT, int,
                                  type_size, type_extent, el_size, true_ub, alignsize);
-	    break;
-	case MPI_LONG_INT:
+            break;
+        case MPI_LONG_INT:
             PAIRTYPE_SIZE_EXTENT(MPI_LONG, long, MPI_INT, int,
                                  type_size, type_extent, el_size, true_ub, alignsize);
-	    break;
-	case MPI_SHORT_INT:
+            break;
+        case MPI_SHORT_INT:
             PAIRTYPE_SIZE_EXTENT(MPI_SHORT, short, MPI_INT, int,
                                  type_size, type_extent, el_size, true_ub, alignsize);
-	    break;
-	case MPI_LONG_DOUBLE_INT:
+            break;
+        case MPI_LONG_DOUBLE_INT:
             PAIRTYPE_SIZE_EXTENT(MPI_LONG_DOUBLE, long double, MPI_INT, int,
                                  type_size, type_extent, el_size, true_ub, alignsize);
-	    break;
-	default:
-	    /* --BEGIN ERROR HANDLING-- */
-	    mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
-					     MPIR_ERR_RECOVERABLE,
-					     "MPIDU_Type_create_pairtype",
-					     __LINE__,
-					     MPI_ERR_OTHER,
-					     "**dtype", 0);
-	    return mpi_errno;
-	    /* --END ERROR HANDLING-- */
+            break;
+        default:
+            /* --BEGIN ERROR HANDLING-- */
+            mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
+                                             MPIR_ERR_RECOVERABLE,
+                                             "MPIR_Type_create_pairtype",
+                                             __LINE__,
+                                             MPI_ERR_OTHER,
+                                             "**dtype", 0);
+            return mpi_errno;
+            /* --END ERROR HANDLING-- */
     }
 
     new_dtp->n_builtin_elements      = 2;
@@ -139,37 +138,31 @@ int MPIDU_Type_create_pairtype(MPI_Datatype type,
     /* There are some really wierd rules for structure alignment;
        these capture the ones of which we are aware. */
     switch(type) {
-	case MPI_SHORT_INT:
-	case MPI_LONG_INT:
+        case MPI_SHORT_INT:
+        case MPI_LONG_INT:
 #ifdef HAVE_MAX_INTEGER_ALIGNMENT
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-						HAVE_MAX_INTEGER_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_INTEGER_ALIGNMENT);
 #endif
-	    break;
-	case MPI_FLOAT_INT:
+            break;
+        case MPI_FLOAT_INT:
 #ifdef HAVE_MAX_FP_ALIGNMENT
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-						HAVE_MAX_FP_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_FP_ALIGNMENT);
 #endif
-	    break;
-	case MPI_DOUBLE_INT:
+            break;
+        case MPI_DOUBLE_INT:
 #ifdef HAVE_MAX_DOUBLE_FP_ALIGNMENT
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-						HAVE_MAX_DOUBLE_FP_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_DOUBLE_FP_ALIGNMENT);
 #elif defined(HAVE_MAX_FP_ALIGNMENT)
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-						HAVE_MAX_FP_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_FP_ALIGNMENT);
 #endif
-	    break;
-	case MPI_LONG_DOUBLE_INT:
+            break;
+        case MPI_LONG_DOUBLE_INT:
 #ifdef HAVE_MAX_LONG_DOUBLE_FP_ALIGNMENT
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-					HAVE_MAX_LONG_DOUBLE_FP_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_LONG_DOUBLE_FP_ALIGNMENT);
 #elif defined(HAVE_MAX_FP_ALIGNMENT)
-	    new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize,
-						HAVE_MAX_FP_ALIGNMENT);
+            new_dtp->alignsize       = MPL_MIN(new_dtp->alignsize, HAVE_MAX_FP_ALIGNMENT);
 #endif
-	    break;
+            break;
     }
 
     new_dtp->is_contig       = (((MPI_Aint) type_size) == type_extent) ? 1 : 0;
@@ -187,39 +180,40 @@ int MPIDU_Type_create_pairtype(MPI_Datatype type,
     /* If MPID implementation needs use to reduce everything to
        a byte stream, do that. */
     err = MPIDU_Dataloop_create_pairtype(type,
-					&(new_dtp->dataloop),
-					&(new_dtp->dataloop_size),
-					&(new_dtp->dataloop_depth),
-					MPIDU_DATALOOP_ALL_BYTES);
+                                        &(new_dtp->dataloop),
+                                        &(new_dtp->dataloop_size),
+                                        &(new_dtp->dataloop_depth),
+                                        MPIDU_DATALOOP_ALL_BYTES);
 #else
     err = MPIDU_Dataloop_create_pairtype(type,
-					&(new_dtp->dataloop),
-					&(new_dtp->dataloop_size),
-					&(new_dtp->dataloop_depth),
-					MPIDU_DATALOOP_HOMOGENEOUS);
+                                        &(new_dtp->dataloop),
+                                        &(new_dtp->dataloop_size),
+                                        &(new_dtp->dataloop_depth),
+                                        MPIDU_DATALOOP_HOMOGENEOUS);
 #endif
 
     if (!err) {
-	err = MPIDU_Dataloop_create_pairtype(type,
-					    &(new_dtp->hetero_dloop),
-					    &(new_dtp->hetero_dloop_size),
-					    &(new_dtp->hetero_dloop_depth),
-					    MPIDU_DATALOOP_HETEROGENEOUS);
+        err = MPIDU_Dataloop_create_pairtype(type,
+                                            &(new_dtp->hetero_dloop),
+                                            &(new_dtp->hetero_dloop_size),
+                                            &(new_dtp->hetero_dloop_depth),
+                                            MPIDU_DATALOOP_HETEROGENEOUS);
     }
 
     /* --BEGIN ERROR HANDLING-- */
     if (err) {
-	mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
-					 MPIR_ERR_RECOVERABLE,
-					 "MPIDU_Dataloop_create_pairtype",
-					 __LINE__,
-					 MPI_ERR_OTHER,
-					 "**nomem",
-					 0);
-	return mpi_errno;
+        mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
+                                         MPIR_ERR_RECOVERABLE,
+                                         "MPIDU_Dataloop_create_pairtype",
+                                         __LINE__,
+                                         MPI_ERR_OTHER,
+                                         "**nomem",
+                                         0);
+        return mpi_errno;
 
     }
     /* --END ERROR HANDLING-- */
 
     return mpi_errno;
 }
+

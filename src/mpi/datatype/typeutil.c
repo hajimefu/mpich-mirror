@@ -175,7 +175,7 @@ int MPIR_Datatype_init(void)
         /* this is a redundant alternative to the previous statement */
         MPIR_Assert((void *) ptr == (void *) (MPIR_Datatype_direct + HANDLE_INDEX(mpi_pairtypes[i])));
 
-        mpi_errno = MPID_Type_create_pairtype(mpi_pairtypes[i], (MPIR_Datatype *) ptr);
+        mpi_errno = MPIR_Type_create_pairtype(mpi_pairtypes[i], (MPIR_Datatype *) ptr);
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
 

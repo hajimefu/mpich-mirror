@@ -215,7 +215,7 @@ int MPIDU_Type_get_contents(MPI_Datatype datatype,
 			   MPI_Aint array_of_addresses[], 
 			   MPI_Datatype array_of_datatypes[]);
 
-int MPIDU_Type_create_pairtype(MPI_Datatype datatype,
+int MPIR_Type_create_pairtype(MPI_Datatype datatype,
                               MPIR_Datatype *new_dtp);
 
 /* internal debugging functions */
