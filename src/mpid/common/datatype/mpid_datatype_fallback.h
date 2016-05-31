@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Segment */
-#define MPID_Segment_free MPIDU_Segment_free
 #define MPID_Segment_pack MPIDU_Segment_pack
 #define MPID_Segment_unpack MPIDU_Segment_unpack
 #define MPID_Segment_pack_external32 MPIDU_Segment_pack_external32

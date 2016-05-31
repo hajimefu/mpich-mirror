@@ -89,7 +89,7 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
 
     *position = (int)((MPI_Aint)*position + last);
 
-    MPID_Segment_free(segp);
+    MPIR_Segment_free(segp);
 
 
  fn_exit:

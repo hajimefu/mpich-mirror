@@ -381,7 +381,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
                              "MPIDU_Segment");
         MPIR_Segment_init(origin_addr, origin_count, origin_datatype, seg, 0);
         MPIDU_Segment_pack(seg, first, &last, packed_buf);
-        MPIDU_Segment_free(seg);
+        MPIR_Segment_free(seg);
 
         MPIR_Datatype_is_contig(basic_type, &is_predef_contig);
 
@@ -528,7 +528,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
                              "MPIDU_Segment");
         MPIR_Segment_init(origin_addr, origin_count, origin_datatype, seg, 0);
         MPIDU_Segment_pack(seg, first, &last, packed_buf);
-        MPIDU_Segment_free(seg);
+        MPIR_Segment_free(seg);
 
         MPIR_Datatype_is_contig(basic_type, &is_predef_contig);
 

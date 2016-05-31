@@ -98,7 +98,7 @@ int MPIR_Pack_impl(const void *inbuf,
 
     *position = (int)((MPI_Aint)*position + last);
 
-    MPID_Segment_free(segp);
+    MPIR_Segment_free(segp);
         
  fn_exit:
     return mpi_errno;

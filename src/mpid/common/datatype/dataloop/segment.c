@@ -31,17 +31,6 @@ static inline void DLOOP_Stackelm_load(struct DLOOP_Dataloop_stackelm *elmp,
 				       struct DLOOP_Dataloop *dlp,
 				       int branch_flag);
 
-/* Segment_free
- *
- * Input Parameters:
- * segp - pointer to segment
- */
-void PREPEND_PREFIX(Segment_free)(struct DLOOP_Segment *segp)
-{
-    DLOOP_Free(segp);
-    return;
-}
-
 /* DLOOP_Segment_manipulate - do something to a segment
  *
  * If you think of all the data to be manipulated (packed, unpacked, whatever),

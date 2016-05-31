@@ -1020,7 +1020,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
             accumulated_count += count;
         }
 
-        MPIDU_Segment_free(segp);
+        MPIR_Segment_free(segp);
         MPL_free(dloop_vec);
     }
 

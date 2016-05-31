@@ -131,7 +131,7 @@ int MPI_Unpack_external(const char datarep[],
 
     *position += last;
 
-    MPID_Segment_free(segp);
+    MPIR_Segment_free(segp);
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     /* ... end of body of routine ... */

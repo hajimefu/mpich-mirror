@@ -146,7 +146,7 @@ int MPI_Pack_external(const char datarep[],
 
     *position += last;
 
-    MPID_Segment_free(segp);
+    MPIR_Segment_free(segp);
 
     /* ... end of body of routine ... */
 

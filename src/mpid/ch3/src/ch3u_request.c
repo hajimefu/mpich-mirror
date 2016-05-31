@@ -595,7 +595,7 @@ void MPID_Request_finalize(MPIR_Request *req)
     }
 
     if (req->dev.segment_ptr != NULL) {
-        MPIDU_Segment_free(req->dev.segment_ptr);
+        MPIR_Segment_free(req->dev.segment_ptr);
     }
 
     if (MPIDI_Request_get_srbuf_flag(req)) {

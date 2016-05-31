@@ -61,7 +61,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
 			 size_array,
 			 array_len_p);
 
-    MPIDU_Segment_free(segp);
+    MPIR_Segment_free(segp);
 
     return 0;
 }
