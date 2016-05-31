@@ -302,7 +302,7 @@ PMPI_LOCAL int MPIR_Type_cyclic(const int *array_of_gsizes,
 	}
 	/* --END ERROR HANDLING-- */
 
-        mpi_errno = MPID_Type_create_resized(type_indexed, 0, disps[2], &type_tmp);
+        mpi_errno = MPIR_Type_create_resized(type_indexed, 0, disps[2], &type_tmp);
 
         MPIR_Type_free_impl(&type_indexed);
         MPIR_Type_free_impl(type_new);
@@ -692,7 +692,7 @@ int MPI_Type_create_darray(int size,
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
     /* --END ERROR HANDLING-- */
 
-    mpi_errno = MPID_Type_create_resized(tmp_type, 0, disps[2], &new_handle);
+    mpi_errno = MPIR_Type_create_resized(tmp_type, 0, disps[2], &new_handle);
 
     /* --BEGIN ERROR HANDLING-- */
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;

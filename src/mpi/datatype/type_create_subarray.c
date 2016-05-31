@@ -289,7 +289,7 @@ int MPI_Type_create_subarray(int ndims,
                                        tmp1, &tmp2);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-    mpi_errno = MPID_Type_create_resized(tmp2, 0, disps[2], &new_handle);
+    mpi_errno = MPIR_Type_create_resized(tmp2, 0, disps[2], &new_handle);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     MPIR_Type_free_impl(&tmp1);
