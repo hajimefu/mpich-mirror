@@ -167,7 +167,7 @@ do {									\
     } while (0)
 
 /* Datatype functions */
-int MPIDU_Type_dup(MPI_Datatype oldtype,
+int MPIR_Type_dup(MPI_Datatype oldtype,
 		  MPI_Datatype *newtype);
 
 int MPIDU_Type_struct(int count,

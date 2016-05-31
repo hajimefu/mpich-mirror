@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Type */
-#define MPID_Type_dup MPIDU_Type_dup
 #define MPID_Type_get_contents MPIDU_Type_get_contents
 #define MPID_Type_get_envelope MPIDU_Type_get_envelope
 #define MPID_Type_indexed MPIDU_Type_indexed
