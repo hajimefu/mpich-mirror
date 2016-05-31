@@ -167,8 +167,6 @@ do {									\
     } while (0)
 
 /* Datatype functions */
-int MPIDU_Type_commit(MPI_Datatype *type);
-
 int MPIDU_Type_dup(MPI_Datatype oldtype,
 		  MPI_Datatype *newtype);
 

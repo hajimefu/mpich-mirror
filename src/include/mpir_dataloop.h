@@ -611,6 +611,8 @@ int MPIR_Type_blockindexed(int count,
                            MPI_Datatype oldtype,
                            MPI_Datatype *newtype);
 
+int MPIR_Type_commit(MPI_Datatype *type);
+
 /* These values are defined by DLOOP code.
  *
  * Note: DLOOP_DATALOOP_ALL_BYTES is used only when the device

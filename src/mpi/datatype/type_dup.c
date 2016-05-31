@@ -105,7 +105,7 @@ int MPI_Type_dup(MPI_Datatype oldtype, MPI_Datatype *newtype)
 				           NULL,
 				           &oldtype);
 
-    mpi_errno = MPID_Type_commit(&new_handle);
+    mpi_errno = MPIR_Type_commit(&new_handle);
     if (mpi_errno) { MPIR_ERR_POP(mpi_errno); }
 
     /* Copy attributes, executing the attribute copy functions */
