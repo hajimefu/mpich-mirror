@@ -112,7 +112,7 @@ PMPI_LOCAL int MPIR_Type_block(const int *array_of_gsizes,
     stride = orig_extent;
     if (order == MPI_ORDER_FORTRAN) {
 	if (dim == 0) {
-	    mpi_errno = MPID_Type_contiguous(mysize,
+	    mpi_errno = MPIR_Type_contiguous(mysize,
 					     type_old,
 					     type_new);
 	    /* --BEGIN ERROR HANDLING-- */
@@ -142,7 +142,7 @@ PMPI_LOCAL int MPIR_Type_block(const int *array_of_gsizes,
     }
     else {
 	if (dim == ndims-1) {
-	    mpi_errno = MPID_Type_contiguous(mysize,
+	    mpi_errno = MPIR_Type_contiguous(mysize,
 					     type_old,
 					     type_new);
 	    /* --BEGIN ERROR HANDLING-- */

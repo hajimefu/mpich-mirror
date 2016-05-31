@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Type */
-#define MPID_Type_contiguous MPIDU_Type_contiguous
 #define MPID_Type_create_pairtype MPIDU_Type_create_pairtype
 #define MPID_Type_create_resized MPIDU_Type_create_resized
 #define MPID_Type_dup MPIDU_Type_dup

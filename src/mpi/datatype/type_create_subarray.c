@@ -189,7 +189,7 @@ int MPI_Type_create_subarray(int ndims,
 
     if (order == MPI_ORDER_FORTRAN) {
 	if (ndims == 1)
-	    mpi_errno = MPID_Type_contiguous(array_of_subsizes[0],
+	    mpi_errno = MPIR_Type_contiguous(array_of_subsizes[0],
 					     oldtype,
 					     &tmp1);
 	else {
@@ -230,7 +230,7 @@ int MPI_Type_create_subarray(int ndims,
     else /* MPI_ORDER_C */ {
 	/* dimension ndims-1 changes fastest */
 	if (ndims == 1) {
-	    mpi_errno = MPID_Type_contiguous(array_of_subsizes[0],
+	    mpi_errno = MPIR_Type_contiguous(array_of_subsizes[0],
 					     oldtype,
 					     &tmp1);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);

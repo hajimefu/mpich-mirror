@@ -34,7 +34,7 @@ int MPIDU_Type_dup(MPI_Datatype oldtype,
 
     if (HANDLE_GET_KIND(oldtype) == HANDLE_KIND_BUILTIN) {
 	/* create a new type and commit it. */
-	mpi_errno = MPIDU_Type_contiguous(1, oldtype, newtype);
+	mpi_errno = MPIR_Type_contiguous(1, oldtype, newtype);
 	if (mpi_errno) { MPIR_ERR_POP(mpi_errno); }
     }
     else {

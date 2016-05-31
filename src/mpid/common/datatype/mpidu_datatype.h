@@ -190,7 +190,7 @@ int MPIDU_Type_vector(int count,
 		     MPI_Datatype oldtype,
 		     MPI_Datatype *newtype);
 
-int MPIDU_Type_contiguous(int count,
+int MPIR_Type_contiguous(int count,
 			 MPI_Datatype oldtype,
 			 MPI_Datatype *newtype);
 
