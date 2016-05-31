@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Type */
-#define MPID_Type_blockindexed MPIDU_Type_blockindexed
 #define MPID_Type_commit MPIDU_Type_commit
 #define MPID_Type_contiguous MPIDU_Type_contiguous
 #define MPID_Type_create_pairtype MPIDU_Type_create_pairtype

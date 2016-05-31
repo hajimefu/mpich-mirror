@@ -290,7 +290,7 @@ PMPI_LOCAL int MPIR_Type_cyclic(const int *array_of_gsizes,
    of the datatype (disps[1]) and type_create_resized to set lb to 0 (disps[0])
    and extent to disps[2], which makes ub = disps[2].
  */
-        mpi_errno = MPID_Type_blockindexed(1, 1, &disps[1],
+        mpi_errno = MPIR_Type_blockindexed(1, 1, &disps[1],
                                            1, /* 1 means disp is in bytes */
                                            *type_new, &type_indexed);
 
@@ -684,7 +684,7 @@ int MPI_Type_create_darray(int size,
    of the datatype (disps[1]) and type_create_resized to set lb to 0 (disps[0])
    and extent to disps[2], which makes ub = disps[2].
  */
-    mpi_errno = MPID_Type_blockindexed(1, 1, &disps[1],
+    mpi_errno = MPIR_Type_blockindexed(1, 1, &disps[1],
                                        1, /* 1 means disp is in bytes */
                                        type_new, &tmp_type);
 

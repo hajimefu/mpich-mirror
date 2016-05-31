@@ -284,7 +284,7 @@ int MPI_Type_create_subarray(int ndims,
    and extent to disps[2], which makes ub = disps[2].
  */
 
-    mpi_errno = MPID_Type_blockindexed(1, 1, &disps[1],
+    mpi_errno = MPIR_Type_blockindexed(1, 1, &disps[1],
                                        1, /* 1 means disp is in bytes */
                                        tmp1, &tmp2);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);

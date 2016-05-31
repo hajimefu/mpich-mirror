@@ -185,13 +185,6 @@ int MPIDU_Type_indexed(int count,
 		      MPI_Datatype oldtype,
 		      MPI_Datatype *newtype);
 
-int MPIDU_Type_blockindexed(int count,
-			   int blocklength,
-			   const void *displacement_array,
-			   int dispinbytes,
-			   MPI_Datatype oldtype,
-			   MPI_Datatype *newtype);
-
 int MPIDU_Type_vector(int count,
 		     int blocklength,
 		     MPI_Aint stride,

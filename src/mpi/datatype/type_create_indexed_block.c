@@ -42,7 +42,7 @@ int MPIR_Type_create_indexed_block_impl(int count,
     MPIR_Datatype *new_dtp;
     int i, *ints;
 
-    mpi_errno = MPID_Type_blockindexed(count,
+    mpi_errno = MPIR_Type_blockindexed(count,
 				       blocklength,
 				       array_of_displacements,
 				       0, /* dispinbytes */

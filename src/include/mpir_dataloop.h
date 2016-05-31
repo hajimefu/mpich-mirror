@@ -604,6 +604,13 @@ DLOOP_Count PREPEND_PREFIX(Type_blockindexed_count_contig)(DLOOP_Count count,
                                                            int dispinbytes,
                                                            DLOOP_Offset old_extent);
 
+int MPIR_Type_blockindexed(int count,
+                           int blocklength,
+                           const void *displacement_array,
+                           int dispinbytes,
+                           MPI_Datatype oldtype,
+                           MPI_Datatype *newtype);
+
 /* These values are defined by DLOOP code.
  *
  * Note: DLOOP_DATALOOP_ALL_BYTES is used only when the device
