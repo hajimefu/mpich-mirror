@@ -64,8 +64,8 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
     
 
     /* non-contig case */
-    segp = MPID_Segment_alloc();
-    MPIR_ERR_CHKANDJUMP1(segp == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment_alloc");
+    segp = MPIR_Segment_alloc();
+    MPIR_ERR_CHKANDJUMP1(segp == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIR_Segment_alloc");
     mpi_errno = MPIR_Segment_init(outbuf, outcount, datatype, segp, 0);
     MPIR_Assert(mpi_errno == MPI_SUCCESS);
 

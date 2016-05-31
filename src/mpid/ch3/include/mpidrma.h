@@ -950,7 +950,7 @@ static inline int do_accumulate_op(void *source_buf, int source_count, MPI_Datat
         void *curr_loc;
         int accumulated_count;
 
-        segp = MPIDU_Segment_alloc();
+        segp = MPIR_Segment_alloc();
         /* --BEGIN ERROR HANDLING-- */
         if (!segp) {
             mpi_errno =

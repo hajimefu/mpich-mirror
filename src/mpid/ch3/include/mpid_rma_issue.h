@@ -349,9 +349,9 @@ static int issue_from_origin_buffer(MPIDI_RMA_Op_t * rma_op, MPIDI_VC_t * vc,
     }
     else {
         /* origin data is non-contiguous */
-        req->dev.segment_ptr = MPIDU_Segment_alloc();
+        req->dev.segment_ptr = MPIR_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(req->dev.segment_ptr == NULL, mpi_errno,
-                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                             MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIR_Segment_alloc");
 
         MPIR_Segment_init(rma_op->origin_addr, rma_op->origin_count,
                           rma_op->origin_datatype, req->dev.segment_ptr, 0);

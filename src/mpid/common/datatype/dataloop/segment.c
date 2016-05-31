@@ -31,14 +31,6 @@ static inline void DLOOP_Stackelm_load(struct DLOOP_Dataloop_stackelm *elmp,
 				       struct DLOOP_Dataloop *dlp,
 				       int branch_flag);
 
-/* Segment_alloc
- *
- */
-struct DLOOP_Segment * PREPEND_PREFIX(Segment_alloc)(void)
-{
-    return (struct DLOOP_Segment *) DLOOP_Malloc(sizeof(struct DLOOP_Segment));
-}
-
 /* Segment_free
  *
  * Input Parameters:

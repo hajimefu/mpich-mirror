@@ -111,7 +111,7 @@ int MPI_Pack_external(const char datarep[],
 	goto fn_exit;
     }
 
-    segp = MPID_Segment_alloc();
+    segp = MPIR_Segment_alloc();
     /* --BEGIN ERROR HANDLING-- */
     if (segp == NULL)
     {

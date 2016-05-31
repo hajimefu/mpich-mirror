@@ -556,9 +556,9 @@ int MPIDI_CH3_PktHandler_Get(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
             iov[0].MPL_IOV_BUF = (MPL_IOV_BUF_CAST) get_resp_pkt;
             iov[0].MPL_IOV_LEN = sizeof(*get_resp_pkt);
 
-            req->dev.segment_ptr = MPIDU_Segment_alloc();
+            req->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1(req->dev.segment_ptr == NULL, mpi_errno,
-                                 MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                                 MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIR_Segment_alloc");
 
             MPIR_Segment_init(get_pkt->addr, get_pkt->count,
                               get_pkt->datatype, req->dev.segment_ptr, 0);
@@ -1697,7 +1697,7 @@ int MPIDI_CH3_PktHandler_Get_AccumResp(MPIDI_VC_t * vc, MPIDI_CH3_Pkt_t * pkt,
         else {
             *buflen = sizeof(MPIDI_CH3_Pkt_t);
 
-            req->dev.segment_ptr = MPIDU_Segment_alloc();
+            req->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_Segment_init(req->dev.user_buf, req->dev.user_count, req->dev.datatype,
                               req->dev.segment_ptr, 0);
             req->dev.segment_first = contig_stream_offset;

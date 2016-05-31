@@ -299,9 +299,9 @@ int MPID_nem_mxm_send(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Data
             intptr_t last;
             MPI_Aint packsize = 0;
 
-            sreq->dev.segment_ptr = MPIDU_Segment_alloc();
+            sreq->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1((sreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER,
-                                 "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                                 "**nomem", "**nomem %s", "MPIR_Segment_alloc");
             MPIR_Pack_size_impl(count, datatype, &packsize);
 
             last = data_sz;
@@ -402,9 +402,9 @@ int MPID_nem_mxm_ssend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
             intptr_t last;
             MPI_Aint packsize = 0;
 
-            sreq->dev.segment_ptr = MPIDU_Segment_alloc();
+            sreq->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1((sreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER,
-                                 "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                                 "**nomem", "**nomem %s", "MPIR_Segment_alloc");
             MPIR_Pack_size_impl(count, datatype, &packsize);
 
             last = data_sz;
@@ -505,9 +505,9 @@ int MPID_nem_mxm_isend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Dat
             intptr_t last;
             MPI_Aint packsize = 0;
 
-            sreq->dev.segment_ptr = MPIDU_Segment_alloc();
+            sreq->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1((sreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER,
-                                 "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                                 "**nomem", "**nomem %s", "MPIR_Segment_alloc");
             MPIR_Pack_size_impl(count, datatype, &packsize);
 
             last = data_sz;
@@ -609,9 +609,9 @@ int MPID_nem_mxm_issend(MPIDI_VC_t * vc, const void *buf, MPI_Aint count, MPI_Da
             MPI_Aint packsize = 0;
 
             sreq->ch.noncontig = TRUE;
-            sreq->dev.segment_ptr = MPIDU_Segment_alloc();
+            sreq->dev.segment_ptr = MPIR_Segment_alloc();
             MPIR_ERR_CHKANDJUMP1((sreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER,
-                                 "**nomem", "**nomem %s", "MPIDU_Segment_alloc");
+                                 "**nomem", "**nomem %s", "MPIR_Segment_alloc");
             MPIR_Pack_size_impl(count, datatype, &packsize);
 
             last = data_sz;
@@ -798,9 +798,9 @@ static int _mxm_process_sdtype(MPIR_Request ** sreq_p, MPI_Datatype datatype,
     int index;
     int size_to_copy = 0;
 
-    sreq->dev.segment_ptr = MPIDU_Segment_alloc();
+    sreq->dev.segment_ptr = MPIR_Segment_alloc();
     MPIR_ERR_CHKANDJUMP1((sreq->dev.segment_ptr == NULL), mpi_errno, MPI_ERR_OTHER, "**nomem",
-                         "**nomem %s", "MPIDU_Segment_alloc");
+                         "**nomem %s", "MPIR_Segment_alloc");
 
     MPIR_Segment_init(buf, count, datatype, sreq->dev.segment_ptr, 0);
     sreq->dev.segment_first = 0;
