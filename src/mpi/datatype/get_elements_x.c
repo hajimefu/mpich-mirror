@@ -192,7 +192,7 @@ PMPI_LOCAL MPI_Count MPIR_Type_get_elements(MPI_Count *bytes_p,
         MPI_Datatype *types;
 
         /* Establish locations of arrays */
-        MPID_Type_access_contents(datatype_ptr->handle, &ints, &aints, &types);
+        MPIR_Type_access_contents(datatype_ptr->handle, &ints, &aints, &types);
         if (!ints || !aints || !types)
             return MPI_ERR_TYPE;
 
