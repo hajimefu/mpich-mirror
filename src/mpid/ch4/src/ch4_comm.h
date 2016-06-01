@@ -225,10 +225,12 @@ __CH4_INLINE__ int MPIDI_Comm_destroy(MPIR_Comm * comm)
     }
 #endif
 
-    if (MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_LUT) {
+    if (MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_LUT
+        || MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_LUT_INTRA) {
         MPIDIU_release_lut(MPIDII_COMM(comm,map).irreg.lut.t);
     }
-    if (MPIDII_COMM(comm,local_map).mode == MPIDII_RANK_MAP_LUT) {
+    if (MPIDII_COMM(comm,local_map).mode == MPIDII_RANK_MAP_LUT
+        || MPIDII_COMM(comm,local_map).mode == MPIDII_RANK_MAP_LUT_INTRA) {
         MPIDIU_release_lut(MPIDII_COMM(comm,local_map).irreg.lut.t);
     }
     if (MPIDII_COMM(comm,map).mode == MPIDII_RANK_MAP_MLUT) {
