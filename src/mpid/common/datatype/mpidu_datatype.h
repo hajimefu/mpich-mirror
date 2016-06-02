@@ -207,7 +207,7 @@ int MPIDU_Type_get_envelope(MPI_Datatype datatype,
 			   int *num_datatypes,
 			   int *combiner);
 
-int MPIDU_Type_get_contents(MPI_Datatype datatype, 
+int MPIR_Type_get_contents(MPI_Datatype datatype, 
 			   int max_integers, 
 			   int max_addresses, 
 			   int max_datatypes, 
