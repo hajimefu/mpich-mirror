@@ -82,6 +82,8 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
                                     MPI_BYTE,
                                     comm_ptr,
                                     &errflag);
+    if (mpi_errno)
+        MPIR_ERR_POP(mpi_errno);
 
     first = disp_units[0];
     same_disp = 1;
