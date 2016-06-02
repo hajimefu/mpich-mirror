@@ -60,7 +60,7 @@ static inline int MPIDI_OFI_do_control_send(MPIDI_OFI_send_control_t *control,
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_DO_CONTROL_SEND);
 
     control->origin_rank = comm_ptr->rank;
-    control->send_buf    = send_buf;
+    control->send_buf    = (uintptr_t) send_buf;
     control->msgsize     = msgsize;
     control->comm_id     = comm_ptr->context_id;
     control->endpoint_id = MPIDI_OFI_COMM_TO_EP(comm_ptr, comm_ptr->rank);

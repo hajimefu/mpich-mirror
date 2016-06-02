@@ -273,6 +273,15 @@ __ALWAYS_INLINE__ int MPIDI_OFI_ssend_ack_event(struct fi_cq_tagged_entry *wc, M
     return mpi_errno;
 }
 
+__ALWAYS_INLINE__ uintptr_t MPIDI_OFI_recv_rbase(MPIDI_OFI_huge_recv_t *recv)
+{
+#ifdef USE_OFI_MR_SCALABLE
+    return 0;
+#else
+    return recv->remote_info.send_buf;
+#endif
+}
+
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_get_huge_event
 #undef FCNAME
@@ -303,14 +312,18 @@ __ALWAYS_INLINE__ int MPIDI_OFI_get_huge_event(struct fi_cq_tagged_entry *wc,
             goto fn_exit;
         }
 
-        remote_key = recv->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
+        if (MPIDI_OFI_ENABLE_MR_SCALABLE)
+            remote_key = recv->remote_info.rma_key << MPIDI_Global.huge_rma_shift;
+        else
+            remote_key = recv->remote_info.rma_key;
+
         MPIDI_OFI_conditional_cntr_incr();
         MPIDI_OFI_CALL_RETRY(fi_read(MPIDI_OFI_EP_TX_RMA(0),                                           /* endpoint     */
                                                     (void *)((uintptr_t)recv->wc.buf + recv->cur_offset),       /* local buffer */
                                                     bytesToGet,                                             /* bytes        */
                                                     NULL,                                                   /* descriptor   */
                                                     MPIDI_OFI_comm_to_phys(recv->comm_ptr,recv->remote_info.origin_rank,MPIDI_OFI_API_MSG), /* Destination  */
-                                                    recv->cur_offset,                                         /* remote maddr */
+                                                    MPIDI_OFI_recv_rbase(recv) + recv->cur_offset,          /* remote maddr */
                                                     remote_key,                                             /* Key          */
                                                     (void *)&recv->context),rdma_readfrom,             /* Context */
                              MPIDI_OFI_CALL_NO_LOCK);

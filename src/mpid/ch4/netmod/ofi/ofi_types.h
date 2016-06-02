@@ -77,6 +77,12 @@
 #define MPIDI_OFI_ENABLE_STX_RMA 0
 #endif
 
+#ifdef USE_OFI_MR_SCALABLE
+#define MPIDI_OFI_ENABLE_MR_SCALABLE 1
+#else
+#define MPIDI_OFI_ENABLE_MR_SCALABLE 0
+#endif
+
 #ifdef USE_OFI_IMMEDIATE_DATA
 /* match/ignore bit manipulation
  *
@@ -413,11 +419,11 @@ typedef struct {
     int16_t       seqno;
     int           origin_rank;
     MPIR_Request *ackreq;
-    char         *send_buf;
+    uintptr_t     send_buf;
     size_t        msgsize;
     int           comm_id;
     int           endpoint_id;
-    int           rma_key;
+    uint64_t      rma_key;
 } MPIDI_OFI_send_control_t;
 
 typedef struct {

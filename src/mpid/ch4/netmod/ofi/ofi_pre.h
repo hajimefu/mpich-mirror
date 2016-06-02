@@ -154,6 +154,16 @@ typedef struct {
 
 struct MPIDI_OFI_win_request;
 
+/* Stores per-rank information for RMA */
+typedef struct {
+    int32_t disp_unit;
+#ifndef USE_OFI_MR_SCALABLE
+    /* For MR_BASIC mode we need to store an MR key and a base address of the target window */
+    uint64_t  mr_key;
+    uintptr_t base;
+#endif
+} MPIDI_OFI_win_targetinfo_t;
+
 typedef struct {
     struct fid_mr                     *mr;
     uint64_t                           mr_key;
@@ -165,7 +175,7 @@ typedef struct {
     struct fid_cntr                   *cmpl_cntr;
     uint64_t                           win_id;
     struct MPIDI_OFI_win_request   *syncQ;
-    uint32_t *disp_units;
+    MPIDI_OFI_win_targetinfo_t        *winfo;
 } MPIDI_OFI_win_t;
 
 typedef struct {

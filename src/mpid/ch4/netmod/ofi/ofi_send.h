@@ -159,7 +159,7 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
     else if(unlikely(1)) {
         MPIDI_OFI_send_control_t ctrl;
         int c;
-        uint64_t rma_key;
+        uint64_t rma_key = 0;
         MPIDI_OFI_huge_counter_t *cntr;
         void *ptr;
         c = 1;
@@ -181,7 +181,8 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
 
         ctrl.rma_key = MPIDI_OFI_index_allocator_alloc(MPIDI_OFI_COMM(comm).rma_id_allocator);
         MPIR_Assert(ctrl.rma_key < MPIDI_Global.max_huge_rmas);
-        rma_key  = ctrl.rma_key<<MPIDI_Global.huge_rma_shift;
+        if (MPIDI_OFI_ENABLE_MR_SCALABLE)
+            rma_key  = ctrl.rma_key<<MPIDI_Global.huge_rma_shift;
         MPIDI_OFI_CALL_NOLOCK(fi_mr_reg(MPIDI_Global.domain,     /* In:  Domain Object       */
                                                 send_buf,                /* In:  Lower memory address*/
                                                 data_sz,                 /* In:  Length              */
@@ -191,6 +192,11 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send_normal(MPIDI_OFI_SENDPARAMS,
                                                 0ULL,                    /* In:  flags               */
                                                 &cntr->mr,               /* Out: memregion object    */
                                                 NULL), mr_reg);          /* In:  context             */
+
+        if (!MPIDI_OFI_ENABLE_MR_SCALABLE) {
+            /* MR_BASIC */
+            ctrl.rma_key = fi_mr_key(cntr->mr);
+        }
 
         cntr->outstanding++;
         cntr->counter++;

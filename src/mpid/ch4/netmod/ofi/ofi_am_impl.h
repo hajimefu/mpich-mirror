@@ -283,13 +283,15 @@ static inline int MPIDI_OFI_send_am_long(int           rank,
     lmt_info = &MPIDI_OFI_AMREQUEST_HDR(sreq, lmt_info);
     lmt_info->context_id = comm->context_id;
     lmt_info->src_rank = comm->rank;
-    lmt_info->src_offset = (uint64_t) 0; /* TODO: Set to data if MR_BASIC */
+    lmt_info->src_offset = MPIDI_OFI_ENABLE_MR_SCALABLE ?
+        (uint64_t) 0 /* MR_SCALABLE */ : (uint64_t) data; /* MR_BASIC */
     lmt_info->sreq_ptr = (uint64_t) sreq;
     /* Always allocates RMA ID from COMM_WORLD as the actual associated communicator
        is not available here */
     index = MPIDI_OFI_index_allocator_alloc(MPIDI_OFI_COMM(MPIR_Process.comm_world).rma_id_allocator);
     MPIR_Assert((int)index < MPIDI_Global.max_huge_rmas);
-    lmt_info->rma_key = index << MPIDI_Global.huge_rma_shift;
+    lmt_info->rma_key = MPIDI_OFI_ENABLE_MR_SCALABLE ?
+        index << MPIDI_Global.huge_rma_shift : 0;
 
     MPIR_cc_incr(sreq->cc_ptr, &c); /* send completion */
     MPIR_cc_incr(sreq->cc_ptr, &c); /* lmt ack handler */
@@ -315,6 +317,11 @@ static inline int MPIDI_OFI_send_am_long(int           rank,
                                                 &MPIDI_OFI_AMREQUEST_HDR(sreq, lmt_mr),
                                                 NULL), mr_reg);
     OPA_incr_int(&MPIDI_Global.am_inflight_rma_send_mrs);
+
+    if (!MPIDI_OFI_ENABLE_MR_SCALABLE) {
+        /* MR_BASIC */
+        lmt_info->rma_key = fi_mr_key(MPIDI_OFI_AMREQUEST_HDR(sreq, lmt_mr));
+    }
 
     iov[0].iov_base = msg_hdr;
     iov[0].iov_len = sizeof(*msg_hdr);

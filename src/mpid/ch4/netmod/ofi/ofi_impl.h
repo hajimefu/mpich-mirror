@@ -242,16 +242,22 @@ __ALWAYS_INLINE__ MPIDII_av_entry_t* MPIDIU_comm_rank_to_av(MPIR_Comm *comm, int
 
 #define WINFO(w,rank) MPIDI_CH4U_WINFO(w,rank)
 
-__ALWAYS_INLINE__ void *MPIDI_OFI_winfo_base(MPIR_Win *w, int rank)
+__ALWAYS_INLINE__ uintptr_t MPIDI_OFI_winfo_base(MPIR_Win *w, int rank)
 {
-    return NULL;
+#if MPIDI_OFI_ENABLE_MR_SCALABLE
+    return 0;
+#else
+    return MPIDI_OFI_WIN(w).winfo[rank].base;
+#endif
 }
-
-#define MPIDI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
 __ALWAYS_INLINE__ uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
 {
+#if MPIDI_OFI_ENABLE_MR_SCALABLE
     return MPIDI_OFI_WIN(w).mr_key;
+#else
+    return MPIDI_OFI_WIN(w).winfo[rank].mr_key;
+#endif
 }
 
 #ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS

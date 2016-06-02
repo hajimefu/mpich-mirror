@@ -52,7 +52,8 @@ static inline int MPIDI_OFI_init_generic(int         rank,
                                                  int         do_am,
                                                  int         do_tagged,
                                                  int         do_data,
-                                                 int         do_stx_rma)
+                                                 int         do_stx_rma,
+                                                 int         do_mr_scalable)
 {
     int mpi_errno = MPI_SUCCESS, pmi_errno, i, fi_version;
     int thr_err=0, str_errno, maxlen;
@@ -172,7 +173,7 @@ static inline int MPIDI_OFI_init_generic(int         rank,
     hints->domain_attr->data_progress    = FI_PROGRESS_MANUAL;
     hints->domain_attr->resource_mgmt    = FI_RM_ENABLED;
     hints->domain_attr->av_type          = do_av_table?FI_AV_TABLE:FI_AV_MAP;
-    hints->domain_attr->mr_mode          = FI_MR_SCALABLE;
+    hints->domain_attr->mr_mode          = do_mr_scalable?FI_MR_SCALABLE:FI_MR_BASIC;
     hints->tx_attr->op_flags             = FI_DELIVERY_COMPLETE | FI_COMPLETION;
     hints->tx_attr->msg_order            = FI_ORDER_SAS;
     hints->tx_attr->comp_order           = FI_ORDER_NONE;
@@ -508,7 +509,8 @@ static inline int MPIDI_NM_init(int         rank,
                                                MPIDI_OFI_ENABLE_AM,
                                                MPIDI_OFI_ENABLE_TAGGED,
                                                MPIDI_OFI_ENABLE_DATA,
-                                               MPIDI_OFI_ENABLE_STX_RMA);
+                                               MPIDI_OFI_ENABLE_STX_RMA,
+                                               MPIDI_OFI_ENABLE_MR_SCALABLE);
     return mpi_errno;
 }
 

@@ -29,7 +29,7 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
     MPIR_Comm      *comm_ptr     = win->comm_ptr;
     int raw_prefix,idx,bitpos;
     unsigned gen_id;
-    uint32_t *disp_units;
+    MPIDI_OFI_win_targetinfo_t *winfo;
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_OFI_WIN_ALLGATHER);
@@ -57,8 +57,13 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
     MPIR_ERR_CHKANDSTMT(window_instance >= max_instances_allowed,mpi_errno,MPI_ERR_OTHER,
                         goto fn_fail,"**ofid_mr_reg");
 
-    /* Context id in lower bits, instance in upper bits */
-    MPIDI_OFI_WIN(win).mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
+    if (MPIDI_OFI_ENABLE_MR_SCALABLE) {
+        /* Context id in lower bits, instance in upper bits */
+        MPIDI_OFI_WIN(win).mr_key = (gen_id<<MPIDI_Global.context_shift) | window_instance;
+    }
+    else {
+        MPIDI_OFI_WIN(win).mr_key = 0;
+    }
 
     MPIDI_OFI_CALL(fi_mr_reg(MPIDI_Global.domain,                /* In:  Domain Object       */
                                      base,                               /* In:  Lower memory address*/
@@ -70,32 +75,42 @@ static inline int MPIDI_OFI_win_allgather(MPIR_Win        *win,
                                      &MPIDI_OFI_WIN(win).mr,                  /* Out: memregion object    */
                                      NULL), mr_reg);                     /* In:  context             */
 
-    MPIDI_OFI_WIN(win).disp_units =
-                                    (uint32_t*)MPL_malloc(sizeof(uint32_t)*comm_ptr->local_size);
+    MPIDI_OFI_WIN(win).winfo =
+        MPL_malloc(sizeof(*winfo) * comm_ptr->local_size);
 
-    disp_units = MPIDI_OFI_WIN(win).disp_units;
-    disp_units[comm_ptr->rank] = disp_unit;
+    winfo = MPIDI_OFI_WIN(win).winfo;
+    winfo[comm_ptr->rank].disp_unit = disp_unit;
+
+#ifndef USE_OFI_MR_SCALABLE
+    /* MR_BASIC */
+    MPIDI_OFI_WIN(win).mr_key = fi_mr_key(MPIDI_OFI_WIN(win).mr);
+    winfo[comm_ptr->rank].mr_key = MPIDI_OFI_WIN(win).mr_key;
+    winfo[comm_ptr->rank].base   = (uintptr_t) base;
+#endif
+
     mpi_errno = MPIR_Allgather_impl(MPI_IN_PLACE, 0,
                                     MPI_DATATYPE_NULL,
-                                    disp_units,
-                                    sizeof(uint32_t),
+                                    winfo,
+                                    sizeof(*winfo),
                                     MPI_BYTE,
                                     comm_ptr,
                                     &errflag);
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
-    first = disp_units[0];
-    same_disp = 1;
-    for(i=1; i<comm_ptr->local_size; i++) {
-        if(disp_units[i] != first){
-            same_disp=0;
-            break;
+    if (MPIDI_OFI_ENABLE_MR_SCALABLE) {
+        first = winfo[0].disp_unit;
+        same_disp = 1;
+        for(i=1; i<comm_ptr->local_size; i++) {
+            if(winfo[i].disp_unit != first){
+                same_disp=0;
+                break;
+            }
         }
-    }
-    if(same_disp){
-        MPL_free(MPIDI_OFI_WIN(win).disp_units);
-        MPIDI_OFI_WIN(win).disp_units = NULL;
+        if(same_disp){
+            MPL_free(MPIDI_OFI_WIN(win).winfo);
+            MPIDI_OFI_WIN(win).winfo = NULL;
+        }
     }
 
 fn_exit:
@@ -641,9 +656,9 @@ static inline int MPIDI_NM_win_free(MPIR_Win **win_ptr)
     if (MPIDI_OFI_WIN(win).cmpl_cntr != MPIDI_Global.rma_cmpl_cntr)
         MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).cmpl_cntr->fid), cqclose);
     MPIDI_OFI_CALL(fi_close(&MPIDI_OFI_WIN(win).mr->fid), mr_unreg);
-    if(MPIDI_OFI_WIN(win).disp_units){
-        MPL_free(MPIDI_OFI_WIN(win).disp_units);
-        MPIDI_OFI_WIN(win).disp_units = NULL;
+    if(MPIDI_OFI_WIN(win).winfo){
+        MPL_free(MPIDI_OFI_WIN(win).winfo);
+        MPIDI_OFI_WIN(win).winfo = NULL;
     }
 
     MPIDI_CH4R_win_finalize(win_ptr);

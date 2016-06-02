@@ -58,10 +58,10 @@
         }                                       \
     } while (0)
 
-static inline uint32_t MPIDI_OFI_disp_unit(MPIR_Win* win, int rank)
+static inline uint32_t MPIDI_OFI_winfo_disp_unit(MPIR_Win* win, int rank)
 {
-    if(MPIDI_OFI_WIN(win).disp_units)
-       return MPIDI_OFI_WIN(win).disp_units[rank];
+    if(MPIDI_OFI_WIN(win).winfo)
+       return MPIDI_OFI_WIN(win).winfo[rank].disp_unit;
     else
         return win->disp_unit;
 }
@@ -331,7 +331,7 @@ static inline int MPIDI_OFI_do_put(const void    *origin_addr,
                                                                                   target_datatype,
                                                                                   &req,&flags,&ep,sigreq));
 
-    offset   = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+    offset   = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
 
     req->event_id          = MPIDI_OFI_EVENT_ABORT;
     msg.desc               = NULL;
@@ -415,7 +415,7 @@ static inline int MPIDI_NM_put(const void   *origin_addr,
         goto fn_exit;
 
     if(target_rank == win->comm_ptr->rank) {
-        offset   = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+        offset   = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
         mpi_errno = MPIR_Localcopy(origin_addr,
                                    origin_count,
                                    origin_datatype,
@@ -430,7 +430,7 @@ static inline int MPIDI_NM_put(const void   *origin_addr,
                                       fi_inject_write(MPIDI_OFI_WIN(win).ep_nocmpl,(char *)origin_addr+origin_true_lb,
                                                       target_bytes,MPIDI_OFI_comm_to_phys(win->comm_ptr,target_rank,MPIDI_OFI_API_CTR),
                                                       (uint64_t)(char *)MPIDI_OFI_winfo_base(win,target_rank)+
-                                                      target_disp*MPIDI_OFI_disp_unit(win,target_rank)+target_true_lb,
+                                                      target_disp*MPIDI_OFI_winfo_disp_unit(win,target_rank)+target_true_lb,
                                                       MPIDI_OFI_winfo_mr_key(win,target_rank)),
                                       rdma_inject_write);
     } else {
@@ -484,7 +484,7 @@ static inline int MPIDI_OFI_do_get(void          *origin_addr,
                                                                                   origin_datatype,target_datatype,
                                                                                   &req,&flags,&ep,sigreq));
 
-    offset                 = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+    offset                 = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
     req->event_id          = MPIDI_OFI_EVENT_ABORT;
     msg.desc               = NULL;
     msg.addr               = MPIDI_OFI_comm_to_phys(win->comm_ptr,req->target_rank,MPIDI_OFI_API_CTR);
@@ -566,7 +566,7 @@ static inline int MPIDI_NM_get(void         *origin_addr,
         goto fn_exit;
 
     if(target_rank == win->comm_ptr->rank) {
-        offset    = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+        offset    = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
         mpi_errno = MPIR_Localcopy((char *)win->base + offset,
                                    target_count,
                                    target_datatype,
@@ -579,7 +579,7 @@ static inline int MPIDI_NM_get(void         *origin_addr,
     MPIDI_Datatype_check_contig(target_datatype,target_contig);
 
     if(origin_contig && target_contig) {
-        offset = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+        offset = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
         MPIDI_OFI_win_datatype_basic(origin_count,origin_datatype,&origin_dt);
         MPIDI_OFI_win_datatype_basic(target_count,target_datatype,&target_dt);
         MPIR_ERR_CHKANDJUMP((origin_dt.size != target_dt.size),
@@ -654,7 +654,7 @@ static inline int MPIDI_NM_rput(const void   *origin_addr,
     if(target_rank == win->comm_ptr->rank) {
         rreq       = MPIR_Request_create(MPIR_REQUEST_KIND__RMA);
         MPIR_Request_add_ref(rreq);
-        offset     = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+        offset     = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
         mpi_errno = MPIR_Localcopy(origin_addr,
                                    origin_count,
                                    origin_datatype,
@@ -709,7 +709,7 @@ static inline int MPIDI_NM_compare_and_swap(const void *origin_addr,
 
     MPIDI_CH4U_EPOCH_CHECK_SYNC(win,mpi_errno,goto fn_fail);
 
-    offset = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+    offset = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
 
     MPIDI_OFI_win_datatype_basic(1,datatype,&origin_dt);
     MPIDI_OFI_win_datatype_basic(1,datatype,&result_dt);
@@ -809,7 +809,7 @@ static inline int MPIDI_OFI_do_accumulate(const void    *origin_addr,
         return MPI_SUCCESS;
     }
 
-    offset = target_disp * MPIDI_OFI_disp_unit(win, target_rank);
+    offset = target_disp * MPIDI_OFI_winfo_disp_unit(win, target_rank);
 
     MPIDI_CH4U_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 
@@ -975,7 +975,7 @@ static inline int MPIDI_OFI_do_get_accumulate(const void    *origin_addr,
         goto fn_exit;
     }
 
-    offset = target_disp * MPIDI_OFI_disp_unit(win,target_rank);
+    offset = target_disp * MPIDI_OFI_winfo_disp_unit(win,target_rank);
 
     MPIDI_CH4U_EPOCH_START_CHECK(win,mpi_errno,goto fn_fail);
 

@@ -16,7 +16,7 @@ AC_DEFUN([PAC_SUBCFG_PREREQ_]PAC_SUBCFG_AUTO_SUFFIX,[
         CH4 OFI netmod arguments:
                 scalable-endpoints - Use OFI scalable endpoint mode
                 av-table           - Use OFI AV table (logical addressing mode).  Default is av-map mode
-                mr-offset          - USE OFI memory region offset mode
+                mr-basic           - USE OFI MR_BASIC mode. Default is MR_SCALABLE mode.
                 direct-provider    - USE OFI FI_DIRECT to compile in a single OFI direct provider
                 no-tagged          - Do not use OFI fi_tagged interfaces.
                 no-data            - Disable immediate data field
@@ -35,6 +35,7 @@ dnl Parse the device arguments
     do_tagged=true
     do_data=true
     do_stx_rma=true
+    do_mr_scalable=true
     echo "Parsing Arguments for OFI Netmod"
     for arg in $args_array; do
     case ${arg} in
@@ -61,6 +62,11 @@ dnl Parse the device arguments
       no-stx-rma)
               do_stx_rma=false
               echo " ---> CH4::OFI Disable per-window EP & counter for RMA : $arg"
+	      ;;
+      mr-basic)
+              do_mr_scalable=false
+              echo " ---> CH4::OFI Switching to MR_BASIC mode : $arg"
+	      ;;
     esac
     done
     IFS=$SAVE_IFS
@@ -93,6 +99,11 @@ dnl Parse the device arguments
     if [test "$do_stx_rma" = "true"]; then
        AC_DEFINE([USE_OFI_STX_RMA], [1], [Define to use per-window EP & counter])
        AC_MSG_NOTICE([Enabling per-window EP & counter])
+    fi
+
+    if [test "$do_mr_scalable" = "true"]; then
+       AC_DEFINE([USE_OFI_MR_SCALABLE], [1], [Define to use MR_SCALABLE])
+       AC_MSG_NOTICE([Enabling MR_SCALABLE])
     fi
 ])
     AM_CONDITIONAL([BUILD_CH4_NETMOD_OFI],[test "X$build_ch4_netmod_ofi" = "Xyes"])
