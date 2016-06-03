@@ -120,9 +120,10 @@ match_l: {
                     data_sz = in_cell ? cell->pkt.mpich.datalen : MPIDI_POSIX_REQUEST(sreq)->data_sz;
                 else if(type == MPIDI_POSIX_TYPELMT)
                     data_sz = MPIDI_POSIX_EAGER_THRESHOLD;
-                else
+                else {
+                    data_sz=0; /*  unused warning */
                     MPIR_Assert(0);
-
+                }
                 /* check for user buffer overflow */
                 size_t user_data_sz = MPIDI_POSIX_REQUEST(req)->data_sz;
                 if(user_data_sz < data_sz) {
