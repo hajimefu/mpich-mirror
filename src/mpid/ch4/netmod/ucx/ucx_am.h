@@ -41,9 +41,8 @@ static inline void MPIDI_UCX_send_am_callback(void *request, ucs_status_t status
         MPIR_Request *req = ucp_request->req;
         int handler_id = req->dev.ch4.ch4u.netmod_am.ucx.handler_id;
 
-        if (req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer) {
-            MPL_free(req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
-        }
+        MPL_free(req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer);
+        req->dev.ch4.ch4u.netmod_am.ucx.pack_buffer = NULL;
         MPIDI_UCX_global.send_cmpl_handlers[handler_id](req);
         ucp_request->req = NULL;
     } else {
