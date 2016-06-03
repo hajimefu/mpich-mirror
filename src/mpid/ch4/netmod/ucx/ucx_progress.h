@@ -38,6 +38,7 @@ static inline int MPIDI_UCX_am_handler(void *msg, size_t msg_sz)
         goto fn_exit;
 
     if((!p_data || !data_sz) && cmpl_handler_fn) {
+        MPIR_STATUS_SET_COUNT(rreq->status, data_sz);
         cmpl_handler_fn(rreq);
         goto fn_exit;
     }
