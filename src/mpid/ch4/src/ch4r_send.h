@@ -58,14 +58,6 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
         if (mpi_errno) MPIR_ERR_POP(mpi_errno);
     }
     else {
-        int dt_contig;
-        size_t dt_size;
-        MPIR_Datatype *dt_ptr;
-        MPI_Aint dt_true_lb;
-        MPIDI_Datatype_get_info(count, datatype, dt_contig, dt_size, dt_ptr, dt_true_lb);
-        (void) dt_true_lb; /* Just to make the compiler happy */
-        (void) dt_contig;
-
         mpi_errno = MPIDI_NM_send_am(rank, comm, MPIDI_CH4U_SEND,
                                      &am_hdr, sizeof(am_hdr),
                                      buf, count, datatype, sreq, NULL);
