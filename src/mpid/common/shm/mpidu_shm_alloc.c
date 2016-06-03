@@ -103,7 +103,7 @@ int MPIDU_shm_seg_alloc(size_t len, void **ptr_p)
     MPIR_CHKPMEM_COMMIT();
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDU_SHM_SEG_ALLOC);
     return mpi_errno;
- fn_fail:
+  fn_fail:
     MPIR_CHKPMEM_REAP();
     goto fn_exit;
 }
@@ -300,8 +300,10 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
         MPIR_CHKPMEM_MALLOC(addr, char *, segment_len + MPIDU_SHM_CACHE_LINE_LEN, mpi_errno, "segment");
 
         memory->base_addr = addr;
-        current_addr = (char *)(((uintptr_t)addr + (uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1) & (~((uintptr_t)MPIDU_SHM_CACHE_LINE_LEN-1)));
-        memory->symmetrical = 0 ;
+        current_addr =
+            (char *) (((uintptr_t) addr + (uintptr_t) MPIDU_SHM_CACHE_LINE_LEN - 1) &
+                      (~((uintptr_t) MPIDU_SHM_CACHE_LINE_LEN - 1)));
+        memory->symmetrical = 0;
 
         /* we still need to call barrier */
 	pmi_errno = PMI_Barrier();
