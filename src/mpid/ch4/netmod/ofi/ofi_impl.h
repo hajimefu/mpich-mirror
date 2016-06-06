@@ -17,28 +17,15 @@
 #include "ch4_impl.h"
 #include "ofi_iovec_util.h"
 
-/* The purpose of this hacky #ifdef is to tag                */
-/* select MPI util functions with always inline.  A better   */
-/* approach would be to declare them inline in a header file */
-/* In a static library with the "always_inline" attribute    */
-/* This allows an application with ipo/pgo enabled to inline */
-/* the function directly into the application despite        */
-/* mpi header files not using attribute inline               */
-/* Trick doesn't work with gcc or clang                      */
-#if defined(__INTEL_COMPILER)
-#ifndef __cplusplus
-struct MPIR_Object_alloc_t;
-#define ILU(ret,fcname,...) inline __attribute__((always_inline)) ret MPIR_##fcname(__VA_ARGS__)
-ILU(void *, Handle_obj_alloc_unsafe, struct MPIR_Object_alloc_t *);
-ILU(void *, Handle_obj_alloc, struct MPIR_Object_alloc_t *);
-ILU(void *, Handle_direct_init, void *, int, int, int);
-ILU(void *, Handle_indirect_init, void *(* *)[], int *, int, int, int, int);
-ILU(void, Handle_obj_alloc_complete, struct MPIR_Object_alloc_t *, int);
-ILU(void, Handle_obj_free, struct MPIR_Object_alloc_t *objmem, void *object);
-ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
-#undef ILU
-#endif /* __cplusplus */
-#endif /* __clang__ || __INTEL_COMPILER */
+/* Tag the prototypes with always_inline to force object allocation */
+/* routines to inline  This allows the library, compiled without    */
+/* ipo/pgo enabled to inline MPI layer functions                    */
+__ALWAYS_INLINE__ MPIR_Request *MPIR_Request_create(MPIR_Request_kind_t kind);
+__ALWAYS_INLINE__ void *MPIR_Handle_obj_alloc(MPIR_Object_alloc_t *);
+__ALWAYS_INLINE__ void *MPIR_Handle_obj_alloc_unsafe(MPIR_Object_alloc_t *);
+__ALWAYS_INLINE__ void  MPIR_Handle_obj_free( MPIR_Object_alloc_t *, void * );
+__ALWAYS_INLINE__ void *MPIR_Handle_get_ptr_indirect( int, MPIR_Object_alloc_t * );
+__ALWAYS_INLINE__ MPIDII_av_entry_t* MPIDIU_comm_rank_to_av(MPIR_Comm *comm, int rank);
 
 #define MPIDI_OFI_DT(dt)         ((dt)->dev.netmod.ofi)
 #define MPIDI_OFI_OP(op)         ((op)->dev.netmod.ofi)
@@ -94,9 +81,15 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
   } while (0)
 
 
-#define MPIDI_OFI_PROGRESS()                              \
+#define MPIDI_OFI_PROGRESS()                                      \
     do {                                                          \
         mpi_errno = MPIDI_Progress_test();                        \
+        if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);      \
+    } while (0)
+
+#define MPIDI_OFI_PROGRESS_NONINLINE()                            \
+    do {                                                          \
+        mpi_errno = MPIDI_OFI_progress_test_no_inline();          \
         if (mpi_errno!=MPI_SUCCESS) MPIR_ERR_POP(mpi_errno);      \
     } while (0)
 
@@ -157,7 +150,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
                               fi_strerror(-_ret));          \
         if (LOCK == MPIDI_OFI_CALL_NO_LOCK)                 \
             MPID_THREAD_CS_EXIT(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);     \
-        MPIDI_OFI_PROGRESS();                                \
+        MPIDI_OFI_PROGRESS_NONINLINE();                              \
         if (LOCK == MPIDI_OFI_CALL_NO_LOCK)                 \
             MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);    \
     } while (_ret == -FI_EAGAIN);                           \
@@ -181,7 +174,7 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
                               __LINE__,                     \
                               FCNAME,                       \
                               fi_strerror(-_ret));          \
-        MPIDI_OFI_PROGRESS();                                \
+        MPIDI_OFI_PROGRESS_NONINLINE();                         \
         MPID_THREAD_CS_ENTER(POBJ,MPIDI_OFI_THREAD_FI_MUTEX);   \
     } while (_ret == -FI_EAGAIN);                           \
     } while (0)
@@ -243,14 +236,14 @@ ILU(void *, Handle_get_ptr_indirect, int, struct MPIR_Object_alloc_t *);
 
 #define WINFO(w,rank) MPIDI_CH4U_WINFO(w,rank)
 
-static inline void *MPIDI_OFI_winfo_base(MPIR_Win *w, int rank)
+__ALWAYS_INLINE__ void *MPIDI_OFI_winfo_base(MPIR_Win *w, int rank)
 {
     return NULL;
 }
 
 #define MPIDI_OFI_WINFO_DISP_UNIT(w,rank) MPIDI_CH4U_WINFO_DISP_UNIT(w,rank)
 
-static inline uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
+__ALWAYS_INLINE__ uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
 {
     return MPIDI_OFI_WIN(w).mr_key;
 }
@@ -263,7 +256,24 @@ static inline uint64_t MPIDI_OFI_winfo_mr_key(MPIR_Win *w, int rank)
 #define MPIDI_OFI_CNTR_INCR() MPIDI_Global.cntr++
 #endif
 
-/*  Prototypes */
+/* Externs:  see util.c for definition */
+extern int   MPIDI_OFI_handle_cq_error_util(ssize_t ret);
+extern int   MPIDI_OFI_progress_test_no_inline();
+extern int   MPIDI_OFI_control_handler(void *am_hdr,
+                                       void **data,size_t *data_sz,int *is_contig,
+                                       MPIDI_NM_am_completion_handler_fn *cmpl_handler_fn,
+                                       MPIR_Request **req);
+extern void  MPIDI_OFI_map_create(void **map);
+extern void  MPIDI_OFI_map_destroy(void *map);
+extern void  MPIDI_OFI_map_set(void *_map, uint64_t id, void *val);
+extern void  MPIDI_OFI_map_erase(void *_map, uint64_t id);
+extern void *MPIDI_OFI_map_lookup(void *_map, uint64_t id);
+extern int   MPIDI_OFI_control_dispatch(void *buf);
+extern void  MPIDI_OFI_index_datatypes();
+extern void  MPIDI_OFI_index_allocator_create(void **_indexmap, int start);
+extern int   MPIDI_OFI_index_allocator_alloc(void *_indexmap);
+extern void  MPIDI_OFI_index_allocator_free(void *_indexmap, int index);
+extern void  MPIDI_OFI_index_allocator_destroy(void *_indexmap);
 
 /* Common Utility functions used by the
  * C and C++ components
@@ -301,7 +311,7 @@ __ALWAYS_INLINE__ void MPIDI_OFI_win_request_complete(MPIDI_OFI_win_request_t *r
     }
 }
 
-static inline fi_addr_t MPIDI_OFI_comm_to_phys(MPIR_Comm *comm, int rank, int ep_family)
+__ALWAYS_INLINE__ fi_addr_t MPIDI_OFI_comm_to_phys(MPIR_Comm *comm, int rank, int ep_family)
 {
 #ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
     int ep_num = MPIDI_OFI_COMM_TO_EP(comm, rank);
@@ -313,7 +323,7 @@ static inline fi_addr_t MPIDI_OFI_comm_to_phys(MPIR_Comm *comm, int rank, int ep
 #endif
 }
 
-static inline fi_addr_t MPIDI_OFI_to_phys(int rank, int ep_family)
+__ALWAYS_INLINE__ fi_addr_t MPIDI_OFI_to_phys(int rank, int ep_family)
 {
 #ifdef MPIDI_OFI_CONFIG_USE_SCALABLE_ENDPOINTS
     int ep_num = 0;
@@ -325,16 +335,16 @@ static inline fi_addr_t MPIDI_OFI_to_phys(int rank, int ep_family)
 #endif
 }
 
-static inline bool MPIDI_OFI_is_tag_sync(uint64_t match_bits)
+__ALWAYS_INLINE__ bool MPIDI_OFI_is_tag_sync(uint64_t match_bits)
 {
     return (0 != (MPIDI_OFI_SYNC_SEND & match_bits));
 }
 
-static inline uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
-                                                      int               source,
-                                                      int               tag,
-                                                      uint64_t          type,
-                                                      int               do_data)
+__ALWAYS_INLINE__ uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
+                                                  int               source,
+                                                  int               tag,
+                                                  uint64_t          type,
+                                                  int               do_data)
 {
     uint64_t match_bits;
     match_bits = contextid;
@@ -350,11 +360,11 @@ static inline uint64_t MPIDI_OFI_init_sendtag(MPIR_Context_id_t contextid,
 }
 
 /* receive posting */
-static inline uint64_t MPIDI_OFI_init_recvtag(uint64_t          *mask_bits,
-                                                      MPIR_Context_id_t  contextid,
-                                                      int                source,
-                                                      int                tag,
-                                                      int                do_data)
+__ALWAYS_INLINE__ uint64_t MPIDI_OFI_init_recvtag(uint64_t          *mask_bits,
+                                                  MPIR_Context_id_t  contextid,
+                                                  int                source,
+                                                  int                tag,
+                                                  int                do_data)
 {
     uint64_t match_bits = 0;
     *mask_bits = MPIDI_OFI_PROTOCOL_MASK;
@@ -382,33 +392,30 @@ static inline uint64_t MPIDI_OFI_init_recvtag(uint64_t          *mask_bits,
     return match_bits;
 }
 
-static inline int MPIDI_OFI_init_get_tag(uint64_t match_bits)
+__ALWAYS_INLINE__ int MPIDI_OFI_init_get_tag(uint64_t match_bits)
 {
     return ((int)(match_bits & MPIDI_OFI_TAG_MASK));
 }
 
-static inline int MPIDI_OFI_init_get_source(uint64_t match_bits)
+__ALWAYS_INLINE__ int MPIDI_OFI_init_get_source(uint64_t match_bits)
 {
     return ((int)((match_bits & MPIDI_OFI_SOURCE_MASK) >> MPIDI_OFI_TAG_SHIFT));
 }
 
-static inline MPIR_Request *MPIDI_OFI_context_to_request(void *context)
+__ALWAYS_INLINE__ MPIR_Request *MPIDI_OFI_context_to_request(void *context)
 {
     char *base = (char *) context;
     return (MPIR_Request *) container_of(base, MPIR_Request, dev.ch4.netmod);
 }
 
-#define MPIDI_OFI_DO_INJECT 1
-#define MPIDI_OFI_DO_SEND   0
-
 #undef FUNCNAME
 #define FUNCNAME MPIDI_OFI_send_handler
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static inline int MPIDI_OFI_send_handler(struct fid_ep *ep, const void *buf, size_t len,
-                                        void *desc, uint64_t dest, fi_addr_t dest_addr,
-                                        uint64_t tag, void *context, int is_inject,
-                                        int do_data, int do_lock)
+__ALWAYS_INLINE__ int MPIDI_OFI_send_handler(struct fid_ep *ep, const void *buf, size_t len,
+                                             void *desc, uint64_t dest, fi_addr_t dest_addr,
+                                             uint64_t tag, void *context, int is_inject,
+                                             int do_data, int do_lock)
 {
     int mpi_errno = MPI_SUCCESS;
 
@@ -425,23 +432,5 @@ fn_exit:
 fn_fail:
     goto fn_exit;
 }
-
-/* Utility functions */
-extern int   MPIDI_OFI_handle_cq_error_util(ssize_t ret);
-extern int   MPIDI_OFI_control_handler(void *am_hdr,
-                                               void **data,size_t *data_sz,int *is_contig,
-                                               MPIDI_NM_am_completion_handler_fn *cmpl_handler_fn,
-                                               MPIR_Request **req);
-extern void  MPIDI_OFI_map_create(void **map);
-extern void  MPIDI_OFI_map_destroy(void *map);
-extern void  MPIDI_OFI_map_set(void *_map, uint64_t id, void *val);
-extern void  MPIDI_OFI_map_erase(void *_map, uint64_t id);
-extern void *MPIDI_OFI_map_lookup(void *_map, uint64_t id);
-extern int   MPIDI_OFI_control_dispatch(void *buf);
-extern void  MPIDI_OFI_index_datatypes();
-extern void  MPIDI_OFI_index_allocator_create(void **_indexmap, int start);
-extern int   MPIDI_OFI_index_allocator_alloc(void *_indexmap);
-extern void  MPIDI_OFI_index_allocator_free(void *_indexmap, int index);
-extern void  MPIDI_OFI_index_allocator_destroy(void *_indexmap);
 
 #endif

@@ -202,6 +202,8 @@
 #define MPIDI_OFI_EP_RX_CTR(x) MPIDI_Global.ep
 #endif
 
+#define MPIDI_OFI_DO_SEND        0
+#define MPIDI_OFI_DO_INJECT      1
 #define MPIDI_OFI_NUM_CQ_ENTRIES 8
 
 /* Typedefs */

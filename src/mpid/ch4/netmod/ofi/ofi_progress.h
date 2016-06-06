@@ -15,7 +15,7 @@
 #include "ofi_events.h"
 #include "ofi_am_events.h"
 
-__attribute__((__always_inline__)) static inline
+__ALWAYS_INLINE__
 int MPIDI_OFI_progress_generic(void *netmod_context,
                                        int   blocking,
                                        int   do_am,
