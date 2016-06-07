@@ -1398,8 +1398,7 @@ static inline int MPIDI_CH4U_send_target_handler(void *am_hdr,
     }
 
     if (rreq == NULL) {
-        rreq = MPIDI_CH4I_am_request_create();
-        rreq->kind = MPIR_REQUEST_KIND__RECV;
+        rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__RECV);
         MPIDI_CH4U_REQUEST(rreq, buffer) = (char *) MPL_malloc(*p_data_sz);
         MPIDI_CH4U_REQUEST(rreq, datatype) = MPI_BYTE;
         MPIDI_CH4U_REQUEST(rreq, count) = *p_data_sz;
@@ -1465,8 +1464,7 @@ static inline int MPIDI_CH4U_send_long_req_target_handler(void *am_hdr,
     }
 
     if (rreq == NULL) {
-        rreq = MPIDI_CH4I_am_request_create();
-        rreq->kind = MPIR_REQUEST_KIND__RECV;
+        rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__RECV);
 
         MPIDI_CH4U_REQUEST(rreq, buffer) = NULL;
         MPIDI_CH4U_REQUEST(rreq, datatype) = MPI_BYTE;

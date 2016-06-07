@@ -38,9 +38,8 @@ static inline int MPIDI_CH4I_do_send(const void    *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_DO_SEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_DO_SEND);
 
-    sreq = MPIDI_CH4I_am_request_create();
+    sreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__SEND);
     MPIR_Assert(sreq);
-    sreq->kind = MPIR_REQUEST_KIND__SEND;
 
     *request = sreq;
     match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, comm->rank, tag);
@@ -87,8 +86,7 @@ static inline int MPIDI_CH4I_send(const void *buf, int count, MPI_Datatype datat
     if (unlikely(rank == MPI_PROC_NULL)) {
         mpi_errno = MPI_SUCCESS;
         if (!noreq) {
-            *request = MPIDI_CH4I_am_request_create();
-            (*request)->kind = MPIR_REQUEST_KIND__SEND;
+            *request = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__SEND);
             MPIDI_Request_complete((*request));
         }
         goto fn_exit;
@@ -116,11 +114,10 @@ static inline int MPIDI_CH4I_psend(const void *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_NM_PSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_NM_PSEND);
 
-    sreq = MPIDI_CH4I_am_request_create();
+    sreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__PREQUEST_SEND);
     *request = sreq;
 
     MPIR_Comm_add_ref(comm);
-    sreq->kind = MPIR_REQUEST_KIND__PREQUEST_SEND;
     sreq->comm = comm;
     match_bits = MPIDI_CH4U_init_send_tag(comm->context_id + context_offset, rank, tag);
 

@@ -163,14 +163,13 @@ static inline int MPIDI_CH4I_do_irecv(void          *buf,
     }
 
     if (alloc_req) {
-        rreq = MPIDI_CH4I_am_request_create();
+        rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__RECV);
     }
     else {
         rreq = *request;
         MPIR_Assert(0);
     }
 
-    rreq->kind = MPIR_REQUEST_KIND__RECV;
     *request = rreq;
     if (unlikely(rank == MPI_PROC_NULL)) {
         rreq->kind = MPIR_REQUEST_KIND__RECV;
@@ -251,10 +250,9 @@ __CH4_INLINE__ int MPIDI_CH4U_recv_init(void *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_RECV_INIT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_RECV_INIT);
 
-    rreq = MPIDI_CH4I_am_request_create();
+    rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__RECV);
 
     *request = rreq;
-    rreq->kind = MPIR_REQUEST_KIND__PREQUEST_RECV;
     rreq->comm = comm;
     MPIR_Comm_add_ref(comm);
 
