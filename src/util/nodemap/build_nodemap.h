@@ -452,7 +452,7 @@ static inline int MPIR_NODEMAP_build_nodemap(int sz,
         node_names[i][0] = '\0';
     }
 
-    g_max_node_id = 0; /* defensive */
+    g_max_node_id = -1; /* defensive */
 
     for (i = 0; i < sz; ++i)
     {
@@ -465,7 +465,7 @@ static inline int MPIR_NODEMAP_build_nodemap(int sz,
             ret = gethostname(hostname, MAX_HOSTNAME_LEN);
             MPIR_ERR_CHKANDJUMP2(ret == -1, mpi_errno, MPI_ERR_OTHER, "**sock_gethost", "**sock_gethost %s %d", MPIR_Strerror(errno), errno);
             hostname[MAX_HOSTNAME_LEN-1] = '\0';
-            MPL_snprintf(node_names[g_max_node_id], key_max_sz, "%s", hostname);
+            MPL_snprintf(node_names[g_max_node_id+1], key_max_sz, "%s", hostname);
             MPL_free(hostname);
         }
         else
@@ -473,7 +473,7 @@ static inline int MPIR_NODEMAP_build_nodemap(int sz,
             memset(key, 0, key_max_sz);
             MPL_snprintf(key, key_max_sz, "hostname[%d]", i);
 
-            pmi_errno = PMI_KVS_Get(kvs_name, key, node_names[g_max_node_id], key_max_sz);
+            pmi_errno = PMI_KVS_Get(kvs_name, key, node_names[g_max_node_id+1], key_max_sz);
             MPIR_ERR_CHKANDJUMP1(pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_kvs_get", "**pmi_kvs_get %d", pmi_errno);
         }
 
@@ -482,12 +482,12 @@ static inline int MPIR_NODEMAP_build_nodemap(int sz,
         /* The right fix is to get all this information from the process
            manager, rather than bother with this hostname hack at all. */
         for (j = 0; j < g_max_node_id + 1; ++j)
-            if (!MPL_strncmp(node_names[j], node_names[g_max_node_id], key_max_sz))
+            if (!MPL_strncmp(node_names[j], node_names[g_max_node_id+1], key_max_sz))
                 break;
         if (j == g_max_node_id + 1)
             ++g_max_node_id;
         else
-            node_names[g_max_node_id][0] = '\0';
+            node_names[g_max_node_id+1][0] = '\0';
         out_nodemap[i] = j;
     }
 
