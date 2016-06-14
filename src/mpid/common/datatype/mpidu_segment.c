@@ -108,9 +108,9 @@ void MPIR_Segment_pack_vector(struct DLOOP_Segment *segp,
 			  int *lengthp)
 {
 struct MPIDU_Segment_piece_params packvec_params;
-MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_PACK_VECTOR);
+MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_PACK_VECTOR);
 
-MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_PACK_VECTOR);
+MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_PACK_VECTOR);
 
 packvec_params.u.pack_vector.vectorp = vectorp;
 packvec_params.u.pack_vector.index   = 0;
@@ -130,7 +130,7 @@ MPIDU_Segment_manipulate(segp,
 
 /* last value already handled by MPIDU_Segment_manipulate */
 *lengthp = packvec_params.u.pack_vector.index;
-MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_PACK_VECTOR);
+MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_PACK_VECTOR);
 return;
 }
 
@@ -148,10 +148,10 @@ void MPIR_Segment_unpack_vector(struct DLOOP_Segment *segp,
 			    DLOOP_VECTOR *vectorp,
 			    int *lengthp)
 {
-MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
-MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
+MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_UNPACK_VECTOR);
+MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_UNPACK_VECTOR);
 MPIR_Segment_pack_vector(segp, first, lastp, vectorp, lengthp);
-MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_UNPACK_VECTOR);
+MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_UNPACK_VECTOR);
 return;
 }
 
@@ -177,9 +177,9 @@ void MPIDU_Segment_flatten(struct DLOOP_Segment *segp,
 		      DLOOP_Offset *lengthp)
 {
 struct MPIDU_Segment_piece_params packvec_params;
-MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_FLATTEN);
+MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_FLATTEN);
 
-MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_FLATTEN);
+MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_FLATTEN);
 
 packvec_params.u.flatten.offp = (int64_t *) offp;
 packvec_params.u.flatten.sizep = sizep;
@@ -200,7 +200,7 @@ MPIDU_Segment_manipulate(segp,
 
 /* last value already handled by MPIDU_Segment_manipulate */
 *lengthp = packvec_params.u.flatten.index;
-MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_FLATTEN);
+MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_FLATTEN);
 return;
 }
 
@@ -227,9 +227,9 @@ static int MPIDU_Segment_contig_pack_to_iov(DLOOP_Offset *blocks_p,
     DLOOP_Offset size;
     char *last_end = NULL;
     struct MPIDU_Segment_piece_params *paramp = v_paramp;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_CONTIG_PACK_TO_IOV);
 
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_CONTIG_PACK_TO_IOV);
 
     el_size = MPIR_Datatype_get_basic_size(el_type);
     size = *blocks_p * (DLOOP_Offset) el_size;
@@ -257,7 +257,7 @@ static int MPIDU_Segment_contig_pack_to_iov(DLOOP_Offset *blocks_p,
 	 * function that we are done (and that we didn't process any blocks).
 	 */
 	*blocks_p = 0;
-	MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_TO_IOV);
+	MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_CONTIG_PACK_TO_IOV);
 	return 1;
     }
     else if (last_idx >= 0 && (last_end == ((char *) bufp + rel_off)))
@@ -270,7 +270,7 @@ static int MPIDU_Segment_contig_pack_to_iov(DLOOP_Offset *blocks_p,
 	paramp->u.pack_vector.vectorp[last_idx+1].DLOOP_VECTOR_LEN = size;
 	paramp->u.pack_vector.index++;
     }
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_CONTIG_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_CONTIG_PACK_TO_IOV);
     return 0;
 }
 
@@ -303,9 +303,9 @@ static int MPIDU_Segment_vector_pack_to_iov(DLOOP_Offset *blocks_p,
     int i;
     DLOOP_Offset size, blocks_left, basic_size;
     struct MPIDU_Segment_piece_params *paramp = v_paramp;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_VECTOR_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_VECTOR_PACK_TO_IOV);
 
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_VECTOR_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_VECTOR_PACK_TO_IOV);
 
     basic_size = (DLOOP_Offset) MPIR_Datatype_get_basic_size(el_type);
     blocks_left = *blocks_p;
@@ -361,7 +361,7 @@ static int MPIDU_Segment_vector_pack_to_iov(DLOOP_Offset *blocks_p,
 			    paramp->u.pack_vector.index,
                             (MPI_Aint) *blocks_p));
 #endif
-	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_VECTOR_PACK_TO_IOV);
+	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_VECTOR_PACK_TO_IOV);
 	    return 1;
 	}
 	else if (last_idx >= 0 && (last_end == ((char *) bufp + rel_off)))
@@ -390,7 +390,7 @@ static int MPIDU_Segment_vector_pack_to_iov(DLOOP_Offset *blocks_p,
      * blocks_p
      */
     MPIR_Assert(blocks_left == 0);
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_VECTOR_PACK_TO_IOV);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_VECTOR_PACK_TO_IOV);
     return 0;
 }
 
@@ -411,9 +411,9 @@ static int MPIDU_Segment_contig_flatten(DLOOP_Offset *blocks_p,
     int idx, el_size;
     DLOOP_Offset size;
     struct MPIDU_Segment_piece_params *paramp = v_paramp;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_CONTIG_FLATTEN);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_CONTIG_FLATTEN);
 
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_CONTIG_FLATTEN);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_CONTIG_FLATTEN);
 
     el_size = MPIR_Datatype_get_basic_size(el_type);
     size = *blocks_p * (DLOOP_Offset) el_size;
@@ -445,11 +445,11 @@ static int MPIDU_Segment_contig_flatten(DLOOP_Offset *blocks_p,
 	 */
 	if (paramp->u.flatten.index == paramp->u.flatten.length)
 	{
-	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_CONTIG_FLATTEN);
+	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_CONTIG_FLATTEN);
 	    return 1;
 	}
     }
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_CONTIG_FLATTEN);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_CONTIG_FLATTEN);
     return 0;
 }
 
@@ -479,9 +479,9 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
     int i;
     DLOOP_Offset size, blocks_left, basic_size;
     struct MPIDU_Segment_piece_params *paramp = v_paramp;
-    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_SEGMENT_VECTOR_FLATTEN);
+    MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIR_SEGMENT_VECTOR_FLATTEN);
 
-    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_SEGMENT_VECTOR_FLATTEN);
+    MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIR_SEGMENT_VECTOR_FLATTEN);
 
     basic_size = (DLOOP_Offset) MPIR_Datatype_get_basic_size(el_type);
     blocks_left = *blocks_p;
@@ -514,7 +514,7 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
 	else {
 	    /* we tried to add to the end of the last region and failed; add blocks back in */
 	    *blocks_p = *blocks_p - blocks_left + (size / basic_size);
-	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_VECTOR_FLATTEN);
+	    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_VECTOR_FLATTEN);
 	    return 1;
 	}
 	rel_off += stride;
@@ -523,6 +523,6 @@ static int MPIDU_Segment_vector_flatten(DLOOP_Offset *blocks_p,
     /* --BEGIN ERROR HANDLING-- */
     MPIR_Assert(blocks_left == 0);
     /* --END ERROR HANDLING-- */
-    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPID_SEGMENT_VECTOR_FLATTEN);
+    MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIR_SEGMENT_VECTOR_FLATTEN);
     return 0;
 }
