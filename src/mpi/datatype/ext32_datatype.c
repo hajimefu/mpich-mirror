@@ -10,7 +10,7 @@
 
 #include <mpichconf.h>
 #include <mpiimpl.h>
-#include <mpidu_dataloop.h>
+#include <mpir_dataloop.h>
 
 
 typedef struct external32_basic_size
@@ -85,7 +85,7 @@ static external32_basic_size_t external32_basic_size_array[] =
     { MPI_CXX_LONG_DOUBLE_COMPLEX, 2*16 }
 };
 
-MPI_Aint MPIDI_Datatype_get_basic_size_external32(MPI_Datatype el_type)
+MPI_Aint MPII_Datatype_get_basic_size_external32(MPI_Datatype el_type)
 {
     MPI_Aint ret = (MPI_Aint) 0;
     unsigned int i = 0;
