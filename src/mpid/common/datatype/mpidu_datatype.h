@@ -16,10 +16,6 @@
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
 
-/* MPIDU_Datatype_get_basic_id() is useful for creating and indexing into arrays
-   that store data on a per-basic type basis */
-#define MPIDU_Datatype_get_basic_id(a) ((a)&0x000000ff)
-
 /*
  * The following macro allows us to reference either the regular or 
  * hetero value for the 3 fields (NULL,_size,_depth) in the
