@@ -183,7 +183,7 @@ int MPIR_Type_indexed(int count,
 		      MPI_Datatype oldtype,
 		      MPI_Datatype *newtype);
 
-int MPIDU_Type_vector(int count,
+int MPIR_Type_vector(int count,
 		     int blocklength,
 		     MPI_Aint stride,
 		     int strideinbytes,

@@ -9,7 +9,6 @@
 #include "mpidu_datatype.h"
 
 /* MPID_Type */
-#define MPID_Type_vector MPIDU_Type_vector
 #define MPID_Type_zerolen MPIDU_Type_zerolen
 
 #endif /* MPiD_DATATYPE_FALLBACK_H_INCLUDED */

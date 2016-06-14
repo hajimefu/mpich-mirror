@@ -94,7 +94,7 @@ int MPI_Type_create_hvector(int count,
 
     /* ... body of routine ... */
 
-    mpi_errno = MPID_Type_vector(count,
+    mpi_errno = MPIR_Type_vector(count,
 				 blocklength,
 				 stride,
 				 1, /* stride in bytes */

@@ -37,7 +37,7 @@ int MPIR_Type_hvector_impl(int count, int blocklength, MPI_Aint stride, MPI_Data
     MPIR_Datatype *new_dtp;
     int ints[2];
     
-    mpi_errno = MPID_Type_vector(count,
+    mpi_errno = MPIR_Type_vector(count,
 				 blocklength,
 				 (MPI_Aint) stride,
 				 1, /* stride in bytes */

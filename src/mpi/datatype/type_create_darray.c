@@ -125,7 +125,7 @@ PMPI_LOCAL int MPIR_Type_block(const int *array_of_gsizes,
 	}
 	else {
 	    for (i=0; i<dim; i++) stride *= (MPI_Aint)(array_of_gsizes[i]);
-	    mpi_errno = MPID_Type_vector(mysize,
+	    mpi_errno = MPIR_Type_vector(mysize,
 					 1,
 					 stride,
 					 1, /* stride in bytes */
@@ -155,7 +155,7 @@ PMPI_LOCAL int MPIR_Type_block(const int *array_of_gsizes,
 	}
 	else {
 	    for (i=ndims-1; i>dim; i--) stride *= (MPI_Aint)(array_of_gsizes[i]);
-	    mpi_errno = MPID_Type_vector(mysize,
+	    mpi_errno = MPIR_Type_vector(mysize,
 					 1,
 					 stride,
 					 1, /* stride in bytes */
@@ -234,7 +234,7 @@ PMPI_LOCAL int MPIR_Type_cyclic(const int *array_of_gsizes,
 	for (i=0; i<dim; i++) stride *= (MPI_Aint)(array_of_gsizes[i]);
     else for (i=ndims-1; i>dim; i--) stride *= (MPI_Aint)(array_of_gsizes[i]);
 
-    mpi_errno = MPID_Type_vector(count,
+    mpi_errno = MPIR_Type_vector(count,
 				 blksize,
 				 stride,
 				 1, /* stride in bytes */

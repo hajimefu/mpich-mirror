@@ -193,7 +193,7 @@ int MPI_Type_create_subarray(int ndims,
 					     oldtype,
 					     &tmp1);
 	else {
-	    mpi_errno = MPID_Type_vector(array_of_subsizes[1],
+	    mpi_errno = MPIR_Type_vector(array_of_subsizes[1],
 					 array_of_subsizes[0],
 					 (MPI_Aint)(array_of_sizes[0]),
 					 0, /* stride in types */
@@ -204,7 +204,7 @@ int MPI_Type_create_subarray(int ndims,
 	    size = ((MPI_Aint)(array_of_sizes[0])) * extent;
 	    for (i=2; i<ndims; i++) {
 		size *= (MPI_Aint)(array_of_sizes[i-1]);
-		mpi_errno = MPID_Type_vector(array_of_subsizes[i],
+		mpi_errno = MPIR_Type_vector(array_of_subsizes[i],
 					     1,
 					     size,
 					     1, /* stride in bytes */
@@ -237,7 +237,7 @@ int MPI_Type_create_subarray(int ndims,
 
 	}
 	else {
-	    mpi_errno = MPID_Type_vector(array_of_subsizes[ndims-2],
+	    mpi_errno = MPIR_Type_vector(array_of_subsizes[ndims-2],
 					 array_of_subsizes[ndims-1],
 					 (MPI_Aint)(array_of_sizes[ndims-1]),
 					 0, /* stride in types */
@@ -248,7 +248,7 @@ int MPI_Type_create_subarray(int ndims,
 	    size = (MPI_Aint)(array_of_sizes[ndims-1]) * extent;
 	    for (i=ndims-3; i>=0; i--) {
 		size *= (MPI_Aint)(array_of_sizes[i+1]);
-		mpi_errno = MPID_Type_vector(array_of_subsizes[i],
+		mpi_errno = MPIR_Type_vector(array_of_subsizes[i],
 					     1,    /* blocklen */
 					     size, /* stride */
 					     1,    /* stride in bytes */
