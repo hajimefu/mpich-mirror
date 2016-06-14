@@ -17,8 +17,6 @@ struct MPIR_Request;
 #include <sys/types.h>
 #endif
 
-#include "mpid_datatype_fallback.h"
-
 /* FIXME: Include here? */
 #include "opa_primitives.h"
 
