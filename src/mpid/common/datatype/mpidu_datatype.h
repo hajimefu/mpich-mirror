@@ -53,14 +53,6 @@ void MPIDU_Segment_flatten(struct DLOOP_Segment *segp,
 			  DLOOP_Size *sizep,
 			  DLOOP_Offset *lengthp);
 
-/* misc */
-void MPIDI_Datatype_get_contents_aints(MPIDU_Datatype_contents *cp,
-				       MPI_Aint *user_aints);
-void MPIDI_Datatype_get_contents_types(MPIDU_Datatype_contents *cp,
-				       MPI_Datatype *user_types);
-void MPIDI_Datatype_get_contents_ints(MPIDU_Datatype_contents *cp,
-				      int *user_ints);
-
 void MPIDU_Dataloop_update(struct DLOOP_Dataloop *dataloop,
 			  MPI_Aint ptrdiff);
 

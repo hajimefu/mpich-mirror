@@ -117,3 +117,7 @@ do {									\
 /* internal debugging functions */
 void MPII_Datatype_printf(MPI_Datatype type, int depth, MPI_Aint displacement, int blocklength, int header);
 void MPII_Dataloop_dot_printf(MPIDU_Dataloop *loop_p, int depth, int header);
+
+void MPII_Datatype_get_contents_ints(MPIR_Datatype_contents *cp, int *user_ints);
+void MPII_Datatype_get_contents_aints(MPIR_Datatype_contents *cp, MPI_Aint *user_aints);
+void MPII_Datatype_get_contents_types(MPIR_Datatype_contents *cp, MPI_Datatype *user_types);

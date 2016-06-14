@@ -88,15 +88,15 @@ int MPIR_Type_get_contents(MPI_Datatype datatype,
 
     if (cp->nr_ints > 0)
     {
-        MPIDI_Datatype_get_contents_ints(cp, array_of_integers);
+        MPII_Datatype_get_contents_ints(cp, array_of_integers);
     }
 
     if (cp->nr_aints > 0) {
-        MPIDI_Datatype_get_contents_aints(cp, array_of_addresses);
+        MPII_Datatype_get_contents_aints(cp, array_of_addresses);
     }
 
     if (cp->nr_types > 0) {
-        MPIDI_Datatype_get_contents_types(cp, array_of_datatypes);
+        MPII_Datatype_get_contents_types(cp, array_of_datatypes);
     }
 
     for (i=0; i < cp->nr_types; i++)
