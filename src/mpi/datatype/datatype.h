@@ -4,6 +4,8 @@
  *      See COPYRIGHT in top-level directory.
  */
 
+#include "mpiimpl.h"
+
 /* Definitions private to the datatype code */
 extern int MPIR_Datatype_init( void );
 extern int MPIR_Datatype_builtin_fillin( void );
@@ -111,3 +113,7 @@ do {									\
 	ub_ = old_ub_ + (disp_);					\
     }									\
 } while(0)
+
+/* internal debugging functions */
+void MPII_Datatype_printf(MPI_Datatype type, int depth, MPI_Aint displacement, int blocklength, int header);
+void MPII_Dataloop_dot_printf(MPIDU_Dataloop *loop_p, int depth, int header);

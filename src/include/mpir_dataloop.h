@@ -643,6 +643,19 @@ int MPIR_Type_blockindexed(int count,
 
 int MPIR_Type_commit(MPI_Datatype *type);
 
+/* Segment functions specific to MPICH */
+void MPIR_Segment_pack_vector(struct DLOOP_Segment *segp,
+			      DLOOP_Offset first,
+			      DLOOP_Offset *lastp,
+			      DLOOP_VECTOR *vector,
+			      int *lengthp);
+
+void MPIR_Segment_unpack_vector(struct DLOOP_Segment *segp,
+				DLOOP_Offset first,
+				DLOOP_Offset *lastp,
+				DLOOP_VECTOR *vector,
+				int *lengthp);
+
 /* These values are defined by DLOOP code.
  *
  * Note: DLOOP_DATALOOP_ALL_BYTES is used only when the device

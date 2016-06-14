@@ -181,11 +181,11 @@ int MPIR_Type_struct(int count,
     if (count == 0) return MPII_Type_zerolen(newtype);
 
 #ifdef MPID_STRUCT_DEBUG
-    MPIDI_Datatype_printf(oldtype_array[0], 1, displacement_array[0],
+    MPII_Datatype_printf(oldtype_array[0], 1, displacement_array[0],
 			  blocklength_array[0], 1);
     for (i=1; i < count; i++)
     {
-	MPIDI_Datatype_printf(oldtype_array[i], 1, displacement_array[i],
+	MPII_Datatype_printf(oldtype_array[i], 1, displacement_array[i],
 			      blocklength_array[i], 0);
     }
 #endif

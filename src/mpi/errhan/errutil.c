@@ -1472,7 +1472,7 @@ static const char * GetDTypeString(MPI_Datatype d)
 			   &combiner);
     if (combiner == MPI_COMBINER_NAMED)
     {
-	str = MPIDU_Datatype_builtin_to_string(d);
+	str = MPIR_Datatype_builtin_to_string(d);
 	if (str == NULL)
 	{
 	    MPL_snprintf(default_str, sizeof(default_str), "dtype=0x%08x", d);
@@ -1482,7 +1482,7 @@ static const char * GetDTypeString(MPI_Datatype d)
     }
     
     /* default is not thread safe */
-    str = MPIDU_Datatype_combiner_to_string(combiner);
+    str = MPIR_Datatype_combiner_to_string(combiner);
     if (str == NULL)
     {
 	MPL_snprintf(default_str, sizeof(default_str), "dtype=USER<0x%08x>", d);
