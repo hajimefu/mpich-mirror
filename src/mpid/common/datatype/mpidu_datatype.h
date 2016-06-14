@@ -170,7 +170,7 @@ do {									\
 int MPIR_Type_dup(MPI_Datatype oldtype,
 		  MPI_Datatype *newtype);
 
-int MPIDU_Type_struct(int count,
+int MPIR_Type_struct(int count,
 		     const int *blocklength_array,
 		     const MPI_Aint *displacement_array,
 		     const MPI_Datatype *oldtype_array,

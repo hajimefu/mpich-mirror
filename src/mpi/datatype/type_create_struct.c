@@ -43,7 +43,7 @@ int MPIR_Type_create_struct_impl(int count,
     MPIR_Datatype *new_dtp;
     MPIR_CHKLMEM_DECL(1);
 
-    mpi_errno = MPID_Type_struct(count,
+    mpi_errno = MPIR_Type_struct(count,
 				 array_of_blocklengths,
 				 array_of_displacements,
 				 array_of_types,

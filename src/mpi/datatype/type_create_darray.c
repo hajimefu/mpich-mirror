@@ -259,7 +259,7 @@ PMPI_LOCAL int MPIR_Type_cyclic(const int *array_of_gsizes,
 	blklens[0] = 1;
 	blklens[1] = rem;
 
-	mpi_errno = MPID_Type_struct(2,
+	mpi_errno = MPIR_Type_struct(2,
 				     blklens,
 				     disps,
 				     types,
