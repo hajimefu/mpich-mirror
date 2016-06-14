@@ -16,36 +16,6 @@
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
 
-/*
- * The following macro allows us to reference either the regular or 
- * hetero value for the 3 fields (NULL,_size,_depth) in the
- * MPIR_Datatype structure.  This is used in the many
- * macros that access fields of the datatype.  We need this macro
- * to simplify the definition of the other macros in the case where
- * MPID_HAS_HETERO is *not* defined.
- */
-#if defined(MPID_HAS_HETERO) || 1
-#define MPIDU_GET_FIELD(hetero_,value_,fieldname_) do {                          \
-        if (hetero_ != MPIDU_DATALOOP_HETEROGENEOUS)                             \
-            value_ = ((MPIR_Datatype *)ptr)->dataloop##fieldname_;              \
-        else value_ = ((MPIR_Datatype *) ptr)->hetero_dloop##fieldname_;        \
-    } while(0)
-#else
-#define MPIDU_GET_FIELD(hetero_,value_,fieldname_) \
-      value_ = ((MPIR_Datatype *)ptr)->dataloop##fieldname_
-#endif
-
-#if defined(MPID_HAS_HETERO) || 1
-#define MPIDU_SET_FIELD(hetero_,value_,fieldname_) do {                          \
-        if (hetero_ != MPIDU_DATALOOP_HETEROGENEOUS)                             \
-            ((MPIR_Datatype *)ptr)->dataloop##fieldname_ = value_;              \
-        else ((MPIR_Datatype *) ptr)->hetero_dloop##fieldname_ = value_;        \
-    } while(0)
-#else
-#define MPIDU_SET_FIELD(hetero_,value_,fieldname_) \
-    ((MPIR_Datatype *)ptr)->dataloop##fieldname_ = value_
-#endif
-
 /* LB/UB calculation helper macros */
 
 /* MPIDU_DATATYPE_CONTIG_LB_UB()
