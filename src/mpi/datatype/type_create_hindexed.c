@@ -104,7 +104,7 @@ int MPI_Type_create_hindexed(int count,
 
     /* ... body of routine ... */
 
-    mpi_errno = MPID_Type_indexed(count,
+    mpi_errno = MPIR_Type_indexed(count,
 				  array_of_blocklengths,
 				  array_of_displacements,
 				  1, /* displacements in bytes */

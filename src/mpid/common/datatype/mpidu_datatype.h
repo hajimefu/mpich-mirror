@@ -176,7 +176,7 @@ int MPIDU_Type_struct(int count,
 		     const MPI_Datatype *oldtype_array,
 		     MPI_Datatype *newtype);
 
-int MPIDU_Type_indexed(int count,
+int MPIR_Type_indexed(int count,
 		      const int *blocklength_array,
 		      const void *displacement_array,
 		      int dispinbytes,
