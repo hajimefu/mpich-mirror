@@ -316,7 +316,7 @@ int MPIDI_CH3_ReqHandler_GaccumRecvComplete(MPIDI_VC_t * vc, MPIR_Request * rreq
 
     /* check if data is contiguous and get true lb */
     MPIR_Datatype_is_contig(rreq->dev.datatype, &is_contig);
-    MPIDU_Datatype_get_true_lb(rreq->dev.datatype, &dt_true_lb);
+    MPIR_Datatype_get_true_lb(rreq->dev.datatype, &dt_true_lb);
 
     resp_req = MPIR_Request_create(MPIR_REQUEST_KIND__UNDEFINED);
     MPIR_ERR_CHKANDJUMP(resp_req == NULL, mpi_errno, MPI_ERR_OTHER, "**nomemreq");

@@ -263,7 +263,7 @@ static int issue_from_origin_buffer(MPIDI_RMA_Op_t * rma_op, MPIDI_VC_t * vc,
 
         /* check if origin data is contiguous and get true lb */
         MPIR_Datatype_is_contig(rma_op->origin_datatype, &is_origin_contig);
-        MPIDU_Datatype_get_true_lb(rma_op->origin_datatype, &dt_true_lb);
+        MPIR_Datatype_get_true_lb(rma_op->origin_datatype, &dt_true_lb);
     }
     else {
         /* origin buffer is empty, mark origin data as contig and true_lb as 0. */

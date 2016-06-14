@@ -300,6 +300,20 @@ static inline void MPIR_Datatype_free(MPIR_Datatype *ptr);
     }                                                                       \
 } while(0)
 
+/* helper macro: takes an MPI_Datatype handle value and returns true_lb in
+ * (*true_lb_) */
+#define MPIR_Datatype_get_true_lb(dtype_, true_lb_)                            \
+    do {                                                                       \
+        if (HANDLE_GET_KIND(dtype_) == HANDLE_KIND_BUILTIN) {                  \
+            *(true_lb_) = 0;                                                   \
+        }                                                                      \
+        else {                                                                 \
+            MPIR_Datatype *dtp_ = NULL;                                        \
+            MPIR_Datatype_get_ptr((dtype_), dtp_);                             \
+            *(true_lb_) = dtp_->true_lb;                                       \
+        }                                                                      \
+    } while (0)
+
 #define MPIR_Datatype_valid_ptr(ptr,err) MPIR_Valid_ptr_class(Datatype,ptr,MPI_ERR_TYPE,err)
 
 #define MPIR_Datatype_get_loopdepth_macro(a,depth_,hetero_) do {    \

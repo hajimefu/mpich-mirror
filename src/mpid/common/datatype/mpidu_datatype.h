@@ -16,20 +16,6 @@
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
 
-/* helper macro: takes an MPI_Datatype handle value and returns true_lb in
- * (*true_lb_) */
-#define MPIDU_Datatype_get_true_lb(dtype_, true_lb_)                            \
-    do {                                                                       \
-        if (HANDLE_GET_KIND(dtype_) == HANDLE_KIND_BUILTIN) {                  \
-            *(true_lb_) = 0;                                                   \
-        }                                                                      \
-        else {                                                                 \
-            MPIR_Datatype *dtp_ = NULL;                                        \
-            MPIR_Datatype_get_ptr((dtype_), dtp_);                             \
-            *(true_lb_) = dtp_->true_lb;                                       \
-        }                                                                      \
-    } while (0)
-
 /* Datatype functions */
 int MPIR_Type_dup(MPI_Datatype oldtype,
 		  MPI_Datatype *newtype);
