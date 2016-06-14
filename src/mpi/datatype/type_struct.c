@@ -248,7 +248,7 @@ int MPIR_Type_struct(int count,
 	    tmp_el_sz   = MPIR_Datatype_get_basic_size(oldtype_array[i]);
 	    tmp_el_type = oldtype_array[i];
 
-	    MPIDU_DATATYPE_BLOCK_LB_UB((MPI_Aint)(blocklength_array[i]),
+	    MPII_DATATYPE_BLOCK_LB_UB((MPI_Aint)(blocklength_array[i]),
 				      displacement_array[i],
 				      0,
 				      tmp_el_sz,
@@ -272,7 +272,7 @@ int MPIR_Type_struct(int count,
 	    tmp_el_sz   = old_dtp->builtin_element_size;
 	    tmp_el_type = old_dtp->basic_type;
 
-	    MPIDU_DATATYPE_BLOCK_LB_UB((MPI_Aint) blocklength_array[i],
+	    MPII_DATATYPE_BLOCK_LB_UB((MPI_Aint) blocklength_array[i],
 				      displacement_array[i],
 				      old_dtp->lb,
 				      old_dtp->ub,

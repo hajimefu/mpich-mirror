@@ -145,7 +145,7 @@ int MPIR_Type_vector(int count,
 	eff_stride = (strideinbytes) ? stride : (stride * old_dtp->extent);
     }
 
-    MPIDU_DATATYPE_VECTOR_LB_UB((MPI_Aint) count,
+    MPII_DATATYPE_VECTOR_LB_UB((MPI_Aint) count,
 			       eff_stride,
 			       (MPI_Aint) blocklength,
 			       old_lb,

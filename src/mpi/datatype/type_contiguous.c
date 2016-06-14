@@ -116,7 +116,7 @@ int MPIR_Type_contiguous(int count,
         new_dtp->has_sticky_ub  = old_dtp->has_sticky_ub;
         new_dtp->has_sticky_lb  = old_dtp->has_sticky_lb;
 
-        MPIDU_DATATYPE_CONTIG_LB_UB((MPI_Aint) count,
+        MPII_DATATYPE_CONTIG_LB_UB((MPI_Aint) count,
                                    old_dtp->lb,
                                    old_dtp->ub,
                                    old_dtp->extent,

@@ -180,7 +180,7 @@ int MPIR_Type_indexed(int count,
     eff_disp = (dispinbytes) ? ((MPI_Aint *) displacement_array)[i] :
 	(((MPI_Aint) ((int *) displacement_array)[i]) * old_extent);
 
-    MPIDU_DATATYPE_BLOCK_LB_UB((MPI_Aint) blocklength_array[i],
+    MPII_DATATYPE_BLOCK_LB_UB((MPI_Aint) blocklength_array[i],
 			      eff_disp,
 			      old_lb,
 			      old_ub,
@@ -202,7 +202,7 @@ int MPIR_Type_indexed(int count,
 		(((MPI_Aint) ((int *) displacement_array)[i]) * old_extent);
 	
 	    /* calculate ub and lb for this block */
-	    MPIDU_DATATYPE_BLOCK_LB_UB((MPI_Aint)(blocklength_array[i]),
+	    MPII_DATATYPE_BLOCK_LB_UB((MPI_Aint)(blocklength_array[i]),
 				      eff_disp,
 				      old_lb,
 				      old_ub,
