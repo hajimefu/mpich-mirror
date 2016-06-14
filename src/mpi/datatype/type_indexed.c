@@ -65,7 +65,7 @@ int MPIR_Type_indexed(int count,
 
     MPIR_Datatype *new_dtp;
 
-    if (count == 0) return MPIDU_Type_zerolen(newtype);
+    if (count == 0) return MPII_Type_zerolen(newtype);
 
     /* sanity check that blocklens are all non-negative */
     for (i = 0; i < count; ++i) {
@@ -172,7 +172,7 @@ int MPIR_Type_indexed(int count,
 
     if (i == count) {
 	MPIR_Handle_obj_free(&MPIR_Datatype_mem, new_dtp);
-	return MPIDU_Type_zerolen(newtype);
+	return MPII_Type_zerolen(newtype);
     }
 
     /* priming for loop */

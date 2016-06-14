@@ -46,7 +46,7 @@ int MPIR_Type_blockindexed(int count,
 
     MPIR_Datatype *new_dtp;
 
-    if (count == 0) return MPIR_Type_zerolen(newtype);
+    if (count == 0) return MPII_Type_zerolen(newtype);
 
     /* allocate new datatype object and handle */
     new_dtp = (MPIR_Datatype *) MPIR_Handle_obj_alloc(&MPIR_Datatype_mem);

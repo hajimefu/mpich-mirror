@@ -194,7 +194,7 @@ int MPIR_Type_contiguous(int count,
 			 MPI_Datatype oldtype,
 			 MPI_Datatype *newtype);
 
-int MPIDU_Type_zerolen(MPI_Datatype *newtype);
+int MPII_Type_zerolen(MPI_Datatype *newtype);
 
 int MPIR_Type_create_resized(MPI_Datatype oldtype,
 			     MPI_Aint lb,

@@ -600,6 +600,7 @@ void MPIR_Type_release_contents(MPI_Datatype type, int **ints_p, MPI_Aint **aint
 /* This routine is used to install an attribute free routine for datatypes
    at finalize-time */
 void MPII_Datatype_attr_finalize( void );
+int MPII_Type_zerolen(MPI_Datatype *newtype);
 
 #define MPIR_DATATYPE_IS_PREDEFINED(type) \
     ((HANDLE_GET_KIND(type) == HANDLE_KIND_BUILTIN) || \

@@ -178,7 +178,7 @@ int MPIR_Type_struct(int count,
 
     MPIR_Datatype *new_dtp;
 
-    if (count == 0) return MPIDU_Type_zerolen(newtype);
+    if (count == 0) return MPII_Type_zerolen(newtype);
 
 #ifdef MPID_STRUCT_DEBUG
     MPIDI_Datatype_printf(oldtype_array[0], 1, displacement_array[0],
@@ -225,7 +225,7 @@ int MPIR_Type_struct(int count,
     if (i == count)
     {
 	MPIR_Handle_obj_free(&MPIR_Datatype_mem, new_dtp);
-	return MPIDU_Type_zerolen(newtype);
+	return MPII_Type_zerolen(newtype);
     }
 
     new_dtp->max_contig_blocks = 0;
