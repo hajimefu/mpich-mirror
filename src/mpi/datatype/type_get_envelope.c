@@ -27,10 +27,10 @@ int MPI_Type_get_envelope(MPI_Datatype datatype, int *num_integers, int *num_add
 #define MPI_Type_get_envelope PMPI_Type_get_envelope
 
 #undef FUNCNAME
-#define FUNCNAME MPIR_Type_get_envelope_impl
+#define FUNCNAME MPIR_Type_get_envelope
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-void MPIR_Type_get_envelope_impl(MPI_Datatype datatype,
+void MPIR_Type_get_envelope(MPI_Datatype datatype,
                                  int *num_integers,
                                  int *num_addresses,
                                  int *num_datatypes,
@@ -131,7 +131,7 @@ int MPI_Type_get_envelope(MPI_Datatype datatype,
 
     /* ... body of routine ...  */
     
-    MPIR_Type_get_envelope_impl(datatype,
+    MPIR_Type_get_envelope(datatype,
                                 num_integers,
                                 num_addresses,
                                 num_datatypes,

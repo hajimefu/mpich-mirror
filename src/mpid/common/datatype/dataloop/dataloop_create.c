@@ -41,7 +41,7 @@ void PREPEND_PREFIX(Dataloop_create)(MPI_Datatype type,
     MPI_Aint *disps;
     DLOOP_Size *blklen;
 
-    MPIR_Type_get_envelope_impl(type, &nr_ints, &nr_aints, &nr_types, &combiner);
+    MPIR_Type_get_envelope(type, &nr_ints, &nr_aints, &nr_types, &combiner);
 
     /* some named types do need dataloops; handle separately. */
     if (combiner == MPI_COMBINER_NAMED) {
@@ -110,7 +110,7 @@ void PREPEND_PREFIX(Dataloop_create)(MPI_Datatype type,
      * note: in the struct case below we'll handle any additional
      *       types "below" the current one.
      */
-    MPIR_Type_get_envelope_impl(types[0], &dummy1, &dummy2, &dummy3, &type0_combiner);
+    MPIR_Type_get_envelope(types[0], &dummy1, &dummy2, &dummy3, &type0_combiner);
     if (type0_combiner != MPI_COMBINER_NAMED)
     {
 	DLOOP_Handle_get_loopptr_macro(types[0], old_dlp, flag);
@@ -270,7 +270,7 @@ void PREPEND_PREFIX(Dataloop_create)(MPI_Datatype type,
 	case MPI_COMBINER_STRUCT:
 	    for (i = 1; i < ints[0]; i++) {
 		int type_combiner;
-		MPIR_Type_get_envelope_impl(types[i], &dummy1, &dummy2, &dummy3, &type_combiner);
+		MPIR_Type_get_envelope(types[i], &dummy1, &dummy2, &dummy3, &type_combiner);
 
 		if (type_combiner != MPI_COMBINER_NAMED) {
 		    DLOOP_Handle_get_loopptr_macro(types[i], old_dlp, flag);

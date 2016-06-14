@@ -162,7 +162,7 @@ void PREPEND_PREFIX(Type_calc_footprint)(MPI_Datatype type,
     int ndims;
     MPI_Datatype tmptype;
 
-    MPIR_Type_get_envelope_impl(type, &nr_ints, &nr_aints, &nr_types, &combiner);
+    MPIR_Type_get_envelope(type, &nr_ints, &nr_aints, &nr_types, &combiner);
 
     if (combiner == MPI_COMBINER_NAMED) {
 	int mpisize;
@@ -458,7 +458,7 @@ static void DLOOP_Type_calc_footprint_struct(MPI_Datatype type,
 	/* skip zero blocklength elements */
 	if (ints[i+1] == 0) continue;
 
-	MPIR_Type_get_envelope_impl(types[i], &nr_ints, &nr_aints, &nr_types, &combiner);
+	MPIR_Type_get_envelope(types[i], &nr_ints, &nr_aints, &nr_types, &combiner);
 
 	/* opt: could just inline assignments for combiner == NAMED case */
 

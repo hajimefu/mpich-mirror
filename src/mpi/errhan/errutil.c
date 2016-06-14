@@ -1468,7 +1468,7 @@ static const char * GetDTypeString(MPI_Datatype d)
 	return default_str;
     }
 
-    MPID_Type_get_envelope(d, &num_integers, &num_addresses, &num_datatypes, 
+    MPIR_Type_get_envelope(d, &num_integers, &num_addresses, &num_datatypes, 
 			   &combiner);
     if (combiner == MPI_COMBINER_NAMED)
     {

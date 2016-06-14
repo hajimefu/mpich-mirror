@@ -636,7 +636,7 @@ int MPIR_Type_contiguous_x_impl(MPI_Count count,
                               MPI_Datatype *new_type_p);
 void MPIR_Type_get_extent_impl(MPI_Datatype datatype, MPI_Aint *lb, MPI_Aint *extent);
 void MPIR_Type_get_true_extent_impl(MPI_Datatype datatype, MPI_Aint *true_lb, MPI_Aint *true_extent);
-void MPIR_Type_get_envelope_impl(MPI_Datatype datatype, int *num_integers, int *num_addresses,
+void MPIR_Type_get_envelope(MPI_Datatype datatype, int *num_integers, int *num_addresses,
                                  int *num_datatypes, int *combiner);
 int MPIR_Type_hvector_impl(int count, int blocklen, MPI_Aint stride, MPI_Datatype old_type, MPI_Datatype *newtype_p);
 int MPIR_Type_indexed_impl(int count, const int blocklens[], const int indices[],
@@ -658,7 +658,6 @@ int MPIR_Type_vector(int count, int blocklength, MPI_Aint stride, int strideinby
 int MPIR_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype *newtype);
 int MPII_Type_zerolen(MPI_Datatype *newtype);
 int MPIR_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, MPI_Datatype *newtype);
-int MPIR_Type_get_envelope(MPI_Datatype datatype, int *num_integers, int *num_addresses, int *num_datatypes, int *combiner);
 int MPIR_Type_get_contents(MPI_Datatype datatype, int max_integers, int max_addresses, int max_datatypes, int array_of_integers[], MPI_Aint array_of_addresses[], MPI_Datatype array_of_datatypes[]);
 int MPIR_Type_create_pairtype(MPI_Datatype datatype, MPIR_Datatype *new_dtp);
 int MPIR_Type_flatten(MPI_Datatype type, MPI_Aint *off_array, DLOOP_Size *size_array, MPI_Aint *array_len_p);

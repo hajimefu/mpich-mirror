@@ -201,7 +201,7 @@ int MPIR_Type_create_resized(MPI_Datatype oldtype,
 			     MPI_Aint extent,
 			     MPI_Datatype *newtype);
 
-int MPIDU_Type_get_envelope(MPI_Datatype datatype,
+int MPIR_Type_get_envelope(MPI_Datatype datatype,
 			   int *num_integers,
 			   int *num_addresses,
 			   int *num_datatypes,
