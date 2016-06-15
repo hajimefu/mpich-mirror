@@ -134,5 +134,10 @@ static inline size_t MPIDI_NM_am_inject_max_sz(void)
     return 0;
 }
 
+static inline int MPIDI_NM_long_am_matched(MPIR_Request *req)
+{
+    MPIR_Assert(0);
+    return 0;
+}
 
 #endif /* NETMOD_STUBNM_AM_H_INCLUDED */
