@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "./dataloop.h"
+#include "mpiimpl.h"
 
 static void DLOOP_Dataloop_create_named(MPI_Datatype type,
 					DLOOP_Dataloop **dlp_p,

@@ -5,7 +5,7 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#include "./dataloop.h"
+#include "mpiimpl.h"
 
 /*@
    Dataloop_contiguous - create the dataloop representation for a

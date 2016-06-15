@@ -5,7 +5,7 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#include "dataloop.h"
+#include "mpiimpl.h"
 
 #define PAIRTYPE_CONTENTS(mt1_,ut1_,mt2_,ut2_)				\
     {									\

@@ -5,7 +5,7 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#include "./dataloop.h"
+#include "mpiimpl.h"
 
 /*@
    Dataloop_create_vector

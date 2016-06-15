@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-#include "./dataloop.h"
+#include "mpiimpl.h"
 
 static void DLOOP_Type_indexed_array_copy(DLOOP_Count count,
 					  DLOOP_Count contig_count,

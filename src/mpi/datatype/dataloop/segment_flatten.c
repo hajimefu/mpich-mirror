@@ -10,7 +10,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "dataloop.h"
+#include "mpiimpl.h"
 
 /* NOTE: I don't think I've removed the need for bufp in here yet! -- RobR */
 

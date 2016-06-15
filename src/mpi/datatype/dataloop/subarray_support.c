@@ -7,7 +7,8 @@
  * Note: This code originally appeared in ROMIO.
  */
 
-#include "dataloop.h"
+#include "mpiimpl.h"
+
 #undef FUNCNAME
 #define FUNCNAME PREPEND_PREFIX(Type_convert_subarray)
 #undef FCNAME

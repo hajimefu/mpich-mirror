@@ -5,7 +5,7 @@
  *      See COPYRIGHT in top-level directory.
  */
 
-#include "./dataloop.h"
+#include "mpiimpl.h"
 
 #ifndef PREPEND_PREFIX
 #error "You must explicitly include a header that sets the PREPEND_PREFIX and includes dataloop_parts.h"
