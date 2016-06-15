@@ -103,14 +103,14 @@ int MPIR_Type_dup(MPI_Datatype oldtype,
 
         if (old_dtp->is_committed) {
             MPIR_Assert(old_dtp->dataloop != NULL);
-            MPIDU_Dataloop_dup(old_dtp->dataloop,
+            MPIR_Dataloop_dup(old_dtp->dataloop,
                               old_dtp->dataloop_size,
                               &new_dtp->dataloop);
             if (old_dtp->hetero_dloop != NULL) {
                 /* at this time MPI_COMPLEX doesn't have this loop...
                  * -- RBR, 02/01/2007
                  */
-                MPIDU_Dataloop_dup(old_dtp->hetero_dloop,
+                MPIR_Dataloop_dup(old_dtp->hetero_dloop,
                                   old_dtp->hetero_dloop_size,
                                   &new_dtp->hetero_dloop);
             }
