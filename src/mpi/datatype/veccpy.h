@@ -20,7 +20,7 @@
 #define MPIR_ALIGN4_TEST(p1,p2) && (((DLOOP_VOID_PTR_CAST_TO_OFFSET p1 | DLOOP_VOID_PTR_CAST_TO_OFFSET p2) & 0x3) == 0)
 #endif
 
-#define MPIDI_COPY_FROM_VEC(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_FROM_VEC(src,dest,stride,type,nelms,count) \
 { \
     if (!nelms) { \
         src = (char*) DLOOP_OFFSET_CAST_TO_VOID_PTR                        \
@@ -28,14 +28,14 @@
 		       ((DLOOP_Offset) count * (DLOOP_Offset) stride)); \
     } \
     else if (stride % sizeof(type)) { \
-        MPIDI_COPY_FROM_VEC_UNALIGNED(src,dest,stride,type,nelms,count); \
+        MPII_COPY_FROM_VEC_UNALIGNED(src,dest,stride,type,nelms,count); \
     } \
     else { \
-        MPIDI_COPY_FROM_VEC_ALIGNED(src,dest,stride/(DLOOP_Offset)sizeof(type),type,nelms,count); \
+        MPII_COPY_FROM_VEC_ALIGNED(src,dest,stride/(DLOOP_Offset)sizeof(type),type,nelms,count); \
     } \
 }
 
-#define MPIDI_COPY_TO_VEC(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_TO_VEC(src,dest,stride,type,nelms,count) \
 { \
     if (!nelms) { \
         dest = (char*) DLOOP_OFFSET_CAST_TO_VOID_PTR                        \
@@ -43,14 +43,14 @@
                         ((DLOOP_Offset) count * (DLOOP_Offset) stride)); \
     } \
     else if (stride % (DLOOP_Offset) sizeof(type)) { \
-        MPIDI_COPY_TO_VEC_UNALIGNED(src,dest,stride,type,nelms,count); \
+        MPII_COPY_TO_VEC_UNALIGNED(src,dest,stride,type,nelms,count); \
     } \
     else { \
-        MPIDI_COPY_TO_VEC_ALIGNED(src,dest,stride/(DLOOP_Offset)sizeof(type),type,nelms,count); \
+        MPII_COPY_TO_VEC_ALIGNED(src,dest,stride/(DLOOP_Offset)sizeof(type),type,nelms,count); \
     } \
 }
 
-#define MPIDI_COPY_FROM_VEC_ALIGNED(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_FROM_VEC_ALIGNED(src,dest,stride,type,nelms,count) \
 {								\
     type * l_src = (type *) src, * l_dest = (type *) dest;	\
     type * tmp_src = l_src;                                     \
@@ -166,7 +166,7 @@
     dest = (char *) l_dest;                                     \
 }
 
-#define MPIDI_COPY_FROM_VEC_UNALIGNED(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_FROM_VEC_UNALIGNED(src,dest,stride,type,nelms,count) \
 {								\
     type * l_src = (type *) src, * l_dest = (type *) dest;	\
     type * tmp_src = l_src;                                     \
@@ -281,7 +281,7 @@
     dest = (char *) l_dest;                                     \
 }
 
-#define MPIDI_COPY_TO_VEC_ALIGNED(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_TO_VEC_ALIGNED(src,dest,stride,type,nelms,count) \
 {								\
     type * l_src = (type *) src, * l_dest = (type *) dest;	\
     type * tmp_dest = l_dest;                                   \
@@ -397,7 +397,7 @@
     dest = (char *) l_dest;                                     \
 }
 
-#define MPIDI_COPY_TO_VEC_UNALIGNED(src,dest,stride,type,nelms,count) \
+#define MPII_COPY_TO_VEC_UNALIGNED(src,dest,stride,type,nelms,count) \
 {								\
     type * l_src = (type *) src, * l_dest = (type *) dest;	\
     type * tmp_dest = l_dest;                                   \
