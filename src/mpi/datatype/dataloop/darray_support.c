@@ -9,11 +9,11 @@
 
 #include "dataloop.h"
 
-static int MPIOI_Type_block(int *array_of_gsizes, int dim, int ndims,
+static int MPII_Type_block(int *array_of_gsizes, int dim, int ndims,
 			    int nprocs, int rank, int darg, int order, MPI_Aint orig_extent,
 			    MPI_Datatype type_old, MPI_Datatype *type_new,
 			    MPI_Aint *st_offset);
-static int MPIOI_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
+static int MPII_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
 		      int rank, int darg, int order, MPI_Aint orig_extent,
 		      MPI_Datatype type_old, MPI_Datatype *type_new,
 		      MPI_Aint *st_offset);
@@ -60,7 +60,7 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
 	for (i=0; i<ndims; i++) {
 	    switch(array_of_distribs[i]) {
 	    case MPI_DISTRIBUTE_BLOCK:
-		mpi_errno = MPIOI_Type_block(array_of_gsizes, i, ndims,
+		mpi_errno = MPII_Type_block(array_of_gsizes, i, ndims,
                                              array_of_psizes[i],
                                              coords[i], array_of_dargs[i],
                                              order, orig_extent,
@@ -69,7 +69,7 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 		break;
 	    case MPI_DISTRIBUTE_CYCLIC:
-		mpi_errno = MPIOI_Type_cyclic(array_of_gsizes, i, ndims,
+		mpi_errno = MPII_Type_cyclic(array_of_gsizes, i, ndims,
                                               array_of_psizes[i], coords[i],
                                               array_of_dargs[i], order,
                                               orig_extent, type_old,
@@ -78,7 +78,7 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
 		break;
 	    case MPI_DISTRIBUTE_NONE:
 		/* treat it as a block distribution on 1 process */
-		mpi_errno = MPIOI_Type_block(array_of_gsizes, i, ndims, 1, 0,
+		mpi_errno = MPII_Type_block(array_of_gsizes, i, ndims, 1, 0,
                                              MPI_DISTRIBUTE_DFLT_DARG, order,
                                              orig_extent,
                                              type_old, &type_new,
@@ -105,14 +105,14 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
 	for (i=ndims-1; i>=0; i--) {
 	    switch(array_of_distribs[i]) {
 	    case MPI_DISTRIBUTE_BLOCK:
-		mpi_errno = MPIOI_Type_block(array_of_gsizes, i, ndims, array_of_psizes[i],
+		mpi_errno = MPII_Type_block(array_of_gsizes, i, ndims, array_of_psizes[i],
                                              coords[i], array_of_dargs[i], order,
                                              orig_extent, type_old, &type_new,
                                              st_offsets+i);
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 		break;
 	    case MPI_DISTRIBUTE_CYCLIC:
-		mpi_errno = MPIOI_Type_cyclic(array_of_gsizes, i, ndims,
+		mpi_errno = MPII_Type_cyclic(array_of_gsizes, i, ndims,
                                               array_of_psizes[i], coords[i],
                                               array_of_dargs[i], order,
                                               orig_extent, type_old, &type_new,
@@ -121,7 +121,7 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
 		break;
 	    case MPI_DISTRIBUTE_NONE:
 		/* treat it as a block distribution on 1 process */
-		mpi_errno = MPIOI_Type_block(array_of_gsizes, i, ndims, array_of_psizes[i],
+		mpi_errno = MPII_Type_block(array_of_gsizes, i, ndims, array_of_psizes[i],
                                              coords[i], MPI_DISTRIBUTE_DFLT_DARG, order, orig_extent,
                                              type_old, &type_new, st_offsets+i);
                 if (mpi_errno) MPIR_ERR_POP(mpi_errno);
@@ -170,10 +170,10 @@ int PREPEND_PREFIX(Type_convert_darray)(int size,
  * needs to call MPIO_Err_return_xxx.
  */
 #undef FUNCNAME
-#define FUNCNAME MPIOI_Type_block
+#define FUNCNAME MPII_Type_block
 #undef FCNAME
 #define FCNAME MPL_QUOTE(FUNCNAME)
-static int MPIOI_Type_block(int *array_of_gsizes, int dim, int ndims, int nprocs,
+static int MPII_Type_block(int *array_of_gsizes, int dim, int ndims, int nprocs,
                             int rank, int darg, int order, MPI_Aint orig_extent,
                             MPI_Datatype type_old, MPI_Datatype *type_new,
                             MPI_Aint *st_offset)
@@ -235,7 +235,7 @@ static int MPIOI_Type_block(int *array_of_gsizes, int dim, int ndims, int nprocs
 /* Returns MPI_SUCCESS on success, an MPI error code on failure.  Code above
  * needs to call MPIO_Err_return_xxx.
  */
-static int MPIOI_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
+static int MPII_Type_cyclic(int *array_of_gsizes, int dim, int ndims, int nprocs,
 		      int rank, int darg, int order, MPI_Aint orig_extent,
 		      MPI_Datatype type_old, MPI_Datatype *type_new,
 		      MPI_Aint *st_offset)
