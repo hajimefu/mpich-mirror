@@ -54,7 +54,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
     first = 0;
     last  = SEGMENT_IGNORE_LAST;
 
-    MPIDU_Segment_flatten(segp,
+    MPIR_Segment_flatten(segp,
 			 first,
 			 &last,
 			 off_array,

@@ -96,7 +96,7 @@ void PREPEND_PREFIX(Segment_mpi_flatten)(DLOOP_Segment *segp,
 				       NULL,
 				       &params);
 
-    /* last value already handled by MPIDU_Segment_manipulate */
+    /* last value already handled by MPIR_Segment_manipulate */
     *lengthp = params.index;
     return;
 }

@@ -645,16 +645,33 @@ int MPIR_Type_commit(MPI_Datatype *type);
 
 /* Segment functions specific to MPICH */
 void MPIR_Segment_pack_vector(struct DLOOP_Segment *segp,
-			      DLOOP_Offset first,
-			      DLOOP_Offset *lastp,
-			      DLOOP_VECTOR *vector,
-			      int *lengthp);
+                              DLOOP_Offset first,
+                              DLOOP_Offset *lastp,
+                              DLOOP_VECTOR *vector,
+                              int *lengthp);
 
 void MPIR_Segment_unpack_vector(struct DLOOP_Segment *segp,
-				DLOOP_Offset first,
-				DLOOP_Offset *lastp,
-				DLOOP_VECTOR *vector,
-				int *lengthp);
+                                DLOOP_Offset first,
+                                DLOOP_Offset *lastp,
+                                DLOOP_VECTOR *vector,
+                                int *lengthp);
+
+void MPIR_Segment_flatten(struct DLOOP_Segment *segp,
+                          DLOOP_Offset first,
+                          DLOOP_Offset *lastp,
+                          DLOOP_Offset *offp,
+                          DLOOP_Size *sizep,
+                          DLOOP_Offset *lengthp);
+
+void MPIR_Segment_pack_external32(struct DLOOP_Segment *segp,
+                                  DLOOP_Offset first,
+                                  DLOOP_Offset *lastp,
+                                  void *pack_buffer);
+
+void MPIR_Segment_unpack_external32(struct DLOOP_Segment *segp,
+                                    DLOOP_Offset first,
+                                    DLOOP_Offset *lastp,
+                                    DLOOP_Buffer unpack_buffer);
 
 /* These values are defined by DLOOP code.
  *
