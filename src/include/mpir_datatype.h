@@ -498,11 +498,11 @@ static inline void MPIR_Datatype_free(MPIR_Datatype *ptr)
         MPIR_Datatype_free_contents(ptr);
     }
     if (ptr->dataloop) {
-        MPIDU_Dataloop_free(&(ptr->dataloop));
+        MPIR_Dataloop_free(&(ptr->dataloop));
     }
 #if defined(MPID_HAS_HETERO) || 1
     if (ptr->hetero_dloop) {
-        MPIDU_Dataloop_free(&(ptr->hetero_dloop));
+        MPIR_Dataloop_free(&(ptr->hetero_dloop));
     }
 #endif /* MPID_HAS_HETERO */
     MPIR_Handle_obj_free(&MPIR_Datatype_mem, ptr);
