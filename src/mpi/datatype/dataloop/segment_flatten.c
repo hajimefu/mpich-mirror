@@ -52,7 +52,7 @@ struct PREPEND_PREFIX(mpi_flatten_params) {
     MPI_Aint *disps;
 };
 
-/* MPIDU_Segment_mpi_flatten - flatten a type into a representation
+/* MPIR_Segment_mpi_flatten - flatten a type into a representation
  *                            appropriate for passing to hindexed create.
  *
  * NOTE: blocks will be in units of bytes when returned.
