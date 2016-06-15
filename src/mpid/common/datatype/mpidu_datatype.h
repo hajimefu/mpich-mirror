@@ -16,8 +16,6 @@
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
 
-void MPIDU_Dataloop_print(struct MPIDU_Dataloop *dataloop,
-			 int depth);
 
 void MPIDU_Dataloop_alloc(int kind,
 			 MPI_Aint count,
