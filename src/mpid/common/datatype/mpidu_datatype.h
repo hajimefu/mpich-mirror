@@ -15,13 +15,6 @@
  *   src/mpid/common/datatype/mpidu_dataloop.h (and gen_dataloop.h).
  * - MPIR_Object_alloc_t is defined in src/include/mpihandle.h
  */
-
-void MPIDU_Dataloop_alloc_and_copy(int kind,
-				  MPI_Aint count,
-				  struct DLOOP_Dataloop *old_loop,
-				  MPI_Aint old_loop_sz,
-				  struct DLOOP_Dataloop **new_loop_p,
-				  MPI_Aint *new_loop_sz_p);
 void MPIDU_Dataloop_struct_alloc(MPI_Aint count,
 				MPI_Aint old_loop_sz,
 				int basic_ct,
