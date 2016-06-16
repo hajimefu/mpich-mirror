@@ -116,7 +116,7 @@ int MPID_nem_llc_isend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Data
     }
     else {
         /* See MPIDI_CH3_EagerNoncontigSend (in ch3u_eager.c) */
-        struct MPIDU_Segment *segment_ptr = MPIR_Segment_alloc();
+        struct MPIR_Segment *segment_ptr = MPIR_Segment_alloc();
         MPIR_ERR_CHKANDJUMP(!segment_ptr, mpi_errno, MPI_ERR_OTHER, "**outofmemory");
 #ifndef	notdef_leak_0001_hack
         /* See also MPIDI_CH3_Request_create and _destory() */
@@ -828,7 +828,7 @@ int llc_poll(int in_blocking_poll, llc_send_f sfnc, llc_recv_f rfnc)
                          * pkt->data_sz is sender's request size.
                          */
                         intptr_t unpack_sz = events[0].side.initiator.length;
-                        MPIDU_Segment seg;
+                        MPIR_Segment seg;
                         MPI_Aint last;
 
                         /* user_buf etc. are set in MPID_irecv --> MPIDI_CH3U_Recvq_FDU_or_AEP */
@@ -1039,7 +1039,7 @@ int MPID_nem_llc_issend(struct MPIDI_VC *vc, const void *buf, int count, MPI_Dat
     }
     else {
         /* See MPIDI_CH3_EagerNoncontigSend (in ch3u_eager.c) */
-        struct MPIDU_Segment *segment_ptr = MPIR_Segment_alloc();
+        struct MPIR_Segment *segment_ptr = MPIR_Segment_alloc();
         MPIR_ERR_CHKANDJUMP(!segment_ptr, mpi_errno, MPI_ERR_OTHER, "**outofmemory");
         /* See also MPIDI_CH3_Request_create and _destory() */
         /*     in src/mpid/ch3/src/ch3u_request.c */

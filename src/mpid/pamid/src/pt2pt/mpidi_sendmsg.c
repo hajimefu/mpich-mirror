@@ -365,7 +365,7 @@ MPIDI_SendMsg_process_userdefined_dt(MPIR_Request      * sreq,
       }
 #endif
 
-      MPIDU_Segment segment;
+      MPIR_Segment segment;
 
       if(data_sz != 0) {
         sreq->mpid.uebuf = sndbuf = MPL_malloc(data_sz);

@@ -445,7 +445,7 @@ int MPIDO_Gather_simple(const void *sendbuf,
   void *sbuf = NULL, *rbuf = NULL;
   int send_size = 0;
   int recv_size = 0;
-  MPIDU_Segment segment;
+  MPIR_Segment segment;
   const int rank = comm_ptr->rank;
   const int size = comm_ptr->local_size;
   const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);

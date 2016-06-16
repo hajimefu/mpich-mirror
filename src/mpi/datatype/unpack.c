@@ -35,7 +35,7 @@ int MPIR_Unpack_impl(const void *inbuf, MPI_Aint insize, MPI_Aint *position,
 {
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint first, last;
-    MPID_Segment *segp;
+    MPIR_Segment *segp;
     int contig;
     MPI_Aint dt_true_lb;
     MPI_Aint data_sz;

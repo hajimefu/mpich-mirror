@@ -106,7 +106,7 @@ void MPIDI_Buffer_copy(
         MPIR_Datatype_get_extent_macro(rdt, rdt_extent);
         char *buf =  MPL_malloc(rdt_extent * rcount);
         memset(buf, 0, rdt_extent * rcount);        
-        MPIDU_Segment seg;
+        MPIR_Segment seg;
         DLOOP_Offset last;
 
         MPIR_Segment_init(buf, rcount, rdt, &seg, 0);
@@ -131,7 +131,7 @@ void MPIDI_Buffer_copy(
       }
 #endif
 
-        MPIDU_Segment seg;
+        MPIR_Segment seg;
         DLOOP_Offset last;
 
         MPIR_Segment_init(rbuf, rcount, rdt, &seg, 0);
@@ -148,7 +148,7 @@ void MPIDI_Buffer_copy(
     }
     else if (rdt_contig)
     {
-        MPIDU_Segment seg;
+        MPIR_Segment seg;
         DLOOP_Offset last;
 
         MPIR_Segment_init(sbuf, scount, sdt, &seg, 0);
@@ -167,9 +167,9 @@ void MPIDI_Buffer_copy(
     {
         char * buf;
         intptr_t buf_off;
-        MPIDU_Segment sseg;
+        MPIR_Segment sseg;
         intptr_t sfirst;
-        MPIDU_Segment rseg;
+        MPIR_Segment rseg;
         intptr_t rfirst;
 
         buf = MPL_malloc(MPIDI_COPY_BUFFER_SZ);

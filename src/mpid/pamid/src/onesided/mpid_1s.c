@@ -129,7 +129,7 @@ MPIDI_Win_datatype_map(MPIDI_Datatype * dt)
       MPID_assert(dt->map != NULL);
 
       DLOOP_Offset last = dt->pointer->size*dt->count;
-      MPIDU_Segment seg;
+      MPIR_Segment seg;
       MPIR_Segment_init(NULL, dt->count, dt->type, &seg, 0);
       MPIR_Segment_pack_vector(&seg, 0, &last, dt->map, &dt->num_contig);
       MPID_assert((unsigned)dt->num_contig <= map_size);

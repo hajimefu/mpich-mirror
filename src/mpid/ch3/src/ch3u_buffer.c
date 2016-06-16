@@ -80,7 +80,7 @@ void MPIDI_CH3U_Buffer_copy(
     }
     else if (sdt_contig)
     {
-	MPIDU_Segment seg;
+	MPIR_Segment seg;
 	MPI_Aint last;
 
 	MPIR_Segment_init(rbuf, rcount, rdt, &seg, 0);
@@ -101,7 +101,7 @@ void MPIDI_CH3U_Buffer_copy(
     }
     else if (rdt_contig)
     {
-	MPIDU_Segment seg;
+	MPIR_Segment seg;
 	MPI_Aint last;
 
 	MPIR_Segment_init(sbuf, scount, sdt, &seg, 0);
@@ -124,9 +124,9 @@ void MPIDI_CH3U_Buffer_copy(
     {
 	char * buf;
 	intptr_t buf_off;
-	MPIDU_Segment sseg;
+	MPIR_Segment sseg;
 	intptr_t sfirst;
-	MPIDU_Segment rseg;
+	MPIR_Segment rseg;
 	intptr_t rfirst;
 
 	buf = MPL_malloc(MPIDI_COPY_BUFFER_SZ);

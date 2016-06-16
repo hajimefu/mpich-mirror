@@ -360,7 +360,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
 
     rest_len = total_len;
     for (i = 0; i < stream_unit_count; i++) {
-        MPIDU_Segment *seg = NULL;
+        MPIR_Segment *seg = NULL;
         void *packed_buf = NULL;
         MPI_Aint first, last;
         int is_predef_contig;
@@ -378,7 +378,7 @@ static inline int MPIDI_CH3I_Shm_acc_op(const void *origin_addr, int origin_coun
 
         seg = MPIR_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(seg == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
-                             "MPIDU_Segment");
+                             "MPIR_Segment");
         MPIR_Segment_init(origin_addr, origin_count, origin_datatype, seg, 0);
         MPIR_Segment_pack(seg, first, &last, packed_buf);
         MPIR_Segment_free(seg);
@@ -507,7 +507,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
 
     rest_len = total_len;
     for (i = 0; i < stream_unit_count; i++) {
-        MPIDU_Segment *seg = NULL;
+        MPIR_Segment *seg = NULL;
         void *packed_buf = NULL;
         MPI_Aint first, last;
         int is_predef_contig;
@@ -525,7 +525,7 @@ static inline int MPIDI_CH3I_Shm_get_acc_op(const void *origin_addr, int origin_
 
         seg = MPIR_Segment_alloc();
         MPIR_ERR_CHKANDJUMP1(seg == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s",
-                             "MPIDU_Segment");
+                             "MPIR_Segment");
         MPIR_Segment_init(origin_addr, origin_count, origin_datatype, seg, 0);
         MPIR_Segment_pack(seg, first, &last, packed_buf);
         MPIR_Segment_free(seg);

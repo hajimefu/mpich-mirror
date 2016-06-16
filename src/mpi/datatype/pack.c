@@ -39,7 +39,7 @@ int MPIR_Pack_impl(const void *inbuf,
 {
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint first, last;
-    MPID_Segment *segp;
+    MPIR_Segment *segp;
     int contig;
     MPI_Aint dt_true_lb;
     MPI_Aint data_sz;
@@ -73,7 +73,7 @@ int MPIR_Pack_impl(const void *inbuf,
     /* TODO: CHECK RETURN VALUES?? */
     /* TODO: SHOULD THIS ALL BE IN A MPID_PACK??? */
     segp = MPIR_Segment_alloc();
-    MPIR_ERR_CHKANDJUMP1(segp == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPID_Segment");
+    MPIR_ERR_CHKANDJUMP1(segp == NULL, mpi_errno, MPI_ERR_OTHER, "**nomem", "**nomem %s", "MPIR_Segment");
     
     mpi_errno = MPIR_Segment_init(inbuf, incount, datatype, segp, 0);
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);

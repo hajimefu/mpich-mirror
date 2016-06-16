@@ -653,7 +653,7 @@ MPIDO_Allgather_simple(const void *sendbuf,
    int snd_data_contig = 1, rcv_data_contig = 1;
    size_t send_size = 0;
    size_t recv_size = 0;
-   MPIDU_Segment segment;
+   MPIR_Segment segment;
    volatile unsigned allgather_active = 1;
    const int rank = comm_ptr->rank;
    const int size = comm_ptr->local_size;

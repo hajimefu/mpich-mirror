@@ -377,8 +377,8 @@ typedef struct MPIDI_Request {
 
     /* segment, segment_first, and segment_size are used when processing 
        non-contiguous datatypes */
-    /*    MPIDU_Segment   segment; */
-    struct MPIDU_Segment *segment_ptr;
+    /*    MPIR_Segment   segment; */
+    struct MPIR_Segment *segment_ptr;
     intptr_t segment_first;
     intptr_t segment_size;
 

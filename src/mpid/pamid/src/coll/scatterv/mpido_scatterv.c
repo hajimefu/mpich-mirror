@@ -488,7 +488,7 @@ int MPIDO_Scatterv_simple(const void *sendbuf,
   void *sbuf = NULL, *rbuf = NULL;
   int *sdispls = NULL, *scounts = NULL;
   int sndcount  = 0;
-  MPIDU_Segment segment;
+  MPIR_Segment segment;
   int tmp, i;
   pami_type_t stype = PAMI_TYPE_NULL;
   const int rank = comm_ptr->rank;

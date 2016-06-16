@@ -323,7 +323,7 @@ int MPIDO_Gatherv_simple(const void *sendbuf,
    int rcvlen    = 0;
   int totalrecvcount  = 0;
    pami_type_t rtype = PAMI_TYPE_NULL;
-   MPIDU_Segment segment;
+   MPIR_Segment segment;
    MPIR_Datatype*data_ptr = NULL;
    int send_true_lb, recv_true_lb = 0;
    int i, tmp;

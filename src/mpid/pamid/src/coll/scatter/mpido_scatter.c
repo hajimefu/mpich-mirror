@@ -372,7 +372,7 @@ int MPIDO_Scatter_simple(const void *sendbuf,
   void *sbuf = NULL, *rbuf = NULL;
   size_t send_size = 0, recv_size = 0, data_size = 0;
   MPI_Aint snd_true_lb = 0, rcv_true_lb = 0; 
-  MPIDU_Segment segment;
+  MPIR_Segment segment;
   const struct MPIDI_Comm* const mpid = &(comm_ptr->mpid);
   const int size = comm_ptr->local_size;
   advisor_algorithm_t advisor_algorithms[1];

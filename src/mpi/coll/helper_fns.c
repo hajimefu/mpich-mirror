@@ -105,7 +105,7 @@ int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtyp
     }
     else if (sendtype_iscontig)
     {
-        MPID_Segment seg;
+        MPIR_Segment seg;
 	MPI_Aint last;
 
 	MPIR_Segment_init(recvbuf, recvcount, recvtype, &seg, 0);
@@ -115,7 +115,7 @@ int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtyp
     }
     else if (recvtype_iscontig)
     {
-        MPID_Segment seg;
+        MPIR_Segment seg;
 	MPI_Aint last;
 
 	MPIR_Segment_init(sendbuf, sendcount, sendtype, &seg, 0);
@@ -127,9 +127,9 @@ int MPIR_Localcopy(const void *sendbuf, MPI_Aint sendcount, MPI_Datatype sendtyp
     {
 	char * buf;
 	intptr_t buf_off;
-	MPID_Segment sseg;
+	MPIR_Segment sseg;
 	intptr_t sfirst;
-	MPID_Segment rseg;
+	MPIR_Segment rseg;
 	intptr_t rfirst;
 
         MPIR_CHKLMEM_MALLOC(buf, char *, COPY_BUFFER_SZ, mpi_errno, "buf");

@@ -31,7 +31,7 @@ int MPIR_Type_flatten(MPI_Datatype type,
     int err;
     MPI_Aint first, last;
     MPIR_Datatype *datatype_ptr ATTRIBUTE((unused));
-    MPIDU_Segment *segp;
+    MPIR_Segment *segp;
 
     if (HANDLE_GET_KIND(type) == HANDLE_KIND_BUILTIN) {
 	off_array[0] = 0;

@@ -69,7 +69,7 @@ int MPI_Unpack_external(const char datarep[],
     static const char FCNAME[] = "MPI_Unpack_external";
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint first, last;
-    MPID_Segment *segp;
+    MPIR_Segment *segp;
     MPIR_FUNC_TERSE_STATE_DECL(MPID_STATE_MPI_UNPACK_EXTERNAL);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();

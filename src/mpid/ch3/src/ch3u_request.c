@@ -532,7 +532,7 @@ int MPIDI_CH3U_Request_unpack_uebuf(MPIR_Request * rreq)
 	}
 	else
 	{
-	    MPIDU_Segment seg;
+	    MPIR_Segment seg;
 	    MPI_Aint last;
 
 	    MPIR_Segment_init(rreq->dev.user_buf, rreq->dev.user_count, 

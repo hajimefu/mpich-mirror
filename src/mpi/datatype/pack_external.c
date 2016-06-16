@@ -71,7 +71,7 @@ int MPI_Pack_external(const char datarep[],
     int mpi_errno = MPI_SUCCESS;
     MPI_Aint first, last;
 
-    MPID_Segment *segp;
+    MPIR_Segment *segp;
     MPIR_FUNC_TERSE_STATE_DECL(MPID_STATE_MPI_PACK_EXTERNAL);
 
     MPIR_ERRTEST_INITIALIZED_ORDIE();
@@ -122,7 +122,7 @@ int MPI_Pack_external(const char datarep[],
 					 MPI_ERR_OTHER,
 					 "**nomem",
 					 "**nomem %s",
-					 "MPID_Segment");
+					 "MPIR_Segment");
 	goto fn_fail;
     }
     /* --END ERROR HANDLING-- */

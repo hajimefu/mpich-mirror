@@ -288,7 +288,7 @@ int MPIDO_Alltoall_simple(const void *sendbuf,
    void *sbuf = NULL, *rbuf = NULL;
    size_t send_size = 0;
    size_t recv_size = 0;
-   MPIDU_Segment segment;
+   MPIR_Segment segment;
    MPIR_Datatype*sdt, *rdt;
    MPI_Aint sdt_true_lb=0, rdt_true_lb;
    MPIDI_Post_coll_t alltoall_post;

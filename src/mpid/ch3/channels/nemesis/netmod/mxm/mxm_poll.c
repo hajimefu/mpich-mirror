@@ -457,7 +457,7 @@ static int _mxm_process_rdtype(MPIR_Request ** rreq_p, MPI_Datatype datatype,
     rreq->dev.segment_size = data_sz;
 
     last = rreq->dev.segment_size;
-    MPIDU_Segment_count_contig_blocks(rreq->dev.segment_ptr, rreq->dev.segment_first, &last,
+    MPIR_Segment_count_contig_blocks(rreq->dev.segment_ptr, rreq->dev.segment_first, &last,
                                      (MPI_Aint *) & n_iov);
     MPIR_Assert(n_iov > 0);
     iov = MPL_malloc(n_iov * sizeof(*iov));
