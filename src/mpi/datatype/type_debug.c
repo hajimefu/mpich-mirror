@@ -8,6 +8,7 @@
 #include "mpiimpl.h"
 #include <stdlib.h>
 #include <limits.h>
+#include "datatype.h"
 
 /* MPI datatype debugging helper routines.
  *

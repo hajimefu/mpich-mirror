@@ -6,6 +6,7 @@
  */
 
 #include "mpiimpl.h"
+#include "datatype.h"
 
 /* -- Begin Profiling Symbol Block for routine MPI_Type_struct */
 #if defined(HAVE_PRAGMA_WEAK)

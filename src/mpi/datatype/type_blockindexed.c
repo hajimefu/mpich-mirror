@@ -6,8 +6,8 @@
  */
 
 #include <mpiimpl.h>
-#include <mpir_dataloop.h>
 #include <stdlib.h>
+#include "datatype.h"
 
 #undef MPID_TYPE_ALLOC_DEBUG
 
