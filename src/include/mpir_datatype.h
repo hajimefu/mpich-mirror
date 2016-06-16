@@ -159,6 +159,8 @@ struct MPIR_Datatype {
 #endif
 };
 
+extern MPIR_Datatype MPIR_Datatype_builtin[MPIR_DATATYPE_N_BUILTIN + 1];
+extern MPIR_Datatype MPIR_Datatype_direct[];
 extern MPIR_Object_alloc_t MPIR_Datatype_mem;
 
 static inline void MPIR_Datatype_free(MPIR_Datatype *ptr);
