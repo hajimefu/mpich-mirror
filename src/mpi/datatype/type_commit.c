@@ -51,13 +51,13 @@ int MPIR_Type_commit(MPI_Datatype *datatype_p)
 #ifdef MPID_NEEDS_DLOOP_ALL_BYTES
         /* If MPID implementation needs use to reduce everything to
            a byte stream, do that. */
-        MPIDU_Dataloop_create(*datatype_p,
+        MPIR_Dataloop_create(*datatype_p,
                              &datatype_ptr->dataloop,
                              &datatype_ptr->dataloop_size,
                              &datatype_ptr->dataloop_depth,
                              MPIDU_DATALOOP_ALL_BYTES);
 #else
-        MPIDU_Dataloop_create(*datatype_p,
+        MPIR_Dataloop_create(*datatype_p,
                              &datatype_ptr->dataloop,
                              &datatype_ptr->dataloop_size,
                              &datatype_ptr->dataloop_depth,
@@ -65,7 +65,7 @@ int MPIR_Type_commit(MPI_Datatype *datatype_p)
 #endif
 
         /* create heterogeneous dataloop */
-        MPIDU_Dataloop_create(*datatype_p,
+        MPIR_Dataloop_create(*datatype_p,
                              &datatype_ptr->hetero_dloop,
                              &datatype_ptr->hetero_dloop_size,
                              &datatype_ptr->hetero_dloop_depth,

@@ -179,13 +179,13 @@ int MPIR_Type_create_pairtype(MPI_Datatype type,
 #ifdef MPID_NEEDS_DLOOP_ALL_BYTES
     /* If MPID implementation needs use to reduce everything to
        a byte stream, do that. */
-    err = MPIDU_Dataloop_create_pairtype(type,
+    err = MPIR_Dataloop_create_pairtype(type,
                                         &(new_dtp->dataloop),
                                         &(new_dtp->dataloop_size),
                                         &(new_dtp->dataloop_depth),
                                         MPIDU_DATALOOP_ALL_BYTES);
 #else
-    err = MPIDU_Dataloop_create_pairtype(type,
+    err = MPIR_Dataloop_create_pairtype(type,
                                         &(new_dtp->dataloop),
                                         &(new_dtp->dataloop_size),
                                         &(new_dtp->dataloop_depth),
@@ -193,7 +193,7 @@ int MPIR_Type_create_pairtype(MPI_Datatype type,
 #endif
 
     if (!err) {
-        err = MPIDU_Dataloop_create_pairtype(type,
+        err = MPIR_Dataloop_create_pairtype(type,
                                             &(new_dtp->hetero_dloop),
                                             &(new_dtp->hetero_dloop_size),
                                             &(new_dtp->hetero_dloop_depth),
@@ -204,7 +204,7 @@ int MPIR_Type_create_pairtype(MPI_Datatype type,
     if (err) {
         mpi_errno = MPIR_Err_create_code(MPI_SUCCESS,
                                          MPIR_ERR_RECOVERABLE,
-                                         "MPIDU_Dataloop_create_pairtype",
+                                         "MPIR_Dataloop_create_pairtype",
                                          __LINE__,
                                          MPI_ERR_OTHER,
                                          "**nomem",
