@@ -25,7 +25,7 @@
  */
 #if defined(MPID_HAS_HETERO) || 1
 #define MPIR_DATALOOP_GET_FIELD(hetero_,value_,fieldname_) do {                          \
-        if (hetero_ != MPIDU_DATALOOP_HETEROGENEOUS)                             \
+        if (hetero_ != MPIR_DATALOOP_HETEROGENEOUS)                             \
             value_ = ((MPIR_Datatype *)ptr)->dataloop##fieldname_;              \
         else value_ = ((MPIR_Datatype *) ptr)->hetero_dloop##fieldname_;        \
     } while(0)
@@ -36,7 +36,7 @@
 
 #if defined(MPID_HAS_HETERO) || 1
 #define MPIR_DATALOOP_SET_FIELD(hetero_,value_,fieldname_) do {                          \
-        if (hetero_ != MPIDU_DATALOOP_HETEROGENEOUS)                             \
+        if (hetero_ != MPIR_DATALOOP_HETEROGENEOUS)                             \
             ((MPIR_Datatype *)ptr)->dataloop##fieldname_ = value_;              \
         else ((MPIR_Datatype *) ptr)->hetero_dloop##fieldname_ = value_;        \
     } while(0)

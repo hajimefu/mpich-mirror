@@ -61,7 +61,7 @@ int MPIR_Type_commit(MPI_Datatype *datatype_p)
                              &datatype_ptr->dataloop,
                              &datatype_ptr->dataloop_size,
                              &datatype_ptr->dataloop_depth,
-                             MPIDU_DATALOOP_HOMOGENEOUS);
+                             MPIR_DATALOOP_HOMOGENEOUS);
 #endif
 
         /* create heterogeneous dataloop */
@@ -69,7 +69,7 @@ int MPIR_Type_commit(MPI_Datatype *datatype_p)
                              &datatype_ptr->hetero_dloop,
                              &datatype_ptr->hetero_dloop_size,
                              &datatype_ptr->hetero_dloop_depth,
-                             MPIDU_DATALOOP_HETEROGENEOUS);
+                             MPIR_DATALOOP_HETEROGENEOUS);
 
         MPL_DBG_MSG_D(MPIR_DBG_DATATYPE,TERSE,"# contig blocks = %d\n",
                        (int) datatype_ptr->max_contig_blocks);
