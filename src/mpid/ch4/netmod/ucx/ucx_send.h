@@ -251,18 +251,6 @@ static inline int ucx_send(const void *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND);
 
-    if (unlikely(rank == MPI_PROC_NULL)) {
-        mpi_errno = MPI_SUCCESS;
-
-        if (have_request) {
-            *request = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
-            MPIR_Request_add_ref(*request);
-            MPIDI_CH4U_request_complete((*request));
-        }
-
-        goto fn_exit;
-    }
-
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     if (dt_contig)
@@ -297,17 +285,6 @@ static inline int ucx_sync_send(const void *buf,
 
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_SEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_SEND);
-
-    if (unlikely(rank == MPI_PROC_NULL)) {
-        mpi_errno = MPI_SUCCESS;
-
-        if (have_request) {
-             *request = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
-            MPIDI_CH4U_request_complete((*request));
-        }
-
-        goto fn_exit;
-    }
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 

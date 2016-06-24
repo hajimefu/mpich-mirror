@@ -35,15 +35,7 @@ static inline int MPIDI_OFI_do_iprobe(int source,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NETMOD_DO_PROBE);
 
-    if(unlikely(source == MPI_PROC_NULL)) {
-        MPIR_Status_set_procnull(status);
-        *flag = true;
-
-        if(message)
-            *message = NULL;
-
-        goto fn_exit;
-    } else if(unlikely(MPI_ANY_SOURCE == source))
+    if(unlikely(MPI_ANY_SOURCE == source))
         remote_proc = FI_ADDR_UNSPEC;
     else
         remote_proc = MPIDI_OFI_comm_to_phys(comm, source, MPIDI_OFI_API_TAG);

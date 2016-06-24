@@ -53,15 +53,6 @@ __ALWAYS_INLINE__ int MPIDI_OFI_do_irecv(void          *buf,
 
     *request = rreq;
 
-    if(unlikely(rank == MPI_PROC_NULL)) {
-        rreq->kind = MPIR_REQUEST_KIND__RECV;
-        rreq->status.MPI_ERROR = MPI_SUCCESS;
-        rreq->status.MPI_SOURCE = rank;
-        rreq->status.MPI_TAG = tag;
-        MPIDI_CH4U_request_complete(rreq);
-        goto fn_exit;
-    }
-
     match_bits = MPIDI_OFI_init_recvtag(&mask_bits, context_id, rank, tag, MPIDI_OFI_ENABLE_DATA);
 
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);

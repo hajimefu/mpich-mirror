@@ -234,17 +234,6 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send(MPIDI_OFI_SENDPARAMS, int noreq, uint64_t s
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_NETMOD_OFI_NM_SEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_NETMOD_OFI_NM_SEND);
 
-    if(unlikely(rank == MPI_PROC_NULL)) {
-        mpi_errno = MPI_SUCCESS;
-
-        if(!noreq) {
-            MPIDI_OFI_REQUEST_CREATE((*request), MPIR_REQUEST_KIND__SEND);
-            MPIDI_CH4U_request_complete((*request));
-        }
-
-        goto fn_exit;
-    }
-
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
 
     if(likely(!syncflag && dt_contig && (data_sz <= MPIDI_Global.max_buffered_send)))

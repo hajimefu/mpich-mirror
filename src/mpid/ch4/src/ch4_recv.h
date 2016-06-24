@@ -29,6 +29,17 @@ __CH4_INLINE__ int MPIDI_Recv(void *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_RECV);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_RECV);
 
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        *request = rreq;
+        MPIR_Request_add_ref(rreq);
+        rreq->status.MPI_SOURCE = rank;
+        rreq->status.MPI_TAG = tag;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno =
         MPIDI_NM_recv(buf, count, datatype, rank, tag, comm, context_offset, status, request);
@@ -179,6 +190,15 @@ __CH4_INLINE__ int MPIDI_Mrecv(void *buf,
         goto fn_exit;
     }
 
+    if(unlikely(message->status.MPI_SOURCE == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = message;
+        rreq->status.MPI_SOURCE = message->status.MPI_SOURCE;
+        rreq->status.MPI_TAG = message->status.MPI_TAG;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_imrecv(buf, count, datatype, message, &rreq);
 #else
@@ -256,6 +276,16 @@ __CH4_INLINE__ int MPIDI_Imrecv(void *buf,
         goto fn_exit;
     }
 
+    if(unlikely(message->status.MPI_SOURCE == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = message;
+        rreq->status.MPI_SOURCE = message->status.MPI_SOURCE;
+        rreq->status.MPI_TAG = message->status.MPI_TAG;
+        MPIDI_CH4U_request_complete(rreq);
+        *rreqp = rreq;
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_imrecv(buf, count, datatype, message, rreqp);
 #else
@@ -295,6 +325,17 @@ __CH4_INLINE__ int MPIDI_Irecv(void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_IRECV);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_IRECV);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
+        *request = rreq;
+        MPIR_Request_add_ref(rreq);
+        rreq->status.MPI_SOURCE = rank;
+        rreq->status.MPI_TAG = tag;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_irecv(buf, count, datatype, rank, tag, comm, context_offset, request);

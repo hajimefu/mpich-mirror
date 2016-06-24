@@ -27,6 +27,16 @@ __CH4_INLINE__ int MPIDI_Send(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_SEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_SEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
@@ -62,6 +72,15 @@ __CH4_INLINE__ int MPIDI_Isend(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_ISEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_ISEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
 
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
@@ -99,6 +118,16 @@ __CH4_INLINE__ int MPIDI_Rsend(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_RSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_RSEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_send(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
@@ -135,6 +164,16 @@ __CH4_INLINE__ int MPIDI_Irsend(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_IRSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_IRSEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_isend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
@@ -170,6 +209,16 @@ __CH4_INLINE__ int MPIDI_Ssend(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_SSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_SSEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_ssend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else
@@ -205,6 +254,16 @@ __CH4_INLINE__ int MPIDI_Issend(const void *buf,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_ISSEND);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_ISSEND);
+
+    if(unlikely(rank == MPI_PROC_NULL)) {
+        MPIR_Request *rreq = MPIR_Request_create(MPIR_REQUEST_KIND__SEND);
+        MPIR_Request_add_ref(rreq);
+        *request = rreq;
+        MPIDI_CH4U_request_complete(rreq);
+        mpi_errno = MPI_SUCCESS;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_issend(buf, count, datatype, rank, tag, comm, context_offset, request);
 #else

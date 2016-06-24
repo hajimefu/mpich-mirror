@@ -23,6 +23,12 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
     int mpi_errno, flag = 0;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_PROBE);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_PROBE);
+
+    if(unlikely(source == MPI_PROC_NULL)) {
+        MPIR_Status_set_procnull(status);
+        goto fn_exit;
+    }
+
     while (!flag) {
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
         mpi_errno = MPIDI_NM_iprobe(source, tag, comm, context_offset, &flag, status);
@@ -77,7 +83,6 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
     if (source == MPI_PROC_NULL)
     {
         MPIR_Status_set_procnull(status);
-        flag = 1;
         *message = NULL; /* should be interpreted as MPI_MESSAGE_NO_PROC */
         goto fn_exit;
     }
@@ -177,6 +182,13 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
     int mpi_errno;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4_IPROBE);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4_IPROBE);
+
+    if(unlikely(source == MPI_PROC_NULL)) {
+        MPIR_Status_set_procnull(status);
+        *flag = 1;
+        goto fn_exit;
+    }
+
 #ifndef MPIDI_CH4_EXCLUSIVE_SHM
     mpi_errno = MPIDI_NM_iprobe(source, tag, comm, context_offset, flag, status);
 #else

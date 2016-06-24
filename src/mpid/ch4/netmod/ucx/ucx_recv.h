@@ -114,17 +114,6 @@ static inline int do_irecv(void *buf,
 
     MPIR_Datatype *dt_ptr;
 
-    if (unlikely(rank == MPI_PROC_NULL)) {
-        req = MPIR_Request_create(MPIR_REQUEST_KIND__RECV);
-        MPIR_Request_add_ref(req);
-        req->status.MPI_ERROR = MPI_SUCCESS;
-        req->status.MPI_SOURCE = rank;
-        req->status.MPI_TAG = tag;
-        MPIDI_CH4U_request_complete(req);
-        *request = req;
-        goto fn_exit;
-    }
-
     MPIDI_Datatype_get_info(count, datatype, dt_contig, data_sz, dt_ptr, dt_true_lb);
     if (dt_contig)
         mpi_errno =
