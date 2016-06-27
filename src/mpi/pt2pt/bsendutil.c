@@ -475,6 +475,10 @@ static int MPIR_Bsend_check_active( void )
 
     active = BsendBuffer.active;
     if(active) {
+        MPID_Progress_start(&progress_state);
+        mpi_errno = MPID_Progress_test( );
+        MPID_Progress_end(&progress_state);
+        if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         /* Multithreading:  work on this list exclusively by dequeuing all elements */
         /* The lock may be released during progress so this thread will process all */
         /* the elements it can                                                      */
@@ -495,7 +499,7 @@ static int MPIR_Bsend_check_active( void )
         if(!(active->kind == IBSEND && MPIR_Object_get_ref(active->request) != 1)) {
             MPI_Request r = active->request->handle;
             int flag;
-            mpi_errno = MPIR_Test_impl(&r, &flag, MPI_STATUS_IGNORE);
+            mpi_errno = MPIR_Test_no_progress_impl(&r, &flag, MPI_STATUS_IGNORE);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             if (flag) {
                 MPII_Bsend_data_t *prev = active->prev;
@@ -505,11 +509,6 @@ static int MPIR_Bsend_check_active( void )
                 MPL_DBG_MSG_P(MPIR_DBG_BSEND,TYPICAL,"Removing segment %p", active);
                 MPIR_Bsend_merge_segment( active );
             }
-        } else {
-            MPID_Progress_start(&progress_state);
-            mpi_errno = MPID_Progress_test( );
-            MPID_Progress_end(&progress_state);
-            if (mpi_errno) MPIR_ERR_POP(mpi_errno);
         }
         active    = next_active;
         MPL_DBG_MSG_P(MPIR_DBG_BSEND,TYPICAL,"Next active is %p",active);
