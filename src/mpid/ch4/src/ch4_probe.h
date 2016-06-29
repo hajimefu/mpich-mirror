@@ -26,6 +26,7 @@ __CH4_INLINE__ int MPIDI_Probe(int source,
 
     if(unlikely(source == MPI_PROC_NULL)) {
         MPIR_Status_set_procnull(status);
+        mpi_errno = MPI_SUCCESS;
         goto fn_exit;
     }
 
@@ -84,6 +85,7 @@ __CH4_INLINE__ int MPIDI_Mprobe(int source,
     {
         MPIR_Status_set_procnull(status);
         *message = NULL; /* should be interpreted as MPI_MESSAGE_NO_PROC */
+        mpi_errno = MPI_SUCCESS;
         goto fn_exit;
     }
 
@@ -143,6 +145,7 @@ __CH4_INLINE__ int MPIDI_Improbe(int source,
         MPIR_Status_set_procnull(status);
         *flag = 1;
         *message = NULL; /* should be interpreted as MPI_MESSAGE_NO_PROC */
+        mpi_errno = MPI_SUCCESS;
         goto fn_exit;
     }
 
@@ -186,6 +189,7 @@ __CH4_INLINE__ int MPIDI_Iprobe(int source,
     if(unlikely(source == MPI_PROC_NULL)) {
         MPIR_Status_set_procnull(status);
         *flag = 1;
+        mpi_errno = MPI_SUCCESS;
         goto fn_exit;
     }
 
