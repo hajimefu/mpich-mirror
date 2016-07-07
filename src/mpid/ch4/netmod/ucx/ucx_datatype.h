@@ -101,34 +101,32 @@ static ucp_generic_dt_ops_t MPIDI_UCX_datatype_ops = {
 
 static inline void MPIDI_NM_datatype_destroy(MPIR_Datatype *datatype_p){
 
-    int in_use;
 
-    ucp_datatype_t ucp_datatype =  datatype_p->dev.netmod.ucx.ucp_datatype  ;
-
-    if( datatype_p->dev.netmod.ucx.has_ucp == 1) {
-        ucp_dt_destroy(ucp_datatype);
-        MPIR_Object_release_ref(datatype_p, &in_use);
+    if(datatype_p->is_committed && (int)datatype_p->dev.netmod.ucx.ucp_datatype >= 0) {
+        ucp_dt_destroy( datatype_p->dev.netmod.ucx.ucp_datatype);  
+        datatype_p->dev.netmod.ucx.ucp_datatype = -1;
     }
 
     return;
 }
+
 static inline void MPIDI_NM_datatype_commit(MPIR_Datatype *datatype_p){
     ucp_datatype_t ucp_datatype;
     ucs_status_t status;
     size_t size;
     int is_contig;
 
-    datatype_p->dev.netmod.ucx.has_ucp = 0;
+
+    datatype_p->dev.netmod.ucx.ucp_datatype = -1;
     MPID_Datatype_is_contig(datatype_p->handle, &is_contig);
 
     if (!is_contig) {
+
         status = ucp_dt_create_generic(&MPIDI_UCX_datatype_ops,
                                        datatype_p, &ucp_datatype);
         MPIR_Assertp(status == UCS_OK);
         datatype_p->dev.netmod.ucx.ucp_datatype = ucp_datatype;
 
-        datatype_p->dev.netmod.ucx.has_ucp = 1;
-        MPIR_Object_add_ref(datatype_p);
     }
 
     return;

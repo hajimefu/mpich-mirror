@@ -21,7 +21,6 @@ typedef struct {
 } MPIDI_UCX_ucp_request_t;
 
 typedef struct {
-   int has_ucp;
    ucp_datatype_t ucp_datatype;
 } MPIDI_UCX_dt_t;
 
