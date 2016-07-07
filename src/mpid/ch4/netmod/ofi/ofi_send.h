@@ -249,7 +249,6 @@ __ALWAYS_INLINE__ int MPIDI_OFI_send(MPIDI_OFI_SENDPARAMS, int noreq, uint64_t s
                                                   context_offset, request, dt_contig,
                                                   data_sz, dt_ptr, dt_true_lb, syncflag);
 
-fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_NM_SEND);
     return mpi_errno;
 }
