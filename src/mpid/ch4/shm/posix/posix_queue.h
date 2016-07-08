@@ -236,6 +236,7 @@ static inline void MPIDI_POSIX_queue_dequeue(MPIDI_POSIX_queue_ptr_t qhead, MPID
 #define FCNAME MPL_QUOTE(FUNCNAME)
 static inline void MPIDI_POSIX_queue_init(MPIDI_POSIX_queue_ptr_t qhead)
 {
+    int err = 0;
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_POSIX_QUEUE_INIT);
 
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPIDI_POSIX_QUEUE_INIT);
@@ -243,17 +244,18 @@ static inline void MPIDI_POSIX_queue_init(MPIDI_POSIX_queue_ptr_t qhead)
     MPIDI_POSIX_SET_REL_NULL(qhead->head);
     MPIDI_POSIX_SET_REL_NULL(qhead->my_head);
     MPIDI_POSIX_SET_REL_NULL(qhead->tail);
-    MPIDI_POSIX_queue_mutex_create(&qhead->lock, NULL);
+    MPIDI_POSIX_queue_mutex_create(&qhead->lock, &err);
 
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_POSIX_QUEUE_INIT);
 }
 
 static inline void MPIDI_POSIX_queue_enqueue(MPIDI_POSIX_queue_ptr_t qhead, MPIDI_POSIX_cell_ptr_t element)
 {
+    int err = 0;
     MPIDI_POSIX_cell_rel_ptr_t r_prev;
     MPIDI_POSIX_cell_rel_ptr_t r_element = MPIDI_POSIX_ABS_TO_REL(element);
 
-    MPIDI_POSIX_queue_mutex_lock(&qhead->lock);
+    MPIDI_POSIX_queue_mutex_lock(&qhead->lock, &err);
 
     r_prev = qhead->tail;
     qhead->tail = r_element;
@@ -264,7 +266,7 @@ static inline void MPIDI_POSIX_queue_enqueue(MPIDI_POSIX_queue_ptr_t qhead, MPID
         MPIDI_POSIX_REL_TO_ABS(r_prev)->next = r_element;
     }
 
-    MPIDI_POSIX_queue_mutex_unlock(&qhead->lock);
+    MPIDI_POSIX_queue_mutex_unlock(&qhead->lock, &err);
 }
 
 /* This operation is only safe because this is a single-dequeuer queue impl. */
@@ -293,6 +295,7 @@ static inline int MPIDI_POSIX_queue_empty(MPIDI_POSIX_queue_ptr_t qhead)
 
 static inline void MPIDI_POSIX_queue_dequeue(MPIDI_POSIX_queue_ptr_t qhead, MPIDI_POSIX_cell_ptr_t *e)
 {
+    int err = 0;
     MPIDI_POSIX_cell_ptr_t _e;
     MPIDI_POSIX_cell_rel_ptr_t _r_e;
 
@@ -302,7 +305,7 @@ static inline void MPIDI_POSIX_queue_dequeue(MPIDI_POSIX_queue_ptr_t qhead, MPID
 
     if(MPIDI_POSIX_IS_REL_NULL(_e->next)) {
         /* a REL_NULL _e->next or writing qhead->tail both require locking */
-        MPIDI_POSIX_queue_mutex_lock(&qhead->lock);
+        MPIDI_POSIX_queue_mutex_lock(&qhead->lock, &err);
         qhead->my_head = _e->next;
 
         /* We have to check _e->next again because it may have changed between
@@ -312,7 +315,7 @@ static inline void MPIDI_POSIX_queue_dequeue(MPIDI_POSIX_queue_ptr_t qhead, MPID
             MPIDI_POSIX_SET_REL_NULL(qhead->tail);
         }
 
-        MPIDI_POSIX_queue_mutex_unlock(&qhead->lock);
+        MPIDI_POSIX_queue_mutex_unlock(&qhead->lock, &err);
     } else {    /* !MPIDI_POSIX_IS_REL_NULL(_e->next) */
         /* We don't need to lock because a non-null _e->next can't be changed by
          * anyone but us (the dequeuer) and we don't need to modify qhead->tail
