@@ -250,7 +250,7 @@ __CH4_INLINE__ int MPIDI_CH4U_recv_init(void *buf,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_CH4U_RECV_INIT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_CH4U_RECV_INIT);
 
-    rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__RECV);
+    rreq = MPIDI_CH4I_am_request_create(MPIR_REQUEST_KIND__PREQUEST_RECV);
 
     *request = rreq;
     rreq->comm = comm;
