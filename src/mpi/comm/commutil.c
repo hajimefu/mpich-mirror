@@ -70,7 +70,7 @@ static struct MPIR_Comm_hint_fn_elt *MPID_hint_fns = NULL;
  * !!! The resulting struct is _not_ ready for communication !!! */
 int MPII_Comm_init(MPIR_Comm * comm_p)
 {
-    int thr_err,mpi_errno = MPI_SUCCESS;
+    int thr_err, mpi_errno = MPI_SUCCESS;
 
     MPIR_Object_set_ref(comm_p, 1);
 
@@ -104,7 +104,7 @@ int MPII_Comm_init(MPIR_Comm * comm_p)
     comm_p->mapper_head = NULL;
     comm_p->mapper_tail = NULL;
 
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ
     MPID_Thread_mutex_create(&MPIR_THREAD_POBJ_COMM_MUTEX(comm_p), &thr_err);
     MPIR_Assert(thr_err == 0);
 #endif
@@ -1008,7 +1008,7 @@ int MPIR_Comm_delete_internal(MPIR_Comm * comm_ptr)
          * allocated out of the remote group's bit vector, not ours. */
         MPIR_Free_contextid(comm_ptr->recvcontext_id);
 
-#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY_PER_OBJECT
+#if MPICH_THREAD_GRANULARITY == MPICH_THREAD_GRANULARITY__POBJ
         MPID_Thread_mutex_destroy(&MPIR_THREAD_POBJ_COMM_MUTEX(comm_ptr), &thr_err);
         MPIR_Assert(thr_err == 0);
 #endif
