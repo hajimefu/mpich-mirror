@@ -64,6 +64,7 @@ pmpi_convenience_libs = @opalib@ @mpllib@
 DIST_SUBDIRS = ${external_subdirs}
 SUBDIRS = ${external_subdirs}
 
+
 ## Automake attempts to guess the correct linker among the various compilers
 ## for each language (see "How the Linker is Chosen" in the AM manual).
 ## However, this process is static and doesn't assume that you will "disable"
@@ -144,22 +145,33 @@ lib_LTLIBRARIES =
 include maint/Makefile.mk
 include src/Makefile.mk
 
+if HAVE_LD_VERSION_SCRIPT
+VERSION_SCRIPT        = -Wl,--version-script=@LD_VERSION_SCRIPT@
+VERSION_SCRIPT_DEPEND = @LD_VERSION_SCRIPT@
+endif
+
+if HAVE_LIBTOOL_VERSION_SCRIPT
+VERSION_SCRIPT        = -export-symbols @LD_VERSION_SCRIPT@
+VERSION_SCRIPT_DEPEND = @LD_VERSION_SCRIPT@
+endif
+
 if BUILD_PROFILING_LIB
 # dropping mpi_fc_sources and mpi_cxx_sources from libmpmpi since they
 # don't contribute any PMPI symbols.
 lib_LTLIBRARIES += lib/lib@PMPILIBNAME@.la
 lib_lib@PMPILIBNAME@_la_SOURCES = $(mpi_sources) $(mpi_f77_sources) $(mpi_core_sources)
-lib_lib@PMPILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
+lib_lib@PMPILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS) $(VERSION_SCRIPT)
 lib_lib@PMPILIBNAME@_la_CPPFLAGS = $(AM_CPPFLAGS) -DF77_USE_PMPI
 lib_lib@PMPILIBNAME@_la_LIBADD = $(external_libs) $(pmpi_convenience_libs)
-EXTRA_lib_lib@PMPILIBNAME@_la_DEPENDENCIES = $(pmpi_convenience_libs)
+lib_lib@PMPILIBNAME@_la_DEPENDENCIES = $(VERSION_SCRIPT_DEPEND)
+EXTRA_lib_lib@PMPILIBNAME@_la_DEPENDENCIES = $(pmpi_convenience_libs) $(VERSION_SCRIPT_DEPEND)
 
 # lib@MPILIBNAME@.la might depend on lib@PMPILIBNAME@.la.  We add them
 # in that order to lib_LTLIBRARIES so libtool doesn't get
 # confused. (see https://bugzilla.redhat.com/show_bug.cgi?id=91110)
 lib_LTLIBRARIES += lib/lib@MPILIBNAME@.la
 lib_lib@MPILIBNAME@_la_SOURCES = $(mpi_sources)
-lib_lib@MPILIBNAME@_la_LDFLAGS = $(ABIVERSIONFLAGS)
+lib_lib@MPILIBNAME@_la_LDFLAGS = $(ABIVERSIONFLAGS) $(VERSION_SCRIPT)
 lib_lib@MPILIBNAME@_la_CPPFLAGS = $(AM_CPPFLAGS) -DMPICH_MPI_FROM_PMPI
 lib_lib@MPILIBNAME@_la_LIBADD = lib/lib@PMPILIBNAME@.la $(mpi_convenience_libs)
 
@@ -167,11 +179,15 @@ else !BUILD_PROFILING_LIB
 
 lib_LTLIBRARIES += lib/lib@MPILIBNAME@.la
 lib_lib@MPILIBNAME@_la_SOURCES = $(mpi_sources) $(mpi_core_sources)
-lib_lib@MPILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS)
+lib_lib@MPILIBNAME@_la_LDFLAGS = $(external_ldflags) $(ABIVERSIONFLAGS) $(VERSION_SCRIPT)
 lib_lib@MPILIBNAME@_la_CPPFLAGS = $(AM_CPPFLAGS)
 lib_lib@MPILIBNAME@_la_LIBADD = $(external_libs) $(pmpi_convenience_libs) $(mpi_convenience_libs)
-EXTRA_lib_lib@MPILIBNAME@_la_DEPENDENCIES = $(pmpi_convenience_libs) $(mpi_convenience_libs)
+EXTRA_lib_lib@MPILIBNAME@_la_DEPENDENCIES = $(pmpi_convenience_libs) $(mpi_convenience_libs) $(VERSION_SCRIPT_DEPEND)
 endif !BUILD_PROFILING_LIB
+
+
+
+
 
 if BUILD_F77_BINDING
 lib_LTLIBRARIES += lib/lib@MPIFCLIBNAME@.la

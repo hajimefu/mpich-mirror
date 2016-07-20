@@ -5193,6 +5193,33 @@ else
 fi
 AC_SUBST(MPI_MAX_ERROR_STRING)
 
+with_exports_ld="no"
+with_exports_libtool="no"
+AC_ARG_WITH(exports,
+	AC_HELP_STRING([--with-exports=file],
+		[Use an exports file]),,
+		 with_exports=$MPID_DEFAULT_EXPORTS_FILE)
+    if test -z "$with_exports" ; then
+        with_exports=no ;
+        AC_MSG_NOTICE([Warning, not using exports file , defaulting to $MPID_DEFAULT_EXPORTS_FILE])
+    fi
+    if test "$with_exports" != "no"; then
+        GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+        if test "$GLD"; then
+            LD_VERSION_SCRIPT=${with_exports}.map
+            with_exports_ld="yes"
+            AC_MSG_NOTICE([Using GNU ld style linker export: $with_exports_ld])
+        else
+            LD_VERSION_SCRIPT=${with_exports}.sym
+            with_exports_ld="libtool"
+            AC_MSG_NOTICE([Using libtool style exports file: $with_exports_libtool])
+     fi
+     AC_SUBST(LD_VERSION_SCRIPT)
+fi
+AM_CONDITIONAL([HAVE_LD_VERSION_SCRIPT], [test "$with_exports_ld" != "no"])
+AM_CONDITIONAL([HAVE_LIBTOOL_VERSION_SCRIPT], [test "$with_exports_libtool" != "no"])
+
+
 # Get the value of libtool_static_flag
 if test ! -z "$MPID_LIBTOOL_STATIC_FLAG" ; then
    mpich_libtool_static_flag="$MPID_LIBTOOL_STATIC_FLAG"
