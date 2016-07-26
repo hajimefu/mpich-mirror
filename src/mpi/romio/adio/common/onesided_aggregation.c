@@ -6,21 +6,40 @@
 
 #include "adio.h"
 #include "adio_extern.h"
+#include "ad_tuning.h"
 #ifdef ROMIO_GPFS
-/* right now this is GPFS only but TODO: extend this to all file systems */
 #include "../ad_gpfs/ad_gpfs_tuning.h"
-#else
-int gpfsmpio_onesided_no_rmw = 0;
-int gpfsmpio_write_aggmethod = 0;
-int gpfsmpio_read_aggmethod = 0;
-int gpfsmpio_onesided_always_rmw = 0;
 #endif
+
 
 #include <pthread.h>
 
 //  #define onesidedtrace 1
 
-
+/* Data that needs to persist throughout multiple calls to ADIOI_OneSidedWriteAggregation
+ * to support file systems that stripe data -- the algorithm can now be called once
+ * for each segment of data, a segment being defined as a contiguous region of the file which
+ * is the size of one striping unit times the number of aggregators.  Each call effectively packs one
+ * striping unit of data into the collective buffer on each agg, with additional parameters which govern when to flush
+ * the collective buffer to the file.  Therefore in practice the collective write call for a file system such as
+ * lustre on a dataset composed of multiple segments would call the algorithm several times without a
+ * flush parameter to fill the collective buffers with multiple stripes of data, before calling it again to flush
+ * the collective buffer to the file system.  In this fashion the synchronization can be minimized as that
+ * only needs to occur during the actual read from or write to the file system.
+ */
+int iWasUsedStripingAgg; /* whether this rank was ever a used agg for this striping segement */
+int numStripesUsed;      /* the number of stripes packed into an aggregator */
+/* These 2 variables are the offset and lengths in the file corresponding to the actual stripes */
+ADIO_Offset *stripeWriteOffsets, *stripeWriteLens;
+int amountOfStripedDataExpected; /* used to determine holes in this segment thereby requiring a rmw */
+/* Since ADIOI_OneSidedWriteAggregation can be called multiple times now only flatten the buffer once */
+/* for optimal performance so persist these two variables through multiple calls */
+MPI_Aint bufTypeExtent;
+ADIOI_Flatlist_node *flatBuf;
+/* These three variables track the state of the source buffer advancement through multiple calls */
+int lastDataTypeExtent;
+int lastFlatBufIndice;
+ADIO_Offset lastIndiceOffset;
 /* This data structure holds the number of extents, the index into the flattened buffer and the remnant length
  * beyond the flattened buffer index corresponding to the base buffer offset for non-contiguous source data
  * for the range to be written coresponding to the round and target agg.
@@ -53,16 +72,16 @@ typedef struct FDSourceBufferState {
 
 } FDSourceBufferState;
 
-
 static int ADIOI_OneSidedSetup(ADIO_File fd, int procs) {
     int ret = MPI_SUCCESS;
 
     ret = MPI_Win_create(fd->io_buf,fd->hints->cb_buffer_size,1,
 	    MPI_INFO_NULL,fd->comm, &fd->io_buf_window);
     if (ret != MPI_SUCCESS) goto fn_exit;
-    fd->io_buf_put_amounts = (int *) ADIOI_Malloc(procs*sizeof(int));
-    ret =MPI_Win_create(fd->io_buf_put_amounts,procs*sizeof(int),sizeof(int),
+    fd->io_buf_put_amounts = 0;
+    ret =MPI_Win_create(&(fd->io_buf_put_amounts),sizeof(int),sizeof(int),
 	    MPI_INFO_NULL,fd->comm, &fd->io_buf_put_amounts_window);
+
 fn_exit:
     return ret;
 }
@@ -74,8 +93,6 @@ int ADIOI_OneSidedCleanup(ADIO_File fd)
 	ret = MPI_Win_free(&fd->io_buf_window);
     if (fd->io_buf_put_amounts_window != MPI_WIN_NULL)
 	ret = MPI_Win_free(&fd->io_buf_put_amounts_window);
-    if (fd->io_buf_put_amounts != NULL)
-	ADIOI_Free(fd->io_buf_put_amounts);
 
     return ret;
 }
@@ -188,16 +205,19 @@ void ADIOI_OneSidedWriteAggregation(ADIO_File fd,
     const void *buf,
     MPI_Datatype datatype,
     int *error_code,
-    ADIO_Offset *st_offsets,
-    ADIO_Offset *end_offsets,
+    ADIO_Offset firstFileOffset,
+    ADIO_Offset lastFileOffset,
     int numNonZeroDataOffsets,
     ADIO_Offset *fd_start,
     ADIO_Offset* fd_end,
-    int *hole_found)
+    int *hole_found,
+    ADIOI_OneSidedStripeParms stripe_parms)
 
 {
     int i,j; /* generic iterators */
 
+    if ((stripe_parms.stripeSize > 0) && stripe_parms.firstStripedWriteCall)
+      iWasUsedStripingAgg = 0;
 #ifdef onesidedtrace
     if (buf == NULL) {
       printf("ADIOI_OneSidedWriteAggregation - buf is NULL contig_access_count is %d\n",contig_access_count);
@@ -250,14 +270,15 @@ printf("ADIOI_OneSidedWriteAggregation started on rank %d\n",myrank);
      */
     int bufTypeIsContig;
 
-    MPI_Aint bufTypeExtent;
-    ADIOI_Flatlist_node *flatBuf=NULL;
     ADIOI_Datatype_iscontig(datatype, &bufTypeIsContig);
 
     if (!bufTypeIsContig) {
    /* Flatten the non-contiguous source datatype and set the extent. */
-      flatBuf = ADIOI_Flatten_and_find(datatype);
-      MPI_Type_extent(datatype, &bufTypeExtent);
+      if ((stripe_parms.stripeSize == 0) || stripe_parms.firstStripedWriteCall) {
+        flatBuf = ADIOI_Flatten_and_find(datatype);
+        MPI_Type_extent(datatype, &bufTypeExtent);
+      }
+
 #ifdef onesidedtrace
       printf("flatBuf->count is %d bufTypeExtent is %d\n", flatBuf->count,bufTypeExtent);
       for (i=0;i<flatBuf->count;i++)
@@ -278,9 +299,9 @@ printf("ADIOI_OneSidedWriteAggregation started on rank %d\n",myrank);
 #ifdef onesidedtrace
     printf("sizeof(FDSourceBufferState) is %d - make sure is 32 for 32-byte memalign optimal\n",sizeof(FDSourceBufferState));
 #endif
-    FDSourceBufferState *currentFDSourceBufferState;
 
-    currentFDSourceBufferState = (FDSourceBufferState *) ADIOI_Malloc(naggs * sizeof(FDSourceBufferState));
+    FDSourceBufferState *currentFDSourceBufferState = (FDSourceBufferState *) ADIOI_Malloc(naggs * sizeof(FDSourceBufferState));
+
     for (i=0;i<naggs;i++) {
       /* initialize based on the bufType to indicate that it is unset.
        */
@@ -301,27 +322,17 @@ printf("ADIOI_OneSidedWriteAggregation started on rank %d\n",myrank);
      */
     int maxNumContigOperations = contig_access_count;
 
-    ADIO_Offset lastFileOffset = 0, firstFileOffset = -1;
-    /* Get the total range being written - in the case of just 1 byte the starting and ending offsets
-     * will match the same as they would for 0 bytes so to distinguish we need the actual data count.
-     */
-    for (j=0;j<numNonZeroDataOffsets;j++) {
-#ifdef onesidedtrace
-printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_offsets[j]);
-#endif
-        lastFileOffset = MPL_MAX(lastFileOffset,end_offsets[j]);
-        if (firstFileOffset == -1)
-          firstFileOffset = st_offsets[j];
-        else
-          firstFileOffset = MPL_MIN(firstFileOffset,st_offsets[j]);
-    }
-
     int myAggRank = -1; /* if I am an aggregor this is my index into fd->hints->ranklist */
     int iAmUsedAgg = 0; /* whether or not this rank is used as an aggregator. */
 
     /* Make coll_bufsize an ADIO_Offset since it is used in calculations with offsets.
      */
-    ADIO_Offset coll_bufsize = (ADIO_Offset)(fd->hints->cb_buffer_size);
+    ADIO_Offset coll_bufsize = 0;
+    if (stripe_parms.stripeSize == 0)
+      coll_bufsize = (ADIO_Offset)(fd->hints->cb_buffer_size);
+    else
+      coll_bufsize = stripe_parms.stripeSize;
+
 #ifdef ROMIO_GPFS
     if (gpfsmpio_pthreadio == 1) {
       /* split buffer in half for a kind of double buffering with the threads*/
@@ -348,6 +359,7 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
         myAggRank = j;
         if (fd_end[j] > fd_start[j]) {
           iAmUsedAgg = 1;
+          iWasUsedStripingAgg = 1;
         }
       }
     }
@@ -411,6 +423,16 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
     int currentDataTypeExtent = 0;
     int currentFlatBufIndice=0;
     ADIO_Offset currentIndiceOffset = 0;
+
+    /* Remember where we left off in the source buffer when packing stripes. */
+    if ((stripe_parms.stripeSize > 0) && !stripe_parms.firstStripedWriteCall) {
+      currentDataTypeExtent = lastDataTypeExtent;
+      currentFlatBufIndice = lastFlatBufIndice;
+      currentIndiceOffset = lastIndiceOffset;
+#ifdef onesidedtrace
+      printf("using lastDataTypeExtent %d lastFlatBufIndice %d lastIndiceOffset %ld\n",lastDataTypeExtent,lastFlatBufIndice,lastIndiceOffset);
+#endif
+    }
 
     /* This denotes the coll_bufsize boundaries within the source buffer for writing for the same round.
      */
@@ -598,8 +620,7 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
         ADIO_Offset amountToAdvanceSBOffsetForFD = 0;
         int additionalFDCounter = 0;
 
-        while (blockEnd >= fd_end[currentAggRankListIndex]) {
-          ADIO_Offset thisAggBlockEnd = fd_end[currentAggRankListIndex];
+        while (blockEnd > fd_end[currentAggRankListIndex]) {          ADIO_Offset thisAggBlockEnd = fd_end[currentAggRankListIndex];
           if (thisAggBlockEnd >= intraRoundCollBufsizeOffset) {
             while (thisAggBlockEnd >= intraRoundCollBufsizeOffset) {
               targetAggsForMyDataCurrentRoundIter[numTargetAggs]++;
@@ -712,10 +733,11 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
 	    additionalFDCounter++;
 
 #ifdef onesidedtrace
-            printf("block extended beyond fd init settings numTargetAggs %d offset_list[%d] with value %ld past fd border %ld with len %ld\n",numTargetAggs,i,offset_list[blockIter],fd_start[currentAggRankListIndex],len_list[blockIter]);
+            printf("block extended beyond fd init settings numTargetAggs %d offset_list[%d] with value %ld past fd border %ld with len %ld\n",numTargetAggs,blockIter,offset_list[blockIter],fd_start[currentAggRankListIndex],len_list[blockIter]);
 #endif
             intraRoundCollBufsizeOffset = fd_start[currentAggRankListIndex] + coll_bufsize;
             targetAggsForMyDataLastOffLenIndex[targetAggsForMyDataCurrentRoundIter[numTargetAggs]][numTargetAggs] = blockIter;
+
           } // if (blockEnd >= fd_start[currentAggRankListIndex])
         } // while (blockEnd >= fd_end[currentAggRankListIndex])
       } // if (blockEnd > fd_end[currentAggRankListIndex])
@@ -775,11 +797,8 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
     char *write_buf = write_buf0;
     MPI_Win write_buf_window = fd->io_buf_window;
 
-    int *write_buf_put_amounts = fd->io_buf_put_amounts;
-    if(!gpfsmpio_onesided_no_rmw) {
+    if(!romio_onesided_no_rmw) {
       *hole_found = 0;
-      for (i=0;i<nprocs;i++)
-        write_buf_put_amounts[i] = 0;
     }
 
     /* Counters to track the offset range being written by the used aggs.
@@ -789,6 +808,7 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
 
     if (iAmUsedAgg) {
       currentRoundFDStart = fd_start[myAggRank];
+      currentRoundFDEnd = fd_end[myAggRank];
       if (myAggRank == smallestFileDomainAggRank) {
         if (currentRoundFDStart < firstFileOffset)
           currentRoundFDStart = firstFileOffset;
@@ -800,7 +820,49 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
 #ifdef onesidedtrace
 printf("iAmUsedAgg - currentRoundFDStart initialized to %ld currentRoundFDEnd to %ld\n",currentRoundFDStart,currentRoundFDEnd);
 #endif
-      if (gpfsmpio_onesided_always_rmw) { // read in the first buffer
+
+      if ((stripe_parms.stripeSize > 0) && (stripe_parms.segmentIter == 0)) {
+        numStripesUsed = 0;
+        stripeWriteOffsets = (ADIO_Offset *) ADIOI_Malloc(stripe_parms.stripesPerAgg*sizeof(ADIO_Offset));
+        stripeWriteLens = (ADIO_Offset *) ADIOI_Malloc(stripe_parms.stripesPerAgg*sizeof(ADIO_Offset));
+        amountOfStripedDataExpected = 0;
+        int stripeIter = 0;
+        for (stripeIter=0;stripeIter<stripe_parms.stripesPerAgg;stripeIter++) {
+        if (stripeIter == 0) {
+          stripeWriteOffsets[stripeIter] = currentRoundFDStart;
+          stripeWriteLens[stripeIter] = (int)(currentRoundFDEnd - currentRoundFDStart)+1;
+          amountOfStripedDataExpected += (int)(currentRoundFDEnd - currentRoundFDStart)+1;
+          numStripesUsed++;
+        }
+          else {
+            if (((currentRoundFDEnd + (ADIO_Offset)1 + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen))) > stripe_parms.stripedLastFileOffset) {
+		      if (((currentRoundFDEnd + (ADIO_Offset)1 - (ADIO_Offset)(stripe_parms.stripeSize) + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen))) <= stripe_parms.stripedLastFileOffset) {
+			    stripeWriteOffsets[stripeIter] = (currentRoundFDEnd + (ADIO_Offset)1) - (ADIO_Offset)(stripe_parms.stripeSize) + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen);
+			    stripeWriteLens[stripeIter] = (int)(stripe_parms.stripedLastFileOffset - (currentRoundFDEnd + (ADIO_Offset)1 - (ADIO_Offset)(stripe_parms.stripeSize) + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen)) + (ADIO_Offset)1);
+                amountOfStripedDataExpected += (int)(stripe_parms.stripedLastFileOffset - (currentRoundFDEnd + (ADIO_Offset)1 - (ADIO_Offset)(stripe_parms.stripeSize) + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen)) + (ADIO_Offset)1);
+                numStripesUsed++;
+			  }
+			}
+            else {
+			  stripeWriteOffsets[stripeIter] = (currentRoundFDEnd + (ADIO_Offset)1) - (ADIO_Offset)(stripe_parms.stripeSize) + ((ADIO_Offset)stripeIter * stripe_parms.segmentLen);
+              stripeWriteLens[stripeIter] = stripe_parms.stripeSize;
+              amountOfStripedDataExpected += stripe_parms.stripeSize;
+              numStripesUsed++;
+		    }
+		  }
+        } // for-loop
+
+#ifdef onesidedtrace
+        printf("amountOfStripedDataExpected is %d numStripesUsed is %d offsets and lengths are ",amountOfStripedDataExpected,numStripesUsed);
+        for (i=0;i<numStripesUsed;i++) {
+          printf("%ld %ld --",stripeWriteOffsets[i],stripeWriteLens[i]);
+        }
+        printf("\n");
+#endif
+      } // if ((stripe_parms.stripeSize>0) && (stripe_parms.segmentIter==0))
+
+
+      if (romio_onesided_always_rmw && ((stripe_parms.stripeSize==0) || (stripe_parms.segmentIter==0))) { // read in the first buffer
         ADIO_Offset tmpCurrentRoundFDEnd = 0;
         if ((fd_end[myAggRank] - currentRoundFDStart) < coll_bufsize) {
           if (myAggRank == greatestFileDomainAggRank) {
@@ -815,14 +877,23 @@ printf("iAmUsedAgg - currentRoundFDStart initialized to %ld currentRoundFDEnd to
         else
         tmpCurrentRoundFDEnd = currentRoundFDStart + coll_bufsize - (ADIO_Offset)1;
 #ifdef onesidedtrace
-printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %ld to %ld total is %d\n",currentRoundFDStart,tmpCurrentRoundFDEnd,(int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1);
+printf("romio_onesided_always_rmw - first buffer pre-read for file offsets %ld to %ld total is %d\n",currentRoundFDStart,tmpCurrentRoundFDEnd,(int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1);
 #endif
-        ADIO_ReadContig(fd, write_buf, (int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1,
-          MPI_BYTE, ADIO_EXPLICIT_OFFSET,currentRoundFDStart, &status, error_code);
 
+        if (stripe_parms.stripeSize==0) {
+          ADIO_ReadContig(fd, write_buf, (int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1,
+            MPI_BYTE, ADIO_EXPLICIT_OFFSET,currentRoundFDStart, &status, error_code);
+		}
+		else {
+          // pre-read the entire batch of stripes we will do before writing
+          int stripeIter = 0;
+          for (stripeIter=0;stripeIter<numStripesUsed;stripeIter++)
+            ADIO_ReadContig(fd, (char*)write_buf + ((ADIO_Offset)stripeIter * (ADIO_Offset)stripe_parms.stripeSize), stripeWriteLens[stripeIter],
+              MPI_BYTE, ADIO_EXPLICIT_OFFSET,stripeWriteOffsets[stripeIter], &status, error_code);
+        }
       }
-    }
-    if (gpfsmpio_onesided_always_rmw) // wait until the first buffer is read
+    } // if iAmUsedAgg
+    if (romio_onesided_always_rmw && ((stripe_parms.stripeSize == 0) || (stripe_parms.segmentIter == 0))) // wait until the first buffer is read
       MPI_Barrier(fd->comm);
 
 #ifdef ROMIO_GPFS
@@ -831,11 +902,12 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
     startTimeBase = MPI_Wtime();
 #endif
 
+
     /* This is the second main loop of the algorithm, actually nested loop of target aggs within rounds.  There are 2 flavors of this.
-     * For gpfsmpio_write_aggmethod of 1 each nested iteration for the target
+     * For romio_write_aggmethod of 1 each nested iteration for the target
      * agg does an mpi_put on a contiguous chunk using a primative datatype
      * determined using the data structures from the first main loop.  For
-     * gpfsmpio_write_aggmethod of 2 each nested iteration for the target agg
+     * romio_write_aggmethod of 2 each nested iteration for the target agg
      * builds up data to use in created a derived data type for 1 mpi_put that is done for the target agg for each round.
      * To support lustre there will need to be an additional layer of nesting
      * for the multiple file domains within target aggs.
@@ -859,7 +931,7 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
       int targetAggContigAccessCount = 0;
 
       /* These data structures are used for the derived datatype mpi_put
-       * in the gpfsmpio_write_aggmethod of 2 case.
+       * in the romio_write_aggmethod of 2 case.
        */
       int *targetAggBlockLengths=NULL;
       MPI_Aint *targetAggDisplacements=NULL, *sourceBufferDisplacements=NULL;
@@ -920,7 +992,7 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
         printf("bufferAmountToSend is %d\n",bufferAmountToSend);
 #endif
         if (bufferAmountToSend > 0) { /* we have data to send this round */
-          if (gpfsmpio_write_aggmethod == 2) {
+          if (romio_write_aggmethod == 2) {
             /* Only allocate these arrays if we are using method 2 and only do it once for this round/target agg.
              */
             if (!allocatedDerivedTypeArrays) {
@@ -947,7 +1019,7 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
 
           /* Determine the offset into the target window.
            */
-          MPI_Aint targetDisplacementToUseThisRound = (MPI_Aint) (offsetStart - currentRoundFDStartForMyTargetAgg);
+          MPI_Aint targetDisplacementToUseThisRound = (MPI_Aint) (offsetStart - currentRoundFDStartForMyTargetAgg)  + ((MPI_Aint)(stripe_parms.segmentIter)*(MPI_Aint)(stripe_parms.stripeSize));
 
           /* If using the thread writer select the appropriate side of the split window.
            */
@@ -955,30 +1027,33 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
             targetDisplacementToUseThisRound += (MPI_Aint) coll_bufsize;
           }
 
-          /* For gpfsmpio_write_aggmethod of 1 do the mpi_put using the primitive MPI_BYTE type for each contiguous
+          /* For romio_write_aggmethod of 1 do the mpi_put using the primitive MPI_BYTE type for each contiguous
            * chunk in the target, of source data is non-contiguous then pack the data first.
            */
 
-          if (gpfsmpio_write_aggmethod == 1) {
+          if (romio_write_aggmethod == 1) {
             MPI_Win_lock(MPI_LOCK_SHARED, targetAggsForMyData[aggIter], 0, write_buf_window);
+            char *putSourceData;
             if (bufTypeIsContig) {
               MPI_Put(((char*)buf) + currentFDSourceBufferState[aggIter].sourceBufferOffset,bufferAmountToSend, MPI_BYTE,targetAggsForMyData[aggIter],targetDisplacementToUseThisRound, bufferAmountToSend,MPI_BYTE,write_buf_window);
               currentFDSourceBufferState[aggIter].sourceBufferOffset += (ADIO_Offset)bufferAmountToSend;
             }
             else {
-              char *putSourceData = (char *) ADIOI_Malloc(bufferAmountToSend*sizeof(char));
+              putSourceData = (char *) ADIOI_Malloc(bufferAmountToSend*sizeof(char));
               nonContigSourceDataBufferAdvance(((char*)buf), flatBuf, bufferAmountToSend, 1, &currentFDSourceBufferState[aggIter], putSourceData);
               MPI_Put(putSourceData,bufferAmountToSend, MPI_BYTE,targetAggsForMyData[aggIter],targetDisplacementToUseThisRound, bufferAmountToSend,MPI_BYTE,write_buf_window);
-              ADIOI_Free(putSourceData);
+
             }
             MPI_Win_unlock(targetAggsForMyData[aggIter], write_buf_window);
+            if (!bufTypeIsContig)
+              ADIOI_Free(putSourceData);
           }
 
-          /* For gpfsmpio_write_aggmethod of 2 populate the data structures for this round/agg for this offset iter
+          /* For romio_write_aggmethod of 2 populate the data structures for this round/agg for this offset iter
            * to be used subsequently when building the derived type for 1 mpi_put for all the data for this
            * round/agg.
            */
-          else if (gpfsmpio_write_aggmethod == 2) {
+          else if (romio_write_aggmethod == 2) {
 
             if (bufTypeIsContig) {
               targetAggBlockLengths[targetAggContigAccessCount]= bufferAmountToSend;
@@ -999,15 +1074,15 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
             }
           }
 #ifdef onesidedtrace
-        printf("roundIter %d bufferAmountToSend is %d offsetStart is %ld currentRoundFDStartForMyTargetAgg is %ld targetDisplacementToUseThisRound is %ld targetAggsForMyDataFDStart[aggIter] is %ld\n",roundIter, bufferAmountToSend, offsetStart,currentRoundFDStartForMyTargetAgg,targetDisplacementToUseThisRound,targetAggsForMyDataFDStart[aggIter]);
+        printf("roundIter %d bufferAmountToSend is %d offsetStart is %ld currentRoundFDStartForMyTargetAgg is %ld currentRoundFDEndForMyTargetAgg is %ld targetDisplacementToUseThisRound is %ld targetAggsForMyDataFDStart[aggIter] is %ld\n",roundIter, bufferAmountToSend, offsetStart,currentRoundFDStartForMyTargetAgg,currentRoundFDEndForMyTargetAgg,targetDisplacementToUseThisRound,targetAggsForMyDataFDStart[aggIter]);
 #endif
 
         } // bufferAmountToSend > 0
       } // contig list
 
-      /* For gpfsmpio_write_aggmethod of 2 now build the derived type using the data from this round/agg and do 1 single mpi_put.
+      /* For romio_write_aggmethod of 2 now build the derived type using the data from this round/agg and do 1 single mpi_put.
        */
-      if (gpfsmpio_write_aggmethod == 2) {
+      if (romio_write_aggmethod == 2) {
 
         MPI_Datatype sourceBufferDerivedDataType, targetBufferDerivedDataType;
         MPI_Type_create_struct(targetAggContigAccessCount, targetAggBlockLengths, sourceBufferDisplacements, targetAggDataTypes, &sourceBufferDerivedDataType);
@@ -1045,23 +1120,40 @@ printf("gpfsmpio_onesided_always_rmw - first buffer pre-read for file offsets %l
         MPI_Type_free(&targetBufferDerivedDataType);
         }
       }
-      if (!gpfsmpio_onesided_no_rmw) {
+      if (!romio_onesided_no_rmw) {
         MPI_Win_lock(MPI_LOCK_SHARED, targetAggsForMyData[aggIter], 0, fd->io_buf_put_amounts_window);
-        MPI_Put(&numBytesPutThisAggRound,1, MPI_INT,targetAggsForMyData[aggIter],myrank, 1,MPI_INT,fd->io_buf_put_amounts_window);
+        MPI_Accumulate(&numBytesPutThisAggRound,1, MPI_INT,targetAggsForMyData[aggIter],0, 1, MPI_INT, MPI_SUM, fd->io_buf_put_amounts_window);
         MPI_Win_unlock(targetAggsForMyData[aggIter], fd->io_buf_put_amounts_window);
       }
       } // baseoffset != -1
     } // target aggs
-	} /// contig_access_count > 0
+
+    if (stripe_parms.stripeSize > 0) {
+      lastDataTypeExtent = currentFDSourceBufferState[numTargetAggs-1].dataTypeExtent;
+      lastFlatBufIndice = currentFDSourceBufferState[numTargetAggs-1].flatBufIndice;
+      lastIndiceOffset = currentFDSourceBufferState[numTargetAggs-1].indiceOffset;
 
 #ifdef onesidedtrace
-printf("first barrier roundIter %d\n",roundIter);
+printf("setting lastDataTypeExtent %d lastFlatBufIndice %d lastIndiceOffset %ld\n",lastDataTypeExtent,lastFlatBufIndice,lastIndiceOffset);
 #endif
-    MPI_Barrier(fd->comm);
 
-    if (iAmUsedAgg) {
+    }
+
+    } /// contig_access_count > 0
+
+    /* Synchronize all procs before the file write */
+    if ((stripe_parms.stripeSize == 0) || (stripe_parms.flushCB)) {
+#ifdef onesidedtrace
+      printf("first barrier roundIter %d\n",roundIter);
+#endif
+      MPI_Barrier(fd->comm);
+    }
+
+    if ((iAmUsedAgg || iWasUsedStripingAgg)  && ((stripe_parms.stripeSize == 0) || (stripe_parms.flushCB))) {
+      iWasUsedStripingAgg = 0;
     /* Determine what offsets define the portion of the file domain the agg is writing this round.
      */
+        if (iAmUsedAgg) {
         if ((fd_end[myAggRank] - currentRoundFDStart) < coll_bufsize) {
           if (myAggRank == greatestFileDomainAggRank) {
             if (fd_end[myAggRank] > lastFileOffset)
@@ -1076,27 +1168,59 @@ printf("first barrier roundIter %d\n",roundIter);
         currentRoundFDEnd = currentRoundFDStart + coll_bufsize - (ADIO_Offset)1;
 
 #ifdef onesidedtrace
-        printf("used agg about to writecontig - currentRoundFDStart is %ld currentRoundFDEnd is %ld within file domeain %ld to %ld\n",currentRoundFDStart,currentRoundFDEnd,fd_start[myAggRank],fd_end[myAggRank]);
+        printf("current used agg about to writecontig - currentRoundFDStart is %ld currentRoundFDEnd is %ld within file domeain %ld to %ld\n",currentRoundFDStart,currentRoundFDEnd,fd_start[myAggRank],fd_end[myAggRank]);
 #endif
-
+        }
+#ifdef onesidedtrace
+        else {
+          printf("former used agg about to writecontig\n");
+        }
+#endif
         int doWriteContig = 1;
-        if (!gpfsmpio_onesided_no_rmw) {
-          int numBytesPutIntoBuf = 0;
-          for (i=0;i<nprocs;i++) {
-            numBytesPutIntoBuf += write_buf_put_amounts[i];
-            write_buf_put_amounts[i] = 0;
+        if (!romio_onesided_no_rmw) {
+          if (stripe_parms.stripeSize == 0) {
+            if (fd->io_buf_put_amounts != ((int)(currentRoundFDEnd - currentRoundFDStart)+1)) {
+              doWriteContig = 0;
+              *hole_found = 1;
+#ifdef onesidedtrace
+              printf("hole found --- fd->io_buf_put_amounts is %d currentRoundFDEnd is %ld currentRoundFDStart is %ld on roundIter %d\n",fd->io_buf_put_amounts,currentRoundFDEnd,currentRoundFDStart,roundIter);
+#endif
+            }
           }
-          if (numBytesPutIntoBuf != ((int)(currentRoundFDEnd - currentRoundFDStart)+1)) {
-            doWriteContig = 0;
-            *hole_found = 1;
+          else { // file striping
+           if (fd->io_buf_put_amounts != amountOfStripedDataExpected) {
+             doWriteContig = 0;
+             *hole_found = 1;
+#ifdef onesidedtrace
+             printf("striping hole found --- fd->io_buf_put_amounts is %d amountOfStripedDataExpected is %d on roundIter %d\n",fd->io_buf_put_amounts,amountOfStripedDataExpected,roundIter);
+#endif
+            }
           }
+          fd->io_buf_put_amounts = 0;
         }
 
         if (!useIOBuffer) {
-          if (doWriteContig)
-            ADIO_WriteContig(fd, write_buf, (int)(currentRoundFDEnd - currentRoundFDStart)+1,
-              MPI_BYTE, ADIO_EXPLICIT_OFFSET,currentRoundFDStart, &status, error_code);
-
+          if (doWriteContig) {
+            if (stripe_parms.stripeSize > 0) {
+#ifdef onesidedtrace
+              printf("about to write out %d stripes\n",numStripesUsed);
+#endif
+              int stripeIter = 0;
+              for (stripeIter=0;stripeIter<numStripesUsed;stripeIter++) {
+#ifdef onesidedtrace
+                printf("writing write_buf offset %ld len %ld file offset %ld\n",((ADIO_Offset)stripeIter * (ADIO_Offset)(stripe_parms.stripeSize)),stripeWriteLens[stripeIter],stripeWriteOffsets[stripeIter]);
+#endif
+                ADIO_WriteContig(fd, (char*)write_buf + ((ADIO_Offset)stripeIter * (ADIO_Offset)(stripe_parms.stripeSize)), stripeWriteLens[stripeIter],
+                  MPI_BYTE, ADIO_EXPLICIT_OFFSET,stripeWriteOffsets[stripeIter], &status, error_code);
+              }
+              ADIOI_Free(stripeWriteLens);
+              ADIOI_Free(stripeWriteOffsets);
+            }
+            else {
+              ADIO_WriteContig(fd, write_buf, (int)(currentRoundFDEnd - currentRoundFDStart)+1,
+                MPI_BYTE, ADIO_EXPLICIT_OFFSET,currentRoundFDStart, &status, error_code);
+	        }
+          }
         } else { /* use the thread writer */
 
         if(!pthread_equal(io_thread, pthread_self())) {
@@ -1124,7 +1248,8 @@ printf("first barrier roundIter %d\n",roundIter);
         io_thread_args.io_kind = ADIOI_WRITE;
         io_thread_args.size = (currentRoundFDEnd-currentRoundFDStart) + 1;
         io_thread_args.offset = currentRoundFDStart;
-        io_thread_args.status = &status;
+        ADIO_Status adio_status;
+        io_thread_args.status = &adio_status;
         io_thread_args.error_code = *error_code;
 
         if ( (pthread_create(&io_thread, NULL,
@@ -1135,7 +1260,7 @@ printf("first barrier roundIter %d\n",roundIter);
 
     } // iAmUsedAgg
 
-    if (!iAmUsedAgg && useIOBuffer) {
+    if (!iAmUsedAgg && useIOBuffer && ((stripe_parms.stripeSize == 0) || (stripe_parms.flushCB))) {
         if (currentWriteBuf == 0) {
             currentWriteBuf = 1;
             write_buf = write_buf1;
@@ -1146,10 +1271,10 @@ printf("first barrier roundIter %d\n",roundIter);
         }
     }
 
-    if (iAmUsedAgg) {
+    if (iAmUsedAgg && stripe_parms.stripeSize == 0) {
       currentRoundFDStart += coll_bufsize;
 
-      if (gpfsmpio_onesided_always_rmw && (roundIter<(numberOfRounds-1))) { // read in the buffer for the next round unless this is the last round
+      if (romio_onesided_always_rmw && (roundIter<(numberOfRounds-1))) { // read in the buffer for the next round unless this is the last round
         ADIO_Offset tmpCurrentRoundFDEnd = 0;
         if ((fd_end[myAggRank] - currentRoundFDStart) < coll_bufsize) {
           if (myAggRank == greatestFileDomainAggRank) {
@@ -1164,7 +1289,7 @@ printf("first barrier roundIter %d\n",roundIter);
         else
         tmpCurrentRoundFDEnd = currentRoundFDStart + coll_bufsize - (ADIO_Offset)1;
 #ifdef onesidedtrace
-printf("gpfsmpio_onesided_always_rmw - round %d buffer pre-read for file offsets %ld to %ld total is %d\n",roundIter, currentRoundFDStart,tmpCurrentRoundFDEnd,(int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1);
+        printf("romio_onesided_always_rmw - round %d buffer pre-read for file offsets %ld to %ld total is %d\n",roundIter, currentRoundFDStart,tmpCurrentRoundFDEnd,(int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1);
 #endif
         ADIO_ReadContig(fd, write_buf, (int)(tmpCurrentRoundFDEnd - currentRoundFDStart)+1,
           MPI_BYTE, ADIO_EXPLICIT_OFFSET,currentRoundFDStart, &status, error_code);
@@ -1174,7 +1299,7 @@ printf("gpfsmpio_onesided_always_rmw - round %d buffer pre-read for file offsets
 
     if (roundIter<(numberOfRounds-1)) {
 #ifdef onesidedtrace
-printf("second barrier roundIter %d\n",roundIter);
+printf("second barrier roundIter %d --- waiting in loop this time\n",roundIter);
 #endif
       MPI_Barrier(fd->comm);
     }
@@ -1720,7 +1845,7 @@ printf("end_offsets[%d] is %ld st_offsets[%d] is %ld\n",j,end_offsets[j],j,st_of
             }
 
             additionalFDCounter++;
- 
+
 
 #ifdef onesidedtrace
             printf("block extended beyond fd init settings numSourceAggs %d offset_list[%d] with value %ld past fd border %ld with len %ld\n",numSourceAggs,i,offset_list[blockIter],fd_start[currentAggRankListIndex],len_list[blockIter]);
@@ -1820,8 +1945,8 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
 
 
     /* This is the second main loop of the algorithm, actually nested loop of target aggs within rounds.  There are 2 flavors of this.
-     * For gpfsmpio_read_aggmethod of 1 each nested iteration for the source agg does an mpi_put on a contiguous chunk using a primative datatype
-     * determined using the data structures from the first main loop.  For gpfsmpio_read_aggmethod of 2 each nested iteration for the source agg
+     * For romio_read_aggmethod of 1 each nested iteration for the source agg does an mpi_put on a contiguous chunk using a primative datatype
+     * determined using the data structures from the first main loop.  For romio_read_aggmethod of 2 each nested iteration for the source agg
      * builds up data to use in created a derived data type for 1 mpi_put that is done for the target agg for each round.
      * To support lustre there will need to be an additional layer of nesting for the multiple file domains
      * within target aggs.
@@ -1959,7 +2084,7 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
       int sourceAggContigAccessCount = 0;
 
       /* These data structures are used for the derived datatype mpi_get
-       * in the gpfsmpio_read_aggmethod of 2 case.
+       * in the romio_read_aggmethod of 2 case.
        */
       int *sourceAggBlockLengths=NULL;
       MPI_Aint *sourceAggDisplacements=NULL, *recvBufferDisplacements=NULL;
@@ -2004,7 +2129,7 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
         }
 
         if (bufferAmountToRecv > 0) { /* we have data to recv this round */
-          if (gpfsmpio_read_aggmethod == 2) {
+          if (romio_read_aggmethod == 2) {
             /* Only allocate these arrays if we are using method 2 and only do it once for this round/source agg.
              */
             if (!allocatedDerivedTypeArrays) {
@@ -2039,11 +2164,11 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
             sourceDisplacementToUseThisRound += (MPI_Aint)coll_bufsize;
           }
 
-          /* For gpfsmpio_read_aggmethod of 1 do the mpi_get using the primitive MPI_BYTE type from each
+          /* For romio_read_aggmethod of 1 do the mpi_get using the primitive MPI_BYTE type from each
            * contiguous chunk from the target, if the source is non-contiguous then unpack the data after
            * the MPI_Win_unlock is done to make sure the data has arrived first.
            */
-          if (gpfsmpio_read_aggmethod == 1) {
+          if (romio_read_aggmethod == 1) {
             MPI_Win_lock(MPI_LOCK_SHARED, sourceAggsForMyData[aggIter], 0, read_buf_window);
             char *getSourceData = NULL;
             if (bufTypeIsContig) {
@@ -2063,11 +2188,11 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
             }
           }
 
-          /* For gpfsmpio_read_aggmethod of 2 populate the data structures for this round/agg for this offset iter
+          /* For romio_read_aggmethod of 2 populate the data structures for this round/agg for this offset iter
            * to be used subsequently when building the derived type for 1 mpi_put for all the data for this
            * round/agg.
            */
-          else if (gpfsmpio_read_aggmethod == 2) {
+          else if (romio_read_aggmethod == 2) {
             if (bufTypeIsContig) {
               sourceAggBlockLengths[sourceAggContigAccessCount]= bufferAmountToRecv;
               sourceAggDataTypes[sourceAggContigAccessCount] = MPI_BYTE;
@@ -2088,9 +2213,9 @@ printf("iAmUsedAgg - currentRoundFDStart initialized "
           } // bufferAmountToRecv > 0
       } // contig list
 
-      /* For gpfsmpio_read_aggmethod of 2 now build the derived type using the data from this round/agg and do 1 single mpi_put.
+      /* For romio_read_aggmethod of 2 now build the derived type using the data from this round/agg and do 1 single mpi_put.
        */
-      if (gpfsmpio_read_aggmethod == 2) {
+      if (romio_read_aggmethod == 2) {
         MPI_Datatype recvBufferDerivedDataType, sourceBufferDerivedDataType;
 
         MPI_Type_create_struct(sourceAggContigAccessCount, sourceAggBlockLengths, recvBufferDisplacements, sourceAggDataTypes, &recvBufferDerivedDataType);

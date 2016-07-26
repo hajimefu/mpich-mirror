@@ -31,20 +31,14 @@ int 	gpfsmpio_timing;
 int 	gpfsmpio_timing2;
 int     gpfsmpio_timing_cw_level;
 int 	gpfsmpio_comm;
-int 	gpfsmpio_tunegather;
 int 	gpfsmpio_tuneblocking;
 long    bglocklessmpio_f_type;
 int     gpfsmpio_bg_nagg_pset;
 int     gpfsmpio_pthreadio;
 int     gpfsmpio_p2pcontig;
-int     gpfsmpio_write_aggmethod;
-int     gpfsmpio_read_aggmethod;
 int	gpfsmpio_balancecontig;
 int     gpfsmpio_devnullio;
 int     gpfsmpio_bridgeringagg;
-int     gpfsmpio_onesided_no_rmw;
-int     gpfsmpio_onesided_always_rmw;
-int     gpfsmpio_onesided_inform_rmw;
 
 double	gpfsmpio_prof_cw    [GPFSMPIO_CIO_LAST+1];
 double	gpfsmpio_prof_cr    [GPFSMPIO_CIO_LAST+1];
@@ -63,12 +57,6 @@ double	gpfsmpio_prof_cr    [GPFSMPIO_CIO_LAST+1];
  *   - 0 - Do not collect/report timing.
  *   - 1 - Collect/report timing.
  *   - Default is 0.
- *
- * - GPFSMPIO_TUNEGATHER - Tune how starting and ending offsets are communicated
- *   for aggregator collective i/o.  Possible values:
- *   - 0 - Use two MPI_Allgather's to collect starting and ending offsets.
- *   - 1 - Use MPI_Allreduce(MPI_MAX) to collect starting and ending offsets.
- *   - Default is 1.
  *
  * - GPFSMPIO_TUNEBLOCKING - Tune how aggregate file domains are
  *   calculated (block size).  Possible values:
@@ -110,40 +98,6 @@ double	gpfsmpio_prof_cr    [GPFSMPIO_CIO_LAST+1];
  * 3.) There are no gaps between the offsets.
  * 4.) No single rank has a data size which spans multiple file domains.
  *
- * - GPFSMPIO_WRITE_AGGMETHOD/GPFSMPIO_READ_AGGMETHOD -  Replaces the two-phase
- *   collective IO aggregation
- *   with a one-sided algorithm, significantly reducing communication and
- *   memory overhead.  Fully
- *   supports all datasets and datatypes, the only caveat is that any holes in the data
- *   when writing to a pre-existing file are ignored -- there is no read-modify-write
- *   support to maintain the correctness of regions of pre-existing data so every byte
- *   must be explicitly written to maintain correctness.  Users must beware of middle-ware
- *   libraries like PNETCDF which may count on read-modify-write functionality for certain
- *   features (like fill values).  Possible values:
- *   - 0 - Normal two-phase collective IO is used.
- *   - 1 - A separate one-sided MPI_Put or MPI_Get is used for each contigous chunk of data
- *         for a compute to write to or read from the collective buffer on the aggregator.
- *   - 2 - An MPI derived datatype is created using all the contigous chunks and just one
- *         call to MPI_Put or MPI_Get is done with the derived datatype.  On Blue Gene /Q
- *         optimal performance for this is achieved when paired with PAMID_TYPED_ONESIDED=1.
- *   - Default is 0
- *
- * - GPFSMPIO_ONESIDED_NO_RMW - For one-sided aggregation (GPFSMPIO_WRITE_AGGMETHOD = 1 or 2)
- *   disable the detection of holes in the data when writing to a pre-existing
- *   file requiring a read-modify-write, thereby avoiding the communication
- *   overhead for this detection.
- *   - 0 (hole detection enabled) or 1 (hole detection disabled)
- *   - Default is 0
- *
- * - GPFSMPIO_ONESIDED_INFORM_RMW - For one-sided aggregation
- *   (GPFSMPIO_AGGMETHOD = 1 or 2) generate an informational message informing
- *   the user whether holes exist in the data when writing to a pre-existing
- *   file requiring a read-modify-write, thereby educating the user to set
- *   GPFSMPIO_ONESIDED_NO_RMW=1 on a future run to avoid the communication
- *   overhead for this detection.
- *   - 0 (disabled) or 1 (enabled)
- *   - Default is 0
- *
  * - GPFSMPIO_BALANCECONTIG -  Relevant only to BGQ.  File domain blocks are assigned
  *   to aggregators in a breadth-first fashion relative to the ions - additionally,
  *   file domains on the aggregators sharing the same bridgeset and ion have contiguous
@@ -178,9 +132,6 @@ void ad_gpfs_get_env_vars() {
     gpfsmpio_timing = 0;
 	x = getenv( "GPFSMPIO_TIMING"       );
 	if (x) gpfsmpio_timing       = atoi(x);
-    gpfsmpio_tunegather = 1;
-	x = getenv( "GPFSMPIO_TUNEGATHER"   );
-	if (x) gpfsmpio_tunegather   = atoi(x);
     gpfsmpio_tuneblocking = 1;
     x = getenv( "GPFSMPIO_TUNEBLOCKING" );
     if (x) gpfsmpio_tuneblocking = atoi(x);
@@ -196,21 +147,9 @@ void ad_gpfs_get_env_vars() {
     x = getenv("GPFSMPIO_NAGG_PSET");
     if (x) gpfsmpio_bg_nagg_pset = atoi(x);
 
-    gpfsmpio_pthreadio = 0;
-    x = getenv( "GPFSMPIO_PTHREADIO" );
-    if (x) gpfsmpio_pthreadio = atoi(x);
-
     gpfsmpio_p2pcontig = 0;
     x = getenv( "GPFSMPIO_P2PCONTIG" );
     if (x) gpfsmpio_p2pcontig = atoi(x);
-
-    gpfsmpio_write_aggmethod = 0;
-    x = getenv( "GPFSMPIO_WRITE_AGGMETHOD" );
-    if (x) gpfsmpio_write_aggmethod = atoi(x);
-
-    gpfsmpio_read_aggmethod = 0;
-    x = getenv( "GPFSMPIO_READ_AGGMETHOD" );
-    if (x) gpfsmpio_read_aggmethod = atoi(x);
 
     gpfsmpio_balancecontig = 0;
     x = getenv( "GPFSMPIO_BALANCECONTIG" );
@@ -224,19 +163,6 @@ void ad_gpfs_get_env_vars() {
     x = getenv( "GPFSMPIO_BRIDGERINGAGG" );
     if (x) gpfsmpio_bridgeringagg = atoi(x);
 
-    gpfsmpio_onesided_no_rmw = 0;
-    x = getenv( "GPFSMPIO_ONESIDED_NO_RMW" );
-    if (x) gpfsmpio_onesided_no_rmw = atoi(x);
-
-    gpfsmpio_onesided_always_rmw = 0;
-    x = getenv( "GPFSMPIO_ONESIDED_ALWAYS_RMW" );
-    if (x) gpfsmpio_onesided_always_rmw = atoi(x);
-    if (gpfsmpio_onesided_always_rmw)
-      gpfsmpio_onesided_no_rmw = 1;
-
-    gpfsmpio_onesided_inform_rmw = 0;
-    x = getenv( "GPFSMPIO_ONESIDED_INFORM_RMW" );
-    if (x) gpfsmpio_onesided_inform_rmw = atoi(x);
 }
 
 /* report timing breakdown for MPI I/O collective call */
