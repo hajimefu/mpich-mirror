@@ -4,7 +4,7 @@
  *   "uthash.h" header files.
  * - some configure-time checking for __typeof() support was added
  * - intentionally omitted from "mpl.h" in order to require using code to opt-in
- * - override malloc/free/realloc to call MPIU routines
+ * - override malloc/free/realloc to call MPL routines
  */
 /*
 Copyright (c) 2003-2014, Troy D. Hanson     http://troydhanson.github.com/uthash/
@@ -168,7 +168,7 @@ do {                                                                            
 do {                                                                             \
   (head)->hh.tbl = (MPL_UT_hash_table*)MPL_uthash_malloc(                        \
                   sizeof(MPL_UT_hash_table));                                    \
-  if (!((head)->hh.tbl))  { uthash_fatal( "out of memory"); }                    \
+  if (!((head)->hh.tbl))  { MPL_uthash_fatal( "out of memory"); }                \
   memset((head)->hh.tbl, 0, sizeof(MPL_UT_hash_table));                          \
   (head)->hh.tbl->tail = &((head)->hh);                                          \
   (head)->hh.tbl->num_buckets = MPL_HASH_INITIAL_NUM_BUCKETS;                    \
@@ -462,7 +462,7 @@ do {                                                                            
         + ( (unsigned)_hj_key[10] << 16 )                                        \
         + ( (unsigned)_hj_key[11] << 24 ) );                                     \
                                                                                  \
-     HASH_JEN_MIX(_hj_i, _hj_j, hashv);                                          \
+     MPL_HASH_JEN_MIX(_hj_i, _hj_j, hashv);                                          \
                                                                                  \
      _hj_key += 12;                                                              \
      _hj_k -= 12U;                                                               \
@@ -627,7 +627,7 @@ do {                                                                   \
 /* iterate over items in a known bucket to find desired item */
 #define MPL_HASH_FIND_IN_BKT(tbl,hh,head,keyptr,keylen_in,out)                       \
 do {                                                                             \
- if (head.hh_head != NULL) { DECLTYPE_ASSIGN(out,MPL_ELMT_FROM_HH(tbl,head.hh_head)); } \
+ if (head.hh_head != NULL) { MPL_DECLTYPE_ASSIGN(out,MPL_ELMT_FROM_HH(tbl,head.hh_head)); } \
  else { out=NULL; }                                                              \
  while (out != NULL) {                                                           \
     if ((out)->hh.keylen == (keylen_in)) {                                       \
@@ -714,7 +714,7 @@ do {                                                                            
         _he_thh = tbl->buckets[ _he_bkt_i ].hh_head;                             \
         while (_he_thh != NULL) {                                                \
            _he_hh_nxt = _he_thh->hh_next;                                        \
-           HASH_TO_BKT( _he_thh->hashv, tbl->num_buckets*2U, _he_bkt);           \
+           MPL_HASH_TO_BKT( _he_thh->hashv, tbl->num_buckets*2U, _he_bkt);       \
            _he_newbkt = &(_he_new_buckets[ _he_bkt ]);                           \
            if (++(_he_newbkt->count) > tbl->ideal_chain_maxlen) {                \
              tbl->nonideal_items++;                                              \
