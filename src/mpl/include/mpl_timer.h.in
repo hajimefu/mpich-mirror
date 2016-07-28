@@ -136,7 +136,7 @@ int MPL_wtime(MPL_time_t * timeval);
   Module:
   Timer
   @*/
-int MPL_wtime_diff( MPL_time_t *t1, MPL_time_t *t2, double *diff );
+MPL_API_PUBLIC int MPL_wtime_diff( MPL_time_t *t1, MPL_time_t *t2, double *diff );
 
 /*@
   MPL_wtime_acc - Accumulate time values

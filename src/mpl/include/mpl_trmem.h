@@ -118,13 +118,13 @@ char *MPL_strdup(const char *str);
    does not alias any pointer prior to the call.
  */
 void MPL_trinit(int, int);
-void *MPL_trmalloc(size_t, int, const char[]);
-void MPL_trfree(void *, int, const char[]);
+MPL_API_PUBLIC void *MPL_trmalloc(size_t, int, const char[]);
+MPL_API_PUBLIC void MPL_trfree(void *, int, const char[]);
 int MPL_trvalid(const char[]);
 int MPL_trvalid2(const char[],int,const char[]);
 void *MPL_trcalloc(size_t, size_t, int, const char[]);
 void *MPL_trrealloc(void *, size_t, int, const char[]);
-void *MPL_trstrdup(const char *, int, const char[]);
+MPL_API_PUBLIC void *MPL_trstrdup(const char *, int, const char[]);
 
 /* Make sure that FILE is defined */
 #include <stdio.h>

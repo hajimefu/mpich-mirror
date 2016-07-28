@@ -104,7 +104,7 @@
 #  define FORT_DLL_SPEC __declspec(dllimport)
 # endif
 #else
-# define FORT_DLL_SPEC
+# define FORT_DLL_SPEC MPICH_API_PUBLIC
 #endif
 
 
@@ -148,21 +148,21 @@ typedef MPI_Aint MPI_FAint;
 
 
 /* MPIR_F_MPI_BOTTOM is the address of the Fortran MPI_BOTTOM value */
-extern FORT_DLL_SPEC int  MPIR_F_NeedInit;
-extern FORT_DLL_SPEC void *MPIR_F_MPI_BOTTOM;
-extern FORT_DLL_SPEC void *MPIR_F_MPI_IN_PLACE;
-extern FORT_DLL_SPEC void *MPIR_F_MPI_UNWEIGHTED;
-extern FORT_DLL_SPEC void *MPIR_F_MPI_WEIGHTS_EMPTY;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC int  MPIR_F_NeedInit;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC void *MPIR_F_MPI_BOTTOM;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC void *MPIR_F_MPI_IN_PLACE;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC void *MPIR_F_MPI_UNWEIGHTED;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC void *MPIR_F_MPI_WEIGHTS_EMPTY;
 /* MPI_F_STATUS(ES)_IGNORE are defined in mpi.h and are intended for C 
    programs. */
 /*
-extern FORT_DLL_SPEC MPI_Fint *MPI_F_STATUS_IGNORE;
-extern FORT_DLL_SPEC MPI_Fint *MPI_F_STATUSES_IGNORE;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC MPI_Fint *MPI_F_STATUS_IGNORE;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC MPI_Fint *MPI_F_STATUSES_IGNORE;
 */
 /* MPI_F_ERRCODES_IGNORE is defined as a Fortran INTEGER type, so must 
    be declared as MPI_Fint */
-extern FORT_DLL_SPEC MPI_Fint  *MPI_F_ERRCODES_IGNORE;
-extern FORT_DLL_SPEC void *MPI_F_ARGVS_NULL;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC MPI_Fint  *MPI_F_ERRCODES_IGNORE;
+extern MPICH_API_PUBLIC FORT_DLL_SPEC void *MPI_F_ARGVS_NULL;
 /* MPIR_F_PTR checks for the Fortran MPI_BOTTOM and provides the value 
    MPI_BOTTOM if found 
    See src/pt2pt/addressf.c for why MPIR_F_PTR(a) is just (a)

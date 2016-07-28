@@ -111,6 +111,8 @@
 #define MPL_UNIQUE_IMPL2_(prefix_,line_) MPL_UNIQUE_IMPL3_(prefix_,line_)
 #define MPL_UNIQUE_IMPL3_(prefix_,line_) prefix_##line_
 
+#define MPL_API_PUBLIC __attribute__ ((visibility ("default")))
+
 typedef int MPL_bool;
 
 #endif /* !defined(MPL_BASE_H_INCLUDED) */
