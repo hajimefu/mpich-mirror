@@ -203,6 +203,8 @@ Makefile.am-stamp
 /src/mpl/include/mpl_timer.h
 /src/mpl/include/stamp-h1
 /src/mpl/include/config.h
+/src/mpl/include/mpl_config.h.in
+/src/mpl/include/mpl_config.h
 /src/mpl/include/stamp-h2
 
 # ARMCI-MPI
